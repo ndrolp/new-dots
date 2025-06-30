@@ -1,0 +1,15 @@
+
+default-timeout=3000
+border-radius=4
+anchor=top-right
+width=320
+
+# Colors
+
+background-color=#303446CC
+text-color=#c6d0f5
+border-color=#ca9ee6
+progress-color=over #414559
+
+[urgency=high]
+border-color=#ef9f76

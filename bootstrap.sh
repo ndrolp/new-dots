@@ -1,4 +1,4 @@
-#/bin/sh
+#!/bin/sh
 clear
 
 # COLORS
@@ -20,6 +20,8 @@ NC='\033[0m' # No Color
 HOSTNAME=$(hostname -s)
 HOST_DIR="host-${HOSTNAME}"
 COMMON_DIR="common"
+
+set -e
 
 #Start script
 echo -e "${GREEN}\n${BOLD}Starting Dotfiles!${NC}\n"

@@ -1,0 +1,22 @@
+{
+  "custom/bluetooth": {
+    "format": "{}",
+    "exec": "~/.config/hypr/themes/bar/waybar/modules/networking/bluetooth.sh",
+    "on-click": "blueman-manager &",
+    "tooltip": true,
+    "tooltip-format": "Bluetooth",
+    "interval": 10
+  },
+  "custom/network": {
+    "format": "{}",
+    "on-click": "nm-connection-editor",
+    "exec": "~/.config/hypr/themes/bar/waybar/modules/networking/network.sh",
+    "tooltip": true,
+    "tooltip-format": "Network Manager",
+    "interval": 10
+  },
+  "group/networking": {
+    "orientation": "horizontal",
+    "modules": ["custom/bluetooth", "custom/network"]
+  }
+}

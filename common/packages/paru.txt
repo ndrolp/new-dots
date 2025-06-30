@@ -12,3 +12,8 @@ cava
 playerctl
 waypaper
 pyprland
+hyprpaper
+waybar
+mako
+pypr
+waypaper

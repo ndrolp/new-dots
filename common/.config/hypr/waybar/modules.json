@@ -1,0 +1,81 @@
+{
+  "hyprland/workspaces": {
+    "active-only": false,
+    "all-outputs": false,
+    "format": "{icon}",
+    "format-icons": {
+      "1": "",
+      "2": "",
+      "3": "󱃷",
+      "4": "",
+      "5": "",
+      "6": "",
+      "7": "󰖟",
+      "8": "",
+      "9": "",
+      "10": "",
+      "11": "",
+      "12": "",
+      "13": "",
+      "14": "",
+      "15": "",
+      "16": "",
+      "17": "",
+      "18": "",
+      "19": "",
+      "20": ""
+    }
+  },
+  "pulseaudio": {
+    "format": "{volume}%  {icon}",
+    "format-bluetooth": "{volume}% {icon} ",
+    "format-bluetooth-muted": "  {icon} ",
+    "format-muted": "",
+    "format-source": "{volume}% ",
+    "format-source-muted": "",
+    "format-icons": {
+      "headphone": "",
+      "hands-free": "",
+      "headset": "",
+      "phone": "",
+      "portable": "",
+      "car": "",
+      "default": ["", "", ""]
+    },
+    "on-click": "pavucontrol"
+  },
+  "hyprland/window": {
+    "max-length": 30,
+    "separate-outputs": true,
+    "icon": false
+  },
+  "clock": {
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+    "format-alt": " {:%Y-%m-%d}",
+    "format": "{:%I:%M %p}  󰥔"
+  },
+  "backlight": {
+    "format": "{percent}% {}",
+    "format-icons": ["", "", "", "", "", "", "", "", ""]
+  },
+  "custom/media": {
+    "format": "{icon} {0}",
+    "format-icons": {
+      "spotify": "",
+      "chromium": ""
+    },
+    "escape": true,
+    "return-type": "json",
+    "max-length": 40,
+    "on-click": "playerctl play-pause",
+    "on-click-right": "playerctl stop",
+    "smooth-scrolling-threshold": 10,
+    "on-scroll-up": "playerctl next",
+    "on-scroll-down": "playerctl previous",
+    "exec": "$HOME/.config/hypr/waybar/custom/media.py 2> /dev/null"
+  },
+  "group/media": {
+    "orientation": "horizontal",
+    "modules": ["hyprland/window"]
+  }
+}

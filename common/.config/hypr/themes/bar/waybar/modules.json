@@ -1,0 +1,106 @@
+{
+  "include": ["~/.config/hypr/themes/bar/waybar/modules/custom_modules.json"],
+  "hyprland/workspaces": {
+    "active-only": false,
+    "all-outputs": false,
+    "format": "{icon}",
+    "format-icons": {
+      "1": "",
+      "2": "",
+      "3": "󱃷",
+      "4": "",
+      "5": "󰊖",
+      "6": "󰒓",
+      "7": "󰖟",
+      "8": "󰝚",
+      "9": "󰡨",
+      "10": "",
+      "11": "",
+      "12": "",
+      "13": "󰆼",
+      "14": "",
+      "15": "",
+      "16": "",
+      "17": "",
+      "18": "",
+      "19": "",
+      "20": ""
+    },
+    "persistent-workspaces": {
+      "DP-3": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      "HDMI-A-1": [11, 12, 13]
+    }
+  },
+  "pulseaudio": {
+    "format": "{volume}%  {icon} ",
+    "format-bluetooth": "{volume}% {icon} ",
+    "format-bluetooth-muted": "  {icon} ",
+    "format-muted": "Silence ",
+    "format-source": "{volume}% ",
+    "format-source-muted": "",
+    "format-icons": {
+      "headphone": "",
+      "hands-free": "",
+      "headset": "",
+      "phone": "",
+      "portable": "",
+      "car": "",
+      "default": ["", "", ""]
+    },
+    "on-click": "pavucontrol"
+  },
+  "pulseaudio/slider": {
+    "min": 0,
+    "max": 100,
+    "orientation": "horizontal"
+  },
+  "hyprland/window": {
+    "max-length": 50,
+    "separate-outputs": true,
+    "icon": false,
+    "icon-size": 12
+  },
+  "clock": {
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+    "format-alt": " {:%Y-%m-%d} ",
+    "format": "{:%I:%M %p}  󰥔"
+  },
+  "backlight": {
+    "format": "{percent}% {}",
+    "format-icons": ["", "", "", "", "", "", "", "", ""]
+  },
+  "custom/media": {
+    "format": "{icon} {0}",
+    "format-icons": {
+      "spotify": "",
+      "chromium": ""
+    },
+    "escape": true,
+    "return-type": "json",
+    "max-length": 40,
+    "on-click": "playerctl play-pause",
+    "on-click-right": "playerctl stop",
+    "smooth-scrolling-threshold": 10,
+    "on-scroll-up": "playerctl next",
+    "on-scroll-down": "playerctl previous",
+    "exec": "$HOME/.config/hypr/waybar/custom/media.py 2> /dev/null"
+  },
+  "group/media": {
+    "orientation": "horizontal",
+    "modules": ["hyprland/window"]
+  },
+  "custom/colorpicker": {
+    "format": "󰈊",
+    "tooltip": "Click me!",
+    "on-click": "$HOME/.config/hypr/themes/bar/waybar/custom/colorpicker.sh"
+  },
+  "custom/screenshot": {
+    "format": "",
+    "tooltip": "Click me!",
+    "on-click": "$HOME/.config/hypr/themes/bar/waybar/custom/screenshot.sh"
+  },
+  "group/scripts": {
+    "orientation": "horizontal",
+    "modules": ["custom/screenshot", "custom/colorpicker"]
+  }
+}

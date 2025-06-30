@@ -1,0 +1,43 @@
+#group-power {
+    margin: 5px 4px;
+    padding: 0px 5px;
+    padding-right: 0px;
+    border-radius: 5px;
+    padding-left: 10px;
+    font-size: 25px;
+    background-color: alpha(@surface0, 0.4);
+}
+
+#group-power #custom-quit,
+#group-power #custom-reboot,
+#group-power #custom-lock {
+    font-size: 15px;
+    margin: 0px 3px;
+    padding-right: 10px;
+}
+
+#group-power #custom-power {
+    font-size: 20px;
+    font-weight: bold;
+    padding-right: 0px;
+    color: @red;
+}
+
+#group-power #custom-reboot {
+    margin-right: 5px;
+    color: @yellow;
+}
+
+#group-power #custom-lock {
+    color: @green;
+}
+
+#group-power #custom-quit {
+    color: @teal;
+}
+
+#group-power #custom-quit:hover,
+#group-power #custom-reboot:hover,
+#group-power #custom-lock:hover {
+    background-color: alpha(@crust, 0.8);
+}
