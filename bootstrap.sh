@@ -27,3 +27,14 @@ set -e
 echo -e "${GREEN}\n${BOLD}Starting Dotfiles!${NC}\n"
 
 ./common/bootstrap/install.sh
+
+echo -e "${GREEN}\n${BOLD}Stowing Config Files!${NC}\n"
+
+stow -v -t ~ "$COMMON_DIR"
+
+if [ -d "$HOST_DIR" ]; then
+  echo "Stowing host-specific dotfiles for $HOSTNAME..."
+  stow -v -t ~ "$HOST_DIR"
+else
+  echo "No host-specific config for $HOSTNAME."
+fi

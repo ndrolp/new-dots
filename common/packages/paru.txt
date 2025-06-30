@@ -15,5 +15,4 @@ pyprland
 hyprpaper
 waybar
 mako
-pypr
 waypaper

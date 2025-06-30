@@ -74,3 +74,12 @@ fi
 echo -e "${YELLOW}\nInstall Paru packages${NC}\n"
 
 paru -Sy --needed --noconfirm - < "$PKG_LIST"
+
+# INSTALL NVM
+echo -e "${YELLOW}\nInstall NVM${NC}\n"
+
+sudo mkdir -p "~/.config/nvm"
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+
+
+
