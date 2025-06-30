@@ -196,12 +196,6 @@ unalias pip
 export PATH=$PATH:/home/ndro/.spicetify
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-alias pvim='XDG_CONFIG_HOME="$HOME/.dotfiles/.config/nvim_new" nvim'
-# alias pv="XDG_CONFIG_HOME='$HOME/Documentos/nvim_new' nvim -u '$HOME/Documentos/new_nvim/nvim/init.lua'"
-# alias pv="nvim -u '$HOME/Documentos/new_nvim/nvim/init.lua'"
-alias pv="NVIM_APPNAME=nvim_new nvim"
-
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 
-#source "$HOME/.zsh/spaceship/spaceship.zsh"

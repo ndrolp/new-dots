@@ -44,3 +44,6 @@ github-cli
 hyprpicker
 bluez
 bluez-utils
+lxappearance
+nemo
+

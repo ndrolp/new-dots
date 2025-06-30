@@ -78,8 +78,13 @@ paru -Sy --needed --noconfirm - < "$PKG_LIST"
 # INSTALL NVM
 echo -e "${YELLOW}\nInstall NVM${NC}\n"
 
-sudo mkdir -p "~/.config/nvm"
+sudo mkdir -p $NVM_DIR
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 
 
 
+
+echo -e "${YELLOW}\nInstall ZSH Plugins${NC}\n"
+
+git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting

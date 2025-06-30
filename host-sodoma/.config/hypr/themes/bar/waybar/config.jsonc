@@ -128,10 +128,10 @@
             "warning": 30,
             "critical": 15,
         },
-        "format": "{capacity}% {icon}",
-        "format-full": "{capacity}% {icon}",
+        "format": "{capacity}% {icon} ",
+        "format-full": "{capacity}% {icon} ",
         "format-charging": "{capacity}% 󰂋 ",
-        "format-plugged": "{capacity}% ",
+        "format-plugged": "{capacity}%  ",
         "format-alt": "{time} {icon}",
         // "format-good": "", // An empty format will hide the module
         // "format-full": "",
@@ -183,10 +183,10 @@
         "modules": [
             "cpu",
             "memory",
-            "battery",
             "temperature",
             "backlight",
-            "pulseaudio"
+            "pulseaudio",
+            "battery",
         ],
     },
 }

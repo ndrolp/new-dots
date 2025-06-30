@@ -6,6 +6,14 @@ return {
         dependencies = { "nvim-lua/plenary.nvim" },
         config = function()
             require("telescope").setup({
+                pickers = {
+                    find_files = {
+                        hidden = true
+                    },
+                    live_grep = {
+                        hidden = true
+                    }
+                },
                 extensions = {
                     ["ui-select"] = {
                         require("telescope.themes").get_dropdown({
