@@ -1,0 +1,14 @@
+ranger
+neovim-git
+nvm
+visual-studio-code-bin
+auto-cpufreq
+google-chrome
+picom
+arc-icon-theme
+arc-gtk-theme
+ristretto
+cava
+playerctl
+waypaper
+pyprland

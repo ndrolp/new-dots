@@ -33,9 +33,9 @@ fi
 
 # Install packages with pacman
 echo -e "${YELLOW}\nUpdate Pacman${NC}\n"
-sudo pacman -Syu
+sudo pacman -Syu --noconfirm
 echo -e "${YELLOW}\nInstall pacman packages${NC}\n"
-sudo pacman -Sy --needed - < "$PKG_LIST"
+sudo pacman -Sy --needed --noconfirm - < "$PKG_LIST"
 rustup default stable
 
 # INSTALL PARU
@@ -62,3 +62,15 @@ else
 
   echo "${GREEN}✅ paru installed successfully.${NC}\n"
 fi
+
+PKG_LIST="${ROOT_DIR}/packages/paru.txt"
+
+# Ensure the file exists
+if [[ ! -f "$PKG_LIST" ]]; then
+  echo -e "${RED} Package list not found: $PKG_LIST ${NC} \n"
+  exit 1
+fi
+
+echo -e "${YELLOW}\nInstall Paru packages${NC}\n"
+
+paru -Sy --needed --noconfirm - < "$PKG_LIST"
