@@ -4,8 +4,8 @@
 INTERFACE=$(ip route | grep default | awk '{print $5}')
 
 if [ -z "$INTERFACE" ]; then
-    echo "󰱟"
-    exit 1
+    echo "ASD"
+    exit 0
 fi
 
 # Check if the interface is wireless
@@ -13,13 +13,13 @@ IS_WIRELESS=$(iw dev "$INTERFACE" info 2>/dev/null)
 
 if [ -n "$IS_WIRELESS" ]; then
     # Wireless connection
-    SSID=$(iwgetid -r)
-    SIGNAL=$(awk '/^\s*w/ { print int($3 * 100 / 70) " %" }' /proc/net/wireless)
 
-    if [ -z "$SSID" ]; then
-        echo "󰤭"
-    else
-        SIGNAL=$(($SIGNAL_RAW * 100 / 70))
+        SSID=$(iwgetid -r)
+        SIGNAL=$(awk '/^\s*w/ { print int($3 * 100 / 70) }' /proc/net/wireless)
+
+        if [ -z "$SSID" ]; then
+            echo "󰤭"
+        else
 
         # Determine strength level (1-5)
         if [ "$SIGNAL" -ge 80 ]; then

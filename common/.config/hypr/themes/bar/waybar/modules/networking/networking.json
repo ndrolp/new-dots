@@ -13,7 +13,7 @@
     "exec": "~/.config/hypr/themes/bar/waybar/modules/networking/network.sh",
     "tooltip": true,
     "tooltip-format": "Network Manager",
-    "interval": 10
+    "interval": 5
   },
   "group/networking": {
     "orientation": "horizontal",

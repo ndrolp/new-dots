@@ -1,0 +1,139 @@
+[4mwofi[24m(1)                                                                           General Commands Manual                                                                           [4mwofi[24m(1)
+
+[1mNAME[0m
+       wofi - A rofi inspired launcher for wlroots compositors
+
+[1mSYNOPSIS[0m
+       [1mwofi [22m[options]
+
+[1mDESCRIPTION[0m
+       [1mwofi  [22mis a rofi inspired menu program for wlroots compositors such as sway. It is intended to be highly customizable and flexible with the help of CSS styling and a dmenu mode that
+       allows for endless scriptability. Wofi can be run cacheless in dmenu mode automatically by invoking it as dmenu with symlink.
+
+       Wofi was designed specifically for wlroots and makes use of the wlr-layer-shell protocol. If your compositor does not support this protocol or if you are in a non-wayland  environ‐
+       ment then wofi must be run with [1m--normal-window [22mor it will crash. If you wish to run wofi this way you can also place [1mnormal_window=true [22min your config file to avoid specifying the
+       option on the command line.
+
+[1mOPTIONS[0m
+       [1m-h, --help[0m
+              Prints the help message and then exits.
+
+       [1m-f, --fork[0m
+              Forks the menu so the terminal running it can be closed.
+
+       [1m-c, --conf=[4m[22mPATH[0m
+              Specifies the config file to use.
+
+       [1m-s, --style=[4m[22mPATH[0m
+              Specifies the CSS file to use as the stylesheet.
+
+       [1m-C, --color=[4m[22mPATH[0m
+              Specifies the colors file to use.
+
+       [1m-d, --dmenu[0m
+              Runs wofi in dmenu mode.
+
+       [1m-S, --show=[4m[22mMODE[0m
+              Specifies the mode to run in. A list of modes can be found in [1mwofi[22m(7).
+
+       [1m-W, --width=[4m[22mWIDTH[0m
+              Specifies the menu width in pixels or percent of screen size, default is 50%. Pixels are used unless the number ends with a %.
+
+       [1m-H, --height=[4m[22mHEIGHT[0m
+              Specifies the menu height in pixels or percent of screen size, default is 40%. Pixels are used unless the number ends with a %.
+
+       [1m-p, --prompt=[4m[22mPROMPT[0m
+              Sets the prompt to be display in the search box, default is the name of the mode.
+
+       [1m-x, --xoffset=[4m[22mOFFSET[0m
+              Sets the x offset from the location in pixels, default is 0.
+
+       [1m-y, --yoffset=[4m[22mOFFSET[0m
+              Sets the y offset from the location in pixels, default is 0.
+
+       [1m-n, --normal-window[0m
+              Runs wofi in a normal window instead of using wlr-layer-shell.
+
+       [1m-I, --allow-images[0m
+              Allows image escape sequences to be processed and rendered.
+
+       [1m-m, --allow-markup[0m
+              Allows pango markup to be processed and rendered.
+
+       [1m-k, --cache-file=[4m[22mPATH[0m
+              Specifies  the  cache  file  to  load/store cache, default is $XDG_CACHE_HOME/wofi-<mode name> where <mode name> is the name of the mode, if $XDG_CACHE_HOME is not specified
+              ~/.cache is used.
+
+       [1m-t, --term=[4m[22mTERM[0m
+              Specifies the term to use when running a program in a terminal. This overrides the default terminal run order which is kitty, alacritty, wezterm, foot, termite, gnome-termi‐
+              nal, weston-terminal in that order.
+
+       [1m-P, --password [22m[character]
+              Runs wofi in password mode with an optional password character to use. If no character is specified * is used by default.
+
+       [1m-e, --exec-search[0m
+              Activiating a search with enter will execute the search not the first result.
+
+       [1m-b, --hide-scroll[0m
+              Hides the scroll bars.
+
+       [1m-M, --matching=[4m[22mMODE[0m
+              Specifies the matching mode, it can be either contains, multi-contains, or fuzzy, default is contains.
+
+       [1m-i, --insensitive[0m
+              Enables case insensitive search.
+
+       [1m-q, --parse-search[0m
+              Parses out image escapes and pango preventing them from being used for searching.
+
+       [1m-v, --version[0m
+              Prints the version and then exits.
+
+       [1m-l, --location=[4m[22mLOCATION[0m
+              Specifies the location. See [1mwofi[22m(7) for more information, default is center.
+
+       [1m-a, --no-actions[0m
+              Disables multiple actions for modes that support it.
+
+       [1m-D, --define=[4m[22mKEY=VALUE[0m
+              Sets a config option
+
+       [1m-L, --lines=[4m[22mLINES[0m
+              Specifies the height in number of lines instead of pixels.
+
+       [1m-w, --columns=[4m[22mCOLUMNS[0m
+              Specifies the number of columns to display, default is 1.
+
+       [1m-O, --sort-order=[4m[22mORDER[0m
+              Specifies the default sort order. There are currently two orders, default and alphabetical. See [1mwofi[22m(7) for details.
+
+       [1m-G, --gtk-dark[0m
+              Instructs wofi to use the dark variant of the current GTK theme, if available.
+
+       [1m-Q, --search[0m
+              Specifies something to search for immediately on opening
+
+       [1m-o, --monitor[0m
+              Sets the monitor to open on
+
+       [1m-r, --pre-display-cmd[0m
+              If set, the selectable entry won't be displayed as-is, but will instead be displayed based on the output of this command, which can be anything. Suggested to use with  [1m"echo[0m
+              [1m%s  |  some_cmd" [22mor [1m"some_cmd %s"[22m, as the string gets replaced in a printf-like fashion. This will not affect the output of wofi once a selection has been done, allowing you
+              to display something else than the original output.
+
+[1mCONFIGURATION[0m
+       Wofi has 3 main files used for configuration. All files are completely optional.
+
+       1.  The config file which defaults to $XDG_CONFIG_HOME/wofi/config.
+
+       2.  The CSS file which defaults to $XDG_CONFIG_HOME/wofi/style.css.
+
+       3.  The colors file which defaults to the pywal cache $XDG_CACHE_HOME/wal/colors.
+
+       All 3 of these paths can be manually specified using the respective command line flag. In the case of the last 2 they can additionally be specified in the config file.
+
+       In the event $XDG_CONFIG_HOME is not specified it defaults to ~/.config likewise if $XDG_CACHE_HOME is not specified it defaults to ~/.cache.
+
+       Information about the formats for these files can be found in [1mwofi[22m(5).
+
+                                                                                                                                                                                    [4mwofi[24m(1)
