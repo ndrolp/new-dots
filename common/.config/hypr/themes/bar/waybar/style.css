@@ -9,7 +9,7 @@
 @import "./modules/scripts/script-style.css";
 
 window#waybar {
-    background: shade(alpha(@mantle, 0.6), 1);
+    background: shade(alpha(@mantle, 0.5), 1);
     border-bottom: 1px solid @surface1;
     /* border-bottom: 3px solid rgba(100, 114, 125, 0.5); */
     color: @text;

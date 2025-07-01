@@ -16,3 +16,4 @@ hyprpaper
 waybar
 mako
 waypaper
+swayosd-git
