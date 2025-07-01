@@ -50,3 +50,5 @@ wireless_tools
 btop
 nemo-fileroller
 wl-clipboard
+xdg-desktop-portal-gtk
+xdg-desktop-portal-hyprland

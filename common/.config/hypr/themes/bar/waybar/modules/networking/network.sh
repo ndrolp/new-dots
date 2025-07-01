@@ -4,7 +4,7 @@
 INTERFACE=$(ip route | grep default | awk '{print $5}')
 
 if [ -z "$INTERFACE" ]; then
-    echo "ASD"
+    echo "󰤭"
     exit 0
 fi
 

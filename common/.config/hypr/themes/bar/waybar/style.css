@@ -9,9 +9,7 @@
 @import "./modules/scripts/script-style.css";
 
 window#waybar {
-    background-color: transparent;
-    background-color: @mantle;
-    background: shade(alpha(@mantle, 0.8), 1);
+    background: shade(alpha(@mantle, 0.6), 1);
     border-bottom: 1px solid @surface1;
     /* border-bottom: 3px solid rgba(100, 114, 125, 0.5); */
     color: @text;
@@ -80,7 +78,7 @@ button:hover {
 
 #workspaces {
     margin: 5px 9px;
-    padding: 5px 10px;
+    padding: 0px 10px;
     border-radius: 5px;
     background-color: alpha(@surface0, 0.4);
 }
