@@ -78,13 +78,31 @@ paru -Sy --needed --noconfirm - < "$PKG_LIST"
 # INSTALL NVM
 echo -e "${YELLOW}\nInstall NVM${NC}\n"
 
-sudo mkdir -p $NVM_DIR
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+if [ -n "$NVM_DIR" ]; then
+  mkdir -p "$NVM_DIR"
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+else
+  echo "NVM_DIR is not defined. Aborting."
+fi
 
 
 
 
 echo -e "${YELLOW}\nInstall ZSH Plugins${NC}\n"
 
-git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+# Set custom plugin path (in case ZSH_CUSTOM is not set)
+ZSH_CUSTOM=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
+
+# zsh-autosuggestions
+if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
+  git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
+else
+  echo "zsh-autosuggestions already installed."
+fi
+
+# zsh-syntax-highlighting
+if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
+  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
+else
+  echo "zsh-syntax-highlighting already installed."
+fi

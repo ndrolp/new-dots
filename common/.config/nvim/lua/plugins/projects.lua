@@ -4,7 +4,7 @@ return {
         opts = {
             projects = { -- define project roots
                 -- "~/.config/*",
-                "~/.dotfiles/.config/*",
+                "~/.dotfiles/common/.config/*",
                 "~/.dotfiles/",
                 "~/Development/Projects/*",
                 "~/Documentos/Projects/*",
