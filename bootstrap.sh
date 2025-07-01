@@ -24,9 +24,28 @@ COMMON_DIR="common"
 set -e
 
 #Start script
-echo -e "${GREEN}\n${BOLD}Starting Dotfiles!${NC}\n"
 
-./common/bootstrap/install.sh
+NO_BOOTSTRAP=false
+
+while [[ "$#" -gt 0 ]]; do
+    case "$1" in
+        --no-bootstrap)
+            NO_BOOTSTRAP=true
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+if [ "$NO_BOOTSTRAP" = false ]; then
+    echo -e "${GREEN}\n${BOLD}Starting Dotfiles!${NC}\n"
+    ./common/bootstrap/install.sh
+else
+    echo -e "${GREEN}\n${BOLD}Starting Dotfiles Withaut bootsrap scripts${NC}\n"
+fi
 
 echo -e "${GREEN}\n${BOLD}Stowing Config Files!${NC}\n"
 
