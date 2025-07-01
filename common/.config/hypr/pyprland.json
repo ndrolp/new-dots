@@ -14,6 +14,14 @@
             "lazy": true,
             "unfocus": "hide"
         },
+        "btop": {
+            "command": "kitty --class scratchtop -e btop ",
+            "class": "scratch-btop",
+            "margin": 50,
+            "animation": "fromTop",
+            "lazy": true,
+            "unfocus": "hide"
+        },
         "pavucntrl": {
             "command": "pavucontrol",
             "margin": 50,

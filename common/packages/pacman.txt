@@ -47,4 +47,6 @@ bluez-utils
 lxappearance
 nemo
 wireless_tools
-
+btop
+nemo-fileroller
+wl-clipboard
