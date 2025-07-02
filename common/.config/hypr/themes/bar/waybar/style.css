@@ -1,4 +1,6 @@
 @import "./catpuccin.css";
+@import "./modules/notifications/notifications-style.css";
+@import "./modules/scripts/script-style.css";
 
 * {
     /* `otf-font-awesome` is required to be installed for icons */
@@ -6,7 +8,6 @@
     font-size: 12px;
 }
 
-@import "./modules/scripts/script-style.css";
 
 window#waybar {
     background: shade(alpha(@mantle, 0.5), 1);

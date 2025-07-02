@@ -14,6 +14,7 @@
         "~/.config/hypr/themes/bar/waybar/modules.json"
     ],
     "modules-left": [
+        "custom/notification",
         "group/scripts",
         "group/media"
     ],

@@ -1,6 +1,7 @@
 {
   "include": [
     "~/.config/hypr/themes/bar/waybar/modules/networking/networking.json",
-    "~/.config/hypr/themes/bar/waybar/modules/scripts/scripts.json"
+    "~/.config/hypr/themes/bar/waybar/modules/scripts/scripts.json",
+    "~/.config/hypr/themes/bar/waybar/modules/notifications/notifications.json"
   ]
 }

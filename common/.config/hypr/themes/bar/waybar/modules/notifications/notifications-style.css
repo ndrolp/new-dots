@@ -1,0 +1,15 @@
+#custom-notification {
+    margin: 5px 9px;
+    margin-right: 5px;
+    padding: 0px 10px;
+    padding-right: 12px;
+    border-radius: 5px;
+    font-size: 15px;
+    color: @yellow;
+    background-color: alpha(@surface0, 0.4);
+}
+
+#custom-notification:hover{
+    color: @yellow;
+    background-color: alpha(@yellow, 0.4);
+}
