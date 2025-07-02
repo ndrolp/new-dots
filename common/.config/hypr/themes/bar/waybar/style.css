@@ -1,5 +1,5 @@
 @import "./catpuccin.css";
-@import "./modules/notifications/notifications-style.css";
+@import "./modules/extras/extras.css";
 @import "./modules/scripts/script-style.css";
 
 * {
@@ -24,21 +24,31 @@ window#waybar.hidden {
     background-color: alpha(@surface0, 0.4);
     border-radius: 5px;
     margin: 5px 4px;
-    padding: 2px 5px;
+    padding: 2px 8px;
 }
 
 #scripts #custom-screenshot,
 #scripts #custom-colorpicker {
-    color: @blue;
-    padding: 0px 5px;
-    padding-right: 9px;
-    border-radius: 2px;
+    padding: 0px 8px;
+    border-radius: 5px;
     transition: 0.3s;
+    padding-right: 12px;
+    font-size: 12px;
 }
 
-#scripts #custom-screenshot:hover,
-#scripts #custom-colorpicker:hover {
-    background-color: alpha(@blue, 0.2);
+
+#custom-screenshot {
+    color: @peach;
+    padding-right: 12px;
+}
+#custom-screenshot:hover{
+    background-color: alpha(@peach, 0.2);
+}
+#custom-colorpicker {
+    color: @mauve
+}
+#custom-colorpicker:hover {
+    background-color: alpha(@mauve, 0.2);
 }
 
 #clock {
@@ -419,7 +429,7 @@ label:focus {
 
 #networking #custom-bluetooth {
     padding-right: 0px;
-    font-size:15px;
+    font-size: 15px;
 }
 
 #networking #custom-network {

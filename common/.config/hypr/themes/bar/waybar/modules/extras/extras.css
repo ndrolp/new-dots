@@ -1,0 +1,46 @@
+#extras{
+    padding: 0px 5px;
+    margin: 5px 4px;
+    border-radius: 5px;
+    background-color: alpha(@surface0, 0.4);
+}
+
+#extras #custom-notification,
+#extras #custom-uptime-icon{
+    font-size: 14px;
+    padding: 0px 8px;
+    border-radius: 5px;
+}
+
+#custom-notification {
+    color: @yellow;
+}
+
+#custom-notification:hover {
+    color: @yellow;
+    background-color: alpha(@yellow, 0.4);
+}
+
+#custom-uptime-icon {
+    color: @green;
+    padding: 0px 10px
+}
+
+#custom-uptime-icon:hover {
+}
+
+#uptime {
+    border-radius: 5px;
+}
+
+#uptime:hover{
+}
+
+#custom-uptime{
+    font-size: 14px;
+    padding: 0px 4px;
+    border-radius: 5px;
+    padding-top: 4px;
+    color: @green;
+    background-color: alpha(@green, 0.1);
+}
