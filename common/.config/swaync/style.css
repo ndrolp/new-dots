@@ -21,12 +21,17 @@ slider {
 }
 
 .floating-notifications.background .notification-row .notification-background {
-    box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.8), inset 0 0 0 1px #414559;
-    border-radius: 12.6px;
-    margin: 18px;
+    box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.3), inset 0 0 0 1px #414559;
+    border-radius: 10px;
+    margin: 10px;
     background-color: #303446;
+    background-color: rgba(48, 52, 70, .9);
     color: #c6d0f5;
     padding: 0;
+}
+
+.floating-notifications.background .notification-row .notification-background {
+    border: 1px solid #babbf1
 }
 
 .floating-notifications.background .notification-row .notification-background .notification {
@@ -97,10 +102,10 @@ slider {
 }
 
 .control-center {
-    box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.8), inset 0 0 0 1px #414559;
-    border-radius: 12.6px;
-    margin: 18px;
-    background-color: #303446;
+    box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.3), inset 0 0 0 1px #414559;
+    border-radius: 0px;
+    margin: 0px;
+    background-color: rgba(48, 52, 70, .9);
     color: #c6d0f5;
     padding: 14px;
 }
