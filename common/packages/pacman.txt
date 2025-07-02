@@ -54,3 +54,4 @@ xdg-desktop-portal-gtk
 xdg-desktop-portal-hyprland
 cliphist
 brightnessctl
+swaync
