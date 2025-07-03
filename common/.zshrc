@@ -168,6 +168,7 @@ alias open="xdg-open"
 # alias colors='for i in {0..255}; do printf "\e[48;5;%sm %3d \e[0m" "$i" "$i"; (( (i+1) % 16 == 0 )) && echo ""; done'
 alias cdp='~/.dotfiles/scripts/tmux/projects.sh'
 alias zj="zellij"
+alias md="glauss md"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
