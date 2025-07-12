@@ -1,0 +1,52 @@
+profile undocked {
+    output eDP-1 enable mode 1920x1080 position 0,0
+}
+
+profile dockedalt {
+
+    output DP-6 enable mode 1920x1080 position 0,0
+    output DP-7 enable mode 1920x1080 position -1920,0
+
+    output eDP-1 disable
+
+    exec ~/.dotfiles/scripts/hyprland/reload.sh
+}
+
+profile triple {
+
+    output DP-6 enable mode 1920x1080 position 0,0
+    output DP-7 enable mode 1920x1080 position -1920,0
+    output eDP-1 enable mode 1920x1080 position 0,-1920
+
+    exec ~/.dotfiles/scripts/hyprland/reload.sh
+}
+
+
+profile docked {
+
+    output DP-4 enable mode 1920x1080 position 0,0
+    output DP-5 enable mode 1920x1080 position -1920,0
+    output eDP-1 enable mode 1920x1080 position 0,-1080
+
+    exec ~/.dotfiles/scripts/hyprland/reload.sh
+}
+
+
+profile dockedwithfour {
+
+    output DP-4 enable mode 1920x1080 position 0,0
+    output DP-5 enable mode 1920x1080 position -1920,0
+    output eDP-1 disable
+
+    exec ~/.dotfiles/scripts/hyprland/reload.sh
+}
+
+
+profile docked {
+
+    output DP-5 enable mode 1920x1080 position 0,0
+    output DP-7 enable mode 1920x1080 position -1920,0
+    output eDP-1 enable mode 1920x1080 position 0,-1080
+
+    exec ~/.dotfiles/scripts/hyprland/reload.sh
+}

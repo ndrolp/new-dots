@@ -57,3 +57,4 @@ brightnessctl
 swaync
 stylua
 glow
+hyprlock

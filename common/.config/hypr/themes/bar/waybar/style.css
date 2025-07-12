@@ -8,7 +8,6 @@
     font-size: 12px;
 }
 
-
 window#waybar {
     background: shade(alpha(@mantle, 0.5), 1);
     border-bottom: 1px solid @surface1;
@@ -36,17 +35,19 @@ window#waybar.hidden {
     font-size: 12px;
 }
 
-
 #custom-screenshot {
     color: @peach;
     padding-right: 12px;
 }
-#custom-screenshot:hover{
+
+#custom-screenshot:hover {
     background-color: alpha(@peach, 0.2);
 }
+
 #custom-colorpicker {
-    color: @mauve
+    color: @mauve;
 }
+
 #custom-colorpicker:hover {
     background-color: alpha(@mauve, 0.2);
 }
@@ -95,8 +96,8 @@ button:hover {
 }
 
 #workspaces button {
-    padding: 0px 5px;
-    padding-right: 12px;
+    padding: 0px 2px;
+    padding-right: 4px;
     border-radius: 5px;
     background-color: transparent;
     color: @text;
@@ -146,7 +147,7 @@ button:hover {
 #pulseaudio {
     color: @text;
     margin-left: 0;
-    padding: 4px 4px;
+    padding: 2px 2px;
     margin: 0 0px;
 }
 

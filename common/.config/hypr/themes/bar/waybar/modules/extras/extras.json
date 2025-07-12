@@ -1,47 +1,60 @@
 {
-    "custom/uptime-icon": {
-        "format": "󰞌",
-        "tooltip": false
+  "custom/uptime-icon": {
+    "format": "󰞌",
+    "tooltip": false
+  },
+  "custom/hardware-icon": {
+    "format": "󰭄",
+    "tooltip": false
+  },
+  "custom/uptime": {
+    "format": "{}",
+    "exec": "~/.config/hypr/themes/bar/waybar/modules/extras/uptime.sh",
+    "interval": 60,
+    "tooltip": false
+  },
+  "custom/notification": {
+    "tooltip": false,
+    "format": "{icon}",
+    "format-icons": {
+      "notification": "<span foreground='#fff'><sup></sup></span>",
+      "none": "",
+      "dnd-notification": "<span foreground='#ed8796'><sup></sup></span>",
+      "dnd-none": "",
+      "inhibited-notification": "<span foreground='#ed8796'><sup></sup></span>",
+      "inhibited-none": "",
+      "dnd-inhibited-notification": "<span foreground='#ed8796'><sup></sup></span>",
+      "dnd-inhibited-none": ""
     },
-    "custom/uptime": {
-        "format": "{}",
-        "exec": "~/.config/hypr/themes/bar/waybar/modules/extras/uptime.sh",
-        "interval": 60,
-        "tooltip": false
+    "return-type": "json",
+    "exec-if": "which swaync-client",
+    "exec": "swaync-client -swb",
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw",
+    "escape": true
+  },
+  "group/uptime": {
+    "orientation": "horizontal",
+    "drawer": {
+      "transition-duration": 300,
+      "children-class": "uptime-children"
     },
-    "custom/notification": {
-        "tooltip": false,
-        "format": "{icon}",
-        "format-icons": {
-        "notification": "<span foreground='#fff'><sup></sup></span>",
-        "none": "",
-        "dnd-notification": "<span foreground='#ed8796'><sup></sup></span>",
-        "dnd-none": "",
-        "inhibited-notification": "<span foreground='#ed8796'><sup></sup></span>",
-        "inhibited-none": "",
-        "dnd-inhibited-notification": "<span foreground='#ed8796'><sup></sup></span>",
-        "dnd-inhibited-none": ""
-        },
-        "return-type": "json",
-        "exec-if": "which swaync-client",
-        "exec": "swaync-client -swb",
-        "on-click": "swaync-client -t -sw",
-        "on-click-right": "swaync-client -d -sw",
-        "escape": true
+    "modules": ["custom/uptime-icon", "custom/uptime"]
+  },
+  "group/extras": {
+    "orientation": "horizontal",
+    "modules": ["custom/notification", "group/uptime", "group/hardware-scroll"]
+  },
+  "group/hardware-scroll": {
+    "orientation": "horizontal",
+    "drawer": {
+      "transition-duration": 300,
+      "children-class": "hard-children"
     },
-    "group/uptime": {
-        "orientation": "horizontal",
-        "drawer": {
-            "transition-duration": 300,
-            "children-class": "uptime-children",
-        },
-        "modules": [
-            "custom/uptime-icon",
-            "custom/uptime"
-        ]
-    },
-    "group/extras": {
-        "orientation": "horizontal",
-        "modules": ["custom/notification", "group/uptime"]
-    },
+    "modules": ["custom/hardware-icon", "group/hardware-stats"]
+  },
+  "group/hardware-stats": {
+    "orientation": "horizontal",
+    "modules": ["cpu", "memory", "temperature"]
+  }
 }

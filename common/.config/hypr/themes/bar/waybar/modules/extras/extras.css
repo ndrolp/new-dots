@@ -1,4 +1,4 @@
-#extras{
+#extras {
     padding: 0px 5px;
     margin: 5px 4px;
     border-radius: 5px;
@@ -6,10 +6,16 @@
 }
 
 #extras #custom-notification,
-#extras #custom-uptime-icon{
+#extras #custom-hardware-icon,
+#extras #custom-uptime-icon {
     font-size: 14px;
     padding: 0px 8px;
     border-radius: 5px;
+}
+
+#extras #custom-hardware-icon {
+    color: @teal;
+    font-size: 16px;
 }
 
 #custom-notification {
@@ -23,24 +29,32 @@
 
 #custom-uptime-icon {
     color: @green;
-    padding: 0px 10px
+    padding: 0px 10px;
 }
 
-#custom-uptime-icon:hover {
-}
+#custom-uptime-icon:hover {}
 
 #uptime {
     border-radius: 5px;
 }
 
-#uptime:hover{
-}
+#uptime:hover {}
 
-#custom-uptime{
+#custom-uptime {
     font-size: 14px;
     padding: 0px 4px;
     border-radius: 5px;
     padding-top: 4px;
     color: @green;
     background-color: alpha(@green, 0.1);
+}
+
+#extras #cpu {
+    color: @yellow;
+}
+
+#hardware-stats {
+    border-radius: 5px;
+    margin-right: 2px;
+    background-color: alpha(@surface2, 0.3);
 }

@@ -7,13 +7,7 @@
 # fi
 
 # If you come from bash you might have to change your $PATH.
-PATH="/opt/flutter/bin:$PATH"
-PATH="$HOME/Android/Sdk/platform-tools:$PATH"
-PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
-PATH="$HOME/go/bin:$PATH"
-PATH="$HOME/.cargo/bin:$PATH"
-PATH="/usr/bin/flutter/bin:$PATH"
-export PATH
+#
 export VISUAL=nvim
 export EDITOR=nvim
 export FZF_TMUX_OPTS='-p80%,60%'
@@ -22,6 +16,13 @@ export ZSH="$HOME/.oh-my-zsh"
 export ZSH_CUSTOM="$HOME/.config/zsh_custom"
 export CHROME_EXECUTABLE=/bin/google-chrome-stable
 export CHROME_EXECUTABLE
+PATH="/opt/flutter/bin:$PATH"
+PATH="$HOME/Android/Sdk/platform-tools:$PATH"
+PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
+PATH="$HOME/go/bin:$PATH"
+PATH="$HOME/.cargo/bin:$PATH"
+PATH="/usr/bin/flutter/bin:$PATH"
+export PATH
 
 
 ZSH_THEME="spaceship"
@@ -194,10 +195,10 @@ export ZELLIJ_CONFIG_DIR="$HOME/.config/zellij"
 #
 unalias pip
 
-export PATH=$PATH:/home/ndro/.spicetify
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+
+export PATH=$PATH:/home/ndro/.spicetify
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 alias dotsync='(cd ~/.dotfiles && ./bootstrap.sh --no-bootstrap)'
