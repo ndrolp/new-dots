@@ -1,5 +1,5 @@
 #extras {
-    padding: 0px 5px;
+    padding: 4px 5px;
     margin: 5px 4px;
     border-radius: 5px;
     background-color: alpha(@surface0, 0.4);
@@ -60,7 +60,23 @@
 }
 
 #custom-powerprofile {
-    padding: 0 8px;
-    padding-right: 8px;
+    padding: 0 5px;
+    margin: 0px;
+    border-radius: 4px;
+    padding-right: 10px;
     font-size: 12px;
+}
+
+#custom-powerprofile.performance {
+    background-color: alpha(@yellow, 0.2);
+}
+
+#custom-powerprofile.power-saver {
+    padding-right: 8px;
+    background-color: alpha(@green, 0.2);
+}
+
+#custom-powerprofile.balanced {
+    padding-right: 12px;
+    background-color: alpha(@blue, 0.2);
 }

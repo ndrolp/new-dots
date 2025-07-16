@@ -44,10 +44,10 @@
   "group/extras": {
     "orientation": "horizontal",
     "modules": [
+      "custom/powerprofile",
       "custom/notification",
       "group/uptime",
-      "group/hardware-scroll",
-      "custom/powerprofile"
+      "group/hardware-scroll"
     ]
   },
   "group/hardware-scroll": {
