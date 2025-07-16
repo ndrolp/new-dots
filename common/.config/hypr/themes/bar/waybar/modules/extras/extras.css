@@ -58,3 +58,9 @@
     margin-right: 2px;
     background-color: alpha(@surface2, 0.3);
 }
+
+#custom-powerprofile {
+    padding: 0 8px;
+    padding-right: 8px;
+    font-size: 12px;
+}

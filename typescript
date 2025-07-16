@@ -1,0 +1,154 @@
+Script started on 2025-07-16 17:29:53+02:00 [TERM="xterm-kitty" TTY="/dev/pts/0" COLUMNS="133" LINES="62"]
+l[1m[7m%[27m[1m[0m                                                                                                                                     ]2;ndrolp@sodoma:~/.dotfiles]1;~/.dotfiles]7;file://sodoma/home/ndrolp/.dotfiles\[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles[0m[36m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[K[130C[1A[1B[130D[?1h[?2004hl[32ml[39m[32ml[39m[90ms[39m[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[32ml[39m[90ms[39m[K[128C[1A[1B[129D[39m [39m script[32ms[32mc[32mr[32mi[32mp[32mt[39m[32mt[32ms[39m[4m[32ms[4m[32mc[4m[32mr[4m[32mi[4m[32mp[4m[32mt[4m[32ms[24m[39m[?1l[?2004l
+]2;scripts]1;scripts[1m[7m%[27m[1m[0m                                                                                                                                     ]2;ndrolp@sodoma:~/.dotfiles/scripts]1;..files/scripts]7;file://sodoma/home/ndrolp/.dotfiles/scripts\[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts[0m[36m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[K[130C[1A[1B[130D[?1h[?2004h[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[K[130C[1A[1B[130D[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[K[130C[1A[1B[130Dl[32ml[39m[32ml[39m[90ms[39m[32ml[32ms[39m[?1l[?2004l
+]2;ls --color=tty]1;ls[0m[01;34mdmenu[0m  [01;34mhyprland[0m  [01;32mhyprland-monitor-toggle.sh[0m  [01;34mrofi[0m  [01;34mscreenshots[0m  [01;32mswitch-audio.sh[0m  [01;34mtmux[0m
+[1m[7m%[27m[1m[0m                                                                                                                                     ]2;ndrolp@sodoma:~/.dotfiles/scripts]1;..files/scripts]7;file://sodoma/home/ndrolp/.dotfiles/scripts\[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts[0m[36m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[K[130C[1A[1B[130D[?1h[?2004h[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[K[130C[1A[1B[130D[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[K[130C[1A[1B[130Dc[1m[31mc[0m[39m[1m[31mc[0m[39m[90mlear[39m[1m[31mc[1m[31md[0m[39m[39m [39m [39m [0m[32mc[0m[32md[39m[90m ..[39m[32mc[32md[32m [39m[32mc[32md[39m[39m [39md[39m [4md[24m[90mmenu[39m[4md[39m[4mm[24m[4mm[39m[4me[24m[4me[39m[4mn[24m[4mn[39m[4mu[24m[?1l[?2004l
+]2;cd dmenu]1;cd[1m[7m%[27m[1m[0m                                                                                                                                     ]2;ndrolp@sodoma:~/.dotfiles/scripts/dmenu]1;..scripts/dmenu]7;file://sodoma/home/ndrolp/.dotfiles/scripts/dmenu\[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[K[130C[1A[1B[130D[?1h[?2004h[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[K[130C[1A[1B[130Dl[32ml[39m[32ml[39m[90ms[39m[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[32ml[39m[90ms[39m[K[128C[1A[1B[129D[32ml[32ms[39m[?1l[?2004l
+]2;ls --color=tty]1;ls[0m[01;32mpower.sh[0m  [01;32mwebsearch.sh[0m
+[1m[7m%[27m[1m[0m                                                                                                                                     ]2;ndrolp@sodoma:~/.dotfiles/scripts/dmenu]1;..scripts/dmenu]7;file://sodoma/home/ndrolp/.dotfiles/scripts/dmenu\[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[K[130C[1A[1B[130D[?1h[?2004h[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[K[130C[1A[1B[130D[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[K[130C[1A[1B[130D.[32m.[39m[32m.[39m[90mdotfiles[39m[8D[32m.[32m/[39m[39m [39m [39m [39m [39m [39m [39m [4m[32m.[4m[32m/[24m[39m[90mhypr[39m[4m[32m.[4m[32m/[4m[32mp[24m[39m[39m [39m [39m [39m[4m.[39m[4m/[39m[4mp[24m[4mp[4mo[24m[4mo[4mw[24m[4mw[4me[24m[24m[32m.[24m[32m/[24m[32mp[24m[32mo[24m[32mw[24m[32me[32mr.sh[39m[1m [0m[0m [?1l[?2004l
+]2;./power.sh]1;./power.shasjdasdl^[^C
+[1m[7m%[27m[1m[0m                                                                                                                                     ]2;ndrolp@sodoma:~/.dotfiles/scripts/dmenu]1;..scripts/dmenu]7;file://sodoma/home/ndrolp/.dotfiles/scripts/dmenu\[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1mtook [0m[1m[33m7,0s[0m[33m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[31m❯[0m[31m[39m[1m [0m[K[130C[1A[1B[130D[?1h[?2004h[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1mtook [0m[1m[33m7,0s[0m[33m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[31m❯[0m[31m[39m[1m [0m[K[130C[1A[1B[130D[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1mtook [0m[1m[33m7,0s[0m[33m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[31m❯[0m[31m[39m[1m [0m[K[130C[1A[1B[130Ds[1m[31ms[0m[39m[1m[31ms[0m[39m[90mcripts[39m[1m[31ms[1m[31mu[0m[39m[39m [39m [39m [39m [39m [0m[32ms[0m[32mu[39m[90mdo pacman -S cheese[39m[19D[32ms[32mu[32md[39m[1m[31ms[1m[31mu[1m[31md[0m[39m[1m[31md[1m[31mo[0m[39m[0m[4m[32ms[0m[4m[32mu[0m[4m[32md[0m[4m[32mo[24m[39m[4m[32mo[4m[32m [24m[39m[4m[32mo[24m[39m[24m[39m [39mp[32mp[39m[32mp[32ma[39m[1m[31mp[1m[31ma[0m[39m[1m[31ma[1m[31mc[0m[39m[1m[31mc[1m[31mm[0m[39m[1m[31mm[1m[31ma[0m[39m[1m[31ma[1m[31mn[0m[39m[0m[32mp[0m[32ma[0m[32mc[0m[32mm[0m[32ma[0m[32mn[39m[32mn[32m [39m[32mn[39m[39m [39m-[39mS[39m [39mb[39m [39m [39m [39m [39m [90mat[39m[39me[39m meu nu[?1l[?2004l
+]2;sudo pacman -S bemenu]1;pacman[sudo] password for ndrolp: 
+Sorry, try again.
+[sudo] password for ndrolp: 
+[?25lresolving dependencies...
+:: There are 3 providers available for bemenu-renderer:
+:: Repository extra
+   1) bemenu-ncurses  2) bemenu-wayland  3) bemenu-x11
+
+Enter a number (default=1): [?25h2
+[?25llooking for conflicting packages...
+warning: dependency cycle detected:
+warning: bemenu-wayland will be installed before its bemenu dependency
+
+Packages (2) bemenu-wayland-0.6.23-1  bemenu-0.6.23-1
+
+Total Download Size:   0,06 MiB
+Total Installed Size:  0,20 MiB
+
+:: Proceed with installation? [Y/n] [?25h
+[?25l:: Retrieving packages...
+ bemenu-0.6.23-1-x86_64
+ Total (0/2)                                          0,0   B  0,00   B/s 00:00 [----------------------------------------------]   0%
+[1F bemenu-wayland-0.6.23-1-x86_64
+ Total (0/2)                                          0,0   B  0,00   B/s 00:00 [----------------------------------------------]   0%
+[3F bemenu-0.6.23-1-x86_64                              42,1 KiB  90,0   B/s 00:00 [##############################################] 100%[2E Total (0/2)                                         42,1 KiB  90,0   B/s 04:22 [#############################-----------------]  64%[1F bemenu-wayland-0.6.23-1-x86_64                      23,1 KiB  49,0   B/s 00:00 [##############################################] 100%[1F bemenu-0.6.23-1-x86_64                              42,1 KiB  50,5 KiB/s 00:01 [##############################################] 100%[1E bemenu-wayland-0.6.23-1-x86_64                      23,1 KiB  27,7 KiB/s 00:01 [##############################################] 100%[1E Total (2/2)                                         65,2 KiB  69,8 KiB/s 00:01 [##############################################] 100%
+(0/2) checking keys in keyring                                                  [----------------------------------------------]   0%(1/2) checking keys in keyring                                                  [#######################-----------------------]  50%(2/2) checking keys in keyring                                                  [##############################################] 100%
+(0/2) checking package integrity                                                [----------------------------------------------]   0%(1/2) checking package integrity                                                [################------------------------------]  35%(2/2) checking package integrity                                                [##############################################] 100%
+(0/2) loading package files                                                     [----------------------------------------------]   0%(1/2) loading package files                                                     [################------------------------------]  35%(2/2) loading package files                                                     [##############################################] 100%
+(0/2) checking for file conflicts                                               [----------------------------------------------]   0%(1/2) checking for file conflicts                                               [#######################-----------------------]  50%(2/2) checking for file conflicts                                               [##############################################] 100%
+(0/2) checking available disk space                                             [----------------------------------------------]   0%(1/2) checking available disk space                                             [#######################-----------------------]  50%(2/2) checking available disk space                                             [##############################################] 100%
+:: Processing package changes...
+(1/2) installing bemenu-wayland                                                 [----------------------------------------------]   0%(1/2) installing bemenu-wayland                                                 [##############################################] 100%
+Note: bemenu's wayland backend only works
+ in compositors which implement wlr-layer-shell.
+(2/2) installing bemenu                                                         [----------------------------------------------]   0%(2/2) installing bemenu                                                         [##############################################] 100%
+:: Running post-transaction hooks...
+(1/2) Arming ConditionNeedsUpdate...
+(2/2) Refreshing PackageKit...
+[?25h[1m[7m%[27m[1m[0m                                                                                                                                     ]2;ndrolp@sodoma:~/.dotfiles/scripts/dmenu]1;..scripts/dmenu]7;file://sodoma/home/ndrolp/.dotfiles/scripts/dmenu\[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1mtook [0m[1m[33m16,1s[0m[33m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[K[130C[1A[1B[130D[?1h[?2004h[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1mtook [0m[1m[33m16,1s[0m[33m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[K[130C[1A[1B[130D[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1mtook [0m[1m[33m16,1s[0m[33m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[K[130C[1A[1B[130Db[1m[31mb[0m[39m[1m[31mb[0m[39m[90mtop[39m[1m[31mb[1m[31mm[0m[39m[39m [39m [1m[31mb[1m[31mm[1m[31me[0m[39m[1m[31me[1m[31mn[0m[39m[1m[31mn[1m[31mu[0m[39m[?1l[?2004l
+]2;bmenu]1;bmenuzsh: command not found: bmenu
+[1m[7m%[27m[1m[0m                                                                                                                                     ]2;ndrolp@sodoma:~/.dotfiles/scripts/dmenu]1;..scripts/dmenu]7;file://sodoma/home/ndrolp/.dotfiles/scripts/dmenu\[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[31m❯[0m[31m[39m[1m [0m[K[130C[1A[1B[130D[?1h[?2004h[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[31m❯[0m[31m[39m[1m [0m[K[130C[1A[1B[130D[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[31m❯[0m[31m[39m[1m [0m[K[130C[1A[1B[130Db[1m[31mb[0m[39m[1m[31mb[0m[39m[90mmenu[39m[1m[31mb[1m[31me[0m[39m[39m [39m [39m [1m[31mb[1m[31me[1m[31me[0m[39m[1m[31mb[1m[31me[0m[39m[0m[39m [1m[31mb[1m[31me[1m[31mm[0m[39m[1m[31mm[1m[31me[0m[39m[1m[31me[1m[31mn[0m[39m[1m[31mn[1m[31mu[0m[39m[0m[32mb[0m[32me[0m[32mm[0m[32me[0m[32mn[0m[32mu[39m[?1l[?2004l
+]2;bemenu]1;bemenu^C
+[1m[7m%[27m[1m[0m                                                                                                                                     ]2;ndrolp@sodoma:~/.dotfiles/scripts/dmenu]1;..scripts/dmenu]7;file://sodoma/home/ndrolp/.dotfiles/scripts/dmenu\[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[31m❯[0m[31m[39m[1m [0m[K[130C[1A[1B[130D[?1h[?2004h[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[31m❯[0m[31m[39m[1m [0m[K[130C[1A[1B[130D[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[31m❯[0m[31m[39m[1m [0m[K[130C[1A[1B[130Dc[1m[31mc[0m[39m[1m[31mc[0m[39m[90md dmenu[39m[1m[31mc[1m[31ma[0m[39m[39m [39m [39m [39m [39m [39m [90mva[39m[1m[31mc[1m[31ma[1m[31mt[0m[39m[39m [0m[32mc[0m[32ma[0m[32mt[39m[90m settings.json[39m[14D[32mt[32m [39m[32mt[39m[39m [39m.[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [12D[4m.[24m[4m.[4m/[24m[24m.[24m/
+[J[01;32mpower.sh[0m*      [J[01;32mwebsearch.sh[0m*[J[A[0m[27m[24m[0m[39m[2C[32mcat[39m ./[K[124C[1A[1B[0m[39m[124D[4m.[4m/[24m[4m/[4mpower.sh[24m
+[J[7mpower.sh*    [0m  [J[01;32mwebsearch.sh[0m*[J[A[0m[27m[24m[0m[39m[2C[32mcat[39m [4m./power.sh[24m[K[116C[1A[1B[0m[39m[116D
+[7mpower.sh*    [0m  [7mpower.sh*    [0m  [A[0m[27m[24m[0m[39m[2C[32mcat[39m [4m./power.sh[24m[K[116C[1A[1B[0m[39m[116D
+[J[A[16C[1m [0m[0m [?1l[?2004l
+[J]2;cat ./power.sh]1;cat#!/bin/bash
+
+SHUTDOWN="⏻ Poweroff"
+REBOOT=" Reboot"
+LOGOUT=" Logout"
+
+
+QUERY=$(echo -e "\
+${LOGOUT}\n\
+${REBOOT}\n\
+${SHUTDOWN}\n\
+" | dmenu -p " ⭘  " -fn "Hasklug Nerd Font-9" -h 28 -i -sb '#f5a97f')
+
+CON=$(echo $QUERY | tr " " "+" )
+
+
+if [[ $(echo $CON | wc -c) -gt 1 ]]
+then
+    case $QUERY in 
+    $LOGOUT ) i3 exit; ;;
+    $REBOOT ) reboot; ;;
+    $SHUTDOWN ) poweroff; ;;
+    * ) echo "NO SELECTED"
+    esac
+fi
+[1m[7m%[27m[1m[0m                                                                                                                                     ]2;ndrolp@sodoma:~/.dotfiles/scripts/dmenu]1;..scripts/dmenu]7;file://sodoma/home/ndrolp/.dotfiles/scripts/dmenu\[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[K[130C[1A[1B[130D[?1h[?2004h[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[K[130C[1A[1B[130D[A[0m[27m[24m[J[1m[33mndrolp[0m[33m[39m[1m [0m[1m󰉋 [0m[1m[36m.dotfiles/scripts/dmenu[0m[36m[39m[1m [0m[1mon [0m[1m[37m[1m[37m[35m main[0m[35m[39m[1m[31m [!?][0m[31m[39m[0m[39m[1m [0m[1m[37m
+[0m[37m[39m[1m[32m❯[0m[32m[39m[1m [0m[K[130C[1A[1B[130Db[1m[31mb[0m[39m[1m[31mb[0m[39m[90memenu[39m[1m[31mb[1m[31mm[0m[39m[39m [39m [39m [39m [90menu[39m[1m[31mb[1m[31mm[1m[31me[0m[39m[1m[31me[1m[31mn[0m[39m[1m[31mn[1m[31mu[0m[39m[1m[31mu[1m[31mu[0m[39m[1m[31mu[1m[31m [0m[39m[1m[31mu[0m[39m[0m[39m -PP p "[33m"[39m[33m"[33m0[39m[33m0[33m"[39m[33m"[33m [39m[33m"[39m[39m -fn  h 28 [1C[1m[31mb[1m[31me[1m[31mm[1m[31me[1m[31mn[1m[31mu[1m[31mu[0m[39m -Pp[39m [33m"[33m0[33m"[39m -h 28 [20D[1C[1C[1C[1C[1C[1C[1m[31mu[0m[39m[0m[39m -Pp [33m"[33m0[33m"[39m[39m -h 28 [16D[0m[32mb[0m[32me[0m[32mm[0m[32me[0m[32mn[0m[32mu[39m[39m1[32mb[32me[32mm[32me[32mn[32mu[39m -Pp[39m [33m"[33m0[33m"[39m -h 28 [21D[1m[31m1[1m[31mb[1m[31me[1m[31mm[1m[31me[1m[31mn[1m[31mu[0m[39m[1m[31m1[1m[31mu[1m[31mb[1m[31me[1m[31mm[1m[31me[1m[31mn[1m[31mu[0m[39m -Pp[39m [33m"[33m0[33m"[39m -h 28 [21D[1m[31mn[1m[31mb[1m[31me[1m[31mm[1m[31me[1m[31mn[1m[31mu[0m[39m -Pp[39m [33m"[33m0[33m"[39m -h 28 [21D[1m[31mo[1m[31mb[1m[31me[1m[31mm[1m[31me[1m[31mn[1m[31mu[0m[39m -Pp[39m [33m"[33m0[33m"[39m -h 28 [21D[1m[31m [1m[31mb[1m[31me[1m[31mm[1m[31me[1m[31mn[1m[31mu[0m[39m -Pp[39m [33m"[33m0[33m"[39m -h 28 [21D[1m[31mo[0m[39m[0m[39m [0m[39mb[0m[39me[0m[39mm[0m[39me[0m[39mn[0m[39musbemenu -Pp[39m [33m"[33m0[33m"[39m -h 28 [21Dobemenu -Pp[39m [33m"[33m0[33m"[39m -h 28 [21Ddbemenu -Pp[39m [33m"[33m0[33m"[39m -h 28 [21D bemenu -Pp[39m [33m"[33m0[33m"[39m -h 28 [21D|bemenu -Pp[39m [33m"[33m0[33m"[39m -h 28 [21D[32mb[32me[32mm[32me[32mn[32mu[39m[39m [32mb[32me[32mm[32me[32mn[32mu[39m -Pp[39m [33m"[33m0[33m"[39m -h 28 [21D[?1l[?2004l
+]2;1uno sod | bemenu -Pp "0" -h 28]1;1unozsh: command not found: 1uno
+usage: bemenu [options]
+Options
+ -h, --help            display this help and exit.
+ -v, --version         display version.
+ -i, --ignorecase      match items case insensitively.
+ -F, --filter          filter entries for a given string before showing the menu.
+ -w, --wrap            wraps cursor selection.
+ -l, --list            list items vertically down or up with the given number of lines(number of lines down/up). (down (default), up)
+ -p, --prompt          defines the prompt text to be displayed.
+ -P, --prefix          text to show before highlighted item.
+ -I, --index           select item at index automatically.
+ -x, --password        display/hide/replace input. (none (default), hide, indicator)
+ -s, --no-spacing      disable the title spacing on entries.
+ -C, --no-cursor       ignore cursor events.
+ -T, --no-touch        ignore touch events.
+ -K, --no-keyboard     ignore keyboard events.
+ --binding             use alternative key bindings. Available options: vim
+ --fixed-height        prevent the display from changing height on filter.
+ --scrollbar           display scrollbar. (none (default), always, autohide)
+ --counter             display a matched/total items counter. (none (default), always)
+ -e, --vim-esc-exits   exit bemenu when pressing escape in normal mode for vim bindings
+ -N, --vim-normal-mode start in normal mode for vim bindings
+ --accept-single       immediately return if there is only one item.
+ --ifne                only display menu if there are items.
+ --single-instance     force a single menu instance.
+ --fork                always fork. (bemenu-run)
+ --no-exec             do not execute command. (bemenu-run)
+ --auto-select         when one entry is left, automatically select it
+
+Use BEMENU_BACKEND env variable to force backend:
+ curses               ncurses based terminal backend
+ wayland              wayland backend
+ x11                  x11 backend
+
+If BEMENU_BACKEND is empty, one of the GUI backends is selected automatically.
+
+Backend specific options
+   c = ncurses, w == wayland, x == x11
+   (...) At end of help indicates the backend support for option.
+
+ -b, --bottom   

@@ -1,0 +1,15 @@
+{
+  "custom/powerprofile": {
+    "tooltip": "false",
+    "format": "{icon}",
+    "format-icons": {
+      "performance": "<span foreground='#ef9f76'></span>",
+      "balanced": "<span foreground='#85c1dc'></span>",
+      "power-saver": "<span foreground='#a6d189'>󰌪</span>"
+    },
+    "interval": 5,
+    "return-type": "json",
+    "exec": "~/.config/hypr/themes/bar/waybar/modules/powerprofile/powerprofile.sh",
+    "on-click": "~/.dotfiles/scripts/tofi/powerprofile.sh"
+  }
+}
