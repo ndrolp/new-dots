@@ -80,3 +80,7 @@
     padding-right: 12px;
     background-color: alpha(@blue, 0.2);
 }
+
+#hardware #custom-powerprofile {
+    margin: 4px 4px;
+}

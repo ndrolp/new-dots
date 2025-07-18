@@ -43,12 +43,7 @@
   },
   "group/extras": {
     "orientation": "horizontal",
-    "modules": [
-      "custom/powerprofile",
-      "custom/notification",
-      "group/uptime",
-      "group/hardware-scroll"
-    ]
+    "modules": ["custom/notification", "group/uptime", "group/hardware-scroll"]
   },
   "group/hardware-scroll": {
     "orientation": "horizontal",

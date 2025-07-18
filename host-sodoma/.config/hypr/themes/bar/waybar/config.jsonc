@@ -149,6 +149,6 @@
   },
   "group/hardware": {
     "orientation": "horizontal",
-    "modules": ["backlight", "pulseaudio", "battery"],
+    "modules": ["custom/powerprofile", "backlight", "pulseaudio", "battery"],
   },
 }
