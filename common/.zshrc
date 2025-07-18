@@ -202,3 +202,4 @@ export PATH=$PATH:/home/ndro/.spicetify
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 alias dotsync='(cd ~/.dotfiles && ./bootstrap.sh --no-bootstrap)'
+alias tk='zellij --layout ~/.config/zellij/layouts/tomekeeper.kdl'

@@ -10,6 +10,6 @@
     "interval": 5,
     "return-type": "json",
     "exec": "~/.config/hypr/themes/bar/waybar/modules/powerprofile/powerprofile.sh",
-    "on-click": "~/.dotfiles/scripts/tofi/powerprofile.sh"
+    "on-click": "~/.config/rofi/extras/powerstyle/powerstyle.sh"
   }
 }

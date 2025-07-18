@@ -1,0 +1,38 @@
+window {
+    margin: 0px;
+    border: 2px solid #89b4fa;
+    /* Catppuccin blue */
+    background-color: rgba(30, 30, 46, 0.85);
+    /* base */
+    border-radius: 12px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 20px;
+    padding: 10px;
+}
+
+#input {
+    display: none;
+    opacity: 0;
+    display: fixed;
+}
+
+#entry {
+    border-radius: 16px;
+    padding: 20px;
+    margin: 10px;
+    background-color: rgba(24, 24, 37, 0.6);
+    /* surface0 */
+    color: #cdd6f4;
+    /* text */
+    text-align: center;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+#entry:selected {
+    background-color: rgba(137, 180, 250, 0.3);
+    /* blue */
+    color: #1e1e2e;
+    font-weight: bold;
+    border: 2px solid #89b4fa;
+}
