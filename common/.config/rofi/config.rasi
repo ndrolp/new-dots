@@ -1,21 +1,190 @@
-configuration{
-    modi: "run,drun,window";
-    icon-theme: "Oranchelo";
-    show-icons: true;
-    terminal: "alacritty";
-    drun-display-format: "{icon} {name}";
-    location: 0;
-    disable-history: false;
-    font: "Open Sans 10";
-    hide-scrollbar: true;
-    display-drun: "   Apps ";
-    display-run: "   Run ";
-    display-window: " 󰕰  Window";
-    display-Network: " 󰤨  Network";
-    sidebar-mode: true;
+// @import "catppuccin-latte"
+@import "~/.config/rofi/catppuccin.rasi"
+// @import "catppuccin-macchiato"
+// @import "catppuccin-mocha"
+
+* {
+  selected-active-foreground:  @background;
+  lightfg:                     @text;
+  separatorcolor:              @foreground;
+  urgent-foreground:           @red;
+  alternate-urgent-background: transparent;
+  lightbg:                     @mantle;
+  background-color:            transparent;
+  border-color:                @foreground;
+  normal-background:           @base;
+  selected-urgent-background:  @red;
+  alternate-active-background: @base;
+  spacing:                     2;
+  alternate-normal-foreground: @foreground;
+  urgent-background:           @background;
+  selected-normal-foreground:  @lightbg;
+  active-foreground:           @blue;
+  background:                  @base;
+  background-transparent:                  @base-transparent;
+  selected-active-background:  @blue;
+  active-background:           @background;
+  selected-normal-background:  @lightfg;
+  alternate-normal-background: @base;
+  foreground:                  @text;
+  selected-urgent-foreground:  @background;
+  normal-foreground:           @foreground;
+  alternate-urgent-foreground: @red;
+  alternate-active-foreground: @blue;
+
 }
 
+configuration {
+    show-icons:                     true;
+}
 
+element {
+    padding: 2px ;
+    border-radius: 5px;
+    cursor:  pointer;
+    spacing: 5px ;
+    border:  0;
+}
+element normal.normal {
+    background-color: @normal-background;
+    text-color:       @normal-foreground;
+}
+element normal.urgent {
+    background-color: @urgent-background;
+    text-color:       @urgent-foreground;
+}
+element normal.active {
+    background-color: @active-background;
+    text-color:       @active-foreground;
+}
+element selected.normal {
+    background-color: @mauve;
+    text-color:       @selected-normal-foreground;
+}
+element selected.urgent {
+    background-color: @selected-urgent-background;
+    text-color:       @selected-urgent-foreground;
+}
+element selected.active {
+    background-color: @selected-active-background;
+    text-color:       @selected-active-foreground;
+}
+element alternate.normal {
+    background-color: @base;
+    text-color:       @alternate-normal-foreground;
+}
+element alternate.urgent {
+    background-color: @alternate-urgent-background;
+    text-color:       @alternate-urgent-foreground;
+}
+element alternate.active {
+    background-color: @alternate-active-background;
+    text-color:       @alternate-active-foreground;
+}
+element-text {
+    font:         "Hasklug Nerd Font Mono 14";
+    padding: 5px;
+    background-color: transparent;
+    cursor:           inherit;
+    highlight:        inherit;
+    text-color:       inherit;
+}
+element-icon {
+    background-color: transparent;
+    size:             1.0000em ;
+    cursor:           inherit;
+    text-color:       inherit;
+}
+window {
+    padding:          10px;
+    height: 310px;
+    width: 600px;
+    background-color: @background-transparent;
+    border:           1;
+    border-radius: 10px;
+}
+mainbox {
+    padding: 0;
+    border:  0;
+}
+message {
+    padding:      1px ;
+    border-color: @separatorcolor;
+    // border:       2px solid 0px 0px ;
+}
+textbox {
+    text-color: @base;
+}
+listview {
+    padding:      5px 0px 0px 0px;
+    scrollbar:    true;
+    columns:      2;
+    lines: 5;
+    // border-color: @separatorcolor;
+    spacing:      4px ;
+    fixed-height: 0;
+    border:       none;
+}
+scrollbar {
+    width:        4px ;
+    padding:      0;
+    handle-width: 8px ;
+    border:       0;
+    handle-color: @normal-foreground;
+}
+sidebar {
+    border-color: @separatorcolor;
+}
+button {
+    cursor:     pointer;
+    spacing:    0;
+    text-color: @normal-foreground;
+}
+button selected {
+    background-color: @selected-normal-background;
+    text-color:       @selected-normal-foreground;
+}
+num-filtered-rows {
+    expand:     false;
+    text-color: Gray;
+}
+num-rows {
+    expand:     false;
+    text-color: Gray;
+}
+textbox-num-sep {
+    expand:     false;
+    str:        "/";
+    text-color: Gray;
+}
+inputbar {
+    padding:    5px ;
+    spacing:    2px ;
+    children:   [ "prompt","textbox-prompt-colon","entry"];
+    background-color: @sky;
+    text-color: @crust;
+    border-radius: 5px;
+}
+case-indicator {
+    spacing:    0;
+    text-color: @normal-foreground;
+}
+entry {
+    text-color:        @base;
+    cursor:            text;
+    spacing:           0;
+    placeholder-color: @surface1;
+    placeholder:       "Type to filter";
+}
 
-@theme "catppuccin-mocha"
+prompt {
+    spacing:    0;
+    text-color: @base;
+}
+textbox-prompt-colon {
+    margin:     0px 0.3000em 0.0000em 0.0000em ;
+    expand:     false;
+    str:        ":";
+    text-color: inherit;
+}
 

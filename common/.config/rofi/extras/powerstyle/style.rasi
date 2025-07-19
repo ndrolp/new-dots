@@ -166,4 +166,5 @@
 #prompt {
     spacing: 0;
     text-color: @normal-foreground;
+    background-color: @sky;
 }

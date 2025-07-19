@@ -17,3 +17,5 @@ vim.keymap.set("n", "K", vim.lsp.buf.hover, {})
 vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
 vim.keymap.set("n", "<leader>la", vim.lsp.buf.code_action, { desc = "Code actions" })
 vim.keymap.set("n", "<leader>ld", vim.diagnostic.open_float, { desc = "Line diagnostics" })
+
+-- vim.api.nvim_set_keymap("n", "<leader>R", ":source $MYVIMRC", { noremap = true, silent = true })
