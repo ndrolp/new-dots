@@ -58,3 +58,4 @@ swaync
 stylua
 glow
 hyprlock
+hypridle

@@ -97,7 +97,7 @@ element-icon {
 }
 window {
     padding:          10px;
-    height: 330px;
+    height: 310px;
     width: 500px;
     background-color: @background-transparent;
     border:           1;

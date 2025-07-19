@@ -3,7 +3,6 @@ return {
 		"nvim-neo-tree/neo-tree.nvim",
 		branch = "v3.x",
 		keys = {
-			{ "<leader>e", ":Neotree filesystem left toggle<CR>", desc = "Toggle Neo Tree" },
 			{ "<C-e>", ":Neotree filesystem left toggle<CR>", desc = "Toggle Neo Tree" },
 		},
 		dependencies = {
