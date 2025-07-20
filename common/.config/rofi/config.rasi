@@ -39,10 +39,10 @@ configuration {
 }
 
 element {
-    padding: 2px ;
-    border-radius: 5px;
+    padding: 5px ;
+    border-radius: 2px;
     cursor:  pointer;
-    spacing: 5px ;
+    spacing: 10px ;
     border:  0;
 }
 element normal.normal {
@@ -96,12 +96,12 @@ element-icon {
     text-color:       inherit;
 }
 window {
-    padding:          10px;
-    height: 330px;
+    padding:          0px;
+    height: 310px;
     width: 500px;
-    background-color: @background-transparent;
-    border:           1;
-    border-radius: 10px;
+    background-color: @base;
+    border-radius: 0px;
+    border: none;
 }
 mainbox {
     padding: 0;
@@ -116,10 +116,10 @@ textbox {
     text-color: @base;
 }
 listview {
-    padding:      5px 0px 0px 0px;
+    padding:      5px;
     scrollbar:    true;
     columns:      1;
-    lines: 6;
+    lines: 5;
     // border-color: @separatorcolor;
     spacing:      4px ;
     fixed-height: 0;
@@ -160,10 +160,10 @@ textbox-num-sep {
 inputbar {
     padding:    5px ;
     spacing:    2px ;
-    children:   [ "prompt","textbox-prompt-colon","entry"];
+    children:   ["entry"];
     background-color: @sky;
     text-color: @crust;
-    border-radius: 5px;
+    border-radius: 0px;
 }
 case-indicator {
     spacing:    0;
@@ -174,7 +174,7 @@ entry {
     cursor:            text;
     spacing:           0;
     placeholder-color: @surface1;
-    placeholder:       "Type to filter";
+    placeholder:       "...";
 }
 
 prompt {
