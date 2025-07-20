@@ -20,7 +20,7 @@ rofi_cmd() {
         -kb-select-1 "p" \
         -kb-select-2 "r" \
         -kb-select-3 "l" \
-        -theme ~/.config/rofi/extras/powerstyle/powerstyle.rasi | awk '{print $1}'
+        -theme ~/.config/rofi/extras/powermenu/powermenu.rasi | awk '{print $1}'
 }
 
 # Execute Command

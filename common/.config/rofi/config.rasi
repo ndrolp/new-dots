@@ -97,11 +97,13 @@ element-icon {
 }
 window {
     padding:          0px;
-    height: 310px;
+    height: 317px;
     width: 500px;
     background-color: @base;
     border-radius: 0px;
     border: none;
+    border: 3px solid;
+    border-color: @surface0;
 }
 mainbox {
     padding: 0;
@@ -164,6 +166,7 @@ inputbar {
     background-color: @sky;
     text-color: @crust;
     border-radius: 0px;
+    border-radius: 2px 2px 0 0;
 }
 case-indicator {
     spacing:    0;
