@@ -1,5 +1,7 @@
 @import "./catpuccin.css";
 @import "./modules/extras/extras.css";
+@import "./modules/playing/style.css";
+@import "./modules/multimedia/style.css";
 @import "./modules/scripts/script-style.css";
 
 * {
@@ -90,7 +92,7 @@ button:hover {
 
 #workspaces {
     margin: 5px 9px;
-    padding: 0px 10px;
+    padding: 3px 10px;
     border-radius: 5px;
     background-color: alpha(@surface0, 0.4);
 }
@@ -100,7 +102,7 @@ button:hover {
     padding-right: 4px;
     border-radius: 5px;
     background-color: transparent;
-    color: @text;
+    color: @lavender;
 }
 
 #workspaces button.empty {
@@ -114,7 +116,9 @@ button:hover {
 #workspaces button.active {
     /* background-color: @lavender; */
     /* background-color: @surface0;*/
-    /* background-color: alpha(@surface0, 0.5);*/
+    padding: 0px 6px;
+    padding-right: 9px;
+    background-color: alpha(@yellow, 0.1);
     color: @yellow;
 }
 

@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
+from gi.repository.Playerctl import Player
+from gi.repository import GLib, Playerctl
+from typing import List
+import sys
+import signal
+import os
+import logging
+import json
+import argparse
 import gi
 
 gi.require_version("Playerctl", "2.0")
-import argparse
-import json
-import logging
-import os
-import signal
-import sys
-from typing import List
 
-import gi
-from gi.repository import GLib, Playerctl
-from gi.repository.Playerctl import Player
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +39,8 @@ class PlayerManager:
         signal.signal(signal.SIGTERM, signal_handler)
         signal.signal(signal.SIGPIPE, signal.SIG_DFL)
         self.selected_player = selected_player
-        self.excluded_player = excluded_player.split(",") if excluded_player else []
+        self.excluded_player = excluded_player.split(
+            ",") if excluded_player else []
 
         self.init_players()
 
@@ -49,7 +49,8 @@ class PlayerManager:
             if player.name in self.excluded_player:
                 continue
             if self.selected_player is not None and self.selected_player != player.name:
-                logger.debug(f"{player.name} is not the filtered player, skipping it")
+                logger.debug(
+                    f"{player.name} is not the filtered player, skipping it")
                 continue
             self.init_player(player)
 
@@ -60,7 +61,8 @@ class PlayerManager:
     def init_player(self, player):
         logger.info(f"Initialize new player: {player.name}")
         player = Playerctl.Player.new_from_name(player)
-        player.connect("playback-status", self.on_playback_status_changed, None)
+        player.connect("playback-status",
+                       self.on_playback_status_changed, None)
         player.connect("metadata", self.on_metadata_changed, None)
         self.manager.manage_player(player)
         self.on_metadata_changed(player, player.props.metadata)
@@ -86,13 +88,15 @@ class PlayerManager:
 
     def on_playback_status_changed(self, player, status, _=None):
         logger.debug(
-            f"Playback status changed for player {player.props.player_name}: {status}"
+            f"Playback status changed for player {
+                player.props.player_name}: {status}"
         )
         self.on_metadata_changed(player, player.props.metadata)
 
     def get_first_playing_player(self):
         players = self.get_players()
-        logger.debug(f"Getting first playing player from {len(players)} players")
+        logger.debug(f"Getting first playing player from {
+                     len(players)} players")
         if len(players) > 0:
             # if any are playing, show the first one that is playing
             # reverse order, so that the most recently added ones are preferred
@@ -112,7 +116,8 @@ class PlayerManager:
         # or else show nothing
         current_player = self.get_first_playing_player()
         if current_player is not None:
-            self.on_metadata_changed(current_player, current_player.props.metadata)
+            self.on_metadata_changed(
+                current_player, current_player.props.metadata)
         else:
             self.clear_output()
 
@@ -149,7 +154,8 @@ class PlayerManager:
             self.write_output(track_info, player)
         else:
             logger.debug(
-                f"Other player {current_playing.props.player_name} is playing, skipping"
+                f"Other player {
+                    current_playing.props.player_name} is playing, skipping"
             )
 
     def on_player_appeared(self, _, player):
@@ -179,7 +185,8 @@ def parse_arguments():
     # Increase verbosity with every occurrence of -v
     parser.add_argument("-v", "--verbose", action="count", default=0)
 
-    parser.add_argument("-x", "--exclude", "- Comma-separated list of excluded player")
+    parser.add_argument("-x", "--exclude",
+                        "- Comma-separated list of excluded player")
 
     # Define for which player we"re listening
     parser.add_argument("--player")

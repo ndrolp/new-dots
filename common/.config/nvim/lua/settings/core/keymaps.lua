@@ -27,3 +27,12 @@ vim.keymap.set("n", "<leader>e", function()
 end, { desc = "Toggle Mini Files", silent = true })
 
 -- vim.api.nvim_set_keymap("n", "<leader>R", ":source $MYVIMRC", { noremap = true, silent = true })
+local inlay_hints_enabled = true
+
+function ToggleInlayHints()
+	inlay_hints_enabled = not inlay_hints_enabled
+	vim.lsp.inlay_hint.enable(inlay_hints_enabled)
+end
+
+-- Example keymap: <leader>ih to toggle inlay hints
+vim.keymap.set("n", "<leader>li", ToggleInlayHints, { desc = "Toggle Inlay Hints" })

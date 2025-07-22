@@ -11,7 +11,7 @@
   "spacing": 1, // Gaps between modules (4px)
   // Choose the order of the modules
   "include": ["~/.config/hypr/themes/bar/waybar/modules.json"],
-  "modules-left": ["group/extras", "group/media"],
+  "modules-left": ["group/extras", "group/multimedia"],
   "modules-center": ["hyprland/workspaces"],
   "modules-right": [
     "tray",

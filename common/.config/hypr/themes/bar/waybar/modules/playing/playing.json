@@ -1,0 +1,9 @@
+{
+ "custom/playing": {
+    "format": "{}",
+    "exec": "playerctl metadata --format '    {{title}} - {{artist}}'",
+    "tooltip": true,
+    "tooltip-format": "Now Playing",
+    "interval": 5
+  }
+},
