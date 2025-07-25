@@ -128,11 +128,16 @@ keybinds {
     }
     tmux {
         bind "[" { SwitchToMode "Scroll"; }
-        bind "Ctrl b" { Write 2; SwitchToMode "Normal"; }
+        bind "Ctrl l" { Write 2; SwitchToMode "Normal"; }
         bind "\"" { NewPane "Down"; SwitchToMode "Normal"; }
         bind "%" { NewPane "Right"; SwitchToMode "Normal"; }
         bind "z" { ToggleFocusFullscreen; SwitchToMode "Normal"; }
         bind "c" { NewTab; SwitchToMode "Normal"; }
+        bind "g" {
+            Run "zellij" "run" "-f" "-c" "--height" "90" "--width" "900" "-x" "0" "-y" "0" "--" "lazygit"{
+                direction "Down"
+            }
+        }
         bind "p" {
             WriteChars "source ~/.dotfiles/scripts/tmux/projects.sh\n";
             SwitchToMode "Normal";
@@ -145,10 +150,10 @@ keybinds {
         bind "Down" { MoveFocus "Down"; SwitchToMode "Normal"; }
         bind "Up" { MoveFocus "Up"; SwitchToMode "Normal"; }
         bind "Shift h" { MoveFocus "Left"; SwitchToMode "Normal"; }
-        bind "l" { MoveFocus "Right"; SwitchToMode "Normal"; }
-        bind "j" { MoveFocus "Down"; SwitchToMode "Normal"; }
-        bind "k" { MoveFocus "Up"; SwitchToMode "Normal"; }
-        bind "o" { FocusNextPane; }
+        // bind "l" { MoveFocus "Right"; SwitchToMode "Normal"; }
+        // bind "j" { MoveFocus "Down"; SwitchToMode "Normal"; }
+        // bind "k" { MoveFocus "Up"; SwitchToMode "Normal"; }
+        // bind "o" { FocusNextPane; }
         bind "d" { Detach; }
         bind "Space" { NextSwapLayout; }
         bind "x" { CloseFocus; SwitchToMode "Normal"; }
@@ -190,7 +195,7 @@ keybinds {
         bind "Ctrl m" { SwitchToMode "Move"; }
     }
     shared_except "tmux" "locked" {
-        bind "Ctrl b" { SwitchToMode "Tmux"; }
+        bind "Ctrl l" { SwitchToMode "Tmux"; }
     }
 }
 

@@ -129,8 +129,7 @@ return {
 		event_handlers = {
 			{
 				event = "file_opened",
-				handler = function(file_path)
-					-- auto close neo-tree when a file is opened
+				handler = function(_)
 					require("neo-tree.command").execute({ action = "close" })
 				end,
 			},
