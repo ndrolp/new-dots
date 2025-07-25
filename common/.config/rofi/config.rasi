@@ -32,6 +32,7 @@
   alternate-urgent-foreground: @red;
   alternate-active-foreground: @blue;
 
+  font:         "Hasklug Nerd Font Mono 11";
 }
 
 configuration {
@@ -82,7 +83,6 @@ element alternate.active {
     text-color:       @alternate-active-foreground;
 }
 element-text {
-    font:         "Hasklug Nerd Font Mono 12";
     padding: 5px;
     background-color: transparent;
     cursor:           inherit;
@@ -97,7 +97,7 @@ element-icon {
 }
 window {
     padding:          0px;
-    height: 317px;
+    height: 301px;
     width: 500px;
     background-color: @base;
     border-radius: 0px;
