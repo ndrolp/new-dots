@@ -69,7 +69,7 @@ layout {
     tomekeeper name="USER INTERFACE" split_direction="vertical" {
         pane {
             command "nvim"
-            cwd "~/Documents/Projects/tomekeeper-web-client/"
+            cwd "~/Documents/Projects/tomekeeper-ui/"
         }
     }
     tomekeeper name="SHELL" split_direction="vertical" {

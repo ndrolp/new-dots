@@ -6,6 +6,15 @@
         ]
     },
     "scratchpads": {
+        "calc": {
+            "command": "gnome-calculator",
+            "class": "scratchcalc",
+            "margin": 96,
+            "animation": "fromRight",
+            "lazy": true,
+            "unfocus": "hide",
+            "size": "10% 30%"
+        },
         "term": {
             "command": "kitty --class scratchpad",
             "class": "scratch-term",

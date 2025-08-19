@@ -11,7 +11,7 @@
 }
 
 window#waybar {
-    background: shade(alpha(@mantle, 0.5), 1);
+    background: shade(alpha(@mantle, 0.6), 1);
     border-bottom: 1px solid @surface1;
     /* border-bottom: 3px solid rgba(100, 114, 125, 0.5); */
     color: @text;
@@ -102,6 +102,7 @@ button:hover {
     padding-right: 4px;
     border-radius: 5px;
     background-color: transparent;
+    transition: 0.3s;
     color: @lavender;
 }
 
@@ -110,7 +111,11 @@ button:hover {
 }
 
 #workspaces button:hover {
+    outline: none;
+    padding-left: 6px;
+    padding-right: 9px;
     background-color: alpha(@surface0, 0.4);
+    color: @mauve;
 }
 
 #workspaces button.active {
@@ -320,9 +325,9 @@ label:focus {
 
 #tray {
     background-color: alpha(@surface0, 0.4);
-    margin: 4px 4px;
+    margin: 5px 4px;
     border-radius: 5px;
-    padding: 5px 10px;
+    padding: 0px 10px;
 }
 
 #tray>.passive {

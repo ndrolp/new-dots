@@ -1,0 +1,65 @@
+(defpoll ipdata 
+  :interval "1s"
+ `hostname -i`)
+
+(defpoll freemem
+  :interval "20s"
+  `free | awk '/Mem/ {printf("%.0f", $3/$2 * 100)}'`)
+
+(defpoll uptimeval
+  :interval "20s"
+  `uptime -p | sed 's/^up //'`)
+
+  
+
+(defwidget ip[]
+  (box
+    :class "card"
+    :orientation "h"
+    :spacing 20
+    :space-evenly false
+    (label :class "ip-icon" :text "󰩟" :width "30%") 
+    (label :class "ip-text" :text ipdata)
+    (label :text "" :width "30%"))) 
+
+(defwidget freemem[]
+  (box
+    :class "card"
+    :orientation "h"
+    :spacing 20
+    :space-evenly false
+    (label :class "mem-icon" :text "" :width "30%") 
+    (progress :class "mem" :value freemem)))
+
+(defwidget uptime[]
+  (box
+    :class "card"
+    :orientation "h"
+    :spacing 10
+    :space-evenly false
+    (label :class "uptime-icon" :text "󰞌" :width "30%") 
+    (label :class "uptime-text" :text uptimeval)))
+    
+  
+
+(defwindow dash
+           :monitor 0
+           :geometry (geometry :x "10px"
+                               :y "10px"
+                               :width "20%"
+                               :height "30px"
+                               :anchor "bottom right")
+           :stacking "fg"
+           :reserve (struts :distance "40px" :side "top")
+           :windowtype "dock"
+           :wm-ignore false
+           (box 
+             :space-evenly false
+             :orientation "h"
+             :spacing 10
+             (ip)(freemem)(uptime)))
+                
+  
+
+  
+  

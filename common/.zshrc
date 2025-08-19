@@ -204,3 +204,6 @@ export PATH=$PATH:/home/ndro/.spicetify
 alias dotsync='(cd ~/.dotfiles && ./bootstrap.sh --no-bootstrap)'
 alias tk='zellij --layout ~/.config/zellij/layouts/tomekeeper.kdl'
 alias envact="source venv/bin/activate"
+
+# Created by `pipx` on 2025-07-27 12:40:09
+export PATH="$PATH:/home/ndrolp/.local/bin"

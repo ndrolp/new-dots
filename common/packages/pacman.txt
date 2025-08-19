@@ -60,3 +60,5 @@ glow
 hyprlock
 hypridle
 udiskie
+hyprpolkitagent
+nwg-look

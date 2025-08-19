@@ -1,0 +1,18 @@
+common/.config/Code/Cache*
+common/.config/Code/Code Cache*
+common/.config/Code/Dawn*
+common/.config/Code/GPU*
+common/.config/Code/Local*
+common/.config/Code/Session*
+common/.config/Code/Shared*
+common/.config/Code/User*
+common/.config/Code/Crash*
+common/.config/Code/logs*
+common/.config/Code/Cook*
+common/.config/Code/DIPS*
+common/.config/Code/Dict*
+common/.config/Code/Prefer*
+common/.config/Code/Tr*
+common/.config/Code/lang*
+common/.config/Code/Net*
+common/.config/Code/mach*

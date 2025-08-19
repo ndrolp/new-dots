@@ -1,0 +1,55 @@
+* {
+    background-color: transparent;
+}
+
+.prue {}
+
+.card {
+    background-color: rgba(48, 52, 70, .9);
+    border-radius: 5px;
+    border: 0px solid;
+    border-color: #ca9ee6;
+    font-size: 14px;
+    color: white;
+    padding: 10px;
+}
+
+.ip-icon {
+    color: #ea999c;
+}
+
+.mem-icon {
+    color: #e5c890;
+}
+
+.mem {
+    padding-bottom: 5px;
+}
+.mem slider {
+  all: unset;
+  color: #ffd5cd;
+}
+
+.mem trough {
+    all: unset;
+    background-color: rgba(35, 38, 52, 0.9)
+}
+
+.mem trough progress {
+    border: none;
+    background-color: #e5c890;
+}
+
+.mem scale trough highlight {
+  all: unset;
+  background-color: #D35D6E;
+  color: #000000;
+  border-radius: 10px;
+}
+
+.uptime-icon {
+    color: #81c8be;
+}
+.uptime-text {
+color: rgba(129, 200, 190, .8);
+}
