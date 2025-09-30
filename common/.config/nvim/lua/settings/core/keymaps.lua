@@ -18,20 +18,12 @@ vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
 vim.keymap.set("n", "<leader>la", vim.lsp.buf.code_action, { desc = "Code actions" })
 vim.keymap.set("n", "<leader>ld", vim.diagnostic.open_float, { desc = "Line diagnostics" })
 
-vim.keymap.set("n", "<leader>e", function()
-	local MiniFiles = require("mini.files")
-	local _ = MiniFiles.close() or MiniFiles.open(vim.api.nvim_buf_get_name(0), false)
-	vim.defer_fn(function()
-		MiniFiles.reveal_cwd()
-	end, 30)
-end, { desc = "Toggle Mini Files", silent = true })
-
 -- vim.api.nvim_set_keymap("n", "<leader>R", ":source $MYVIMRC", { noremap = true, silent = true })
 local inlay_hints_enabled = true
 
 function ToggleInlayHints()
-	inlay_hints_enabled = not inlay_hints_enabled
-	vim.lsp.inlay_hint.enable(inlay_hints_enabled)
+    inlay_hints_enabled = not inlay_hints_enabled
+    vim.lsp.inlay_hint.enable(inlay_hints_enabled)
 end
 
 -- Example keymap: <leader>ih to toggle inlay hints

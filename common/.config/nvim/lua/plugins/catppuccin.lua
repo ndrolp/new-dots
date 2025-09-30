@@ -11,6 +11,10 @@ return {
                 light = "latte",
                 dark = "frappe",
             },
+            float = {
+                transparent = true, -- enable transparent floating windows
+                solid = true,     -- use solid styling for floating windows, see |winborder|
+            },
             transparent_background = true, -- disables setting the background color.
             show_end_of_buffer = false, -- shows the '~' characters after the end of buffers
             term_colors = false,  -- sets terminal colors (e.g. `g:terminal_color_0`)
@@ -48,6 +52,9 @@ return {
             default_integrations = true,
             integrations = {
                 cmp = true,
+                telescope = {
+                    enabled = true,
+                },
                 render_markdown = true,
                 native_lsp = {
                     enabled = true,
