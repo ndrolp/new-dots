@@ -1,5 +1,5 @@
-// -*- mode: jsonc -*-
 {
+  "include": ["~/.config/hypr/themes/bar/waybar/modules.json"],
   // "layer": "top", // Waybar at top layer
   "position": "top", // Waybar position (top|bottom|left|right)
   "height": 8, // Waybar height (to be removed for auto height)
@@ -10,9 +10,12 @@
   // "width": 1280, // Waybar width
   "spacing": 1, // Gaps between modules (4px)
   // Choose the order of the modules
-  "include": ["~/.config/hypr/themes/bar/waybar/modules.json"],
   "modules-left": ["group/extras", "group/multimedia"],
-  "modules-center": ["hyprland/workspaces"],
+  "modules-center": [
+    "custom/notification",
+    "hyprland/workspaces",
+    "custom/powerprofile",
+  ],
   "modules-right": [
     "tray",
     // "group/networking",
@@ -148,6 +151,6 @@
   },
   "group/hardware": {
     "orientation": "horizontal",
-    "modules": ["custom/powerprofile", "backlight", "pulseaudio", "battery"],
+    "modules": ["backlight", "pulseaudio", "battery"],
   },
 }
