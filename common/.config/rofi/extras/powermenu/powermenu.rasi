@@ -15,11 +15,11 @@ configuration {
 window {
     padding:                        0px;
     border:                         2px;
-    border-radius:                  10px;
+    border-radius:                  0px;
     border-color:                   #c6a0f6;
-    border: 2px solid;
+    border: 1px solid;
     cursor:                         "default";
-    background-color:               transparent;
+    background-color:               #303446;
     location:                       center;
     anchor:                         center;
     fullscreen:                     false;
@@ -86,7 +86,7 @@ listview {
 element {
     enabled:                        true;
     padding:                        0px;
-    border-radius:                  10px;
+    border-radius:                  0px;
     background-color:               transparent;
     text-color:                     @foreground;
     cursor:                         pointer;
