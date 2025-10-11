@@ -62,3 +62,4 @@ hypridle
 udiskie
 hyprpolkitagent
 nwg-look
+upower

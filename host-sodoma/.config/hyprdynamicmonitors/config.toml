@@ -1,0 +1,36 @@
+[general]
+destination = "$HOME/.config/hypr/monitors.conf"
+
+[power_events]
+[power_events.dbus_query_object]
+path = "/org/freedesktop/UPower/devices/line_power_ACAD"
+
+[[power_events.dbus_signal_match_rules]]
+object_path = "/org/freedesktop/UPower/devices/line_power_ACAD"
+
+[profiles.laptop_only]
+config_file = "hyprconfigs/laptop.conf"
+config_file_type = "static"
+
+[[profiles.laptop_only.conditions.required_monitors]]
+name = "eDP-1"  # Replace with your display name from hyprctl monitors
+
+
+
+
+[profiles.Desktop]
+config_file = "/home/ndrolp/.config/hyprdynamicmonitors/hyprconfigs/Desktop.go.tmpl"
+config_file_type = "template"
+[profiles.Desktop.conditions]
+
+[[profiles.Desktop.conditions.required_monitors]]
+description = "BOE 0x08D5"
+monitor_tag = "monitor0"
+
+[[profiles.Desktop.conditions.required_monitors]]
+description = "Philips Consumer Electronics Company PHL 271V8 0x0000A8BE"
+monitor_tag = "monitor1"
+
+[[profiles.Desktop.conditions.required_monitors]]
+description = "Philips Consumer Electronics Company PHL 243V7 0x00009A4C"
+monitor_tag = "monitor2"

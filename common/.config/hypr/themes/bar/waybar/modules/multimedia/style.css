@@ -28,6 +28,7 @@
 #multimedia #custom-playing-text {
     font-size: 15px;
     margin-left: 5px;
+    margin-top: 5px;
     color: @sky;
 }
 

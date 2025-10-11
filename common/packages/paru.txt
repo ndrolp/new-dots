@@ -18,3 +18,4 @@ mako
 waypaper
 swayosd-git
 postman-bin
+hyprdynamicmonitors

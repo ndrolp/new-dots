@@ -9,7 +9,7 @@ host=$(hostnamectl hostname)
 # Options (labels)
 options=("Github" "Youtube" "Nerd Font" "Anime FLV" "Wallhaven" "ChatGPT" "Netflix" "Gmail")
 # Icons (these can be Nerd Font or any Pango span)
-icons=("" "" "" "" "" "󰭹" "󰝆" "󰊫")
+icons=("" "󰑈" "" "" "" "󰭹" "󰝆" "󰊫")
 
 # URLs corresponding to each option
 urls=(

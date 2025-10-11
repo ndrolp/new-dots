@@ -133,7 +133,7 @@ element-icon {
 
 element selected.normal {
     border: 1px;
-    border-color: #babbf1;
+    border-color: #626880;
     background-color:               transparent;
 }
 element alternate.normal {
