@@ -1,0 +1,170 @@
+* {
+    // active-background: #c6a0f6;
+    active-foreground: #c6d0f5;
+    normal-background: #3e445c;
+    normal-foreground: #c6d0f5;
+    // urgent-background: #f2cdcd;
+    urgent-foreground: #c6d0f5;
+
+    alternate-active-background: #3e445c;
+    alternate-active-foreground: #c6d0f5;
+    alternate-normal-background: #3e445c4D;
+    alternate-normal-foreground: #c6d0f5;
+    alternate-urgent-background: #3e445c;
+    alternate-urgent-foreground: #c6d0f5;
+
+    selected-active-background: #f2cdcd;
+    selected-active-foreground: #c6d0f5;
+    selected-normal-background: #c6a0f6;
+    selected-normal-foreground: #c6d0f5;
+    selected-urgent-background: #f5a97f;
+    selected-urgent-foreground: #c6d0f5;
+
+    background-color: #3e445c66;
+    background: #3e445c;
+    foreground: #c6d0f5;
+    border-color: #3e445c;
+    spacing: 2;
+}
+
+#window {
+    background-color: @background;
+    border: 3px;
+    padding: 10px;
+    border: 10px;
+    border-color: #f2cdcd;
+}
+
+#mainbox {
+    border: 10px;
+    border-color: #f2cdcd;
+    padding: 0;
+}
+
+#message {
+    border: 2px 0px 0px;
+    border-color: @border-color;
+    padding: 1px;
+}
+
+#textbox {
+    text-color: @foreground;
+}
+
+#inputbar {
+    children:   [ prompt,textbox-prompt-colon,entry,case-indicator ];
+}
+
+#textbox-prompt-colon {
+    expand: false;
+    str: ":";
+    margin: 0px 0.3em 0em 0em;
+    text-color: @normal-foreground;
+}
+
+#listview {
+    fixed-height: 0;
+    border: 2px 0px 0px;
+    border-color: @border-color;
+    spacing: 2px;
+    scrollbar: true;
+    padding: 2px 0px 0px;
+}
+
+#element {
+    border: 0;
+    padding: 1px;
+}
+
+#element-text, element-icon {
+    background-color: inherit;
+    text-color:       inherit;
+}
+
+#element.normal.normal {
+    background-color: @normal-background;
+    text-color: @normal-foreground;
+}
+
+#element.normal.urgent {
+    background-color: @urgent-background;
+    text-color: @urgent-foreground;
+}
+
+#element.normal.active {
+    background-color: @active-background;
+    text-color: @active-foreground;
+}
+
+#element.selected.normal {
+    background-color: @selected-normal-background;
+    text-color: @selected-normal-foreground;
+}
+
+#element.selected.urgent {
+    background-color: @selected-urgent-background;
+    text-color: @selected-urgent-foreground;
+}
+
+#element.selected.active {
+    background-color: @selected-active-background;
+    text-color: @selected-active-foreground;
+}
+
+#element.alternate.normal {
+    background-color: @alternate-normal-background;
+    text-color: @alternate-normal-foreground;
+}
+
+#element.alternate.urgent {
+    background-color: @alternate-urgent-background;
+    text-color: @alternate-urgent-foreground;
+}
+
+#element.alternate.active {
+    background-color: @alternate-active-background;
+    text-color: @alternate-active-foreground;
+}
+
+#scrollbar {
+    width: 4px;
+    border: 0;
+    handle-width: 8px;
+    padding: 0;
+}
+
+#sidebar {
+    border: 2px 0px 0px;
+    border-color: @border-color;
+}
+
+#button {
+    text-color: @normal-foreground;
+}
+
+#button.selected {
+    background-color: @selected-normal-background;
+    text-color: @selected-normal-foreground;
+}
+
+#inputbar {
+    spacing: 0;
+    text-color: @normal-foreground;
+    padding: 1px;
+}
+
+#case-indicator {
+    spacing: 0;
+    text-color: @normal-foreground;
+}
+
+#entry {
+    spacing: 0;
+    text-color: @normal-foreground;
+}
+
+#prompt {
+    spacing: 0;
+    text-color: @normal-foreground;
+    background-color: @sky;
+}

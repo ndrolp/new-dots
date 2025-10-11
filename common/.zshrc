@@ -207,3 +207,5 @@ alias envact="source venv/bin/activate"
 
 # Created by `pipx` on 2025-07-27 12:40:09
 export PATH="$PATH:/home/ndrolp/.local/bin"
+
+export PATH=$PATH:/home/ndrolp/.spicetify
