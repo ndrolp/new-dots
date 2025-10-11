@@ -25,7 +25,7 @@ window {
     border-radius:                  00px;
     border-color:                   #c6a0f6;
     cursor:                         "default";
-    background-color:               rgba(48, 52, 70, 0.4);
+    background-color:               rgba(48, 52, 70, 0.7);
     location: center;
     anchor: center;
     // x-offset: -10px;
@@ -96,7 +96,7 @@ listview {
     background-color:               transparent;
     cursor:                         "default";
     border:                         0px;
-	border-color:                   @active-background;
+	border-color:                   @border-color;
 }
 
 /* ---- Elements ---- */
@@ -133,11 +133,15 @@ element-icon {
 
 element selected.normal {
     border: 1px;
-    // border-color: #ca9ee6;
-    background-color:               #303446;
+    border-color: #babbf1;
+    background-color:               transparent;
 }
 element alternate.normal {
-    background-color:               @background;
+    background-color:               transparent;
+}
+
+element normal.normal {
+    background-color: transparent;
 }
 
 /* ---- Message ---- */

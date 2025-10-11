@@ -5,6 +5,7 @@
     normal-foreground: #c6d0f5;
     // urgent-background: #f2cdcd;
     urgent-foreground: #c6d0f5;
+    element-background: rgba(48, 52, 70, .9);
 
     alternate-active-background: #3e445c;
     alternate-active-foreground: #c6d0f5;
@@ -24,6 +25,7 @@
     background: #3e445c;
     foreground: #c6d0f5;
     border-color: #3e445c;
+    elementbg: rgba(48, 52, 70, .9);
     spacing: 2;
 }
 
