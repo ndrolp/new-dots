@@ -22,6 +22,7 @@ PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
 PATH="$HOME/go/bin:$PATH"
 PATH="$HOME/.cargo/bin:$PATH"
 PATH="/usr/bin/flutter/bin:$PATH"
+PATH="$HOME/Documents/Tools/Flutter/bin:$PATH"
 export PATH
 
 
@@ -204,6 +205,9 @@ export PATH=$PATH:/home/ndro/.spicetify
 alias dotsync='(cd ~/.dotfiles && ./bootstrap.sh --no-bootstrap)'
 alias tk='zellij --layout ~/.config/zellij/layouts/tomekeeper.kdl'
 alias envact="source venv/bin/activate"
+alias adbwireless="~/.dotfiles/scripts/adb_wireless_helper/wireless_helper.sh"
+alias pjs="cd ~/Documents/Projects/"
+
 
 # Created by `pipx` on 2025-07-27 12:40:09
 export PATH="$PATH:/home/ndrolp/.local/bin"
