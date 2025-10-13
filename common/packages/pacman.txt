@@ -63,3 +63,5 @@ udiskie
 hyprpolkitagent
 nwg-look
 upower
+spotify-player
+ppeaclock
