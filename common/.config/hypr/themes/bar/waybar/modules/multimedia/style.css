@@ -38,3 +38,11 @@
     background: shade(alpha(@sky, 0.1), 1);
     color: @sky;
 }
+
+#custom-cava {
+    font-size: 4px;
+    color: #ca9ee6;
+    margin-top: 10px;
+    padding-left: 10px;
+    font-family: "bargraph";
+}
