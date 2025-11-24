@@ -66,35 +66,31 @@
       "button-text": "Clear All"
     },
     "buttons-grid": {
-      "buttons-per-row": 6,
+      "buttons-per-row": 2,
       "actions": [
         {
+          "label": "",
+          "type": "toggle",
+          "command": "sh -c 'if [ \"$SWAYNC_TOGGLE_STATE\" = true ]; then iwctl device list | awk \"/station/ {print \\$2}\" | xargs -I{} iwctl device {} set-property Powered on; else iwctl device list | awk \"/station/ {print \\$2}\" | xargs -I{} iwctl device {} set-property Powered off; fi'",
+          "update-command": "sh -c '[[ $(nmcli radio wifi) == \"enabled\" ]] && echo true || echo false'"
+        },
+        {
+          "label": "",
+          "type": "toggle",
+          "command": "sh -c 'if [ \"$SWAYNC_TOGGLE_STATE\" = true ]; then bluetoothctl power on; else bluetoothctl power off; fi'",
+          "update-command": "sh -c 'bluetoothctl show | grep -q \"Powered: yes\" && echo true || echo false'"
+        },
+        {
+          "label": "",
+          "type": "toggle",
+          "command": "sh -c 'if [ \"$SWAYNC_TOGGLE_STATE\" = true ]; then pactl set-sink-mute @DEFAULT_SINK@ false; else pactl set-sink-mute @DEFAULT_SINK@ true; fi'",
+          "update-command": "sh -c 'pactl get-sink-mute @DEFAULT_SINK@ | grep -q yes && echo false || echo true'"
+        },
+        {
           "label": "󰍬",
-          "command": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
-          "type": "toggle"
-        },
-        {
-          "label": "󰐥",
-          "command": "systemctl poweroff"
-        },
-        {
-          "label": "󰕾",
-          "command": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
-          "type": "toggle"
-        },
-        {
-          "label": "󰍬",
-          "command": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
-          "type": "toggle"
-        },
-        {
-          "label": "󰐥",
-          "command": "systemctl poweroff"
-        },
-        {
-          "label": "󰕾",
-          "command": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
-          "type": "toggle"
+          "type": "toggle",
+          "command": "sh -c 'if [ \"$SWAYNC_TOGGLE_STATE\" = true ]; then pactl set-source-mute @DEFAULT_SOURCE@ false; else pactl set-source-mute @DEFAULT_SOURCE@ true; fi'",
+          "update-command": "sh -c 'pactl get-source-mute @DEFAULT_SOURCE@ | grep -q yes && echo false || echo true'"
         }
       ]
     },

@@ -419,8 +419,8 @@ slider {
 }
 
 .widget-buttons-grid {
-    margin-top: 1rem;
-    border-radius: 5px;
+  margin-top: 1rem;
+  border-radius: 5px;
 }
 
 .widget-buttons-grid > flowbox > flowboxchild > button label {
@@ -430,14 +430,13 @@ slider {
 .widget-buttons-grid > flowbox > flowboxchild > button {
   margin: 5px;
   font-size: 0.5rem;
-  padding: 5px;
+  padding: 15px 30px;
   border: 1px solid #838ba7;
   border-radius: 5px;
 }
 
 .widget-buttons-grid > flowbox > flowboxchild > button:hover {
-  background: rgba(202, 158, 230, .5);
-
+  background: rgba(202, 158, 230, 0.5);
 }
 
 .widget-volume {

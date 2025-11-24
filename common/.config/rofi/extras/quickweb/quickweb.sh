@@ -46,7 +46,7 @@ run_cmd() {
     # Fallback: Google search
     search=$(echo "$choice" | tr " " "+")
     xdg-open "https://www.google.com/search?q=$search" &
-    notify-send "🔎 Searching on Google" "$choice"
+    # notify-send "🔎 Searching on Google" "$choice"
 }
 
 # Run

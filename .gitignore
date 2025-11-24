@@ -16,3 +16,6 @@ common/.config/Code/Tr*
 common/.config/Code/lang*
 common/.config/Code/Net*
 common/.config/Code/mach*
+common/.config/Code/Service Worker*
+common/.config/Code/WebStorage*
+common/.config/Code/Cache Storage*
