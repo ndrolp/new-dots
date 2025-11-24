@@ -37,6 +37,14 @@
             "animation": "fromTop",
             "lazy": true,
             "unfocus": "hide"
+        },
+        "wifi": {
+            "command": "kitty --class scratchpad -e impala ",
+            "class": "scratch-wifi",
+            "margin": 50,
+            "animation": "fromTop",
+            "lazy": true,
+            "unfocus": "hide"
         }
     }
 }

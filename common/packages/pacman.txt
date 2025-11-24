@@ -1,4 +1,5 @@
 fzf
+impala
 rustup
 base-devel
 htop
