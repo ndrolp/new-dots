@@ -1,0 +1,19 @@
+{
+  "include": [
+      "~/.config/hypr/waybar/modules/core_modules/core_modules.jsonc",
+      "~/.config/hypr/waybar/modules/custom_modules/custom_modules.jsonc"
+  ],
+  "position": "top", // Waybar position (top|bottom|left|right)
+  "modules-left": ["group/multimedia"],
+  "modules-center": [
+    "custom/notification",
+    "hyprland/workspaces",
+    "custom/powerprofile",
+  ],
+  "modules-right": [
+      "group/tray-drawer",
+      "pulseaudio",
+      "battery",
+      "clock"
+  ],
+}

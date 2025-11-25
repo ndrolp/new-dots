@@ -1,0 +1,87 @@
+#extras {
+    padding: 4px 5px;
+    margin: 5px 4px;
+    border-radius: 5px;
+    background-color: alpha(@surface0, 0.4);
+}
+
+#extras #custom-notification,
+#extras #custom-hardware-icon,
+#extras #custom-uptime-icon,
+#extras #custom-colorpicker {
+    font-size: 14px;
+    padding: 0px 8px;
+    border-radius: 5px;
+}
+
+#extras #custom-hardware-icon {
+    color: @teal;
+    font-size: 16px;
+}
+
+#custom-notification {
+    color: @yellow;
+}
+
+#custom-notification:hover {
+    color: @yellow;
+    background-color: alpha(@yellow, 0.4);
+}
+
+#custom-uptime-icon {
+    color: @green;
+    padding: 0px 10px;
+}
+
+#custom-uptime-icon:hover {}
+
+#uptime {
+    border-radius: 5px;
+}
+
+#uptime:hover {}
+
+#custom-uptime {
+    font-size: 14px;
+    padding: 0px 4px;
+    border-radius: 5px;
+    padding-top: 4px;
+    color: @green;
+    background-color: alpha(@green, 0.1);
+}
+
+#extras #cpu {
+    color: @yellow;
+}
+
+#hardware-stats {
+    border-radius: 5px;
+    margin-right: 2px;
+    background-color: alpha(@surface2, 0.3);
+}
+
+#custom-powerprofile {
+    padding: 0 5px;
+    margin: 0px;
+    border-radius: 4px;
+    padding-right: 10px;
+    font-size: 12px;
+}
+
+#custom-powerprofile.performance {
+    background-color: alpha(@yellow, 0.1);
+}
+
+#custom-powerprofile.power-saver {
+    padding-right: 8px;
+    background-color: alpha(@green, 0.1);
+}
+
+#custom-powerprofile.balanced {
+    padding-right: 12px;
+    background-color: alpha(@blue, 0.1);
+}
+
+#hardware #custom-powerprofile {
+    margin: 4px 4px;
+}

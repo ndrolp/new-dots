@@ -66,3 +66,4 @@ nwg-look
 upower
 spotify-player
 ppeaclock
+ttf-firacode-nerd

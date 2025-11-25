@@ -1,0 +1,16 @@
+#tray-drawer {
+    color: @tray-icon;
+    background: @tray-background;
+    border: 0px solid @tray-border;
+    font-family: "Roboto";
+    border-radius: 5px;
+    padding-right: 10px;
+    padding-left: 10px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    margin: 8px 8px;
+}
+
+#tray-drawer #tray {
+    margin-left: 15px
+}

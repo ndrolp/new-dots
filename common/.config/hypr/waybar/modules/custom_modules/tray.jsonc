@@ -1,0 +1,13 @@
+{
+    "group/tray-drawer": {
+        "orientation": "horizontal",
+        "drawer": {
+            "transition-duration": 300
+        },
+        "modules": ["custom/tray-icon","tray"] 
+    },
+    "custom/tray-icon": {
+        "format": "󱗼",
+        "tooltip": false
+    },
+}

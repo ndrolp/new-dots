@@ -1,0 +1,27 @@
+/* @define-color bar-bg #292c3c; */
+@define-color bar-bg #292c3c;
+@define-color darker-bg #414559;
+@define-color default-text #c6d0f5;
+@define-color border-bottom #51576d;
+@define-color workspace-section-bg transparent;
+@define-color workspace-color #d9d9d9;
+@define-color workspace-background #303446;
+@define-color workspace-active-color #232634;
+@define-color workspace-active-background #ca9ee6;
+@define-color workspace-empty-color #706e7a;
+@define-color workspace-empty-background #303446;
+@define-color battery-color #E5C890;
+@define-color battery-background #40414D;
+@define-color battery-border #E5C890;
+@define-color clock-color #85c1dc;
+@define-color clock-background #384154;
+@define-color clock-border #384154;
+@define-color volume-color #a6d189;
+@define-color volume-background #3B424C;
+@define-color volume-border #3B424C;
+@define-color volume-muted #e78284;
+@define-color volume-muted-background #413B4C;
+@define-color volume-muted-border #413B4C;
+@define-color tray-icon #c6d0f5;
+@define-color tray-background #3E4256;
+@define-color tray-border #3E4256;

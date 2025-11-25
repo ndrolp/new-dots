@@ -1,0 +1,8 @@
+{
+    "include":[ 
+        "~/.config/hypr/waybar/modules/core_modules/workspaces.jsonc",
+        "~/.config/hypr/waybar/modules/core_modules/battery.jsonc",
+        "~/.config/hypr/waybar/modules/core_modules/clock.jsonc",
+        "~/.config/hypr/waybar/modules/core_modules/volume.jsonc"
+    ]
+}

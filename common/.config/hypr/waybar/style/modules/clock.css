@@ -1,0 +1,14 @@
+#clock {
+    margin: 8px 8px;
+    padding: 0px 10px;
+    margin-right: 10px;
+    border-radius: 5px;
+    color: @clock-color;
+    background-color: @clock-background;
+    border: 0px solid @clock-border;
+}
+
+#clock:hover {
+    background-color: alpha(@blue, 0.2);
+}
+

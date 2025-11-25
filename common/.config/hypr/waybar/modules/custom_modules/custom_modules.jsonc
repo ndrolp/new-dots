@@ -1,0 +1,6 @@
+{
+    "include": [
+        "~/.config/hypr/waybar/modules/custom_modules/tray.jsonc",
+        "~/.config/hypr/waybar/modules/custom_modules/multimedia/multimedia.json",
+    ]
+}

@@ -24,6 +24,8 @@ PATH="$HOME/.cargo/bin:$PATH"
 PATH="/usr/bin/flutter/bin:$PATH"
 PATH="$HOME/Documents/Tools/Flutter/bin:$PATH"
 export PATH
+export QML_IMPORT_PATH=/usr/lib/qt6/qml
+export QML2_IMPORT_PATH=/usr/lib/qt6/qml
 
 
 ZSH_THEME="spaceship"

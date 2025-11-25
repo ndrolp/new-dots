@@ -1,0 +1,11 @@
+{
+  "include": [
+    "~/.config/hypr/themes/bar/waybar/modules/cava/cava.json",
+    "~/.config/hypr/themes/bar/waybar/modules/networking/networking.json",
+    "~/.config/hypr/themes/bar/waybar/modules/powerprofile/powerprofile.json",
+    "~/.config/hypr/themes/bar/waybar/modules/scripts/scripts.json",
+    "~/.config/hypr/themes/bar/waybar/modules/extras/extras.json",
+    "~/.config/hypr/themes/bar/waybar/modules/playing/playing.json",
+    "~/.config/hypr/themes/bar/waybar/modules/multimedia/multimedia.json"
+  ]
+}

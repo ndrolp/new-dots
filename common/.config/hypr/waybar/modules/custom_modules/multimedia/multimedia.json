@@ -1,0 +1,33 @@
+{
+    "group/multimedia": {
+        "orientation": "horizontal",
+        "modules": ["custom/playpause" , "custom/playing-text"]
+    },
+    "custom/playing-text": {
+        "format": "{}",
+        "exec": "~/.config/hypr/themes/bar/waybar/modules/multimedia/now_playing.sh",
+        "tooltip": true,
+        "tooltip-format": "Now Playing",
+        "interval": 5
+    },
+    "custom/playpause": {
+        "format": "{}",
+        "exec": "~/.config/hypr/themes/bar/waybar/modules/multimedia/playpause.sh",
+        "on-click": "playerctl play-pause",
+        "tooltip": false,
+        "tooltip-format": "Now Playing",
+        "interval": 5
+    },
+    "custom/next": {
+        "format": "{}",
+        "exec": "echo 󰒭",
+        "tooltip": false,
+        "on-click": "playerctl next"
+    },
+    "custom/previous":{
+        "format":"{}",
+        "exec": "echo 󰒮",
+        "tooltip": false,
+        "on-click": "playerctl previous"
+    }
+},

@@ -1,0 +1,48 @@
+#multimedia {
+    margin: 5px;
+    border-radius: 5px;
+    padding: 0px 10px;
+    background: shade(alpha(@base, 0.5), 1);
+}
+
+#multimedia #custom-playpause,
+#multimedia #custom-next,
+#multimedia #custom-previous {
+    padding: 3px;
+    margin: 3px;
+    border-radius: 5px;
+    font-size: 14px;
+    color: @lavender;
+    transition: 0.3s;
+}
+
+#multimedia #custom-playpause {
+    padding-left: 6px;
+}
+
+#multimedia #custom-next,
+#multimedia #custom-previous {
+    font-size: 16px;
+}
+
+#multimedia #custom-playing-text {
+    font-size: 15px;
+    margin-left: 5px;
+    margin-top: 5px;
+    color: @sky;
+}
+
+#multimedia #custom-playpause:hover,
+#multimedia #custom-next:hover,
+#multimedia #custom-previous:hover {
+    background: shade(alpha(@sky, 0.1), 1);
+    color: @sky;
+}
+
+#custom-cava {
+    font-size: 4px;
+    color: #ca9ee6;
+    margin-top: 10px;
+    padding-left: 10px;
+    font-family: "bargraph";
+}

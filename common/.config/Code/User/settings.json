@@ -99,4 +99,10 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
 },
 "animations.Install-Method": "Apc Customize UI++",
+"qt-core.additionalQtPaths": [
+    {
+        "name": "Qt-5.15.18-linux-g++_from_PATH",
+        "path": "/usr/bin/qmake"
+    }
+],
 }
