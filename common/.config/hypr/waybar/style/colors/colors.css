@@ -13,6 +13,9 @@
 @define-color battery-color #E5C890;
 @define-color battery-background #40414D;
 @define-color battery-border #E5C890;
+@define-color battery-charging-color #f4b8e4;
+@define-color battery-charging-background #424054;
+@define-color battery-charging-border #424054;
 @define-color clock-color #85c1dc;
 @define-color clock-background #384154;
 @define-color clock-border #384154;
@@ -25,3 +28,6 @@
 @define-color tray-icon #c6d0f5;
 @define-color tray-background #3E4256;
 @define-color tray-border #3E4256;
+@define-color updates-color #ef9f76;
+@define-color updates-background #413E4A;
+@define-color updates-border #413E4A;

@@ -1,0 +1,8 @@
+{
+    "custom/archupdates": {
+        "exec": "~/.config/hypr/waybar/modules/custom_modules/arch_update/updates.sh",
+        "interval": 60000,
+        "format": "{}",
+        "tooltip": false
+    }
+}

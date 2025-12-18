@@ -15,7 +15,9 @@
 
 #battery.charging,
 #battery.plugged {
-    color: @blue;
+    color: @battery-charging-color;
+    background: @battery-charging-background;
+    border-color: @battery-charging-border;
 }
 
 @keyframes blink {

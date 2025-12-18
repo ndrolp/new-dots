@@ -16,6 +16,7 @@ return {
 				},
 				ignore_focus = {},
 				always_divide_middle = false,
+				always_show_tabline = true,
 				globalstatus = true,
 				refresh = {
 					statusline = 1000,

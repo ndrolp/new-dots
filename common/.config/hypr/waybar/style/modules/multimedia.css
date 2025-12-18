@@ -4,13 +4,18 @@
     border: 0px solid @tray-border;
     font-family: "Roboto";
     border-radius: 5px;
-    padding-right: 10px;
-    padding-left: 10px;
+    /* padding-right: 10px; */
+    /* padding-left: 10px; */
     margin-top: 8px;
     margin-bottom: 8px;
     margin: 8px 8px;
 }
 
 #multimedia #custom-playing-text {
-    margin-top: 4px
+    margin-top: 4px;
+    margin-right: 10px;
+}
+
+#multimedia #custom-playpause{
+    margin-left: 10px;
 }

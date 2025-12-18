@@ -1,0 +1,14 @@
+#custom-archupdates {
+    color: @updates-color;
+    background: @updates-background;
+    border: 0px solid @updates-border;
+    font-family: "Roboto";
+    font-size: 14px;
+    border-radius: 5px;
+    padding-right: 10px;
+    padding-left: 10px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    margin-left: 10px;
+    margin: 8px 8px;
+}
