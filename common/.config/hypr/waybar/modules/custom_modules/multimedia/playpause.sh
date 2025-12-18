@@ -16,17 +16,6 @@ DEFAULT_ICON="󰣆"
 # -----------------------------
 # Helpers
 # -----------------------------
-match_icon() {
-    local text="$1"
-    for key in "${!ICONS[@]}"; do
-        if [[ "$text" =~ $key ]]; then
-            echo "${ICONS[$key]}"
-            return
-        fi
-    done
-    echo "$DEFAULT_ICON"
-}
-
 get_focused_title() {
     # Hyprland
     if command -v hyprctl >/dev/null 2>&1; then
@@ -82,10 +71,19 @@ fi
 # Fallback: focused app icon
 # -----------------------------
 focused=$(get_focused_title)
+focused="${focused//[[:space:]]/}"  # remove all whitespace
 
 # No focused window → show nothing
 [[ -z "$focused" ]] && echo "" && exit 0
 
-# Focused window exists → match or default
-echo "$(match_icon "$focused")"
+# Focused window exists → match dictionary
+for key in "${!ICONS[@]}"; do
+    if [[ "$focused" =~ $key ]]; then
+        echo "${ICONS[$key]}"
+        exit 0
+    fi
+done
+
+# Focused app exists but not in dictionary → show default
+echo "$DEFAULT_ICON"
 exit 0

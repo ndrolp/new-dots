@@ -41,9 +41,9 @@ button:hover {
 }
 
 #workspaces button.active {
-    padding: 0px 18px;
-    padding-right: 20px;
-    font-size: 15px;
+    padding: 0px 14px;
+    padding-right: 16px;
+    /* font-size: 15px; */
     background-color: @workspace-active-background;
     color: @workspace-active-color;
 }

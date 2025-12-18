@@ -6,8 +6,8 @@
   "position": "top", // Waybar position (top|bottom|left|right)
   "modules-left": [
       "custom/powerprofile",
-      "group/multimedia",
-      "custom/archupdates"
+      "group/multimedia"
+      // "custom/archupdates"
   ],
   "modules-center": [
     "custom/notification",
