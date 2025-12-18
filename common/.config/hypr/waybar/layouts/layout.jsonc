@@ -4,11 +4,14 @@
       "~/.config/hypr/waybar/modules/custom_modules/custom_modules.jsonc"
   ],
   "position": "top", // Waybar position (top|bottom|left|right)
-  "modules-left": ["custom/archupdates", "group/multimedia"],
+  "modules-left": [
+      "custom/powerprofile",
+      "group/multimedia",
+      "custom/archupdates"
+  ],
   "modules-center": [
     "custom/notification",
     "hyprland/workspaces",
-    "custom/powerprofile",
   ],
   "modules-right": [
       "group/tray-drawer",

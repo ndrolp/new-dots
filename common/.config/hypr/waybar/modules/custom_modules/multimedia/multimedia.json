@@ -8,15 +8,15 @@
         "exec": "~/.config/hypr/waybar/modules/custom_modules/multimedia/now_playing.sh",
         "tooltip": true,
         "tooltip-format": "Now Playing",
-        "interval": 5
+        "interval": 1
     },
     "custom/playpause": {
-        "format": "{}",
+        "format": "{} ",
         "exec": "~/.config/hypr/waybar/modules/custom_modules/multimedia/playpause.sh",
         "on-click": "playerctl play-pause",
         "tooltip": false,
         "tooltip-format": "Now Playing",
-        "interval": 5
+        "interval": 1
     },
     "custom/next": {
         "format": "{}",
