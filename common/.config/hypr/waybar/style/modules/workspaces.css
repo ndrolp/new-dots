@@ -3,13 +3,13 @@
 
 #workspaces {
     margin: 5px 9px;
-    padding: 3px 10px;
+    padding: 2px 10px;
     border-radius: 5px;
     background-color: alpha(@workspace-section-bg, 0.4);
 }
 
 #workspaces button {
-    padding: 0px 2px;
+    padding: 1px 2px;
     font-size: 40px;
     border-radius: 5px;
     padding-right: 5px;
@@ -41,7 +41,7 @@ button:hover {
 }
 
 #workspaces button.active {
-    padding: 0px 14px;
+    padding: 1px 14px;
     padding-right: 16px;
     /* font-size: 15px; */
     background-color: @workspace-active-background;
