@@ -1,21 +1,20 @@
 #pulseaudio {
-    color: @volume-color;
-    background: @volume-background;
-    border: 0px solid @volume-border;
-    font-family: "Roboto";
-    font-size: 14px;
-    border-radius: 5px;
-    padding-right: 10px;
-    padding-left: 10px;
-    margin-top: 8px;
-    margin-bottom: 8px;
-    margin-right: 10px;
-    margin: 8px 8px;
+  color: @volume-color;
+  background: @volume-background;
+  border: 0px solid @volume-border;
+  font-family: "Roboto";
+  font-size: 14px;
+  border-radius: 3px;
+  padding-right: 10px;
+  padding-left: 10px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  margin-right: 10px;
+  margin: 6px 4px;
 }
 
 #pulseaudio.muted {
-    color: @volume-muted;
-    background: @volume-muted-background;
-    border: 0px solid @volume-muted-border;
+  color: @volume-muted;
+  background: @volume-muted-background;
+  border: 0px solid @volume-muted-border;
 }
-

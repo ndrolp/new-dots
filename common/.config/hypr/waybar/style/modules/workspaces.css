@@ -1,20 +1,20 @@
-
 /* you can set a style on hover for any module like this */
 
 #workspaces {
-    margin: 5px 9px;
-    padding: 2px 10px;
-    border-radius: 5px;
+    margin: 2px 9px;
+    padding: 4px 10px;
+    border-radius: 2px;
     background-color: alpha(@workspace-section-bg, 0.4);
 }
 
 #workspaces button {
-    padding: 1px 2px;
+    padding: 0px 5px;
     font-size: 40px;
-    border-radius: 5px;
-    padding-right: 5px;
+    border-radius: 3px;
+    padding-right: 10px;
+    border: 0px solid transparent;
     background-color: @workspace-background;
-    transition: 0.3s;
+    transition: 0.1s ease-out;
     color: @workspace-color;
     margin-right: 3px;
     margin-left: 3px;
@@ -25,25 +25,29 @@ button:hover {
 }
 
 #workspaces button.empty {
+    padding: 0px 2px;
+    /* border-color: red; */
+    padding-right: 5px;
     color: @workspace-empty-color;
     background: @workspace-empty-background;
 }
 
-#workspaces button.empty:hover {
-}
+#workspaces button.empty:hover {}
 
 #workspaces button:hover {
     outline: none;
     padding-left: 6px;
     padding-right: 9px;
     background-color: alpha(@surface0, 0.4);
-    color: @mauve;
+    /* color: @mauve; */
 }
 
 #workspaces button.active {
-    padding: 1px 14px;
+    padding: 0px 14px;
     padding-right: 16px;
     /* font-size: 15px; */
+    /* border-color: transparent; */
+    border-color: @workspace-active-color;
     background-color: @workspace-active-background;
     color: @workspace-active-color;
 }

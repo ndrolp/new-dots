@@ -1,21 +1,20 @@
 #multimedia {
-    color: @tray-icon;
-    background: @tray-background;
-    border: 0px solid @tray-border;
-    font-family: "Roboto";
-    border-radius: 5px;
-    /* padding-right: 10px; */
-    /* padding-left: 10px; */
-    margin-top: 8px;
-    margin-bottom: 8px;
-    margin: 8px 4px;
+  font-family: "Roboto";
+  border-radius: 3px;
+  /* padding-right: 10px; */
+  /* padding-left: 10px; */
+  margin: 6px 4px;
+  margin-left: 10px;
+  color: @tray-icon;
+  background: @multimedia-background;
+  border: 0px solid @tray-border;
 }
 
 #multimedia #custom-playing-text {
-    margin-top: 4px;
-    margin-right: 10px;
+  margin-top: 4px;
+  margin-right: 10px;
 }
 
-#multimedia #custom-playpause{
-    margin-left: 10px;
+#multimedia #custom-playpause {
+  margin-left: 10px;
 }

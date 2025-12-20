@@ -6,9 +6,9 @@ return {
 			options = {
 				icons_enabled = true,
 				theme = "catppuccin",
-				-- section_separators = { left = "", right = "" },
-				section_separators = { left = "", right = "" },
-				component_separators = { left = "", right = " " },
+				section_separators = { left = "", right = "" },
+				-- section_separators = { left = "", right = "" },
+				component_separators = { left = "", right = "" },
 				disabled_filetypes = {
 					statusline = {},
 					winbar = {},
@@ -25,7 +25,8 @@ return {
 				},
 			},
 			sections = {
-				lualine_a = { "mode" },
+				lualine_a = { { "mode", separator = { left = "" }, right_padding = 2 } },
+				-- lualine_a = { "mode" },
 				lualine_b = {
 					{ "branch", icon = "" },
 					{
@@ -60,7 +61,9 @@ return {
 					"encoding",
 				},
 				lualine_y = { "progress", "searchcount" },
-				lualine_z = { "filetype" },
+				lualine_z = {
+					{ "filetype", separator = { right = "" }, left_padding = 2 },
+				},
 			},
 			inactive_sections = {
 				lualine_a = {},
@@ -70,31 +73,7 @@ return {
 				lualine_y = {},
 				lualine_z = {},
 			},
-			tabline = {
-				lualine_a = {
-					{
-						"buffers",
-						symbols = {
-							modified = "  ", -- Text to show when the buffer is modified
-							alternate_file = " 󱗼 ", -- Text to show to identify the alternate file
-							directory = "  ", -- Text to show when the buffer is a directory
-						},
-					},
-				},
-				lualine_b = {},
-				lualine_c = {},
-				lualine_x = {},
-				lualine_y = {},
-				lualine_z = {
-					{
-						"tabs",
-						show_modified_status = false, -- Shows a symbol next to the tab name if the file has been modified.
-						symbols = {
-							modified = "[+]", -- Text to show when the file is modified.
-						},
-					},
-				},
-			},
+			tabline = {},
 			-- winbar = {
 			--     -- lualine_a = {},
 			-- },
