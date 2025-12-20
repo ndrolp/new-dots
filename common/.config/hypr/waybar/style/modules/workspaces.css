@@ -22,6 +22,10 @@
 
 button:hover {
     /* background: inherit; */
+    background-color: red;
+    border: 1px solid red;
+    outline: none;
+    border-top: none;
 }
 
 #workspaces button.empty {
@@ -38,7 +42,8 @@ button:hover {
     outline: none;
     padding-left: 6px;
     padding-right: 9px;
-    background-color: alpha(@surface0, 0.4);
+    color: @workspace-color;
+    background-color: @workspace-active-background;
     /* color: @mauve; */
 }
 

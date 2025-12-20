@@ -1,1 +1,1 @@
-vim.keymap.set("n", "<leader>bf", ":Telescope buffers<CR>", {silent=true})
+vim.keymap.set("n", "<leader>bf", ":Telescope buffers theme=dropdown<CR>", { silent = true })
