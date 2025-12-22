@@ -11,12 +11,22 @@ return {
 			options = {
 				show_close_icon = false,
 				show_buffer_close_icons = false,
-				style_preset = bufferline.style_preset.default,
+				style_preset = bufferline.style_preset.minimal,
 				separator_style = { "", "" },
 				indicator = {
 					-- icon = "▎", -- this should be omitted if indicator style is not 'icon'
-					-- icon = "|", -- this should be omitted if indicator style is not 'icon'
+					icon = "|", -- this should be omitted if indicator style is not 'icon'
 					style = "icon",
+				},
+				tab_size = 10,
+				diagnostics = "nvim_lsp",
+				offsets = {
+					{
+						filetype = "neo-tree",
+						text = "File Explorer",
+						text_align = "left",
+						separator = true,
+					},
 				},
 			},
 		})
