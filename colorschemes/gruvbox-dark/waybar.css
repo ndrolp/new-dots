@@ -1,0 +1,54 @@
+/* Gruvbox Dark (medium) */
+
+@define-color bar-bg #282828;
+@define-color darker-bg #1d2021;
+
+@define-color default-text #ebdbb2;
+@define-color border-bottom #3c3836;
+
+@define-color workspace-section-bg transparent;
+
+@define-color workspace-color #ebdbb2;
+@define-color workspace-background #3c3836;
+
+@define-color workspace-active-color #fabd2f;
+@define-color workspace-active-background #504945;
+
+@define-color workspace-empty-color #928374;
+@define-color workspace-empty-background #3c3836;
+
+/* Battery */
+@define-color battery-color #b8bb26;
+@define-color battery-background #3c3836;
+@define-color battery-border #b8bb26;
+
+@define-color battery-charging-color #8ec07c;
+@define-color battery-charging-background #3c3836;
+@define-color battery-charging-border #8ec07c;
+
+/* Clock */
+@define-color clock-color #83a598;
+@define-color clock-background #3c3836;
+@define-color clock-border #3c3836;
+
+/* Volume */
+@define-color volume-color #b8bb26;
+@define-color volume-background #3c3836;
+@define-color volume-border #3c3836;
+
+@define-color volume-muted #fb4934;
+@define-color volume-muted-background #3c3836;
+@define-color volume-muted-border #3c3836;
+
+/* Tray */
+@define-color tray-icon #ebdbb2;
+@define-color tray-background #3c3836;
+@define-color tray-border #3c3836;
+
+/* Updates */
+@define-color updates-color #fe8019;
+@define-color updates-background #3c3836;
+@define-color updates-border #3c3836;
+
+/* Multimedia */
+@define-color multimedia-background #3c3836;

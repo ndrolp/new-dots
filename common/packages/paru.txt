@@ -19,3 +19,4 @@ waypaper
 swayosd-git
 postman-bin
 hyprdynamicmonitors
+gruvbox-material-gtk-theme-git 
