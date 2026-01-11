@@ -1,8 +1,9 @@
 {
-    "include": [
-        "~/.config/hypr/waybar/modules/custom_modules/tray.jsonc",
-        "~/.config/hypr/waybar/modules/custom_modules/multimedia/multimedia.json",
-        "~/.config/hypr/waybar/modules/custom_modules/arch_update/arch_updates.jsonc",
-        "~/.config/hypr/waybar/modules/custom_modules/power_profile/power_profile.jsonc",
-    ]
+  "include": [
+    "~/.config/hypr/waybar/modules/custom_modules/tray.jsonc",
+    "~/.config/hypr/waybar/modules/custom_modules/multimedia/multimedia.json",
+    "~/.config/hypr/waybar/modules/custom_modules/arch_update/arch_updates.jsonc",
+    "~/.config/hypr/waybar/modules/custom_modules/power_profile/power_profile.jsonc",
+    "~/.config/hypr/waybar/modules/custom_modules/shrotcuts/shrotcuts.jsonc",
+  ],
 }

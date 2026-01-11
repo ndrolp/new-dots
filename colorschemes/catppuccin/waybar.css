@@ -1,4 +1,7 @@
-/* @define-color bar-bg #292c3c; */
+@define-color red #e78284;
+@define-color blue #85c1dc;
+@define-color yellow #E5C890;
+@define-color green #a6d189;
 @define-color bar-bg #292c3c;
 @define-color darker-bg #292c3c;
 @define-color default-text #c6d0f5;
@@ -32,3 +35,5 @@
 @define-color updates-background #413E4A;
 @define-color updates-border #413E4A;
 @define-color multimedia-background #3E4256;
+@define-color shortcuts-background #40414D;
+@define-color shortcuts-color #e5c89c;

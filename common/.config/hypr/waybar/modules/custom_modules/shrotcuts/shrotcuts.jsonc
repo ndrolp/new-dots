@@ -1,0 +1,18 @@
+{
+  "group/shortcuts": {
+    "orientation": "horizontal",
+    "modules": ["custom/chrome", "custom/files", "custom/spotify"],
+  },
+  "custom/chrome": {
+    "format": "",
+    "on-click": "google-chrome-stable &",
+  },
+  "custom/files": {
+    "format": "",
+    "on-click": "nemo &",
+  },
+  "custom/spotify": {
+    "format": "",
+    "on-click": "spotify &",
+  },
+}

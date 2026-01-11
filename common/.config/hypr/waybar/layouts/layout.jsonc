@@ -1,22 +1,14 @@
 {
   "include": [
-      "~/.config/hypr/waybar/modules/core_modules/core_modules.jsonc",
-      "~/.config/hypr/waybar/modules/custom_modules/custom_modules.jsonc"
+    "~/.config/hypr/waybar/modules/core_modules/core_modules.jsonc",
+    "~/.config/hypr/waybar/modules/custom_modules/custom_modules.jsonc",
   ],
   "position": "top", // Waybar position (top|bottom|left|right)
   "modules-left": [
-      "custom/powerprofile",
-      "group/multimedia"
-      // "custom/archupdates"
+    "group/shortcuts",
+    "custom/powerprofile",
+    "group/multimedia",
   ],
-  "modules-center": [
-    "custom/notification",
-    "hyprland/workspaces",
-  ],
-  "modules-right": [
-      "group/tray-drawer",
-      "pulseaudio",
-      "battery",
-      "clock"
-  ],
+  "modules-center": ["custom/notification", "hyprland/workspaces"],
+  "modules-right": ["group/tray-drawer", "pulseaudio", "battery", "clock"],
 }

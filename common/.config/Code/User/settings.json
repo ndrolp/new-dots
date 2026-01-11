@@ -41,7 +41,7 @@
   "editor.fontLigatures": true,
   "editor.fontSize": 13,
   "editor.guides.indentation": false,
-  "editor.hover.enabled": false,
+  "editor.hover.enabled": "off",
   "editor.lightbulb.enabled": "off",
   "editor.lineHeight": 17,
   "editor.matchBrackets": "never",
