@@ -67,3 +67,4 @@ upower
 spotify-player
 ppeaclock
 ttf-firacode-nerd
+qutebrowser

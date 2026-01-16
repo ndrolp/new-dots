@@ -6,12 +6,10 @@
     border-radius: 5px;
     padding-right: 16px;
     padding-left: 10px;
-    margin-top: 8px;
-    margin-bottom: 8px;
-    margin: 8px 4px;
+    margin: 6px 4px;
     margin-left: 10px;
 }
 
 #tray-drawer #tray {
-    margin-left: 15px
+    margin-left: 15px;
 }

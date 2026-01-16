@@ -3,6 +3,11 @@
 WALLPAPER_MAIN="$HOME/Pictures/Wallpapers"
 WALLPAPER_SECONDARY="$HOME/Pictures/Wallpapers Vertical"
 
+# Transition settings (optional, tweak to taste)
+TRANSITION_TYPE="center"
+TRANSITION_STEP=60
+TRANSITION_FPS=60
+
 # Get monitor info
 MONITORS_JSON=$(hyprctl monitors -j)
 
@@ -14,16 +19,17 @@ echo "$MONITORS_JSON" | jq -c '.[]' | while read -r MON; do
     NAME=$(echo "$MON" | jq -r '.name')
     TRANSFORM=$(echo "$MON" | jq -r '.transform')
 
-    # Decide wallpaper and mode based on rotation
+    # Decide wallpaper based on rotation
     if [[ "$TRANSFORM" == "1" || "$TRANSFORM" == "3" ]]; then
         WP=$(pick_random "$WALLPAPER_SECONDARY")
-        MODE="contain"
     else
         WP=$(pick_random "$WALLPAPER_MAIN")
-        MODE="fill"
     fi
 
-    echo "$NAME"
-    # Set wallpaper for this monitor
-    swww img "$WP" --outputs "$NAME"
+    echo "Setting wallpaper for $NAME → $WP"
+
+    awww img -o "$NAME" "$WP" \
+        --transition-type "$TRANSITION_TYPE" \
+        --transition-step "$TRANSITION_STEP" \
+        --transition-fps "$TRANSITION_FPS"
 done

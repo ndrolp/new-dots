@@ -43,6 +43,7 @@ element {
     padding: 5px ;
     border-radius: 2px;
     cursor:  pointer;
+    orientation: vertical;
     spacing: 10px ;
     border:  0;
 }
@@ -91,13 +92,13 @@ element-text {
 }
 element-icon {
     background-color: transparent;
-    size:             1.0000em ;
+    size:             2.0000em ;
     cursor:           inherit;
     text-color:       inherit;
 }
 window {
     padding:          0px;
-    height: 301px;
+    // height: 301px;
     width: 500px;
     background-color: @base;
     border-radius: 0px;
@@ -120,8 +121,8 @@ textbox {
 listview {
     padding:      5px;
     scrollbar:    true;
-    columns:      1;
-    lines: 5;
+    columns:      4;
+    lines: 3;
     // border-color: @separatorcolor;
     spacing:      4px ;
     fixed-height: 0;

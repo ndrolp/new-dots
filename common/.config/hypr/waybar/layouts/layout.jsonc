@@ -5,10 +5,16 @@
   ],
   "position": "top", // Waybar position (top|bottom|left|right)
   "modules-left": [
-    "group/shortcuts",
     "custom/powerprofile",
+    "group/shortcuts",
     "group/multimedia",
   ],
   "modules-center": ["custom/notification", "hyprland/workspaces"],
-  "modules-right": ["group/tray-drawer", "pulseaudio", "battery", "clock"],
+  "modules-right": [
+    "group/tray-drawer",
+    "custom/archupdates",
+    "pulseaudio",
+    "battery",
+    "clock",
+  ],
 }
