@@ -12,7 +12,7 @@
   "modules-center": ["custom/notification", "hyprland/workspaces"],
   "modules-right": [
     "group/tray-drawer",
-    "custom/archupdates",
+    // "custom/archupdates",
     "pulseaudio",
     "battery",
     "clock",
