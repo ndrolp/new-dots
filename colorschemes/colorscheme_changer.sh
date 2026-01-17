@@ -1,6 +1,6 @@
 #!/bin/bash
 
-WAYBAR_COLORS="$HOME/.config/hypr/waybar/style/colors/colors.css"
+WAYBAR_COLORS="$HOME/.config/waybar/custom/colors.css"
 HYPRLAND_COLORS="$HOME/.config/hypr/colors/colors.conf"
 KITTY_COLORS="$HOME/.config/kitty/colors.conf"
 
@@ -19,7 +19,9 @@ capitalize() {
 
 TARGET_DIR="$HOME/.dotfiles/colorschemes"
 
-SELECTED_FOLDER=$(find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort | rofi -dmenu)
+SELECTED_FOLDER=$(find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' \
+  | sort \
+  | rofi -dmenu -l 5 -columns 1 -font "FiraCode Nerd Font 10")
 
 [ -z "$SELECTED_FOLDER" ] && exit 0
 
@@ -30,11 +32,13 @@ CAPITALIZED_THEME=$(capitalize "$SELECTED_FOLDER")
 THEME_FOLDER="$HOME/.dotfiles/colorschemes/$SELECTED_FOLDER"
 
 echo "LINKING WAYBAR"
-ln -sf "$THEME_FOLDER/waybar.css" "$WAYBAR_COLORS"
+ln -sf "$THEME_FOLDER/waybar/colors.css" "$WAYBAR_COLORS"
 echo "LINKING HYPR COLORS"
-ln -sf "$THEME_FOLDER/hyprland.conf" "$HYPRLAND_COLORS"
+ln -sf "$THEME_FOLDER/hypr/colors.conf" "$HYPRLAND_COLORS"
+
+cat "$THEME_FOLDER/hypr/colors.conf"
 
 kitten themes --reload-in=all "$CAPITALIZED_THEME"
 
 
-bash ~/.config/hypr/waybar/waybar.sh
+bash ~/.dotfiles/scripts/hyprland/reload.sh
