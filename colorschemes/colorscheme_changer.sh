@@ -1,7 +1,7 @@
 #!/bin/bash
 
 WAYBAR_COLORS="$HOME/.config/waybar/custom/colors.css"
-HYPRLAND_COLORS="$HOME/.config/hypr/colors/colors.conf"
+HYPRLAND_COLORS="$HOME/.config/hypr/custom/colors.conf"
 KITTY_COLORS="$HOME/.config/kitty/colors.conf"
 
 capitalize() {
