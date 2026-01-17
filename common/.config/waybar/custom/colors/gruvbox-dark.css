@@ -1,11 +1,12 @@
 /* Backgrounds */
 @define-color bg0 #1f2224;
-/* darkest background */
-@define-color bg1 #282828;
-@define-color bg2 #3c3836;
+/* darkest, original dark muted tone */
+@define-color bg1 #2c2c2c;
+/* slightly lighter but still muted */
+@define-color bg2 #3a3632;
 @define-color bg3 #504945;
 @define-color bg4 #665c54;
-/* lighter background */
+/* lightest, earthy muted */
 
 /* Foreground */
 @define-color fg #ebdbb2;

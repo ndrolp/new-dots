@@ -1,0 +1,1 @@
+/home/ndrolp/.dotfiles/colorschemes/gruvbox-dark/nvim/theme.lua
