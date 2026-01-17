@@ -1,0 +1,20 @@
+#multimedia {
+    font-family: "Roboto";
+    border-radius: 3px;
+    /* padding-right: 10px; */
+    /* padding-left: 10px; */
+    margin: 6px 4px;
+    margin-left: 4px;
+    color: @fg;
+    background: @bg2;
+}
+
+#multimedia #custom-playing-text {
+    margin-top: 4px;
+    margin-right: 10px;
+    margin-left: 5px;
+}
+
+#multimedia #custom-playpause {
+    margin-left: 10px;
+}

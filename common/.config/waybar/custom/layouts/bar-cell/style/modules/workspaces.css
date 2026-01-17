@@ -1,0 +1,67 @@
+/* you can set a style on hover for any module like this */
+
+#workspaces {
+    margin: 2px 9px;
+    padding: 4px 10px;
+    border-radius: 2px;
+    background-color: alpha(@bg3, 0);
+}
+
+#workspaces button {
+    padding: 0px 5px;
+    font-size: 40px;
+    border-radius: 3px;
+    padding-right: 10px;
+    border: 0px solid transparent;
+    background-color: @bg1;
+    transition: 0.1s ease-out;
+    color: @fg;
+    margin-right: 3px;
+    margin-left: 3px;
+}
+
+button:hover {
+    /* background: inherit; */
+    background-color: red;
+    border: 1px solid red;
+    outline: none;
+    border-top: none;
+}
+
+#workspaces button.empty {
+    padding: 0px 2px;
+    /* border-color: red; */
+    padding-right: 5px;
+    color: @grey0;
+    background: @bg1;
+}
+
+#workspaces button.empty:hover {}
+
+#workspaces button:hover {
+    outline: none;
+    padding-left: 6px;
+    padding-right: 9px;
+    color: @workspace-color;
+    background-color: @workspace-active-background;
+    /* color: @mauve; */
+}
+
+#workspaces button.active {
+    padding: 0px 14px;
+    padding-right: 16px;
+    /* font-size: 15px; */
+    /* border-color: transparent; */
+    border-color: @workspace-active-color;
+    background-color: @bg2;
+    color: @purple;
+}
+
+#workspaces button.urgent {
+    color: @red;
+}
+
+#mode {
+    background-color: #64727d;
+    box-shadow: inset 0 -3px #ffffff;
+}

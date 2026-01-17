@@ -1,0 +1,12 @@
+#clock {
+    margin: 6px 4px;
+    padding: 0px 10px;
+    margin-right: 10px;
+    border-radius: 3px;
+    color: @blue;
+    background-color: @bg2;
+}
+
+#clock:hover {
+    background-color: alpha(@blue, 0.2);
+}

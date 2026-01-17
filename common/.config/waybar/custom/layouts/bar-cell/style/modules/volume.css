@@ -1,0 +1,18 @@
+#pulseaudio {
+    color: @green;
+    background: @bg2;
+    font-family: "Roboto";
+    font-size: 14px;
+    border-radius: 3px;
+    padding-right: 10px;
+    padding-left: 10px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    margin-right: 10px;
+    margin: 6px 4px;
+}
+
+#pulseaudio.muted {
+    color: @red;
+    background: @bg2;
+}

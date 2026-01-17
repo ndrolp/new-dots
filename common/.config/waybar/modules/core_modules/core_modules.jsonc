@@ -1,0 +1,9 @@
+{
+  "include": [
+    "~/.config/waybar/modules/core_modules/workspaces.jsonc",
+    "~/.config/waybar/modules/core_modules/battery.jsonc",
+    "~/.config/waybar/modules/core_modules/clock.jsonc",
+    "~/.config/waybar/modules/core_modules/volume.jsonc",
+    "~/.config/waybar/modules/core_modules/tray.jsonc",
+  ],
+}

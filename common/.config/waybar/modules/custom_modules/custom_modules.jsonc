@@ -1,0 +1,9 @@
+{
+  "include": [
+    "~/.config/waybar/modules/custom_modules/tray.jsonc",
+    "~/.config/waybar/modules/custom_modules/multimedia/multimedia.json",
+    "~/.config/waybar/modules/custom_modules/arch_update/arch_updates.jsonc",
+    "~/.config/waybar/modules/custom_modules/power_profile/power_profile.jsonc",
+    "~/.config/waybar/modules/custom_modules/shrotcuts/shrotcuts.jsonc",
+  ],
+}

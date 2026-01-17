@@ -1,0 +1,15 @@
+#tray-drawer {
+    color: @fg;
+    background: @bg2;
+    border: 0px solid @tray-border;
+    border-radius: 5px;
+    padding-right: 10px;
+    padding-left: 10px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    margin: 6px 4px;
+}
+
+#tray-drawer #tray {
+    margin-left: 15px;
+}
