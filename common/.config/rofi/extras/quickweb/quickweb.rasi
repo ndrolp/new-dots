@@ -4,7 +4,7 @@ configuration {
 }
 
 /* ---- Load pywal colors (custom wal template) ---- */
-@import "~/.config/rofi/extras/powerstyle/style.rasi"
+@import "~/.config/rofi/custom/colors.rasi"
 
 /* ---- Global Properties ---- */
 * {
@@ -22,8 +22,8 @@ window {
     y-offset:                       0px;
     padding:                        0px;
     border:                         1px;
-    border-radius:                  00px;
-    border-color:                   #c6a0f6;
+    border-radius:                  20px;
+    // border-color:                   #c6a0f6;
     cursor:                         "default";
     background-color:               rgba(48, 52, 70, 0.7);
     location: center;
@@ -37,12 +37,12 @@ mainbox {
     enabled:                        true;
     spacing:                        0px;
     margin:                         0px;
-    padding:                        0px;
+    padding:                        10px;
     border:                         0px solid;
     border-radius:                  0px;
     // background-image:               url("~/.config/rofi/.current_wallpaper", height);
-    border-color:                   @active-background;
-    background-color:               @background-color;
+    // border-color:                   @active-background;
+    background-color:               @bg0;
     children:                       [ "inputbar" ,"listview"];
 }
 
@@ -51,7 +51,8 @@ inputbar {
     enabled:                        true;
 	padding:						5px 10px;
     padding-bottom: 5px;
-    margin: 1px;
+    margin: 10px 0px;
+    margin-top: 10px;
     background-color:               transparent;
     color: red;
     border:                         1px;
@@ -61,11 +62,13 @@ inputbar {
 }
 
 entry {
-    background-color: transparent;
+    background-color: @bg2;
+    padding: 10px;
+    border-radius: 10px;
     placeholder: "Go to web page...";
     font:                           "Hasklug Nerd Font Mono 12";
     hide-cursor-on-empty: true;
-    text-color:                     @foreground;
+    text-color:                     @fg;
 }
 
 prompt {
@@ -75,7 +78,7 @@ prompt {
 	border-radius:					15px;
     border-color:                   @foreground;
     background-color:               transparent;
-    text-color:                     @background;
+    text-color:                     @fg;
     cursor:                         text;
 }
 
@@ -96,22 +99,23 @@ listview {
     background-color:               transparent;
     cursor:                         "default";
     border:                         0px;
-	border-color:                   @border-color;
+	// border-color:                   @border-color;
 }
 
 /* ---- Elements ---- */
 element {
     enabled:                        true;
     padding-bottom:                        10px;
-    border-radius:                  0px;
+    border-radius:                  10px;
     background-color:               transparent;
-    text-color:                     @foreground;
+    text-color:                     @fg;
     cursor:                         pointer;
     orientation: vertical;
     children: [  "element-icon", "element-text"  ];
 }
 element-text {
     font:                           "Hasklug Nerd Font Mono 11";
+    font-weight: bold;
     background-color:               transparent;
     text-color:                     inherit;
     cursor:                         inherit;
@@ -127,14 +131,16 @@ element-icon {
     padding: 5px;
     text-color:                     red;
     padding-right: 25px;
-    color: red;
+    // color: red;
 }
+
 
 
 element selected.normal {
     border: 1px;
-    border-color: #626880;
+    border-color: @purple;
     background-color:               transparent;
+    color: @purple;
 }
 element alternate.normal {
     background-color:               transparent;

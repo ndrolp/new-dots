@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Kill any lingering wofi instance (optional)
-killall wofi 2>/dev/null
+killall rofi 2>/dev/null
 
 # Define options (each on its own line)
 GITHUB="   Github"

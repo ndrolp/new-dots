@@ -4,6 +4,7 @@ WAYBAR_COLORS="$HOME/.config/waybar/custom/colors.css"
 HYPRLAND_COLORS="$HOME/.config/hypr/custom/colors.conf"
 KITTY_COLORS="$HOME/.config/kitty/colors.conf"
 NVIM_COLORS="$HOME/.config/nvim/lua/settings/core/theme.lua"
+ROFI_COLORS="$HOME/.config/rofi/custom/colors.rasi"
 
 capitalize() {
   local input="$1"
@@ -46,5 +47,11 @@ kitten themes --reload-in=all "$CAPITALIZED_THEME"
 
 echo "LINKING NVIM"
 ln -sf "$THEME_FOLDER/nvim/theme.lua" "$NVIM_COLORS"
+
+
+echo "LINKING ROFI"
+ln -sf "$THEME_FOLDER/rofi/colors.rasi" "$ROFI_COLORS"
+
+
 
 bash ~/.dotfiles/scripts/hyprland/reload.sh

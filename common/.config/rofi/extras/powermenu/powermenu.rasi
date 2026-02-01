@@ -4,7 +4,7 @@ configuration {
 }
 
 /* ---- Load pywal colors (custom wal template) ---- */
-@import "~/.config/rofi/extras/powermenu/style.rasi"
+@import "~/.config/rofi/custom/colors.rasi"
 
 /* ---- Global Properties ---- */
 * {
@@ -15,11 +15,11 @@ configuration {
 window {
     padding:                        0px;
     border:                         2px;
-    border-radius:                  0px;
-    border-color:                   #c6a0f6;
+    border-radius:                  10px;
+    border-color:                   @purple;
     border: 1px solid;
     cursor:                         "default";
-    background-color:               #303446;
+    background-color:               @bg0;
     location:                       center;
     anchor:                         center;
     fullscreen:                     false;
@@ -35,11 +35,11 @@ mainbox {
     spacing:                        0px;
     margin:                         0px;
     padding:                        0px;
-    border-radius:                  0px;
+    border-radius:                  10px;
     border:                         2px solid;
-    border-color:                   @surface1;
+    // border-color:                   @surface1;
     // background-image:               url("~/.config/rofi/.current_wallpaper", height);
-    background-color:               @background-color;
+    background-color:               @bg0;
     children:                       [ "listview"];
 }
 
@@ -85,11 +85,12 @@ listview {
 /* ---- Elements ---- */
 element {
     enabled:                        true;
-    padding:                        0px;
-    border-radius:                  0px;
+    // padding:                        0px;
+    border-radius:                  10px;
     background-color:               transparent;
-    text-color:                     @foreground;
+    text-color:                     @purple;
     cursor:                         pointer;
+    // borrder-color: 2px solid red;
 }
 element-text {
     font:                           "Hasklug Nerd Font Mono 30";
@@ -100,8 +101,8 @@ element-text {
     horizontal-align:               0.5;
 }
 element selected.normal {
-    background-color:               @selected-normal-background;
-    text-color:                     @background;
+    background-color:               @purple;
+    text-color:                     @bg0;
 }
 element alternate.normal {
     background-color:               @background;

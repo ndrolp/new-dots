@@ -1,0 +1,25 @@
+* {
+  /* Backgrounds */
+  bg0: #1f2224;
+  bg1: #2c2c2c;
+  bg2: #3a3632;
+  bg3: #504945;
+  bg4: #665c54;
+
+  /* Foreground */
+  fg: #ebdbb2;
+
+  /* Standard colors */
+  red: #fb4934;
+  orange: #fe8019;
+  yellow: #fabd2f;
+  green: #b8bb26;
+  aqua: #8ec07c;
+  blue: #83a598;
+  purple: #d3869b;
+
+  /* Grayscale / neutral colors */
+  grey0: #7c6f64;
+  grey1: #928374;
+  grey2: #a89984;
+}
