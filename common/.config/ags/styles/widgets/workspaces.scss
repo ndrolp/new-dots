@@ -1,0 +1,39 @@
+.workspaces {
+  background: var(--bg2);
+  min-height: 0px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  /* height: 10px; */
+
+  /* aspect-ratio: 1; */
+  /* width: 4px; */
+  /* height: 10px; */
+
+  .workspace-button-container {
+    aspect-ratio: 1;
+
+    .workspace-button {
+      background: var(--bg0);
+      min-height: 10px;
+      min-width: 10px;
+      padding: 0px 0px;
+      transition: 0.3s;
+      /* border-radius: 1000px; */
+      border: 2px solid var(--bg4);
+      box-sizing: border-box;
+      /* padding: 1px 3px; */
+      /* font-size: 1px; */
+
+      &:hover {
+        border-radius: 1000px;
+        border: 2px solid var(--aqua);
+        padding: 0px 0px;
+      }
+    }
+
+    .workspace-button.focused {
+      border: 2px solid var(--purple);
+      transition: 0.3s;
+    }
+  }
+}

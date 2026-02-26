@@ -34,6 +34,7 @@
     border: 3px;
     padding: 10px;
     border: 10px;
+    border: 2px solid red;
     border-color: #f2cdcd;
 }
 

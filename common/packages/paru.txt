@@ -21,3 +21,5 @@ postman-bin
 hyprdynamicmonitors
 gruvbox-material-gtk-theme-git 
 awww
+aylurs-gtk-shell-git
+libastal-meta

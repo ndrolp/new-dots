@@ -4,11 +4,7 @@
     "~/.config/waybar/modules/custom_modules/custom_modules.jsonc",
   ],
   "position": "top", // Waybar position (top|bottom|left|right)
-  "modules-left": [
-    "custom/powerprofile",
-    "group/shortcuts",
-    "group/multimedia",
-  ],
+  "modules-left": ["group/multimedia", "custom/powerprofile"],
   "modules-center": ["custom/notification", "hyprland/workspaces"],
   "modules-right": [
     "group/tray-drawer",

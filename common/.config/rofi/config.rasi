@@ -53,8 +53,7 @@ element alternate.normal {
 //     text-color:       @alternate-active-foreground;
 // }
 element-text {
-    padding: 5px;
-    background-color: transparent;
+    padding: 5px; background-color: transparent;
     cursor:           inherit;
     highlight:        inherit;
     text-color:       inherit;
@@ -66,14 +65,14 @@ element-icon {
     text-color:       inherit;
 }
 window {
-    padding:          20px 30px;
+    padding:          10px 20px;
     // height: 301px;
     width: 560px;
     background-color: @bg0;
     border-radius: 10px;
     border: none;
-    border: 3px solid;
-    border-color: @bg0;
+    border: 2px solid;
+    border-color: @blue;
 }
 mainbox {
     padding: 0;
@@ -95,7 +94,7 @@ listview {
     lines: 3;
     // border-color: @separatorcolor;
     spacing:      2px ;
-    fixed-height: 0;
+    // fixed-height: 0;
     border:       none;
 }
 scrollbar {

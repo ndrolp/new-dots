@@ -22,8 +22,9 @@ window {
     y-offset:                       0px;
     padding:                        0px;
     border:                         1px;
+    border: 2px solid;
     border-radius:                  20px;
-    // border-color:                   #c6a0f6;
+    border-color:                   @purple;
     cursor:                         "default";
     background-color:               rgba(48, 52, 70, 0.7);
     location: center;
@@ -107,6 +108,7 @@ element {
     enabled:                        true;
     padding-bottom:                        10px;
     border-radius:                  10px;
+    padding: 5px;
     background-color:               transparent;
     text-color:                     @fg;
     cursor:                         pointer;
@@ -137,7 +139,7 @@ element-icon {
 
 
 element selected.normal {
-    border: 1px;
+    border: 2px;
     border-color: @purple;
     background-color:               transparent;
     color: @purple;
