@@ -1,0 +1,29 @@
+@use "../themes.scss";
+
+.battery-dashboard-togler {
+  padding: 0;
+  min-width: 0;
+  min-height: 0;
+  margin-right: 5px;
+  background-color: var(--bg2);
+  border-radius: 4px;
+  border: none;
+  transition: 0.3s;
+
+  &:hover {
+    padding: 0;
+    background-color: var(--bg4);
+  }
+
+  .battery {
+    padding: 1px 10px;
+    background-color: transparent;
+    color: var(--yellow);
+  }
+}
+
+window.Battery {
+  .container {
+    background: var(--blue);
+  }
+}

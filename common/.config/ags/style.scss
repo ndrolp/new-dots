@@ -1,22 +1,26 @@
-// https://gitlab.gnome.org/GNOME/gtk/-/blob/gtk-3-24/gtk/theme/Adwaita/_colors-public.scss
-$fg-color: #{"@theme_fg_color"};
-$bg-color: #{"@theme_bg_color"};
-
-@use "styles/widgets.scss";
 @use "styles/themes.scss";
+@use "styles/widgets.scss";
 
 window.Bar {
   background: transparent;
-  /* color: $bg0; */
+  color: var(--fg);
   font-weight: bold;
   font-size: 10pt;
 
-  > centerbox {
-    background: $bg-color;
+  >centerbox {
     background: var(--bg0);
     border-radius: 5px;
     border: 2px solid var(--bg3);
-    padding: 3px;
+    padding: 4px;
     margin: 5px 10px;
+    margin-bottom: 0px;
+
+    .blue-fg {
+      color: var(--blue);
+    }
+
+    .green-fg {
+      color: var(--green);
+    }
   }
 }

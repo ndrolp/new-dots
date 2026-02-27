@@ -1,0 +1,12 @@
+.clock {
+  background: var(--bg2);
+  min-height: 0px;
+  padding: 1px 10px;
+  border-radius: 4px;
+  font-size: 10pt;
+  color: var(--blue);
+
+  .icon {
+    margin-right: 5px;
+  }
+}

@@ -4,13 +4,11 @@ import { createBinding, With } from "ags"
 export default function WorkspaceButton({
   hyprInstance,
   id,
-  focused = false,
-  selfFound = false,
+  isLast = false,
 }: {
   hyprInstance: AstalHyprland.Hyprland
   id: number
-  focused?: boolean
-  selfFound?: boolean
+  isLast?: boolean
 }) {
   const instance = hyprInstance.workspaces.find((element) => element.id === id)
   const focusedWorkspace = createBinding(hyprInstance, "focusedWorkspace")

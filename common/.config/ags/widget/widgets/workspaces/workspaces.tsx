@@ -1,15 +1,22 @@
 import AstalHyprland from "gi://AstalHyprland?version=0.1"
-import { Gtk } from "ags/gtk4"
+import { Gtk, Gdk } from "ags/gtk4"
 import { createPoll } from "ags/time"
 import { createBinding, createComputed, With } from "ags"
 import WorkspaceButton from "./WorkspaceButton"
+import { SETTINGS } from "../../../config/Settings"
+import { WorkspaceRange } from "./WorkspacesSettingsType"
 
-export default function Workspaces() {
-  const labels = ["label1", "label2", "label3"]
+export default function Workspaces({ monitor }: { monitor: Gdk.Monitor }) {
+  const monitorSettings: WorkspaceRange = SETTINGS.workspaces.monitors[
+    monitor.get_model() ?? "NULL"
+  ] ?? { from: 1, to: 20, minWorkspaces: 5 }
+
+  console.log(monitorSettings.minWorkspaces)
+
   const hypr = AstalHyprland.get_default()
-  const Five = Array(4).fill(0)
-  const wp = hypr.get_focused_workspace()
+  const Five = Array(monitorSettings?.minWorkspaces ?? 5).fill(0)
   const hyprlandWorkspaces = createBinding(hypr, "workspaces")
+
   return (
     <box
       $type="start"
@@ -22,15 +29,19 @@ export default function Workspaces() {
           return (
             <box>
               {Five.map((_, index) => (
-                <WorkspaceButton id={index + 1} hyprInstance={hypr} />
+                <WorkspaceButton
+                  id={monitorSettings?.from + index}
+                  hyprInstance={hypr}
+                />
               ))}
-              {sortedWorkspaces.map(
-                (element: AstalHyprland.Workspace, index) =>
-                  element.id > Five.length ? (
-                    <WorkspaceButton id={element.id} hyprInstance={hypr} />
-                  ) : (
-                    <box />
-                  ),
+              {sortedWorkspaces.map((element: AstalHyprland.Workspace) =>
+                element.id > Five.length &&
+                monitorSettings.to >= element.id &&
+                monitorSettings.from <= element.id ? (
+                  <WorkspaceButton id={element.id} hyprInstance={hypr} />
+                ) : (
+                  <box />
+                ),
               )}
             </box>
           )
