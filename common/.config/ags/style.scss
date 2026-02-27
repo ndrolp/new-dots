@@ -7,10 +7,10 @@ window.Bar {
   font-weight: bold;
   font-size: 10pt;
 
-  >centerbox {
+  > centerbox {
     background: var(--bg0);
+    border: 2px solid var(--bg4);
     border-radius: 5px;
-    border: 2px solid var(--bg3);
     padding: 4px;
     margin: 5px 10px;
     margin-bottom: 0px;
@@ -23,4 +23,11 @@ window.Bar {
       color: var(--green);
     }
   }
+}
+
+.separator {
+  min-height: 2px;
+  background: red;
+  background: var(--bg1);
+  margin: 3px 0px;
 }

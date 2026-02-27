@@ -48,3 +48,18 @@ export function getBatteryIcon(state: AstalBattery.State, percentage: number) {
     }
   }
 }
+export function secondsToTime(seconds: number) {
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+
+  const hourText = hours > 0 ? `${hours} ${hours === 1 ? "hour" : "hours"}` : ""
+
+  const minuteText =
+    minutes > 0 ? `${minutes} ${minutes === 1 ? "minute" : "minutes"}` : ""
+
+  if (hours > 0 && minutes > 0) {
+    return `${hourText} and ${minuteText}`
+  }
+
+  return hourText || minuteText || "0 minutes"
+}

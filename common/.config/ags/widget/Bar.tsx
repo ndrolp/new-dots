@@ -21,10 +21,11 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
         <box $type="start">
           <Workspaces monitor={gdkmonitor} />
         </box>
-        <box $type="center"></box>
+        <box $type="center">
+          <Clock />
+        </box>
         <box $type="end">
           <Battery />
-          <Clock />
         </box>
       </centerbox>
     </window>

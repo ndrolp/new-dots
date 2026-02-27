@@ -1,4 +1,4 @@
-import { Gtk } from "ags/gtk4"
+import { Gdk, Gtk } from "ags/gtk4"
 import AstalBattery from "gi://AstalBattery"
 import { createBinding, createComputed, With } from "ags"
 import { getBatteryIcon } from "../../../utils/battery"
@@ -24,10 +24,11 @@ export default function Battery() {
                 {(state) => (
                   <box class=".blue-fg">
                     <label
-                      margin_end={state === AstalBattery.State.CHARGING ? 8 : 5}
+                      margin_end={state === AstalBattery.State.CHARGING ? 0 : 0}
                       label={getBatteryIcon(state, percentage)}
                     />
                     <label
+                      visible={false}
                       label={
                         parseInt((percentage * 100).toString()).toString() + "%"
                       }

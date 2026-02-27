@@ -1,15 +1,24 @@
-import { Astal, Gtk } from "ags/gtk4"
+import { Astal, Gtk, Gdk } from "ags/gtk4"
 import app from "ags/gtk4/app"
+import AstalBattery from "gi://AstalBattery"
+import { createBinding, With } from "ags"
+import { secondsToTime } from "../../../utils/battery"
 
 export const BATTERY_DASHBOARD_WINDOW_NAME = "battery"
 
 export default function BatteryDashboard() {
-  const { TOP, LEFT, RIGHT } = Astal.WindowAnchor
+  const { TOP, RIGHT } = Astal.WindowAnchor
+  const battery = AstalBattery.get_default()
+
+  const batteryPercentage = createBinding(battery, "percentage")
+  const batteryDischargeTime = createBinding(battery, "timeToEmpty")
+  const batteryChargeTime = createBinding(battery, "time_to_full")
+  const batteryState = createBinding(battery, "state")
 
   return (
     <window
-      visible
-      namespace={"battery-dashboard"}
+      namespace={"dashboard"}
+      keymode={Astal.Keymode.ON_DEMAND}
       name={BATTERY_DASHBOARD_WINDOW_NAME}
       exclusivity={Astal.Exclusivity.EXCLUSIVE}
       class={"Battery catppuccin"}
@@ -18,6 +27,13 @@ export default function BatteryDashboard() {
       margin_top={10}
       application={app}
     >
+      <Gtk.EventControllerKey
+        onKeyPressed={({ widget }, keyval: number) => {
+          if (keyval === Gdk.KEY_Escape) {
+            widget.hide()
+          }
+        }}
+      />
       <box class="container" orientation={Gtk.Orientation.VERTICAL}>
         <label
           class="title"
@@ -27,8 +43,74 @@ export default function BatteryDashboard() {
           margin_bottom={10}
         />
         <box class="battery-dashboard-percentage" hexpand>
-          <slider hexpand value={0.5} min={0} max={1} />
-          <label label="50%" />
+          <With value={batteryPercentage}>
+            {(percentage) => (
+              <box>
+                <slider
+                  hexpand
+                  value={percentage}
+                  min={0}
+                  max={1}
+                  canTarget={false}
+                />
+                <label
+                  margin_start={10}
+                  label={(percentage * 100).toFixed(0).toString() + "%"}
+                />
+              </box>
+            )}
+          </With>
+        </box>
+        <box hexpand class="separator"></box>
+        <box class="time">
+          <With value={batteryState}>
+            {(state) => {
+              return (
+                <box>
+                  {state === AstalBattery.State.DISCHARGING ? (
+                    <box>
+                      <With value={batteryDischargeTime}>
+                        {(dischargeTime) => (
+                          <box>
+                            <label
+                              hexpand
+                              halign={Gtk.Align.START}
+                              label="Remaining:"
+                            />
+                            <label
+                              hexpand
+                              marginStart={10}
+                              halign={Gtk.Align.END}
+                              label={secondsToTime(dischargeTime)}
+                            />
+                          </box>
+                        )}
+                      </With>
+                    </box>
+                  ) : (
+                    <box>
+                      <With value={batteryChargeTime}>
+                        {(chargeTime) => (
+                          <box>
+                            <label
+                              hexpand
+                              halign={Gtk.Align.START}
+                              label="Time to Full:"
+                            />
+                            <label
+                              hexpand
+                              halign={Gtk.Align.END}
+                              label={secondsToTime(chargeTime)}
+                            />
+                          </box>
+                        )}
+                      </With>
+                    </box>
+                  )}
+                </box>
+              )
+            }}
+          </With>
         </box>
       </box>
     </window>

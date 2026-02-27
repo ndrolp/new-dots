@@ -5,7 +5,6 @@ export default function Clock() {
 
   return (
     <box class="clock">
-      <label class="icon" label="󰥔" />
       <label label={date} />
     </box>
   )
