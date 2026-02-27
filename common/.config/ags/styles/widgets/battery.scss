@@ -23,7 +23,66 @@
 }
 
 window.Battery {
+  font-weight: bold;
+  font-size: 10pt;
+
+  color: var(--fg);
+
   .container {
-    background: var(--blue);
+    background: var(--bg0);
+    padding: 10px;
+    border: 2px solid var(--bg4);
+    margin-left: 12px;
+    border-radius: 8px;
+    min-width: 190px;
+
+    .title {
+      text-align: "center";
+      font-size: 12pt;
+    }
+
+    .battery-dashboard-percentage {
+      /* background: transparent; */
+
+      >label {
+        margin-left: 5px;
+      }
+
+      scale {
+        border-radius: 0px;
+        padding: 10px 0;
+
+        trough {
+          background: var(--bg3);
+          min-height: 10px;
+          margin: 0;
+          border-radius: 3px;
+
+          highlight {
+            background: var(--aqua);
+            border-radius: 3px;
+            margin: 0;
+          }
+
+          slider {
+            box-shadow: none;
+            background: transparent;
+            pointer-events: none;
+            color: red;
+          }
+        }
+      }
+    }
+
+    .percentage {
+      min-height: 8px;
+      background: var(--bg3);
+
+      .fill {
+        min-height: 8px;
+        background: var(--blue);
+        min-width: 50px;
+      }
+    }
   }
 }
