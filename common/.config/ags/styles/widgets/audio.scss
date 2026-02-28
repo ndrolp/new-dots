@@ -1,6 +1,28 @@
 .audio-button {
   color: var(--green);
-  padding-right: 13px;
-  padding-left: 7px;
+  padding-right: 4px;
+  padding-left: 4px;
   transition: 0.3s ease-in-out;
+  /* font-weigt: ; */
+
+  .data-container {
+    transition: 0.3s;
+
+    &.muted {
+      color: var(--red);
+
+      &.silence {
+        padding-right: 5px;
+      }
+    }
+
+    &.silence {
+      padding-right: 0px;
+    }
+
+    .bar {
+      font-weight: bolder;
+      font-family: "Wavefont", "Wavefont Thin", sans-serif;
+    }
+  }
 }

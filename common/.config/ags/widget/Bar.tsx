@@ -20,7 +20,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
       application={app}
     >
       <centerbox cssName="centerbox" class="bar-content">
-        <box $type="start">
+        <box $type="start" halign={Gtk.Align.START} marginEnd={5}>
           <button margin_end={5} class="bar-icon test">
             <box class="">
               <label label="" />
@@ -31,7 +31,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
         <box $type="center">
           <Clock />
         </box>
-        <box $type="end">
+        <box $type="end" halign={Gtk.Align.END} margin_start={5}>
           <AudioButton />
           <Battery />
         </box>

@@ -1,19 +1,37 @@
 import AstalWp from "gi://AstalWp"
-import { createBinding, With } from "ags"
-export default function AudioButton() {
-  const audioServer = AstalWp.get_default().get_default_speaker()
-  const audio = createBinding(audioServer, "name")
-  const esto = AstalWp.get_default().audio.defaultSpeaker
+import { createBinding, createComputed, With } from "ags"
+import { getVolumeBar, getVolumeIcon } from "../../../utils/audio"
 
-  console.log({
-    name: audioServer.volume,
-    server: audioServer,
-    esto: esto.name,
+export default function AudioButton() {
+  const wp = AstalWp.get_default().audio.defaultSpeaker
+  const wpVolume = createBinding(wp, "volume")
+  const wpMuted = createBinding(wp, "mute")
+
+  const volumeData = createComputed(() => {
+    return { volume: wpVolume(), muted: wpMuted() }
   })
 
   return (
     <button class="bar-icon audio-button" margin_end={5}>
-      <label label="" />
+      <With value={volumeData}>
+        {(volumeData) => {
+          return (
+            <box
+              class={`data-container ${volumeData.muted ? "muted" : ""} ${volumeData.volume === 0 ? "silence" : ""}`}
+            >
+              <label
+                class="icon"
+                label={getVolumeIcon(volumeData.volume, volumeData.muted)}
+              />
+              <label
+                visible={volumeData.volume !== 0}
+                class="bar"
+                label={getVolumeBar(volumeData.volume)}
+              />
+            </box>
+          )
+        }}
+      </With>
     </button>
   )
 }

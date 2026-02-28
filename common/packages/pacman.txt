@@ -68,3 +68,8 @@ spotify-player
 ppeaclock
 ttf-firacode-nerd
 qutebrowser
+meson
+vala
+valadoc
+wireplumber
+gobject-introspection
