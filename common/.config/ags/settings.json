@@ -1,6 +1,8 @@
 {
     "$schema": "./settings.schema.json",
     "layout": "transparent",
+    "theme": "catppuccin",
+    "island": false,
     "workspaces": {
         "monitors": {
             "PHL 271V8": {

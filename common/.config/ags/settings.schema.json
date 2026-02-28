@@ -1,38 +1,61 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "ShellSettings",
-  "type": "object",
-  "required": ["layout", "workspaces"],
-  "properties": {
-    "layout": {
-      "type": "string",
-      "enum": ["default", "transparent"]
-    },
-    "workspaces": {
-      "type": "object",
-      "required": ["monitors"],
-      "properties": {
-        "monitors": {
-          "type": "object",
-          "additionalProperties": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "ShellSettings",
+    "type": "object",
+    "required": [
+        "layout",
+        "workspaces",
+        "theme"
+    ],
+    "properties": {
+        "island": {
+            "type": "boolean"
+        },
+        "layout": {
+            "type": "string",
+            "enum": [
+                "default",
+                "transparent"
+            ]
+        },
+        "theme": {
+            "type": "string",
+            "enum": [
+                "catppuccin",
+                "gruvbox-dark"
+            ]
+        },
+        "workspaces": {
             "type": "object",
-            "required": ["minWorkspaces", "from", "to"],
+            "required": [
+                "monitors"
+            ],
             "properties": {
-              "minWorkspaces": {
-                "type": "number",
-                "minimum": 0
-              },
-              "from": {
-                "type": "number"
-              },
-              "to": {
-                "type": "number"
-              }
+                "monitors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                            "minWorkspaces",
+                            "from",
+                            "to"
+                        ],
+                        "properties": {
+                            "minWorkspaces": {
+                                "type": "number",
+                                "minimum": 0
+                            },
+                            "from": {
+                                "type": "number"
+                            },
+                            "to": {
+                                "type": "number"
+                            }
+                        }
+                    }
+                }
             }
-          }
         }
-      }
-    }
-  },
-  "additionalProperties": false
+    },
+    "additionalProperties": false
 }

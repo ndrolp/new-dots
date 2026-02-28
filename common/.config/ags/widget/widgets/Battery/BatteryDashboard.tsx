@@ -3,6 +3,7 @@ import app from "ags/gtk4/app"
 import AstalBattery from "gi://AstalBattery"
 import { createBinding, With } from "ags"
 import { secondsToTime } from "../../../utils/battery"
+import { SETTINGS } from "../../../config/Settings"
 
 export const BATTERY_DASHBOARD_WINDOW_NAME = "battery"
 
@@ -20,9 +21,9 @@ export default function BatteryDashboard() {
       namespace={"dashboard"}
       keymode={Astal.Keymode.ON_DEMAND}
       name={BATTERY_DASHBOARD_WINDOW_NAME}
-      exclusivity={Astal.Exclusivity.EXCLUSIVE}
-      class={"Battery catppuccin"}
-      anchor={TOP | RIGHT}
+      exclusivity={Astal.Exclusivity.IGNORE}
+      class={`Battery ${SETTINGS.theme}`}
+      anchor={SETTINGS.island ? TOP : TOP | RIGHT}
       marginRight={10}
       margin_top={10}
       application={app}
