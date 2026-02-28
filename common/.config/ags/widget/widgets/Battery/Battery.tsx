@@ -11,7 +11,7 @@ export default function Battery() {
   const batteryState = createBinding(battery, "state")
   return (
     <button
-      class="battery-dashboard-togler"
+      class="battery-dashboard-togler bar-icon"
       onClicked={() => {
         app.toggle_window(BATTERY_DASHBOARD_WINDOW_NAME)
       }}

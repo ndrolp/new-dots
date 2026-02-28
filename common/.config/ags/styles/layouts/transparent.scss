@@ -1,0 +1,38 @@
+.layout-transparent {
+  &.Bar .bar-content {
+    background-color: transparent;
+    padding: 0;
+    border: none;
+  }
+
+  .bar-icon {
+    background-color: var(--bg0);
+    padding: 3px 6px;
+    border: 2px solid var(--bg2);
+  }
+
+  /* button.bar-icon { */
+  /*   padding: 0; */
+  /* } */
+
+  .workspaces {
+    padding: 5px;
+    background-color: var(--bg0);
+    border: 2px solid var(--bg2);
+
+    .workspace-button {
+      background-color: var(--bg0);
+      border: 2px solid var(--bg4);
+
+      &.focused {
+        background-color: var(--purple);
+        border-color: var(--purple);
+      }
+    }
+  }
+
+  .audio-button {
+    padding-right: 11px;
+    padding-left: 4px;
+  }
+}

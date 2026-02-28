@@ -3,6 +3,8 @@ import { Astal, Gtk, Gdk } from "ags/gtk4"
 import Workspaces from "./widgets/workspaces/workspaces"
 import Clock from "./widgets/Clock"
 import Battery from "./widgets/Battery/Battery"
+import { SETTINGS } from "../config/Settings"
+import AudioButton from "./widgets/Audio/Audio"
 
 export default function Bar(gdkmonitor: Gdk.Monitor) {
   const { TOP, LEFT, RIGHT } = Astal.WindowAnchor
@@ -11,20 +13,26 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     <window
       visible
       name="bar"
-      class="Bar catppuccin"
+      class={`Bar catppuccin layout-${SETTINGS.layout}`}
       gdkmonitor={gdkmonitor}
       exclusivity={Astal.Exclusivity.EXCLUSIVE}
       anchor={TOP | LEFT | RIGHT}
       application={app}
     >
-      <centerbox cssName="centerbox" class="asd">
+      <centerbox cssName="centerbox" class="bar-content">
         <box $type="start">
+          <button margin_end={5} class="bar-icon test">
+            <box class="">
+              <label label="" />
+            </box>
+          </button>
           <Workspaces monitor={gdkmonitor} />
         </box>
         <box $type="center">
           <Clock />
         </box>
         <box $type="end">
+          <AudioButton />
           <Battery />
         </box>
       </centerbox>

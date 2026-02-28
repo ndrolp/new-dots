@@ -38,7 +38,7 @@ export default function Workspaces({ monitor }: { monitor: Gdk.Monitor }) {
                 element.id > Five.length &&
                 monitorSettings.to >= element.id &&
                 monitorSettings.from <= element.id ? (
-                  <WorkspaceButton id={element.id} hyprInstance={hypr} />
+                  <WorkspaceButton showId id={element.id} hyprInstance={hypr} />
                 ) : (
                   <box />
                 ),

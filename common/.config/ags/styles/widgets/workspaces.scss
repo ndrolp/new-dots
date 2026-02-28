@@ -1,8 +1,9 @@
 .workspaces {
   background: var(--bg2);
   min-height: 0px;
-  padding: 2px 5px;
+  padding: 4px 5px;
   border-radius: 4px;
+  transition: 0.3s;
   /* height: 10px; */
 
   /* aspect-ratio: 1; */
@@ -11,6 +12,7 @@
 
   .workspace-button-container {
     aspect-ratio: 1;
+    margin-left: 3px;
 
     .workspace-button {
       background: var(--bg0);
@@ -28,10 +30,36 @@
       }
 
       &.focused {
+        animation: active-workspace 0.3s ease-in-out 1;
         border: 2px solid var(--purple);
+        padding: 0px 1px;
+        /* background-color: var(--purple); */
+        /* border-color: var(--bg3); */
         /* padding: 0px 5px; */
         transition: 0.3s;
       }
     }
+  }
+}
+
+@keyframes active-workspace {
+  0% {
+    transform: scale(1);
+    padding: 0px 1px;
+    border: 2px solid var(--bg4);
+  }
+
+  25% {
+    transform: scale(0.9);
+  }
+
+  75% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+    padding: 0px 1px;
+    border: 2px solid var(--purple);
   }
 }

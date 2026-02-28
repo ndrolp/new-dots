@@ -1,0 +1,20 @@
+.bar-icon {
+  padding: 2px 9px;
+  min-width: 0;
+  min-height: 0;
+  background-color: var(--bg2);
+  border-radius: 4px;
+  border: none;
+  transition: 0.3s;
+  font-size: 11pt;
+
+  label {
+    margin: 0px 5px;
+  }
+}
+
+.separator {
+  min-height: 2px;
+  background: var(--bg2);
+  margin: 3px 0px;
+}

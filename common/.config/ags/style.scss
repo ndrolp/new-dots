@@ -1,5 +1,6 @@
 @use "styles/themes.scss";
 @use "styles/widgets.scss";
+@use "styles/layouts.scss";
 
 window.Bar {
   background: transparent;
@@ -7,7 +8,7 @@ window.Bar {
   font-weight: bold;
   font-size: 10pt;
 
-  > centerbox {
+  .bar-content {
     background: var(--bg0);
     border: 2px solid var(--bg4);
     border-radius: 5px;
@@ -23,11 +24,11 @@ window.Bar {
       color: var(--green);
     }
   }
-}
 
-.separator {
-  min-height: 2px;
-  background: red;
-  background: var(--bg1);
-  margin: 3px 0px;
+  .test {
+    font-size: 11pt;
+    color: var(--blue);
+    padding: 0 8px;
+    padding-right: 12px;
+  }
 }
