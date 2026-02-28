@@ -1,8 +1,22 @@
-import { WorkspacesConfig } from "../widget/widgets/workspaces/WorkspacesSettingsType"
-
 export interface IShellSettings {
-  layout: "default" | "transparent"
   theme: "catppuccin" | "gruvbox-dark" | "monochrome-blue-dark"
-  island: boolean
+  barAppearence: IBarAppearence
   workspaces: WorkspacesConfig
+}
+
+export interface WorkspaceRange {
+  minWorkspaces: number
+  from: number
+  to: number
+}
+
+export type WorkspacesConfig = {
+  monitors: Record<string, WorkspaceRange>
+}
+
+export interface IBarAppearence {
+  layout: "default" | "transparent"
+  island: boolean
+  compact: boolean
+  rounding: "lg" | "sm" | "md" | "none" | "full"
 }

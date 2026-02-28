@@ -1,4 +1,5 @@
 @use "styles/widgets.scss";
+@use "styles/extras.scss";
 @use "styles/layouts.scss";
 @use "styles/themes.scss";
 
@@ -11,7 +12,7 @@ window.Bar {
   .bar-content {
     background: var(--bg0);
     border: 2px solid var(--bg4);
-    padding: 4px;
+    padding: 4px 5px;
     border-radius: 5px;
     margin: 5px 10px;
     margin-top: 10px;

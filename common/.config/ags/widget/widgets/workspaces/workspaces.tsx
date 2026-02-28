@@ -20,7 +20,7 @@ export default function Workspaces({ monitor }: { monitor: Gdk.Monitor }) {
   return (
     <box
       $type="start"
-      class="workspaces"
+      class="bar-icon workspaces "
       orientation={Gtk.Orientation.HORIZONTAL}
     >
       <With value={hyprlandWorkspaces}>

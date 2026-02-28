@@ -1,0 +1,104 @@
+.rounding-none {
+  &.Bar {
+    .bar-content {
+      border-radius: 0px;
+    }
+  }
+
+  .workspaces {
+    .workspace-button-container {
+      .workspace-button {
+        border-radius: 0px;
+      }
+    }
+  }
+
+  .bar-icon {
+    border-radius: 0px;
+  }
+}
+
+.rounding-full {
+  &.Bar {
+    .bar-content {
+      border-radius: 1000px;
+    }
+  }
+
+  .workspaces {
+    .workspace-button-container {
+      .workspace-button {
+        border-radius: 1000px;
+      }
+    }
+  }
+
+  .bar-icon {
+    border-radius: 1000px;
+  }
+}
+
+.rounding-sm {
+  .bar-content {
+    border-radius: 5px;
+  }
+
+  .bar-icon {
+    border-radius: 5px;
+  }
+}
+
+.rounding-md {
+  &.Bar {
+    .bar-content {
+      border-radius: 7px;
+    }
+  }
+
+  .bar-icon {
+    border-radius: 7px;
+  }
+}
+
+.rounding-lg {
+  &.Bar {
+    .bar-content {
+      border-radius: 10px;
+    }
+  }
+
+  .bar-icon {
+    border-radius: 10px;
+  }
+}
+
+.compact {
+  font-size: 10pt;
+
+  &.Bar {
+    .bar-content {
+      padding: 3px 5px;
+    }
+  }
+
+  .workspaces {
+    padding: 3px 0px;
+
+    .workspace-button-container {
+      padding: 0px 0px;
+
+      .workspace-button {
+        &.focused {
+          background-color: var(--purple);
+        }
+      }
+    }
+  }
+
+  .bar-icon {
+    font-size: 10pt;
+    background-color: transparent;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}

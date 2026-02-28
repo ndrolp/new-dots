@@ -16,18 +16,41 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     JSON.parse(readFile("settings.json")) as IShellSettings,
   )
 
+  const Container = ({
+    children,
+  }: {
+    children: JSX.Element | Array<JSX.Element>
+  }) => {
+    if (SETTINGS.barAppearence.island) {
+      return (
+        <box hexpand cssName="centerbox" class="bar-content">
+          {children}
+        </box>
+      )
+    }
+    return (
+      <centerbox cssName="centerbox" class="bar-content">
+        {children}
+      </centerbox>
+    )
+  }
+
   return (
     <window
       visible
       name="bar"
-      class={`Bar ${SETTINGS.theme ?? "catppuccin"} layout-${SETTINGS.layout ?? "default"}`}
+      class={`Bar 
+          ${SETTINGS.theme ?? "catppuccin"} 
+          layout-${SETTINGS.barAppearence.layout ?? "default"} 
+          rounding-${SETTINGS.barAppearence.rounding} 
+          ${SETTINGS.barAppearence.compact ? "compact" : ""}`}
       gdkmonitor={gdkmonitor}
       exclusivity={Astal.Exclusivity.EXCLUSIVE}
-      anchor={!SETTINGS.island ? TOP | LEFT | RIGHT : TOP}
+      anchor={!SETTINGS.barAppearence.island ? TOP | LEFT | RIGHT : TOP}
       application={app}
     >
-      <centerbox cssName="centerbox" class="bar-content">
-        <box $type="start" halign={Gtk.Align.START} marginEnd={5}>
+      <Container>
+        <box $type="start" marginEnd={5}>
           <button margin_end={5} class="bar-icon test">
             <box class="">
               <label label="" />
@@ -35,14 +58,14 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
           </button>
           <Workspaces monitor={gdkmonitor} />
         </box>
-        <box $type="center">
+        <box hexpand halign={Gtk.Align.CENTER} $type="center">
           <Clock />
         </box>
-        <box $type="end" halign={Gtk.Align.END} margin_start={5}>
+        <box hexpand halign={Gtk.Align.END} $type="end" margin_start={5}>
           <AudioButton />
           <Battery />
         </box>
-      </centerbox>
+      </Container>
     </window>
   )
 }

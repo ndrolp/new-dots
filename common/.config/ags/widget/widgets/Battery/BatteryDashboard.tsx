@@ -23,7 +23,7 @@ export default function BatteryDashboard() {
       name={BATTERY_DASHBOARD_WINDOW_NAME}
       exclusivity={Astal.Exclusivity.IGNORE}
       class={`Battery ${SETTINGS.theme}`}
-      anchor={SETTINGS.island ? TOP : TOP | RIGHT}
+      anchor={SETTINGS.barAppearence.island ? TOP : TOP | RIGHT}
       marginRight={10}
       margin_top={10}
       application={app}
