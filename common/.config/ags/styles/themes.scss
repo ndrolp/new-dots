@@ -54,3 +54,92 @@
   --grey1: #a89984;
   --grey2: #bdae93;
 }
+
+.monochrome-blue-dark {
+  --bg0: #0f1726;
+  --bg1: #0f1726;
+  --bg2: #0f1726;
+  --bg3: #0f1726;
+  --bg4: #0f1726;
+
+  --fg: #7aa2f7;
+
+  --red: #7aa2f7;
+  --orange: #7aa2f7;
+  --yellow: #7aa2f7;
+  --green: #7aa2f7;
+  --blue: #7aa2f7;
+  --purple: #7aa2f7;
+  --aqua: #7aa2f7;
+  --pink: #7aa2f7;
+
+  --subtext0: #7aa2f7;
+  --subtext1: #7aa2f7;
+
+  --surface0: #0f1726;
+  --surface1: #0f1726;
+  --surface2: #0f1726;
+
+  --overlay0: #7aa2f7;
+  --overlay1: #7aa2f7;
+  --overlay2: #7aa2f7;
+
+  --crust: #0f1726;
+  --mantle: #0f1726;
+}
+
+.monochrome-blue-dark {
+  --bg0: #0b1220;
+  --bg1: #0b1220;
+  --bg2: #0b1220;
+  --bg3: #0b1220;
+  --bg4: #0b1220;
+
+  --fg: #cfdbe6;
+
+  --red: #cfdbe6;
+  --orange: #cfdbe6;
+  --yellow: #cfdbe6;
+  --green: #cfdbe6;
+  --blue: #cfdbe6;
+  --purple: #cfdbe6;
+  --aqua: #cfdbe6;
+  --pink: #cfdbe6;
+
+  --subtext0: #cfdbe6;
+  --subtext1: #cfdbe6;
+
+  --surface0: #0b1220;
+  --surface1: #0b1220;
+  --surface2: #0b1220;
+
+  --overlay0: #cfdbe6;
+  --overlay1: #cfdbe6;
+  --overlay2: #cfdbe6;
+
+  --crust: #0b1220;
+  --mantle: #0b1220;
+
+  .bar-content {
+    background: var(--bg0);
+    border: 0px solid var(--bg4);
+    border-radius: 0px;
+  }
+
+  .workspaces {
+    .workspace-button-container {
+      .workspace-button {
+        border-color: var(--fg);
+
+        &.focused {
+          background-color: var(--fg);
+        }
+      }
+    }
+  }
+
+  .bar-icon {
+    font-size: 9pt;
+    padding: 0;
+  }
+}

@@ -6,6 +6,7 @@ import BatteryDashboard from "./widget/widgets/Battery/BatteryDashboard"
 import { monitorFile } from "ags/file"
 import Gio from "gi://Gio?version=2.0"
 import { execAsync } from "ags/process"
+import Dashboard from "./widget/widgets/Dashboard/Dashboard"
 
 const runApp = () =>
   app.start({
@@ -15,6 +16,7 @@ const runApp = () =>
         console.log(monitor.model)
         Bar(monitor)
         BatteryDashboard()
+        Dashboard()
       })
     },
   })

@@ -1,6 +1,6 @@
 {
     "$schema": "./settings.schema.json",
-    "layout": "transparent",
+    "layout": "default",
     "theme": "catppuccin",
     "island": false,
     "workspaces": {

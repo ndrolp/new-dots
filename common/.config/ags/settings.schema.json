@@ -22,7 +22,8 @@
             "type": "string",
             "enum": [
                 "catppuccin",
-                "gruvbox-dark"
+                "gruvbox-dark",
+                "monochrome-blue-dark"
             ]
         },
         "workspaces": {

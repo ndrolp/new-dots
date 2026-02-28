@@ -18,3 +18,25 @@
   background: var(--bg2);
   margin: 3px 0px;
 }
+
+.window {
+  font-weight: bold;
+  font-size: 10pt;
+
+  color: var(--fg);
+
+  .container {
+    background: var(--bg0);
+    padding: 10px;
+    border: 2px solid var(--bg4);
+    margin-left: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+    min-width: 190px;
+
+    .title {
+      text-align: "center";
+      font-size: 12pt;
+    }
+  }
+}
