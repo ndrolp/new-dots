@@ -1,61 +1,119 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "IShellSettings",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["theme", "barAppearence", "workspaces"],
-  "properties": {
-    "theme": {
-      "type": "string",
-      "enum": ["catppuccin", "gruvbox-dark", "monochrome-blue-dark"]
-    },
-    "barAppearence": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["layout", "island", "compact", "rounding"],
-      "properties": {
-        "layout": {
-          "type": "string",
-          "enum": ["default", "transparent"]
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "IShellSettings",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "debug",
+        "theme",
+        "barAppearence",
+        "workspaces",
+        "nowPlaying"
+    ],
+    "properties": {
+        "debug": {
+            "type": "boolean"
         },
-        "island": {
-          "type": "boolean"
+        "theme": {
+            "type": "string",
+            "enum": [
+                "catppuccin",
+                "gruvbox-dark",
+                "monochrome-blue-dark"
+            ]
         },
-        "compact": {
-          "type": "boolean"
-        },
-        "rounding": {
-          "type": "string",
-          "enum": ["lg", "sm", "md", "none", "full"]
-        }
-      }
-    },
-    "workspaces": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["monitors"],
-      "properties": {
-        "monitors": {
-          "type": "object",
-          "description": "Record<string, WorkspaceRange>",
-          "additionalProperties": {
+        "barAppearence": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["minWorkspaces", "from", "to"],
+            "required": [
+                "layout",
+                "island",
+                "compact",
+                "rounding"
+            ],
             "properties": {
-              "minWorkspaces": {
-                "type": "number"
-              },
-              "from": {
-                "type": "number"
-              },
-              "to": {
-                "type": "number"
-              }
+                "layout": {
+                    "type": "string",
+                    "enum": [
+                        "default",
+                        "transparent"
+                    ]
+                },
+                "island": {
+                    "type": "boolean"
+                },
+                "compact": {
+                    "type": "boolean"
+                },
+                "rounding": {
+                    "type": "string",
+                    "enum": [
+                        "lg",
+                        "sm",
+                        "md",
+                        "none",
+                        "full"
+                    ]
+                }
             }
-          }
+        },
+        "workspaces": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "monitors"
+            ],
+            "properties": {
+                "monitors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                            "minWorkspaces",
+                            "from",
+                            "to"
+                        ],
+                        "properties": {
+                            "minWorkspaces": {
+                                "type": "number"
+                            },
+                            "from": {
+                                "type": "number"
+                            },
+                            "to": {
+                                "type": "number"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "nowPlaying": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "showControls",
+                "preferedClients",
+                "ignoreClients"
+            ],
+            "properties": {
+                "showControls": {
+                    "type": "boolean"
+                },
+                "watchClients": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "ignoreClients": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
         }
-      }
     }
-  }
 }

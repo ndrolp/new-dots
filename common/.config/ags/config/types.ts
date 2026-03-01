@@ -2,6 +2,7 @@ export interface IShellSettings {
   theme: "catppuccin" | "gruvbox-dark" | "monochrome-blue-dark"
   barAppearence: IBarAppearence
   workspaces: WorkspacesConfig
+  nowPlaying: INowPlayingConfig
 }
 
 export interface WorkspaceRange {
@@ -19,4 +20,10 @@ export interface IBarAppearence {
   island: boolean
   compact: boolean
   rounding: "lg" | "sm" | "md" | "none" | "full"
+}
+
+export interface INowPlayingConfig {
+  showControls: boolean
+  preferedClients: string[]
+  ignoreClients: string[]
 }

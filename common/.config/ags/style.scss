@@ -3,13 +3,19 @@
 @use "styles/layouts.scss";
 @use "styles/themes.scss";
 
+* {
+  transition: 0.3s ease-in-out;
+}
+
 window.Bar {
   background: transparent;
   color: var(--fg);
   font-weight: bold;
   font-size: 10pt;
+  transition: 0.3s;
 
   .bar-content {
+    transition: 0.3s;
     background: var(--bg0);
     border: 2px solid var(--bg4);
     padding: 4px 5px;

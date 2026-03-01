@@ -1,0 +1,12 @@
+.now-playing {
+  color: var(--aqua);
+  transition: 0.3s;
+
+  .paused {
+    color: var(--grey2);
+  }
+
+  .stopped {
+    color: var(--grey0);
+  }
+}

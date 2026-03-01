@@ -73,3 +73,4 @@ vala
 valadoc
 wireplumber
 gobject-introspection
+vlc-plugin-ffmpeg

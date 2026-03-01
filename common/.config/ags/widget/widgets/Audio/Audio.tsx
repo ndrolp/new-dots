@@ -12,7 +12,7 @@ export default function AudioButton() {
   })
 
   return (
-    <button class="bar-icon audio-button" margin_end={5}>
+    <button class="bar-icon audio-button">
       <With value={volumeData}>
         {(volumeData) => {
           return (

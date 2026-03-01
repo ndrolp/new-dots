@@ -10,12 +10,15 @@ import { createBinding, createState, For, With } from "ags"
 import { IShellSettings } from "../config/types"
 import Gio from "gi://Gio?version=2.0"
 import AstalHyprland from "gi://AstalHyprland"
+import NowPlaying from "./widgets/Audio/Playing"
 
 export default function Bar(gdkmonitor: Gdk.Monitor) {
   const { TOP, LEFT, RIGHT } = Astal.WindowAnchor
   const [currentSettings, updateCurrentSettings] = createState(
     JSON.parse(readFile("settings.json")) as IShellSettings,
   )
+
+  const spacing = SETTINGS.barAppearence.compact ? 0 : 0
 
   const Container = ({
     children,
@@ -24,11 +27,12 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   }) => {
     if (SETTINGS.barAppearence.island) {
       return (
-        <box>
+        <box halign={Gtk.Align.CENTER}>
           <box
             orientation={Gtk.Orientation.HORIZONTAL}
             cssName="centerbox"
             class="bar-content"
+            spacing={spacing}
           >
             {children}
           </box>
@@ -57,18 +61,19 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
       application={app}
     >
       <Container>
-        <box $type="start">
-          <button margin_end={5} class="bar-icon test">
+        <box $type="start" spacing={spacing}>
+          <button class="bar-icon test">
             <box class="">
               <label label="" />
             </box>
           </button>
           <Workspaces monitor={gdkmonitor} />
         </box>
-        <box halign={Gtk.Align.CENTER} $type="center">
+        <box halign={Gtk.Align.CENTER} $type="center" spacing={spacing}>
           <Clock />
         </box>
-        <box halign={Gtk.Align.END} $type="end">
+        <box halign={Gtk.Align.END} $type="end" spacing={spacing}>
+          <NowPlaying />
           <AudioButton />
           <Battery />
         </box>
