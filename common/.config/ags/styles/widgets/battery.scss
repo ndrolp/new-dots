@@ -25,6 +25,8 @@
 window.Battery {
   font-weight: bold;
   font-size: 10pt;
+  margin-top: 0px;
+  margin-top: 15px;
 
   color: var(--fg);
 
@@ -34,7 +36,7 @@ window.Battery {
     border: 2px solid var(--bg4);
     margin-left: 12px;
     border-radius: 8px;
-    margin-top: 40px;
+    /* margin-top: 40px; */
     min-width: 190px;
 
     .title {

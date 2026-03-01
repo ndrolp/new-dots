@@ -21,7 +21,7 @@ export default function BatteryDashboard() {
       namespace={"dashboard"}
       keymode={Astal.Keymode.ON_DEMAND}
       name={BATTERY_DASHBOARD_WINDOW_NAME}
-      exclusivity={Astal.Exclusivity.IGNORE}
+      exclusivity={Astal.Exclusivity.NORMAL}
       class={`Battery ${SETTINGS.theme}`}
       anchor={SETTINGS.barAppearence.island ? TOP : TOP | RIGHT}
       marginRight={10}

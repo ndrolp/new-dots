@@ -1,0 +1,22 @@
+.network-button {
+  color: var(--purple);
+
+  .network-icon {
+    padding-right: 4px;
+    font-size: 11pt;
+  }
+
+  .rotate {
+    animation: rotate-network 1.7s ease-out infinite;
+  }
+}
+
+@keyframes rotate-network {
+  0% {
+    transform: rotateZ(0deg);
+  }
+
+  100% {
+    transform: rotateZ(360deg);
+  }
+}

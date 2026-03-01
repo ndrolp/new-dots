@@ -1,36 +1,30 @@
 {
-    "$schema": "./settings.schema.json",
-    "theme": "catppuccin",
-    "debug": true,
-    "barAppearence": {
-        "layout": "default",
-        "island": true,
-        "compact": true,
-        "rounding": "full"
-    },
-    "workspaces": {
-        "monitors": {
-            "PHL 271V8": {
-                "minWorkspaces": 5,
-                "from": 1,
-                "to": 10
-            },
-            "PHL 243V7": {
-                "minWorkspaces": 3,
-                "from": 11,
-                "to": 20
-            }
-        }
-    },
-    "nowPlaying": {
-        "showControls": false,
-        "preferedClients": [
-            "spotify",
-            "chrome",
-            "chromium"
-        ],
-        "ignoreClients": [
-            "plasma-browser-integration"
-        ]
+  "$schema": "./settings.schema.json",
+  "theme": "catppuccin",
+  "debug": true,
+  "barAppearence": {
+    "layout": "default",
+    "island": true,
+    "compact": true,
+    "rounding": "full"
+  },
+  "workspaces": {
+    "monitors": {
+      "PHL 271V8": {
+        "minWorkspaces": 5,
+        "from": 1,
+        "to": 10
+      },
+      "PHL 243V7": {
+        "minWorkspaces": 3,
+        "from": 11,
+        "to": 20
+      }
     }
+  },
+  "nowPlaying": {
+    "showControls": false,
+    "preferedClients": ["spotify", "chrome", "chromium"],
+    "ignoreClients": ["plasma-browser-integration"]
+  }
 }

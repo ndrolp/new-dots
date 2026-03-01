@@ -11,6 +11,7 @@ import { IShellSettings } from "../config/types"
 import Gio from "gi://Gio?version=2.0"
 import AstalHyprland from "gi://AstalHyprland"
 import NowPlaying from "./widgets/Audio/Playing"
+import NetworkButton from "./widgets/Network/NetworkButton"
 
 export default function Bar(gdkmonitor: Gdk.Monitor) {
   const { TOP, LEFT, RIGHT } = Astal.WindowAnchor
@@ -71,9 +72,10 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
         </box>
         <box halign={Gtk.Align.CENTER} $type="center" spacing={spacing}>
           <Clock />
+          <NowPlaying />
         </box>
         <box halign={Gtk.Align.END} $type="end" spacing={spacing}>
-          <NowPlaying />
+          <NetworkButton />
           <AudioButton />
           <Battery />
         </box>
