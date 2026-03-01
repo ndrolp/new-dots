@@ -9,6 +9,7 @@ import { monitorFile, readFile } from "ags/file"
 import { createBinding, createState, For, With } from "ags"
 import { IShellSettings } from "../config/types"
 import Gio from "gi://Gio?version=2.0"
+import AstalHyprland from "gi://AstalHyprland"
 
 export default function Bar(gdkmonitor: Gdk.Monitor) {
   const { TOP, LEFT, RIGHT } = Astal.WindowAnchor
@@ -23,8 +24,14 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   }) => {
     if (SETTINGS.barAppearence.island) {
       return (
-        <box hexpand cssName="centerbox" class="bar-content">
-          {children}
+        <box>
+          <box
+            orientation={Gtk.Orientation.HORIZONTAL}
+            cssName="centerbox"
+            class="bar-content"
+          >
+            {children}
+          </box>
         </box>
       )
     }
@@ -50,7 +57,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
       application={app}
     >
       <Container>
-        <box $type="start" marginEnd={5}>
+        <box $type="start">
           <button margin_end={5} class="bar-icon test">
             <box class="">
               <label label="" />
@@ -58,10 +65,10 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
           </button>
           <Workspaces monitor={gdkmonitor} />
         </box>
-        <box hexpand halign={Gtk.Align.CENTER} $type="center">
+        <box halign={Gtk.Align.CENTER} $type="center">
           <Clock />
         </box>
-        <box hexpand halign={Gtk.Align.END} $type="end" margin_start={5}>
+        <box halign={Gtk.Align.END} $type="end">
           <AudioButton />
           <Battery />
         </box>
