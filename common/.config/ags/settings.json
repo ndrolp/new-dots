@@ -4,9 +4,9 @@
   "debug": true,
   "barAppearence": {
     "layout": "default",
-    "island": true,
-    "compact": true,
-    "rounding": "full"
+    "island": false,
+    "compact": false,
+    "rounding": "md"
   },
   "workspaces": {
     "monitors": {

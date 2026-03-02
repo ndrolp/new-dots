@@ -20,39 +20,32 @@
   --green: #a6d189;
   --aqua: #81c8be;
   --blue: #8caaee;
-  --purple: #ca9ee6;
-
-  --grey0: #737994;
+  --purple: #ca9ee --grey0: #737994;
   --grey1: #838ba7;
   --grey2: #949cbb;
 }
 
+/* Gruvbox Darker theme */
 .gruvbox-dark {
-  --bg0: #282828;
-  /* dark0 */
-  --bg1: #3c3836;
-  /* dark1 */
-  --bg2: #504945;
-  /* dark2 */
-  --bg3: #665c54;
-  /* dark3 */
-  --bg4: #7c6f64;
-  /* dark4 */
+  --bg0: #1d2021;
+  --bg1: #282828;
+  --bg2: #32302f;
+  --bg3: #3c3836;
+  --bg4: #504945;
 
   --fg: #ebdbb2;
-  /* light1 */
 
-  --red: #cc241d;
-  --orange: #d65d0e;
-  --yellow: #d79921;
-  --green: #98971a;
-  --aqua: #689d6a;
-  --blue: #458588;
-  --purple: #b16286;
+  --red: #fb4934;
+  --orange: #fe8019;
+  --yellow: #fabd2f;
+  --green: #b8bb26;
+  --aqua: #8ec07c;
+  --blue: #83a598;
+  --purple: #d3869b;
 
-  --grey0: #928374;
-  --grey1: #a89984;
-  --grey2: #bdae93;
+  --grey0: #665c54;
+  --grey1: #7c6f64;
+  --grey2: #928374;
 }
 
 .monochrome-blue-dark {
