@@ -10,6 +10,8 @@ export interface CustomWindowProps {
   exclusivity?: Astal.Exclusivity
   position: Gtk.Align
   css?: string
+  visible?: boolean
+  onVisivilityChange?: (self: Astal.Window) => void
 }
 
 export default function CustomWindow({
@@ -18,12 +20,18 @@ export default function CustomWindow({
   name,
   namespace,
   css = "",
+  visible = false,
+  onVisivilityChange = () => {},
 }: CustomWindowProps) {
   const anchor = getWindowAnchors(position)
   const cssClass = getWindowMarginClass(anchor)
 
   return (
     <window
+      onNotifyVisible={(self) => {
+        onVisivilityChange(self)
+      }}
+      visible={visible}
       application={app}
       name={name}
       keymode={Astal.Keymode.ON_DEMAND}

@@ -1,17 +1,21 @@
-import { Gtk, Astal } from "ags/gtk4"
+import { Gtk } from "ags/gtk4"
 import { SETTINGS } from "../../../../config/Settings"
 import AstalNetwork from "gi://AstalNetwork"
 import { createBinding, createComputed, With } from "ags"
-import NM from "gi://NM"
-import { getWifiIcon } from "../../../../utils/network"
+import {
+  getNetworkIcon,
+  getNetworkIconBinding,
+} from "../../../../utils/network"
 
-export const WifiNetworkInfo = (props: {}) => {
-  const Network = AstalNetwork.get_default()
-
-  const wifiName = createBinding(Network, "wifi", "ssid")
-  const wifiDevice = createBinding(Network, "wifi", "device")
-  const wifiStrength = createBinding(Network, "wifi", "strength")
-  const wifiState = createBinding(Network, "state")
+export const WifiNetworkInfo = ({
+  network = AstalNetwork.get_default(),
+}: {
+  network?: AstalNetwork.Network
+}) => {
+  const wifiName = createBinding(network, "wifi", "ssid")
+  const wifiDevice = createBinding(network, "wifi", "device")
+  const wifiStrength = createBinding(network, "wifi", "strength")
+  const wifiState = createBinding(network, "state")
 
   const wifiInfoData = createComputed(() => {
     return {
@@ -19,9 +23,11 @@ export const WifiNetworkInfo = (props: {}) => {
       device: wifiDevice(),
       strength: wifiStrength(),
       state: wifiState(),
+      networkBind: getNetworkIconBinding(),
     }
   })
 
+  // label={getWifiIcon(data.state, 100)}
   return (
     <box>
       <With value={wifiInfoData}>
@@ -39,10 +45,9 @@ export const WifiNetworkInfo = (props: {}) => {
             >
               <box hexpand>
                 <label
-                  label={getWifiIcon(data.state, 100)}
-                  class={`network-icon ${rotateClass}`}
+                  label={getNetworkIconBinding()}
+                  class={`network-icon `}
                   halign={Gtk.Align.CENTER}
-                  yalign={Gtk.Align.CENTER}
                 />
               </box>
               <box

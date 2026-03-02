@@ -8,8 +8,9 @@ import CustomWindow from "../../common/Window"
 
 export const BATTERY_DASHBOARD_WINDOW_NAME = "battery"
 
+//TODO: Remake this component
+
 export default function BatteryDashboard(position: Gtk.Align = Gtk.Align.END) {
-  const { TOP, RIGHT } = Astal.WindowAnchor
   const battery = AstalBattery.get_default()
 
   const batteryPercentage = createBinding(battery, "percentage")

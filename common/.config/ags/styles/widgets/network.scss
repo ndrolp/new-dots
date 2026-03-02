@@ -74,4 +74,34 @@
       color: var(--grey1);
     }
   }
+
+  .connection-manager {
+    min-height: 10px;
+    padding-top: 5px;
+
+    .network-scan-label {
+      margin: 0;
+      padding: 0;
+      min-width: 60pt;
+      padding-right: 19px;
+      font-size: 50pt;
+      line-height: 50pt;
+      color: var(--bg3);
+    }
+
+    .title {
+      padding-bottom: 5px;
+    }
+
+    .acces-point-button {
+      button {
+        padding: 4px 10px;
+        background: var(--bg1);
+
+        &:hover {
+          background: var(--bg2);
+        }
+      }
+    }
+  }
 }

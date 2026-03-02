@@ -8,7 +8,7 @@ import { monitorFile } from "ags/file"
 import Gio from "gi://Gio?version=2.0"
 import { execAsync } from "ags/process"
 import Dashboard from "./widget/widgets/Dashboard/Dashboard"
-import NetworkDashboard from "./widget/widgets/Dashboard/NetworkDashboard"
+import NetworkDashboard from "./widget/widgets/Network/NetworkDashboard"
 
 const runApp = () =>
   app.start({

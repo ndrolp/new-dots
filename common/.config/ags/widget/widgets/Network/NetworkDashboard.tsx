@@ -1,11 +1,9 @@
-import { SETTINGS } from "../../../config/Settings"
 import { Gtk, Astal } from "ags/gtk4"
-import app from "ags/gtk4/app"
 import { WifiNetworkInfo } from "./components/NetworkInfo"
 import { createBinding, createComputed, With } from "ags"
 import AstalNetwork from "gi://AstalNetwork"
-import { getWindowAnchors, getWindowMarginClass } from "../../../utils/popups"
 import CustomWindow from "../../common/Window"
+import { WirelessConectionManager } from "./components/WirelessConectionManager"
 
 export const NETWORK_DASHBOARD_WINDOW_NAME = "networkdash"
 
@@ -27,6 +25,12 @@ export default function NetworkDashboard(
       namespace={NETWORK_DASHBOARD_WINDOW_NAME}
       position={position}
       css="network-dashboard"
+      onVisivilityChange={(self) => {
+        if (!self.visible) return
+        if (Network.primary === AstalNetwork.Primary.WIFI) {
+          Network.wifi.scan()
+        }
+      }}
     >
       <box>
         <With value={networkDashboardData}>
@@ -35,7 +39,7 @@ export default function NetworkDashboard(
               <box>
                 <box orientation={Gtk.Orientation.VERTICAL} spacing={5}>
                   {data.primary === AstalNetwork.Primary.WIFI ? (
-                    <WifiNetworkInfo />
+                    <WifiNetworkInfo network={Network} />
                   ) : data.primary === AstalNetwork.Primary.WIRED ? (
                     <label label="WIRED" />
                   ) : (
@@ -53,6 +57,13 @@ export default function NetworkDashboard(
                       <label label="No network connected" />
                     </box>
                   )}
+                  <box>
+                    {data.wifiEnabled ? (
+                      <WirelessConectionManager network={Network} />
+                    ) : (
+                      <></>
+                    )}
+                  </box>
                 </box>
               </box>
             )
