@@ -11,6 +11,11 @@
   }
 }
 
+.rotate {
+  padding: 0;
+  animation: rotate-network 1.7s ease-out infinite;
+}
+
 @keyframes rotate-network {
   0% {
     transform: rotateZ(0deg);
@@ -18,5 +23,55 @@
 
   100% {
     transform: rotateZ(360deg);
+  }
+}
+
+.network-dashboard {
+  min-width: 250px;
+
+  >label {
+    border-bottom: 2px solid var(--gray0);
+  }
+
+  .network-icon {
+    font-size: 60pt;
+    padding-top: 0;
+    line-height: 40pt;
+    padding-right: 20px;
+    color: var(--grey1);
+  }
+
+  .wifi-settings {
+    background: var(--bg2);
+    padding-right: 0px;
+    padding: 15px;
+
+    .network-icon {
+      margin-right: 50px;
+      color: var(--fg);
+    }
+
+    .network-info-status {
+      :nth-child(1) {
+        color: var(--fg);
+        font-size: 12pt;
+      }
+
+      :nth-child(2) {
+        color: var(--grey0);
+      }
+
+      :nth-child(4) {
+        color: var(--green);
+        font-size: 9pt;
+      }
+    }
+  }
+
+  .disconnected-card {
+    :nth-child(2) {
+      font-size: 12pt;
+      color: var(--grey1);
+    }
   }
 }

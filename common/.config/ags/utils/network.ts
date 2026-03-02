@@ -1,7 +1,7 @@
 import AstalNetwork from "gi://AstalNetwork"
 import NM from "gi://NM"
 
-export function getWifiIcon(state: AstalNetwork.State, strength: number) {
+export function getWifiIcon(state: AstalNetwork.State, strength: number = 100) {
   let icon: string | undefined = undefined
 
   if (state === AstalNetwork.State.CONNECTED_GLOBAL) {

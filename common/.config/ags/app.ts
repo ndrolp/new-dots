@@ -1,4 +1,5 @@
 import app from "ags/gtk4/app"
+import { Gtk } from "ags/gtk4"
 import style from "./style.scss"
 import Bar from "./widget/Bar"
 import themes from "./styles/themes.scss"
@@ -7,6 +8,7 @@ import { monitorFile } from "ags/file"
 import Gio from "gi://Gio?version=2.0"
 import { execAsync } from "ags/process"
 import Dashboard from "./widget/widgets/Dashboard/Dashboard"
+import NetworkDashboard from "./widget/widgets/Dashboard/NetworkDashboard"
 
 const runApp = () =>
   app.start({
@@ -16,6 +18,7 @@ const runApp = () =>
         console.log(monitor.model)
         Bar(monitor)
         BatteryDashboard()
+        NetworkDashboard(Gtk.Align.END)
         Dashboard()
       })
     },

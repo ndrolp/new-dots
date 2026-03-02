@@ -4,10 +4,11 @@ import AstalBattery from "gi://AstalBattery"
 import { createBinding, With } from "ags"
 import { secondsToTime } from "../../../utils/battery"
 import { SETTINGS } from "../../../config/Settings"
+import CustomWindow from "../../common/Window"
 
 export const BATTERY_DASHBOARD_WINDOW_NAME = "battery"
 
-export default function BatteryDashboard() {
+export default function BatteryDashboard(position: Gtk.Align = Gtk.Align.END) {
   const { TOP, RIGHT } = Astal.WindowAnchor
   const battery = AstalBattery.get_default()
 
@@ -17,50 +18,41 @@ export default function BatteryDashboard() {
   const batteryState = createBinding(battery, "state")
 
   return (
-    <window
+    <CustomWindow
       namespace={"dashboard"}
-      keymode={Astal.Keymode.ON_DEMAND}
       name={BATTERY_DASHBOARD_WINDOW_NAME}
       exclusivity={Astal.Exclusivity.NORMAL}
-      class={`Battery ${SETTINGS.theme}`}
-      anchor={SETTINGS.barAppearence.island ? TOP : TOP | RIGHT}
-      marginRight={10}
-      margin_top={10}
-      application={app}
+      css={`Battery`}
+      position={position}
     >
-      <Gtk.EventControllerKey
-        onKeyPressed={({ widget }, keyval: number) => {
-          if (keyval === Gdk.KEY_Escape) {
-            widget.hide()
-          }
-        }}
-      />
-      <box class="container" orientation={Gtk.Orientation.VERTICAL}>
-        <label
-          class="title"
-          label="󰁹  Battery Info"
-          halign={Gtk.Align.CENTER}
-          hexpand
-          margin_bottom={10}
-        />
-        <box class="battery-dashboard-percentage" hexpand>
-          <With value={batteryPercentage}>
-            {(percentage) => (
-              <box>
-                <slider
-                  hexpand
-                  value={percentage}
-                  min={0}
-                  max={1}
-                  canTarget={false}
-                />
-                <label
-                  margin_start={10}
-                  label={(percentage * 100).toFixed(0).toString() + "%"}
-                />
-              </box>
-            )}
-          </With>
+      <box orientation={Gtk.Orientation.VERTICAL}>
+        <box class="" orientation={Gtk.Orientation.VERTICAL}>
+          <label
+            class="title"
+            label="󰁹  Battery Info"
+            halign={Gtk.Align.CENTER}
+            hexpand
+            margin_bottom={10}
+          />
+          <box class="battery-dashboard-percentage" hexpand>
+            <With value={batteryPercentage}>
+              {(percentage) => (
+                <box>
+                  <slider
+                    hexpand
+                    value={percentage}
+                    min={0}
+                    max={1}
+                    canTarget={false}
+                  />
+                  <label
+                    margin_start={10}
+                    label={(percentage * 100).toFixed(0).toString() + "%"}
+                  />
+                </box>
+              )}
+            </With>
+          </box>
         </box>
         <box hexpand class="separator"></box>
         <box class="time">
@@ -114,6 +106,6 @@ export default function BatteryDashboard() {
           </With>
         </box>
       </box>
-    </window>
+    </CustomWindow>
   )
 }

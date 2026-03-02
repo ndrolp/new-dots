@@ -30,78 +30,76 @@ window.Battery {
 
   color: var(--fg);
 
-  .container {
-    background: var(--bg0);
-    padding: 10px;
-    border: 2px solid var(--bg4);
-    margin-left: 12px;
-    border-radius: 8px;
-    /* margin-top: 40px; */
-    min-width: 190px;
+  background: var(--bg0);
+  padding: 10px;
+  border: 2px solid var(--bg4);
+  margin-left: 12px;
+  border-radius: 8px;
+  /* margin-top: 40px; */
+  min-width: 190px;
 
-    .title {
-      text-align: "center";
-      font-size: 12pt;
+  .title {
+    text-align: "center";
+    font-size: 12pt;
+  }
+
+  .battery-dashboard-percentage {
+    /* background: transparent; */
+
+    >label {
+      margin-left: 8px;
+      font-size: 9pt;
+      font-weight: bolder;
     }
 
-    .battery-dashboard-percentage {
-      /* background: transparent; */
+    scale {
+      border-radius: 0px;
+      padding: 10px 0;
 
-      >label {
-        margin-left: 8px;
-        font-size: 9pt;
-        font-weight: bolder;
-      }
+      trough {
+        background: var(--bg3);
+        min-height: 10px;
+        margin: 0;
+        border-radius: 3px;
 
-      scale {
-        border-radius: 0px;
-        padding: 10px 0;
-
-        trough {
-          background: var(--bg3);
-          min-height: 10px;
-          margin: 0;
+        highlight {
+          background: var(--aqua);
           border-radius: 3px;
+          margin: 0;
+        }
 
-          highlight {
-            background: var(--aqua);
-            border-radius: 3px;
-            margin: 0;
-          }
-
-          slider {
-            box-shadow: none;
-            background: transparent;
-            pointer-events: none;
-            color: red;
-          }
+        slider {
+          box-shadow: none;
+          background: transparent;
+          pointer-events: none;
+          color: red;
         }
       }
     }
+  }
 
-    .percentage {
+  .percentage {
+    min-height: 8px;
+    background: var(--bg3);
+
+    .fill {
       min-height: 8px;
-      background: var(--bg3);
+      background: var(--blue);
+      min-width: 50px;
+    }
+  }
 
-      .fill {
-        min-height: 8px;
-        background: var(--blue);
-        min-width: 50px;
-      }
+  .time {
+    margin-top: 10px;
+    font-size: 10pt;
+
+    label:nth-child(1) {
+      margin: 0px;
+      padding: 0px;
     }
 
-    .time {
-      margin-top: 10px;
-      font-size: 10pt;
-
-      label:nth-child(1) {
-        margin: 0px;
-        padding: 0px;
-      }
-
-      label:nth-child(2) {
-        color: var(--aqua);
-      }
+    label:nth-child(2) {
+      color: var(--aqua);
     }
   }
 }

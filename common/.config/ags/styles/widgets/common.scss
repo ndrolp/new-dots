@@ -24,6 +24,22 @@
   font-weight: bold;
   font-size: 10pt;
 
+  &.top {
+    margin-top: 10px;
+  }
+
+  &.left {
+    margin-left: 10px;
+  }
+
+  &.right {
+    margin-right: 10px;
+  }
+
+  &.bottom {
+    margin-bottom: 10px;
+  }
+
   color: var(--fg);
 
   .container {
@@ -48,4 +64,10 @@ button.bar-icon {
   &:hover {
     background: var(--bg3);
   }
+}
+
+.card {
+  background: var(--bg2);
+  box-shadow: none;
+  padding: 15px;
 }

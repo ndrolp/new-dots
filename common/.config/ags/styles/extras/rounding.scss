@@ -1,8 +1,15 @@
 .rounding-none {
-  &.Bar {
+  border-radius: 0px;
+
+  &.Bar,
+  &.Popup {
     .bar-content {
       border-radius: 0px;
     }
+  }
+
+  &.window {
+    border-radius: 0px;
   }
 
   .workspaces {
@@ -19,6 +26,16 @@
 }
 
 .rounding-full {
+  border-radius: 1000px;
+
+  &.card {
+    border-radius: 10px;
+  }
+
+  &.window {
+    border-radius: 10px;
+  }
+
   &.Bar {
     .bar-content {
       border-radius: 1000px;
@@ -39,8 +56,14 @@
 }
 
 .rounding-sm {
+  border-radius: 3px;
+
   .bar-content {
-    border-radius: 5px;
+    border-radius: 3px;
+  }
+
+  &.window {
+    border-radius: 3px;
   }
 
   .bar-icon {
@@ -49,10 +72,16 @@
 }
 
 .rounding-md {
+  border-radius: 7px;
+
   &.Bar {
     .bar-content {
       border-radius: 7px;
     }
+  }
+
+  &.window {
+    border-radius: 7px;
   }
 
   .bar-icon {
@@ -65,6 +94,12 @@
     .bar-content {
       border-radius: 10px;
     }
+  }
+
+  border-radius: 10px;
+
+  &.window {
+    border-radius: 7px;
   }
 
   .bar-icon {

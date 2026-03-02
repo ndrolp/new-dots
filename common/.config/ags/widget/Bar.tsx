@@ -12,9 +12,10 @@ import Gio from "gi://Gio?version=2.0"
 import AstalHyprland from "gi://AstalHyprland"
 import NowPlaying from "./widgets/Audio/Playing"
 import NetworkButton from "./widgets/Network/NetworkButton"
+import NetworkDashboard from "./widgets/Dashboard/NetworkDashboard"
 
 export default function Bar(gdkmonitor: Gdk.Monitor) {
-  const { TOP, LEFT, RIGHT } = Astal.WindowAnchor
+  const { TOP, LEFT, RIGHT, BOTTOM } = Astal.WindowAnchor
   const [currentSettings, updateCurrentSettings] = createState(
     JSON.parse(readFile("settings.json")) as IShellSettings,
   )

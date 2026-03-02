@@ -1,7 +1,11 @@
 import AstalNetwork from "gi://AstalNetwork"
+import app from "ags/gtk4/app"
 import { getWifiIcon } from "../../../utils/network"
 import NM from "gi://NM"
 import { createBinding, createComputed, With } from "ags"
+import NetworkDashboard, {
+  NETWORK_DASHBOARD_WINDOW_NAME,
+} from "../Dashboard/NetworkDashboard"
 
 export default function NetworkButton() {
   const Network = AstalNetwork.get_default()
@@ -31,7 +35,12 @@ export default function NetworkButton() {
               ? "rotate"
               : ""
           return (
-            <button class="network-button bar-icon">
+            <button
+              class="network-button bar-icon"
+              onClicked={() => {
+                app.toggle_window(NETWORK_DASHBOARD_WINDOW_NAME)
+              }}
+            >
               {data.primary === AstalNetwork.Primary.WIFI ? (
                 <label
                   class={`network-icon ${rotateClass}`}
