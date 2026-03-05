@@ -14,25 +14,34 @@ export default function WorkspaceButton({
   const focusedWorkspace = createBinding(hyprInstance, "focusedWorkspace")
 
   return (
-    <With value={focusedWorkspace}>
-      {(focusedElement) => {
-        return (
-          <box
-            $type="start"
-            hexpand={false}
-            vexpand={false}
-            class={`workspace-button-container`}
-          >
-            <button
-              onClicked={() =>
-                hyprInstance.dispatch("workspace", id.toString())
-              }
-              marginEnd={5}
-              class={`workspace-button ${focusedElement.id === id ? "focused" : ""}`}
-            />
-          </box>
-        )
-      }}
-    </With>
+    <box>
+      <With value={focusedWorkspace}>
+        {(focusedElement) => {
+          const getWorkspaceIcon = (): string => {
+            const isFocused = focusedElement.id === id
+
+            // return id.toString()
+            return isFocused ? "" : ""
+          }
+          return (
+            <box
+              $type="start"
+              hexpand={false}
+              vexpand={false}
+              class={`workspace-button-container`}
+            >
+              <button
+                onClicked={() =>
+                  hyprInstance.dispatch("workspace", id.toString())
+                }
+                class={`workspace-button ${focusedElement.id === id ? "focused" : ""}`}
+              >
+                <label label={getWorkspaceIcon()} />
+              </button>
+            </box>
+          )
+        }}
+      </With>
+    </box>
   )
 }

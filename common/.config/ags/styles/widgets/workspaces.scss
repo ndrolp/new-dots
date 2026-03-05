@@ -1,38 +1,40 @@
 .workspaces {
-  background: var(--bg2);
+  /* background: var(--bg2); */
   min-height: 0px;
   padding: 4px 5px;
   border-radius: 4px;
   transition: 0.3s;
-  /* height: 10px; */
-
-  /* aspect-ratio: 1; */
-  /* width: 4px; */
-  /* height: 10px; */
+  background: coral;
 
   .workspace-button-container {
     aspect-ratio: 1;
-    margin-left: 3px;
+    /* margin-left: 3px; */
     padding: 2px 0px;
 
     .workspace-button {
-      background: var(--bg0);
-      min-height: 10px;
-      min-width: 10px;
-      padding: 0px 1px;
+      /* background: var(--bg0); */
+      background-color: transparent;
+      color: var(--grey0);
+      padding: 0px 0px;
       transition: 0.3s;
-      border: 2px solid var(--bg4);
       box-sizing: border-box;
+
+      label {
+        font-weight: bolder;
+        padding: 0;
+        margin: 0;
+      }
 
       &:hover {
         border-radius: 1000px;
-        border: 2px solid var(--aqua);
+        /* border: 2px solid var(--aqua); */
       }
 
       &.focused {
         animation: active-workspace 0.3s ease-in-out 1;
-        border: 2px solid var(--purple);
-        padding: 0px 1px;
+        color: var(--purple);
+        /* border: 2px solid var(--purple); */
+        /* padding: 0px 1px; */
         /* background-color: var(--purple); */
         /* border-color: var(--bg3); */
         /* padding: 0px 5px; */
@@ -45,8 +47,9 @@
 @keyframes active-workspace {
   0% {
     transform: scale(1);
-    padding: 0px 1px;
-    border: 2px solid var(--bg4);
+    /* padding: 0px 1px; */
+    /* border: 2px solid var(--bg4); */
+    /* color: var(--grey0); */
   }
 
   25% {
@@ -59,7 +62,8 @@
 
   100% {
     transform: scale(1);
-    padding: 0px 1px;
-    border: 2px solid var(--purple);
+    /* padding: 0px 1px; */
+    /* border: 2px solid var(--purple); */
+    /* color: var(--purple); */
   }
 }

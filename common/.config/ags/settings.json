@@ -2,9 +2,9 @@
   "theme": "catppuccin",
   "barAppearence": {
     "layout": "default",
-    "compact": true,
     "island": true,
-    "rounding": "full"
+    "compact": true,
+    "rounding": "sm"
   },
   "workspaces": {
     "monitors": {
@@ -22,13 +22,7 @@
   },
   "nowPlaying": {
     "showControls": false,
-    "preferedClients": [
-      "spotify",
-      "chrome",
-      "chromium"
-    ],
-    "ignoreClients": [
-      "plasma-browser-integration"
-    ]
+    "preferedClients": ["spotify", "chrome", "chromium"],
+    "ignoreClients": ["plasma-browser-integration"]
   }
 }

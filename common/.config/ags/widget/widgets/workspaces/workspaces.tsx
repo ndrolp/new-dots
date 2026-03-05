@@ -1,7 +1,6 @@
 import AstalHyprland from "gi://AstalHyprland?version=0.1"
 import { Gtk, Gdk } from "ags/gtk4"
-import { createPoll } from "ags/time"
-import { createBinding, createComputed, With } from "ags"
+import { createBinding, With } from "ags"
 import WorkspaceButton from "./WorkspaceButton"
 import { SETTINGS } from "../../../config/Settings"
 import { WorkspaceRange } from "./WorkspacesSettingsType"
@@ -27,7 +26,7 @@ export default function Workspaces({ monitor }: { monitor: Gdk.Monitor }) {
         {(workspaces) => {
           const sortedWorkspaces = workspaces.sort((a, b) => a.id - b.id)
           return (
-            <box>
+            <box spacing={2.5}>
               {Five.map((_, index) => (
                 <WorkspaceButton
                   id={monitorSettings?.from + index}
@@ -40,7 +39,7 @@ export default function Workspaces({ monitor }: { monitor: Gdk.Monitor }) {
                 monitorSettings.from <= element.id ? (
                   <WorkspaceButton showId id={element.id} hyprInstance={hypr} />
                 ) : (
-                  <box />
+                  <></>
                 ),
               )}
             </box>

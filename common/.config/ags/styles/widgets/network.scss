@@ -1,10 +1,7 @@
 .network-button {
   color: var(--purple);
 
-  .network-icon {
-    padding-right: 4px;
-    font-size: 11pt;
-  }
+  .network-icon {}
 
   .rotate {
     animation: rotate-network 1.7s ease-out infinite;

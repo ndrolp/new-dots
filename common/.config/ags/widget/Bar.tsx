@@ -63,7 +63,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
       application={app}
     >
       <Container>
-        <box $type="start" spacing={spacing}>
+        <box $type="start" spacing={spacing} class="">
           <button class="bar-icon test">
             <box class="">
               <label label="" />
@@ -73,9 +73,9 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
         </box>
         <box halign={Gtk.Align.CENTER} $type="center" spacing={spacing}>
           <Clock />
-          <NowPlaying />
         </box>
         <box halign={Gtk.Align.END} $type="end" spacing={spacing}>
+          <NowPlaying />
           <NetworkButton />
           <AudioButton />
           <Battery />

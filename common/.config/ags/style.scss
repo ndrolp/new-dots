@@ -5,7 +5,7 @@
 
 * {
   transition: 0.3s ease-in-out;
-  font-family: "Noto Sans", "Hasklug Nerd Font";
+  font-family: "Noto Sans", "Hasklug Nerd Font Propo";
 }
 
 window.Bar {
@@ -18,11 +18,12 @@ window.Bar {
   .bar-content {
     transition: 0.3s;
     background: var(--bg0);
-    padding: 4px 5px;
+    padding: 5px;
     border: 2px solid var(--bg4);
     border-radius: 5px;
     margin: 5px 10px;
     margin-top: 10px;
+    border-bottom: 2px solid var(--bg4);
     margin-bottom: 0px;
     width: fit-content;
 
@@ -36,10 +37,10 @@ window.Bar {
   }
 
   .test {
-    font-size: 11pt;
+    /* font-size: 12pt; */
     color: var(--blue);
-    padding: 0 8px;
-    padding-right: 12px;
+    /* padding: 0 8px; */
+    /* padding-right: 12px; */
   }
 }
 

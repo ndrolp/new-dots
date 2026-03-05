@@ -11,26 +11,6 @@
     border: 2px solid var(--bg4);
   }
 
-  /* button.bar-icon { */
-  /*   padding: 0; */
-  /* } */
-
-  .workspaces {
-    padding: 4px 5px;
-    background-color: var(--bg0);
-    border: 2px solid var(--bg4);
-
-    .workspace-button {
-      background-color: var(--bg0);
-      border: 2px solid var(--bg4);
-
-      &.focused {
-        background-color: var(--bg0);
-        border-color: var(--purple);
-      }
-    }
-  }
-
   .audio-button {
     padding-right: 4px;
     padding-left: 4px;
