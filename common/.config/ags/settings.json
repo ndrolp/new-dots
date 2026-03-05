@@ -1,10 +1,12 @@
 {
+  "$schema": "./settings.schema.json",
   "theme": "catppuccin",
   "barAppearence": {
+    "float": false,
     "layout": "default",
-    "island": true,
+    "island": false,
     "compact": true,
-    "rounding": "sm"
+    "rounding": "md"
   },
   "workspaces": {
     "monitors": {

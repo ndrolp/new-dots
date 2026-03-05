@@ -12,6 +12,7 @@ export default function WorkspaceButton({
 }) {
   const instance = hyprInstance.workspaces.find((element) => element.id === id)
   const focusedWorkspace = createBinding(hyprInstance, "focusedWorkspace")
+  focusedWorkspace().clients
 
   return (
     <box>
@@ -28,7 +29,8 @@ export default function WorkspaceButton({
               $type="start"
               hexpand={false}
               vexpand={false}
-              class={`workspace-button-container`}
+              cssClasses={["workspace-button-container"]}
+              class={`workspace-button-container ${(instance?.clients?.length ?? 0 > 0) ? "test" : ""}`}
             >
               <button
                 onClicked={() =>

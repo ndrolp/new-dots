@@ -12,6 +12,7 @@ import AstalHyprland from "gi://AstalHyprland"
 import NowPlaying from "./widgets/Audio/Playing"
 import NetworkButton from "./widgets/Network/NetworkButton"
 import { ShellSettings } from "../utils/SettingsManager"
+import { getWindowSettingsCssClasses } from "../utils/mainBar"
 
 export default function Bar(gdkmonitor: Gdk.Monitor) {
   const SETTINGS = ShellSettings.getInstance()
@@ -48,15 +49,13 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     )
   }
 
+  let barCss = getWindowSettingsCssClasses()
+
   return (
     <window
       visible
       name="bar"
-      class={`Bar 
-          ${SETTINGS.theme ?? "catppuccin"} 
-          layout-${SETTINGS.barAppearence.layout ?? "default"} 
-          rounding-${SETTINGS.barAppearence.rounding} 
-          ${SETTINGS.barAppearence.compact ? "compact" : ""}`}
+      class={`Bar ${barCss}`}
       gdkmonitor={gdkmonitor}
       exclusivity={Astal.Exclusivity.EXCLUSIVE}
       anchor={!SETTINGS.barAppearence.island ? TOP | LEFT | RIGHT : TOP}

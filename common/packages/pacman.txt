@@ -74,3 +74,4 @@ valadoc
 wireplumber
 gobject-introspection
 vlc-plugin-ffmpeg
+noto-fonts-cjk

@@ -27,6 +27,7 @@ export class ShellSettings implements IShellSettings {
       island: data?.barAppearence?.island ?? false,
       compact: data?.barAppearence?.compact ?? false,
       rounding: data?.barAppearence?.rounding ?? "md",
+      float: data?.barAppearence?.float ?? true,
     }
 
     this.workspaces = {

@@ -29,6 +29,7 @@
             "required": [
                 "layout",
                 "island",
+                "float",
                 "compact",
                 "rounding"
             ],
@@ -41,6 +42,9 @@
                     ]
                 },
                 "island": {
+                    "type": "boolean"
+                },
+                "float": {
                     "type": "boolean"
                 },
                 "compact": {
