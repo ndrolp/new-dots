@@ -1,5 +1,7 @@
+import { SHEL_THEME } from "../utils/settings/DefaultBarAppearences"
+
 export interface IShellSettings {
-  theme: "catppuccin" | "gruvbox-dark" | "monochrome-blue-dark"
+  theme: SHEL_THEME
   barAppearence: IBarAppearence
   workspaces: WorkspacesConfig
   nowPlaying: INowPlayingConfig

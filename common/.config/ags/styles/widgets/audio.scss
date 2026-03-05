@@ -8,6 +8,10 @@
   .data-container {
     transition: 0.3s;
 
+    .bar {
+      font-weight: bold;
+    }
+
     &.muted {
       color: var(--red);
 
@@ -22,7 +26,7 @@
 
     .bar {
       font-weight: bolder;
-      font-family: "Wavefont", "Wavefont Thin", sans-serif;
+      font-family: "Wavefont", "Wavefont Thin";
     }
   }
 }

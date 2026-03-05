@@ -20,9 +20,34 @@
   --green: #a6d189;
   --aqua: #81c8be;
   --blue: #8caaee;
-  --purple: #ca9ee --grey0: #737994;
+  --purple: #ca9eee;
+
+  --grey0: #737994;
   --grey1: #838ba7;
   --grey2: #949cbb;
+}
+
+/* Nord theme */
+.nord {
+  --bg0: #2e3440;
+  --bg1: #3b4252;
+  --bg2: #434c5e;
+  --bg3: #4c566a;
+  --bg4: #616e88;
+
+  --fg: #d8dee9;
+
+  --red: #bf616a;
+  --orange: #d08770;
+  --yellow: #ebcb8b;
+  --green: #a3be8c;
+  --aqua: #8fbcbb;
+  --blue: #81a1c1;
+  --purple: #b48ead;
+
+  --grey0: #d8dee9;
+  --grey1: #cfd6e3;
+  --grey2: #bfc7d5;
 }
 
 /* Gruvbox Darker theme */

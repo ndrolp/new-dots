@@ -19,7 +19,8 @@
             "enum": [
                 "catppuccin",
                 "gruvbox-dark",
-                "monochrome-blue-dark"
+                "monochrome-blue-dark",
+                "nord"
             ]
         },
         "barAppearence": {

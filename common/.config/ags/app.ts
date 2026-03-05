@@ -9,9 +9,29 @@ import Gio from "gi://Gio?version=2.0"
 import { execAsync } from "ags/process"
 import Dashboard from "./widget/widgets/Dashboard/Dashboard"
 import NetworkDashboard from "./widget/widgets/Network/NetworkDashboard"
+import { ShellSettings } from "./utils/SettingsManager"
+import {
+  DEFAULT_BAR_APPEARENCE,
+  SHELL_THEMES_BINDER,
+} from "./utils/settings/DefaultBarAppearences"
 
 const runApp = () =>
   app.start({
+    requestHandler(argv: string[], response: (response: string) => void) {
+      const settings = ShellSettings.getInstance()
+      const [cmd, arg, ...rest] = argv
+      if (cmd == "appearence") {
+        settings.setAppearence(arg as DEFAULT_BAR_APPEARENCE)
+        execAsync(["bash", "-c", "~/.config/ags/reload.sh"])
+        return response(arg)
+      }
+      if (cmd == "theme") {
+        settings.setColorscheme(SHELL_THEMES_BINDER[arg])
+        execAsync(["bash", "-c", "~/.config/ags/reload.sh"])
+        return response("THEME APPLIED")
+      }
+      response("unknown command")
+    },
     css: style,
     main() {
       app.get_monitors().map((monitor) => {

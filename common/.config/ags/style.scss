@@ -5,6 +5,7 @@
 
 * {
   transition: 0.3s ease-in-out;
+  font-family: "Noto Sans", "Hasklug Nerd Font";
 }
 
 window.Bar {
@@ -17,8 +18,8 @@ window.Bar {
   .bar-content {
     transition: 0.3s;
     background: var(--bg0);
-    border: 2px solid var(--bg4);
     padding: 4px 5px;
+    border: 2px solid var(--bg4);
     border-radius: 5px;
     margin: 5px 10px;
     margin-top: 10px;

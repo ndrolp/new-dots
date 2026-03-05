@@ -50,8 +50,10 @@ ln -sf "$THEME_FOLDER/nvim/theme.lua" "$NVIM_COLORS"
 
 
 echo "LINKING ROFI"
-ln -sf "$THEME_FOLDER/kofi/colors.rasi" "$ROFI_COLORS"
+ln -sf "$THEME_FOLDER/rofi/colors.rasi" "$ROFI_COLORS"
 
 
+ags request theme $SELECTED_FOLDER
+sleep 0.3
 
-bash ~/.dotfiles/scripts/hyprland/reload.sh
+# bash ~/.dotfiles/scripts/hyprland/reload.sh

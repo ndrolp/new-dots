@@ -1,7 +1,6 @@
 import AstalNetwork from "gi://AstalNetwork"
 import { createBinding, createComputed, createState, With } from "ags"
 import { Gtk } from "ags/gtk4"
-import { getAccessPointIcon } from "../../../../utils/network"
 import { AccessPointButton } from "./AccessPointButton"
 
 const [wifiConnections, wifiConnectionsSetter] = createState<string[]>([])
@@ -52,8 +51,10 @@ export const WirelessConectionManager = ({
                         return 1
                       }
                     })
-                    .map((accessPoint) => {
-                      return <AccessPointButton accessPoint={accessPoint} />
+                    .map((accessPoint, index) => {
+                      if (index < 10)
+                        return <AccessPointButton accessPoint={accessPoint} />
+                      return <></>
                     })
                   return (
                     <box>

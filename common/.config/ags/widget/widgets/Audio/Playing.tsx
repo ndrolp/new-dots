@@ -77,8 +77,14 @@ export function PlayerBarLine({ player }: { player: Mpris.Player }) {
           console.log(cssPlaybackClass)
           return (
             <box class={cssPlaybackClass}>
-              <label label={getPlayerIcon(data.identity, data.title)} />
-              <label label={truncateString(data.title, 35)} />
+              <label
+                halign={Gtk.Align.CENTER}
+                label={getPlayerIcon(data.identity, data.title)}
+              />
+              <label
+                halign={Gtk.Align.CENTER}
+                label={truncateString(data.title, 35)}
+              />
             </box>
           )
         }}

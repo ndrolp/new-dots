@@ -1,12 +1,10 @@
 {
-  "$schema": "./settings.schema.json",
   "theme": "catppuccin",
-  "debug": true,
   "barAppearence": {
     "layout": "default",
-    "island": false,
-    "compact": false,
-    "rounding": "md"
+    "compact": true,
+    "island": true,
+    "rounding": "full"
   },
   "workspaces": {
     "monitors": {
@@ -24,7 +22,13 @@
   },
   "nowPlaying": {
     "showControls": false,
-    "preferedClients": ["spotify", "chrome", "chromium"],
-    "ignoreClients": ["plasma-browser-integration"]
+    "preferedClients": [
+      "spotify",
+      "chrome",
+      "chromium"
+    ],
+    "ignoreClients": [
+      "plasma-browser-integration"
+    ]
   }
 }
