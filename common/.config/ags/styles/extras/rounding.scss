@@ -8,6 +8,10 @@
     }
   }
 
+  .bar-section {
+    border-radius: 0px;
+  }
+
   &.window {
     border-radius: 0px;
   }
@@ -27,6 +31,10 @@
 
 .rounding-full {
   border-radius: 1000px;
+
+  .bar-section {
+    border-radius: 1000px;
+  }
 
   &.card {
     border-radius: 10px;
@@ -62,6 +70,10 @@
     border-radius: 3px;
   }
 
+  .bar-section {
+    border-radius: 3px;
+  }
+
   &.window {
     border-radius: 3px;
   }
@@ -80,6 +92,10 @@
     }
   }
 
+  .bar-section {
+    border-radius: 7px;
+  }
+
   &.window {
     border-radius: 7px;
   }
@@ -94,6 +110,10 @@
     .bar-content {
       border-radius: 10px;
     }
+  }
+
+  .bar-section {
+    border-radius: 10px;
   }
 
   border-radius: 10px;

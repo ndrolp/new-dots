@@ -38,7 +38,8 @@
                     "type": "string",
                     "enum": [
                         "default",
-                        "transparent"
+                        "transparent",
+                        "separated-islands"
                     ]
                 },
                 "island": {

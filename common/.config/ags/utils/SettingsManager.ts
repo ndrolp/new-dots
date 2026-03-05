@@ -70,7 +70,16 @@ export class ShellSettings implements IShellSettings {
   // Save to JSON
   // =========================
   save(): void {
-    const dataToSave = JSON.stringify(this, null, 2)
+    const data = {
+      $schema: "./settings.schema.json", // <-- injected schema
+
+      theme: this.theme,
+      barAppearence: this.barAppearence,
+      workspaces: this.workspaces,
+      nowPlaying: this.nowPlaying,
+    }
+
+    const dataToSave = JSON.stringify(data, null, 4)
     writeFile("settings.json", dataToSave)
   }
 

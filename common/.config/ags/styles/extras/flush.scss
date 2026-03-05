@@ -3,10 +3,15 @@
     border-radius: 0;
 
     .bar-content {
+      padding: 2px 5px;
       border: none;
       border-radius: 0px;
       border-bottom: 2px solid var(--bg4);
       margin: 0px;
+
+      .bar-icon {
+        padding: 0px 5px;
+      }
     }
   }
 

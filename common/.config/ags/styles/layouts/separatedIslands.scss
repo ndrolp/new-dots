@@ -1,0 +1,18 @@
+.separated-islands {
+  &.Bar .bar-content {
+    background-color: transparent;
+    padding: 0;
+    border: none;
+  }
+
+  .bar-icon {
+    border: none;
+    padding: 0px 5px;
+  }
+
+  .bar-section {
+    padding: 5px 5px;
+    background: var(--bg0);
+    border: 2px solid var(--bg4);
+  }
+}
