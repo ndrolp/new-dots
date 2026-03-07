@@ -50,3 +50,15 @@ window.Bar {
   border: 2px solid var(--bg4);
   padding: 10px;
 }
+
+.slant {
+  font-size: 31px;
+  transform: translateX(-1px) translateY(1px) scaleY(1.2);
+  color: orange;
+}
+
+.slanta {
+  font-size: 32px;
+  color: var(--bg0);
+  transform: translateX(-22px) translateY(0px) scaleX(0.87);
+}

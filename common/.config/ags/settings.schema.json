@@ -39,7 +39,8 @@
                     "enum": [
                         "default",
                         "transparent",
-                        "separated-islands"
+                        "separated-islands",
+                        "slanted-separated-islands"
                     ]
                 },
                 "island": {

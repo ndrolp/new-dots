@@ -4,24 +4,23 @@ import Workspaces from "./widgets/workspaces/workspaces"
 import Clock from "./widgets/Clock"
 import Battery from "./widgets/Battery/Battery"
 import AudioButton from "./widgets/Audio/Audio"
-import { monitorFile, readFile } from "ags/file"
-import { createBinding, createState, For, With } from "ags"
-import { IShellSettings } from "../config/types"
-import Gio from "gi://Gio?version=2.0"
-import AstalHyprland from "gi://AstalHyprland"
 import NowPlaying from "./widgets/Audio/Playing"
 import NetworkButton from "./widgets/Network/NetworkButton"
 import { ShellSettings } from "../utils/SettingsManager"
 import { getWindowSettingsCssClasses } from "../utils/mainBar"
+import CurrentApp from "./widgets/CurrentApp/CurrentApp"
 
 export default function Bar(gdkmonitor: Gdk.Monitor) {
   const SETTINGS = ShellSettings.getInstance()
   const { TOP, LEFT, RIGHT, BOTTOM } = Astal.WindowAnchor
-  const [currentSettings, updateCurrentSettings] = createState(
-    JSON.parse(readFile("settings.json")) as IShellSettings,
-  )
 
-  const spacing = SETTINGS.barAppearence.compact ? 0 : 0
+  const allowedBarNames = ["default", "separated-islands"]
+
+  const spacing =
+    !allowedBarNames.includes(SETTINGS.barAppearence.layout) &&
+    SETTINGS.barAppearence.compact
+      ? 5
+      : 0
 
   const Container = ({
     children,
@@ -51,6 +50,13 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
 
   let barCss = getWindowSettingsCssClasses()
 
+  // <box class="slant">
+  //   <label label={""} />
+  // </box>
+  // <box class="slanta">
+  //   <label label={""} />
+  // </box>
+
   return (
     <window
       visible
@@ -64,11 +70,9 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
       <Container>
         <box $type="start" spacing={spacing} class="bar-section">
           <button class="bar-icon test">
-            <box>
-              <label label="" />
-            </box>
+            <label label="" />
           </button>
-          <Workspaces monitor={gdkmonitor} />
+          <CurrentApp monitor={gdkmonitor} />
         </box>
         <box
           halign={Gtk.Align.CENTER}
@@ -76,7 +80,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
           spacing={spacing}
           class="bar-section"
         >
-          <Clock />
+          <Workspaces monitor={gdkmonitor} />
         </box>
         <box
           halign={Gtk.Align.END}
@@ -88,6 +92,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
           <NetworkButton />
           <AudioButton />
           <Battery />
+          <Clock />
         </box>
       </Container>
     </window>

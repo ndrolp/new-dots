@@ -8,11 +8,16 @@
       border-radius: 0px;
       border-bottom: 2px solid var(--bg4);
       margin: 0px;
+      padding-top: 4px;
 
       .bar-icon {
         padding: 0px 5px;
       }
     }
+  }
+
+  &.separated-islands {
+    &.Bar .bar-content {}
   }
 
   &.island.Bar {

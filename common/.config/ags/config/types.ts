@@ -18,7 +18,11 @@ export type WorkspacesConfig = {
 }
 
 export interface IBarAppearence {
-  layout: "default" | "transparent" | "separated-islands"
+  layout:
+    | "default"
+    | "transparent"
+    | "separated-islands"
+    | "slanted-separated-island"
   island: boolean
   compact: boolean
   float: boolean

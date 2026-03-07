@@ -1,108 +1,92 @@
 {
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "apc.electron": {
-    "titleBarStyle": "hiddenInset",
-    "backgroundColor": "#00000000",
-    "opacity": 0.95
-  },
-  "apc.font.family": "Dank Mono",
-  "apc.imports": [
-    "file:///Users/igorbabko/.vscode/extensions/brandonkirbyson.vscode-animations-2.0.1/dist/updateHandler.js"
-  ],
-  "apc.listRow": {
-    "height": 30,
-    "lists": ["explorer-folders-view", "quick-input-list", "results"]
-  },
-  "apc.stylesheet": {
-    ".filematch .monaco-count-badge": "padding: 5px 6px 0 6px !important",
-    ".filematch .monaco-icon-label:before, .custom-list-row.results .monaco-list-row .monaco-icon-label:before": "background-position: 0 bottom !important",
-    ".monaco-editor .cursors-layer .cursor": "background-image: linear-gradient(135deg, #67D0FF 10%, #C45DFF 100%)",
-    ".monaco-editor .scroll-decoration": "display: none !important",
-    ".monaco-scrollable-element > .shadow.top": "display: none !important",
-    ".monaco-split-view2 > .monaco-scrollable-element > .split-view-container": "background: #191521 !important",
-    ".monaco-workbench .monaco-list:not(.element-focused):focus:before": "outline: none !important",
-    ".panel .composite.title": "visibility: hidden !important",
-    ".quick-input-list-row div": "display: flex !important; align-items: center !important",
-    ".quick-input-widget.show-file-icons, .editor-widget.find-widget": "box-shadow: none !important",
-    ".sidebar": "border: none !important",
-    ".sidebar .title-label": "padding: 0 !important",
-    ".sidebar .title-label h2": "line-height: 2.8 !important",
-    ".title-actions": "display: none !important",
-    ".title.show-file-icons .label-container .monaco-icon-label.file-icon": "padding-bottom: 6px !important"
-  },
-  "catppuccin-noctis-icons.hidesExplorerArrows": false,
-  "chat.commandCenter.enabled": false,
-  "editor.cursorBlinking": "solid",
-  "editor.cursorSmoothCaretAnimation": "on",
-  "editor.detectIndentation": false,
-  "editor.fontFamily": "JetBrains Mono NL",
-  "terminal.integrated.fontFamily": "Hasklug Nerd Font Mono",
-  "editor.fontLigatures": true,
-  "editor.fontSize": 13,
-  "editor.guides.indentation": false,
-  "editor.hover.enabled": "off",
-  "editor.lightbulb.enabled": "off",
-  "editor.matchBrackets": "never",
-  "editor.minimap.enabled": false,
-  "editor.overviewRulerBorder": false,
-  "editor.renderLineHighlight": "none",
-  "editor.renderWhitespace": "none",
-  "editor.scrollbar.horizontal": "hidden",
-  "editor.scrollbar.vertical": "hidden",
-  "editor.showFoldingControls": "never",
-  "editor.tabSize": 4,
-  "explorer.compactFolders": false,
-  "explorer.confirmDelete": false,
-  "explorer.confirmDragAndDrop": false,
-  "extensions.ignoreRecommendations": true,
-  "files.autoSave": "afterDelay",
-  "files.insertFinalNewline": true,
-  "git.decorations.enabled": false,
-  "scm.diffDecorations": "none",
-  "terminal.integrated.env.osx": {
-    "FIG_NEW_SESSION": "1"
-  },
-  "terminal.integrated.fontSize": 13,
-  "terminal.integrated.tabs.enabled": false,
-  "vim.easymotion": true,
-  "vim.handleKeys": {
-    "<C-b>": false,
-    "<C-e>": false,
-    "<C-p>": false,
-    "<C-k>": false
-  },
-  "vim.leader": " ",
-  "vim.smartRelativeLine": true,
-  "vim.surround": true,
-  "vim.useSystemClipboard": true,
-  "window.commandCenter": false,
-  "window.customTitleBarVisibility": "never",
-  "window.menuBarVisibility": "toggle",
-  "window.titleBarStyle": "native",
-  "window.zoomLevel": -0.3,
-  "workbench.activityBar.location": "bottom",
-  "workbench.colorTheme": "Catppuccin Noctis Frappé",
-  "workbench.editor.showTabs": "multiple",
-  "workbench.iconTheme": "a-file-icon-vscode",
-  "workbench.layoutControl.enabled": false,
-  "workbench.sideBar.location": "left",
-  "workbench.startupEditor": "none",
-  "workbench.statusBar.visible": true,
-  "workbench.tips.enabled": false,
-  "workbench.tree.renderIndentGuides": "none",
-  "quick-projects.ProjectsFolderPath": "/home/ndrolp/Documents/Projects",
-  "editor.semanticHighlighting.enabled": true,
-  "terminal.integrated.minimumContrastRatio": 1,
-  "[jsonc]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-},
-"animations.Install-Method": "Apc Customize UI++",
-"qt-core.additionalQtPaths": [
-    {
-        "name": "Qt-5.15.18-linux-g++_from_PATH",
-        "path": "/usr/bin/qmake"
-    }
-],
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "animations.Enabled": true,
+    "animations.Install-Method": "Custom UI Style",
+    "chat.mcp.gallery.enabled": true,
+    "custom-ui-style.external.imports": [
+        "file:///home/ndrolp/.vscode/extensions/brandonkirbyson.vscode-animations-2.0.7/dist/updateHandler.js",
+        "file:///home/ndrolp/.config/Code/User/globalStorage/why-trv.neovim-statusline/statusline.css",
+        "file:///home/ndrolp/.vscode/extensions/why-trv.neovim-statusline-0.2.1/assets/statusline.min.js"
+    ],
+    "editor.cursorBlinking": "smooth",
+    "editor.cursorSmoothCaretAnimation": "on",
+    "editor.detectIndentation": false,
+    "editor.fontFamily": "GeistMono Nerd Font Mono",
+    "editor.fontLigatures": true,
+    "editor.fontSize": 14,
+    "editor.guides.indentation": false,
+    "editor.hover.enabled": "off",
+    "editor.lightbulb.enabled": "off",
+    "editor.matchBrackets": "never",
+    "editor.minimap.enabled": false,
+    "editor.minimap.renderCharacters": false,
+    "editor.minimap.showSlider": "always",
+    "editor.minimap.size": "fill",
+    "editor.overviewRulerBorder": false,
+    "editor.padding.bottom": 15,
+    "editor.padding.top": 15,
+    "editor.renderLineHighlight": "none",
+    "editor.renderWhitespace": "none",
+    "editor.scrollbar.horizontal": "hidden",
+    "editor.scrollbar.vertical": "hidden",
+    "editor.semanticHighlighting.enabled": true,
+    "editor.showFoldingControls": "never",
+    "editor.smoothScrolling": true,
+    "editor.tabSize": 4,
+    "explorer.compactFolders": false,
+    "explorer.confirmDelete": false,
+    "explorer.confirmDragAndDrop": false,
+    "extensions.experimental.affinity": {
+        "asvetliakov.vscode-neovim": 1
+    },
+    "extensions.ignoreRecommendations": true,
+    "files.autoSave": "afterDelay",
+    "files.insertFinalNewline": true,
+    "git.decorations.enabled": false,
+    "qt-core.additionalQtPaths": [
+        {
+            "name": "Qt-5.15.18-linux-g++_from_PATH",
+            "path": "/usr/bin/qmake"
+        }
+    ],
+    "quick-projects.ProjectsFolderPath": "/home/ndrolp/Documents/Projects",
+    "scm.diffDecorations": "none",
+    "terminal.integrated.env.osx": {
+        "FIG_NEW_SESSION": "1"
+    },
+    "terminal.integrated.fontFamily": "Hasklug Nerd Font Mono",
+    "terminal.integrated.fontSize": 13,
+    "terminal.integrated.minimumContrastRatio": 1,
+    "terminal.integrated.tabs.enabled": false,
+    "vim.easymotion": true,
+    "vim.handleKeys": {
+        "<C-b>": false,
+        "<C-e>": false,
+        "<C-k>": false,
+        "<C-p>": false
+    },
+    "vim.leader": " ",
+    "vim.smartRelativeLine": true,
+    "vim.surround": true,
+    "vim.useSystemClipboard": true,
+    "window.commandCenter": false,
+    "window.customTitleBarVisibility": "never",
+    "window.menuBarVisibility": "toggle",
+    "window.titleBarStyle": "native",
+    "window.zoomLevel": -0.3,
+    "workbench.activityBar.location": "bottom",
+    "workbench.colorTheme": "Catppuccin Noctis Mocha",
+    "workbench.editor.showTabs": "multiple",
+    "workbench.iconTheme": "bearded-icons",
+    "workbench.layoutControl.enabled": false,
+    "workbench.productIconTheme": "material-product-icons",
+    "workbench.sideBar.location": "left",
+    "workbench.startupEditor": "none",
+    "workbench.tips.enabled": false,
+    "workbench.tree.renderIndentGuides": "none"
 }
