@@ -89,8 +89,8 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
           class="bar-section"
         >
           <NowPlaying />
-          <NetworkButton />
           <AudioButton />
+          <NetworkButton />
           <Battery />
           <Clock />
         </box>

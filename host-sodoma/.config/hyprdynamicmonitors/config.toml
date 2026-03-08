@@ -9,7 +9,7 @@ path = "/org/freedesktop/UPower/devices/line_power_ACAD"
 object_path = "/org/freedesktop/UPower/devices/line_power_ACAD"
 
 [profiles.laptop_only]
-config_file = "hyprconfigs/laptop.conf"
+config_file = "/home/ndrolp/.config/hyprdynamicmonitors/hyprconfigs/laptop.conf"
 config_file_type = "static"
 
 [[profiles.laptop_only.conditions.required_monitors]]

@@ -2,13 +2,16 @@
   &.Bar {
     border-radius: 0;
 
+    .bar-section {
+      padding: 2px 0px;
+    }
+
     .bar-content {
       padding: 2px 5px;
       border: none;
       border-radius: 0px;
       border-bottom: 2px solid var(--bg4);
       margin: 0px;
-      padding-top: 4px;
 
       .bar-icon {
         padding: 0px 5px;
@@ -17,7 +20,51 @@
   }
 
   &.separated-islands {
-    &.Bar .bar-content {}
+    border-top-right-radius: 0px;
+    border-top-left-radius: 0px;
+
+    &.rounding-full {
+      .bar-section {
+        padding-left: 20px;
+        padding-right: 20px;
+
+        &:nth-child(1),
+        &:nth-child(3) {
+          padding-left: 10px;
+          padding-right: 10px;
+        }
+      }
+    }
+
+    &.Bar .bar-content {
+      border-top: none;
+
+      .bar-icon {
+        padding: 0px 2px;
+      }
+
+      .bar-section {
+        border-top: none;
+        border-top-right-radius: 0px;
+        border-top-left-radius: 0px;
+
+        &:nth-child(1) {
+          border-top: none;
+          border-left: none;
+          border-top-right-radius: 0px;
+          border-top-left-radius: 0px;
+          border-bottom-left-radius: 0px;
+        }
+
+        &:nth-child(3) {
+          border-top: none;
+          border-right: none;
+          border-top-right-radius: 0px;
+          border-top-left-radius: 0px;
+          border-bottom-right-radius: 0px;
+        }
+      }
+    }
   }
 
   &.island.Bar {

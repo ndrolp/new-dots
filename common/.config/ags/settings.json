@@ -2,11 +2,11 @@
   "$schema": "./settings.schema.json",
   "theme": "catppuccin",
   "barAppearence": {
-    "layout": "separated-islands",
+    "layout": "default",
     "island": false,
     "compact": true,
-    "rounding": "md",
-    "float": true
+    "rounding": "lg",
+    "float": false
   },
   "workspaces": {
     "monitors": {
