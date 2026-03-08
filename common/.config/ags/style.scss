@@ -4,7 +4,6 @@
 @use "styles/themes.scss";
 
 * {
-  transition: 0.3s ease-in-out;
   font-family:
     "Noto Sans", "Hasklug Nerd Font Propo", "Noto Sans Simplified Chinese";
 }
@@ -22,7 +21,7 @@ window.Bar {
     padding: 5px;
     border: 2px solid var(--bg4);
     border-radius: 5px;
-    margin: 5px 10px;
+    margin: 5px 20px;
     margin-top: 10px;
     border-bottom: 2px solid var(--bg4);
     margin-bottom: 0px;

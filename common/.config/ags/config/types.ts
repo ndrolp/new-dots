@@ -15,6 +15,7 @@ export interface WorkspaceRange {
 
 export type WorkspacesConfig = {
   monitors: Record<string, WorkspaceRange>
+  displayType: "dots" | "numbers"
 }
 
 export interface IBarAppearence {

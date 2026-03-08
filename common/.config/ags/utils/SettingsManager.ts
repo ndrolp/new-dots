@@ -32,6 +32,7 @@ export class ShellSettings implements IShellSettings {
 
     this.workspaces = {
       monitors: data?.workspaces?.monitors ?? {},
+      displayType: "numbers",
     }
 
     this.nowPlaying = {

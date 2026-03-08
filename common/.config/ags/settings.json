@@ -5,7 +5,7 @@
     "layout": "default",
     "island": false,
     "compact": true,
-    "rounding": "lg",
+    "rounding": "full",
     "float": false
   },
   "workspaces": {
@@ -20,7 +20,8 @@
         "from": 11,
         "to": 20
       }
-    }
+    },
+    "displayType": "dots"
   },
   "nowPlaying": {
     "showControls": false,

@@ -1,6 +1,6 @@
 import AstalHyprland from "gi://AstalHyprland?version=0.1"
 import { Gtk, Gdk } from "ags/gtk4"
-import { createBinding, With } from "ags"
+import { createBinding, createComputed, With } from "ags"
 import WorkspaceButton from "./WorkspaceButton"
 import { SETTINGS } from "../../../config/Settings"
 import { WorkspaceRange } from "./WorkspacesSettingsType"
@@ -11,9 +11,10 @@ export default function Workspaces({ monitor }: { monitor: Gdk.Monitor }) {
   ] ?? { from: 1, to: 20, minWorkspaces: 5 }
 
   console.log(monitorSettings.minWorkspaces)
+  const monitorsToDISPLAY = monitorSettings.to - monitorSettings.from + 1
 
   const hypr = AstalHyprland.get_default()
-  const Five = Array(monitorSettings?.minWorkspaces ?? 5).fill(0)
+  const allWorkspaces = Array(monitorsToDISPLAY).fill(0)
   const hyprlandWorkspaces = createBinding(hypr, "workspaces")
 
   return (
@@ -22,30 +23,35 @@ export default function Workspaces({ monitor }: { monitor: Gdk.Monitor }) {
       class="bar-icon workspaces "
       orientation={Gtk.Orientation.HORIZONTAL}
     >
-      <With value={hyprlandWorkspaces}>
-        {(workspaces) => {
-          const sortedWorkspaces = workspaces.sort((a, b) => a.id - b.id)
-          return (
-            <box spacing={2.5}>
-              {Five.map((_, index) => (
-                <WorkspaceButton
-                  id={monitorSettings?.from + index}
-                  hyprInstance={hypr}
-                />
-              ))}
-              {sortedWorkspaces.map((element: AstalHyprland.Workspace) =>
-                element.id > Five.length &&
-                monitorSettings.to >= element.id &&
-                monitorSettings.from <= element.id ? (
-                  <WorkspaceButton showId id={element.id} hyprInstance={hypr} />
-                ) : (
-                  <></>
-                ),
-              )}
+      <box spacing={0}>
+        {allWorkspaces.map((_, index) => (
+          <revealer
+            transitionType={Gtk.RevealerTransitionType.SWING_RIGHT}
+            transitionDuration={200}
+            revealChild={createComputed(() => {
+              const sortedWorkspaces = hyprlandWorkspaces().sort(
+                (a, b) => a.id - b.id,
+              )
+              const workspaceId = monitorSettings.from + index
+              const workspaceExists = sortedWorkspaces.some(
+                (workspace) => workspace.id === workspaceId,
+              )
+              return (
+                workspaceExists || workspaceId <= monitorSettings.minWorkspaces
+              )
+            })}
+          >
+            <box>
+              <WorkspaceButton
+                id={monitorSettings?.from + index}
+                hyprInstance={hypr}
+                margin_left={index === 0 ? 0 : 4}
+                margin_right={index === allWorkspaces.length - 1 ? 0 : 4}
+              />
             </box>
-          )
-        }}
-      </With>
+          </revealer>
+        ))}
+      </box>
     </box>
   )
 }
