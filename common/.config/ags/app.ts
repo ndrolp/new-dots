@@ -35,7 +35,6 @@ const runApp = () =>
     css: style,
     main() {
       app.get_monitors().map((monitor) => {
-        console.log(monitor.model)
         Bar(monitor)
         BatteryDashboard()
         NetworkDashboard(Gtk.Align.END)
@@ -47,7 +46,6 @@ const runApp = () =>
 monitorFile("settings.json", (file, event) => {
   // updateCurrentSettings(JSON.parse(file))
   if (event === Gio.FileMonitorEvent.CHANGES_DONE_HINT) {
-    console.log("RESTARTING AGS")
     execAsync(["bash", "-c", "~/.config/ags/reload.sh"])
   }
 })

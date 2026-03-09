@@ -34,7 +34,6 @@ export const WirelessConectionManager = ({
                   )
                 else {
                   const accessPoints = network.wifi.accessPoints
-                  accessPoints.forEach((point) => console.log(point.ssid))
                   const accessPointsUi = accessPoints
                     .filter((value) => {
                       return (

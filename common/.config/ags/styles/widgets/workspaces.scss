@@ -12,7 +12,7 @@
     .workspace-button {
       /* background: var(--bg0); */
       background-color: transparent;
-      color: var(--grey0);
+      color: var(--bg4);
       padding: 0px 0px;
       transition:
         padding 0.3s ease-in-out,
@@ -22,13 +22,62 @@
 
       &.dot {
         font-size: 12pt;
+
+        &.occupied {
+          color: var(--fg);
+        }
+      }
+
+      &.icons-filled {
+        /* background-color: var(--bg2); */
+        padding: 0px 2px;
+        min-height: 0;
+
+        &.occupied {
+          color: var(--grey2);
+        }
+
+        &.focused {
+          background-color: var(--purple);
+          padding: 0px 8px;
+          color: var(--bg2);
+        }
+      }
+
+      &.dots {
+        padding: 0px 2px;
+        min-height: 0;
+
+        &.occupied {
+          color: var(--grey2);
+        }
+
+        &.focused {
+          color: var(--purple);
+        }
+      }
+
+      &.icons {
+        padding: 0px 2px;
+        min-height: 0;
+
+        &.occupied {
+          color: var(--grey2);
+        }
+
+        &.focused {
+          color: var(--purple);
+        }
       }
 
       &.numbers {
         /* background-color: var(--bg2); */
-        padding: 0px 2px;
-        color: var(--grey0);
+        padding: 0px 0px;
         min-height: 0;
+
+        &.occupied {
+          color: var(--grey2);
+        }
 
         &.focused {
           background-color: var(--purple);

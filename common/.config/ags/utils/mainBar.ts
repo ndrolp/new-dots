@@ -15,9 +15,5 @@ export function getWindowSettingsCssClasses() {
     SETTINGS.barAppearence.showBorder ? "show-border" : "no-border",
   )
 
-  const valueToReturn = cssClasses.join(" ")
-
-  console.log({ CssClasses: valueToReturn })
-
   return cssClasses.join(" ")
 }

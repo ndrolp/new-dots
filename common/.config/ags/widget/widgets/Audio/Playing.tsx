@@ -74,7 +74,6 @@ export function PlayerBarLine({ player }: { player: Mpris.Player }) {
                 : playbackStatus === Mpris.PlaybackStatus.PAUSED
                   ? "paused"
                   : ""
-          console.log(cssPlaybackClass)
           return (
             <box class={cssPlaybackClass}>
               <label

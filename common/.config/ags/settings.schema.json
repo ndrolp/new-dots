@@ -1,126 +1,118 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "IShellSettings",
-    "type": "object",
-    "additionalProperties": false,
-    "required": [
-        "debug",
-        "theme",
-        "barAppearence",
-        "workspaces",
-        "nowPlaying"
-    ],
-    "properties": {
-        "debug": {
-            "type": "boolean"
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IShellSettings",
+  "type": "object",
+  "properties": {
+    "theme": {
+      "type": "string",
+      "enum": ["catppuccin", "gruvbox-dark", "monochrome-blue-dark", "nord"]
+    },
+    "barAppearence": {
+      "type": "object",
+      "properties": {
+        "layout": {
+          "type": "string",
+          "enum": [
+            "default",
+            "transparent",
+            "separated-islands",
+            "slanted-separated-island"
+          ]
         },
-        "theme": {
-            "type": "string",
-            "enum": [
-                "catppuccin",
-                "gruvbox-dark",
-                "monochrome-blue-dark",
-                "nord"
-            ]
+        "island": {
+          "type": "boolean"
         },
-        "barAppearence": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "layout",
-                "island",
-                "float",
-                "compact",
-                "rounding"
-            ],
-            "properties": {
-                "layout": {
-                    "type": "string",
-                    "enum": [
-                        "default",
-                        "transparent",
-                        "separated-islands",
-                        "slanted-separated-islands"
-                    ]
-                },
-                "island": {
-                    "type": "boolean"
-                },
-                "float": {
-                    "type": "boolean"
-                },
-                "compact": {
-                    "type": "boolean"
-                },
-                "rounding": {
-                    "type": "string",
-                    "enum": [
-                        "lg",
-                        "sm",
-                        "md",
-                        "none",
-                        "full"
-                    ]
-                }
-            }
+        "compact": {
+          "type": "boolean"
         },
-        "workspaces": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "monitors"
-            ],
-            "properties": {
-                "monitors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                            "minWorkspaces",
-                            "from",
-                            "to"
-                        ],
-                        "properties": {
-                            "minWorkspaces": {
-                                "type": "number"
-                            },
-                            "from": {
-                                "type": "number"
-                            },
-                            "to": {
-                                "type": "number"
-                            }
-                        }
-                    }
-                }
-            }
+        "float": {
+          "type": "boolean"
         },
-        "nowPlaying": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "showControls",
-                "preferedClients",
-                "ignoreClients"
-            ],
-            "properties": {
-                "showControls": {
-                    "type": "boolean"
-                },
-                "watchClients": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "ignoreClients": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
+        "showBorder": {
+          "type": "boolean"
+        },
+        "rounding": {
+          "type": "string",
+          "enum": ["lg", "sm", "md", "none", "full"]
         }
+      },
+      "required": [
+        "layout",
+        "island",
+        "compact",
+        "float",
+        "showBorder",
+        "rounding"
+      ]
+    },
+    "workspaces": {
+      "type": "object",
+      "properties": {
+        "monitors": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "minWorkspaces": {
+                "type": "integer"
+              },
+              "from": {
+                "type": "integer"
+              },
+              "to": {
+                "type": "integer"
+              }
+            },
+            "required": ["minWorkspaces", "from", "to"]
+          }
+        },
+        "displayType": {
+          "type": "string",
+          "enum": ["dots", "numbers", "icons-filled", "icons"]
+        },
+        "icons": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["monitors", "displayType", "icons"]
+    },
+    "nowPlaying": {
+      "type": "object",
+      "properties": {
+        "showControls": {
+          "type": "boolean"
+        },
+        "preferedClients": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ignoreClients": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["showControls", "preferedClients", "ignoreClients"]
+    },
+    "log": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "level": {
+          "type": "string",
+          "enum": ["log", "error", "warn"]
+        }
+      },
+      "required": ["enabled", "level"]
     }
+  },
+  "required": ["theme", "barAppearence", "workspaces", "nowPlaying", "log"]
 }

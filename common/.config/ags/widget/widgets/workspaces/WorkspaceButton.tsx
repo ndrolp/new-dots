@@ -2,6 +2,7 @@ import AstalHyprland from "gi://AstalHyprland?version=0.1"
 import { createBinding, createComputed, With } from "ags"
 import { ShellSettings } from "../../../utils/SettingsManager"
 import { Gdk } from "ags/gtk4"
+import Logger from "../../../utils/logger"
 
 export default function WorkspaceButton({
   hyprInstance,
@@ -9,35 +10,75 @@ export default function WorkspaceButton({
   showId = false,
   margin_left = 0,
   margin_right = 0,
+  index = null,
 }: {
   hyprInstance: AstalHyprland.Hyprland
   id: number
   showId?: boolean
   margin_left?: number
   margin_right?: number
+  index?: number | null
 }) {
+  const log = Logger.getInstance()
   const SETTINGS = ShellSettings.getInstance()
   const instance = hyprInstance.workspaces.find((element) => element.id === id)
   const focusedWorkspace = createBinding(hyprInstance, "focusedWorkspace")
   focusedWorkspace().clients
+  const allWorkspaces = createBinding(hyprInstance, "workspaces")
 
   const workspaceIcon = createComputed(() => {
     if (SETTINGS.workspaces.displayType === "numbers") {
       return id.toString()
+    }
+    if (
+      SETTINGS.workspaces.displayType === "icons" ||
+      SETTINGS.workspaces.displayType === "icons-filled"
+    ) {
+      return SETTINGS.workspaces.icons[id.toString()] ?? "󰣆"
     }
     return id == focusedWorkspace().id ? "" : ""
   })
 
   const workspaceClass = createComputed(() => {
     let classes = "workspace-button"
-    if (id === focusedWorkspace().id) {
+
+    const focused = focusedWorkspace()
+    const workspaces = allWorkspaces()
+      .sort((a, b) => a.id - b.id)
+      .filter((workspace) => workspace.id >= 0)
+    const currentFound = workspaces.find((workspace) => {
+      return workspace.id === id
+    })
+
+    log.separator()
+    log.log("Computing classes for workspace", id)
+    log.log("Focused workspace:", focused.id)
+    log.log("Current workspace:", id)
+    log.log("Is focused?", id === focused.id)
+    log.log("Is occupied?", currentFound ? "Yes" : "No")
+
+    if (id === focused.id) {
       classes += " focused"
+    } else if (currentFound?.clients?.length ?? 0 > 0) {
+      classes += " occupied"
     }
-    if (SETTINGS.workspaces.displayType === "dots") {
-      classes += " dot"
-    } else {
-      classes += " numbers"
+
+    switch (SETTINGS.workspaces.displayType) {
+      case "dots":
+        classes += " dots"
+        break
+      case "numbers":
+        classes += " numbers"
+        break
+      case "icons":
+        classes += " icons"
+        break
+      case "icons-filled":
+        classes += " icons-filled"
+        break
     }
+
+    log.separator()
     return classes
   })
 

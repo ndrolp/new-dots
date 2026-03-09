@@ -18,6 +18,5 @@ export function getWindowAnchors(position: Gtk.Align): Astal.WindowAnchor {
     if (position === Gtk.Align.START) anchorToReturn = anchorToReturn | LEFT
   }
 
-  console.log({ anchorToReturn })
   return anchorToReturn
 }

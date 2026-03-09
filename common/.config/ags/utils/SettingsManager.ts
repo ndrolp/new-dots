@@ -1,6 +1,7 @@
 import { readFile, readFileAsync, writeFile } from "ags/file"
 import {
   IBarAppearence,
+  ILogSettings,
   INowPlayingConfig,
   IShellSettings,
   WorkspacesConfig,
@@ -14,6 +15,7 @@ import {
 export class ShellSettings implements IShellSettings {
   private static instance: ShellSettings
 
+  log: ILogSettings
   theme: SHEL_THEME
   barAppearence: IBarAppearence
   workspaces: WorkspacesConfig
@@ -21,6 +23,11 @@ export class ShellSettings implements IShellSettings {
 
   private constructor(data?: Partial<IShellSettings>) {
     this.theme = data?.theme ?? "catppuccin"
+
+    this.log = {
+      enabled: data?.log?.enabled ?? false,
+      level: data?.log?.level ?? "log",
+    }
 
     this.barAppearence = {
       layout: data?.barAppearence?.layout ?? "default",
@@ -34,6 +41,7 @@ export class ShellSettings implements IShellSettings {
     this.workspaces = {
       monitors: data?.workspaces?.monitors ?? {},
       displayType: data?.workspaces?.displayType ?? "dots",
+      icons: data?.workspaces?.icons ?? {},
     }
 
     this.nowPlaying = {
@@ -59,7 +67,6 @@ export class ShellSettings implements IShellSettings {
   private static load(): ShellSettings {
     try {
       const raw = readFile("settings.json")
-      console.log(raw)
       const parsed = JSON.parse(raw)
       return new ShellSettings(parsed)
     } catch (err) {
@@ -93,7 +100,6 @@ export class ShellSettings implements IShellSettings {
 
   setAppearence(appearence: DEFAULT_BAR_APPEARENCE) {
     this.barAppearence = BAR_APPEARENCES[appearence]
-    console.log(this.barAppearence)
     this.save()
   }
 

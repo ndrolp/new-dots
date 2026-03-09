@@ -1,10 +1,12 @@
-import { SHEL_THEME } from "../utils/settings/DefaultBarAppearences"
+export type SHEL_THEME =
+  | "catppuccin"
+  | "gruvbox-dark"
+  | "monochrome-blue-dark"
+  | "nord"
 
-export interface IShellSettings {
-  theme: SHEL_THEME
-  barAppearence: IBarAppearence
-  workspaces: WorkspacesConfig
-  nowPlaying: INowPlayingConfig
+export interface ILogSettings {
+  enabled: boolean
+  level: "log" | "error" | "warn"
 }
 
 export interface WorkspaceRange {
@@ -15,7 +17,10 @@ export interface WorkspaceRange {
 
 export type WorkspacesConfig = {
   monitors: Record<string, WorkspaceRange>
-  displayType: "dots" | "numbers"
+  displayType: "dots" | "numbers" | "icons-filled" | "icons"
+  icons: {
+    [key: string]: string
+  }
 }
 
 export interface IBarAppearence {
@@ -35,4 +40,12 @@ export interface INowPlayingConfig {
   showControls: boolean
   preferedClients: string[]
   ignoreClients: string[]
+}
+
+export interface IShellSettings {
+  theme: SHEL_THEME
+  barAppearence: IBarAppearence
+  workspaces: WorkspacesConfig
+  nowPlaying: INowPlayingConfig
+  log: ILogSettings
 }

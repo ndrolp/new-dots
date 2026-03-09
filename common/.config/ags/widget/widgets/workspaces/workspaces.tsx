@@ -10,7 +10,6 @@ export default function Workspaces({ monitor }: { monitor: Gdk.Monitor }) {
     monitor.get_model() ?? "NULL"
   ] ?? { from: 1, to: 20, minWorkspaces: 5 }
 
-  console.log(monitorSettings.minWorkspaces)
   const monitorsToDISPLAY = monitorSettings.to - monitorSettings.from + 1
 
   const hypr = AstalHyprland.get_default()
@@ -37,7 +36,9 @@ export default function Workspaces({ monitor }: { monitor: Gdk.Monitor }) {
                 (workspace) => workspace.id === workspaceId,
               )
               return (
-                workspaceExists || workspaceId <= monitorSettings.minWorkspaces
+                workspaceExists ||
+                workspaceId <
+                  monitorSettings.minWorkspaces + monitorSettings.from
               )
             })}
           >
