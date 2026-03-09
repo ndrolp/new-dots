@@ -10,7 +10,6 @@
       padding: 2px 5px;
       border: none;
       border-radius: 0px;
-      border-bottom: 2px solid var(--bg4);
       margin: 0px;
 
       .bar-icon {
@@ -72,8 +71,6 @@
     border-top-left-radius: 0px;
 
     .bar-content {
-      border: 2px solid var(--bg4);
-      border-top: none;
       border-top-right-radius: 0px;
       border-top-left-radius: 0px;
     }

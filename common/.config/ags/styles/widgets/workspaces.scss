@@ -20,16 +20,20 @@
         background-color 0.1s ease;
       box-sizing: border-box;
 
+      &.dot {
+        font-size: 12pt;
+      }
+
       &.numbers {
-        background-color: var(--bg2);
-        padding: 0px 5px;
-        color: var(--grey1);
+        /* background-color: var(--bg2); */
+        padding: 0px 2px;
+        color: var(--grey0);
         min-height: 0;
 
         &.focused {
           background-color: var(--purple);
-          padding: 0px 10px;
-          color: var(--bg0);
+          padding: 0px 8px;
+          color: var(--bg2);
         }
       }
 

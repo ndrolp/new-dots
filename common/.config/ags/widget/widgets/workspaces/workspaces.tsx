@@ -45,8 +45,8 @@ export default function Workspaces({ monitor }: { monitor: Gdk.Monitor }) {
               <WorkspaceButton
                 id={monitorSettings?.from + index}
                 hyprInstance={hypr}
-                margin_left={index === 0 ? 0 : 4}
-                margin_right={index === allWorkspaces.length - 1 ? 0 : 4}
+                margin_left={index === 0 ? 0 : 2}
+                margin_right={index === allWorkspaces.length - 1 ? 0 : 2}
               />
             </box>
           </revealer>

@@ -1,6 +1,7 @@
 import AstalHyprland from "gi://AstalHyprland?version=0.1"
 import { createBinding, createComputed, With } from "ags"
 import { ShellSettings } from "../../../utils/SettingsManager"
+import { Gdk } from "ags/gtk4"
 
 export default function WorkspaceButton({
   hyprInstance,
@@ -43,6 +44,7 @@ export default function WorkspaceButton({
   return (
     <box marginStart={margin_left} marginEnd={margin_right}>
       <box
+        cursor={Gdk.Cursor.new_from_name("pointer", null)}
         $type="start"
         hexpand={false}
         vexpand={false}

@@ -83,7 +83,7 @@ export function PlayerBarLine({ player }: { player: Mpris.Player }) {
               />
               <label
                 halign={Gtk.Align.CENTER}
-                label={truncateString(data.title, 35)}
+                label={truncateString(data.title, 30)}
               />
             </box>
           )

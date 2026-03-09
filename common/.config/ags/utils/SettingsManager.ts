@@ -28,11 +28,12 @@ export class ShellSettings implements IShellSettings {
       compact: data?.barAppearence?.compact ?? false,
       rounding: data?.barAppearence?.rounding ?? "md",
       float: data?.barAppearence?.float ?? true,
+      showBorder: data?.barAppearence?.showBorder ?? true,
     }
 
     this.workspaces = {
       monitors: data?.workspaces?.monitors ?? {},
-      displayType: "numbers",
+      displayType: data?.workspaces?.displayType ?? "dots",
     }
 
     this.nowPlaying = {

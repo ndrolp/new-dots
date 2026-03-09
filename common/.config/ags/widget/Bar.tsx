@@ -56,11 +56,13 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   // <box class="slanta">
   //   <label label={""} />
   // </box>
+  // <CurrentApp monitor={gdkmonitor} />
 
   return (
     <window
       visible
       name="bar"
+      namespace={"agsbar"}
       class={`Bar ${barCss}`}
       gdkmonitor={gdkmonitor}
       exclusivity={Astal.Exclusivity.EXCLUSIVE}
@@ -69,10 +71,8 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     >
       <Container>
         <box $type="start" spacing={spacing} class="bar-section">
-          <button class="bar-icon test">
-            <label label="" />
-          </button>
-          <CurrentApp monitor={gdkmonitor} />
+          <Clock />
+          <NowPlaying />
         </box>
         <box
           halign={Gtk.Align.CENTER}
@@ -88,11 +88,9 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
           spacing={spacing}
           class="bar-section"
         >
-          <NowPlaying />
           <AudioButton />
           <NetworkButton />
           <Battery />
-          <Clock />
         </box>
       </Container>
     </window>

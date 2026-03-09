@@ -27,6 +27,7 @@ export interface IBarAppearence {
   island: boolean
   compact: boolean
   float: boolean
+  showBorder: boolean
   rounding: "lg" | "sm" | "md" | "none" | "full"
 }
 

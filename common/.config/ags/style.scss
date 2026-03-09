@@ -19,13 +19,12 @@ window.Bar {
     transition: 0.3s;
     background: var(--bg0);
     padding: 5px;
-    border: 2px solid var(--bg4);
     border-radius: 5px;
     margin: 5px 20px;
     margin-top: 10px;
-    border-bottom: 2px solid var(--bg4);
-    margin-bottom: 0px;
+    margin-bottom: 2px;
     width: fit-content;
+    box-shadow: 0px 0px 16px rgba(0, 0, 0, 0.03);
 
     .blue-fg {
       color: var(--blue);
