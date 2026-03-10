@@ -16,8 +16,10 @@
       padding: 0px 0px;
       transition:
         padding 0.3s ease-in-out,
-        color 0.1s ease-out,
-        background-color 0.1s ease;
+        padding-left 0.2s ease-in-out,
+        padding-right 0.1s ease-in-out,
+        color 0s ease-out,
+        background-color 0s ease-in-out;
       box-sizing: border-box;
 
       &.dot {

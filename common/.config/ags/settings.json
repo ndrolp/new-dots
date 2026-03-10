@@ -6,8 +6,8 @@
         "level": "log"
     },
     "barAppearence": {
-        "layout": "separated-islands",
-        "island": false,
+        "layout": "default",
+        "island": true,
         "compact": true,
         "rounding": "full",
         "float": true,
@@ -26,9 +26,9 @@
                 "to": 20
             }
         },
-        "displayType": "icons-filled",
+        "displayType": "numbers",
         "icons": {
-            "1": "",
+            "1": "",
             "2": "",
             "3": "",
             "4": "󰣆",

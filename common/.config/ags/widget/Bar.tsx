@@ -34,7 +34,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
             orientation={Gtk.Orientation.HORIZONTAL}
             cssName="centerbox"
             class="bar-content"
-            spacing={spacing}
+            spacing={spacing + 5}
           >
             {children}
           </box>
