@@ -1,0 +1,22 @@
+@use "./notification-box.scss";
+
+window.notification-overlay {
+  background: transparent;
+  border: none;
+}
+
+.orange {
+  background: orange;
+}
+
+.teal {
+  background: teal;
+}
+
+.crimson {
+  background: crimson;
+}
+
+.tomato {
+  background: tomato;
+}

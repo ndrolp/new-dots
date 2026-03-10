@@ -14,6 +14,8 @@ import {
   DEFAULT_BAR_APPEARENCE,
   SHELL_THEMES_BINDER,
 } from "./utils/settings/DefaultBarAppearences"
+import ActiveNotifications from "./widget/widgets/Notifications/ActiveNotifications"
+import { NotificationsWindow } from "./widget/Test"
 
 const runApp = () =>
   app.start({
@@ -36,10 +38,11 @@ const runApp = () =>
     main() {
       app.get_monitors().map((monitor) => {
         Bar(monitor)
-        BatteryDashboard()
-        NetworkDashboard(Gtk.Align.END)
-        Dashboard()
       })
+      BatteryDashboard()
+      NetworkDashboard(Gtk.Align.END)
+      Dashboard()
+      ActiveNotifications()
     },
   })
 

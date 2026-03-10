@@ -23,3 +23,33 @@ export function capitalizeEachWord(str: string) {
     })
     .join(" ")
 }
+export function isPath(input: string): boolean {
+  if (!input || typeof input !== "string") return false
+
+  return (
+    input.includes("/") ||
+    input.includes("\\") ||
+    input === "." ||
+    input === ".."
+  )
+}
+export function wrapWords(text: string, maxLength: number): string {
+  const words = text.split(/\s+/)
+  const lines: string[] = []
+  let currentLine = ""
+
+  for (const word of words) {
+    const next = currentLine ? `${currentLine} ${word}` : word
+
+    if (next.length <= maxLength) {
+      currentLine = next
+    } else {
+      if (currentLine) lines.push(currentLine)
+      currentLine = word
+    }
+  }
+
+  if (currentLine) lines.push(currentLine)
+
+  return lines.join("\n")
+}

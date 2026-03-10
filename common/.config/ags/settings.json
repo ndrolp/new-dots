@@ -1,10 +1,6 @@
 {
     "$schema": "./settings.schema.json",
     "theme": "catppuccin",
-    "log": {
-        "enabled": true,
-        "level": "log"
-    },
     "barAppearence": {
         "layout": "default",
         "island": true,
