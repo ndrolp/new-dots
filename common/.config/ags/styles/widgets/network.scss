@@ -1,5 +1,5 @@
 .network-button {
-  color: var(--purple);
+  color: var(--accent0);
 
   .network-icon {}
 
@@ -58,10 +58,10 @@
         color: var(--grey0);
       }
 
-      :nth-child(4) {
-        color: var(--green);
-        font-size: 9pt;
-      }
+        :nth-child(4) {
+          color: var(--accent3);
+          font-size: 9pt;
+        }
     }
   }
 
