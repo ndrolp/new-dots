@@ -1,1 +1,3 @@
-require("nord").set()
+-- require("nord").set()
+
+vim.cmd([[colorscheme nord]])

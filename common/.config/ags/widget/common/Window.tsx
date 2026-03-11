@@ -8,7 +8,7 @@ export interface CustomWindowProps {
   namespace: string
   name: string
   exclusivity?: Astal.Exclusivity
-  position: Gtk.Align
+  position?: Gtk.Align
   css?: string
   visible?: boolean
   onVisivilityChange?: (self: Astal.Window) => void
@@ -16,14 +16,14 @@ export interface CustomWindowProps {
 
 export default function CustomWindow({
   children,
-  position,
+  position = undefined,
   name,
   namespace,
   css = "",
   visible = false,
   onVisivilityChange = () => {},
 }: CustomWindowProps) {
-  const anchor = getWindowAnchors(position)
+  const anchor = getWindowAnchors(position ?? Gtk.Align.CENTER)
   const cssClass = getWindowMarginClass(anchor)
 
   return (

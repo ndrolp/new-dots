@@ -46,7 +46,7 @@
   .container {
     background: var(--bg0);
     padding: 10px;
-    border: 2px solid var(--bg4);
+    border: 2px solid var(--border0);
     margin-left: 10px;
     border-radius: 8px;
     margin-top: 10px;
@@ -64,6 +64,15 @@ button.bar-icon {
 
   &:hover {
     background: var(--bg3);
+  }
+}
+
+button {
+  border: none;
+  background: var(--bg0);
+
+  &:hover {
+    background: var(--bg2);
   }
 }
 

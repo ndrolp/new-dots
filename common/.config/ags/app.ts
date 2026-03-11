@@ -16,6 +16,7 @@ import {
 } from "./utils/settings/DefaultBarAppearences"
 import ActiveNotifications from "./widget/widgets/Notifications/ActiveNotifications"
 import { NotificationsWindow } from "./widget/Test"
+import WallpaperPicker from "./widget/widgets/Wallpaper/WallpaperPicker"
 
 const runApp = () =>
   app.start({
@@ -43,6 +44,7 @@ const runApp = () =>
       NetworkDashboard(Gtk.Align.END)
       Dashboard()
       ActiveNotifications()
+      WallpaperPicker()
     },
   })
 

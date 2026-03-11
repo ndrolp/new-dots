@@ -12,7 +12,7 @@
     .workspace-button {
       /* background: var(--bg0); */
       background-color: transparent;
-      color: var(--bg4);
+      color: var(--fg2);
       padding: 0px 0px;
       transition:
         padding 0.3s ease-in-out,
@@ -31,7 +31,7 @@
 
       &.icons-filled {
         /* background-color: var(--bg2); */
-        padding: 0px 2px;
+        padding: 0px 4px;
         border: none;
         min-height: 0;
 
@@ -74,7 +74,7 @@
 
       &.numbers {
         /* background-color: var(--bg2); */
-        padding: 0px 0px;
+        padding: 0px 2px;
         min-height: 0;
         border: none;
 

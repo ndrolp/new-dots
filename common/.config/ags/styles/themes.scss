@@ -2,6 +2,8 @@
 :root {
   --bg0: #232634;
   --fg: #c6d0f5;
+  --fg1: #a5afd8;
+  --fg2: #8490bb;
   --accent0: #ca9eee;
   --accent1: #8caaee;
   --accent2: #81c8be;
@@ -9,6 +11,10 @@
   --accent4: #e5c890;
   --accent5: #ef9f76;
   --accent6: #e78284;
+
+  --border0: #51576d;
+  --border1: #626879;
+  --border2: #737994;
 }
 
 /* Catppuccin theme */
@@ -20,6 +26,8 @@
   --bg4: #51576d;
 
   --fg: #c6d0f5;
+  --fg1: #a5afd8;
+  --fg2: #8490bb;
 
   --accent0: #ca9eee;
   --accent1: #8caaee;
@@ -32,6 +40,10 @@
   --grey0: #737994;
   --grey1: #838ba7;
   --grey2: #949cbb;
+
+  --border0: #51576d;
+  --border1: #626879;
+  --border2: #737994;
 }
 
 /* Nord theme */
@@ -43,6 +55,8 @@
   --bg4: #616e88;
 
   --fg: #d8dee9;
+  --fg1: #b0bccf;
+  --fg2: #8898b0;
 
   --accent0: #b48ead;
   --accent1: #81a1c1;
@@ -55,6 +69,11 @@
   --grey0: #d8dee9;
   --grey1: #cfd6e3;
   --grey2: #bfc7d5;
+
+  /* --border0: #616e88; */
+  --border0: #81a1c1;
+  --border1: #748099;
+  --border2: #8892aa;
 }
 
 /* Gruvbox Darker theme */
@@ -66,6 +85,8 @@
   --bg4: #504945;
 
   --fg: #ebdbb2;
+  --fg1: #c8b898;
+  --fg2: #a5957a;
 
   --accent0: #d3869b;
   --accent1: #83a598;
@@ -78,6 +99,10 @@
   --grey0: #665c54;
   --grey1: #7c6f64;
   --grey2: #928374;
+
+  --border0: #504945;
+  --border1: #665c54;
+  --border2: #7c6f64;
 }
 
 .monochrome-blue-dark {
@@ -88,6 +113,8 @@
   --bg4: #0f1726;
 
   --fg: #7aa2f7;
+  --fg1: #9ab8fa;
+  --fg2: #b8ccfc;
 
   --accent0: #7aa2f7;
   --accent1: #7aa2f7;
@@ -111,6 +138,10 @@
 
   --crust: #0f1726;
   --mantle: #0f1726;
+
+  --border0: #0f1726;
+  --border1: #1a2d42;
+  --border2: #2a4060;
 }
 
 .monochrome-blue-dark {
@@ -121,6 +152,8 @@
   --bg4: #0b1220;
 
   --fg: #cfdbe6;
+  --fg1: #a8b8c8;
+  --fg2: #8096a8;
 
   --accent0: #cfdbe6;
   --accent1: #cfdbe6;
@@ -145,9 +178,13 @@
   --crust: #0b1220;
   --mantle: #0b1220;
 
+  --border0: #0b1220;
+  --border1: #1a2d42;
+  --border2: #2a4060;
+
   .bar-content {
     background: var(--bg0);
-    border: 0px solid var(--bg4);
+    border: 0px solid var(--border0);
     border-radius: 0px;
   }
 

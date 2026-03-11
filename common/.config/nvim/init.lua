@@ -1,6 +1,5 @@
 vim.g.mapleader = " "
 
-
 require("settings.core.general")
 require("settings.core.lsp")
 require("settings.core.keymaps")

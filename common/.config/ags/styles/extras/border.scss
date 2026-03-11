@@ -1,7 +1,7 @@
 .show-border {
   &.Bar {
     .bar-content {
-      border: 1px solid var(--bg4);
+      border: 1px solid var(--border0);
     }
   }
 
@@ -9,7 +9,7 @@
     &.Bar {
       .bar-content {
         border: none;
-        border-bottom: 1px solid var(--bg4);
+        border-bottom: 1px solid var(--border0);
       }
     }
 
@@ -20,7 +20,7 @@
         }
 
         .bar-section {
-          border: 2px solid var(--bg4);
+          border: 2px solid var(--border0);
           border-top: none;
         }
       }
@@ -29,7 +29,7 @@
     &.island {
       &.Bar {
         .bar-content {
-          border: 2px solid var(--bg4);
+          border: 2px solid var(--border0);
           border-top: none;
         }
       }
@@ -42,7 +42,7 @@
         border: none;
 
         .bar-section {
-          border: 2px solid var(--bg4);
+          border: 2px solid var(--border0);
         }
       }
     }

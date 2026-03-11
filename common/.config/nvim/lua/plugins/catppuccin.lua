@@ -2,8 +2,8 @@ return {
 	"catppuccin/nvim",
 	name = "catppuccin",
 	priority = 1000,
+	enabled = true,
 	config = function()
-		vim.cmd("colorscheme catppuccin")
 		vim.g.catppuccin_transparent_background = true
 		require("catppuccin").setup({
 			flavour = "auto", -- latte, frappe, macchiato, mocha

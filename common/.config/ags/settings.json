@@ -3,11 +3,11 @@
     "theme": "nord",
     "barAppearence": {
         "layout": "default",
-        "island": true,
+        "island": false,
         "compact": true,
         "rounding": "full",
-        "float": true,
-        "showBorder": false
+        "float": false,
+        "showBorder": true
     },
     "workspaces": {
         "monitors": {
