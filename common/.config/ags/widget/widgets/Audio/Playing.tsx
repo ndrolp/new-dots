@@ -20,8 +20,14 @@ export default function NowPlaying() {
         {(barData) => {
           return (
             <revealer
-              transitionType={Gtk.RevealerTransitionType.CROSSFADE}
-              revealChild={true}
+              transitionType={Gtk.RevealerTransitionType.SLIDE_LEFT}
+              revealChild={createComputed(() => {
+                if (spotifyAvailable()) return true
+                const players = defaultPlayers()
+                if (players.length > 0 && (players?.[0].title ?? false))
+                  return true
+                return false
+              })}
             >
               <box
                 visible={barData.spotifyAvailable || barData.players.length > 0}

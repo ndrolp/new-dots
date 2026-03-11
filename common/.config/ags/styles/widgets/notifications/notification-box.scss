@@ -1,9 +1,8 @@
 .notification-box {
   background: var(--bg1);
-  border-radius: 5px;
-  box-shadow: 0px 0px 5px var(--bg0);
-  border: 1px solid var(--bg4);
-  transition: 0.3s ease-in-out;
+  border-radius: 10px;
+  border: 1px solid var(--bg2);
+  background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
 
   .image-container {
     padding: 0px;
@@ -17,13 +16,14 @@
 
   .content {
     padding: 4px 5px;
+    border-radius: 10px;
   }
 
   .header {
     .title {
       font-size: 1em;
       font-weight: bolder;
-      color: var(--grey1);
+      color: var(--grey2);
     }
 
     .app {

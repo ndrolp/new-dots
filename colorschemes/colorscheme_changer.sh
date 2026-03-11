@@ -52,6 +52,9 @@ ln -sf "$THEME_FOLDER/nvim/theme.lua" "$NVIM_COLORS"
 echo "LINKING ROFI"
 ln -sf "$THEME_FOLDER/rofi/colors.rasi" "$ROFI_COLORS"
 
+source "$THEME_FOLDER/gtk/colors.sh"
+mkdir -p ~/.config/gtk-4.0
+echo -e "[Settings]\ngtk-theme-name=THEME_NAME" > ~/.config/gtk-4.0/settings.ini
 
 ags request theme $SELECTED_FOLDER
 sleep 0.3

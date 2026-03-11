@@ -1,5 +1,6 @@
 return {
 	settings = {
+		cmd = { "qmlls", "-E" },
 		qml = {
 			qmlImportPaths = {
 				vim.env.QML_IMPORT_PATH,

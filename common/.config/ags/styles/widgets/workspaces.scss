@@ -10,9 +10,9 @@
     padding: 2px 0px;
 
     .workspace-button {
-        /* background: var(--bg0); */
-        background-color: transparent;
-        color: var(--bg4);
+      /* background: var(--bg0); */
+      background-color: transparent;
+      color: var(--bg4);
       padding: 0px 0px;
       transition:
         padding 0.3s ease-in-out,
@@ -20,7 +20,6 @@
         padding-right 0.1s ease-in-out,
         color 0s ease-out,
         background-color 0s ease-in-out;
-      box-sizing: border-box;
 
       &.dot {
         font-size: 12pt;
@@ -30,63 +29,65 @@
         }
       }
 
-        &.icons-filled {
-          /* background-color: var(--bg2); */
-          padding: 0px 2px;
-          min-height: 0;
+      &.icons-filled {
+        /* background-color: var(--bg2); */
+        padding: 0px 2px;
+        border: none;
+        min-height: 0;
 
-          &.occupied {
-            color: var(--grey2);
-          }
-
-          &.focused {
-            background-color: var(--accent0);
-            padding: 0px 8px;
-            color: var(--bg2);
-          }
+        &.occupied {
+          color: var(--grey2);
         }
 
-        &.dots {
-          padding: 0px 2px;
-          min-height: 0;
+        &.focused {
+          background-color: var(--accent0);
+          padding: 0px 8px;
+          color: var(--bg2);
+        }
+      }
 
-          &.occupied {
-            color: var(--grey2);
-          }
+      &.dots {
+        padding: 0px 2px;
+        min-height: 0;
 
-          &.focused {
-            color: var(--accent0);
-          }
+        &.occupied {
+          color: var(--grey2);
         }
 
-        &.icons {
-          padding: 0px 2px;
-          min-height: 0;
+        &.focused {
+          color: var(--accent0);
+        }
+      }
 
-          &.occupied {
-            color: var(--grey2);
-          }
+      &.icons {
+        padding: 0px 2px;
+        min-height: 0;
 
-          &.focused {
-            color: var(--accent0);
-          }
+        &.occupied {
+          color: var(--grey2);
         }
 
-        &.numbers {
-          /* background-color: var(--bg2); */
-          padding: 0px 0px;
-          min-height: 0;
-
-          &.occupied {
-            color: var(--grey2);
-          }
-
-          &.focused {
-            background-color: var(--accent0);
-            padding: 0px 8px;
-            color: var(--bg2);
-          }
+        &.focused {
+          color: var(--accent0);
         }
+      }
+
+      &.numbers {
+        /* background-color: var(--bg2); */
+        padding: 0px 0px;
+        min-height: 0;
+        border: none;
+
+        &.occupied {
+          color: var(--grey2);
+        }
+
+        &.focused {
+          background-color: var(--accent0);
+          padding: 0px 8px;
+          color: var(--bg2);
+        }
+      }
 
       label {
         font-weight: bolder;
@@ -99,15 +100,15 @@
         /* border: 2px solid var(--accent2); */
       }
 
-        &.focused {
-          /* animation: active-workspace 0.3s ease-in-out 1; */
-          color: var(--accent0);
-          /* border: 2px solid var(--accent0); */
-          /* padding: 0px 1px; */
-          /* background-color: var(--accent0); */
-          /* border-color: var(--bg3); */
-          /* padding: 0px 5px; */
-        }
+      &.focused {
+        /* animation: active-workspace 0.3s ease-in-out 1; */
+        color: var(--accent0);
+        /* border: 2px solid var(--accent0); */
+        /* padding: 0px 1px; */
+        /* background-color: var(--accent0); */
+        /* border-color: var(--bg3); */
+        /* padding: 0px 5px; */
+      }
     }
   }
 }

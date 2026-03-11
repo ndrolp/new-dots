@@ -6,6 +6,7 @@ DEFAULT_DIR="$HOME/Pictures/Wallpapers/Default/"
 BASE_DIR="$HOME/Pictures/Horizontal/"
 DEFAULT_DIR="$HOME/Pictures/Horizontal/Default/"
 
+
 declare -A THEME_COMMANDS=(
     ["catppuccin"]="lutgen apply -p catppuccin-latte -L 0.65"
     ["gruvboxdark"]="lutgen apply -p gruvbox-light-hard -L 0.65 "
