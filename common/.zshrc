@@ -211,6 +211,8 @@ alias adbwireless="~/.dotfiles/scripts/adb_wireless_helper/wireless_helper.sh"
 alias pjs="cd ~/Documents/Projects/"
 alias fm=yazi
 alias bf="~/.dotfiles/scripts/lenovo/battery_max_charge.sh"
+alias wg="~/.dotfiles/scripts/wallpapers/wallpaper-generator.sh"
+alias wgd="~/.dotfiles/scripts/wallpapers/wallpaper-generator.sh '$HOME/Pictures/[01] - Wallpapers/[01] - Default/Default/'"
 
 
 # Created by `pipx` on 2025-07-27 12:40:09

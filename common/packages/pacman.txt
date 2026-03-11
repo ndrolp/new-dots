@@ -65,7 +65,6 @@ hyprpolkitagent
 nwg-look
 upower
 spotify-player
-ppeaclock
 ttf-firacode-nerd
 qutebrowser
 meson
@@ -75,3 +74,5 @@ wireplumber
 gobject-introspection
 vlc-plugin-ffmpeg
 noto-fonts-cjk
+networkmanager
+jq

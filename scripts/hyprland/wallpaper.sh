@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-WALLPAPER_MAIN="$HOME/Pictures/Wallpapers"
-WALLPAPER_SECONDARY="$HOME/Pictures/Wallpapers Vertical"
+WALLPAPER_MAIN="$HOME/Pictures/[01] - Wallpapers/[02] - Current/Horizontal/"
+WALLPAPER_SECONDARY="$HOME/Pictures/[01] - Wallpapers/[02] - Current/Vertical/"
 
 # Transition settings (optional, tweak to taste)
 TRANSITION_TYPE="center"

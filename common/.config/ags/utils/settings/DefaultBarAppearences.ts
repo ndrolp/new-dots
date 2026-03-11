@@ -17,6 +17,7 @@ export type SHEL_THEME =
 export const SHELL_THEMES_BINDER: Record<string, SHEL_THEME> = {
   catppuccin: "catppuccin",
   gruvboxdark: "gruvbox-dark",
+  nord: "nord",
 }
 
 export const BAR_APPEARENCES: Record<DEFAULT_BAR_APPEARENCE, IBarAppearence> = {

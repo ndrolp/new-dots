@@ -109,8 +109,8 @@ fi
 
 # INSTALL Spicetify
 #
-curl -fsSL https://raw.githubusercontent.com/spicetify/cli/main/install.sh | sh
-sudo chmod a+wr /opt/spotify
-sudo chmod a+wr /opt/spotify/Apps -R
-spicetify backup apply
-curl -fsSL https://raw.githubusercontent.com/spicetify/marketplace/main/resources/install.sh | sh
+#curl -fsSL https://raw.githubusercontent.com/spicetify/cli/main/install.sh | sh
+#sudo chmod a+wr /opt/spotify
+#sudo chmod a+wr /opt/spotify/Apps -R
+#spicetify backup apply
+#curl -fsSL https://raw.githubusercontent.com/spicetify/marketplace/main/resources/install.sh | sh

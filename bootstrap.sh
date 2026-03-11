@@ -17,7 +17,7 @@ UNDERLINE='\033[4m'
 NC='\033[0m' # No Color
 
 # VARIABLES
-HOSTNAME=$(hostname -s)
+HOSTNAME=$(hostnamectl hostname)
 HOST_DIR="host-${HOSTNAME}"
 COMMON_DIR="common"
 

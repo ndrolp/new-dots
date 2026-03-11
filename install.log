@@ -1,0 +1,9 @@
+[11:45:07 2026-03-11] FETCHING Version 2.42.14
+[11:45:07 2026-03-11] DOWNLOADING https://github.com/spicetify/cli/releases/download/v2.42.14/spicetify-2.42.14-linux-amd64.tar.gz
+[11:45:09 2026-03-11] EXTRACTING /home/ndrolp/.spicetify/spicetify.tar.gz
+[11:45:09 2026-03-11] SETTING EXECUTABLE PERMISSIONS TO /home/ndrolp/.spicetify/spicetify
+[11:45:09 2026-03-11] REMOVING /home/ndrolp/.spicetify/spicetify.tar.gz
+[11:45:09 2026-03-11] spicetify path already set in /home/ndrolp/.bashrc, continuing...
+[11:45:09 2026-03-11] spicetify path already set in /home/ndrolp/.bash_profile, continuing...
+[11:45:09 2026-03-11] spicetify v2.42.14 was installed successfully to /home/ndrolp/.spicetify
+[11:45:09 2026-03-11] Run 'spicetify --help' to get started

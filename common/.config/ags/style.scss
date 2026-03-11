@@ -20,11 +20,10 @@ window.Bar {
     background: var(--bg0);
     padding: 5px;
     border-radius: 5px;
-    margin: 5px 20px;
+    margin: 5px 15px;
     margin-top: 10px;
     margin-bottom: 2px;
     width: fit-content;
-    box-shadow: 0px 0px 16px rgba(0, 0, 0, 0.03);
 
     .blue-fg {
       color: var(--accent1);
@@ -53,6 +52,11 @@ window.Bar {
   font-size: 31px;
   transform: translateX(-1px) translateY(1px) scaleY(1.2);
   color: orange;
+}
+
+button {
+  padding: 0;
+  box-shadow: none;
 }
 
 .slanta {

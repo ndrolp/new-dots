@@ -1,4 +1,4 @@
-import AstalHyprland from "gi://AstalHyprland?version=0.1"
+import AstalHyprland from "gi://AstalHyprland"
 import { createBinding, createComputed, With } from "ags"
 import { ShellSettings } from "../../../utils/SettingsManager"
 import { Gdk } from "ags/gtk4"
