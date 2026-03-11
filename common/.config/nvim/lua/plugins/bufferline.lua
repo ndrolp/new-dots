@@ -2,6 +2,7 @@ return {
 	"akinsho/bufferline.nvim",
 	version = "*",
 	dependencies = "nvim-tree/nvim-web-devicons",
+	enabled = true,
 	config = function()
 		local bufferline = require("bufferline")
 		local mocha = require("catppuccin.palettes").get_palette("frappe")

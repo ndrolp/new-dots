@@ -6,8 +6,9 @@ return {
 			options = {
 				icons_enabled = true,
 				-- theme = "catppuccin",
-				section_separators = { left = "", right = "" },
-				-- section_separators = { left = "", right = "" },
+				-- section_separators = { left = "", right = "" },
+				-- section_separators = { left = "", right = "" },
+				section_separators = { left = "", right = "" },
 				component_separators = { left = "", right = "" },
 				disabled_filetypes = {
 					statusline = {},
@@ -73,11 +74,18 @@ return {
 				lualine_y = {},
 				lualine_z = {},
 			},
-			tabline = {},
+			tabline = {
+				-- lualine_a = { "buffers" },
+				-- lualine_b = {},
+				-- lualine_c = {},
+				-- lualine_x = {},
+				-- lualine_y = { "filename" },
+				-- lualine_z = { "tabs" },
+			},
 			-- winbar = {
-			--     -- lualine_a = {},
+			-- 	lualine_a = { "filename" },
 			-- },
-			-- inactive_winbar = {},
+			inactive_winbar = {},
 			extensions = { "nvim-tree", "symbols-outline", "toggleterm" },
 		})
 	end,
