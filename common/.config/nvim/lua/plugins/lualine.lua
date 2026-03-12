@@ -59,7 +59,6 @@ return {
 				},
 				lualine_x = {
 					"lsp_status",
-					"encoding",
 				},
 				lualine_y = { "progress", "searchcount" },
 				lualine_z = {

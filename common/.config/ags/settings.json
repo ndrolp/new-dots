@@ -1,13 +1,13 @@
 {
     "$schema": "./settings.schema.json",
-    "theme": "nord",
+    "theme": "catppuccin",
     "barAppearence": {
-        "layout": "default",
-        "island": true,
+        "layout": "separated-islands",
+        "island": false,
         "compact": true,
         "rounding": "full",
         "float": true,
-        "showBorder": true
+        "showBorder": false
     },
     "workspaces": {
         "monitors": {

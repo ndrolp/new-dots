@@ -1,0 +1,16 @@
+.wallpaper-picker {
+  .monitor-button {
+    background-color: var(--bg1);
+    padding: 2px 5px;
+    font-weight: bolder;
+
+    &:hover {
+      background-color: var(--bg2);
+    }
+
+    &.active {
+      /* background: var(--accent1); */
+      color: var(--accent1);
+    }
+  }
+}

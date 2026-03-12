@@ -23,18 +23,18 @@ autosens = 1
 # The number of bars (0-512). 0 sets it to auto (fill up console).
 # Bars' width and space between bars in number of characters.
 # ;bars = 0
- bar_width = 1
+ bar_width = 2 
  bar_spacing = 1
 # bar_height is only used for output in "noritake" format
 ; bar_height = 32
 
 # For SDL width and space between bars is in pixels, defaults are:
 ; bar_width = 30
-; bar_spacing = 5
+; bar_spacing = 0
 
 # sdl_glsl have these default values, they are only used to calulate max number of bars.
-; bar_width = 50
-; bar_spacing = 5
+; bar_width = 60
+; bar_spacing = 0
 
 
 # Lower and higher cutoff frequencies for lowest and highest bars

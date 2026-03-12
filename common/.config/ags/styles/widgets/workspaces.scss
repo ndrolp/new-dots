@@ -77,9 +77,10 @@
         padding: 0px 2px;
         min-height: 0;
         border: none;
+        color: var(--fg2);
 
         &.occupied {
-          color: var(--grey2);
+          color: var(--fg);
         }
 
         &.focused {

@@ -68,10 +68,10 @@ ags request theme "$SELECTED_FOLDER"
 
 #===== MOVE WALLPAPERS =======
 
-WALLPAPERS_FOLDER="$HOME/Pictures/[01] - Wallpapers/[02] - Current/"
+WALLPAPERS_FOLDER="$HOME/Pictures/Wallpapers/Current/"
 
-ln -sf "$HOME/Pictures/[01] - Wallpapers/[01] - Default/$SELECTED_FOLDER/Horizontal" "$WALLPAPERS_FOLDER"
-ln -sf "$HOME/Pictures/[01] - Wallpapers/[01] - Default/$SELECTED_FOLDER/Vertical" "$WALLPAPERS_FOLDER"
+ln -sf "$HOME/Pictures/Wallpapers/[01] - Default/$SELECTED_FOLDER/Horizontal" "$WALLPAPERS_FOLDER"
+ln -sf "$HOME/Pictures/Wallpapers/[01] - Default/$SELECTED_FOLDER/Vertical" "$WALLPAPERS_FOLDER"
 
 exec "$HOME/.dotfiles/scripts/hyprland/wallpaper.sh"
 
