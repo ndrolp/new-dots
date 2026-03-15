@@ -5,7 +5,6 @@ return {
 	enabled = true,
 	config = function()
 		local bufferline = require("bufferline")
-		local mocha = require("catppuccin.palettes").get_palette("frappe")
 
 		bufferline.setup({
 			highlights = require("catppuccin.special.bufferline").get_theme(),
@@ -17,7 +16,7 @@ return {
 				separator_style = { "", "" },
 				indicator = {
 					-- icon = "▎", -- this should be omitted if indicator style is not 'icon'
-					icon = "▎", -- this should be omitted if indicator style is not 'icon'
+					-- icon = "▎", -- this should be omitted if indicator style is not 'icon'
 					style = "icon",
 				},
 				tab_size = 10,

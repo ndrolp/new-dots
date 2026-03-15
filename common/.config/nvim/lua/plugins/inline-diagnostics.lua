@@ -1,139 +1,145 @@
 return {
-    "rachartier/tiny-inline-diagnostic.nvim",
-    event = "VeryLazy", -- Or `LspAttach`
-    priority = 1000,    -- needs to be loaded in first
-    config = function()
-        -- Default configuration
-        require("tiny-inline-diagnostic").setup({
-            -- Style preset for diagnostic messages
-            -- Available options:
-            -- "modern", "classic", "minimal", "powerline",
-            -- "ghost", "simple", "nonerdfont", "amongus"
-            preset = "modern",
+	"rachartier/tiny-inline-diagnostic.nvim",
+	event = "VeryLazy", -- Or `LspAttach`
+	priority = 1000, -- needs to be loaded in first
+	enabled = true,
+	config = function()
+		-- Default configuration
+		require("tiny-inline-diagnostic").setup({
+			-- Choose a preset style for diagnostic appearance
+			-- Available: "modern", "classic", "minimal", "powerline", "ghost", "simple", "nonerdfont", "amongus"
+			preset = "minimal",
 
-            transparent_bg = true, -- Set the background of the diagnostic to transparent
+			-- Make diagnostic background transparent
+			transparent_bg = false,
 
-            hi = {
-                error = "DiagnosticError", -- Highlight group for error messages
-                warn = "DiagnosticWarn",   -- Highlight group for warning messages
-                info = "DiagnosticInfo",   -- Highlight group for informational messages
-                hint = "DiagnosticHint",   -- Highlight group for hint or suggestion messages
-                arrow = "NonText",         -- Highlight group for diagnostic arrows
+			-- Make cursorline background transparent for diagnostics
+			transparent_cursorline = true,
 
-                -- Background color for diagnostics
-                -- Can be a highlight group or a hexadecimal color (#RRGGBB)
-                background = "CursorLine",
+			-- Customize highlight groups for colors
+			-- Use Neovim highlight group names or hex colors like "#RRGGBB"
+			hi = {
+				error = "DiagnosticError", -- Highlight for error diagnostics
+				warn = "DiagnosticWarn", -- Highlight for warning diagnostics
+				info = "DiagnosticInfo", -- Highlight for info diagnostics
+				hint = "DiagnosticHint", -- Highlight for hint diagnostics
+				arrow = "NonText", -- Highlight for the arrow pointing to diagnostic
+				background = "CursorLine", -- Background highlight for diagnostics
+				mixing_color = "Normal", -- Color to blend background with (or "None")
+			},
 
-                -- Color blending option for the diagnostic background
-                -- Use "None" or a hexadecimal color (#RRGGBB) to blend with another color
-                mixing_color = "None",
-            },
+			-- List of filetypes to disable the plugin for
+			disabled_ft = {},
 
-            options = {
-                -- Display the source of the diagnostic (e.g., basedpyright, vsserver, lua_ls etc.)
-                show_source = false,
+			options = {
+				-- Display the source of diagnostics (e.g., "lua_ls", "pyright")
+				show_source = {
+					enabled = false, -- Enable showing source names
+					if_many = false, -- Only show source if multiple sources exist for the same diagnostic
+				},
 
-                -- Use icons defined in the diagnostic configuration
-                use_icons_from_diagnostic = true,
+				-- Display the diagnostic code of diagnostics (e.g., "F401", "no-dupe-args")
+				show_code = true,
 
-                -- Set the arrow icon to the same color as the first diagnostic severity
-                set_arrow_to_diag_color = false,
+				-- Use icons from vim.diagnostic.config instead of preset icons
+				use_icons_from_diagnostic = false,
 
-                -- Add messages to diagnostics when multiline diagnostics are enabled
-                -- If set to false, only signs will be displayed
-                add_messages = true,
+				-- Color the arrow to match the severity of the first diagnostic
+				set_arrow_to_diag_color = false,
 
-                -- Time (in milliseconds) to throttle updates while moving the cursor
-                -- Increase this value for better performance if your computer is slow
-                -- or set to 0 for immediate updates and better visual
-                throttle = 20,
+				-- Throttle update frequency in milliseconds to improve performance
+				-- Higher values reduce CPU usage but may feel less responsive
+				-- Set to 0 for immediate updates (may cause lag on slow systems)
+				throttle = 20,
 
-                -- Minimum message length before wrapping to a new line
-                softwrap = 30,
+				-- Minimum number of characters before wrapping long messages
+				softwrap = 30,
 
-                -- Configuration for multiline diagnostics
-                -- Can either be a boolean or a table with the following options:
-                --  multilines = {
-                --      enabled = false,
-                --      always_show = false,
-                -- }
-                -- If it set as true, it will enable the feature with this options:
-                --  multilines = {
-                --      enabled = true,
-                --      always_show = false,
-                -- }
-                multilines = {
-                    -- Enable multiline diagnostic messages
-                    enabled = false,
+				-- Control how diagnostic messages are displayed
+				-- NOTE: When using display_count = true, you need to enable multiline diagnostics with multilines.enabled = true
+				--       If you want them to always be displayed, you can also set multilines.always_show = true.
+				add_messages = {
+					messages = true, -- Show full diagnostic messages
+					display_count = false, -- Show diagnostic count instead of messages when cursor not on line
+					use_max_severity = false, -- When counting, only show the most severe diagnostic
+					show_multiple_glyphs = true, -- Show multiple icons for multiple diagnostics of same severity
+				},
 
-                    -- Always show messages on all lines for multiline diagnostics
-                    always_show = false,
-                },
+				-- Settings for multiline diagnostics
+				multilines = {
+					enabled = false, -- Enable support for multiline diagnostic messages
+					always_show = false, -- Always show messages on all lines of multiline diagnostics
+					trim_whitespaces = false, -- Remove leading/trailing whitespace from each line
+					tabstop = 4, -- Number of spaces per tab when expanding tabs
+					severity = nil, -- Filter multiline diagnostics by severity (e.g., { vim.diagnostic.severity.ERROR })
+				},
 
-                -- Display all diagnostic messages on the cursor line
-                show_all_diags_on_cursorline = false,
+				-- Show all diagnostics on the current cursor line, not just those under the cursor
+				show_all_diags_on_cursorline = false,
 
-                -- Enable diagnostics in Insert mode
-                -- If enabled, it is better to set the `throttle` option to 0 to avoid visual artifacts
-                enable_on_insert = false,
+				-- Only show diagnostics when the cursor is directly over them, no fallback to line diagnostics
+				show_diags_only_under_cursor = false,
 
-                -- Enable diagnostics in Select mode (e.g when auto inserting with Blink)
-                enable_on_select = false,
+				-- Display related diagnostics from LSP relatedInformation
+				show_related = {
+					enabled = true, -- Enable displaying related diagnostics
+					max_count = 3, -- Maximum number of related diagnostics to show per diagnostic
+				},
 
-                overflow = {
-                    -- Manage how diagnostic messages handle overflow
-                    -- Options:
-                    -- "wrap" - Split long messages into multiple lines
-                    -- "none" - Do not truncate messages
-                    -- "oneline" - Keep the message on a single line, even if it's long
-                    mode = "wrap",
+				-- Enable diagnostics display in insert mode
+				-- May cause visual artifacts; consider setting throttle to 0 if enabled
+				enable_on_insert = false,
 
-                    -- Trigger wrapping to occur this many characters earlier when mode == "wrap".
-                    -- Increase this value appropriately if you notice that the last few characters
-                    -- of wrapped diagnostics are sometimes obscured.
-                    padding = 0,
-                },
+				-- Enable diagnostics display in select mode (e.g., during auto-completion)
+				enable_on_select = false,
 
-                -- Configuration for breaking long messages into separate lines
-                break_line = {
-                    -- Enable the feature to break messages after a specific length
-                    enabled = false,
+				-- Handle messages that exceed the window width
+				overflow = {
+					mode = "wrap", -- "wrap": split into lines, "none": no truncation, "oneline": keep single line
+					padding = 0, -- Extra characters to trigger wrapping earlier
+				},
 
-                    -- Number of characters after which to break the line
-                    after = 30,
-                },
+				-- Break long messages into separate lines
+				break_line = {
+					enabled = false, -- Enable automatic line breaking
+					after = 30, -- Number of characters before inserting a line break
+				},
 
-                -- Custom format function for diagnostic messages
-                -- Example:
-                -- format = function(diagnostic)
-                --     return diagnostic.message .. " [" .. diagnostic.source .. "]"
-                -- end
-                format = nil,
+				-- Custom function to format diagnostic messages
+				-- Receives diagnostic object, returns formatted string
+				-- Example: function(diag) return diag.message .. " [" .. diag.source .. "]" end
+				format = nil,
 
-                virt_texts = {
-                    -- Priority for virtual text display
-                    priority = 2048,
-                },
+				-- Virtual text display priority
+				-- Higher values appear above other plugins (e.g., GitBlame)
+				virt_texts = {
+					priority = 2048,
+				},
 
-                -- Filter diagnostics by severity
-                -- Available severities:
-                -- vim.diagnostic.severity.ERROR
-                -- vim.diagnostic.severity.WARN
-                -- vim.diagnostic.severity.INFO
-                -- vim.diagnostic.severity.HINT
-                severity = {
-                    vim.diagnostic.severity.ERROR,
-                    vim.diagnostic.severity.WARN,
-                    vim.diagnostic.severity.INFO,
-                    vim.diagnostic.severity.HINT,
-                },
+				-- Filter diagnostics by severity levels
+				-- Remove severities you don't want to display
+				severity = {
+					vim.diagnostic.severity.ERROR,
+					vim.diagnostic.severity.WARN,
+					vim.diagnostic.severity.INFO,
+					vim.diagnostic.severity.HINT,
+				},
 
-                -- Events to attach diagnostics to buffers
-                -- You should not change this unless the plugin does not work with your configuration
-                overwrite_events = nil,
-            },
-            disabled_ft = {},                          -- List of filetypes to disable the plugin
-        })
-        vim.diagnostic.config({ virtual_text = true }) -- Only if needed in your configuration, if you already have native LSP diagnostics
-    end,
+				-- Events that trigger attaching diagnostics to buffers
+				-- Default is {"LspAttach"}; change only if plugin doesn't work with your LSP setup
+				overwrite_events = nil,
+
+				-- Automatically disable diagnostics when opening diagnostic float windows
+				override_open_float = false,
+
+				-- Experimental options, subject to misbehave in future NeoVim releases
+				experimental = {
+					-- Make diagnostics not mirror across windows containing the same buffer
+					-- See: https://github.com/rachartier/tiny-inline-diagnostic.nvim/issues/127
+					use_window_local_extmarks = false,
+				},
+			},
+		})
+		vim.diagnostic.config({ virtual_text = true }) -- Only if needed in your configuration, if you already have native LSP diagnostics
+	end,
 }

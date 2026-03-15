@@ -6,6 +6,7 @@ htop
 ranger
 docker
 docker-compose
+docker-buildx
 git
 zsh
 stow
@@ -16,8 +17,6 @@ ripgrep
 polybar
 dmenu
 bob
-i3-wm
-polybar
 kitty
 feh
 dmenu
@@ -55,7 +54,6 @@ xdg-desktop-portal-gtk
 xdg-desktop-portal-hyprland
 cliphist
 brightnessctl
-swaync
 stylua
 glow
 hyprlock
@@ -76,3 +74,4 @@ vlc-plugin-ffmpeg
 noto-fonts-cjk
 networkmanager
 jq
+ripgrep

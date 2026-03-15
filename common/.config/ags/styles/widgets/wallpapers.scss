@@ -1,4 +1,14 @@
 .wallpaper-picker {
+  background: var(--bg0);
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px solid var(--border0);
+
+  &.window {
+    background: transparent;
+    border: none;
+  }
+
   .monitor-button {
     background-color: var(--bg1);
     padding: 2px 5px;
@@ -12,5 +22,10 @@
       /* background: var(--accent1); */
       color: var(--accent1);
     }
+  }
+
+  .picture {
+    border-radius: 5px;
+    border: 2px solid var(--border1);
   }
 }

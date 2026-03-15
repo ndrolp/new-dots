@@ -12,7 +12,7 @@ pyprland-git
 hyprpaper
 waybar
 mako
-swayosd-git
+swayosd
 postman-bin
 awww-bin
 aylurs-gtk-shell-git

@@ -1,5 +1,28 @@
 .layout-transparent {
+  &.compact {
+    .bar-section {
+      background-color: transparent;
+
+      .workspaces {
+        padding: 5px 5px;
+
+        .workspace-button {
+          background-color: transparent;
+
+          &.focused {
+            background-color: var(--accent0);
+            border: none;
+          }
+        }
+      }
+    }
+  }
+
   &.Bar .bar-content {
+    background-color: transparent;
+    padding: 0;
+    border: none;
+
     background-color: transparent;
     padding: 0;
     border: none;
@@ -8,7 +31,13 @@
   .bar-icon {
     background-color: var(--bg0);
     padding: 3px 6px;
-    border: 2px solid var(--border0);
+  }
+
+  &.show-border {
+    .bar-icon {
+      border: 2px solid var(--border0);
+      padding: 3px 6px;
+    }
   }
 
   .audio-button {

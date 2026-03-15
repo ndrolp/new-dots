@@ -73,10 +73,40 @@ WALLPAPERS_FOLDER="$HOME/Pictures/Wallpapers/Current/"
 ln -sf "$HOME/Pictures/Wallpapers/[01] - Default/$SELECTED_FOLDER/Horizontal" "$WALLPAPERS_FOLDER"
 ln -sf "$HOME/Pictures/Wallpapers/[01] - Default/$SELECTED_FOLDER/Vertical" "$WALLPAPERS_FOLDER"
 
-exec "$HOME/.dotfiles/scripts/hyprland/wallpaper.sh"
 
 #=============================
 
-sleep 0.3
+#===== WALLPAPER THUMBNAILS =======
 
-# bash ~/.dotfiles/scripts/hyprland/reload.sh
+# Base folder for thumbnails
+THUMBS_BASE="$HOME/Pictures/Wallpapers Thumbnails/"
+mkdir -p "$THUMBS_BASE/Horizontal" "$THUMBS_BASE/Vertical"
+
+# Thumbnail size
+THUMB_W=120
+THUMB_H=120
+
+# Function to generate thumbnails from a folder
+generate_thumbs() {
+    local src="$1"
+    local dest="$2"
+    [ -d "$src" ] || return
+
+    for img in "$src"/*.{jpg,jpeg,png}; do
+        [ -f "$img" ] || continue
+        fname=$(basename "$img")
+        magick "$img" -thumbnail "${THUMB_W}x${THUMB_H}^" -gravity center -extent "${THUMB_W}x${THUMB_H}" "$dest/$fname"
+    done
+}
+
+echo "Generating thumbnails from linked wallpapers..."
+
+# Horizontal
+generate_thumbs "$WALLPAPERS_FOLDER/Horizontal" "$THUMBS_BASE/Horizontal"
+
+# Vertical
+generate_thumbs "$WALLPAPERS_FOLDER/Vertical" "$THUMBS_BASE/Vertical"
+
+echo "Thumbnails created in $THUMBS_BASE"
+
+exec "$HOME/.dotfiles/scripts/hyprland/wallpaper.sh"

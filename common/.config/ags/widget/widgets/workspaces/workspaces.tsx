@@ -1,6 +1,6 @@
 import AstalHyprland from "gi://AstalHyprland?version=0.1"
 import { Gtk, Gdk } from "ags/gtk4"
-import { createBinding, createComputed, With } from "ags"
+import { createBinding, createComputed } from "ags"
 import WorkspaceButton from "./WorkspaceButton"
 import { SETTINGS } from "../../../config/Settings"
 import { WorkspaceRange } from "./WorkspacesSettingsType"

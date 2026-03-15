@@ -1,9 +1,9 @@
 {
     "$schema": "./settings.schema.json",
-    "theme": "catppuccin",
+    "theme": "nord",
     "barAppearence": {
-        "layout": "separated-islands",
-        "island": false,
+        "layout": "default",
+        "island": true,
         "compact": true,
         "rounding": "full",
         "float": true,

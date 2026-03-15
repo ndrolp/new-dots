@@ -5,6 +5,14 @@
     }
   }
 
+  &.transparent {
+    &.bar {
+      .bar-content {
+        border: 0px solid var(--border0);
+      }
+    }
+  }
+
   &.flush {
     &.Bar {
       .bar-content {

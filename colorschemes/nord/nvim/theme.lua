@@ -1,5 +1,5 @@
 -- require("nord").set()
 
-vim.cmd([[colorscheme nord]])
+vim.cmd([[colorscheme onenord]])
 
 -- require("nordic").load()

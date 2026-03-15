@@ -208,7 +208,7 @@ alias dotsync='(cd ~/.dotfiles && ./bootstrap.sh --no-bootstrap)'
 alias tk='zellij --layout ~/.config/zellij/layouts/tomekeeper.kdl'
 alias envact="source venv/bin/activate"
 alias adbwireless="~/.dotfiles/scripts/adb_wireless_helper/wireless_helper.sh"
-alias pjs="cd ~/Documents/Projects/"
+alias pjs="cd ~/Documents/00 - Projects/"
 alias fm=yazi
 alias bf="~/.dotfiles/scripts/lenovo/battery_max_charge.sh"
 alias wg="~/.dotfiles/scripts/wallpapers/wallpaper-generator.sh"
@@ -219,3 +219,5 @@ alias wgd="~/.dotfiles/scripts/wallpapers/wallpaper-generator.sh '$HOME/Pictures
 export PATH="$PATH:/home/ndrolp/.local/bin"
 
 export PATH=$PATH:/home/ndrolp/.spicetify
+
+. "$HOME/.local/share/../bin/env"

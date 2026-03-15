@@ -1,59 +1,33 @@
 return {
-	"gbprod/nord.nvim",
+	"rmehri01/onenord.nvim",
 	lazy = false,
 	priority = 1000,
 	config = function()
-		-- vim.cmd.colorscheme("nord")
-		--
-		require("nord").setup({
-			-- your configuration comes here
-			-- or leave it empty to use the default settings
-			transparent = true, -- Enable this to disable setting the background color
-			terminal_colors = true, -- Configure the colors used when opening a `:terminal` in Neovim
-			diff = { mode = "bg" }, -- enables/disables colorful backgrounds when used in diff mode. values : [bg|fg]
-			borders = true, -- Enable the border between verticaly split windows visible
-			errors = { mode = "bg" }, -- Display mode for errors and diagnostics
-			-- values : [bg|fg|none]
-			search = { theme = "vim" }, -- theme for highlighting search results
-			-- values : [vim|vscode]
+		require("onenord").setup({
+			theme = nil, -- "dark" or "light". Alternatively, remove the option and set vim.o.background instead
+			borders = true, -- Split window borders
+			fade_nc = false, -- Fade non-current windows, making them more distinguishable
+			-- Style that is applied to various groups: see `highlight-args` for options
 			styles = {
-				-- Style to be applied to different syntax groups
-				-- Value is any valid attr-list value for `:help nvim_set_hl`
-				comments = { italic = true },
-				keywords = {},
-				functions = {},
-				variables = {},
-
-				-- To customize lualine/bufferline
-				bufferline = {
-					current = {},
-					modified = { italic = true },
-				},
-
-				lualine_bold = false, -- When `true`, section headers in the lualine theme will be bold
+				comments = "NONE",
+				strings = "NONE",
+				keywords = "NONE",
+				functions = "NONE",
+				variables = "NONE",
+				diagnostics = "underline",
 			},
-
-			-- colorblind mode
-			-- see https://github.com/EdenEast/nightfox.nvim#colorblind
-			-- simulation mode has not been implemented yet.
-			colorblind = {
-				enable = false,
-				preserve_background = false,
-				severity = {
-					protan = 0.0,
-					deutan = 0.0,
-					tritan = 0.0,
-				},
+			disable = {
+				background = true, -- Disable setting the background color
+				float_background = true, -- Disable setting the background color for floating windows
+				cursorline = false, -- Disable the cursorline
+				eob_lines = true, -- Hide the end-of-buffer lines
 			},
-
-			-- Override the default colors
-			---@param colors Nord.Palette
-			on_colors = function(colors) end,
-
-			--- You can override specific highlights to use other groups or a hex color
-			--- function will be called with all highlights and the colorScheme table
-			---@param colors Nord.Palette
-			on_highlights = function(highlights, colors) end,
+			-- Inverse highlight for different groups
+			inverse = {
+				match_paren = false,
+			},
+			custom_highlights = {}, -- Overwrite default highlight groups
+			custom_colors = {}, -- Overwrite default colors
 		})
 	end,
 }
