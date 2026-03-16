@@ -1,0 +1,24 @@
+configuration {
+    show-icons: true;
+    hover-select: true;
+    kb-accept-entry: "Return,space";
+    kb-cancel: "Escape";
+}
+
+* {
+    background-color: transparent;
+    text-color: #FFFFFF;
+}
+
+listview {
+    columns: 5;
+    spacing: 10px;
+}
+
+element-icon {
+    size: 200px;
+}
+
+element-text {
+    enabled: false;
+}

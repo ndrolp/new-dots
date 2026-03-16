@@ -162,7 +162,7 @@
                 "default": {
                     "$ref": "#/definitions/widgetLayout"
                 },
-                "flus": {
+                "flush": {
                     "$ref": "#/definitions/widgetLayout"
                 },
                 "island": {
@@ -171,7 +171,7 @@
             },
             "required": [
                 "default",
-                "flus",
+                "flush",
                 "island"
             ],
             "additionalProperties": false

@@ -8,7 +8,7 @@ export const ACTIVE_CLIENT_ICONS: Record<string, string> = {
   terminal: "",
   vscode: "",
   thunderbird: "",
-  obsidian: "",
+  obsidian: "󰎚",
   kitty: "",
   nvim: "",
   default: "",
@@ -28,11 +28,12 @@ const terminals = [
 
 const terminalProgramsIcons: Record<string, string> = {
   htop: "",
+  btm: "",
   nvim: "",
   "btop++": "",
   btop: "",
   lazygit: "",
-  lazydocker: "",
+  lazydocker: "",
   broot: "",
   nnn: "",
   ranger: "",
@@ -59,6 +60,7 @@ export function getActiveClientIcon(initialClass: string, title: string) {
   if (terminals.includes(initialClass.toLowerCase())) {
     return (
       terminalProgramsIcons[title.toLowerCase()] ||
+      ACTIVE_CLIENT_ICONS[initialClass] ||
       ACTIVE_CLIENT_ICONS["terminal"]
     )
   }

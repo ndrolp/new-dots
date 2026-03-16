@@ -7,7 +7,7 @@ import WallpapersBox from "./components/WallpapersBox"
 import { getMonitorDirection } from "./lib/layout"
 import { createComputed, createState, With } from "ags"
 
-const WALLPAPER_PICKER_NAMESPACE = "wallpaper_picker"
+export const WALLPAPER_PICKER_NAMESPACE = "wallpaper_picker"
 
 export default function WallpaperPicker() {
   const hypr = AstalHyprland.get_default()
@@ -63,7 +63,7 @@ export default function WallpaperPicker() {
 
   return (
     <CustomWindow
-      visible={true}
+      visible={false}
       css="wallpaper-picker"
       position={Gtk.Align.CENTER}
       name={WALLPAPER_PICKER_NAMESPACE}

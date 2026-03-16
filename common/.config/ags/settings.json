@@ -1,9 +1,9 @@
 {
     "$schema": "./settings.schema.json",
-    "theme": "nord",
+    "theme": "catppuccin",
     "barAppearence": {
-        "layout": "default",
-        "island": true,
+        "layout": "separated-islands",
+        "island": false,
         "compact": true,
         "rounding": "full",
         "float": true,
@@ -61,7 +61,7 @@
                     "clock"
                 ],
                 [
-                    "now-playing"
+                    "current-app"
                 ]
             ],
             "center": [
@@ -71,8 +71,11 @@
             ],
             "right": [
                 [
-                    "network",
+                    "now-playing"
+                ],
+                [
                     "audio",
+                    "network",
                     "battery"
                 ]
             ]
@@ -80,18 +83,41 @@
         "flush": {
             "left": [
                 [
-                    "workspaces"
+                    "clock"
+                ],
+                [
+                    "current-app"
                 ]
             ],
             "center": [
                 [
-                    "clock"
+                    "workspaces"
                 ]
             ],
             "right": [
                 [
                     "now-playing"
                 ],
+                [
+                    "network",
+                    "audio",
+                    "battery"
+                ]
+            ]
+        },
+        "island": {
+            "left": [
+                [
+                    "clock",
+                    "now-playing"
+                ]
+            ],
+            "center": [
+                [
+                    "workspaces"
+                ]
+            ],
+            "right": [
                 [
                     "network",
                     "audio",

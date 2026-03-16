@@ -54,14 +54,19 @@ export class ShellSettings implements IShellSettings {
 
     this.widgets = {
       default: data?.widgets?.default ?? {
-        left: [["clock", "now-playing"]],
-        center: [["workspaces"]],
-        right: [["network", "audio", "battery"]],
+        left: [["clock", "workspaces"]],
+        center: [["current-app"]],
+        right: [["now-playing"], ["network", "audio", "battery"]],
       },
       flush: data?.widgets?.flush ?? {
-        left: [["workspaces"]],
-        center: [["clock"]],
-        right: [["now-playing", "network", "audio", "battery"]],
+        left: [["clock", "workspaces"]],
+        center: [["current-app"]],
+        right: [["now-playing"], ["network", "audio", "battery"]],
+      },
+      island: data?.widgets?.island ?? {
+        left: [["clock"]],
+        center: [["workspaces"]],
+        right: [["now-playing"], ["network", "audio", "battery"]],
       },
     }
   }

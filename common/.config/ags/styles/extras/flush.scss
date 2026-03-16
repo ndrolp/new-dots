@@ -6,8 +6,14 @@
       padding: 0px 0px;
     }
 
+    &.compact {
+      .bar-content {
+        padding: 2px 0px;
+      }
+    }
+
     .bar-content {
-      padding: 2px 5px;
+      padding: 5px 5px;
       border: none;
       border-radius: 0px;
       margin: 0px;
@@ -18,9 +24,18 @@
 
       .workspaces {
         background: transparent;
+        padding: 0;
+        margin: 0;
+
+        &.bar-icon {
+          padding: 0px;
+          margin: 0;
+        }
 
         .workspace-button {
           box-shadow: none;
+          padding: 2px 4px;
+          margin: 0;
           background: var(--bg1);
           transition: 0.1s ease-in-out;
 
@@ -62,22 +77,6 @@
         border-top: none;
         border-top-right-radius: 0px;
         border-top-left-radius: 0px;
-
-        &:nth-child(1) {
-          border-top: none;
-          border-left: none;
-          border-top-right-radius: 0px;
-          border-top-left-radius: 0px;
-          border-bottom-left-radius: 0px;
-        }
-
-        &:nth-child(3) {
-          border-top: none;
-          border-right: none;
-          border-top-right-radius: 0px;
-          border-top-left-radius: 0px;
-          border-bottom-right-radius: 0px;
-        }
       }
     }
   }

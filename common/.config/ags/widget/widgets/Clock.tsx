@@ -1,4 +1,6 @@
 import { createPoll } from "ags/time"
+import app from "ags/gtk4/app"
+import { WALLPAPER_PICKER_NAMESPACE } from "./Wallpaper/WallpaperPicker"
 
 export default function Clock() {
   // const date = createPoll("", 1000, `bash -c "date +%H:%M"`)
@@ -11,10 +13,16 @@ export default function Clock() {
   })
 
   return (
-    <box class="bar-icon clock" spacing={0}>
-      <box>
+    <button
+      onClicked={() => {
+        app.toggle_window(WALLPAPER_PICKER_NAMESPACE)
+      }}
+      class="bar-icon clock"
+    >
+      <box class="fg-blue">
+        <label class="icon" label="󰥔" />
         <label label={date} />
       </box>
-    </box>
+    </button>
   )
 }

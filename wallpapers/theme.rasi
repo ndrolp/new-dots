@@ -1,0 +1,67 @@
+configuration {
+    show-icons: true;
+    hover-select: true;
+    kb-accept-entry: "Return,space";
+    kb-cancel: "Escape";
+}
+
+* {
+    background-color: transparent;
+    text-color: #FFFFFF;
+}
+
+window {
+    transparency: "real";
+    background-color: transparent;   /* Fully transparent – Hyprland blur will show through */
+    border: 0px;
+    border-radius: 0px;
+    padding: 0px;                    /* Small outer padding only */
+    width: 30%;
+    height: 65%;
+    location: center;
+}
+
+mainbox {
+    background-color: rgba(0, 0, 0, 0.4);
+    padding: 20;
+    children: [listview];
+}
+
+listview {
+    columns: 2;
+    lines: 2;
+    fixed-height: false;
+    spacing: 5px;                     /* Zero gap between thumbnails */
+    padding: 5px;                     /* No inner padding */
+    border: 0px;
+    scrollbar: false;
+}
+
+element {
+    padding: 0px;                     /* No padding around each thumbnail */
+    border-radius: 0px;               /* Square, no rounded corners */
+    cursor: pointer;
+    margin: 0px;
+}
+
+element normal.active {
+    background-color: rgba(255, 255, 255, 0.25);  /* Slightly stronger hover overlay for visibility */
+}
+
+element-icon {
+    size: 170px;
+    cursor: pointer;
+}
+
+element-icon normal.active {
+    size: 170px;                      /* Hover zoom */
+}
+
+element-text {
+    enabled: false;
+}
+
+/* Ensure no hidden defaults add space */
+element normal.normal { background-color: transparent; }
+element selected { background-color: transparent; }
+element selected.normal { background-color: transparent; }
