@@ -49,5 +49,55 @@
         "ignoreClients": [
             "plasma-browser-integration"
         ]
+    },
+    "log": {
+        "enabled": false,
+        "level": "log"
+    },
+    "widgets": {
+        "default": {
+            "left": [
+                [
+                    "clock"
+                ],
+                [
+                    "now-playing"
+                ]
+            ],
+            "center": [
+                [
+                    "workspaces"
+                ]
+            ],
+            "right": [
+                [
+                    "network",
+                    "audio",
+                    "battery"
+                ]
+            ]
+        },
+        "flush": {
+            "left": [
+                [
+                    "workspaces"
+                ]
+            ],
+            "center": [
+                [
+                    "clock"
+                ]
+            ],
+            "right": [
+                [
+                    "now-playing"
+                ],
+                [
+                    "network",
+                    "audio",
+                    "battery"
+                ]
+            ]
+        }
     }
 }

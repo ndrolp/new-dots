@@ -4,6 +4,7 @@ import {
   ILogSettings,
   INowPlayingConfig,
   IShellSettings,
+  IWidgetSettings,
   WorkspacesConfig,
 } from "../config/types"
 import {
@@ -20,6 +21,7 @@ export class ShellSettings implements IShellSettings {
   barAppearence: IBarAppearence
   workspaces: WorkspacesConfig
   nowPlaying: INowPlayingConfig
+  widgets: IWidgetSettings
 
   private constructor(data?: Partial<IShellSettings>) {
     this.theme = data?.theme ?? "catppuccin"
@@ -48,6 +50,19 @@ export class ShellSettings implements IShellSettings {
       showControls: data?.nowPlaying?.showControls ?? true,
       preferedClients: data?.nowPlaying?.preferedClients ?? [],
       ignoreClients: data?.nowPlaying?.ignoreClients ?? [],
+    }
+
+    this.widgets = {
+      default: data?.widgets?.default ?? {
+        left: [["clock", "now-playing"]],
+        center: [["workspaces"]],
+        right: [["network", "audio", "battery"]],
+      },
+      flush: data?.widgets?.flush ?? {
+        left: [["workspaces"]],
+        center: [["clock"]],
+        right: [["now-playing", "network", "audio", "battery"]],
+      },
     }
   }
 
@@ -86,6 +101,8 @@ export class ShellSettings implements IShellSettings {
       barAppearence: this.barAppearence,
       workspaces: this.workspaces,
       nowPlaying: this.nowPlaying,
+      log: this.log,
+      widgets: this.widgets,
     }
 
     const dataToSave = JSON.stringify(data, null, 4)

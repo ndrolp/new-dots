@@ -42,10 +42,32 @@ export interface INowPlayingConfig {
   ignoreClients: string[]
 }
 
+export type AVAILABLE_WIDGETS =
+  | "battery"
+  | "audio"
+  | "network"
+  | "now-playing"
+  | "current-app"
+  | "workspaces"
+  | "clock"
+
+export interface IWidgetLayout {
+  left: AVAILABLE_WIDGETS[][]
+  center: AVAILABLE_WIDGETS[][]
+  right: AVAILABLE_WIDGETS[][]
+}
+
+export interface IWidgetSettings {
+  default: IWidgetLayout
+  flush?: IWidgetLayout
+  island?: IWidgetLayout
+}
+
 export interface IShellSettings {
   theme: SHEL_THEME
   barAppearence: IBarAppearence
   workspaces: WorkspacesConfig
   nowPlaying: INowPlayingConfig
   log: ILogSettings
+  widgets: IWidgetSettings
 }

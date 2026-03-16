@@ -9,6 +9,7 @@ import NetworkButton from "./widgets/Network/NetworkButton"
 import { ShellSettings } from "../utils/SettingsManager"
 import { getWindowSettingsCssClasses } from "../utils/mainBar"
 import CurrentApp from "./widgets/CurrentApp/CurrentApp"
+import Layout from "./common/Layout"
 
 export default function Bar(gdkmonitor: Gdk.Monitor) {
   const SETTINGS = ShellSettings.getInstance()
@@ -70,28 +71,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
       application={app}
     >
       <Container>
-        <box $type="start" spacing={spacing} class="bar-section">
-          <Clock />
-          <NowPlaying />
-        </box>
-        <box
-          halign={Gtk.Align.CENTER}
-          $type="center"
-          spacing={spacing}
-          class="bar-section"
-        >
-          <Workspaces monitor={gdkmonitor} />
-        </box>
-        <box
-          halign={Gtk.Align.END}
-          $type="end"
-          spacing={spacing}
-          class="bar-section"
-        >
-          <AudioButton />
-          <NetworkButton />
-          <Battery />
-        </box>
+        <Layout monitor={gdkmonitor} />
       </Container>
     </window>
   )

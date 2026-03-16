@@ -3,7 +3,7 @@
     border-radius: 0;
 
     .bar-section {
-      padding: 4px 0px;
+      padding: 0px 0px;
     }
 
     .bar-content {
@@ -25,7 +25,7 @@
           transition: 0.1s ease-in-out;
 
           &.focused {
-            padding: 2px 10px;
+            padding: 0px 10px;
             background: var(--accent0);
           }
         }

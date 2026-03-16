@@ -1,7 +1,7 @@
 .separated-islands {
   &.Bar .bar-content {
     background-color: transparent;
-    padding: 0;
+    padding: 0 5px;
     border: none;
   }
 
@@ -13,6 +13,6 @@
   .bar-section {
     padding: 5px 5px;
     background: var(--bg0);
-    /* box-shadow: 2px2px 0 16px var(--bg4); */
+    /* box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.4); */
   }
 }
