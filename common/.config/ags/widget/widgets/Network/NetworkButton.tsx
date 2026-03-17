@@ -33,12 +33,7 @@ export default function NetworkButton() {
               ? "rotate"
               : ""
           return (
-            <button
-              class="network-button bar-icon"
-              onClicked={() => {
-                app.toggle_window(NETWORK_DASHBOARD_WINDOW_NAME)
-              }}
-            >
+            <menubutton class="network-button bar-icon">
               {data.primary === AstalNetwork.Primary.WIFI ? (
                 <label
                   class={`network-icon ${rotateClass}`}
@@ -52,7 +47,7 @@ export default function NetworkButton() {
                   label={getWifiIcon(AstalNetwork.State.DISCONNECTED, 0)}
                 />
               )}
-            </button>
+            </menubutton>
           )
         }}
       </With>

@@ -13,16 +13,11 @@ export default function Clock() {
   })
 
   return (
-    <button
-      onClicked={() => {
-        app.toggle_window(WALLPAPER_PICKER_NAMESPACE)
-      }}
-      class="bar-icon clock"
-    >
+    <menubutton class="bar-icon clock">
       <box class="fg-blue">
         <label class="icon" label="󰥔" />
         <label label={date} />
       </box>
-    </button>
+    </menubutton>
   )
 }

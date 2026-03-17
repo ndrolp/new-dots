@@ -10,12 +10,7 @@ export default function Battery() {
   const batteryPercentage = createBinding(battery, "percentage")
   const batteryState = createBinding(battery, "state")
   return (
-    <button
-      class="battery-dashboard-togler bar-icon"
-      onClicked={() => {
-        app.toggle_window(BATTERY_DASHBOARD_WINDOW_NAME)
-      }}
-    >
+    <menubutton class="battery-dashboard-togler bar-icon">
       <box class="battery">
         <With value={batteryPercentage}>
           {(percentage) => (
@@ -40,6 +35,6 @@ export default function Battery() {
           )}
         </With>
       </box>
-    </button>
+    </menubutton>
   )
 }

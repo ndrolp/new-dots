@@ -32,7 +32,7 @@ export default function NowPlaying() {
               <box
                 visible={barData.spotifyAvailable || barData.players.length > 0}
               >
-                <button class="now-playing bar-icon">
+                <menubutton class="now-playing bar-icon">
                   {barData.spotifyAvailable ? (
                     <PlayerBarLine player={spotify} />
                   ) : (
@@ -44,7 +44,7 @@ export default function NowPlaying() {
                       )}
                     </box>
                   )}
-                </button>
+                </menubutton>
               </box>
             </revealer>
           )

@@ -1,10 +1,12 @@
 .clock {
-  /* background: var(--bg2); */
-  /* min-height: 0px; */
-  /* padding: 0px 10px; */
-  /* border-radius: 4px; */
   font-weight: bolder;
   color: var(--fg);
+
+  > .toggle {
+    color: inherit;
+    font-weight: inherit;
+    background: transparent;
+  }
 
   label {
     margin: 0px 0px;

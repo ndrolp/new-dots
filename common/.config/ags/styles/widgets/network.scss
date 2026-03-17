@@ -1,6 +1,11 @@
 .network-button {
   color: var(--accent0);
 
+  > .toggle {
+    color: inherit;
+    background: transparent;
+  }
+
   .network-icon {}
 
   .rotate {

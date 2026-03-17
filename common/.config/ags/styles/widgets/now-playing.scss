@@ -3,6 +3,12 @@
   font-weight: bolder;
   transition: 0.3s;
 
+  > .toggle {
+    color: inherit;
+    font-weight: inherit;
+    background: transparent;
+  }
+
   .paused {
     color: var(--grey2);
   }
