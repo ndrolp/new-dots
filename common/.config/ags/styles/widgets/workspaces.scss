@@ -3,6 +3,7 @@
   min-height: 0px;
   padding: 0px 5px;
   border-radius: 4px;
+  font-weight: bolder;
 
   .workspace-button-container {
     aspect-ratio: 1;
@@ -14,6 +15,7 @@
       background-color: transparent;
       color: var(--fg2);
       padding: 0px 0px;
+      font-weight: bolder;
       transition:
         padding 0.3s ease-in-out,
         padding-left 0.2s ease-in-out,

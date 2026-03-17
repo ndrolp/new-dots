@@ -184,5 +184,12 @@
     padding-left: 0;
     padding-right: 0;
     margin: 0;
+
+    .toggle {
+      font-size: 10pt;
+      background-color: var(--bg1);
+      padding-left: 0;
+      padding-right: 0;
+    }
   }
 }

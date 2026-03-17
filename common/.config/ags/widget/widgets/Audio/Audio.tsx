@@ -12,7 +12,7 @@ export default function AudioButton() {
   })
 
   return (
-    <button class="bar-icon">
+    <menubutton class="bar-icon">
       <With value={volumeData}>
         {(volumeData) => {
           return (
@@ -34,6 +34,6 @@ export default function AudioButton() {
           )
         }}
       </With>
-    </button>
+    </menubutton>
   )
 }
