@@ -6,8 +6,7 @@ import { execAsync } from "ags/process"
 import WallpapersBox from "./components/WallpapersBox"
 import { getMonitorDirection } from "./lib/layout"
 import { createComputed, createState, With } from "ags"
-
-export const WALLPAPER_PICKER_NAMESPACE = "wallpaper_picker"
+import { WINDOWS_NAMESPACES } from "../../windows"
 
 export default function WallpaperPicker() {
   const hypr = AstalHyprland.get_default()
@@ -67,8 +66,8 @@ export default function WallpaperPicker() {
       visible={false}
       css="wallpaper-picker"
       position={Gtk.Align.CENTER}
-      name={WALLPAPER_PICKER_NAMESPACE}
-      namespace={WALLPAPER_PICKER_NAMESPACE}
+      name={WINDOWS_NAMESPACES.wallpaper}
+      namespace={WINDOWS_NAMESPACES.wallpaper}
     >
       <box class="wallpaper-picker" spacing={10}>
         <box orientation={Gtk.Orientation.VERTICAL} spacing={10}>

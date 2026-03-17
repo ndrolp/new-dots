@@ -13,8 +13,7 @@ import { Gtk, Astal } from "ags/gtk4"
 import { getWindowSettingsCssClasses } from "../../../utils/mainBar"
 import { ShellSettings } from "../../../utils/SettingsManager"
 import Logger from "../../../utils/logger"
-
-export const ACTIVE_NOTIFICATIONS_APP_NAME = "ActiveNotifications"
+import { WINDOWS_NAMESPACES } from "../../windows"
 
 export default function ActiveNotifications() {
   const SETTINGS = ShellSettings.getInstance()
@@ -87,7 +86,7 @@ export default function ActiveNotifications() {
   return (
     <window
       visible={createComputed(() => activeNotifications().length > 0)}
-      name={ACTIVE_NOTIFICATIONS_APP_NAME}
+      name={WINDOWS_NAMESPACES.notifications}
       vexpand={false}
       anchor={Astal.WindowAnchor.TOP}
       application={app}

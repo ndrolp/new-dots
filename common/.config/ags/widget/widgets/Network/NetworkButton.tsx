@@ -3,7 +3,7 @@ import app from "ags/gtk4/app"
 import { getWifiIcon } from "../../../utils/network"
 import NM from "gi://NM"
 import { createBinding, createComputed, With } from "ags"
-import { NETWORK_DASHBOARD_WINDOW_NAME } from "./NetworkDashboard"
+import { WINDOWS_NAMESPACES } from "../../windows"
 
 export default function NetworkButton() {
   const Network = AstalNetwork.get_default()

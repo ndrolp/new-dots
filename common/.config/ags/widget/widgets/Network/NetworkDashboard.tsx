@@ -4,8 +4,7 @@ import { createBinding, createComputed, With } from "ags"
 import AstalNetwork from "gi://AstalNetwork"
 import CustomWindow from "../../common/Window"
 import { WirelessConectionManager } from "./components/WirelessConectionManager"
-
-export const NETWORK_DASHBOARD_WINDOW_NAME = "networkdash"
+import { WINDOWS_NAMESPACES } from "../../windows"
 
 export default function NetworkDashboard(
   position: Gtk.Align = Gtk.Align.CENTER,
@@ -21,8 +20,8 @@ export default function NetworkDashboard(
 
   return (
     <CustomWindow
-      name={NETWORK_DASHBOARD_WINDOW_NAME}
-      namespace={NETWORK_DASHBOARD_WINDOW_NAME}
+      name={WINDOWS_NAMESPACES.network}
+      namespace={WINDOWS_NAMESPACES.network}
       position={position}
       css="network-dashboard"
       onVisivilityChange={(self) => {

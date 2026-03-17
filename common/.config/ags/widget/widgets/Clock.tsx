@@ -1,6 +1,6 @@
 import { createPoll } from "ags/time"
 import app from "ags/gtk4/app"
-import { WALLPAPER_PICKER_NAMESPACE } from "./Wallpaper/WallpaperPicker"
+import { WINDOWS_NAMESPACES } from "../windows"
 
 export default function Clock() {
   // const date = createPoll("", 1000, `bash -c "date +%H:%M"`)

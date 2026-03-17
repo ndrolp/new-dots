@@ -4,6 +4,10 @@
   > .toggle {
     color: inherit;
     background: transparent;
+
+    &:hover {
+      background: var(--bg3);
+    }
   }
 
   .network-icon {}

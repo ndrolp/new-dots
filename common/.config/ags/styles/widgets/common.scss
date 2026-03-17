@@ -66,13 +66,14 @@ button {
   padding: 0;
 }
 
-button.bar-icon,
-menubutton.bar-icon > .toggle {
-  transition: 0.3s;
+button.bar-icon:hover,
+menubutton.bar-icon:hover {
+  background: var(--bg3);
+}
 
-  &:hover {
-    background: var(--bg3);
-  }
+button.bar-icon,
+menubutton > .toggle {
+  transition: 0.3s;
 }
 
 menubutton.bar-icon > .toggle {

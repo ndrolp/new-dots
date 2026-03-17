@@ -185,9 +185,13 @@
     padding-right: 0;
     margin: 0;
 
+    &:not(.workspaces):hover {
+      background-color: var(--bg3);
+    }
+
     .toggle {
       font-size: 10pt;
-      background-color: var(--bg1);
+      background-color: transparent;
       padding-left: 0;
       padding-right: 0;
     }

@@ -4,8 +4,7 @@ import AstalBattery from "gi://AstalBattery"
 import { createBinding, With } from "ags"
 import { secondsToTime } from "../../../utils/battery"
 import CustomWindow from "../../common/Window"
-
-export const BATTERY_DASHBOARD_WINDOW_NAME = "battery"
+import { WINDOWS_NAMESPACES } from "../../windows"
 
 //TODO: Remake this component
 
@@ -20,7 +19,7 @@ export default function BatteryDashboard(position: Gtk.Align = Gtk.Align.END) {
   return (
     <CustomWindow
       namespace={"dashboard"}
-      name={BATTERY_DASHBOARD_WINDOW_NAME}
+      name={WINDOWS_NAMESPACES.battery}
       exclusivity={Astal.Exclusivity.NORMAL}
       css={`Battery`}
       position={position}

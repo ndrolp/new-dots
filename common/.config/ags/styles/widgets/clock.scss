@@ -6,6 +6,10 @@
     color: inherit;
     font-weight: inherit;
     background: transparent;
+
+    &:hover {
+      background: var(--bg3);
+    }
   }
 
   label {
