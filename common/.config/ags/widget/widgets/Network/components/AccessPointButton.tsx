@@ -2,7 +2,7 @@ import { Gtk } from "ags/gtk4"
 import { getAccessPointIcon } from "../../../../utils/network"
 import { createState } from "ags"
 import AstalNetwork from "gi://AstalNetwork"
-import { SETTINGS } from "../../../../config/Settings"
+import { ShellSettings } from "../../../../utils/SettingsManager"
 
 export const AccessPointButton = ({
   accessPoint,
@@ -11,11 +11,12 @@ export const AccessPointButton = ({
 }) => {
   const [passwordEntryRevealed, passwordEntryRevealedSetter] =
     createState(false)
+  const settings = ShellSettings.getInstance()
   return (
     <box
       cssClasses={[
         "acces-point-button",
-        `rounding-${SETTINGS.barAppearence.rounding}`,
+        `rounding-${settings.barAppearence.rounding}`,
       ]}
       orientation={Gtk.Orientation.VERTICAL}
     >

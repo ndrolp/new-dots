@@ -1,6 +1,6 @@
 import { Gdk } from "ags/gtk4"
 import { IWidgetLayout } from "../../config/types"
-import { WIDGETS } from "../../config/Widgets/RenderWidgets"
+import { WIDGETS } from "../registry"
 import { ShellSettings } from "../../utils/SettingsManager"
 
 export default function LayoutGenerator({

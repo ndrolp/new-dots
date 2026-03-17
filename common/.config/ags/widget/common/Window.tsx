@@ -1,6 +1,6 @@
 import { Gtk, Gdk, Astal } from "ags/gtk4"
 import app from "ags/gtk4/app"
-import { SETTINGS } from "../../config/Settings"
+import { ShellSettings } from "../../utils/SettingsManager"
 import { getWindowAnchors, getWindowMarginClass } from "../../utils/popups"
 
 export interface CustomWindowProps {
@@ -25,6 +25,7 @@ export default function CustomWindow({
 }: CustomWindowProps) {
   const anchor = getWindowAnchors(position ?? Gtk.Align.CENTER)
   const cssClass = getWindowMarginClass(anchor)
+  const settings = ShellSettings.getInstance()
 
   return (
     <window
@@ -37,10 +38,10 @@ export default function CustomWindow({
       keymode={Astal.Keymode.ON_DEMAND}
       namespace={namespace}
       class={`window 
-          ${SETTINGS.theme ?? "catppuccin"} 
-          layout-${SETTINGS.barAppearence.layout ?? "default"} 
-          rounding-${SETTINGS.barAppearence.rounding} 
-          ${SETTINGS.barAppearence.compact ? "compact" : ""} 
+          ${settings.theme ?? "catppuccin"} 
+          layout-${settings.barAppearence.layout ?? "default"} 
+          rounding-${settings.barAppearence.rounding} 
+          ${settings.barAppearence.compact ? "compact" : ""} 
           ${css} ${getWindowMarginClass(anchor)} ${cssClass}`}
       anchor={anchor}
     >

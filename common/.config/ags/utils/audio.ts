@@ -1,5 +1,4 @@
 import Mpris from "gi://AstalMpris"
-import { SETTINGS } from "../config/Settings"
 import { createBinding, createComputed, createState, With } from "ags"
 
 export function getVolumeIcon(volume: number, muted: boolean): string {

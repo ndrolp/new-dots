@@ -1,4 +1,4 @@
-import { SETTINGS } from "../config/Settings"
+import { ShellSettings } from "./SettingsManager"
 import { Astal, Gtk } from "ags/gtk4"
 const { TOP, LEFT, RIGHT } = Astal.WindowAnchor
 
@@ -15,6 +15,7 @@ export function getWindowMarginClass(
 export function getWindowAnchors(
   position: Gtk.Align,
 ): Astal.WindowAnchor | undefined {
+  const SETTINGS = ShellSettings.getInstance()
   let anchorToReturn: Astal.WindowAnchor = TOP
 
   if (SETTINGS.barAppearence.island) anchorToReturn = TOP

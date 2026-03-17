@@ -1,5 +1,5 @@
 import { Gtk } from "ags/gtk4"
-import { SETTINGS } from "../../../../config/Settings"
+import { ShellSettings } from "../../../../utils/SettingsManager"
 import AstalNetwork from "gi://AstalNetwork"
 import { createBinding, createComputed, With } from "ags"
 import {
@@ -27,6 +27,8 @@ export const WifiNetworkInfo = ({
     }
   })
 
+  const settings = ShellSettings.getInstance()
+
   // label={getWifiIcon(data.state, 100)}
   return (
     <box>
@@ -40,7 +42,7 @@ export const WifiNetworkInfo = ({
 
           return (
             <box
-              class={`wifi-settings rounding-${SETTINGS.barAppearence.rounding} card`}
+              class={`wifi-settings rounding-${settings.barAppearence.rounding} card`}
               hexpand
             >
               <box hexpand>

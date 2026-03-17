@@ -13,9 +13,8 @@ import { ShellSettings } from "./utils/SettingsManager"
 import {
   DEFAULT_BAR_APPEARENCE,
   SHELL_THEMES_BINDER,
-} from "./utils/settings/DefaultBarAppearences"
+} from "./utils/settings/DefaultBarAppearances"
 import ActiveNotifications from "./widget/widgets/Notifications/ActiveNotifications"
-import { NotificationsWindow } from "./widget/Test"
 import WallpaperPicker from "./widget/widgets/Wallpaper/WallpaperPicker"
 
 const runApp = () =>

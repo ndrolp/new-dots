@@ -3,7 +3,6 @@ import app from "ags/gtk4/app"
 import AstalBattery from "gi://AstalBattery"
 import { createBinding, With } from "ags"
 import { secondsToTime } from "../../../utils/battery"
-import { SETTINGS } from "../../../config/Settings"
 import CustomWindow from "../../common/Window"
 
 export const BATTERY_DASHBOARD_WINDOW_NAME = "battery"

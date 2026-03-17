@@ -1,6 +1,6 @@
 import app from "ags/gtk4/app"
 import { Astal, Gtk, Gdk } from "ags/gtk4"
-import Workspaces from "./widgets/workspaces/workspaces"
+import Workspaces from "./widgets/Workspaces/workspaces"
 import Clock from "./widgets/Clock"
 import Battery from "./widgets/Battery/Battery"
 import AudioButton from "./widgets/Audio/Audio"

@@ -11,7 +11,7 @@ import {
   BAR_APPEARENCES,
   DEFAULT_BAR_APPEARENCE,
   SHEL_THEME,
-} from "./settings/DefaultBarAppearences"
+} from "./settings/DefaultBarAppearances"
 
 export class ShellSettings implements IShellSettings {
   private static instance: ShellSettings

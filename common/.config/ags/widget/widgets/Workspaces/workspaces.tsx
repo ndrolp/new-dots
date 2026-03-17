@@ -2,11 +2,11 @@ import AstalHyprland from "gi://AstalHyprland?version=0.1"
 import { Gtk, Gdk } from "ags/gtk4"
 import { createBinding, createComputed } from "ags"
 import WorkspaceButton from "./WorkspaceButton"
-import { SETTINGS } from "../../../config/Settings"
+import { ShellSettings } from "../../../utils/SettingsManager"
 import { WorkspaceRange } from "./WorkspacesSettingsType"
 
 export default function Workspaces({ monitor }: { monitor: Gdk.Monitor }) {
-  const monitorSettings: WorkspaceRange = SETTINGS.workspaces.monitors[
+  const monitorSettings: WorkspaceRange = ShellSettings.getInstance().workspaces.monitors[
     monitor.get_model() ?? "NULL"
   ] ?? { from: 1, to: 20, minWorkspaces: 5 }
 

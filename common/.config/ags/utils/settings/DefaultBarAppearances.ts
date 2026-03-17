@@ -1,4 +1,4 @@
-import { IBarAppearence } from "../../config/types"
+import { IBarAppearence, SHEL_THEME } from "../../config/types"
 
 export type DEFAULT_BAR_APPEARENCE =
   | "default"
@@ -8,11 +8,7 @@ export type DEFAULT_BAR_APPEARENCE =
   | "separated-island"
   | "separated-full"
 
-export type SHEL_THEME =
-  | "catppuccin"
-  | "gruvbox-dark"
-  | "monochrome-blue-dark"
-  | "nord"
+export { SHEL_THEME }
 
 export const SHELL_THEMES_BINDER: Record<string, SHEL_THEME> = {
   catppuccin: "catppuccin",
