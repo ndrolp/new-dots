@@ -25,7 +25,7 @@ export default function NowPlaying() {
                 if (spotifyAvailable()) return true
                 const players = defaultPlayers()
                 if (players.length > 0 && (players?.[0].title ?? false))
-                  return true
+                  return players[0].title !== ""
                 return false
               })}
             >

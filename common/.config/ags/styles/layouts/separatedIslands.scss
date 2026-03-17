@@ -5,9 +5,11 @@
     border: none;
   }
 
+  background-color: red;
+
   .bar-icon {
     border: none;
-    padding: 0px 5px;
+    padding: 0px 2px;
   }
 
   .bar-section {
@@ -19,9 +21,16 @@
   &.compact {
     .bar-section {
       padding: 0px;
+      padding: 0px 5px;
 
       .bar-icon {
-        padding: 3px 5px;
+        padding: 0px 2px;
+
+        &.workspaces {
+          /* background-color: var(--bg1); */
+          padding: 0px;
+          padding: 3px 5px;
+        }
       }
     }
   }

@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # $HOME/.config/waybar/waybar.sh
-$HOME/.config/ags/reload.sh
 
 MONITOR_MAIN="desc:Philips Consumer Electronics Company PHL 271V8 0x0000A8BE"
 MONITOR_SECONDARY="desc:Philips Consumer Electronics Company PHL 243V7 0x00009A4C"
@@ -15,3 +14,5 @@ done
 for ws in {11..20}; do
   hyprctl dispatch moveworkspacetomonitor "$ws" "$MONITOR_SECONDARY"
 done
+
+$HOME/.config/ags/reload.sh

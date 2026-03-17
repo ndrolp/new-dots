@@ -29,7 +29,7 @@ export default function LayoutGenerator({
           >
             {layout[position as keyof IWidgetLayout].map((widgetRow) => {
               return (
-                <box class="bar-section">
+                <box class="bar-section" spacing={0}>
                   {widgetRow.map((widget) => {
                     const Widget = WIDGETS[widget as keyof typeof WIDGETS]({
                       monitor,

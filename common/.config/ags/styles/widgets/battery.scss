@@ -4,21 +4,20 @@
   padding: 0;
   min-width: 0;
   min-height: 0;
-  background-color: var(--bg2);
   border-radius: 4px;
   border: none;
   transition: 0.3s;
   cursor: pointer;
+  background-color: transparent;
 
   &:hover {
     background-color: var(--bg3);
   }
 
-    .battery {
-      /* padding: 0px 10px; */
-      background-color: transparent;
-      color: var(--accent4);
-    }
+  .battery {
+    padding: 0px 3px;
+    color: var(--accent4);
+  }
 }
 
 window.Battery {
@@ -55,25 +54,25 @@ window.Battery {
       border-radius: 0px;
       padding: 10px 0;
 
-        trough {
-          background: var(--bg3);
-          min-height: 10px;
-          margin: 0;
+      trough {
+        background: var(--bg3);
+        min-height: 10px;
+        margin: 0;
+        border-radius: 3px;
+
+        highlight {
+          background: var(--accent2);
           border-radius: 3px;
-
-          highlight {
-            background: var(--accent2);
-            border-radius: 3px;
-            margin: 0;
-          }
-
-          slider {
-            box-shadow: none;
-            background: transparent;
-            pointer-events: none;
-            color: red;
-          }
+          margin: 0;
         }
+
+        slider {
+          box-shadow: none;
+          background: transparent;
+          pointer-events: none;
+          color: red;
+        }
+      }
     }
   }
 
@@ -81,11 +80,11 @@ window.Battery {
     min-height: 8px;
     background: var(--bg3);
 
-      .fill {
-        min-height: 8px;
-        background: var(--accent1);
-        min-width: 50px;
-      }
+    .fill {
+      min-height: 8px;
+      background: var(--accent1);
+      min-width: 50px;
+    }
   }
 
   .time {
@@ -97,9 +96,9 @@ window.Battery {
       padding: 0px;
     }
 
-      label:nth-child(2) {
-        color: var(--accent2);
-      }
+    label:nth-child(2) {
+      color: var(--accent2);
+    }
   }
 }
 

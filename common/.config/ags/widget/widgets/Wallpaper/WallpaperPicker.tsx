@@ -23,6 +23,7 @@ export default function WallpaperPicker() {
   //TODO: Move the locations to a settings
   const HORIZONTAL_PATH = "/home/ndrolp/Pictures/Wallpapers/Current/Horizontal"
   const VERTICAL_PATH = "/home/ndrolp/Pictures/Wallpapers/Current/Vertical"
+
   const VERTICAL_THUMBNAILS =
     "/home/ndrolp/Pictures/Wallpapers Thumbnails/Vertical/"
   const HORIZONTAL_TUMBNAILS =
@@ -125,8 +126,8 @@ export default function WallpaperPicker() {
                                 }
                                 thumbnailPath={
                                   direction === "vertical"
-                                    ? VERTICAL_PATH
-                                    : HORIZONTAL_PATH
+                                    ? VERTICAL_THUMBNAILS
+                                    : HORIZONTAL_TUMBNAILS
                                 }
                                 direction={direction}
                               />

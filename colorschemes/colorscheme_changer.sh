@@ -83,8 +83,8 @@ THUMBS_BASE="$HOME/Pictures/Wallpapers Thumbnails/"
 mkdir -p "$THUMBS_BASE/Horizontal" "$THUMBS_BASE/Vertical"
 
 # Thumbnail size
-THUMB_W=50
-THUMB_H=50
+THUMB_W=100
+THUMB_H=100
 
 # Function to generate thumbnails from a folder
 generate_thumbs() {

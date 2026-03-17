@@ -155,10 +155,15 @@
     .bar-section {
       background-color: var(--bg1);
     }
+
+    .workspaces {
+      background-color: var(--bg1);
+    }
   }
 
   .workspaces {
     padding: 0px 0px;
+    background-color: var(--bg1);
 
     .workspace-button-container {
       padding: 0px 0px;

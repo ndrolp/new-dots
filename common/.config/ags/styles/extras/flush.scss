@@ -4,11 +4,37 @@
 
     .bar-section {
       padding: 0px 0px;
+
+      .workspaces {
+        background: transparent;
+
+        &.bar-icon {
+          padding: 0px;
+          margin: 0;
+        }
+
+        .workspace-button {
+          box-shadow: none;
+          padding: 0px 4px;
+          margin: 0;
+          background: var(--bg1);
+          transition: 0.1s ease-in-out;
+
+          &.focused {
+            padding: 0px 10px;
+            background: var(--accent0);
+          }
+        }
+      }
     }
 
     &.compact {
       .bar-content {
         padding: 2px 0px;
+      }
+
+      .workspace-button-container {
+        margin: 3px 0px;
       }
     }
 
@@ -20,30 +46,6 @@
 
       .bar-icon {
         padding: 0px 5px;
-      }
-
-      .workspaces {
-        background: transparent;
-        padding: 0;
-        margin: 0;
-
-        &.bar-icon {
-          padding: 0px;
-          margin: 0;
-        }
-
-        .workspace-button {
-          box-shadow: none;
-          padding: 2px 4px;
-          margin: 0;
-          background: var(--bg1);
-          transition: 0.1s ease-in-out;
-
-          &.focused {
-            padding: 0px 10px;
-            background: var(--accent0);
-          }
-        }
       }
     }
   }
