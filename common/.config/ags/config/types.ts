@@ -50,6 +50,7 @@ export type AVAILABLE_WIDGETS =
   | "current-app"
   | "workspaces"
   | "clock"
+  | "timer"
 
 export interface IWidgetLayout {
   left: AVAILABLE_WIDGETS[][]

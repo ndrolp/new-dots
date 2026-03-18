@@ -67,6 +67,9 @@
             "center": [
                 [
                     "workspaces"
+                ],
+                [
+                    "timer"
                 ]
             ],
             "right": [

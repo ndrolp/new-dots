@@ -1,0 +1,70 @@
+.timer-button {
+  .timer-button-container {
+    font-size: 10pt;
+    font-weight: bolder;
+    color: var(--fg);
+
+    .bar-icon-icon {
+      font-size: 12pt;
+      color: var(--accent1);
+    }
+  }
+}
+
+.timer-popover {
+  .title {
+    font-size: 12pt;
+    font-weight: bolder;
+    color: var(--fg1);
+  }
+
+  .time {
+    font-size: 18pt;
+    color: var(--accent2);
+    margin: 20px 0px;
+  }
+
+  .default-timers {
+    font-size: 20pt;
+    color: var(--fg2);
+    background: transparent;
+
+    &:hover {
+      color: var(--fg);
+    }
+  }
+
+  .time-modifier-button {
+    font-size: 10pt;
+    font-weight: bold;
+    background: var(--bg2);
+    border-radius: 5px;
+
+    &:hover {
+      color: var(--accent2);
+    }
+  }
+
+  .run-button {
+    font-size: 12pt;
+    border-radius: 5px;
+    margin: 10px 0px;
+    margin-bottom: 0;
+    font-weight: bold;
+
+    &.start {
+      background: var(--accent2);
+      color: var(--bg0);
+    }
+
+    &.cancel {
+      background: var(--accent6);
+      color: var(--bg0);
+    }
+
+    &:hover {
+      background: var(--accent2);
+      color: var(--bg0);
+    }
+  }
+}
