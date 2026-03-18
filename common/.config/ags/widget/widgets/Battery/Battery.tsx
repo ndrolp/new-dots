@@ -4,6 +4,7 @@ import { createBinding, createComputed, With } from "ags"
 import { getBatteryIcon } from "../../../utils/battery"
 import app from "ags/gtk4/app"
 import { WINDOWS_NAMESPACES } from "../../windows"
+import BatteryDashboard from "./BatteryDashboard"
 export default function Battery() {
   const battery = AstalBattery.get_default()
 
@@ -35,6 +36,7 @@ export default function Battery() {
           )}
         </With>
       </box>
+      <BatteryDashboard />
     </menubutton>
   )
 }

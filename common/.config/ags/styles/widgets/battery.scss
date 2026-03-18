@@ -8,7 +8,7 @@
   border: none;
   transition: 0.3s;
 
-  > .toggle {
+  >.toggle {
     cursor: pointer;
     background-color: transparent;
 
@@ -23,21 +23,15 @@
   }
 }
 
-window.Battery {
+.battery-popover {
   font-weight: bold;
   font-size: 10pt;
-  margin-top: 0px;
-  margin-top: 15px;
 
+  transform-origin: top;
   color: var(--fg);
 
   background: var(--bg0);
-  padding: 10px;
-  border: 2px solid var(--border0);
-  margin-left: 12px;
-  border-radius: 8px;
   /* margin-top: 40px; */
-  min-width: 190px;
 
   .title {
     text-align: "center";
@@ -107,38 +101,10 @@ window.Battery {
 
 @keyframes wiggle {
   0% {
-    transform: rotateZ(0);
-  }
-
-  7% {
-    transform: rotateZ(0);
-  }
-
-  15% {
-    transform: rotateZ(-15deg);
-  }
-
-  20% {
-    transform: rotateZ(10deg);
-  }
-
-  25% {
-    transform: rotateZ(-10deg);
-  }
-
-  30% {
-    transform: rotateZ(6deg);
-  }
-
-  35% {
-    transform: rotateZ(-4deg);
-  }
-
-  40% {
-    transform: rotateZ(0);
+    transform: scaleY(0);
   }
 
   100% {
-    transform: rotateZ(0);
+    transform: scaleY(1);
   }
 }

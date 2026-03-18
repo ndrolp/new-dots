@@ -13,11 +13,14 @@ export default function Clock() {
   })
 
   return (
-    <menubutton class="bar-icon clock">
+    <button
+      class="bar-icon clock"
+      onClicked={() => app.toggle_window(WINDOWS_NAMESPACES.wallpaper)}
+    >
       <box class="fg-blue">
         <label class="icon" label="󰥔" />
         <label label={date} />
       </box>
-    </menubutton>
+    </button>
   )
 }

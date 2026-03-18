@@ -72,11 +72,11 @@ menubutton.bar-icon:hover {
 }
 
 button.bar-icon,
-menubutton > .toggle {
+menubutton>.toggle {
   transition: 0.3s;
 }
 
-menubutton.bar-icon > .toggle {
+menubutton.bar-icon>.toggle {
   background: transparent;
   border: none;
   padding: 0;
@@ -99,4 +99,23 @@ button {
   background: var(--bg2);
   box-shadow: none;
   padding: 15px;
+}
+
+popover {
+  background: transparent;
+  border: none;
+  margin-top: 10px;
+  margin-bottom: 10px;
+
+  &.menu {
+    background: transparent;
+    border: none;
+  }
+
+  contents {
+    background: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+  }
 }

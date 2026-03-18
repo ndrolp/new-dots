@@ -32,6 +32,9 @@ const runApp = () =>
         execAsync(["bash", "-c", "~/.config/ags/reload.sh"])
         return response("THEME APPLIED")
       }
+      if (cmd == "toggle") {
+        app.toggle_window(arg)
+      }
       response("unknown command")
     },
     css: style,
@@ -39,7 +42,6 @@ const runApp = () =>
       app.get_monitors().map((monitor) => {
         Bar(monitor)
       })
-      BatteryDashboard()
       NetworkDashboard(Gtk.Align.END)
       Dashboard()
       ActiveNotifications()
