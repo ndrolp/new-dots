@@ -61,15 +61,15 @@
                     "clock"
                 ],
                 [
+                    "timer"
+                ],
+                [
                     "current-app"
                 ]
             ],
             "center": [
                 [
                     "workspaces"
-                ],
-                [
-                    "timer"
                 ]
             ],
             "right": [

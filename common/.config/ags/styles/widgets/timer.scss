@@ -45,26 +45,52 @@
     }
   }
 
+  .pomodoro-types {
+    border-radius: 5px;
+    font-size: 10pt;
+    font-weight: bold;
+    background: var(--bg1);
+    padding: 5px 5px;
+    transition: 0.3s ease-in-out;
+
+    &:hover {
+      background: var(--bg3);
+    }
+  }
+
   .run-button {
     font-size: 12pt;
     border-radius: 5px;
-    margin: 10px 0px;
     margin-bottom: 0;
     font-weight: bold;
+    transition: 0.3s ease-in-out;
+    background: var(--bg1);
 
     &.start {
-      background: var(--accent2);
-      color: var(--bg0);
+      color: var(--accent2);
+
+      &:hover {
+        background: var(--accent2);
+        color: var(--bg0);
+      }
     }
 
     &.cancel {
-      background: var(--accent6);
-      color: var(--bg0);
+      color: var(--accent6);
+
+      &:hover {
+        background: var(--accent6);
+        color: var(--bg0);
+      }
     }
 
-    &:hover {
-      background: var(--accent2);
-      color: var(--bg0);
+    &.pause {
+      color: var(--accent1);
+
+      &:hover {
+        background: var(--accent1);
+        color: var(--bg0);
+      }
     }
   }
 }
