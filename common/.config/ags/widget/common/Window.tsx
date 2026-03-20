@@ -11,6 +11,7 @@ export interface CustomWindowProps {
   position?: Gtk.Align
   css?: string
   visible?: boolean
+  resizable?: boolean
   onVisivilityChange?: (self: Astal.Window) => void
 }
 
@@ -21,6 +22,7 @@ export default function CustomWindow({
   namespace,
   css = "",
   visible = false,
+  resizable = true,
   onVisivilityChange = () => {},
 }: CustomWindowProps) {
   const anchor = getWindowAnchors(position ?? Gtk.Align.CENTER)
@@ -33,6 +35,7 @@ export default function CustomWindow({
         onVisivilityChange(self)
       }}
       visible={visible}
+      resizable={resizable}
       application={app}
       name={name}
       keymode={Astal.Keymode.ON_DEMAND}
