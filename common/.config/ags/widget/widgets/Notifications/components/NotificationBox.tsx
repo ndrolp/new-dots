@@ -49,7 +49,7 @@ export default function NotificationBox({
     >
       <box
         orientation={Gtk.Orientation.VERTICAL}
-        halign={Gtk.Align.END}
+        halign={Gtk.Align.CENTER}
         css_classes={["notification-box"]}
       >
         <box

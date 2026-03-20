@@ -10,6 +10,7 @@ import { ShellSettings } from "../utils/SettingsManager"
 import { getWindowSettingsCssClasses } from "../utils/mainBar"
 import CurrentApp from "./widgets/CurrentApp/CurrentApp"
 import Layout from "./common/Layout"
+import { WINDOWS_NAMESPACES } from "./windows"
 
 export default function Bar(gdkmonitor: Gdk.Monitor) {
   const SETTINGS = ShellSettings.getInstance()
@@ -63,7 +64,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     <window
       visible
       name="bar"
-      namespace={"agsbar"}
+      namespace={WINDOWS_NAMESPACES.bar}
       class={`Bar ${barCss}`}
       gdkmonitor={gdkmonitor}
       exclusivity={Astal.Exclusivity.EXCLUSIVE}

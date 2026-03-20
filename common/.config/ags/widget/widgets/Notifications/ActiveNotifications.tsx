@@ -101,13 +101,11 @@ export default function ActiveNotifications() {
               <box orientation={Gtk.Orientation.VERTICAL} spacing={5}>
                 {notifications.map((notification, index) => {
                   return (
-                    <box class="notification-box" valign={Gtk.Align.END}>
-                      <NotificationBox
-                        notification={notification}
-                        onHide={handleHideNotification}
-                        last={index === notifications.length - 1}
-                      />
-                    </box>
+                    <NotificationBox
+                      notification={notification}
+                      onHide={handleHideNotification}
+                      last={index === notifications.length - 1}
+                    />
                   )
                 })}
               </box>
