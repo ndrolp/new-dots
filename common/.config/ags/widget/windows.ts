@@ -5,4 +5,5 @@ export const WINDOWS_NAMESPACES = {
   dashboard: "ndro-shell-dashboard",
   wallpaper: "ndro-shell-wallpaper",
   notifications: "ndro-shell-notifications",
+  settings: "ndro-shell-settings",
 } as const

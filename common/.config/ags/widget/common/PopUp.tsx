@@ -13,6 +13,7 @@ export default function PopUp({ children, cssClass }: PopUpProps) {
   return (
     <popover
       has_arrow={false}
+      cascade_popdown
       onNotifyVisible={(p) => setIsPopoverOpen(p.visible)}
     >
       <revealer

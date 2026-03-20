@@ -16,6 +16,7 @@ import {
 } from "./utils/settings/DefaultBarAppearances"
 import ActiveNotifications from "./widget/widgets/Notifications/ActiveNotifications"
 import WallpaperPicker from "./widget/widgets/Wallpaper/WallpaperPicker"
+import SettingsWindow from "./widget/widgets/Settings/Settings"
 
 const runApp = () =>
   app.start({
@@ -46,6 +47,7 @@ const runApp = () =>
       Dashboard()
       ActiveNotifications()
       WallpaperPicker()
+      SettingsWindow()
     },
   })
 

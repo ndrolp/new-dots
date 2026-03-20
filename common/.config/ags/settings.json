@@ -61,9 +61,6 @@
                     "clock"
                 ],
                 [
-                    "timer"
-                ],
-                [
                     "current-app"
                 ]
             ],
@@ -78,6 +75,7 @@
                 ],
                 [
                     "audio",
+                    "timer",
                     "network",
                     "battery"
                 ]
@@ -86,12 +84,6 @@
         "flush": {
             "left": [
                 [
-                    "clock"
-                ],
-                [
-                    "timer"
-                ],
-                [
                     "current-app"
                 ]
             ],
@@ -106,8 +98,10 @@
                 ],
                 [
                     "audio",
+                    "timer",
                     "network",
-                    "battery"
+                    "battery",
+                    "clock"
                 ]
             ]
         },
@@ -125,8 +119,8 @@
             ],
             "right": [
                 [
-                    "timer",
                     "audio",
+                    "timer",
                     "network",
                     "battery"
                 ]

@@ -18,11 +18,12 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
 
   const allowedBarNames = ["default", "separated-islands"]
 
-  const spacing =
+  let spacing =
     !allowedBarNames.includes(SETTINGS.barAppearence.layout) &&
     SETTINGS.barAppearence.compact
       ? 5
       : 0
+  if (SETTINGS.barAppearence.layout === "transparent") spacing = 5
 
   const Container = ({
     children,

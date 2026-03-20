@@ -10,7 +10,17 @@ export default function LayoutGenerator({
   layout: IWidgetLayout
   monitor: Gdk.Monitor
 }) {
-  const settings = ShellSettings.getInstance()
+  const SETTINGS = ShellSettings.getInstance()
+
+  const allowedBarNames = ["default", "separated-islands"]
+
+  let spacing =
+    !allowedBarNames.includes(SETTINGS.barAppearence.layout) &&
+    SETTINGS.barAppearence.compact
+      ? 5
+      : 0
+  if (SETTINGS.barAppearence.layout === "transparent") spacing = 5
+
   return (
     <>
       {Object.keys(layout).map((position) => {
@@ -24,12 +34,12 @@ export default function LayoutGenerator({
           <box
             $type={type}
             spacing={
-              settings.barAppearence.layout === "separated-islands" ? 5 : 0
+              SETTINGS.barAppearence.layout === "separated-islands" ? 5 : 0
             }
           >
             {layout[position as keyof IWidgetLayout].map((widgetRow) => {
               return (
-                <box class="bar-section" spacing={0}>
+                <box class="bar-section" spacing={spacing}>
                   {widgetRow.map((widget) => {
                     const Widget = WIDGETS[widget as keyof typeof WIDGETS]({
                       monitor,

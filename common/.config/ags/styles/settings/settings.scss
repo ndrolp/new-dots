@@ -1,0 +1,41 @@
+.settings-window {
+  background: var(--bg0);
+  padding: 1rem;
+  color: var(--fg0);
+
+  .settings-window-title {
+    font-size: 16pt;
+    font-family:
+      "Hasklug Nerd Font Propo", "Noto Sans Simplified Chinese", "Noto Sans";
+    margin-bottom: 1rem;
+  }
+
+  .settings-section-button {
+    transition: background 0.2s ease-in-out;
+    font-size: 13pt;
+    color: var(--fg0);
+    font-family:
+      "Hasklug Nerd Font Propo", "Noto Sans Simplified Chinese", "Noto Sans";
+    padding: 10px 10px;
+    background: var(--bg0);
+    border-radius: 5px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    transform: translateX(3px);
+
+    &.active {
+      background: var(--bg2);
+    }
+
+    &:hover {
+      background: var(--bg2);
+    }
+  }
+
+  .settings-window-content {
+    background: var(--bg2);
+    min-width: 300px;
+    min-height: 50px;
+    border-radius: 5px;
+  }
+}
