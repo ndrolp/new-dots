@@ -2,8 +2,8 @@
     "$schema": "./settings.schema.json",
     "theme": "catppuccin",
     "barAppearence": {
-        "layout": "default",
-        "island": true,
+        "layout": "separated-islands",
+        "island": false,
         "compact": true,
         "rounding": "full",
         "float": true,
