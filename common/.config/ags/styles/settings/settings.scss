@@ -21,7 +21,8 @@
     border-radius: 5px;
     border-top-right-radius: 0px;
     border-bottom-right-radius: 0px;
-    transform: translateX(3px);
+    padding-right: 25px;
+    transform: translateX(7px);
 
     &.active {
       background: var(--bg2);
@@ -36,6 +37,6 @@
     background: var(--bg2);
     min-width: 300px;
     min-height: 50px;
-    border-radius: 5px;
+    border-radius: 10px;
   }
 }
