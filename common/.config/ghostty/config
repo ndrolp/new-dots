@@ -71,7 +71,7 @@ selection-foreground = c6d0f5
 
 # GENERAL
 confirm-close-surface = false
-background-opacity = 1
+background-opacity = 0.88
 window-padding-y = 4
 window-padding-x = 4
 # Font

@@ -11,7 +11,10 @@ export default function PopUp({ children, cssClass }: PopUpProps) {
   const [isPopoverOpen, setIsPopoverOpen] = createState(false)
   const classes = `window ${getWindowSettingsCssClasses()} ${cssClass}`
   return (
-    <popover onNotifyVisible={(p) => setIsPopoverOpen(p.visible)}>
+    <popover
+      has_arrow={false}
+      onNotifyVisible={(p) => setIsPopoverOpen(p.visible)}
+    >
       <revealer
         transitionDuration={300}
         transitionType={Gtk.RevealerTransitionType.SLIDE_DOWN}

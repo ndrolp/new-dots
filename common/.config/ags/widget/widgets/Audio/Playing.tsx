@@ -3,6 +3,7 @@ import { createBinding, createComputed, createState, With } from "ags"
 import { Gtk } from "ags/gtk4"
 import { getPlayerIcon } from "../../../utils/audio"
 import { truncateString } from "../../../utils/stringFunctions"
+import PlayingPopUp from "./PlayingPopup"
 
 export default function NowPlaying() {
   const spotify = Mpris.Player.new("spotify")
@@ -44,6 +45,11 @@ export default function NowPlaying() {
                       )}
                     </box>
                   )}
+                  <PlayingPopUp
+                    player={
+                      barData.spotifyAvailable ? spotify : barData.players[0]
+                    }
+                  />
                 </menubutton>
               </box>
             </revealer>

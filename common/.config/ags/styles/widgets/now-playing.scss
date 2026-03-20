@@ -3,7 +3,7 @@
   font-weight: bolder;
   transition: 0.3s;
 
-  > .toggle {
+  >.toggle {
     color: inherit;
     font-weight: inherit;
     background: transparent;
@@ -19,5 +19,29 @@
 
   .stopped {
     color: var(--grey0);
+  }
+}
+
+.playing-popup {
+  min-width: 300px;
+
+  label {
+    color: var(--fg);
+    font-weight: bolder;
+  }
+
+  .song-info {
+    background: var(--bg1);
+    padding: 5px;
+
+    .song-artist {
+      color: var(--fg1);
+      font-size: 9pt;
+    }
+
+    .song-album {
+      color: var(--fg2);
+      font-size: 8pt;
+    }
   }
 }

@@ -14,6 +14,9 @@ export const ACTIVE_CLIENT_ICONS: Record<string, string> = {
   default: "",
   "google-chrome": "",
   nemo: "",
+  nautilus: "",
+  Nautilus: "",
+  "orgkgnome.Nautilus": "",
 }
 
 const terminals = [
