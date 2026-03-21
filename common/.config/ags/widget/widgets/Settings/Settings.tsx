@@ -1,7 +1,7 @@
 import CustomWindow from "../../common/Window"
 import { WINDOWS_NAMESPACES } from "../../windows"
 import { Gtk } from "ags/gtk4"
-import { createComputed, createState, With } from "ags"
+import { createState, With } from "ags"
 import SettingsSectionButton from "./SettingsSectionButton"
 import { ShellSettings } from "../../../utils/SettingsManager"
 import { execAsync } from "ags/process"
@@ -9,16 +9,22 @@ import BarAppearanceSection from "./sections/BarAppearanceSection"
 import WorkspacesSection from "./sections/WorkspacesSection"
 import MonitorsSection from "./sections/MonitorsSection"
 import NowPlayingSection from "./sections/NowPlayingSection"
+import WidgetsSection from "./sections/WidgetsSection"
 
 const options = {
   bar: { label: "Bar Appearance", icon: "󰸌" },
   workspace: { label: "Workspaces", icon: "󱂬" },
   monitors: { label: "Monitors", icon: "󰍹" },
   nowPlaying: { label: "Now Playing", icon: "󰝚" },
+  widgets: { label: "Widgets", icon: "󱒊" },
 }
 
-const onCollapsed = (self: Gtk.Revealer) => {
-  if (!self.childRevealed) self.get_parent()?.queue_resize()
+const SECTIONS: Record<string, () => JSX.Element> = {
+  "Bar Appearance": () => <BarAppearanceSection />,
+  Workspaces: () => <WorkspacesSection />,
+  Monitors: () => <MonitorsSection />,
+  "Now Playing": () => <NowPlayingSection />,
+  Widgets: () => <WidgetsSection />,
 }
 
 export default function SettingsWindow() {
@@ -26,7 +32,6 @@ export default function SettingsWindow() {
 
   return (
     <CustomWindow
-      visible={true}
       resizable={false}
       name={WINDOWS_NAMESPACES.settings}
       namespace={WINDOWS_NAMESPACES.settings}
@@ -79,59 +84,23 @@ export default function SettingsWindow() {
                 )}
               </With>
             </box>
-            <box
-              class="settings-window-content"
-              orientation={Gtk.Orientation.VERTICAL}
-            >
-              <revealer
-                transitionType={Gtk.RevealerTransitionType.SWING_DOWN}
-                transitionDuration={200}
-                revealChild={createComputed(
-                  () => focusedWindow() === options.bar.label,
-                )}
-                onNotifyChildRevealed={onCollapsed}
-              >
-                <box>
-                  <BarAppearanceSection />
-                </box>
-              </revealer>
-              <revealer
-                transitionType={Gtk.RevealerTransitionType.SWING_DOWN}
-                transitionDuration={200}
-                revealChild={createComputed(
-                  () => focusedWindow() === options.workspace.label,
-                )}
-                onNotifyChildRevealed={onCollapsed}
-              >
-                <box>
-                  <WorkspacesSection />
-                </box>
-              </revealer>
-              <revealer
-                transitionType={Gtk.RevealerTransitionType.SWING_DOWN}
-                transitionDuration={200}
-                revealChild={createComputed(
-                  () => focusedWindow() === options.monitors.label,
-                )}
-                onNotifyChildRevealed={onCollapsed}
-              >
-                <box>
-                  <MonitorsSection />
-                </box>
-              </revealer>
-              <revealer
-                transitionType={Gtk.RevealerTransitionType.SWING_DOWN}
-                transitionDuration={200}
-                revealChild={createComputed(
-                  () => focusedWindow() === options.nowPlaying.label,
-                )}
-                onNotifyChildRevealed={onCollapsed}
-              >
-                <box>
-                  <NowPlayingSection />
-                </box>
-              </revealer>
-            </box>
+            <With value={focusedWindow}>
+              {(active) => (
+                <scrolledwindow
+                  vscrollbarPolicy={Gtk.PolicyType.AUTOMATIC}
+                  hscrollbarPolicy={Gtk.PolicyType.NEVER}
+                  propagateNaturalHeight={true}
+                  maxContentHeight={600}
+                >
+                  <box
+                    class="settings-window-content"
+                    orientation={Gtk.Orientation.VERTICAL}
+                  >
+                    {SECTIONS[active]?.()}
+                  </box>
+                </scrolledwindow>
+              )}
+            </With>
           </box>
         </box>
       </box>
