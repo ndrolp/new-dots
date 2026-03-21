@@ -2,11 +2,11 @@
     "$schema": "./settings.schema.json",
     "theme": "catppuccin",
     "barAppearence": {
-        "layout": "separated-islands",
+        "layout": "default",
         "island": false,
-        "compact": true,
-        "rounding": "full",
-        "float": true,
+        "compact": false,
+        "rounding": "sm",
+        "float": false,
         "showBorder": false
     },
     "workspaces": {
@@ -84,12 +84,12 @@
         "flush": {
             "left": [
                 [
-                    "current-app"
+                    "workspaces"
                 ]
             ],
             "center": [
                 [
-                    "workspaces"
+                    "current-app"
                 ]
             ],
             "right": [

@@ -2,29 +2,48 @@
   &.Bar {
     border-radius: 0;
 
+    .bar-icon {
+      margin: 0 2.5px;
+    }
+
     .bar-section {
       padding: 0px 0px;
 
       .workspaces {
         background: transparent;
+        margin: 0;
+        padding: 0;
 
         &.bar-icon {
           padding: 0px;
           margin: 0;
         }
 
+        .workspace-button-container {
+          margin: 0px;
+          padding: 0px;
+        }
+
         .workspace-button {
           box-shadow: none;
           padding: 0px 4px;
           margin: 0;
-          background: var(--bg1);
+          background: var(--bg2);
           transition: 0.1s ease-in-out;
+
+          &.occupied {
+            color: var(--fg);
+          }
 
           &.focused {
             padding: 0px 10px;
             background: var(--accent0);
           }
         }
+      }
+
+      .current-app {
+        background: transparent;
       }
     }
 
