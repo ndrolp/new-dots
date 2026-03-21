@@ -1,0 +1,26 @@
+.settings-window .settings-section {
+  // Chip (enum selector) buttons
+  .settings-chip {
+    font-size: 9pt;
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: var(--bg3);
+    color: var(--fg1);
+    transition:
+      background 0.15s ease-in-out,
+      color 0.15s ease-in-out;
+    border: 1px solid transparent;
+
+    &:hover {
+      background: var(--bg4);
+      color: var(--fg);
+    }
+
+    &.active {
+      background: transparent;
+      color: var(--accent0);
+      border-color: var(--accent0);
+    }
+  }
+}

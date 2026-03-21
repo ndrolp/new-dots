@@ -1,0 +1,21 @@
+.settings-window .settings-section {
+  .settings-monitor-card {
+    background: var(--bg1);
+    border-radius: 8px;
+    padding: 10px 14px;
+    .settings-monitor-entry {
+      font-size: 9pt;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: var(--bg2);
+      color: var(--fg);
+      border: 1px solid var(--border0);
+      caret-color: var(--accent0);
+
+      &:focus {
+        border-color: var(--accent0);
+        background: var(--bg1);
+      }
+    }
+  }
+}

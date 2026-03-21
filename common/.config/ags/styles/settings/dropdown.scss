@@ -1,0 +1,51 @@
+.settings-window .settings-section {
+  .dropdown {
+    .dropdown-trigger {
+      background: var(--bg3);
+      border-radius: 6px;
+      padding: 6px 10px;
+      transition: background 0.15s ease-in-out;
+
+      &:hover {
+        background: var(--bg4);
+      }
+
+      .dropdown-value {
+        font-size: 10pt;
+        color: var(--fg);
+      }
+
+      .dropdown-arrow {
+        font-size: 8pt;
+        color: var(--fg2);
+      }
+    }
+
+    .dropdown-list {
+      background: var(--bg3);
+      border-radius: 0 0 6px 6px;
+      padding: 4px;
+      border-top: 1px solid var(--border0);
+
+      .dropdown-item {
+        background: transparent;
+        border-radius: 4px;
+        padding: 5px 10px;
+        font-size: 10pt;
+        color: var(--fg1);
+        transition:
+          background 0.1s ease-in-out,
+          color 0.1s ease-in-out;
+
+        &:hover {
+          background: var(--bg4);
+          color: var(--fg);
+        }
+
+        &.active {
+          color: var(--accent0);
+        }
+      }
+    }
+  }
+}

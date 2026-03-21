@@ -7,14 +7,12 @@ import { ShellSettings } from "../../../utils/SettingsManager"
 import { execAsync } from "ags/process"
 import BarAppearanceSection from "./sections/BarAppearanceSection"
 import WorkspacesSection from "./sections/WorkspacesSection"
-import MonitorsSection from "./sections/MonitorsSection"
 import NowPlayingSection from "./sections/NowPlayingSection"
 import WidgetsSection from "./sections/WidgetsSection"
 
 const options = {
   bar: { label: "Bar Appearance", icon: "󰸌" },
   workspace: { label: "Workspaces", icon: "󱂬" },
-  monitors: { label: "Monitors", icon: "󰍹" },
   nowPlaying: { label: "Now Playing", icon: "󰝚" },
   widgets: { label: "Widgets", icon: "󱒊" },
 }
@@ -22,7 +20,6 @@ const options = {
 const SECTIONS: Record<string, () => JSX.Element> = {
   "Bar Appearance": () => <BarAppearanceSection />,
   Workspaces: () => <WorkspacesSection />,
-  Monitors: () => <MonitorsSection />,
   "Now Playing": () => <NowPlayingSection />,
   Widgets: () => <WidgetsSection />,
 }

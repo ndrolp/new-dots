@@ -1,0 +1,72 @@
+.settings-window {
+  background: var(--bg0);
+  padding: 1rem;
+  color: var(--fg);
+
+  .settings-window-title {
+    font-size: 16pt;
+    font-weight: bold;
+    font-family:
+      "Hasklug Nerd Font Propo", "Noto Sans Simplified Chinese", "Noto Sans";
+    margin-bottom: 0.5rem;
+    color: var(--fg);
+  }
+
+  .settings-apply-button {
+    background: var(--accent0);
+    color: var(--bg0);
+    border-radius: 6px;
+    padding: 4px 14px;
+    font-weight: bold;
+    font-size: 10pt;
+    transition: background 0.15s ease-in-out;
+
+    &:hover {
+      background: var(--accent1);
+    }
+  }
+
+  .settings-window-buttons {
+    padding-right: 0;
+
+    .settings-section-button {
+      transition:
+        background 0.2s ease-in-out,
+        color 0.2s ease-in-out;
+      font-size: 11pt;
+      color: var(--fg1);
+      font-family:
+        "Hasklug Nerd Font Propo", "Noto Sans Simplified Chinese", "Noto Sans";
+      padding: 10px 16px;
+      padding-right: 28px;
+      background: transparent;
+      border-radius: 8px;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      transform: translateX(7px);
+      margin-bottom: 2px;
+
+      .icon {
+        font-size: 13pt;
+        min-width: 20px;
+      }
+
+      &.active {
+        background: var(--bg2);
+        color: var(--fg);
+      }
+
+      &:hover:not(.active) {
+        background: var(--bg1);
+        color: var(--fg);
+      }
+    }
+  }
+
+  .settings-window-content {
+    background: var(--bg2);
+    min-width: 380px;
+    border-radius: 10px;
+    padding: 20px;
+  }
+}

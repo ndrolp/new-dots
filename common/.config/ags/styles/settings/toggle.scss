@@ -1,0 +1,25 @@
+.settings-window .settings-section {
+  // On/off toggle buttons
+  .settings-toggle {
+    font-size: 8pt;
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 20px;
+    min-width: 36px;
+    background: var(--bg3);
+    color: var(--fg2);
+    transition:
+      background 0.15s ease-in-out,
+      color 0.15s ease-in-out;
+
+    &.active {
+      background: var(--accent0);
+      color: var(--bg0);
+    }
+
+    &:hover:not(.active) {
+      background: var(--bg4);
+      color: var(--fg);
+    }
+  }
+}
