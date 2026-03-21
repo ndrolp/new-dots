@@ -4,7 +4,7 @@
     "barAppearence": {
         "layout": "default",
         "island": false,
-        "compact": false,
+        "compact": true,
         "rounding": "sm",
         "float": false,
         "showBorder": false

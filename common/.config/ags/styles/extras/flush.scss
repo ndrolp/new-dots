@@ -49,11 +49,22 @@
 
     &.compact {
       .bar-content {
-        padding: 2px 0px;
+        padding: 2px 5px;
       }
 
-      .workspace-button-container {
-        margin: 3px 0px;
+      .workspaces {
+        background: transparent;
+        padding: 5px;
+        padding: 0;
+
+        .workspace-button-container {
+          margin: 3px 0px;
+
+          .workspace-button {
+            padding: 0px 4px;
+            margin: 0px;
+          }
+        }
       }
     }
 
