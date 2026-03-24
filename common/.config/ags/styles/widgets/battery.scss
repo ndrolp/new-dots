@@ -8,7 +8,7 @@
   border: none;
   transition: 0.3s;
 
-  > .toggle {
+  >.toggle {
     cursor: pointer;
     background-color: transparent;
 
@@ -41,7 +41,7 @@
   .battery-dashboard-percentage {
     /* background: transparent; */
 
-    > label {
+    >label {
       margin-left: 8px;
       font-size: 9pt;
       font-weight: bolder;

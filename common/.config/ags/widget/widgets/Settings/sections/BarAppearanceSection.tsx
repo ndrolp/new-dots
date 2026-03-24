@@ -8,7 +8,7 @@ const THEMES: SHEL_THEME[] = [
   "catppuccin",
   "gruvbox-dark",
   "nord",
-  "monochrome-blue-dark",
+  "transparent-catppuccin",
 ]
 const ROUNDINGS: IBarAppearence["rounding"][] = [
   "none",

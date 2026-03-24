@@ -43,7 +43,7 @@ export default function TimerButton({}) {
   return (
     <menubutton class="timer-button bar-icon">
       <box class="timer-button-container">
-        <label class="bar-icon-icon" label="󰞌" valign={Gtk.Align.CENTER} />
+        <label class="bar-icon-icon" label="" valign={Gtk.Align.CENTER} />
         <revealer
           transition_type={Gtk.RevealerTransitionType.SWING_LEFT}
           revealChild={createComputed(() => {

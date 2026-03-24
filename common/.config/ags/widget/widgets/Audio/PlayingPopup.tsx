@@ -34,7 +34,7 @@ export default function PlayingPopUp({ player }: { player: Mpris.Player }) {
     }
   })
   return (
-    <PopUp cssClass="playing-popup">
+    <PopUp autohide={false} cssClass="playing-popup">
       <With value={displayData}>
         {(data) => {
           return (

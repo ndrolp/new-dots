@@ -8,7 +8,7 @@
             "enum": [
                 "catppuccin",
                 "gruvbox-dark",
-                "monochrome-blue-dark",
+                "transparent-catppuccin",
                 "nord"
             ]
         },

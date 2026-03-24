@@ -1,4 +1,4 @@
-/* Default (fallback) *
+/* Default (fallback) */
 :root {
   --bg0: #232634;
   --fg: #c6d0f5;
@@ -105,7 +105,7 @@
   --border2: #7c6f64;
 }
 
-.monochrome-blue-dark {
+.transparent-catppuccin {
   --bg0: #0f1726;
   --bg1: #0f1726;
   --bg2: #0f1726;
@@ -144,30 +144,30 @@
   --border2: #2a4060;
 }
 
-.monochrome-blue-dark {
-  --bg0: #0b1220;
-  --bg1: #0b1220;
-  --bg2: #0b1220;
-  --bg3: #0b1220;
-  --bg4: #0b1220;
+.transparent-catppuccin {
+  --bg0: rgba(0, 0, 0, 0.3);
+  --bg1: rgba(0, 0, 0, 0.3);
+  --bg2: rgba(0, 0, 0, 0.3);
+  --bg3: rgba(0, 0, 0, 0.3);
+  --bg4: rgba(0, 0, 0, 0.3);
 
   --fg: #cfdbe6;
   --fg1: #a8b8c8;
   --fg2: #8096a8;
 
-  --accent0: #cfdbe6;
-  --accent1: #cfdbe6;
-  --accent2: #cfdbe6;
-  --accent3: #cfdbe6;
-  --accent4: #cfdbe6;
-  --accent5: #cfdbe6;
-  --accent6: #cfdbe6;
+  --accent0: #ca9eee;
+  --accent1: #8caaee;
+  --accent2: #81c8be;
+  --accent3: #a6d189;
+  --accent4: #e5c890;
+  --accent5: #ef9f76;
+  --accent6: #e78284;
   --pink: #cfdbe6;
 
   --subtext0: #cfdbe6;
   --subtext1: #cfdbe6;
 
-  --surface0: #0b1220;
+  --surface0: #24273a;
   --surface1: #0b1220;
   --surface2: #0b1220;
 
@@ -188,13 +188,34 @@
     border-radius: 0px;
   }
 
+  &.island {
+    .bar-icon {
+      background: transparent;
+    }
+
+    .workspaces {
+      background: transparent;
+
+      .workspace-button-container {
+        .workspace-button {
+          padding: 0px 2.5px;
+
+          &.focused {
+            padding: 0px 10px;
+          }
+        }
+      }
+    }
+  }
+
   .workspaces {
+    background: transparent;
+
     .workspace-button-container {
       .workspace-button {
-        border-color: var(--fg);
-
         &.focused {
-          background-color: var(--fg);
+          background-color: var(--accent0);
+          color: var(--border2);
         }
       }
     }

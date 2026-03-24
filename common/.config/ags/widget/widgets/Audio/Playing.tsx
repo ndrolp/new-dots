@@ -74,7 +74,7 @@ export function PlayerBarLine({ player }: { player: Mpris.Player }) {
   })
 
   return (
-    <box>
+    <box visible={createComputed(() => title() !== "")}>
       <With value={playerData}>
         {(data) => {
           const playbackStatus = data.status

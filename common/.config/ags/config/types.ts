@@ -1,7 +1,7 @@
 export type SHEL_THEME =
   | "catppuccin"
   | "gruvbox-dark"
-  | "monochrome-blue-dark"
+  | "transparent-catppuccin"
   | "nord"
 
 export interface ILogSettings {

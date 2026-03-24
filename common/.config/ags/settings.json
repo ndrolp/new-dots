@@ -2,11 +2,11 @@
     "$schema": "./settings.schema.json",
     "theme": "catppuccin",
     "barAppearence": {
-        "layout": "default",
+        "layout": "separated-islands",
         "island": false,
         "compact": true,
-        "rounding": "sm",
-        "float": false,
+        "rounding": "full",
+        "float": true,
         "showBorder": false
     },
     "workspaces": {
@@ -20,6 +20,11 @@
                 "minWorkspaces": 3,
                 "from": 11,
                 "to": 20
+            },
+            "0x08D5": {
+                "from": 1,
+                "to": 10,
+                "minWorkspaces": 5
             }
         },
         "displayType": "numbers",
@@ -67,6 +72,9 @@
             "center": [
                 [
                     "workspaces"
+                ],
+                [
+                    "timer"
                 ]
             ],
             "right": [
@@ -75,7 +83,6 @@
                 ],
                 [
                     "audio",
-                    "timer",
                     "network",
                     "battery"
                 ]
@@ -108,7 +115,9 @@
         "island": {
             "left": [
                 [
-                    "clock",
+                    "clock"
+                ],
+                [
                     "now-playing"
                 ]
             ],
@@ -119,8 +128,10 @@
             ],
             "right": [
                 [
+                    "timer"
+                ],
+                [
                     "audio",
-                    "timer",
                     "network",
                     "battery"
                 ]

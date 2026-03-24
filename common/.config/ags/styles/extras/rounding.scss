@@ -154,6 +154,27 @@
     .bar-content {
       background: var(--bg1);
       padding: 5px 5px;
+
+      .bar-section {
+        .bar-icon {
+          font-size: 10pt;
+          background-color: transparent;
+          padding-left: 0;
+          padding-right: 0;
+          margin: 0;
+
+          &:not(.workspaces):hover {
+            background-color: var(--bg3);
+          }
+
+          .toggle {
+            font-size: 10pt;
+            background-color: transparent;
+            padding-left: 0;
+            padding-right: 0;
+          }
+        }
+      }
     }
 
     .bar-section {
@@ -179,25 +200,6 @@
           /* background-color: var(--accent0); */
         }
       }
-    }
-  }
-
-  .bar-icon {
-    font-size: 10pt;
-    background-color: var(--bg1);
-    padding-left: 0;
-    padding-right: 0;
-    margin: 0;
-
-    &:not(.workspaces):hover {
-      background-color: var(--bg3);
-    }
-
-    .toggle {
-      font-size: 10pt;
-      background-color: transparent;
-      padding-left: 0;
-      padding-right: 0;
     }
   }
 }

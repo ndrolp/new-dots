@@ -5,13 +5,19 @@ import { Gtk } from "ags/gtk4"
 export interface PopUpProps {
   children: JSX.Element | Array<JSX.Element>
   cssClass: string
+  autohide?: boolean
 }
 
-export default function PopUp({ children, cssClass }: PopUpProps) {
+export default function PopUp({
+  children,
+  cssClass,
+  autohide = true,
+}: PopUpProps) {
   const [isPopoverOpen, setIsPopoverOpen] = createState(false)
   const classes = `window ${getWindowSettingsCssClasses()} ${cssClass}`
   return (
     <popover
+      autohide={autohide}
       has_arrow={false}
       cascade_popdown
       onNotifyVisible={(p) => setIsPopoverOpen(p.visible)}

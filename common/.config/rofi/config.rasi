@@ -91,6 +91,8 @@ listview {
     padding:      10px;
     scrollbar:    true;
     columns:      4;
+    dynamic: true;
+    fixed-height: false;
     lines: 3;
     // border-color: @separatorcolor;
     spacing:      2px ;

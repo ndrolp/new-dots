@@ -24,6 +24,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
       ? 5
       : 0
   if (SETTINGS.barAppearence.layout === "transparent") spacing = 5
+  if (SETTINGS.theme === "transparent-catppuccin") spacing = 5
 
   const Container = ({
     children,
@@ -37,7 +38,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
             orientation={Gtk.Orientation.HORIZONTAL}
             cssName="centerbox"
             class="bar-content"
-            spacing={spacing + 5}
+            spacing={spacing}
           >
             {children}
           </box>
@@ -64,7 +65,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   return (
     <window
       visible
-      name="bar"
+      name={WINDOWS_NAMESPACES.bar}
       namespace={WINDOWS_NAMESPACES.bar}
       class={`Bar ${barCss}`}
       gdkmonitor={gdkmonitor}

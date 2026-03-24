@@ -20,7 +20,6 @@ export default function LayoutGenerator({
       ? 5
       : 0
   if (SETTINGS.barAppearence.layout === "transparent") spacing = 5
-
   return (
     <>
       {Object.keys(layout).map((position) => {
