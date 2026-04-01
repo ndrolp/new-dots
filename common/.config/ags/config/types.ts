@@ -51,6 +51,7 @@ export type AVAILABLE_WIDGETS =
   | "workspaces"
   | "clock"
   | "timer"
+  | "dashboard"
 
 export interface IWidgetLayout {
   left: AVAILABLE_WIDGETS[][]

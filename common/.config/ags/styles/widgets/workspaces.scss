@@ -42,8 +42,25 @@
 
         &.focused {
           background-color: var(--accent0);
+          padding: 0px 6px;
+          color: var(--fgdark);
+        }
+      }
+
+      &.icons {
+        /* background-color: var(--bg2); */
+        padding: 0px 4px;
+        border: none;
+        min-height: 0;
+
+        &.occupied {
+          color: var(--fg);
+        }
+
+        &.focused {
+          background-color: transparent;
           padding: 0px 8px;
-          color: var(--bg2);
+          color: var(--fgdark);
         }
       }
 

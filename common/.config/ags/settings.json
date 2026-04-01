@@ -71,6 +71,9 @@
             ],
             "center": [
                 [
+                    "dashboard"
+                ],
+                [
                     "workspaces"
                 ],
                 [
@@ -91,6 +94,7 @@
         "flush": {
             "left": [
                 [
+                    "dashboard",
                     "workspaces"
                 ]
             ],
@@ -114,6 +118,9 @@
         },
         "island": {
             "left": [
+                [
+                    "dashboard"
+                ],
                 [
                     "clock"
                 ],

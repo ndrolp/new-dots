@@ -9,10 +9,14 @@
     .bar-section {
       padding: 0px 0px;
 
+      .dashboard-button {
+        margin-right: 5px;
+      }
+
       .workspaces {
         background: transparent;
-        margin: 0;
-        padding: 0;
+        margin: 5;
+        /* padding: 5; */
 
         &.bar-icon {
           padding: 0px;
@@ -25,6 +29,24 @@
         }
 
         .workspace-button {
+          &.icons {
+            background-color: transparent;
+            margin: 0px;
+            padding: 0px 2px;
+            border: none;
+            min-height: 0;
+
+            &.occupied {
+              color: var(--fg);
+            }
+
+            &.focused {
+              background-color: transparent;
+              padding: 0px 4px;
+              color: var(--accent0);
+            }
+          }
+
           box-shadow: none;
           padding: 0px 4px;
           margin: 0;
@@ -37,6 +59,7 @@
 
           &.focused {
             padding: 0px 10px;
+            color: var(--fgdark);
             background: var(--accent0);
           }
         }
@@ -50,6 +73,10 @@
     &.compact {
       .bar-content {
         padding: 2px 5px;
+
+        .bar-section {
+          background: transparent;
+        }
       }
 
       .workspaces {

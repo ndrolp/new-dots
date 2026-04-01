@@ -14,6 +14,7 @@ const ALL_WIDGETS: AVAILABLE_WIDGETS[] = [
   "workspaces",
   "clock",
   "timer",
+  "dashboard",
 ]
 
 const VARIANTS = ["default", "flush", "island"] as const

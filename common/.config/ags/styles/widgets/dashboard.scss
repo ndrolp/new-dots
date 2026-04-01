@@ -1,0 +1,293 @@
+.dashboard-button {
+  color: var(--accent3);
+  font-size: 14pt;
+  font-family:
+    "Noto Sans", "Hasklug Nerd Font Propo", "Noto Sans Simplified Chinese";
+
+  label {
+    font-size: 12pt;
+    font-family:
+      "Noto Sans", "Hasklug Nerd Font Propo", "Noto Sans Simplified Chinese";
+    margin: 0px 0px;
+  }
+}
+
+// ── Window ──────────────────────────────────────────────────────────────────
+
+.nc-window {
+  min-width: 320px;
+}
+
+.nc-root {
+  background: var(--bg1);
+}
+
+// ── Scrollable area ─────────────────────────────────────────────────────────
+
+.nc-scroll {
+  background: transparent;
+  min-height: 160px;
+  max-height: 680px;
+}
+
+.nc-tiles {
+  padding: 12px 12px 8px;
+
+  // Each tile is a horizontal pill: [toggle button | divider | chevron]
+  .qs-tile {
+    border-radius: 14px;
+    background: var(--bg2);
+    overflow: hidden;
+    min-height: 62px;
+
+    &.active {
+      background: color-mix(in srgb, var(--accent1) 22%, var(--bg2));
+
+      .tile-icon { color: var(--accent1); }
+      .tile-name { color: var(--fg); }
+    }
+
+    .qs-tile-toggle {
+      background: transparent;
+      border: none;
+      padding: 10px 0 10px 12px;
+
+      &:hover { background: color-mix(in srgb, var(--fg) 5%, transparent); }
+
+      .tile-icon {
+        font-size: 15pt;
+        min-width: 22px;
+        color: var(--grey1);
+        line-height: 1;
+      }
+
+      .tile-name {
+        font-size: 9pt;
+        font-weight: bold;
+        color: var(--fg1);
+      }
+
+      .tile-detail {
+        font-size: 8pt;
+        color: var(--grey1);
+      }
+    }
+
+    .qs-tile-chevron {
+      background: transparent;
+      border: none;
+      border-left: 1px solid var(--bg3);
+      padding: 0 10px;
+      min-width: 32px;
+
+      &:hover { background: color-mix(in srgb, var(--fg) 8%, transparent); }
+
+      .tile-chevron {
+        font-size: 10pt;
+        color: var(--grey1);
+      }
+    }
+  }
+}
+
+// ── Inline settings panels ──────────────────────────────────────────────────
+
+.nc-settings-wrap {
+  padding: 0 12px 8px;
+}
+
+.qs-settings-panel {
+  background: var(--bg2);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.qs-empty {
+  font-size: 9pt;
+  color: var(--grey1);
+  padding: 6px 0;
+}
+
+// BT device rows inside settings panel
+.bt-device-row {
+  padding: 6px 4px;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--bg3);
+  }
+
+  .bt-device-icon {
+    font-size: 14pt;
+    min-width: 24px;
+    color: var(--accent0);
+  }
+
+  .bt-device-name {
+    font-size: 9pt;
+    font-weight: bold;
+    color: var(--fg);
+  }
+
+  .bt-device-battery {
+    font-size: 8pt;
+    color: var(--grey1);
+  }
+
+  .bt-connect-btn {
+    background: var(--bg3);
+    border: none;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 10pt;
+    color: var(--grey1);
+
+    &:hover { background: var(--bg4); }
+    &.connected { color: var(--accent2); }
+
+    label.rotate {
+      animation: rotate-network 1.2s linear infinite;
+    }
+  }
+}
+
+// ── Brightness ──────────────────────────────────────────────────────────────
+
+.nc-brightness {
+  padding: 4px 14px 10px;
+
+  .brightness-row {
+    .brightness-icon {
+      font-size: 13pt;
+      color: var(--accent4);
+      min-width: 20px;
+    }
+
+    .brightness-slider {
+      trough {
+        min-height: 4px;
+        border-radius: 4px;
+        background: var(--bg3);
+      }
+      highlight {
+        background: var(--accent4);
+        border-radius: 4px;
+      }
+      slider {
+        min-width: 14px;
+        min-height: 14px;
+        border-radius: 50%;
+        background: var(--fg);
+        border: none;
+        box-shadow: none;
+        margin: -5px 0;
+      }
+    }
+
+    .brightness-pct {
+      font-size: 8pt;
+      color: var(--grey1);
+      min-width: 28px;
+    }
+  }
+}
+
+// ── Notifications ───────────────────────────────────────────────────────────
+
+.nc-scroll-inner { padding: 0 12px 10px; }
+
+.nc-notifs {
+  .nc-empty {
+    padding: 36px 0;
+    .nc-empty-icon {
+      font-size: 30pt;
+      color: var(--bg3);
+    }
+    .nc-empty-text {
+      font-size: 9pt;
+      color: var(--grey1);
+    }
+  }
+
+  .nc-notifs-header {
+    padding: 4px 2px 8px;
+    .nc-notifs-label {
+      font-size: 9pt;
+      font-weight: bold;
+      color: var(--grey1);
+    }
+    .nc-clear-btn {
+      background: transparent;
+      border: none;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 9pt;
+      color: var(--grey1);
+      &:hover {
+        color: var(--accent6);
+        background: color-mix(in srgb, var(--accent6) 15%, transparent);
+      }
+    }
+  }
+
+  .nc-card {
+    background: var(--bg2);
+    border-radius: 12px;
+    padding: 10px 12px 12px;
+
+    .nc-card-app {
+      font-size: 8pt;
+      font-weight: bold;
+      color: var(--accent1);
+    }
+
+    .nc-card-close {
+      background: transparent;
+      border: none;
+      padding: 0 2px;
+      border-radius: 50%;
+      font-size: 9pt;
+      color: var(--bg4);
+      min-width: 18px;
+      min-height: 18px;
+      &:hover {
+        background: var(--bg3);
+        color: var(--fg2);
+      }
+    }
+
+    .nc-card-title {
+      font-size: 10pt;
+      font-weight: bold;
+      color: var(--fg);
+    }
+
+    .nc-card-body {
+      font-size: 9pt;
+      color: var(--fg2);
+      line-height: 1.3;
+    }
+  }
+}
+
+// ── System tray ─────────────────────────────────────────────────────────────
+
+.nc-tray-wrap {
+  border-top: 1px solid var(--bg3);
+  padding: 7px 12px;
+  background: var(--bg1);
+}
+
+.system-tray {
+  .tray-item {
+    padding: 4px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    &:hover { background: var(--bg3); }
+    image { -gtk-icon-size: 18px; }
+  }
+  .empty-label {
+    font-size: 8pt;
+    color: var(--bg3);
+  }
+}

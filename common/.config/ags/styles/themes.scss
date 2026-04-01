@@ -25,9 +25,18 @@
   --bg3: #494d64;
   --bg4: #6e738d;
 
+  &.flush {
+    --bg0: #1e203080;
+    --bg1: #24273a99;
+    --bg2: #363a4fdd;
+    --bg3: #494d64dd;
+    --bg4: #6e738dff;
+  }
+
   --fg: #cad3f5;
   --fg1: #b8c0e0;
   --fg2: #6e738d;
+  --fgdark: #1e203080;
 
   --accent0: #c6a0f6;
   --accent1: #eed49f;
@@ -57,6 +66,7 @@
   --fg: #d8dee9;
   --fg1: #b0bccf;
   --fg2: #616e88;
+  --fgdark: #2e3440;
 
   --accent0: #81a1c1;
   --accent1: #b48ead;
@@ -87,6 +97,7 @@
   --fg: #ebdbb2;
   --fg1: #c8b898;
   --fg2: #a5957a;
+  --fgdark: #1d2021;
 
   --accent0: #d3869b;
   --accent1: #83a598;

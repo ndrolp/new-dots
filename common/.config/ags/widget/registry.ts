@@ -9,6 +9,7 @@ import { Gdk } from "ags/gtk4"
 import Clock from "./widgets/Clock"
 import { AVAILABLE_WIDGETS } from "../config/types"
 import TimerButton from "./widgets/Timer/TimerButton"
+import DashboardButton from "./widgets/Dashboard/DashboardButton"
 
 export type WidgetFunction = (props: { monitor: Gdk.Monitor }) => JSX.Element
 
@@ -21,4 +22,5 @@ export const WIDGETS: Record<AVAILABLE_WIDGETS, WidgetFunction> = {
   workspaces: Workspaces,
   clock: Clock,
   timer: TimerButton,
+  dashboard: DashboardButton,
 }

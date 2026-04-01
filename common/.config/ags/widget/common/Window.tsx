@@ -12,6 +12,7 @@ export interface CustomWindowProps {
   css?: string
   visible?: boolean
   resizable?: boolean
+  hideOnFocusLoss?: boolean
   onVisivilityChange?: (self: Astal.Window) => void
 }
 
@@ -23,6 +24,7 @@ export default function CustomWindow({
   css = "",
   visible = false,
   resizable = true,
+  hideOnFocusLoss = false,
   onVisivilityChange = () => {},
 }: CustomWindowProps) {
   const anchor = getWindowAnchors(position ?? Gtk.Align.CENTER)
@@ -32,8 +34,9 @@ export default function CustomWindow({
   return (
     <window
       onNotifyVisible={(self) => {
-        onVisivilityChange(self)
-      }}
+          if (self.visible && hideOnFocusLoss) self.grab_focus()
+          onVisivilityChange(self)
+        }}
       visible={visible}
       resizable={resizable}
       application={app}
@@ -55,6 +58,13 @@ export default function CustomWindow({
           }
         }}
       />
+      {hideOnFocusLoss && (
+        <Gtk.EventControllerFocus
+          onLeave={({ widget }) => {
+            widget.hide()
+          }}
+        />
+      )}
       {children}
     </window>
   )

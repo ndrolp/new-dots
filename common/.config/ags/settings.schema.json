@@ -203,7 +203,9 @@
                                 "now-playing",
                                 "current-app",
                                 "workspaces",
-                                "clock"
+                                "clock",
+                                "timer",
+                                "dashboard"
                             ]
                         }
                     }
@@ -221,7 +223,9 @@
                                 "now-playing",
                                 "current-app",
                                 "workspaces",
-                                "clock"
+                                "clock",
+                                "timer",
+                                "dashboard"
                             ]
                         }
                     }
@@ -239,7 +243,9 @@
                                 "now-playing",
                                 "current-app",
                                 "workspaces",
-                                "clock"
+                                "clock",
+                                "timer",
+                                "dashboard"
                             ]
                         }
                     }
