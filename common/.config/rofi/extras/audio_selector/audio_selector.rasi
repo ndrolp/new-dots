@@ -24,7 +24,7 @@ window {
     border:                         1px;
     border: 2px solid;
     border-radius:                  20px;
-    border-color:                   @purple;
+    border-color:                   @blue;
     cursor:                         "default";
     background-color:               rgba(48, 52, 70, 0.7);
     location: center;
@@ -58,7 +58,7 @@ inputbar {
     color: red;
     border:                         1px;
     orientation:                    horizontal;
-    children:                       ["prompt", "entry"];
+    children:                       ["entry"];
     font:                           "Hasklug Nerd Font Mono 12";
 }
 
@@ -66,7 +66,7 @@ entry {
     background-color: @bg2;
     padding: 10px;
     border-radius: 10px;
-    placeholder: "Go to web page...";
+    placeholder: "Select audio output device...";
     font:                           "Hasklug Nerd Font Mono 12";
     hide-cursor-on-empty: true;
     text-color:                     @fg;
@@ -86,14 +86,15 @@ prompt {
 /* ---- Listview ---- */
 listview {
     enabled:                        true;
-    columns:                        4;
-    lines:                          2;
+    columns:                        1;
+    lines:                          3;
     cycle:                          true;
     dynamic:                        true;
     scrollbar:                      false;
     layout:                         vertical;
     reverse:                        false;
     fixed-height:                   false;
+    fixed-lines: false;
     fixed-columns:                  false;
     spacing:                        10px;
     padding:                        10px 10px;
@@ -113,7 +114,7 @@ element {
     text-color:                     @fg;
     cursor:                         pointer;
     orientation: vertical;
-    children: [  "element-icon", "element-text"  ];
+    children: [ "element-text"  ];
 }
 element-text {
     font:                           "Hasklug Nerd Font Mono 11";
@@ -122,7 +123,7 @@ element-text {
     text-color:                     inherit;
     cursor:                         inherit;
     vertical-align:                 0.5;
-    horizontal-align:               0.5;
+    horizontal-align:               0.0;
     margin: 4px;
 }
 
@@ -140,9 +141,9 @@ element-icon {
 
 element selected.normal {
     border: 2px;
-    border-color: @purple;
-    background-color:               transparent;
-    color: @purple;
+    border-color: @blue;
+    background-color: @blue;
+    color: @bg0;
 }
 element alternate.normal {
     background-color:               transparent;

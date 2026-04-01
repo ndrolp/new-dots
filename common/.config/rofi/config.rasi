@@ -93,6 +93,7 @@ listview {
     columns:      4;
     dynamic: true;
     fixed-height: false;
+    fixed-columns: false;
     lines: 3;
     // border-color: @separatorcolor;
     spacing:      2px ;

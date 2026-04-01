@@ -62,7 +62,7 @@ palette = 13=#f4b8e4
 palette = 14=#81c8be
 palette = 15=#b5bfe2
 # background = 303446
-background = 24273a
+background = #1e2030
 foreground = c6d0f5
 cursor-color = f2d5cf
 cursor-text = 303446
@@ -71,8 +71,9 @@ selection-foreground = c6d0f5
 
 # GENERAL
 confirm-close-surface = false
-background-opacity = 0.88
+background-opacity = 1.00
 window-padding-y = 4
 window-padding-x = 4
 # Font
 font-size = 10
+font-family = GeistMono Nerd Font Mono

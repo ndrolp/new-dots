@@ -6,9 +6,12 @@ import { ShellSettings } from "../../../utils/SettingsManager"
 import { WorkspaceRange } from "./WorkspacesSettingsType"
 
 export default function Workspaces({ monitor }: { monitor: Gdk.Monitor }) {
-  const monitorSettings: WorkspaceRange = ShellSettings.getInstance().workspaces.monitors[
-    monitor.get_model() ?? "NULL"
-  ] ?? { from: 1, to: 20, minWorkspaces: 5 }
+  const monitorSettings: WorkspaceRange = ShellSettings.getInstance().workspaces
+    .monitors[monitor.get_model() ?? "NULL"] ?? {
+    from: 1,
+    to: 20,
+    minWorkspaces: 5,
+  }
 
   const monitorsToDISPLAY = monitorSettings.to - monitorSettings.from + 1
 

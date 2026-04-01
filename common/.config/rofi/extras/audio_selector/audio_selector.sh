@@ -16,7 +16,7 @@ while read -r line; do
 done < <(pactl list short sinks)
 
 # Show the menu with wofi
-selection=$(echo -e "$menu" | rofi -dmenu -prompt "Select Audio Output" -no-show-icons -i -columns 1)
+selection=$(echo -e "$menu" | rofi -dmenu -prompt "Select Audio Output" -no-show-icons -i -columns 1 -theme ~/.config/rofi/extras/audio_selector/audio_selector.rasi)
 
 # Set the selected sink as default and move streams
 if [[ -n "$selection" ]]; then
