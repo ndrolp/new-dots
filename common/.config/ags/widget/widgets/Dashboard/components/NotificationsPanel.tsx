@@ -10,7 +10,12 @@ function NotificationCard({
   onDismiss: () => void
 }) {
   return (
-    <box class="nc-card" orientation={Gtk.Orientation.VERTICAL} spacing={4} hexpand>
+    <box
+      class="nc-card"
+      orientation={Gtk.Orientation.VERTICAL}
+      spacing={4}
+      hexpand
+    >
       <box hexpand spacing={0}>
         <label
           class="nc-card-app"
@@ -19,7 +24,11 @@ function NotificationCard({
           hexpand
           ellipsize={3}
         />
-        <button class="nc-card-close" onClicked={onDismiss} valign={Gtk.Align.CENTER}>
+        <button
+          class="nc-card-close"
+          onClicked={onDismiss}
+          valign={Gtk.Align.CENTER}
+        >
           <label label="" />
         </button>
       </box>
@@ -52,7 +61,12 @@ export function NotificationsPanel() {
   const notifications = createBinding(notifd, "notifications")
 
   return (
-    <box class="nc-notifs" orientation={Gtk.Orientation.VERTICAL} spacing={0} hexpand>
+    <box
+      class="nc-notifs"
+      orientation={Gtk.Orientation.VERTICAL}
+      spacing={0}
+      hexpand
+    >
       <With value={notifications}>
         {(notifs) => {
           if (notifs.length === 0)

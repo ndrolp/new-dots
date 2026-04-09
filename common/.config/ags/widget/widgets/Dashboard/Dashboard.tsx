@@ -2,10 +2,7 @@ import { Gtk } from "ags/gtk4"
 import { createState, createComputed } from "ags"
 import { WINDOWS_NAMESPACES } from "../../windows"
 import { WifiTile, WifiSettings } from "./components/WifiPanel"
-import {
-  BluetoothTile,
-  BluetoothSettings,
-} from "./components/BluetoothPanel"
+import { BluetoothTile, BluetoothSettings } from "./components/BluetoothPanel"
 import { NotificationsPanel } from "./components/NotificationsPanel"
 import { SystemTray } from "./components/SystemTray"
 import { BrightnessSlider } from "./components/BrightnessSlider"
@@ -19,8 +16,7 @@ export default function Dashboard() {
   const wifiExpanded = createComputed(() => expanded() === "wifi")
   const btExpanded = createComputed(() => expanded() === "bt")
 
-  const toggleWifi = () =>
-    setExpanded((e) => (e === "wifi" ? null : "wifi"))
+  const toggleWifi = () => setExpanded((e) => (e === "wifi" ? null : "wifi"))
   const toggleBt = () => setExpanded((e) => (e === "bt" ? null : "bt"))
 
   return (
@@ -30,7 +26,6 @@ export default function Dashboard() {
       position={getDashboardAlign()}
       css="nc-window"
       resizable={false}
-      hideOnFocusLoss
     >
       <box class="nc-root" orientation={Gtk.Orientation.VERTICAL}>
         {/* Quick-setting tiles */}
