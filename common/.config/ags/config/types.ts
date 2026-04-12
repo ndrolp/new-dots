@@ -3,6 +3,7 @@ export type SHEL_THEME =
   | "gruvbox-dark"
   | "transparent-catppuccin"
   | "nord"
+  | "tokyonight"
 
 export interface ILogSettings {
   enabled: boolean
@@ -29,8 +30,10 @@ export interface IBarAppearence {
     | "transparent"
     | "separated-islands"
     | "slanted-separated-island"
+  position: "top" | "bottom"
   island: boolean
   compact: boolean
+  verbose: boolean
   float: boolean
   showBorder: boolean
   rounding: "lg" | "sm" | "md" | "none" | "full"

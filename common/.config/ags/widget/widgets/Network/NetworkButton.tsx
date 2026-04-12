@@ -1,12 +1,11 @@
 import AstalNetwork from "gi://AstalNetwork"
-import app from "ags/gtk4/app"
-import { getWifiIcon } from "../../../utils/network"
-import NM from "gi://NM"
+import { getDeviceIpAddress, getWifiIcon } from "../../../utils/network"
 import { createBinding, createComputed, With } from "ags"
-import { WINDOWS_NAMESPACES } from "../../windows"
+import { ShellSettings } from "../../../utils/SettingsManager"
 
 export default function NetworkButton() {
   const Network = AstalNetwork.get_default()
+  const settings = ShellSettings.getInstance()
 
   const wifi = createBinding(Network, "wifi")
   const wired = createBinding(Network, "wired")
@@ -19,10 +18,10 @@ export default function NetworkButton() {
       wired: wired(),
       state: stateData(),
       primary: primary(),
+      verbose: settings.barAppearence.verbose,
     }
   })
 
-  AstalNetwork.DeviceState.SECONDARIES
   return (
     <box>
       <With value={wirelessButtonData}>
@@ -35,12 +34,30 @@ export default function NetworkButton() {
           return (
             <menubutton class="network-button bar-icon">
               {data.primary === AstalNetwork.Primary.WIFI ? (
-                <label
-                  class={`network-icon ${rotateClass}`}
-                  label={getWifiIcon(data.state, data.wifi.state)}
-                />
+                <box>
+                  <label
+                    class={`network-icon ${rotateClass}`}
+                    label={getWifiIcon(data.state, data.wifi.state)}
+                  />
+                  <label
+                    visible={data.verbose && !!data.wifi?.ssid}
+                    class="network-label"
+                    label={data.wifi?.ssid ?? ""}
+                    ellipsize={3}
+                    maxWidthChars={16}
+                  />
+                </box>
               ) : data.primary === AstalNetwork.Primary.WIRED ? (
-                "WIRED"
+                <box>
+                  <label class="network-icon" label="󰈀" />
+                  <label
+                    visible={data.verbose}
+                    class="network-label"
+                    label={getDeviceIpAddress(data.wired?.device) ?? "Wired"}
+                    ellipsize={3}
+                    maxWidthChars={16}
+                  />
+                </box>
               ) : (
                 <label
                   class={`network-icon ${rotateClass}`}

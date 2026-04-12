@@ -2,10 +2,12 @@
     "$schema": "./settings.schema.json",
     "theme": "nord",
     "barAppearence": {
-        "layout": "separated-islands",
-        "island": false,
+        "layout": "default",
+        "position": "top",
+        "island": true,
         "compact": true,
-        "rounding": "full",
+        "verbose": false,
+        "rounding": "md",
         "float": true,
         "showBorder": false
     },
@@ -25,14 +27,19 @@
                 "from": 1,
                 "to": 20,
                 "minWorkspaces": 5
+            },
+            "E2212F": {
+                "from": 11,
+                "to": 20,
+                "minWorkspaces": 3
             }
         },
-        "displayType": "numbers",
+        "displayType": "icons-filled",
         "icons": {
             "1": "",
             "2": "",
-            "3": "",
-            "4": "󰣆",
+            "3": "󰣆",
+            "4": "",
             "5": "",
             "6": "",
             "7": "",
@@ -95,12 +102,13 @@
             "left": [
                 [
                     "dashboard",
-                    "workspaces"
+                    "timer",
+                    "current-app"
                 ]
             ],
             "center": [
                 [
-                    "current-app"
+                    "workspaces"
                 ]
             ],
             "right": [
@@ -108,22 +116,20 @@
                     "now-playing"
                 ],
                 [
-                    "audio",
-                    "timer",
                     "network",
-                    "battery",
-                    "clock"
+                    "audio",
+                    "clock",
+                    "battery"
                 ]
             ]
         },
         "island": {
             "left": [
                 [
-                    "dashboard"
-                ],
-                [
+                    "dashboard",
                     "clock"
                 ],
+                [],
                 [
                     "now-playing"
                 ]

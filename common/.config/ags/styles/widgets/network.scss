@@ -12,6 +12,10 @@
 
   .network-icon {}
 
+  .network-label {
+    margin-left: 0;
+  }
+
   .rotate {
     animation: rotate-network 1.7s ease-out infinite;
   }

@@ -1,12 +1,12 @@
-import { Gdk, Gtk } from "ags/gtk4"
 import AstalBattery from "gi://AstalBattery"
-import { createBinding, createComputed, With } from "ags"
+import { createBinding, With } from "ags"
 import { getBatteryIcon } from "../../../utils/battery"
-import app from "ags/gtk4/app"
-import { WINDOWS_NAMESPACES } from "../../windows"
+import { ShellSettings } from "../../../utils/SettingsManager"
 import BatteryDashboard from "./BatteryDashboard"
+
 export default function Battery() {
   const battery = AstalBattery.get_default()
+  const settings = ShellSettings.getInstance()
 
   const batteryPercentage = createBinding(battery, "percentage")
   const batteryState = createBinding(battery, "state")
@@ -24,10 +24,8 @@ export default function Battery() {
                       label={getBatteryIcon(state, percentage)}
                     />
                     <label
-                      visible={false}
-                      label={
-                        parseInt((percentage * 100).toString()).toString() + "%"
-                      }
+                      visible={settings.barAppearence.verbose}
+                      label={`${Math.round(percentage * 100)}%`}
                     />
                   </box>
                 )}

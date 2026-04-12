@@ -24,10 +24,20 @@
                         "slanted-separated-island"
                     ]
                 },
+                "position": {
+                    "type": "string",
+                    "enum": [
+                        "top",
+                        "bottom"
+                    ]
+                },
                 "island": {
                     "type": "boolean"
                 },
                 "compact": {
+                    "type": "boolean"
+                },
+                "verbose": {
                     "type": "boolean"
                 },
                 "float": {
@@ -49,8 +59,10 @@
             },
             "required": [
                 "layout",
+                "position",
                 "island",
                 "compact",
+                "verbose",
                 "float",
                 "showBorder",
                 "rounding"

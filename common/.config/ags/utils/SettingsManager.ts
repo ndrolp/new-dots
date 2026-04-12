@@ -33,8 +33,10 @@ export class ShellSettings implements IShellSettings {
 
     this.barAppearence = {
       layout: data?.barAppearence?.layout ?? "default",
+      position: data?.barAppearence?.position ?? "top",
       island: data?.barAppearence?.island ?? false,
       compact: data?.barAppearence?.compact ?? false,
+      verbose: data?.barAppearence?.verbose ?? false,
       rounding: data?.barAppearence?.rounding ?? "md",
       float: data?.barAppearence?.float ?? true,
       showBorder: data?.barAppearence?.showBorder ?? true,

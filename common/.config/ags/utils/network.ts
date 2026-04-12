@@ -29,6 +29,12 @@ export function getWifiIcon(state: AstalNetwork.State, strength: number = 100) {
   return icon ?? "󰤨"
 }
 
+export function getDeviceIpAddress(device?: {
+  get_dhcp4_config?: () => { get_options?: () => { ip_address?: string } | null } | null
+} | null) {
+  return device?.get_dhcp4_config?.()?.get_options?.()?.ip_address ?? null
+}
+
 export function getNetworkIconBinding() {
   const network = AstalNetwork.get_default()
 

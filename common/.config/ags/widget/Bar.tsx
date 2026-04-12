@@ -15,6 +15,8 @@ import { WINDOWS_NAMESPACES } from "./windows"
 export default function Bar(gdkmonitor: Gdk.Monitor) {
   const SETTINGS = ShellSettings.getInstance()
   const { TOP, LEFT, RIGHT, BOTTOM } = Astal.WindowAnchor
+  const verticalAnchor =
+    SETTINGS.barAppearence.position === "bottom" ? BOTTOM : TOP
 
   const allowedBarNames = ["default", "separated-islands"]
 
@@ -70,7 +72,11 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
       class={`Bar ${barCss}`}
       gdkmonitor={gdkmonitor}
       exclusivity={Astal.Exclusivity.EXCLUSIVE}
-      anchor={!SETTINGS.barAppearence.island ? TOP | LEFT | RIGHT : TOP}
+      anchor={
+        !SETTINGS.barAppearence.island
+          ? verticalAnchor | LEFT | RIGHT
+          : verticalAnchor
+      }
       application={app}
     >
       <Container>

@@ -43,12 +43,12 @@ export default function CustomWindow({
       name={name}
       keymode={Astal.Keymode.ON_DEMAND}
       namespace={namespace}
-      class={`window 
+        class={`window 
           ${settings.theme ?? "catppuccin"} 
           layout-${settings.barAppearence.layout ?? "default"} 
           rounding-${settings.barAppearence.rounding} 
           ${settings.barAppearence.compact ? "compact" : ""} 
-          ${css} ${getWindowMarginClass(anchor)} ${cssClass}`}
+          ${css} ${cssClass}`}
       anchor={anchor}
     >
       <Gtk.EventControllerKey

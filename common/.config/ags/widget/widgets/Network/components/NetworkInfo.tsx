@@ -3,6 +3,7 @@ import { ShellSettings } from "../../../../utils/SettingsManager"
 import AstalNetwork from "gi://AstalNetwork"
 import { createBinding, createComputed, With } from "ags"
 import {
+  getDeviceIpAddress,
   getNetworkIcon,
   getNetworkIconBinding,
 } from "../../../../utils/network"
@@ -65,8 +66,7 @@ export const WifiNetworkInfo = ({
                 />
                 <label
                   label={
-                    data.device.get_dhcp4_config()?.get_options()?.ip_address ??
-                    "Retrieving ip"
+                    getDeviceIpAddress(data.device) ?? "Retrieving ip"
                   }
                   hexpand
                   halign={Gtk.Align.END}

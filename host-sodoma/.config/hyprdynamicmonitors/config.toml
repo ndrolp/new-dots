@@ -48,3 +48,39 @@ monitor_tag = "monitor0"
 [[profiles.second-desk.conditions.required_monitors]]
 description = "HKC OVERSEAS LIMITED E2212F 0000000000001"
 monitor_tag = "monitor1"
+
+
+[profiles.desktop]
+config_file = "/home/ndrolp/.config/hyprdynamicmonitors/hyprconfigs/desktop.go.tmpl"
+config_file_type = "template"
+[profiles.desktop.conditions]
+
+[[profiles.desktop.conditions.required_monitors]]
+description = "BOE 0x08D5"
+monitor_tag = "monitor0"
+
+[[profiles.desktop.conditions.required_monitors]]
+description = "HKC OVERSEAS LIMITED E2212F 0000000000001"
+monitor_tag = "monitor1"
+
+[[profiles.desktop.conditions.required_monitors]]
+description = "Philips Consumer Electronics Company PHL 271V8 0x0000A8BE"
+monitor_tag = "monitor2"
+
+
+[profiles.two-monitors]
+config_file = "/home/ndrolp/.config/hyprdynamicmonitors/hyprconfigs/two-monitors.go.tmpl"
+config_file_type = "template"
+[profiles.two-monitors.conditions]
+
+[[profiles.two-monitors.conditions.required_monitors]]
+description = "BOE 0x08D5"
+monitor_tag = "monitor0"
+
+[[profiles.two-monitors.conditions.required_monitors]]
+description = "HKC OVERSEAS LIMITED E2212F 0000000000001"
+monitor_tag = "monitor1"
+
+[[profiles.two-monitors.conditions.required_monitors]]
+description = "Philips Consumer Electronics Company PHL 271V8 0x0000A8BE"
+monitor_tag = "monitor2"

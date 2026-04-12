@@ -1,24 +1,31 @@
 import { ShellSettings } from "./SettingsManager"
 import { Astal, Gtk } from "ags/gtk4"
-const { TOP, LEFT, RIGHT } = Astal.WindowAnchor
+const { TOP, BOTTOM, LEFT, RIGHT } = Astal.WindowAnchor
 
 export function getWindowMarginClass(
   anchor: Astal.WindowAnchor | undefined,
 ): string {
-  let classToReturn = "top"
   if (anchor === undefined) return ""
-  if (anchor === (TOP | RIGHT)) return "top right"
-  if (anchor === (TOP | LEFT)) return "top left"
-  return classToReturn
+
+  const vertical = (anchor & BOTTOM) === BOTTOM ? "bottom" : "top"
+  const horizontal =
+    (anchor & RIGHT) === RIGHT
+      ? " right"
+      : (anchor & LEFT) === LEFT
+        ? " left"
+        : ""
+
+  return `${vertical}${horizontal}`
 }
 
 export function getWindowAnchors(
   position: Gtk.Align,
 ): Astal.WindowAnchor | undefined {
   const SETTINGS = ShellSettings.getInstance()
-  let anchorToReturn: Astal.WindowAnchor = TOP
+  let anchorToReturn: Astal.WindowAnchor =
+    SETTINGS.barAppearence.position === "bottom" ? BOTTOM : TOP
 
-  if (SETTINGS.barAppearence.island) anchorToReturn = TOP
+  if (SETTINGS.barAppearence.island) return anchorToReturn
   else {
     if (position === Gtk.Align.END) anchorToReturn = anchorToReturn | RIGHT
     if (position === Gtk.Align.START) anchorToReturn = anchorToReturn | LEFT

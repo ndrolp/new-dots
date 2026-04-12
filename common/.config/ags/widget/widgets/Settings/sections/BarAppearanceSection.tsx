@@ -22,6 +22,7 @@ const LAYOUTS: IBarAppearence["layout"][] = [
   "transparent",
   "separated-islands",
 ]
+const POSITIONS: IBarAppearence["position"][] = ["top", "bottom"]
 
 export default function BarAppearanceSection() {
   const s = ShellSettings.getInstance()
@@ -29,10 +30,12 @@ export default function BarAppearanceSection() {
   const [theme, setTheme] = createState<SHEL_THEME>(s.theme)
   const [island, setIsland] = createState(s.barAppearence.island)
   const [compact, setCompact] = createState(s.barAppearence.compact)
+  const [verbose, setVerbose] = createState(s.barAppearence.verbose)
   const [float, setFloat] = createState(s.barAppearence.float)
   const [showBorder, setShowBorder] = createState(s.barAppearence.showBorder)
   const [rounding, setRounding] = createState(s.barAppearence.rounding)
   const [layout, setLayout] = createState(s.barAppearence.layout)
+  const [position, setPosition] = createState(s.barAppearence.position)
 
   return (
     <box
@@ -97,6 +100,23 @@ export default function BarAppearanceSection() {
         />
       </box>
 
+      <box hexpand orientation={Gtk.Orientation.VERTICAL} spacing={4}>
+        <label
+          label="Position"
+          class="settings-row-label"
+          halign={Gtk.Align.START}
+        />
+        <Dropdown
+          items={POSITIONS}
+          selected={position}
+          onSelect={(p) => {
+            s.barAppearence.position = p
+            s.save()
+            setPosition(p)
+          }}
+        />
+      </box>
+
       <box hexpand orientation={Gtk.Orientation.VERTICAL} spacing={6}>
         <label
           label="Options"
@@ -107,6 +127,7 @@ export default function BarAppearanceSection() {
           [
             ["Island", island, setIsland, "island"],
             ["Compact", compact, setCompact, "compact"],
+            ["Verbose", verbose, setVerbose, "verbose"],
             ["Float", float, setFloat, "float"],
             ["Show Border", showBorder, setShowBorder, "showBorder"],
           ] as [

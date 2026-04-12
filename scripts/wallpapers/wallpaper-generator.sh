@@ -21,6 +21,7 @@ declare -A THEME_COMMANDS=(
     ["catppuccin"]="lutgen apply -p catppuccin-latte -L 0.65"
     ["gruvboxdark"]="lutgen apply -p gruvbox-light-hard -L 0.65"
     ["nord"]="lutgen apply -p nord-light"
+    ["tokyonight"]="lutgen apply -p tokyo-night-dark"
 )
 
 cleanup_themes() {
