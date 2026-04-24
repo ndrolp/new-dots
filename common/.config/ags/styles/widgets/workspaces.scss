@@ -11,6 +11,12 @@
 
     .workspace-button {
       /* background: var(--bg0); */
+      label {
+        padding: 0;
+        font-family:
+          "Noto Sans", "Hasklug Nerd Font Propo", "Noto Sans Simplified Chinese";
+      }
+
       background-color: transparent;
       color: var(--fg2);
       padding: 0px 0px;
@@ -41,8 +47,11 @@
         }
 
         &.focused {
+          font-family:
+            "Noto Sans", "Hasklug Nerd Font Propo",
+            "Noto Sans Simplified Chinese";
           background-color: var(--accent0);
-          padding: 0px 6px;
+          padding: 0px 8px;
           color: var(--fgdark);
         }
       }

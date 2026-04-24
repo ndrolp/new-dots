@@ -156,16 +156,24 @@
       padding: 5px 5px;
 
       .bar-section {
+        .first {
+          padding-left: 5px;
+        }
+
+        .last {
+          padding-right: 5px;
+        }
+
+        .sole {
+          padding: 0px 0px;
+        }
+
         .bar-icon {
           font-size: 10pt;
           background-color: transparent;
           padding-left: 0;
           padding-right: 0;
           margin: 0;
-
-          &:not(.workspaces):hover {
-            background-color: var(--bg3);
-          }
 
           .toggle {
             font-size: 10pt;

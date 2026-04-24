@@ -5,6 +5,14 @@ auto-cpufreq-git
 picom
 arc-icon-theme-full-git
 ristretto
+hyprland-git
+hyprpaper-git
+hyprpicker-git
+xdg-desktop-portal-gtk-git
+xdg-desktop-portal-hyprland-git
+hyprlock-git
+hypridle-git
+hyprpolkitagent-git
 cava
 playerctl
 waypaper-git

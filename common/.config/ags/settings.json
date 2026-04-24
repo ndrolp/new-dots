@@ -1,13 +1,13 @@
 {
     "$schema": "./settings.schema.json",
-    "theme": "nord",
+    "theme": "catppuccin",
     "barAppearence": {
-        "layout": "default",
+        "layout": "separated-islands",
         "position": "top",
         "island": true,
         "compact": true,
         "verbose": false,
-        "rounding": "md",
+        "rounding": "full",
         "float": true,
         "showBorder": false
     },
@@ -89,9 +89,6 @@
             ],
             "right": [
                 [
-                    "now-playing"
-                ],
-                [
                     "audio",
                     "network",
                     "battery"
@@ -126,27 +123,26 @@
         "island": {
             "left": [
                 [
-                    "dashboard",
-                    "clock"
-                ],
-                [],
-                [
+                    "clock",
                     "now-playing"
                 ]
             ],
             "center": [
                 [
+                    "dashboard"
+                ],
+                [
                     "workspaces"
+                ],
+                [
+                    "timer"
                 ]
             ],
             "right": [
                 [
-                    "timer"
-                ],
-                [
                     "audio",
-                    "network",
-                    "battery"
+                    "battery",
+                    "network"
                 ]
             ]
         }

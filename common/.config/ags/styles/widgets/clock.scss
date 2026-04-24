@@ -2,7 +2,7 @@
   font-weight: bolder;
   color: var(--fg);
 
-  > .toggle {
+  >.toggle {
     color: inherit;
     font-weight: inherit;
     background: transparent;
@@ -18,6 +18,6 @@
   }
 
   .icon {
-    font-size: 12pt;
+    font-size: 11pt;
   }
 }

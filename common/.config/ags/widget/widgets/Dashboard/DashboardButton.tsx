@@ -8,7 +8,7 @@ export default function DashboardButton(_: { monitor: Gdk.Monitor }) {
       class="bar-icon dashboard-button"
       onClicked={() => app.toggle_window(WINDOWS_NAMESPACES.dashboard)}
     >
-      <label label="󱗼" />
+      <label label="" />
     </button>
   )
 }

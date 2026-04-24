@@ -1,4 +1,4 @@
-import { Gdk } from "ags/gtk4"
+import { Gdk, Gtk } from "ags/gtk4"
 import { IWidgetLayout } from "../../config/types"
 import { WIDGETS } from "../registry"
 import { ShellSettings } from "../../utils/SettingsManager"
@@ -33,17 +33,35 @@ export default function LayoutGenerator({
           <box
             $type={type}
             spacing={
-              SETTINGS.barAppearence.layout === "separated-islands" ? 5 : 0
+              SETTINGS.barAppearence.layout === "separated-islands" ? 10 : 5
             }
           >
             {layout[position as keyof IWidgetLayout].map((widgetRow) => {
               return (
-                <box class="bar-section" spacing={spacing}>
-                  {widgetRow.map((widget) => {
+                <box
+                  class={"bar-section"}
+                  orientation={Gtk.Orientation.HORIZONTAL}
+                  spacing={spacing}
+                >
+                  {widgetRow.map((widget, index) => {
+                    const length = widgetRow.length
+                    const notWorkspace = widget !== "workspaces"
                     const Widget = WIDGETS[widget as keyof typeof WIDGETS]({
                       monitor,
                     })
-                    return <box>{Widget}</box>
+                    return (
+                      <box
+                        class={
+                          index === 0 && length > 1
+                            ? "first"
+                            : index === length - 1 && length > 1
+                              ? "last"
+                              : "sole"
+                        }
+                      >
+                        {Widget}
+                      </box>
+                    )
                   })}
                 </box>
               )
