@@ -10,6 +10,11 @@ return {
 
 		config = function()
 			require("telescope").setup({
+				defaults = {
+					preview = {
+						treesitter = false,
+					},
+				},
 				pickers = {
 					find_files = {
 						hidden = true,

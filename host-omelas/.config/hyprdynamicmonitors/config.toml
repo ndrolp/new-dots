@@ -1,0 +1,30 @@
+[general]
+destination = "$HOME/.config/hypr/monitors.conf"
+
+
+[profiles.laptop]
+config_file = "/home/ndrolp/.config/hyprdynamicmonitors/hyprconfigs/laptop.go.tmpl"
+config_file_type = "template"
+[profiles.laptop.conditions]
+
+[[profiles.laptop.conditions.required_monitors]]
+description = "Samsung Display Corp. ATNA40HQ01-0"
+monitor_tag = "monitor0"
+
+
+[profiles.docked]
+config_file = "/home/ndrolp/.config/hyprdynamicmonitors/hyprconfigs/docked.go.tmpl"
+config_file_type = "template"
+[profiles.docked.conditions]
+
+[[profiles.docked.conditions.required_monitors]]
+description = "Samsung Display Corp. ATNA40HQ01-0"
+monitor_tag = "monitor0"
+
+[[profiles.docked.conditions.required_monitors]]
+description = "HKC OVERSEAS LIMITED E2212F 0000000000001"
+monitor_tag = "monitor1"
+
+[[profiles.docked.conditions.required_monitors]]
+description = "Philips Consumer Electronics Company PHL 271V8 0x0000A8BE"
+monitor_tag = "monitor2"

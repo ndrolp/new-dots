@@ -1,0 +1,37 @@
+disable_ligatures cursor
+font_size        10
+window_padding_width 3
+font_family      GeistMono Nerd Font Mono
+bold_font        auto
+italic_font      auto
+bold_italic_font auto
+enable_audio_bell no
+cursor_trail 3
+cursor_trail_decay 0.1 0.4
+
+tab_title_template "{fmt.fg.red}{bell_symbol}{activity_symbol}{fmt.fg.tab}{tab.last_focused_progress_percent}{fmt.bg.color4} {index} {fmt.bg.default}{fmt.fg.color4} {title} "
+
+active_tab_title_template "{fmt.fg.red}{bell_symbol}{activity_symbol}{fmt.fg.tab}{tab.last_focused_progress_percent}{fmt.bg.color5} {index} {fmt.bg.default}{fmt.fg.color5} {title} "
+
+tab_bar_margin_width 0.0
+tab_bar_margin_height 0.0 0.0
+tab_bar_edge top
+tab_bar_align left
+tab_separator ""
+tab_bar_style separator
+tab_powerline_style slanted
+tab_fade  1
+allow_remote_control yes
+
+
+
+enabled_layouts stack, fat:bias=70;full_size=1;mirrored=false
+
+include keybinds.conf
+
+
+# BEGIN_KITTY_THEME
+# Tokyonight
+include current-theme.conf
+# END_KITTY_THEME
+

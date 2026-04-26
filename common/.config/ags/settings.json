@@ -4,10 +4,10 @@
     "barAppearence": {
         "layout": "separated-islands",
         "position": "top",
-        "island": true,
+        "island": false,
         "compact": true,
         "verbose": false,
-        "rounding": "full",
+        "rounding": "lg",
         "float": true,
         "showBorder": false
     },

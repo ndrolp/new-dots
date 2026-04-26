@@ -1,5 +1,9 @@
 .audio-button {
-  color: var(--accent3);
+  .icon,
+  .bar,
+  .percentage{
+    color: var(--accent3);
+  }
   transition: 0.3s ease-in-out;
   /* font-weigt: ; */
 
@@ -8,10 +12,17 @@
 
     .bar {
       font-weight: bold;
+      font-weight: bolder;
+      font-family: "Wavefont", "Wavefont Thin";
     }
 
+
     &.muted {
-      color: var(--accent6);
+      .icon,
+      .bar,
+      .percentage{
+          color: var(--accent6);
+      }
 
       &.silence {
         padding-right: 5px;
@@ -22,10 +33,6 @@
       padding-right: 0px;
     }
 
-    .bar {
-      font-weight: bolder;
-      font-family: "Wavefont", "Wavefont Thin";
-    }
 
     .percentage {
       font-weight: bold;

@@ -1,5 +1,4 @@
 .network-button {
-  color: var(--accent0);
 
   > .toggle {
     color: inherit;
@@ -10,7 +9,9 @@
     }
   }
 
-  .network-icon {}
+  .network-icon {
+    color: var(--accent0);
+  }
 
   .network-label {
     margin-left: 0;
