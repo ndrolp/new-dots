@@ -1,29 +1,44 @@
 #!/usr/bin/env bash
 
-WALLPAPER_MAIN="$HOME/Pictures/Wallpapers/Current/Horizontal/"
-WALLPAPER_SECONDARY="$HOME/Pictures/Wallpapers/Current/Vertical/"
+set -euo pipefail
 
-# Transition settings (optional, tweak to taste)
-TRANSITION_TYPE="center"
-TRANSITION_STEP=60
-TRANSITION_FPS=60
+WALLPAPER_MAIN="$HOME/Pictures/Wallpapers/Current/Horizontal"
+WALLPAPER_SECONDARY="$HOME/Pictures/Wallpapers/Current/Vertical"
 
-# Get monitor info
+TRANSITION_TYPE="wipe"
+TRANSITION_STEP=120
+TRANSITION_FPS=120
+
 MONITORS_JSON=$(hyprctl monitors -j)
-
-pick_random() {
-    find "$1" -type f | shuf -n 1
-}
+AWWW_QUERY=$(awww query)
 
 echo "$MONITORS_JSON" | jq -c '.[]' | while read -r MON; do
     NAME=$(echo "$MON" | jq -r '.name')
     TRANSFORM=$(echo "$MON" | jq -r '.transform')
 
-    # Decide wallpaper based on rotation
+    # Extract current wallpaper path for this monitor
+    CURRENT_WP=$(echo "$AWWW_QUERY" | \
+        grep "$NAME:" | \
+        sed -E 's/.*image: (.*)$/\1/')
+
+    if [[ -z "$CURRENT_WP" ]]; then
+        echo "Could not determine current wallpaper for $NAME"
+        continue
+    fi
+
+    FILENAME=$(basename "$CURRENT_WP")
+
+    # Select matching orientation
     if [[ "$TRANSFORM" == "1" || "$TRANSFORM" == "3" ]]; then
-        WP=$(pick_random "$WALLPAPER_SECONDARY")
+        WP="$WALLPAPER_SECONDARY/$FILENAME"
     else
-        WP=$(pick_random "$WALLPAPER_MAIN")
+        WP="$WALLPAPER_MAIN/$FILENAME"
+    fi
+
+    # Fallback if missing
+    if [[ ! -f "$WP" ]]; then
+        echo "Missing wallpaper: $WP"
+        continue
     fi
 
     echo "Setting wallpaper for $NAME → $WP"
