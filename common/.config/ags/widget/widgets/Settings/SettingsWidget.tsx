@@ -7,6 +7,7 @@ import BarAppearanceSection from "./sections/BarAppearanceSection"
 import WorkspacesSection from "./sections/WorkspacesSection"
 import NowPlayingSection from "./sections/NowPlayingSection"
 import WidgetsSection from "./sections/WidgetsSection"
+import { placeWorkspaceInMonitor } from "../../../utils/workspaces"
 
 const options = {
   bar: { label: "Bar Appearance", icon: "󰸌" },
@@ -38,6 +39,7 @@ export function SettingsWidget() {
               class="settings-apply-button"
               onClicked={() => {
                 ShellSettings.getInstance().save()
+                placeWorkspaceInMonitor()
                 execAsync(["bash", "./reload.sh"])
               }}
             >

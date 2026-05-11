@@ -1,8 +1,10 @@
 .clock {
   font-weight: bolder;
   color: var(--fg);
+  margin: 0;
+  padding: 0;
 
-  >.toggle {
+  > .toggle {
     color: inherit;
     font-weight: inherit;
     background: transparent;

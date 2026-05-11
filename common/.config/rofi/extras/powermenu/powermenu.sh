@@ -5,8 +5,8 @@ uptime_info=$(uptime -p | sed -e 's/up //g')
 host=$(hostnamectl hostname)
 
 # Options with Icons and Text
-options=("Balanced" "Power Saver" "Performance")
-icons=("" "󰜉" "")
+options=("Power Off" "Reboot" "Logout" "Suspend")
+icons=("" "󰜉" "" "󰤄")
 
 # Rofi CMD
 rofi_cmd() {
@@ -20,6 +20,7 @@ rofi_cmd() {
         -kb-select-1 "p" \
         -kb-select-2 "r" \
         -kb-select-3 "l" \
+        -kb-select-4 "s" \
         -theme ~/.config/rofi/extras/powermenu/powermenu.rasi | awk '{print $1}'
 }
 
@@ -35,6 +36,9 @@ run_cmd() {
             ;;
         "")
             hyprctl dispatch exit
+            ;;
+        "󰤄")
+            systemctl suspend
             ;;
     esac
 }

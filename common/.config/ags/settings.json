@@ -32,6 +32,16 @@
                 "from": 11,
                 "to": 20,
                 "minWorkspaces": 3
+            },
+            "Q27G42XE": {
+                "from": 1,
+                "to": 10,
+                "minWorkspaces": 5
+            },
+            "ATNA40HQ01-0 ": {
+                "from": 1,
+                "to": 10,
+                "minWorkspaces": 5
             }
         },
         "displayType": "icons-filled",
@@ -89,6 +99,9 @@
             ],
             "right": [
                 [
+                    "now-playing"
+                ],
+                [
                     "audio",
                     "network",
                     "battery"
@@ -98,14 +111,15 @@
         "flush": {
             "left": [
                 [
-                    "dashboard",
-                    "timer",
+                    "workspaces",
                     "current-app"
                 ]
             ],
             "center": [
                 [
-                    "workspaces"
+                    "dashboard",
+                    "clock",
+                    "timer"
                 ]
             ],
             "right": [
@@ -115,7 +129,6 @@
                 [
                     "network",
                     "audio",
-                    "clock",
                     "battery"
                 ]
             ]

@@ -1,5 +1,5 @@
 import Mpris from "gi://AstalMpris"
-import { createBinding, createComputed, createState, With } from "ags"
+import { createBinding, createComputed, With } from "ags"
 import { Gtk } from "ags/gtk4"
 import { getPlayerIcon } from "../../../utils/audio"
 import { truncateString } from "../../../utils/stringFunctions"

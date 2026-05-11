@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+#set -euo pipefail
 shopt -s nullglob
 
 if [ $# -ne 1 ]; then
@@ -23,6 +23,32 @@ declare -A THEME_COMMANDS=(
     ["nord"]="lutgen apply -p nord-light"
     ["tokyonight"]="lutgen apply -p tokyo-night-dark"
 )
+
+TOTAL_IMAGES=0
+CURRENT=0
+
+# Count total images first
+for dir in "$HORIZONTAL" "$VERTICAL"; do
+    for img in "$dir"/*.{png,jpg,jpeg}; do
+        [ -e "$img" ] || continue
+        ((TOTAL_IMAGES++))
+    done
+done
+
+# Multiply by number of themes
+TOTAL_IMAGES=$((TOTAL_IMAGES * ${#THEME_COMMANDS[@]}))
+
+draw_progress() {
+    local percent=$((CURRENT * 100 / TOTAL_IMAGES))
+    local width=40
+    local filled=$((percent * width / 100))
+    local empty=$((width - filled))
+
+    printf "\r["
+    printf "%0.s#" $(seq 1 $filled)
+    printf "%0.s-" $(seq 1 $empty)
+    printf "] %3d%% (%d/%d)" "$percent" "$CURRENT" "$TOTAL_IMAGES"
+}
 
 cleanup_themes() {
     echo "Cleaning old theme folders..."
@@ -48,7 +74,11 @@ generate_images() {
 
         filename=$(basename "$img")
 
-        eval "$command -P \"$img\" -o \"$dst/$filename\""
+        # Silence command output
+        eval "$command -P \"$img\" -o \"$dst/$filename\"" > /dev/null 2>&1
+
+        ((CURRENT++))
+        draw_progress
     done
 }
 
@@ -57,6 +87,7 @@ generate_theme() {
     local command="${THEME_COMMANDS[$theme]}"
     local theme_dir="$PARENT_DIR/$theme"
 
+    echo
     echo "Generating theme: $theme"
 
     generate_images "$HORIZONTAL" "$theme_dir/Horizontal" "$command"
@@ -69,4 +100,5 @@ for theme in "${!THEME_COMMANDS[@]}"; do
     generate_theme "$theme"
 done
 
+echo
 echo "Done."

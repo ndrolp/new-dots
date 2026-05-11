@@ -28,3 +28,21 @@ monitor_tag = "monitor1"
 [[profiles.docked.conditions.required_monitors]]
 description = "Philips Consumer Electronics Company PHL 271V8 0x0000A8BE"
 monitor_tag = "monitor2"
+
+
+[profiles.omelas-docked]
+config_file = "/home/ndrolp/.config/hyprdynamicmonitors/hyprconfigs/omelas-docked.go.tmpl"
+config_file_type = "template"
+[profiles.omelas-docked.conditions]
+
+[[profiles.omelas-docked.conditions.required_monitors]]
+description = "Samsung Display Corp. ATNA40HQ01-0"
+monitor_tag = "monitor0"
+
+[[profiles.omelas-docked.conditions.required_monitors]]
+description = "AOC Q27G42XE 2S6S1HA031479"
+monitor_tag = "monitor1"
+
+[[profiles.omelas-docked.conditions.required_monitors]]
+description = "Philips Consumer Electronics Company PHL 243V7 0x00009A4C"
+monitor_tag = "monitor2"

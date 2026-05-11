@@ -31,7 +31,7 @@ include keybinds.conf
 
 
 # BEGIN_KITTY_THEME
-# Tokyonight
+# Nord
 include current-theme.conf
 # END_KITTY_THEME
 
