@@ -1,1 +1,1 @@
-/home/ndrolp/.dotfiles/colorschemes/gruvboxdark/nvim/theme.lua
+/home/ndrolp/.dotfiles/colorschemes/catppuccin/nvim/theme.lua

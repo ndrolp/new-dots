@@ -1,5 +1,6 @@
 [general]
-destination = "$HOME/.config/hypr/monitors.conf"
+#destination = "$HOME/.config/hypr/monitors.conf"
+destination = "$HOME/.config/hypr/modules/monitors/monitors.lua"
 
 
 [profiles.laptop]

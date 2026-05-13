@@ -1,14 +1,14 @@
 {
     "$schema": "./settings.schema.json",
-    "theme": "gruvbox-dark",
+    "theme": "catppuccin",
     "barAppearence": {
-        "layout": "separated-islands",
+        "layout": "default",
         "position": "top",
         "island": false,
         "compact": true,
-        "verbose": false,
-        "rounding": "lg",
-        "float": true,
+        "verbose": true,
+        "rounding": "sm",
+        "float": false,
         "showBorder": false
     },
     "workspaces": {
@@ -44,7 +44,7 @@
                 "minWorkspaces": 5
             }
         },
-        "displayType": "icons-filled",
+        "displayType": "numbers",
         "icons": {
             "1": "",
             "2": "",
@@ -88,12 +88,8 @@
             ],
             "center": [
                 [
-                    "dashboard"
-                ],
-                [
-                    "workspaces"
-                ],
-                [
+                    "dashboard",
+                    "workspaces",
                     "timer"
                 ]
             ],
@@ -117,7 +113,6 @@
             ],
             "center": [
                 [
-                    "dashboard",
                     "clock",
                     "timer"
                 ]
