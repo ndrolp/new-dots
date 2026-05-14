@@ -8,5 +8,6 @@ for i = 11, 20 do
 	hl.workspace_rule({
 		workspace = tostring(i),
 		monitor = "desc:Philips Consumer Electronics Company PHL 243V7 0x00009A4C",
+		layout = "dwindle",
 	})
 end

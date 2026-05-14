@@ -11,3 +11,11 @@ hl.layer_rule({
 	match = { class = "wofi|eww|tofi|Tofi|eww-volume|mako|swaync|swaync-client" },
 	blur = true,
 })
+
+hl.window_rule({
+	name = "transparent",
+	match = {
+		class = "nemo|Spotify",
+	},
+	opacity = 0.9,
+})

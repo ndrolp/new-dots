@@ -14,11 +14,14 @@ for i = 11, 20 do
 end
 
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd(terminal))
+hl.bind(mainMod .. " + S", hl.dsp.workspace.toggle_special("magic"))
+hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
 hl.bind(mainMod .. " + SHIFT + q", hl.dsp.window.close())
 hl.bind(mainMod .. " + SHIFT + t", hl.dsp.window.float())
 hl.bind(mainMod .. " + SHIFT + f", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
 hl.bind(mainMod .. " + SHIFT + e", hl.dsp.exec_cmd("~/.config/rofi/extras/powermenu/powermenu.sh"))
+hl.bind(mainMod .. " + SHIFT + a", hl.dsp.exec_cmd("~/.config/rofi/extras/audio_selector/audio_selector.sh"))
 hl.bind(win .. " + t", hl.dsp.exec_cmd("~/.dotfiles/colorschemes/colorscheme_changer.sh"))
 hl.bind(mainMod .. " + SHIFT + r", hl.dsp.exec_cmd("~/.dotfiles/scripts/hyprland/reload.sh"))
 hl.bind(mainMod .. " + SHIFT + w", hl.dsp.exec_cmd("~/.dotfiles/scripts/hyprland/move_workspaces.sh"))

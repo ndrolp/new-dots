@@ -44,7 +44,7 @@
                 "minWorkspaces": 5
             }
         },
-        "displayType": "numbers",
+        "displayType": "icons-filled",
         "icons": {
             "1": "",
             "2": "",
