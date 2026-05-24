@@ -211,29 +211,29 @@
 // ── Notifications ───────────────────────────────────────────────────────────
 
 .nc-scroll-inner {
-  padding: 0 12px 10px;
+  padding: 0 10px 8px;
 }
 
 .nc-notifs {
   .nc-empty {
-    padding: 36px 0;
+    padding: 24px 0;
 
     .nc-empty-icon {
-      font-size: 30pt;
+      font-size: 22pt;
       color: var(--bg3);
     }
 
     .nc-empty-text {
-      font-size: 9pt;
+      font-size: 8.5pt;
       color: var(--grey1);
     }
   }
 
   .nc-notifs-header {
-    padding: 4px 2px 8px;
+    padding: 2px 2px 6px;
 
     .nc-notifs-label {
-      font-size: 9pt;
+      font-size: 8.5pt;
       font-weight: bold;
       color: var(--grey1);
     }
@@ -254,25 +254,43 @@
   }
 
   .nc-card {
-    background: var(--bg2);
+    background: color-mix(in srgb, var(--bg2) 86%, var(--bg1));
+    border: 1px solid color-mix(in srgb, var(--border0) 55%, transparent);
     border-radius: 12px;
-    padding: 10px 12px 12px;
+    padding: 8px 10px;
+
+    .nc-card-top {
+      min-height: 20px;
+    }
+
+    .nc-card-app-wrap {
+      min-width: 0;
+    }
+
+    .nc-card-app-icon,
+    .nc-card-title-icon {
+      color: var(--accent1);
+      font-size: 8pt;
+      min-width: 12px;
+    }
 
     .nc-card-app {
-      font-size: 8pt;
+      font-size: 7.5pt;
       font-weight: bold;
-      color: var(--accent1);
+      color: var(--grey1);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
     .nc-card-close {
       background: transparent;
       border: none;
-      padding: 0 2px;
+      padding: 0;
       border-radius: 50%;
-      font-size: 9pt;
+      font-size: 8pt;
       color: var(--bg4);
-      min-width: 18px;
-      min-height: 18px;
+      min-width: 16px;
+      min-height: 16px;
 
       &:hover {
         background: var(--bg3);
@@ -280,16 +298,97 @@
       }
     }
 
+    .nc-card-title-row {
+      min-width: 0;
+    }
+
     .nc-card-title {
-      font-size: 10pt;
+      font-size: 9pt;
       font-weight: bold;
       color: var(--fg);
     }
 
     .nc-card-body {
-      font-size: 9pt;
+      font-size: 8.5pt;
       color: var(--fg2);
-      line-height: 1.3;
+      line-height: 1.2;
+    }
+  }
+
+  .nc-group {
+    .nc-group-header {
+      min-height: 0;
+    }
+
+    .nc-group-toggle {
+      background: color-mix(in srgb, var(--bg2) 72%, var(--bg1));
+      border: 1px solid color-mix(in srgb, var(--border0) 45%, transparent);
+      border-radius: 12px;
+      padding: 7px 9px;
+
+      &:hover {
+        background: color-mix(in srgb, var(--bg2) 88%, var(--bg1));
+      }
+    }
+
+    .nc-group-toggle-inner,
+    .nc-group-topline {
+      min-width: 0;
+    }
+
+    .nc-group-chevron {
+      color: var(--accent1);
+      font-size: 8pt;
+      min-width: 12px;
+    }
+
+    .nc-group-meta {
+      min-width: 0;
+    }
+
+    .nc-group-app {
+      font-size: 7.5pt;
+      font-weight: bold;
+      color: var(--grey1);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .nc-group-count {
+      min-width: 18px;
+      border-radius: 999px;
+      padding: 1px 5px;
+      background: color-mix(in srgb, var(--accent1) 20%, transparent);
+      color: var(--accent1);
+      font-size: 7pt;
+      font-weight: bold;
+    }
+
+    .nc-group-summary {
+      font-size: 8.5pt;
+      font-weight: bold;
+      color: var(--fg);
+    }
+
+    .nc-group-dismiss {
+      background: transparent;
+      border: none;
+      padding: 0;
+      border-radius: 50%;
+      min-width: 18px;
+      min-height: 18px;
+      color: var(--bg4);
+
+      &:hover {
+        background: var(--bg3);
+        color: var(--fg2);
+      }
+    }
+
+    .nc-group-list {
+      margin-left: 10px;
+      padding-left: 10px;
+      border-left: 1px solid color-mix(in srgb, var(--border0) 40%, transparent);
     }
   }
 }

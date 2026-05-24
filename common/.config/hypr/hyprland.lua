@@ -4,7 +4,6 @@
 
 -- Please note not all available settings / options are set here.
 -- For a full list, see the wiki
-
 require("modules.appearence.blur")
 -- You can (and should!!) split this configuration into multiple files
 -- Create your files separately and then require them like this:
@@ -12,6 +11,7 @@ require("modules.appearence.blur")
 --
 require("modules.rules.workspaces")
 require("modules.rules.windows")
+require("modules.rules.apps")
 
 ------------------
 ---- MONITORS ----
@@ -22,10 +22,6 @@ require("modules.monitors.monitors")
 ---------------------
 ---- MY PROGRAMS ----
 ---------------------
-
--- Set programs that you use
-local fileManager = "nemo"
-local menu = "rofi"
 
 -------------------
 ---- AUTOSTART ----
@@ -59,6 +55,11 @@ end)
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 
+hl.config({
+	cursor = {
+		no_hardware_cursors = 1, --.55 hotfix
+	},
+})
 -----------------------
 ----- PERMISSIONS -----
 -----------------------

@@ -17,6 +17,7 @@ import {
 import ActiveNotifications from "./widget/widgets/Notifications/ActiveNotifications"
 import WallpaperPicker from "./widget/widgets/Wallpaper/WallpaperPicker"
 import SettingsWindow from "./widget/widgets/Settings/Settings"
+import ClockPanel from "./widget/widgets/ClockPanel"
 
 const runApp = () =>
   app.start({
@@ -46,6 +47,7 @@ const runApp = () =>
       NetworkDashboard(Gtk.Align.END)
       Dashboard()
       ActiveNotifications()
+      ClockPanel()
       WallpaperPicker()
       SettingsWindow()
     },

@@ -220,3 +220,11 @@ export PATH="$PATH:/home/ndrolp/.local/bin"
 
 export PATH=$PATH:/home/ndrolp/.spicetify
 
+
+# opencode
+export PATH=/home/ndrolp/.opencode/bin:$PATH
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/home/ndrolp/.lmstudio/bin"
+# End of LM Studio CLI section
+

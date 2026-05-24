@@ -30,7 +30,7 @@ return {
 				workspaces = {
 					{
 						name = "Babel",
-						path = "~/Documents/01 - Vaults/01 -  Babel/",
+						path = "~/Documents/01 - Vaults/01 - Babel/",
 					},
 				},
 			})

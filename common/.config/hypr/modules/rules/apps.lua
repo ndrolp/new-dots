@@ -1,30 +1,25 @@
-hl.window_rule({
-	name = "spotify",
-	match = { class = "Spotify|spotify" },
-	workspace = "special:spotify",
-})
-
 hl.layer_rule({
 	name = "spring",
-	match = { class = "rofi" },
-	animation = "spring",
+	match = { namespace = "rofi" },
+	animation = "popin 80 20",
+	dim_around = true,
 })
 
 hl.layer_rule({
 	name = "ndro-bar",
 	match = { namespace = "ndro-shell-bar" },
 	ignore_alpha = 0.1,
-	blur = true,
-	dim_around = true,
+	blur = false,
+	dim_around = false,
 	animation = "spring",
 })
 
 hl.curve("easy", { type = "spring", mass = 1, stiffness = 71.2633, dampening = 15.8273644 })
 hl.layer_rule({
 	name = "ndro-bar-no-blur",
-	match = { namespace = "ndro-shell-settings|ndro-shell-wallpaper" },
-	ignore_alpha = 0.2,
+	match = { namespace = "ndro-shell-settings|ndro-shell-wallpaper|ndro-shell-notifications" },
+	ignore_alpha = 0.1,
 	blur = false,
-	dim_around = true,
+	dim_around = false,
 	animation = "slide",
 })

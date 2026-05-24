@@ -15,7 +15,7 @@ export default function Clock() {
   return (
     <button
       class="bar-icon clock"
-      onClicked={() => app.toggle_window(WINDOWS_NAMESPACES.wallpaper)}
+      onClicked={() => app.toggle_window(WINDOWS_NAMESPACES.clock)}
     >
       <box class="fg-blue">
         <label class="icon" label="󰥔" />

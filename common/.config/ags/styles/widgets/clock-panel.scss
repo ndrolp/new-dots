@@ -1,0 +1,93 @@
+.clock-panel-window {
+  &.window {
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  .clock-panel {
+    min-width: 360px;
+    background: var(--bg1);
+    border: 2px solid var(--border0);
+    border-radius: 14px;
+    padding: 14px;
+  }
+
+  .clock-panel-header {
+    .clock-panel-time {
+      font-size: 22pt;
+      font-weight: 700;
+      color: var(--fg);
+    }
+
+    .clock-panel-date {
+      font-size: 9pt;
+      color: var(--grey1);
+    }
+  }
+
+  .clock-panel-calendar-card,
+  .clock-panel-notifications {
+    background: var(--bg2);
+    border-radius: 14px;
+    padding: 10px 12px;
+  }
+
+  .clock-panel-calendar-card {
+    calendar {
+      background: transparent;
+      color: var(--fg);
+    }
+
+    .today {
+      color: var(--accent1);
+      font-weight: 700;
+    }
+  }
+
+  .clock-panel-notifications {
+    min-height: 220px;
+    padding: 8px 10px;
+  }
+
+  .clock-panel-notifications-header {
+    padding-bottom: 4px;
+  }
+
+  .clock-panel-section-title {
+    font-size: 9pt;
+    font-weight: 700;
+    color: var(--grey1);
+  }
+
+  .clock-panel-clear-button {
+    background: transparent;
+    border: none;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 9pt;
+    color: var(--grey1);
+
+    &:hover {
+      color: var(--accent6);
+      background: color-mix(in srgb, var(--accent6) 15%, transparent);
+    }
+  }
+
+  .clock-panel-scroll {
+    min-height: 180px;
+    max-height: 300px;
+    background: transparent;
+  }
+
+  .clock-panel-scroll-inner {
+    .nc-scroll-inner,
+    .nc-notifs {
+      padding: 0;
+    }
+
+    .nc-empty {
+      padding: 18px 0;
+    }
+  }
+}
