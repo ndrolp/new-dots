@@ -22,7 +22,7 @@ window {
     y-offset:                       0px;
     padding:                        0px;
     border:                         1px;
-    border: 2px solid;
+    border: 1px solid;
     border-radius:                  20px;
     border-color:                   @purple;
     cursor:                         "default";

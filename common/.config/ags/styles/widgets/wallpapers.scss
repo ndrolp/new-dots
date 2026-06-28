@@ -1,12 +1,18 @@
 .wallpaper-picker {
-  background: var(--bg0);
+  background: var(--bg1);
   padding: 10px;
   border-radius: 10px;
-  border: 2px solid var(--border0);
+  // border: 2px solid var(--border0);
 
   &.window {
     background: transparent;
     border: none;
+  }
+
+  .wp-scroll {
+    background: transparent;
+    min-height: 400px;
+    max-height: 680px;
   }
 
   .monitor-button {

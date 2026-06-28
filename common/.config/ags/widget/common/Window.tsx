@@ -34,21 +34,22 @@ export default function CustomWindow({
   return (
     <window
       onNotifyVisible={(self) => {
-          if (self.visible && hideOnFocusLoss) self.grab_focus()
-          onVisivilityChange(self)
-        }}
+        if (self.visible && hideOnFocusLoss) self.grab_focus()
+        onVisivilityChange(self)
+      }}
       visible={visible}
       resizable={resizable}
       application={app}
       name={name}
+      exclusivity={Astal.Exclusivity.IGNORE}
       keymode={Astal.Keymode.ON_DEMAND}
       namespace={namespace}
-        class={`window 
+      class={`window 
           ${settings.theme ?? "catppuccin"} 
           layout-${settings.barAppearence.layout ?? "default"} 
           rounding-${settings.barAppearence.rounding} 
           ${settings.barAppearence.compact ? "compact" : ""} 
-          ${css} ${cssClass}`}
+          ${css}`}
       anchor={anchor}
     >
       <Gtk.EventControllerKey

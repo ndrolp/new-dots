@@ -107,14 +107,15 @@
         "flush": {
             "left": [
                 [
-                    "workspaces",
-                    "current-app"
+                    "timer"
+                ],
+                [
+                    "workspaces"
                 ]
             ],
             "center": [
                 [
-                    "clock",
-                    "timer"
+                    "current-app"
                 ]
             ],
             "right": [
@@ -124,7 +125,8 @@
                 [
                     "network",
                     "audio",
-                    "battery"
+                    "battery",
+                    "clock"
                 ]
             ]
         },
@@ -136,9 +138,6 @@
                 ]
             ],
             "center": [
-                [
-                    "dashboard"
-                ],
                 [
                     "workspaces"
                 ],

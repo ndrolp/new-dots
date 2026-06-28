@@ -27,64 +27,70 @@ export default function WallpapersBox({
   return (
     <box>
       <box>
-        <With
-          value={createComputed(() =>
-            buildRows(wallpapers, direction === "vertical" ? 5 : 5),
-          )}
+        <scrolledwindow
+          class="wp-scroll"
+          hscrollbar_policy={Gtk.PolicyType.NEVER}
+          vscrollbar_policy={Gtk.PolicyType.AUTOMATIC}
         >
-          {(rows: string[][]) => (
-            <Gtk.Box orientation={Gtk.Orientation.VERTICAL} spacing={8}>
-              {rows.map((row) => (
-                <box spacing={10}>
-                  {row.map((wallpaper) => (
-                    <button
-                      onClicked={() => {
-                        execAsync([
-                          "awww",
-                          "img",
-                          "-o",
-                          monitorName,
-                          `${path}/${wallpaper}`,
-                          "--transition-type",
-                          "wipe",
-                        ])
-                      }}
-                      cursor={Gdk.Cursor.new_from_name("pointer", null)}
-                    >
-                      <Adw.Clamp
-                        valign={Gtk.Align.START}
-                        maximumSize={
-                          direction === "horizontal" ? height : width
-                        }
-                        widthRequest={width}
-                        heightRequest={height}
+          <With
+            value={createComputed(() =>
+              buildRows(wallpapers, direction === "vertical" ? 5 : 5),
+            )}
+          >
+            {(rows: string[][]) => (
+              <Gtk.Box orientation={Gtk.Orientation.VERTICAL} spacing={8}>
+                {rows.map((row) => (
+                  <box spacing={10}>
+                    {row.map((wallpaper) => (
+                      <button
+                        onClicked={() => {
+                          execAsync([
+                            "awww",
+                            "img",
+                            "-o",
+                            monitorName,
+                            `${path}/${wallpaper}`,
+                            "--transition-type",
+                            "wipe",
+                          ])
+                        }}
+                        cursor={Gdk.Cursor.new_from_name("pointer", null)}
                       >
                         <Adw.Clamp
-                          orientation={
-                            direction === "horizontal"
-                              ? Gtk.Orientation.HORIZONTAL
-                              : Gtk.Orientation.VERTICAL
-                          }
+                          valign={Gtk.Align.START}
                           maximumSize={
-                            direction === "horizontal" ? width : height
+                            direction === "horizontal" ? height : width
                           }
+                          widthRequest={width}
+                          heightRequest={height}
                         >
-                          <Gtk.Picture
-                            class="picture"
-                            contentFit={Gtk.ContentFit.COVER}
-                            file={Gio.file_new_for_path(
-                              `${thumbnailPath ? thumbnailPath : path}/${wallpaper}`,
-                            )}
-                          />
+                          <Adw.Clamp
+                            orientation={
+                              direction === "horizontal"
+                                ? Gtk.Orientation.HORIZONTAL
+                                : Gtk.Orientation.VERTICAL
+                            }
+                            maximumSize={
+                              direction === "horizontal" ? width : height
+                            }
+                          >
+                            <Gtk.Picture
+                              class="picture"
+                              contentFit={Gtk.ContentFit.COVER}
+                              file={Gio.file_new_for_path(
+                                `${thumbnailPath ? thumbnailPath : path}/${wallpaper}`,
+                              )}
+                            />
+                          </Adw.Clamp>
                         </Adw.Clamp>
-                      </Adw.Clamp>
-                    </button>
-                  ))}
-                </box>
-              ))}
-            </Gtk.Box>
-          )}
-        </With>
+                      </button>
+                    ))}
+                  </box>
+                ))}
+              </Gtk.Box>
+            )}
+          </With>
+        </scrolledwindow>
       </box>
     </box>
   )

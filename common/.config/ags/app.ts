@@ -18,6 +18,7 @@ import ActiveNotifications from "./widget/widgets/Notifications/ActiveNotificati
 import WallpaperPicker from "./widget/widgets/Wallpaper/WallpaperPicker"
 import SettingsWindow from "./widget/widgets/Settings/Settings"
 import ClockPanel from "./widget/widgets/ClockPanel"
+import { DesktopClock } from "./widget/widgets/DesktopClock"
 
 const runApp = () =>
   app.start({
@@ -50,6 +51,7 @@ const runApp = () =>
       ClockPanel()
       WallpaperPicker()
       SettingsWindow()
+      DesktopClock({})
     },
   })
 

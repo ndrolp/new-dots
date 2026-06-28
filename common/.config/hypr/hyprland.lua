@@ -44,6 +44,7 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("udiskie --tray --notify")
 	hl.exec_cmd("awww-daemon")
 	hl.exec_cmd("hyprdynamicmonitors --disable-power-events")
+	hl.exec_cmd("ags run & disown")
 end)
 
 -------------------------------
@@ -88,7 +89,7 @@ hl.config({
 		gaps_in = 5,
 		gaps_out = 10,
 
-		border_size = 2,
+		border_size = 0,
 
 		col = {
 			active_border = { colors = { "rgba(535353ee)", "rgba(535353ee)" }, angle = 45 },
@@ -106,16 +107,16 @@ hl.config({
 	},
 
 	decoration = {
-		rounding = 10,
+		rounding = 5,
 		rounding_power = 2,
 
 		-- Change transparency of focused and unfocused windows
 		active_opacity = 1.0,
-		inactive_opacity = 1.0,
+		inactive_opacity = 0.9,
 
 		shadow = {
 			enabled = true,
-			range = 4,
+			range = 0,
 			render_power = 3,
 			color = 0xee1a1a1a,
 		},

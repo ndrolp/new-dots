@@ -98,5 +98,7 @@
         "{git,gitlens,chat-editing-snapshot-text-model,copilot,git-graph,git-graph-3}:/**/*.qrc": "default",
         "*.qrc": "qt-core.qrcEditor"
     },
-    "qt-qml.qmlls.useQmlImportPathEnvVar": true
+    "qt-qml.qmlls.useQmlImportPathEnvVar": true,
+    "qt-core.qtInstallationRoot": "/usr/lib/qt6/qml",
+    "qt-qml.qmlls.additionalImportPaths": ["/usr/lib/qt6/qml"]
 }

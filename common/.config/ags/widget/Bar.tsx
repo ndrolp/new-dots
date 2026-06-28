@@ -4,6 +4,7 @@ import { ShellSettings } from "../utils/SettingsManager"
 import { getWindowSettingsCssClasses } from "../utils/mainBar"
 import Layout from "./common/Layout"
 import { WINDOWS_NAMESPACES } from "./windows"
+import { SettingsWidget } from "./widgets/Settings/SettingsWidget"
 
 export default function Bar(gdkmonitor: Gdk.Monitor) {
   const SETTINGS = ShellSettings.getInstance()
@@ -49,14 +50,6 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   }
 
   let barCss = getWindowSettingsCssClasses()
-
-  // <box class="slant">
-  //   <label label={""} />
-  // </box>
-  // <box class="slanta">
-  //   <label label={""} />
-  // </box>
-  // <CurrentApp monitor={gdkmonitor} />
 
   return (
     <window
