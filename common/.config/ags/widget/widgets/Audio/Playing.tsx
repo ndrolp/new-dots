@@ -34,6 +34,7 @@ export default function NowPlaying() {
                 visible={barData.spotifyAvailable || barData.players.length > 0}
               >
                 <menubutton class="now-playing bar-icon">
+                  <Gtk.EventControllerMotion />
                   {barData.spotifyAvailable ? (
                     <PlayerBarLine player={spotify} />
                   ) : (
@@ -41,7 +42,7 @@ export default function NowPlaying() {
                       {barData.players.length > 0 ? (
                         <PlayerBarLine player={barData.players[0]} />
                       ) : (
-                        <></>
+                        <box visible={false} />
                       )}
                     </box>
                   )}

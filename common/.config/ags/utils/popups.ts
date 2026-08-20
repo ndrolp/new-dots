@@ -22,6 +22,8 @@ export function getWindowMarginClass(
 export function getWindowAnchors(
   position: Gtk.Align,
 ): Astal.WindowAnchor | undefined {
+  if (position === Gtk.Align.CENTER) return undefined
+
   const SETTINGS = ShellSettings.getInstance()
   let anchorToReturn: Astal.WindowAnchor =
     SETTINGS.barAppearence.position === "bottom" ? BOTTOM : TOP

@@ -3,7 +3,7 @@
   font-weight: bolder;
   transition: 0.3s;
 
-  >.toggle {
+  > .toggle {
     color: inherit;
     font-weight: inherit;
     background: transparent;
@@ -24,6 +24,31 @@
 
 .playing-popup {
   min-width: 300px;
+  margin-top: -4px;
+  padding: 2px;
+  border-radius: 16px;
+  background: transparent;
+  border: none;
+
+  &.rounding-none {
+    border-top-right-radius: 0;
+  }
+
+  &.rounding-full {
+    border-top-right-radius: 1000px;
+  }
+
+  &.rounding-sm {
+    border-top-right-radius: 3px;
+  }
+
+  &.rounding-md {
+    border-top-right-radius: 7px;
+  }
+
+  &.rounding-lg {
+    border-top-right-radius: 10px;
+  }
 
   label {
     color: var(--fg);
@@ -31,9 +56,13 @@
   }
 
   .song-info {
-    background: var(--bg1);
-    padding: 5px;
-    border-radius: 5px;
+    background: var(--bg2);
+    padding: 10px;
+    border-radius: 12px;
+
+    .song-title {
+      font-size: 11pt;
+    }
 
     .song-artist {
       color: var(--fg1);
@@ -47,12 +76,41 @@
   }
 
   .picture {
-    border-radius: 5px;
+    border-radius: 12px;
+  }
+
+  .playback-controls {
+    .playback-control {
+      min-width: 12px;
+      font-size: 12pt;
+      min-height: 12px;
+      padding: 1px;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--fg1);
+
+      &:hover {
+        background: var(--bg3);
+        color: var(--fg);
+      }
+
+      &:disabled {
+        color: var(--grey1);
+      }
+    }
+
+    .play-pause {
+      color: var(--accent2);
+
+      &:hover {
+        color: var(--accent1);
+      }
+    }
   }
 
   scale {
     border-radius: 0px;
-    padding: 10px 0;
+    padding: 8px 0 4px;
 
     trough {
       background: var(--bg3);

@@ -2,6 +2,7 @@ import AstalNetwork from "gi://AstalNetwork"
 import { getDeviceIpAddress, getWifiIcon } from "../../../utils/network"
 import { createBinding, createComputed, With } from "ags"
 import { ShellSettings } from "../../../utils/SettingsManager"
+import NetworkPopup from "./NetworkPopup"
 
 export default function NetworkButton() {
   const Network = AstalNetwork.get_default()
@@ -23,16 +24,17 @@ export default function NetworkButton() {
   })
 
   return (
-    <box>
-      <With value={wirelessButtonData}>
-        {(data) => {
-          const rotateClass =
-            data.state === AstalNetwork.State.CONNECTING ||
-            data.state === AstalNetwork.State.DISCONNECTING
-              ? "rotate"
-              : ""
-          return (
-            <menubutton class="network-button bar-icon">
+    <menubutton class="network-button bar-icon">
+      <box>
+        <With value={wirelessButtonData}>
+          {(data) => {
+            const rotateClass =
+              data.state === AstalNetwork.State.CONNECTING ||
+              data.state === AstalNetwork.State.DISCONNECTING
+                ? "rotate"
+                : ""
+            return (
+              <box>
               {data.primary === AstalNetwork.Primary.WIFI ? (
                 <box>
                   <label
@@ -64,10 +66,12 @@ export default function NetworkButton() {
                   label={getWifiIcon(AstalNetwork.State.DISCONNECTED, 0)}
                 />
               )}
-            </menubutton>
-          )
-        }}
-      </With>
-    </box>
+              </box>
+            )
+          }}
+        </With>
+      </box>
+      <NetworkPopup />
+    </menubutton>
   )
 }

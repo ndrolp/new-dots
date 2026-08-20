@@ -11,25 +11,26 @@ export default function CurrentApp({ monitor }: { monitor: Gdk.Monitor }) {
   const hyprWorkspace = createBinding(hypr, "focusedWorkspace")
 
   const monitorIsVisible = createComputed(() => {
-    if (activeClient() == null || activeClient.name === "") return false
-    return hyprWorkspace().monitor.model == monitor.model
+    const client = activeClient()
+    const workspace = hyprWorkspace()
+    if (client == null) return false
+    return workspace?.monitor?.model == monitor.model
   })
 
   const noClient = createComputed(() => {
-    if (
-      (activeClient() == null || activeClient.name === "") &&
-      hyprWorkspace().monitor.model == monitor.model
+    const client = activeClient()
+    const workspace = hyprWorkspace()
+    return (
+      client == null &&
+      workspace?.monitor?.model == monitor.model
     )
-      return true
-
-    return false
   })
 
   const displayData = createComputed(() => {
+    const client = activeClient()
     return {
-      client: activeClient(),
-      class: activeClient().initialClass,
-      title: title(),
+      class: client?.initialClass ?? "",
+      title: title() ?? client?.title ?? "",
     }
   })
 
@@ -43,12 +44,13 @@ export default function CurrentApp({ monitor }: { monitor: Gdk.Monitor }) {
         <box class="bar-icon current-app" spacing={5} visible={true}>
           <With value={displayData}>
             {(data) => {
-              const icon = getActiveClientIcon(data.class, data.title)
-              return (
+              return data?.class || data?.title ? (
                 <box>
                   <label label={getActiveClientIcon(data.class, data.title)} />
                   <label label={truncateString(data.title ?? "Desktop", 50)} />
                 </box>
+              ) : (
+                <box visible={false} />
               )
             }}
           </With>

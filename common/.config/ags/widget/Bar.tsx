@@ -56,7 +56,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
       visible
       name={WINDOWS_NAMESPACES.bar}
       namespace={WINDOWS_NAMESPACES.bar}
-      class={`Bar ${barCss}`}
+      class={`Bar test ${barCss}`}
       gdkmonitor={gdkmonitor}
       exclusivity={Astal.Exclusivity.EXCLUSIVE}
       anchor={

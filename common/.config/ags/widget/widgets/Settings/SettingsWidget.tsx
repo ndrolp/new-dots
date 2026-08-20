@@ -7,6 +7,7 @@ import BarAppearanceSection from "./sections/BarAppearanceSection"
 import WorkspacesSection from "./sections/WorkspacesSection"
 import NowPlayingSection from "./sections/NowPlayingSection"
 import WidgetsSection from "./sections/WidgetsSection"
+import WallpapersSection from "./sections/WallpapersSection"
 import { placeWorkspaceInMonitor } from "../../../utils/workspaces"
 
 const options = {
@@ -14,6 +15,7 @@ const options = {
   workspace: { label: "Workspaces", icon: "󱂬" },
   nowPlaying: { label: "Now Playing", icon: "󰝚" },
   widgets: { label: "Widgets", icon: "󱒊" },
+  wallpapers: { label: "Wallpapers", icon: "󰸉" },
 }
 
 const SECTIONS: Record<string, () => JSX.Element> = {
@@ -21,6 +23,7 @@ const SECTIONS: Record<string, () => JSX.Element> = {
   Workspaces: () => <WorkspacesSection />,
   "Now Playing": () => <NowPlayingSection />,
   Widgets: () => <WidgetsSection />,
+  Wallpapers: () => <WallpapersSection />,
 }
 
 export function SettingsWidget() {

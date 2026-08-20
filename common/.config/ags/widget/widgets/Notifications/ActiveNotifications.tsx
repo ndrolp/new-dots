@@ -1,25 +1,15 @@
 import app from "ags/gtk4/app"
 import Notifd from "gi://AstalNotifd"
-import {
-  createBinding,
-  createComputed,
-  createState,
-  For,
-  onCleanup,
-  With,
-} from "ags"
+import { createComputed, createState, onCleanup, With } from "ags"
 import NotificationBox from "./components/NotificationBox"
 import { Gtk, Astal } from "ags/gtk4"
 import { getWindowSettingsCssClasses } from "../../../utils/mainBar"
-import { ShellSettings } from "../../../utils/SettingsManager"
 import Logger from "../../../utils/logger"
 import { WINDOWS_NAMESPACES } from "../../windows"
 
 export default function ActiveNotifications() {
-  const SETTINGS = ShellSettings.getInstance()
   const notifd = Notifd.get_default()
   const { log } = Logger.getInstance()
-  let contentbox: Gtk.Box
 
   const [activeNotifications, setActiveNotifications] = createState(
     [] as Notifd.Notification[],
@@ -75,8 +65,6 @@ export default function ActiveNotifications() {
     )
   }
 
-  console.log(getWindowSettingsCssClasses())
-
   onCleanup(() => {
     log("Cleaning up ActiveNotifications component, disconnecting signals")
     notifd.disconnect(notifiedHandler)
@@ -87,21 +75,31 @@ export default function ActiveNotifications() {
     <window
       visible={createComputed(() => activeNotifications().length > 0)}
       name={WINDOWS_NAMESPACES.notifications}
-      vexpand={false}
+      namespace={WINDOWS_NAMESPACES.notifications}
       anchor={Astal.WindowAnchor.TOP}
       application={app}
-      valign={Gtk.Align.END}
-      exclusivity={Astal.Exclusivity.NORMAL}
+      exclusivity={Astal.Exclusivity.IGNORE}
       class={"notification-overlay  window " + getWindowSettingsCssClasses()}
     >
-      <box valign={Gtk.Align.START} class="" hexpand>
+      <box
+        class="notification-overlay__content"
+        orientation={Gtk.Orientation.VERTICAL}
+        halign={Gtk.Align.CENTER}
+        valign={Gtk.Align.START}
+      >
         <With value={activeNotifications}>
           {(notifications) => {
             return (
-              <box orientation={Gtk.Orientation.VERTICAL} spacing={5}>
+              <box
+                class="notification-pane"
+                orientation={Gtk.Orientation.VERTICAL}
+                spacing={0}
+                halign={Gtk.Align.CENTER}
+              >
                 {notifications.map((notification, index) => {
                   return (
                     <NotificationBox
+                      key={notification.id}
                       notification={notification}
                       onHide={handleHideNotification}
                       last={index === notifications.length - 1}

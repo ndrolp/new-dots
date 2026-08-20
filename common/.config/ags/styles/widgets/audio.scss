@@ -1,7 +1,7 @@
 .audio-button {
   .icon,
   .bar,
-  .percentage{
+  .percentage {
     color: var(--accent3);
   }
   transition: 0.3s ease-in-out;
@@ -16,12 +16,11 @@
       font-family: "Wavefont", "Wavefont Thin";
     }
 
-
     &.muted {
       .icon,
       .bar,
-      .percentage{
-          color: var(--accent6);
+      .percentage {
+        color: var(--accent6);
       }
 
       &.silence {
@@ -33,9 +32,96 @@
       padding-right: 0px;
     }
 
-
     .percentage {
       font-weight: bold;
+    }
+  }
+}
+
+.audio-popup {
+  min-width: 340px;
+  padding: 0;
+  background: transparent;
+  border: none;
+
+  .audio-popup-content {
+    padding: 2px;
+  }
+
+  .audio-popup-title {
+    font-size: 13pt;
+    font-weight: bold;
+  }
+
+  .audio-sinks {
+    background: var(--bg2);
+    border-radius: 14px;
+    padding: 6px;
+  }
+
+  .audio-volume {
+    padding: 4px 2px;
+
+    .mute-button {
+      min-width: 40px;
+      min-height: 40px;
+      color: var(--accent3);
+
+      label {
+        font-size: 14pt;
+      }
+    }
+
+    scale {
+      trough {
+        min-height: 8px;
+        border-radius: 4px;
+        background: var(--bg3);
+
+        highlight {
+          border-radius: 4px;
+          background: var(--accent3);
+        }
+      }
+    }
+
+    .volume-percentage {
+      min-width: 46px;
+      font-size: 11pt;
+      font-weight: bold;
+    }
+  }
+
+  .audio-sink {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: transparent;
+    transition: 180ms ease-out;
+
+    &:hover {
+      background: color-mix(in srgb, var(--accent3) 12%, transparent);
+    }
+
+    &.active {
+      background: color-mix(in srgb, var(--accent3) 20%, var(--bg2));
+    }
+
+    &.active .sink-icon,
+    &.active .sink-selected {
+      color: var(--accent3);
+    }
+
+    .sink-icon {
+      min-width: 28px;
+      font-size: 14pt;
+    }
+
+    .sink-name {
+      font-size: 11pt;
+    }
+
+    .sink-selected {
+      font-size: 14pt;
     }
   }
 }

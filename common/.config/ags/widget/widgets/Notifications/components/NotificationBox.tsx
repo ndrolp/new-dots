@@ -1,10 +1,19 @@
 import Notifd from "gi://AstalNotifd"
+import { createState, onCleanup } from "ags"
 import { Gdk, Gtk } from "ags/gtk4"
 import Gio from "gi://Gio"
-import Adw from "gi://Adw"
-import { isPath, wrapWords } from "../../../../utils/stringFunctions"
-import { interval, timeout } from "ags/time"
-import { createState } from "gnim"
+import { isPath } from "../../../../utils/stringFunctions"
+import { interval } from "ags/time"
+
+const MIN_NOTIFICATION_TIMEOUT = 3000
+const DEFAULT_NOTIFICATION_TIMEOUT = 5000
+
+function getNotificationTimeout(notification: Notifd.Notification) {
+  if (notification.expire_timeout === 0) return 0
+  if (notification.expire_timeout < 0) return DEFAULT_NOTIFICATION_TIMEOUT
+
+  return Math.max(notification.expire_timeout, MIN_NOTIFICATION_TIMEOUT)
+}
 
 export default function NotificationBox({
   notification,
@@ -17,24 +26,41 @@ export default function NotificationBox({
   onHide?: (notification: Notifd.Notification) => void
   last?: boolean
 }) {
-  const expire = notification.expire_timeout < 3000 ? 3000 : 3000
-  const [timeNow, setTimeNow] = createState(0)
-  const [revealed, setRevealed] = createState(false)
+  const expire = getNotificationTimeout(notification)
+  const [revealed, setRevealed] = createState(true)
+  const body = notification.body ?? ""
+  let hidden = false
 
-  console.log("Notification expire timeout:", expire)
+  const timer =
+    expire > 0
+      ? interval(100, () => {
+          if (hidden) return
+          expireRemaining -= 100
+          if (expireRemaining > 0) return
 
-  const timer = interval(100, () => {})
+          hidden = true
+          timer?.cancel()
+          setRevealed(false)
+          onHide(notification)
+        })
+      : null
+  let expireRemaining = expire
 
-  const watch = timer.connect("now", (time) => {
-    setRevealed(true)
-    if (timeNow() >= expire) {
-      timer.cancel()
-      timer.disconnect(watch)
+  const hasBody = body.trim().length > 0
+  const imagePath = notification.image
+  const appIcon = notification.appIcon
 
-      onHide(notification)
-    }
-    setTimeNow((prev) => prev + 100)
-    console.log("Timer tick:", timeNow())
+  function hideNotification() {
+    if (hidden) return
+
+    hidden = true
+    setRevealed(false)
+    timer?.cancel()
+    if (onHide) onHide(notification)
+  }
+
+  onCleanup(() => {
+    timer?.cancel()
   })
 
   return (
@@ -48,92 +74,75 @@ export default function NotificationBox({
       transition_duration={300}
     >
       <box
-        orientation={Gtk.Orientation.VERTICAL}
+        class={`notification-box ${last ? "notification-box-last" : ""}`}
+        spacing={10}
         halign={Gtk.Align.CENTER}
-        css_classes={["notification-box"]}
       >
-        <box
-          orientation={Gtk.Orientation.VERTICAL}
-          overflow={Gtk.Overflow.HIDDEN}
-        >
-          <Adw.Clamp maximum_size={200} orientation={Gtk.Orientation.VERTICAL}>
-            <box class="" orientation={Gtk.Orientation.HORIZONTAL} spacing={0}>
-              <box
-                visible={isPath(notification.image)}
-                class="image-container"
-                halign={Gtk.Align.CENTER}
-              >
-                <box
-                  class="image"
-                  halign={Gtk.Align.CENTER}
-                  valign={Gtk.Align.CENTER}
-                >
-                  <Adw.Clamp
-                    valign={Gtk.Align.START}
-                    maximumSize={80}
-                    widthRequest={80}
-                    heightRequest={80}
-                  >
-                    <Adw.Clamp
-                      orientation={Gtk.Orientation.VERTICAL}
-                      maximumSize={80}
-                    >
-                      <Gtk.Picture
-                        class="picture"
-                        contentFit={Gtk.ContentFit.COVER}
-                        file={Gio.file_new_for_path(notification.image)}
-                      />
-                    </Adw.Clamp>
-                  </Adw.Clamp>
-                </box>
-              </box>
-              <box
-                class="content"
-                orientation={Gtk.Orientation.VERTICAL}
-                spacing={5}
-              >
-                <centerbox
-                  hexpand
-                  class="header"
-                  orientation={Gtk.Orientation.HORIZONTAL}
-                >
-                  <box $type="start" orientation={Gtk.Orientation.VERTICAL}>
-                    <label
-                      class="title"
-                      halign={Gtk.Align.START}
-                      label={notification.summary}
-                    />
-                    <label
-                      class="app"
-                      halign={Gtk.Align.START}
-                      label={notification.appName}
-                    />
-                  </box>
-                  <button
-                    $type="end"
-                    cursor={Gdk.Cursor.new_from_name("pointer", null)}
-                    halign={Gtk.Align.END}
-                    valign={Gtk.Align.START}
-                    class="close"
-                    label=""
-                    onClicked={() => {
-                      setRevealed(false)
-                      timer.disconnect(watch)
-                      timer.cancel()
-                      if (onHide) onHide(notification)
-                    }}
-                  ></button>
-                </centerbox>
-                <box class="body">
-                  <label
-                    maxWidthChars={10}
-                    label={wrapWords(notification.body, 30)}
-                  />
-                </box>
-              </box>
+        {isPath(imagePath) ? (
+          <box
+            class="image-container notification-image"
+            widthRequest={80}
+            heightRequest={80}
+            overflow={Gtk.Overflow.HIDDEN}
+          >
+            <Gtk.Picture
+              class="picture"
+              canShrink
+              contentFit={Gtk.ContentFit.COVER}
+              file={Gio.file_new_for_path(imagePath)}
+              widthRequest={80}
+              heightRequest={80}
+            />
+          </box>
+        ) : (
+          appIcon && (
+            <box class="image-container">
+              <image class="icon" iconName={appIcon} pixelSize={36} />
             </box>
-          </Adw.Clamp>
+          )
+        )}
+        <box class="content" spacing={10}>
+          <label
+            class="app"
+            label={notification.appName || "Notification"}
+            valign={Gtk.Align.CENTER}
+          />
+          <box
+            class="text"
+            orientation={Gtk.Orientation.VERTICAL}
+            spacing={2}
+            hexpand
+          >
+            <label
+              class="title"
+              halign={Gtk.Align.START}
+              label={notification.summary}
+              ellipsize={3}
+              maxWidthChars={32}
+            />
+            {hasBody && (
+              <label
+                class="body"
+                halign={Gtk.Align.START}
+                label={body}
+                ellipsize={3}
+                lines={1}
+                maxWidthChars={42}
+              />
+            )}
+          </box>
         </box>
+        {showActions && (
+          <button
+            cursor={Gdk.Cursor.new_from_name("pointer", null)}
+            halign={Gtk.Align.END}
+            valign={Gtk.Align.CENTER}
+            class="close"
+            onClicked={hideNotification}
+          >
+            <label label="󰅖" />
+          </button>
+        )}
       </box>
     </revealer>
   )

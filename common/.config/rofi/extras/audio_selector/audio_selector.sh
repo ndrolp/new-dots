@@ -26,6 +26,7 @@ if [[ -n "$selection" ]]; then
     # Move playing streams to the new sink
     pactl list short sink-inputs | while read -r input; do
         input_id=$(echo "$input" | awk '{print $1}')
+        echo "Moving input $input_id to sink $selected_sink"
         pactl move-sink-input "$input_id" "$selected_sink"
     done
 fi

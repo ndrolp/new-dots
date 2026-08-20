@@ -6,15 +6,17 @@ export interface PopUpProps {
   children: JSX.Element | Array<JSX.Element>
   cssClass: string
   autohide?: boolean
+  transitionDuration?: number
 }
 
 export default function PopUp({
   children,
   cssClass,
   autohide = true,
+  transitionDuration = 300,
 }: PopUpProps) {
   const [isPopoverOpen, setIsPopoverOpen] = createState(false)
-  const classes = `window ${getWindowSettingsCssClasses()} ${cssClass}`
+  const classes = `popup ${getWindowSettingsCssClasses()} ${cssClass}`
   return (
     <popover
       autohide={autohide}
@@ -23,7 +25,7 @@ export default function PopUp({
       onNotifyVisible={(p) => setIsPopoverOpen(p.visible)}
     >
       <revealer
-        transitionDuration={300}
+        transitionDuration={transitionDuration}
         transitionType={Gtk.RevealerTransitionType.SLIDE_DOWN}
         revealChild={isPopoverOpen}
       >

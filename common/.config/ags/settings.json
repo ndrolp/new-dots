@@ -2,13 +2,13 @@
     "$schema": "./settings.schema.json",
     "theme": "catppuccin",
     "barAppearence": {
-        "layout": "default",
+        "layout": "separated-islands",
         "position": "top",
         "island": false,
         "compact": true,
-        "verbose": true,
-        "rounding": "sm",
-        "float": false,
+        "verbose": false,
+        "rounding": "md",
+        "float": true,
         "showBorder": false
     },
     "workspaces": {
@@ -44,7 +44,7 @@
                 "minWorkspaces": 5
             }
         },
-        "displayType": "icons-filled",
+        "displayType": "numbers",
         "icons": {
             "1": "",
             "2": "",
@@ -62,7 +62,7 @@
         }
     },
     "nowPlaying": {
-        "showControls": false,
+        "showControls": true,
         "preferedClients": [
             "spotify",
             "chrome",
@@ -88,14 +88,15 @@
             ],
             "center": [
                 [
-                    "dashboard",
-                    "workspaces",
-                    "timer"
+                    "workspaces"
                 ]
             ],
             "right": [
                 [
                     "now-playing"
+                ],
+                [
+                    "tray"
                 ],
                 [
                     "audio",

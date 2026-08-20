@@ -18,32 +18,32 @@
 }
 
 .tokyonight {
-  --bg0: #1a1b26;
-  --bg1: #1f2335;
+  --bg0: #16161e;
+  --bg1: #1a1b26;
   --bg2: #24283b;
-  --bg3: #292e42;
-  --bg4: #3b4261;
+  --bg3: #2f3549;
+  --bg4: #414868;
 
   --fg: #c0caf5;
   --fg1: #a9b1d6;
   --fg2: #565f89;
-  --fgdark: #1a1b26;
+  --fgdark: #16161e;
 
-  --accent0: #bb9af7;
-  --accent1: #e0af68;
-  --accent2: #9ece6a;
-  --accent3: #7dcfff;
-  --accent4: #c0caf5;
-  --accent5: #ff9e64;
-  --accent6: #f7768e;
+  --accent0: #bb9af7; /* purple */
+  --accent1: #e0af68; /* yellow */
+  --accent2: #9ece6a; /* green */
+  --accent3: #7dcfff; /* cyan */
+  --accent4: #f7768e; /* pink/red */
+  --accent5: #ff9e64; /* orange */
+  --accent6: #db4b4b; /* red */
 
   --grey0: #565f89;
   --grey1: #737aa2;
-  --grey2: #9aa5ce;
+  --grey2: #8b93c7;
 
-  --border0: #3b4261;
+  --border0: #414868;
   --border1: #2f3549;
-  --border2: #414868;
+  --border2: #565f89;
 }
 
 /* Catppuccin Macchiato theme */

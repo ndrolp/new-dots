@@ -28,6 +28,11 @@
 .window {
   font-weight: bold;
   font-size: 10pt;
+  background: var(--bg0);
+  border: 1px solid color-mix(in srgb, var(--border0) 60%, transparent);
+  border-radius: 18px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+  padding: 16px;
 
   &.top {
     margin-top: 10px;
@@ -111,8 +116,18 @@ popover {
   margin-bottom: 10px;
 
   &.menu {
-    background: transparent;
-    border: none;
+    background: var(--bg1);
+    border: 1px solid var(--border0);
+
+    contents {
+      background: var(--bg1);
+      border: none;
+    }
+
+    arrow {
+      background: transparent;
+      border: none;
+    }
   }
 
   contents {

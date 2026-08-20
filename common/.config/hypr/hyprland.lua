@@ -34,17 +34,17 @@ require("modules.monitors.monitors")
 -- Or execute your favorite apps at launch like this:
 --
 hl.on("hyprland.start", function()
-	hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
-	hl.exec_cmd("cliphist wipe")
-	hl.exec_cmd("systemctl --user start hyprpolkitagent")
-	hl.exec_cmd("wl-paste --type text --watch cliphist store ")
-	hl.exec_cmd("wl-paste --type image --watch cliphist store")
-	hl.exec_cmd("hypridle")
-	hl.exec_cmd("bash -c 'playerctl metadata artist && playerctl metadata title'")
-	hl.exec_cmd("udiskie --tray --notify")
-	hl.exec_cmd("awww-daemon")
-	hl.exec_cmd("hyprdynamicmonitors --disable-power-events")
-	hl.exec_cmd("ags run & disown")
+    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
+    hl.exec_cmd("cliphist wipe")
+    hl.exec_cmd("systemctl --user start hyprpolkitagent")
+    hl.exec_cmd("wl-paste --type text --watch cliphist store ")
+    hl.exec_cmd("wl-paste --type image --watch cliphist store")
+    hl.exec_cmd("hypridle")
+    hl.exec_cmd("bash -c 'playerctl metadata artist && playerctl metadata title'")
+    hl.exec_cmd("udiskie --tray --notify")
+    hl.exec_cmd("awww-daemon")
+    hl.exec_cmd("hyprdynamicmonitors --disable-power-events")
+    hl.exec_cmd("qs & disown")
 end)
 
 -------------------------------
@@ -57,9 +57,9 @@ hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 
 hl.config({
-	cursor = {
-		no_hardware_cursors = 1, --.55 hotfix
-	},
+    cursor = {
+        no_hardware_cursors = 1, --.55 hotfix
+    },
 })
 -----------------------
 ----- PERMISSIONS -----
@@ -70,9 +70,9 @@ hl.config({
 -- for security reasons
 
 hl.config({
-	ecosystem = {
-		enforce_permissions = true,
-	},
+    ecosystem = {
+        enforce_permissions = true,
+    },
 })
 
 hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
@@ -85,69 +85,69 @@ hl.permission("/usr/(bin|local/bin)/hyprpm", "plugin", "allow")
 
 -- Refer to https://wiki.hypr.land/Configuring/Basics/Variables/
 hl.config({
-	general = {
-		gaps_in = 5,
-		gaps_out = 10,
+    general = {
+        gaps_in = 5,
+        gaps_out = 10,
 
-		border_size = 0,
+        border_size = 0,
 
-		col = {
-			active_border = { colors = { "rgba(535353ee)", "rgba(535353ee)" }, angle = 45 },
-			inactive_border = "rgba(2b2b2baa)",
-		},
-		-- #535353
+        col = {
+            active_border = { colors = { "rgba(535353ee)", "rgba(535353ee)" }, angle = 45 },
+            inactive_border = "rgba(2b2b2baa)",
+        },
+        -- #535353
 
-		-- Set to true to enable resizing windows by clicking and dragging on borders and gaps
-		resize_on_border = false,
+        -- Set to true to enable resizing windows by clicking and dragging on borders and gaps
+        resize_on_border = false,
 
-		-- Please see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Tearing/ before you turn this on
-		allow_tearing = false,
+        -- Please see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Tearing/ before you turn this on
+        allow_tearing = false,
 
-		layout = "scrolling",
-	},
+        layout = "scrolling",
+    },
 
-	decoration = {
-		rounding = 5,
-		rounding_power = 2,
+    decoration = {
+        rounding = 5,
+        rounding_power = 2,
 
-		-- Change transparency of focused and unfocused windows
-		active_opacity = 1.0,
-		inactive_opacity = 0.9,
+        -- Change transparency of focused and unfocused windows
+        active_opacity = 1.0,
+        inactive_opacity = 0.9,
 
-		shadow = {
-			enabled = true,
-			range = 0,
-			render_power = 3,
-			color = 0xee1a1a1a,
-		},
-	},
+        shadow = {
+            enabled = true,
+            range = 0,
+            render_power = 3,
+            color = 0xee1a1a1a,
+        },
+    },
 
-	animations = {
-		enabled = true,
-	},
+    animations = {
+        enabled = true,
+    },
 })
 
 require("modules.animations.core")
 
 -- See https://wiki.hypr.land/Configuring/Layouts/Dwindle-Layout/ for more
 hl.config({
-	dwindle = {
-		preserve_split = true, -- You probably want this
-	},
+    dwindle = {
+        preserve_split = true, -- You probably want this
+    },
 })
 
 -- See https://wiki.hypr.land/Configuring/Layouts/Master-Layout/ for more
 hl.config({
-	master = {
-		new_status = "master",
-	},
+    master = {
+        new_status = "master",
+    },
 })
 
 -- See https://wiki.hypr.land/Configuring/Layouts/Scrolling-Layout/ for more
 hl.config({
-	scrolling = {
-		fullscreen_on_one_column = true,
-	},
+    scrolling = {
+        fullscreen_on_one_column = true,
+    },
 })
 
 ----------------
@@ -155,10 +155,10 @@ hl.config({
 ----------------
 
 hl.config({
-	misc = {
-		force_default_wallpaper = -1, -- Set to 0 or 1 to disable the anime mascot wallpapers
-		disable_hyprland_logo = false, -- If true disables the random hyprland logo / anime girl background. :(
-	},
+    misc = {
+        force_default_wallpaper = -1, -- Set to 0 or 1 to disable the anime mascot wallpapers
+        disable_hyprland_logo = false, -- If true disables the random hyprland logo / anime girl background. :(
+    },
 })
 
 ---------------
@@ -166,34 +166,34 @@ hl.config({
 ---------------
 
 hl.config({
-	input = {
-		kb_layout = "es",
-		kb_variant = "",
-		kb_model = "",
-		kb_options = "",
-		kb_rules = "",
+    input = {
+        kb_layout = "es",
+        kb_variant = "",
+        kb_model = "",
+        kb_options = "",
+        kb_rules = "",
 
-		follow_mouse = 1,
+        follow_mouse = 1,
 
-		sensitivity = 0, -- -1.0 - 1.0, 0 means no modification.
+        sensitivity = 0, -- -1.0 - 1.0, 0 means no modification.
 
-		touchpad = {
-			natural_scroll = false,
-		},
-	},
+        touchpad = {
+            natural_scroll = false,
+        },
+    },
 })
 
 hl.gesture({
-	fingers = 3,
-	direction = "horizontal",
-	action = "workspace",
+    fingers = 3,
+    direction = "horizontal",
+    action = "workspace",
 })
 
 -- Example per-device config
 -- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Devices/ for more
 hl.device({
-	name = "epic-mouse-v1",
-	sensitivity = -0.5,
+    name = "epic-mouse-v1",
+    sensitivity = -0.5,
 })
 
 ---------------------
@@ -219,27 +219,27 @@ require("modules.keybinds.ags")
 -- Example window rules that are useful
 
 local suppressMaximizeRule = hl.window_rule({
-	-- Ignore maximize requests from all apps. You'll probably like this.
-	name = "suppress-maximize-events",
-	match = { class = ".*" },
+    -- Ignore maximize requests from all apps. You'll probably like this.
+    name = "suppress-maximize-events",
+    match = { class = ".*" },
 
-	suppress_event = "maximize",
+    suppress_event = "maximize",
 })
 -- suppressMaximizeRule:set_enabled(false)
 
 hl.window_rule({
-	-- Fix some dragging issues with XWayland
-	name = "fix-xwayland-drags",
-	match = {
-		class = "^$",
-		title = "^$",
-		xwayland = true,
-		float = true,
-		fullscreen = false,
-		pin = false,
-	},
+    -- Fix some dragging issues with XWayland
+    name = "fix-xwayland-drags",
+    match = {
+        class = "^$",
+        title = "^$",
+        xwayland = true,
+        float = true,
+        fullscreen = false,
+        pin = false,
+    },
 
-	no_focus = true,
+    no_focus = true,
 })
 
 -- Layer rules also return a handle.
@@ -252,9 +252,9 @@ hl.window_rule({
 
 -- Hyprland-run windowrule
 hl.window_rule({
-	name = "move-hyprland-run",
-	match = { class = "hyprland-run" },
+    name = "move-hyprland-run",
+    match = { class = "hyprland-run" },
 
-	move = "20 monitor_h-120",
-	float = true,
+    move = "20 monitor_h-120",
+    float = true,
 })

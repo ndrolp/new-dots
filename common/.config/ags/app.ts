@@ -2,8 +2,6 @@ import app from "ags/gtk4/app"
 import { Gtk } from "ags/gtk4"
 import style from "./style.scss"
 import Bar from "./widget/Bar"
-import themes from "./styles/themes.scss"
-import BatteryDashboard from "./widget/widgets/Battery/BatteryDashboard"
 import { monitorFile } from "ags/file"
 import Gio from "gi://Gio?version=2.0"
 import { execAsync } from "ags/process"
@@ -18,7 +16,6 @@ import ActiveNotifications from "./widget/widgets/Notifications/ActiveNotificati
 import WallpaperPicker from "./widget/widgets/Wallpaper/WallpaperPicker"
 import SettingsWindow from "./widget/widgets/Settings/Settings"
 import ClockPanel from "./widget/widgets/ClockPanel"
-import { DesktopClock } from "./widget/widgets/DesktopClock"
 
 const runApp = () =>
   app.start({
@@ -51,7 +48,6 @@ const runApp = () =>
       ClockPanel()
       WallpaperPicker()
       SettingsWindow()
-      DesktopClock({})
     },
   })
 

@@ -55,6 +55,7 @@ export type AVAILABLE_WIDGETS =
   | "clock"
   | "timer"
   | "dashboard"
+  | "tray"
 
 export interface IWidgetLayout {
   left: AVAILABLE_WIDGETS[][]

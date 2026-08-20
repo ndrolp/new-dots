@@ -1,11 +1,7 @@
 return {
 	settings = {
-		cmd = { "qmlls", "-E" },
-		qml = {
-			qmlImportPaths = {
-				vim.env.QML_IMPORT_PATH,
-				vim.env.QML2_IMPORT_PATH,
-			},
-		},
+		cmd = { "qml-language-server" },
+		filetypes = { "qml" },
+		root_markers = { { "qmldir, shell.qml" }, ".git" },
 	},
 }

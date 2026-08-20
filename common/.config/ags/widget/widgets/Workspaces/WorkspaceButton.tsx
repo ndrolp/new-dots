@@ -3,6 +3,7 @@ import { createBinding, createComputed, With } from "ags"
 import { ShellSettings } from "../../../utils/SettingsManager"
 import { Gdk } from "ags/gtk4"
 import Logger from "../../../utils/logger"
+import { execAsync } from "ags/process"
 
 export default function WorkspaceButton({
   hyprInstance,
@@ -21,9 +22,7 @@ export default function WorkspaceButton({
 }) {
   const log = Logger.getInstance()
   const SETTINGS = ShellSettings.getInstance()
-  const instance = hyprInstance.workspaces.find((element) => element.id === id)
   const focusedWorkspace = createBinding(hyprInstance, "focusedWorkspace")
-  focusedWorkspace().clients
   const allWorkspaces = createBinding(hyprInstance, "workspaces")
 
   const workspaceIcon = createComputed(() => {
@@ -36,15 +35,15 @@ export default function WorkspaceButton({
     ) {
       return SETTINGS.workspaces.icons[id.toString()] ?? "󰣆"
     }
-    return id == focusedWorkspace().id ? "" : ""
+    return id === focusedWorkspace()?.id ? "" : ""
   })
 
   const workspaceClass = createComputed(() => {
     let classes = "workspace-button"
 
     const focused = focusedWorkspace()
-    const workspaces = allWorkspaces()
-      .sort((a, b) => a.id - b.id)
+    const focusedId = focused?.id
+    const workspaces = [...allWorkspaces()]
       .filter((workspace) => workspace.id >= 0)
     const currentFound = workspaces.find((workspace) => {
       return workspace.id === id
@@ -52,12 +51,12 @@ export default function WorkspaceButton({
 
     log.separator()
     log.log("Computing classes for workspace", id)
-    log.log("Focused workspace:", focused.id)
+    log.log("Focused workspace:", focusedId)
     log.log("Current workspace:", id)
-    log.log("Is focused?", id === focused.id)
+    log.log("Is focused?", id === focusedId)
     log.log("Is occupied?", currentFound ? "Yes" : "No")
 
-    if (id === focused.id) {
+    if (id === focusedId) {
       classes += " focused"
     } else if (currentFound?.clients?.length ?? 0 > 0) {
       classes += " occupied"
@@ -93,10 +92,17 @@ export default function WorkspaceButton({
           "workspace-button-container",
           SETTINGS.workspaces.displayType,
         ]}
-        class={`workspace-button-container ${(instance?.clients?.length ?? 0 > 0) ? "test" : ""}`}
       >
         <button
-          onClicked={() => hyprInstance.dispatch("workspace", id.toString())}
+          onClicked={() => {
+            execAsync([
+              "hyprctl",
+              "dispatch",
+              `hl.dsp.focus({ workspace = '${id}' })`,
+            ]).catch((error) =>
+              log.error(`Failed to switch to workspace ${id}:`, error),
+            )
+          }}
           class={workspaceClass}
         >
           <label label={workspaceIcon} />

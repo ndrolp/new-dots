@@ -2,47 +2,63 @@ import AstalWp from "gi://AstalWp"
 import { createBinding, createComputed, With } from "ags"
 import { getVolumeBar, getVolumeIcon } from "../../../utils/audio"
 import { ShellSettings } from "../../../utils/SettingsManager"
+import AudioPopup from "./AudioPopup"
 
 export default function AudioButton() {
-  const wp = AstalWp.get_default().audio.defaultSpeaker
+  const audio = AstalWp.get_default().audio
   const settings = ShellSettings.getInstance()
-  const wpVolume = createBinding(wp, "volume")
-  const wpMuted = createBinding(wp, "mute")
-
-  const volumeData = createComputed(() => {
-    return { volume: wpVolume(), muted: wpMuted() }
-  })
+  const defaultSpeaker = createBinding(audio, "defaultSpeaker")
 
   return (
     <menubutton class="bar-icon">
-      <With value={volumeData}>
-        {(volumeData) => {
-          return (
-            <box class="audio-button">
-              <box
-                class={`data-container ${volumeData.muted ? "muted" : ""} ${volumeData.volume === 0 ? "silence" : ""}`}
-              >
-                <label
-                  class="icon"
-                  label={getVolumeIcon(volumeData.volume, volumeData.muted)}
-                />
-                <label
-                  visible={
-                    !settings.barAppearence.verbose && volumeData.volume !== 0
-                  }
-                  class="bar"
-                  label={getVolumeBar(volumeData.volume)}
-                />
-                <label
-                  visible={settings.barAppearence.verbose}
-                  class="percentage"
-                  label={`${Math.round(volumeData.volume * 100)}%`}
-                />
+      <box>
+        <With value={defaultSpeaker}>
+          {(speaker) => {
+            const volume = createBinding(speaker, "volume")
+            const muted = createBinding(speaker, "mute")
+            const volumeData = createComputed(() => ({
+              volume: volume(),
+              muted: muted(),
+            }))
+
+            return (
+              <box class="audio-button">
+                <box
+                  class={createComputed(() => {
+                    const data = volumeData()
+                    return `data-container ${data.muted ? "muted" : ""} ${data.volume === 0 ? "silence" : ""}`
+                  })}
+                >
+                  <label
+                    class="icon"
+                    label={createComputed(() => {
+                      const data = volumeData()
+                      return getVolumeIcon(data.volume, data.muted)
+                    })}
+                  />
+                  <label
+                    visible={createComputed(
+                      () =>
+                        !settings.barAppearence.verbose &&
+                        volumeData().volume !== 0,
+                    )}
+                    class="bar"
+                    label={createComputed(() => getVolumeBar(volumeData().volume))}
+                  />
+                  <label
+                    visible={settings.barAppearence.verbose}
+                    class="percentage"
+                    label={createComputed(
+                      () => `${Math.round(volumeData().volume * 100)}%`,
+                    )}
+                  />
+                </box>
               </box>
-            </box>
-          )
-        }}
-      </With>
+            )
+          }}
+        </With>
+      </box>
+      <AudioPopup audio={audio} />
     </menubutton>
   )
 }

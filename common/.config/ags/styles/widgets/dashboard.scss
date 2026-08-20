@@ -361,7 +361,7 @@
       background: color-mix(in srgb, var(--accent1) 20%, transparent);
       color: var(--accent1);
       font-size: 7pt;
-      font-weight: bold;
+      font-weiht: bold;
     }
 
     .nc-group-summary {
@@ -403,7 +403,7 @@
 
 .system-tray {
   .tray-item {
-    padding: 4px;
+    padding: 4px 18px;
     border-radius: 8px;
     background: transparent;
     border: none;

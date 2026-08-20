@@ -3,20 +3,18 @@
 window.notification-overlay {
   background: transparent;
   border: none;
+  box-shadow: none;
+  margin-top: 00px;
 }
 
-.orange {
-  background: orange;
+.notification-overlay__content {
 }
 
-.teal {
-  background: teal;
-}
-
-.crimson {
-  background: crimson;
-}
-
-.tomato {
-  background: tomato;
+.notification-pane {
+  min-width: 0;
+  padding: 0px;
+  background: var(--bg1);
+  border-radius: 5px;
+  border: 1px solid color-mix(in srgb, var(--bg3) 88%, transparent);
+  box-shadow: 0 10px 28px color-mix(in srgb, black 28%, transparent);
 }

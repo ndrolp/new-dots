@@ -8,7 +8,7 @@ import { getMonitorDirection } from "./lib/layout"
 import { createComputed, createState, With } from "ags"
 import { WINDOWS_NAMESPACES } from "../../windows"
 
-export default function WallpaperPicker() {
+export function WallpaperPickerContent() {
   const hypr = AstalHyprland.get_default()
   const Log = Logger.getInstance()
   const [horizontalWallpapers, setHorizontalWallPapers] = createState(
@@ -62,14 +62,7 @@ export default function WallpaperPicker() {
   })
 
   return (
-    <CustomWindow
-      visible={false}
-      css="wallpaper-picker"
-      position={Gtk.Align.CENTER}
-      name={WINDOWS_NAMESPACES.wallpaper}
-      namespace={WINDOWS_NAMESPACES.wallpaper}
-    >
-      <box class="wallpaper-picker" spacing={10}>
+    <box class="wallpaper-picker" spacing={10}>
         <box orientation={Gtk.Orientation.VERTICAL} spacing={10}>
           <box>
             <box class="monitor-selector" spacing={5}>
@@ -94,7 +87,7 @@ export default function WallpaperPicker() {
               <With value={boxesData}>
                 {(data) => {
                   return (
-                    <box hexpand class="card">
+                    <box hexpand>
                       {hypr.monitors.map((monitor) => {
                         const direction = getMonitorDirection(monitor.transform)
                         return (
@@ -141,7 +134,20 @@ export default function WallpaperPicker() {
             </box>
           </box>
         </box>
-      </box>
+    </box>
+  )
+}
+
+export default function WallpaperPicker() {
+  return (
+    <CustomWindow
+      visible={false}
+      css="wallpaper-picker"
+      position={Gtk.Align.CENTER}
+      name={WINDOWS_NAMESPACES.wallpaper}
+      namespace={WINDOWS_NAMESPACES.wallpaper}
+    >
+      <WallpaperPickerContent />
     </CustomWindow>
   )
 }

@@ -100,5 +100,10 @@
     },
     "qt-qml.qmlls.useQmlImportPathEnvVar": true,
     "qt-core.qtInstallationRoot": "/usr/lib/qt6/qml",
-    "qt-qml.qmlls.additionalImportPaths": ["/usr/lib/qt6/qml"]
+    "qt-qml.qmlls.additionalImportPaths": [
+        "/usr/lib/qt6/qml"
+    ],
+    "[qml]": {
+        "editor.defaultFormatter": "Delgan.qml-format"
+    }
 }

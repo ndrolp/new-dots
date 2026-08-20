@@ -1,0 +1,16 @@
+{
+    "assignments": {
+        "AOC Q27G42XE 2S6S1HA031479": {
+            "from": 1,
+            "to": 5
+        },
+        "Philips Consumer Electronics Company PHL 243V7 0x00009A4C": {
+            "from": 11,
+            "to": 13
+        },
+        "default": {
+            "from": 1,
+            "to": 5
+        }
+    }
+}

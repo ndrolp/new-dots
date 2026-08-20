@@ -1,19 +1,13 @@
-import { Astal, Gtk, Gdk } from "ags/gtk4"
-import app from "ags/gtk4/app"
+import { Gtk } from "ags/gtk4"
 import AstalBattery from "gi://AstalBattery"
 import { createBinding, createState, With } from "ags"
+import { execAsync } from "ags/process"
 import { secondsToTime } from "../../../utils/battery"
-import CustomWindow from "../../common/Window"
-import { WINDOWS_NAMESPACES } from "../../windows"
 import { getWindowSettingsCssClasses } from "../../../utils/mainBar"
 
 //TODO: Remake this component
 
-export default function BatteryDashboard({
-  position = Gtk.Align.END,
-}: {
-  position?: Gtk.Align
-}) {
+export default function BatteryDashboard({}: { position?: Gtk.Align }) {
   const battery = AstalBattery.get_default()
 
   const batteryPercentage = createBinding(battery, "percentage")
@@ -21,6 +15,19 @@ export default function BatteryDashboard({
   const batteryChargeTime = createBinding(battery, "time_to_full")
   const batteryState = createBinding(battery, "state")
   const [isVisible, setIsVisible] = createState(false)
+  const [batteryHealth, setBatteryHealth] = createState("Loading...")
+
+  const refreshBatteryHealth = () => {
+    execAsync([
+      "sh",
+      "-c",
+      "battery=$(upower -e | awk '/battery/ { print; exit }'); [ -n \"$battery\" ] && upower -i \"$battery\" | awk -F: '/^[[:space:]]*capacity:/ { gsub(/^[[:space:]]+|[[:space:]]+$/, \"\", $2); print $2; exit }'",
+    ])
+      .then((health) => setBatteryHealth(health.trim() || "Unavailable"))
+      .catch(() => setBatteryHealth("Unavailable"))
+  }
+
+  refreshBatteryHealth()
 
   return (
     <popover
@@ -31,6 +38,7 @@ export default function BatteryDashboard({
       hasArrow={false}
       onNotifyVisible={(a) => {
         setIsVisible(a.visible)
+        if (a.visible) refreshBatteryHealth()
       }}
     >
       <revealer
@@ -117,6 +125,19 @@ export default function BatteryDashboard({
               }}
             </With>
           </box>
+          <With value={batteryHealth}>
+            {(health) => (
+              <box>
+                <label hexpand halign={Gtk.Align.START} label="Health:" />
+                <label
+                  hexpand
+                  marginStart={10}
+                  halign={Gtk.Align.END}
+                  label={health}
+                />
+              </box>
+            )}
+          </With>
         </box>
       </revealer>
     </popover>

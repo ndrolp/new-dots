@@ -1,7 +1,6 @@
 .network-button {
-
   > .toggle {
-    color: inherit;
+    color: var(--accent0);
     background: transparent;
 
     &:hover {
@@ -40,10 +39,177 @@
 .network-dashboard {
   min-width: 250px;
 
-  >label {
+  > label {
     border-bottom: 2px solid var(--gray0);
   }
+}
 
+.network-popup {
+  min-width: 380px;
+  padding: 20px;
+  border-radius: 20px;
+  background: var(--bg0);
+
+    .network-popup-section {
+      padding: 16px;
+      border-radius: 16px;
+      background: var(--bg2);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .network-popup-tabs {
+      padding: 4px;
+      border-radius: 14px;
+      background: var(--bg2);
+
+      .network-popup-tab {
+        min-height: 48px;
+        border-radius: 10px;
+        background: transparent;
+        font-size: 11pt;
+        font-weight: bold;
+        transition: 200ms ease-out;
+
+        &:hover {
+          background: color-mix(in srgb, var(--fg) 8%, transparent);
+        }
+
+        &.active {
+          background: color-mix(in srgb, var(--accent0) 24%, var(--bg2));
+          color: var(--accent0);
+        }
+      }
+    }
+
+    .network-popup-section-header {
+      min-height: 40px;
+    }
+
+    .network-popup-section-icon {
+      min-width: 30px;
+      color: var(--accent0);
+      font-size: 20pt;
+    }
+
+    .network-popup-section-title {
+      font-size: 13pt;
+      font-weight: bold;
+    }
+
+    .network-popup-toggle,
+    .network-popup-action {
+      min-width: 46px;
+      min-height: 38px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--fg) 10%, transparent);
+      font-weight: bold;
+      transition: 200ms ease-out;
+
+      &:hover {
+        background: color-mix(in srgb, var(--fg) 18%, transparent);
+      }
+    }
+
+    .network-popup-toggle.active {
+      background: var(--accent0);
+      color: var(--bg0);
+    }
+
+    .network-popup-action {
+      min-width: 38px;
+      padding: 0;
+
+      label {
+        font-size: 14pt;
+      }
+    }
+
+    .network-popup-list {
+      margin-top: 6px;
+    }
+
+  .network-popup-row {
+    min-height: 48px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: transparent;
+    transition: 200ms ease-out;
+
+    &:hover {
+      background: color-mix(in srgb, var(--accent0) 14%, transparent);
+    }
+
+    &.wifi-active {
+      background: color-mix(in srgb, var(--accent3) 18%, transparent);
+    }
+
+    &.wifi-active .network-popup-row-icon,
+    &.wifi-active .network-popup-row-detail {
+      color: var(--accent3);
+    }
+
+    &.bluetooth-active {
+      background: color-mix(in srgb, var(--accent2) 18%, transparent);
+    }
+
+    &.bluetooth-active .network-popup-row-icon,
+    &.bluetooth-active .network-popup-row-detail {
+      color: var(--accent2);
+    }
+  }
+
+  .network-popup-action.scanning {
+    color: var(--accent2);
+
+    label {
+      animation: rotate-network 1.2s linear infinite;
+    }
+  }
+
+  .network-popup-access-point {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .network-popup-password {
+    padding: 10px 12px 12px;
+    background: color-mix(in srgb, var(--accent0) 10%, var(--bg1));
+
+    entry {
+      min-height: 36px;
+      padding: 0 10px;
+      border-radius: 8px;
+      background: var(--bg0);
+    }
+  }
+
+  .network-popup-connect {
+    min-height: 36px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: var(--accent0);
+    color: var(--bg0);
+    font-weight: bold;
+  }
+
+  .network-popup-row-icon {
+    min-width: 26px;
+    font-size: 15pt;
+  }
+
+  .network-popup-row-name {
+    font-size: 11pt;
+  }
+
+  .network-popup-row-detail {
+    min-width: 36px;
+    font-size: 9pt;
+    color: var(--grey1);
+  }
+}
+
+.network-dashboard {
   .network-icon {
     font-size: 60pt;
     padding-top: 0;
@@ -72,10 +238,10 @@
         color: var(--grey0);
       }
 
-        :nth-child(4) {
-          color: var(--accent3);
-          font-size: 9pt;
-        }
+      :nth-child(4) {
+        color: var(--accent3);
+        font-size: 9pt;
+      }
     }
   }
 

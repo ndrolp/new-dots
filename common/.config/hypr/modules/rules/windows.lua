@@ -12,6 +12,12 @@ hl.layer_rule({
 	blur = true,
 })
 
+hl.layer_rule({
+	name = "remove-blur",
+	match = { class = "slurp" },
+	blur = false,
+})
+
 hl.window_rule({
 	name = "transparent",
 	match = {

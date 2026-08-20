@@ -10,6 +10,7 @@ import Clock from "./widgets/Clock"
 import { AVAILABLE_WIDGETS } from "../config/types"
 import TimerButton from "./widgets/Timer/TimerButton"
 import DashboardButton from "./widgets/Dashboard/DashboardButton"
+import { Tray } from "./widgets/Tray/Tray"
 
 export type WidgetFunction = (props: { monitor: Gdk.Monitor }) => JSX.Element
 
@@ -23,4 +24,5 @@ export const WIDGETS: Record<AVAILABLE_WIDGETS, WidgetFunction> = {
   clock: Clock,
   timer: TimerButton,
   dashboard: DashboardButton,
+  tray: Tray,
 }
