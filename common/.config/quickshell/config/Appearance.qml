@@ -10,6 +10,11 @@ QtObject {
     property alias textSize: settings.textSize
     property alias archButtonHorizontalPadding: settings.archButtonHorizontalPadding
     property alias activeWorkspaceHorizontalPadding: settings.activeWorkspaceHorizontalPadding
+    property alias pillVerticalPadding: settings.pillVerticalPadding
+    property alias workspacePadding: settings.workspacePadding
+    property alias pillsTransparent: settings.pillsTransparent
+    property alias transparentBarTopMargin: settings.transparentBarTopMargin
+    property alias barTransparent: settings.barTransparent
 
     property var settingsFile: FileView {
         id: settingsFile
@@ -37,6 +42,11 @@ QtObject {
             property int textSize: 14
             property int archButtonHorizontalPadding: 6
             property int activeWorkspaceHorizontalPadding: 6
+            property int pillVerticalPadding: 3
+            property int workspacePadding: 4
+            property bool pillsTransparent: false
+            property int transparentBarTopMargin: 0
+            property bool barTransparent: false
         }
     }
 }

@@ -96,20 +96,19 @@ PanelWindow {
                     spacing: 12
 
                     Rectangle {
-                        width: 42
-                        height: 42
-                        radius: 21
+                        width: 76
+                        height: 76
+                        radius: root.appearance.radius
                         color: theme.accent
 
                         Image {
-                            anchors.centerIn: parent
-                            width: 28
-                            height: 28
+                            anchors.fill: parent
+                            anchors.margins: 2
                             source: notificationCard.modelData.image !== ""
                                 ? notificationCard.modelData.image
                                 : notificationCard.modelData.appIcon !== ""
                                     ? Quickshell.iconPath(notificationCard.modelData.appIcon, true) : ""
-                            fillMode: Image.PreserveAspectFit
+                            fillMode: Image.PreserveAspectCrop
                         }
 
                         Text {
@@ -123,7 +122,8 @@ PanelWindow {
                     }
 
                     Column {
-                        width: parent.width - 54
+                        width: parent.width - 116
+                        anchors.verticalCenter: parent.verticalCenter
                         spacing: 3
 
                         Text {
@@ -156,6 +156,36 @@ PanelWindow {
                             font.pixelSize: root.appearance.textSize - 1
                             font.bold: true
                         }
+                    }
+                }
+
+                Rectangle {
+                    anchors.top: parent.top
+                    anchors.right: parent.right
+                    anchors.margins: 10
+                    width: 24
+                    height: 24
+                    radius: root.appearance.radius
+                    color: closeHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+
+                    Behavior on color {
+                        ColorAnimation { duration: 140 }
+                    }
+
+                    HoverHandler {
+                        id: closeHover
+                    }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "󰅖"
+                        color: theme.textMuted
+                        font.pixelSize: 15
+                        font.bold: true
+                    }
+
+                    TapHandler {
+                        onTapped: notificationCard.modelData.dismiss()
                     }
                 }
 

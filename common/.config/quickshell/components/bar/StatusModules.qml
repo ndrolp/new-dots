@@ -75,9 +75,9 @@ Row {
     Rectangle {
         visible: root.player !== null
         width: mediaContent.implicitWidth + 16
-        height: root.appearance.workspaceButtonSize
+        height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
-        color: mediaHover.hovered ? theme.surfaceHover : theme.surface
+        color: mediaHover.hovered ? theme.surfaceHover : root.appearance.pillsTransparent ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -97,8 +97,7 @@ Row {
         Row {
             id: mediaContent
 
-            anchors.fill: parent
-            anchors.margins: 8
+            anchors.centerIn: parent
             spacing: 7
 
             Text {
@@ -160,9 +159,9 @@ Row {
 
     Rectangle {
         width: 76
-        height: root.appearance.workspaceButtonSize
+        height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
-        color: audioHover.hovered ? theme.surfaceHover : theme.surface
+        color: audioHover.hovered ? theme.surfaceHover : root.appearance.pillsTransparent ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -173,9 +172,7 @@ Row {
         }
 
         Row {
-            anchors.fill: parent
-            anchors.leftMargin: 8
-            anchors.rightMargin: 8
+            anchors.centerIn: parent
             spacing: 7
 
             Text {
@@ -211,9 +208,9 @@ Row {
 
     Rectangle {
         width: root.appearance.workspaceButtonSize
-        height: root.appearance.workspaceButtonSize
+        height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
-        color: networkHover.hovered ? theme.surfaceHover : theme.surface
+        color: networkHover.hovered ? theme.surfaceHover : root.appearance.pillsTransparent ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -240,9 +237,9 @@ Row {
     Rectangle {
         visible: root.hasBattery
         width: batteryContent.implicitWidth + 16
-        height: root.appearance.workspaceButtonSize
+        height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
-        color: batteryHover.hovered ? theme.surfaceHover : theme.surface
+        color: batteryHover.hovered ? theme.surfaceHover : root.appearance.pillsTransparent ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -279,9 +276,9 @@ Row {
 
     Rectangle {
         width: clock.implicitWidth + 16
-        height: root.appearance.workspaceButtonSize
+        height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
-        color: clockHover.hovered ? theme.surfaceHover : theme.surface
+        color: clockHover.hovered ? theme.surfaceHover : root.appearance.pillsTransparent ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }

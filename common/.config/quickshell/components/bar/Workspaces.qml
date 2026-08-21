@@ -1,7 +1,7 @@
 import QtQuick
 import "../../config" as Config
 
-Row {
+Rectangle {
     id: root
 
     required property var appearance
@@ -9,81 +9,65 @@ Row {
     required property var monitors
     required property var workspaceService
 
-    spacing: appearance.spacing
+    implicitWidth: workspaceRow.implicitWidth + (appearance.barTransparent ? 16 : 0)
+    implicitHeight: workspaceRow.implicitHeight + (appearance.barTransparent
+        ? (appearance.pillVerticalPadding + 2) * 2 : 0)
+    radius: appearance.radius
+    color: appearance.barTransparent && !appearance.pillsTransparent ? theme.surface : "transparent"
 
-    move: Transition {
-        NumberAnimation {
-            properties: "x"
-            duration: 180
-            easing.type: Easing.OutCubic
+    Behavior on color {
+        ColorAnimation {
+            duration: 140
         }
     }
 
-    Config.Theme {
-        id: theme
-    }
+    Row {
+        id: workspaceRow
 
-    Repeater {
-        model: root.workspaceService.workspacesForScreen(
-            root.monitorScreen,
-            root.monitors.workspacesFor(root.workspaceService.monitorDescriptionForScreen(root.monitorScreen))
-        )
+        anchors.centerIn: parent
+        spacing: appearance.spacing
 
-        delegate: Rectangle {
-            id: workspaceButton
-
-            required property var modelData
-            readonly property int workspaceId: modelData
-            readonly property bool active: root.workspaceService.isActive(workspaceId)
-            readonly property bool occupied: root.workspaceService.isOccupied(workspaceId)
-
-            width: active
-                ? appearance.workspaceButtonSize + (appearance.activeWorkspaceHorizontalPadding * 2)
-                : appearance.workspaceButtonSize
-            height: appearance.workspaceButtonSize
-            radius: appearance.radius
-            color: active ? theme.accent : occupied ? theme.surface : "transparent"
-
-            Behavior on width {
-                NumberAnimation {
-                    duration: 180
-                    easing.type: Easing.OutCubic
-                }
+        move: Transition {
+            NumberAnimation {
+                properties: "x"
+                duration: 180
+                easing.type: Easing.OutCubic
             }
+        }
 
-            Behavior on color {
-                ColorAnimation {
-                    duration: 140
-                }
-            }
+        Repeater {
+            model: root.workspaceService.workspacesForScreen(
+                root.monitorScreen,
+                root.monitors.workspacesFor(root.workspaceService.monitorDescriptionForScreen(root.monitorScreen))
+            )
 
-            Text {
-                anchors.centerIn: parent
-                text: workspaceButton.workspaceId
-                color: workspaceButton.active ? theme.background : workspaceButton.occupied ? theme.text : theme.textDisabled
-                font.pixelSize: appearance.textSize
-                font.bold: true
+            delegate: Rectangle {
+                id: workspaceButton
 
-                Behavior on color {
-                    ColorAnimation {
-                        duration: 80
+                required property var modelData
+                readonly property int workspaceId: modelData
+                readonly property bool active: root.workspaceService.isActive(workspaceId)
+                readonly property bool occupied: root.workspaceService.isOccupied(workspaceId)
+
+                width: active
+                    ? appearance.workspaceButtonSize + (appearance.activeWorkspaceHorizontalPadding * 2)
+                    : appearance.workspaceButtonSize
+                height: appearance.barTransparent
+                    ? appearance.workspaceButtonSize - 2
+                    : appearance.barHeight - (appearance.workspacePadding * 2)
+                radius: appearance.radius
+                color: active ? theme.accent
+                    : occupied && !appearance.pillsTransparent ? theme.surface : "transparent"
+
+                Behavior on width {
+                    NumberAnimation {
+                        duration: 180
+                        easing.type: Easing.OutCubic
                     }
                 }
 
-            }
-
-            HoverHandler {
-                id: hover
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                radius: appearance.radius
-                color: theme.surfaceHover
-                opacity: hover.hovered && !workspaceButton.active ? 1 : 0
-
-                Behavior on opacity {
-                    NumberAnimation {
+                Behavior on color {
+                    ColorAnimation {
                         duration: 140
                     }
                 }
@@ -91,15 +75,51 @@ Row {
                 Text {
                     anchors.centerIn: parent
                     text: workspaceButton.workspaceId
-                    color: theme.text
+                    color: workspaceButton.active ? theme.background : workspaceButton.occupied ? theme.text : theme.textDisabled
                     font.pixelSize: appearance.textSize
                     font.bold: true
+
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: 80
+                        }
+                    }
+
+                }
+
+                HoverHandler {
+                    id: hover
+                }
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: appearance.radius
+                    color: theme.surfaceHover
+                    opacity: hover.hovered && !workspaceButton.active ? 1 : 0
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: 140
+                        }
+                    }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: workspaceButton.workspaceId
+                        color: theme.text
+                        font.pixelSize: appearance.textSize
+                        font.bold: true
+                    }
+                }
+
+                TapHandler {
+                    onTapped: root.workspaceService.switchTo(workspaceButton.workspaceId)
                 }
             }
-
-            TapHandler {
-                onTapped: root.workspaceService.switchTo(workspaceButton.workspaceId)
-            }
         }
+    }
+
+    Config.Theme {
+        id: theme
     }
 }

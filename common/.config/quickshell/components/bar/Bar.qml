@@ -44,8 +44,11 @@ Variants {
                 width: panel.width
                 height: panel.height
             }
-            exclusiveZone: panel.appearance.barHeight
-            implicitHeight: panel.appearance.barHeight
+            readonly property int totalBarHeight: panel.appearance.barHeight
+                + (panel.appearance.barTransparent ? panel.appearance.transparentBarTopMargin : 0)
+
+            exclusiveZone: totalBarHeight
+            implicitHeight: totalBarHeight
 
             anchors {
                 top: true
@@ -63,8 +66,15 @@ Variants {
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
-                height: panel.appearance.barHeight
-                color: theme.background
+                height: panel.totalBarHeight
+                color: panel.appearance.barTransparent ? "transparent" : theme.background
+
+                Behavior on color {
+                    ColorAnimation {
+                        duration: 220
+                        easing.type: Easing.OutCubic
+                    }
+                }
 
                 BarContent {
                     id: barContent
@@ -72,6 +82,8 @@ Variants {
                     anchors.fill: parent
                     anchors.leftMargin: panel.appearance.horizontalPadding
                     anchors.rightMargin: panel.appearance.horizontalPadding
+                    anchors.topMargin: panel.appearance.barTransparent
+                        ? panel.appearance.transparentBarTopMargin : 0
                     appearance: panel.appearance
                     configOpen: panel.configOpen
                     monitorScreen: panel.screen

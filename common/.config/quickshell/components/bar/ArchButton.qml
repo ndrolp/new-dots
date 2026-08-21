@@ -10,9 +10,9 @@ Rectangle {
     signal clicked()
 
     width: appearance.workspaceButtonSize + (appearance.archButtonHorizontalPadding * 2)
-    height: appearance.workspaceButtonSize
+    height: appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
     radius: appearance.radius
-    color: hover.hovered ? theme.surfaceHover : theme.surface
+    color: hover.hovered ? theme.surfaceHover : appearance.pillsTransparent ? "transparent" : theme.surface
 
     Behavior on color {
         ColorAnimation {

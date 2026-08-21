@@ -37,9 +37,9 @@ Row {
 
     Rectangle {
         width: appContent.implicitWidth + 16
-        height: appearance.workspaceButtonSize
+        height: appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
         radius: appearance.radius
-        color: appHover.hovered ? theme.surfaceHover : theme.surface
+        color: appHover.hovered ? theme.surfaceHover : root.appearance.pillsTransparent ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation {

@@ -269,6 +269,7 @@ Rectangle {
                             onTapped: root.currentSection = modelData.section
                         }
                     }
+
                 }
             }
 
@@ -324,7 +325,7 @@ Rectangle {
 
                         Item {
                             width: pageScroll.availableWidth - 12
-                            implicitHeight: 430
+                            implicitHeight: 650
 
                             Column {
                                 id: appearancePage
@@ -337,6 +338,9 @@ Rectangle {
                                     model: [
                                         { label: "Bar height", from: 24, to: 56, propertyName: "barHeight" },
                                         { label: "Horizontal padding", from: 0, to: 48, propertyName: "horizontalPadding" },
+                                        { label: "Pill vertical padding", from: 0, to: 8, propertyName: "pillVerticalPadding" },
+                                        { label: "Workspace bar padding", from: 0, to: 10, propertyName: "workspacePadding" },
+                                        { label: "Transparent bar top margin", from: 0, to: 32, propertyName: "transparentBarTopMargin" },
                                         { label: "Corner radius", from: 0, to: 24, propertyName: "radius" },
                                         { label: "Component spacing", from: 0, to: 24, propertyName: "spacing" }
                                     ]
@@ -372,6 +376,116 @@ Rectangle {
                                             value: root.appearance[modelData.propertyName]
                                             onMoved: root.appearance[modelData.propertyName] = Math.round(value)
                                         }
+                                    }
+                                }
+
+                                Rectangle {
+                                    width: parent.width
+                                    height: 44
+                                    radius: root.appearance.radius
+                                    color: transparencyHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+
+                                    Behavior on color {
+                                        ColorAnimation { duration: 140 }
+                                    }
+
+                                    HoverHandler {
+                                        id: transparencyHover
+                                    }
+
+                                    Text {
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 12
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: "TRANSPARENT BAR"
+                                        color: theme.text
+                                        font.pixelSize: root.appearance.textSize - 1
+                                        font.bold: true
+                                    }
+
+                                    Rectangle {
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: 10
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: 48
+                                        height: 28
+                                        radius: root.appearance.radius
+                                        color: root.appearance.barTransparent ? theme.accent : theme.surface
+
+                                        Rectangle {
+                                            x: root.appearance.barTransparent ? parent.width - width - 3 : 3
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            width: 22
+                                            height: 22
+                                            radius: 11
+                                            color: theme.text
+
+                                            Behavior on x {
+                                                NumberAnimation {
+                                                    duration: 160
+                                                    easing.type: Easing.OutCubic
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    TapHandler {
+                                        onTapped: root.appearance.barTransparent = !root.appearance.barTransparent
+                                    }
+                                }
+
+                                Rectangle {
+                                    width: parent.width
+                                    height: 44
+                                    radius: root.appearance.radius
+                                    color: pillsTransparencyHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+
+                                    Behavior on color {
+                                        ColorAnimation { duration: 140 }
+                                    }
+
+                                    HoverHandler {
+                                        id: pillsTransparencyHover
+                                    }
+
+                                    Text {
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 12
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: "TRANSPARENT PILLS"
+                                        color: theme.text
+                                        font.pixelSize: root.appearance.textSize - 1
+                                        font.bold: true
+                                    }
+
+                                    Rectangle {
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: 10
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: 48
+                                        height: 28
+                                        radius: root.appearance.radius
+                                        color: root.appearance.pillsTransparent ? theme.accent : theme.surface
+
+                                        Rectangle {
+                                            x: root.appearance.pillsTransparent ? parent.width - width - 3 : 3
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            width: 22
+                                            height: 22
+                                            radius: 11
+                                            color: theme.text
+
+                                            Behavior on x {
+                                                NumberAnimation {
+                                                    duration: 160
+                                                    easing.type: Easing.OutCubic
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    TapHandler {
+                                        onTapped: root.appearance.pillsTransparent = !root.appearance.pillsTransparent
                                     }
                                 }
                             }
