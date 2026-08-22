@@ -12,6 +12,8 @@ Row {
     id: root
 
     required property var appearance
+    required property var monitorScreen
+    required property var pomodoro
     property string activePopup: ""
     signal popupRequested(string popup)
 
@@ -22,6 +24,8 @@ Row {
     readonly property var battery: UPower.displayDevice
     readonly property bool hasBattery: battery && battery.isPresent
     readonly property var bluetoothAdapter: Bluetooth.defaultAdapter
+    readonly property real mediaTitleMaximumWidth: monitorScreen
+        ? Math.max(96, Math.min(260, monitorScreen.width * 0.12)) : 260
     property var player: null
     readonly property string playerLabel: player
         ? (player.trackTitle !== "" ? player.trackTitle : player.identity) : ""
@@ -96,7 +100,8 @@ Row {
         width: mediaContent.implicitWidth + 16
         height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
-        color: mediaHover.hovered ? theme.surfaceHover : root.appearance.pillsTransparent ? "transparent" : theme.surface
+        color: mediaHover.hovered ? theme.surfaceHover
+            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -133,7 +138,7 @@ Row {
                 property string displayedLabel: root.displayedPlayerLabel
 
                 anchors.verticalCenter: parent.verticalCenter
-                width: Math.min(260, implicitWidth)
+                width: Math.min(root.mediaTitleMaximumWidth, implicitWidth)
                 text: displayedLabel
                 color: theme.green
                 elide: Text.ElideRight
@@ -182,7 +187,8 @@ Row {
         width: 76
         height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
-        color: audioHover.hovered ? theme.surfaceHover : root.appearance.pillsTransparent ? "transparent" : theme.surface
+        color: audioHover.hovered ? theme.surfaceHover
+            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -231,7 +237,8 @@ Row {
         width: root.appearance.workspaceButtonSize
         height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
-        color: bluetoothHover.hovered ? theme.surfaceHover : root.appearance.pillsTransparent ? "transparent" : theme.surface
+        color: bluetoothHover.hovered ? theme.surfaceHover
+            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -259,7 +266,8 @@ Row {
         width: root.appearance.workspaceButtonSize
         height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
-        color: trayHover.hovered ? theme.surfaceHover : root.appearance.pillsTransparent ? "transparent" : theme.surface
+        color: trayHover.hovered ? theme.surfaceHover
+            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -287,7 +295,8 @@ Row {
         width: root.appearance.workspaceButtonSize
         height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
-        color: networkHover.hovered ? theme.surfaceHover : root.appearance.pillsTransparent ? "transparent" : theme.surface
+        color: networkHover.hovered ? theme.surfaceHover
+            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -316,7 +325,8 @@ Row {
         width: batteryContent.implicitWidth + 16
         height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
-        color: batteryHover.hovered ? theme.surfaceHover : root.appearance.pillsTransparent ? "transparent" : theme.surface
+        color: batteryHover.hovered ? theme.surfaceHover
+            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -356,10 +366,11 @@ Row {
     }
 
     Rectangle {
-        width: clock.implicitWidth + 16
+        width: clockContent.implicitWidth + 16
         height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
-        color: clockHover.hovered ? theme.surfaceHover : root.appearance.pillsTransparent ? "transparent" : theme.surface
+        color: clockHover.hovered ? theme.surfaceHover
+            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -369,11 +380,53 @@ Row {
             id: clockHover
         }
 
-        Clock {
-            id: clock
+        Row {
+            id: clockContent
 
             anchors.centerIn: parent
-            color: theme.orange
+            spacing: 7
+
+            Item {
+                id: pomodoroIndicator
+
+                width: root.pomodoro.started ? pomodoroText.implicitWidth : 0
+                height: pomodoroText.implicitHeight
+                clip: true
+
+                Behavior on width {
+                    NumberAnimation {
+                        duration: 180
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                Text {
+                    id: pomodoroText
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "󰔟  " + root.pomodoro.remainingLabel
+                    color: root.pomodoro.running ? theme.green : theme.textMuted
+                    opacity: root.pomodoro.started ? 1 : 0
+                    font.pixelSize: root.appearance.textSize
+                    font.bold: true
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: 140
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                }
+            }
+
+            Clock {
+                color: theme.orange
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: root.popupRequested("pomodoro")
         }
     }
 }

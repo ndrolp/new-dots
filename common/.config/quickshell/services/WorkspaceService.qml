@@ -1,4 +1,5 @@
 import Quickshell.Hyprland
+import Quickshell.Io
 import QtQuick
 
 QtObject {
@@ -72,6 +73,16 @@ QtObject {
     }
 
     function switchTo(id) {
-        Hyprland.dispatch("workspace " + id);
+        if (id < 1 || id > 21)
+            return;
+
+        workspaceDispatcher.exec([
+            "hyprctl", "dispatch",
+            "hl.dsp.focus({ workspace = " + id + " })"
+        ]);
+    }
+
+    property var workspaceDispatcher: Process {
+        id: workspaceDispatcher
     }
 }

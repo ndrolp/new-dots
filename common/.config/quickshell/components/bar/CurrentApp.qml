@@ -28,11 +28,14 @@ Row {
     readonly property string iconSource: iconName !== ""
         ? Quickshell.iconPath(iconName, true) : ""
     readonly property string terminalGlyph: terminal ? terminalIconGlyph(windowTitle) : ""
+    readonly property real activeTitleMaximumWidth: monitorScreen
+        ? Math.max(120, Math.min(320, monitorScreen.width * 0.14)) : 320
 
     spacing: appearance.spacing
     visible: label !== "" && monitor !== null && Hyprland.focusedWorkspace
         && Hyprland.focusedWorkspace.monitor !== null
         && Hyprland.focusedWorkspace.monitor.name === monitor.name
+    width: visible ? implicitWidth : 0
 
     Config.Theme {
         id: theme
@@ -96,7 +99,8 @@ Row {
         width: appContent.implicitWidth + 16
         height: appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
         radius: appearance.radius
-        color: appHover.hovered ? theme.surfaceHover : root.appearance.pillsTransparent ? "transparent" : theme.surface
+        color: appHover.hovered ? theme.surfaceHover
+            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation {
@@ -158,7 +162,7 @@ Row {
                 property string displayedLabel: root.label
 
                 anchors.verticalCenter: parent.verticalCenter
-                width: Math.min(320, implicitWidth)
+                width: Math.min(root.activeTitleMaximumWidth, implicitWidth)
                 text: displayedLabel
                 color: theme.text
                 elide: Text.ElideRight

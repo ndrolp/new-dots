@@ -15,6 +15,8 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     implicitWidth: 404
     implicitHeight: notificationList.implicitHeight + 24
+    readonly property bool bottomAligned: root.appearance.notificationPopupLocation.indexOf("bottom") === 0
+    readonly property bool rightAligned: root.appearance.notificationPopupLocation.indexOf("right") !== -1
 
     WlrLayershell.namespace: "ndro-shell-notifications"
     mask: Region {
@@ -22,13 +24,19 @@ PanelWindow {
     }
 
     anchors {
-        top: true
+        top: !root.bottomAligned
+        bottom: root.bottomAligned
         left: true
     }
 
     margins {
-        top: root.appearance.barHeight + root.appearance.spacing
-        left: screen ? (screen.width - root.implicitWidth) / 2 : 0
+        top: root.bottomAligned ? 0 : root.appearance.barHeight + root.appearance.spacing
+        bottom: root.bottomAligned ? root.appearance.spacing : 0
+        left: !screen ? 0 : root.rightAligned
+            ? screen.width - root.implicitWidth - root.appearance.horizontalPadding
+            : root.appearance.notificationPopupLocation.indexOf("left") !== -1
+                ? root.appearance.horizontalPadding
+                : (screen.width - root.implicitWidth) / 2
     }
 
     Config.Theme {
@@ -51,6 +59,9 @@ PanelWindow {
 
                 required property var modelData
                 property real reveal: 0
+                readonly property int timeout: modelData.expireTimeout > 0
+                    ? modelData.expireTimeout : 5000
+                property real lifetimeProgress: 1
 
                 width: parent.width
                 height: content.implicitHeight + 28
@@ -82,10 +93,16 @@ PanelWindow {
                 }
 
                 Timer {
-                    interval: notificationCard.modelData.expireTimeout > 0
-                        ? notificationCard.modelData.expireTimeout : 5000
+                    interval: 50
                     running: true
-                    onTriggered: notificationCard.modelData.dismiss()
+                    repeat: true
+                    onTriggered: {
+                        notificationCard.lifetimeProgress = Math.max(0,
+                            notificationCard.lifetimeProgress - interval / notificationCard.timeout);
+
+                        if (notificationCard.lifetimeProgress === 0)
+                            notificationCard.modelData.dismiss();
+                    }
                 }
 
                 Row {
@@ -191,6 +208,15 @@ PanelWindow {
 
                 TapHandler {
                     onTapped: notificationCard.modelData.dismiss()
+                }
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.bottom: parent.bottom
+                    width: parent.width * notificationCard.lifetimeProgress
+                    height: 3
+                    radius: root.appearance.radius
+                    color: theme.accent
                 }
             }
         }

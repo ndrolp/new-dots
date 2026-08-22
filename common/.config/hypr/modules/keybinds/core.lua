@@ -29,6 +29,7 @@ hl.bind(mainMod .. " + SHIFT + w", hl.dsp.exec_cmd("~/.dotfiles/scripts/hyprland
 hl.bind(mainMod .. " + g", hl.dsp.exec_cmd("~/.config/rofi/extras/quickweb/quickweb.sh"))
 hl.bind(mainMod .. " + d", hl.dsp.exec_cmd("rofi -show drun"))
 hl.bind(mainMod .. " + p", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call config toggle"))
+hl.bind(mainMod .. " + n", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call notifications toggle"))
 hl.bind(win .. " + l", hl.dsp.exec_cmd("hyprlock"))
 hl.bind(mainMod .. " + left", hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))

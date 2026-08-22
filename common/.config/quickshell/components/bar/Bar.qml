@@ -12,6 +12,8 @@ Variants {
     property string activeStatusPopup: ""
     property var activeStatusPopupWindow: null
     required property var monitors
+    required property var pomodoro
+    required property var systemMonitor
     required property var workspaceService
 
     signal configRequested(var screen, var panelWindow)
@@ -32,6 +34,8 @@ Variants {
             property string activeStatusPopup: bar.activeStatusPopupWindow === panel
                 ? bar.activeStatusPopup : ""
             property var monitors: bar.monitors
+            property var pomodoro: bar.pomodoro
+            property var systemMonitor: bar.systemMonitor
             property var workspaceService: bar.workspaceService
 
             Component.onCompleted: bar.panelReady(panel.screen, panel)
@@ -46,7 +50,8 @@ Variants {
                 height: panel.height
             }
             readonly property int totalBarHeight: panel.appearance.barHeight
-                + (panel.appearance.barTransparent ? panel.appearance.transparentBarTopMargin : 0)
+                + (panel.appearance.barTransparent && !panel.appearance.transparentBarSlanted
+                    ? panel.appearance.transparentBarTopMargin : 0)
 
             exclusiveZone: totalBarHeight
             implicitHeight: totalBarHeight
@@ -81,15 +86,20 @@ Variants {
                     id: barContent
 
                     anchors.fill: parent
-                    anchors.leftMargin: panel.appearance.horizontalPadding
-                    anchors.rightMargin: panel.appearance.horizontalPadding
+                    anchors.leftMargin: panel.appearance.barTransparent
+                        && panel.appearance.transparentBarSlanted ? 0 : panel.appearance.horizontalPadding
+                    anchors.rightMargin: panel.appearance.barTransparent
+                        && panel.appearance.transparentBarSlanted ? 0 : panel.appearance.horizontalPadding
                     anchors.topMargin: panel.appearance.barTransparent
+                        && !panel.appearance.transparentBarSlanted
                         ? panel.appearance.transparentBarTopMargin : 0
                     appearance: panel.appearance
                     configOpen: panel.configOpen
                     activeStatusPopup: panel.activeStatusPopup
                     monitorScreen: panel.screen
                     monitors: panel.monitors
+                    pomodoro: panel.pomodoro
+                    systemMonitor: panel.systemMonitor
                     workspaceService: panel.workspaceService
 
                     onConfigRequested: function(screen) {
@@ -106,6 +116,8 @@ Variants {
                 appearance: panel.appearance
                 barWindow: panel
                 activePopup: panel.activeStatusPopup
+                pomodoro: panel.pomodoro
+                systemMonitor: panel.systemMonitor
 
                 onPopupClosed: function(popup) {
                     bar.statusPopupClosed(popup, panel);

@@ -14,6 +14,11 @@ ShellRoot {
     property var configWindow: null
     property string statusPopup: ""
     property var statusPopupWindow: null
+    property bool notificationPanelOpen: false
+
+    Config.Theme {
+        id: theme
+    }
 
     Config.Appearance {
         id: appearance
@@ -31,6 +36,18 @@ ShellRoot {
         id: workspaceService
     }
 
+    Services.Pomodoro {
+        id: pomodoro
+    }
+
+    Services.NotificationHistory {
+        id: notificationHistory
+    }
+
+    Services.SystemMonitor {
+        id: systemMonitor
+    }
+
     NotificationServer {
         id: notificationServer
 
@@ -40,12 +57,30 @@ ShellRoot {
         imageSupported: true
         keepOnReload: true
 
-        onNotification: notification => notification.tracked = true
+        onNotification: notification => {
+            notification.tracked = true;
+            notificationHistory.add(notification);
+            notificationSound.exec(["pw-play", "/usr/share/sounds/freedesktop/stereo/message.oga"]);
+        }
+    }
+
+    Process {
+        id: notificationSound
     }
 
     Panels.NotificationPopup {
         appearance: appearance
         notificationServer: notificationServer
+    }
+
+    Panels.NotificationPanel {
+        appearance: appearance
+        notificationServer: notificationServer
+        notificationHistory: notificationHistory
+        open: shell.notificationPanelOpen
+        targetWindow: shell.configWindow
+
+        onCloseRequested: shell.notificationPanelOpen = false
     }
 
     Panels.OsdPopup {
@@ -87,12 +122,22 @@ ShellRoot {
         }
     }
 
+    IpcHandler {
+        target: "notifications"
+
+        function toggle() {
+            shell.notificationPanelOpen = !shell.notificationPanelOpen;
+        }
+    }
+
     Bar.Bar {
         appearance: appearance
         configOpen: shell.configOpen
         activeStatusPopup: shell.statusPopup
         activeStatusPopupWindow: shell.statusPopupWindow
         monitors: monitors
+        pomodoro: pomodoro
+        systemMonitor: systemMonitor
         workspaceService: workspaceService
 
         onConfigRequested: function(screen, panelWindow) {

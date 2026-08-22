@@ -1,14 +1,16 @@
 {
     "activeWorkspaceHorizontalPadding": 6,
     "archButtonHorizontalPadding": 6,
-    "barHeight": 32,
+    "barHeight": 33,
     "barTransparent": true,
     "horizontalPadding": 10,
+    "notificationPopupLocation": "top-right",
     "pillVerticalPadding": 4,
     "pillsTransparent": false,
     "radius": 2,
     "spacing": 5,
     "textSize": 14,
+    "transparentBarSlanted": false,
     "transparentBarTopMargin": 7,
     "workspaceButtonSize": 20,
     "workspacePadding": 6

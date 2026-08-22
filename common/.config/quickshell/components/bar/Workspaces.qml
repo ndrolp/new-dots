@@ -12,12 +12,22 @@ Rectangle {
     implicitWidth: workspaceRow.implicitWidth + (appearance.barTransparent ? 16 : 0)
     implicitHeight: workspaceRow.implicitHeight + (appearance.barTransparent
         ? (appearance.pillVerticalPadding + 2) * 2 : 0)
+    width: implicitWidth
+    height: implicitHeight
     radius: appearance.radius
-    color: appearance.barTransparent && !appearance.pillsTransparent ? theme.surface : "transparent"
+    color: appearance.barTransparent && !appearance.pillsTransparent
+        && !appearance.transparentBarSlanted ? theme.surface : "transparent"
 
     Behavior on color {
         ColorAnimation {
             duration: 140
+        }
+    }
+
+    Behavior on width {
+        NumberAnimation {
+            duration: 180
+            easing.type: Easing.OutCubic
         }
     }
 
@@ -57,7 +67,8 @@ Rectangle {
                     : appearance.barHeight - (appearance.workspacePadding * 2)
                 radius: appearance.radius
                 color: active ? theme.accent
-                    : occupied && !appearance.pillsTransparent ? theme.surface : "transparent"
+                    : occupied && !appearance.pillsTransparent && !appearance.transparentBarSlanted
+                        ? theme.surface : "transparent"
 
                 Behavior on width {
                     NumberAnimation {
@@ -112,8 +123,10 @@ Rectangle {
                     }
                 }
 
-                TapHandler {
-                    onTapped: root.workspaceService.switchTo(workspaceButton.workspaceId)
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.workspaceService.switchTo(workspaceButton.workspaceId)
                 }
             }
         }

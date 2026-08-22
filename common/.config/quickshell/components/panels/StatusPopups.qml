@@ -15,8 +15,12 @@ Item {
 
     required property var appearance
     required property var barWindow
+    required property var pomodoro
+    required property var systemMonitor
     property string activePopup: ""
     property var player: null
+    property real mediaPosition: 0
+    property string mediaTrackKey: ""
     property var passwordNetwork: null
     signal popupClosed(string popup)
     signal audioSinkSelected(var sink)
@@ -37,7 +41,18 @@ Item {
     }
 
     function updatePlayer() {
-        player = activePlayer();
+        const nextPlayer = activePlayer();
+        const trackKey = nextPlayer
+            ? nextPlayer.identity + "\u0000" + nextPlayer.trackTitle + "\u0000" + nextPlayer.length : "";
+
+        if (nextPlayer !== player || trackKey !== mediaTrackKey) {
+            player = nextPlayer;
+            mediaTrackKey = trackKey;
+            mediaPosition = player ? player.position : 0;
+        } else if (player) {
+            mediaPosition = player.isPlaying
+                ? Math.min(player.length, mediaPosition + 1) : player.position;
+        }
     }
 
     Component.onCompleted: updatePlayer()
@@ -157,6 +172,476 @@ Item {
     }
 
     PopupWindow {
+        id: systemPopup
+
+        property real reveal: root.activePopup === "system" ? 1 : 0
+
+        onVisibleChanged: {
+            if (!visible && root.activePopup === "system")
+                root.popupClosed("system");
+        }
+        visible: reveal > 0
+        anchor.window: root.barWindow
+        anchor.rect.x: root.appearance.horizontalPadding
+        anchor.rect.y: root.appearance.barHeight + root.appearance.spacing
+        implicitWidth: 430
+        implicitHeight: 254
+        color: "transparent"
+
+        Behavior on reveal {
+            NumberAnimation {
+                duration: 180
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: 12
+            anchors.topMargin: 12 - 12 * (1 - systemPopup.reveal)
+            radius: root.appearance.radius
+            color: theme.surface
+            opacity: systemPopup.reveal
+
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: "#73000000"
+                shadowBlur: 0.65
+                shadowVerticalOffset: 6
+            }
+
+            Column {
+                anchors.fill: parent
+                anchors.margins: 18
+                spacing: 12
+
+                Row {
+                    width: parent.width
+
+                    Text {
+                        text: "System resources"
+                        color: theme.text
+                        font.pixelSize: root.appearance.textSize + 3
+                        font.bold: true
+                    }
+
+                    Item {
+                        width: parent.width - parent.children[0].implicitWidth - loadLabel.implicitWidth
+                        height: 1
+                    }
+
+                    Text {
+                        id: loadLabel
+
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Load " + root.systemMonitor.loadAverage
+                        color: theme.textMuted
+                        font.pixelSize: root.appearance.textSize - 3
+                        font.bold: true
+                    }
+                }
+
+                Row {
+                    width: parent.width
+                    spacing: 10
+
+                    Rectangle {
+                        width: (parent.width - parent.spacing) / 2
+                        height: 72
+                        radius: root.appearance.radius
+                        color: theme.backgroundSecondary
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 12
+                            anchors.top: parent.top
+                            anchors.topMargin: 10
+                            text: "󰍛  CPU"
+                            color: theme.blue
+                            font.pixelSize: root.appearance.textSize - 1
+                            font.bold: true
+                        }
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 12
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 10
+                            text: Math.round(root.systemMonitor.cpuUsage) + "%"
+                            color: theme.text
+                            font.pixelSize: root.appearance.textSize + 5
+                            font.bold: true
+                        }
+                    }
+
+                    Rectangle {
+                        width: (parent.width - parent.spacing) / 2
+                        height: 72
+                        radius: root.appearance.radius
+                        color: theme.backgroundSecondary
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 12
+                            anchors.top: parent.top
+                            anchors.topMargin: 10
+                            text: "󰘚  Memory"
+                            color: theme.yellow
+                            font.pixelSize: root.appearance.textSize - 1
+                            font.bold: true
+                        }
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 12
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 10
+                            text: root.systemMonitor.memoryUsedGiB.toFixed(1)
+                                + " / " + root.systemMonitor.memoryTotalGiB.toFixed(1) + " GiB"
+                            color: theme.text
+                            font.pixelSize: root.appearance.textSize
+                            font.bold: true
+                        }
+                    }
+                }
+
+                Row {
+                    width: parent.width
+                    spacing: 10
+
+                    Rectangle {
+                        width: (parent.width - parent.spacing) / 2
+                        height: 56
+                        radius: root.appearance.radius
+                        color: theme.backgroundSecondary
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 12
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "  Temperature"
+                            color: theme.orange
+                            font.pixelSize: root.appearance.textSize - 1
+                            font.bold: true
+                        }
+
+                        Text {
+                            anchors.right: parent.right
+                            anchors.rightMargin: 12
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: root.systemMonitor.temperature > 0
+                                ? Math.round(root.systemMonitor.temperature) + "°C" : "--"
+                            color: theme.text
+                            font.pixelSize: root.appearance.textSize + 1
+                            font.bold: true
+                        }
+                    }
+
+                    Rectangle {
+                        width: (parent.width - parent.spacing) / 2
+                        height: 56
+                        radius: root.appearance.radius
+                        color: theme.backgroundSecondary
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 12
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "󰌢  Memory use"
+                            color: theme.green
+                            font.pixelSize: root.appearance.textSize - 1
+                            font.bold: true
+                        }
+
+                        Text {
+                            anchors.right: parent.right
+                            anchors.rightMargin: 12
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: Math.round(root.systemMonitor.memoryUsage) + "%"
+                            color: theme.text
+                            font.pixelSize: root.appearance.textSize + 1
+                            font.bold: true
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    PopupWindow {
+        id: pomodoroPopup
+
+        property real reveal: root.activePopup === "pomodoro" ? 1 : 0
+
+        onVisibleChanged: {
+            if (!visible && root.activePopup === "pomodoro")
+                root.popupClosed("pomodoro");
+        }
+        visible: reveal > 0
+        anchor.window: root.barWindow
+        anchor.rect.x: Math.max(root.appearance.horizontalPadding,
+            root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
+        anchor.rect.y: root.appearance.barHeight + root.appearance.spacing
+        implicitWidth: 356
+        implicitHeight: 326
+        color: "transparent"
+
+        Behavior on reveal {
+            NumberAnimation {
+                duration: 180
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: 12
+            anchors.topMargin: 12 - 12 * (1 - pomodoroPopup.reveal)
+            radius: root.appearance.radius
+            color: theme.surface
+            opacity: pomodoroPopup.reveal
+
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: "#73000000"
+                shadowBlur: 0.65
+                shadowVerticalOffset: 6
+            }
+
+            Column {
+                anchors.fill: parent
+                anchors.margins: 18
+                spacing: 12
+
+                Text {
+                    text: "Pomodoro"
+                    color: theme.text
+                    font.pixelSize: root.appearance.textSize + 3
+                    font.bold: true
+                }
+
+                Text {
+                    width: parent.width
+                    horizontalAlignment: Text.AlignHCenter
+                    text: root.pomodoro.remainingLabel
+                    color: root.pomodoro.running ? theme.green : theme.text
+                    font.pixelSize: 38
+                    font.bold: true
+                }
+
+                Text {
+                    width: parent.width
+                    horizontalAlignment: Text.AlignHCenter
+                    text: root.pomodoro.running ? "Focus session in progress"
+                        : root.pomodoro.started ? "Timer paused" : "Choose a focus duration"
+                    color: theme.textMuted
+                    font.pixelSize: root.appearance.textSize - 1
+                    font.bold: true
+                }
+
+                Row {
+                    width: parent.width
+                    spacing: 6
+
+                    Repeater {
+                        model: [25, 30, 45, 60]
+
+                        delegate: Rectangle {
+                            required property int modelData
+
+                            width: (parent.width - parent.spacing * 3) / 4
+                            height: 34
+                            radius: root.appearance.radius
+                            color: root.pomodoro.durationSeconds === modelData * 60
+                                ? theme.accent : presetHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+
+                            Behavior on color {
+                                ColorAnimation { duration: 140 }
+                            }
+
+                            HoverHandler {
+                                id: presetHover
+                            }
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: modelData === 60 ? "1h" : modelData + "m"
+                                color: root.pomodoro.durationSeconds === modelData * 60
+                                    ? theme.background : theme.text
+                                font.pixelSize: root.appearance.textSize - 1
+                                font.bold: true
+                            }
+
+                            TapHandler {
+                                onTapped: root.pomodoro.selectMinutes(modelData)
+                            }
+                        }
+                    }
+                }
+
+                Row {
+                    width: parent.width
+                    spacing: 8
+
+                    Rectangle {
+                        width: 52
+                        height: 38
+                        radius: root.appearance.radius
+                        color: subtractHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+
+                        HoverHandler {
+                            id: subtractHover
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "−10m"
+                            color: theme.text
+                            font.pixelSize: root.appearance.textSize - 1
+                            font.bold: true
+                        }
+
+                        TapHandler {
+                            onTapped: root.pomodoro.adjustMinutes(-10)
+                        }
+                    }
+
+                    Rectangle {
+                        width: 36
+                        height: 38
+                        radius: root.appearance.radius
+                        color: subtractOneHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+
+                        HoverHandler {
+                            id: subtractOneHover
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "−1"
+                            color: theme.text
+                            font.pixelSize: root.appearance.textSize - 1
+                            font.bold: true
+                        }
+
+                        TapHandler {
+                            onTapped: root.pomodoro.adjustMinutes(-1)
+                        }
+                    }
+
+                    Rectangle {
+                        width: parent.width - 208
+                        height: 38
+                        radius: root.appearance.radius
+                        color: root.pomodoro.running
+                            ? stopHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+                            : startHover.hovered ? theme.accentHover : theme.accent
+
+                        HoverHandler {
+                            id: startHover
+                            enabled: !root.pomodoro.running
+                        }
+
+                        HoverHandler {
+                            id: stopHover
+                            enabled: root.pomodoro.running
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: root.pomodoro.running ? "Stop" : root.pomodoro.started ? "Resume" : "Start"
+                            color: root.pomodoro.running ? theme.text : theme.background
+                            font.pixelSize: root.appearance.textSize
+                            font.bold: true
+                        }
+
+                        TapHandler {
+                            onTapped: {
+                                if (root.pomodoro.running)
+                                    root.pomodoro.stop();
+                                else
+                                    root.pomodoro.start();
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        width: 36
+                        height: 38
+                        radius: root.appearance.radius
+                        color: addOneHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+
+                        HoverHandler {
+                            id: addOneHover
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "+1"
+                            color: theme.text
+                            font.pixelSize: root.appearance.textSize - 1
+                            font.bold: true
+                        }
+
+                        TapHandler {
+                            onTapped: root.pomodoro.adjustMinutes(1)
+                        }
+                    }
+
+                    Rectangle {
+                        width: 52
+                        height: 38
+                        radius: root.appearance.radius
+                        color: addHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+
+                        HoverHandler {
+                            id: addHover
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "+10m"
+                            color: theme.text
+                            font.pixelSize: root.appearance.textSize - 1
+                            font.bold: true
+                        }
+
+                        TapHandler {
+                            onTapped: root.pomodoro.adjustMinutes(10)
+                        }
+                    }
+                }
+
+                Rectangle {
+                    visible: root.pomodoro.started
+                    width: parent.width
+                    height: 32
+                    radius: root.appearance.radius
+                    color: cancelPomodoroHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+
+                    HoverHandler {
+                        id: cancelPomodoroHover
+                    }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "Cancel timer"
+                        color: theme.red
+                        font.pixelSize: root.appearance.textSize - 1
+                        font.bold: true
+                    }
+
+                    TapHandler {
+                        onTapped: root.pomodoro.cancel()
+                    }
+                }
+            }
+        }
+    }
+
+    PopupWindow {
         id: mediaPopup
 
         property real reveal: root.activePopup === "media" ? 1 : 0
@@ -168,10 +653,11 @@ Item {
         }
         visible: reveal > 0
         anchor.window: root.barWindow
-        anchor.rect.x: Math.max(root.appearance.horizontalPadding, root.barWindow.width - 480)
+        anchor.rect.x: Math.max(root.appearance.horizontalPadding,
+            root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
         anchor.rect.y: root.appearance.barHeight + root.appearance.spacing
-        implicitWidth: 364
-        implicitHeight: 224
+        implicitWidth: 480
+        implicitHeight: 258
         color: "transparent"
 
         Behavior on reveal {
@@ -190,6 +676,32 @@ Item {
             radius: root.appearance.radius
             color: theme.surface
             opacity: mediaPopup.reveal
+            clip: true
+
+            Image {
+                anchors.fill: parent
+                source: mediaPopup.player ? mediaPopup.player.trackArtUrl : ""
+                fillMode: Image.PreserveAspectCrop
+                opacity: 0.32
+                visible: source !== ""
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+
+                    GradientStop {
+                        position: 0
+                        color: "transparent"
+                    }
+
+                    GradientStop {
+                        position: 0.72
+                        color: theme.surface
+                    }
+                }
+            }
 
             layer.enabled: true
             layer.effect: MultiEffect {
@@ -208,43 +720,67 @@ Item {
 
             Row {
                 anchors.fill: parent
-                anchors.margins: 16
+                anchors.margins: 18
                 spacing: 16
 
-                Rectangle {
-                    width: 136
-                    height: 136
-                    radius: 20
-                    color: theme.green
-
-                    Image {
-                        anchors.fill: parent
-                        anchors.margins: 4
-                        source: mediaPopup.player ? mediaPopup.player.trackArtUrl : ""
-                        fillMode: Image.PreserveAspectCrop
-                    }
+                Item {
+                    width: 150
+                    height: parent.height
 
                     Rectangle {
-                        id: sinkCard
-
-                        anchors.fill: parent
-                        visible: parent.children[0].status !== Image.Ready
-                        radius: parent.radius
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 150
+                        height: 150
+                        radius: root.appearance.radius
                         color: theme.green
+                        clip: true
 
-                        Text {
-                            anchors.centerIn: parent
-                            text: "󰎈"
-                            color: theme.background
-                            font.pixelSize: 36
+                        Image {
+                            anchors.fill: parent
+                            source: mediaPopup.player ? mediaPopup.player.trackArtUrl : ""
+                            fillMode: Image.PreserveAspectCrop
+                        }
+
+                        Rectangle {
+                            id: sinkCard
+
+                            anchors.fill: parent
+                            visible: parent.children[0].status !== Image.Ready
+                            radius: parent.radius
+                            color: theme.green
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "󰎈"
+                                color: theme.background
+                                font.pixelSize: 36
+                            }
+                        }
+
+                        Rectangle {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
+                            height: 26
+                            color: "#99000000"
+
+                            Text {
+                                anchors.left: parent.left
+                                anchors.leftMargin: 9
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "NOW PLAYING"
+                                color: theme.text
+                                font.pixelSize: 10
+                                font.bold: true
+                            }
                         }
                     }
                 }
 
                 Column {
-                    width: parent.width - 152
+                    width: parent.width - 166
                     anchors.verticalCenter: parent.verticalCenter
-                    spacing: 10
+                    spacing: 9
 
                     Text {
                         width: parent.width
@@ -266,6 +802,16 @@ Item {
                         font.bold: true
                     }
 
+                    Text {
+                        width: parent.width
+                        visible: mediaPopup.player && mediaPopup.player.identity !== ""
+                        text: mediaPopup.player ? mediaPopup.player.identity : ""
+                        color: theme.green
+                        elide: Text.ElideRight
+                        font.pixelSize: root.appearance.textSize - 2
+                        font.bold: true
+                    }
+
                     Column {
                         width: parent.width
                         visible: !!mediaPopup.player && mediaPopup.player.lengthSupported
@@ -273,14 +819,14 @@ Item {
 
                         Rectangle {
                             width: parent.width
-                            height: 4
-                            radius: 2
+                            height: 6
+                            radius: 3
                             color: theme.backgroundSecondary
 
                             Rectangle {
                                 width: parent.width * Math.min(1, Math.max(0,
                                     mediaPopup.player && mediaPopup.player.length > 0
-                                    ? mediaPopup.player.position / mediaPopup.player.length : 0))
+                                    ? root.mediaPosition / mediaPopup.player.length : 0))
                                 height: parent.height
                                 radius: parent.radius
                                 color: theme.green
@@ -293,7 +839,7 @@ Item {
                             Text {
                                 id: currentTime
 
-                                text: root.formatDuration(mediaPopup.player ? mediaPopup.player.position : 0)
+                                text: root.formatDuration(root.mediaPosition)
                                 color: theme.textMuted
                                 font.pixelSize: root.appearance.textSize - 2
                                 font.bold: true
@@ -316,13 +862,13 @@ Item {
                     }
 
                     Row {
-                        width: parent.width
-                        spacing: 10
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 8
 
                         Rectangle {
-                            width: 34
-                            height: 34
-                            radius: 17
+                            width: 28
+                            height: 28
+                            radius: 14
                             color: previousHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
 
                             Behavior on color {
@@ -337,7 +883,7 @@ Item {
                                 anchors.centerIn: parent
                                 text: "󰒮"
                                 color: theme.text
-                                font.pixelSize: 18
+                                font.pixelSize: 16
                             }
 
                             TapHandler {
@@ -347,9 +893,9 @@ Item {
                         }
 
                         Rectangle {
-                            width: 42
-                            height: 42
-                            radius: 21
+                            width: 36
+                            height: 36
+                            radius: 18
                             color: playHover.hovered ? theme.accentHover : theme.green
 
                             Behavior on color {
@@ -364,7 +910,7 @@ Item {
                                 anchors.centerIn: parent
                                 text: mediaPopup.player && mediaPopup.player.isPlaying ? "󰏤" : "󰐊"
                                 color: theme.background
-                                font.pixelSize: 22
+                                font.pixelSize: 19
                             }
 
                             TapHandler {
@@ -374,9 +920,9 @@ Item {
                         }
 
                         Rectangle {
-                            width: 34
-                            height: 34
-                            radius: 17
+                            width: 28
+                            height: 28
+                            radius: 14
                             color: nextHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
 
                             Behavior on color {
@@ -391,7 +937,7 @@ Item {
                                 anchors.centerIn: parent
                                 text: "󰒭"
                                 color: theme.text
-                                font.pixelSize: 18
+                                font.pixelSize: 16
                             }
 
                             TapHandler {

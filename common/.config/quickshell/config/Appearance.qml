@@ -14,6 +14,8 @@ QtObject {
     property alias workspacePadding: settings.workspacePadding
     property alias pillsTransparent: settings.pillsTransparent
     property alias transparentBarTopMargin: settings.transparentBarTopMargin
+    property alias transparentBarSlanted: settings.transparentBarSlanted
+    property alias notificationPopupLocation: settings.notificationPopupLocation
     property alias barTransparent: settings.barTransparent
 
     property var settingsFile: FileView {
@@ -46,6 +48,8 @@ QtObject {
             property int workspacePadding: 4
             property bool pillsTransparent: false
             property int transparentBarTopMargin: 0
+            property bool transparentBarSlanted: false
+            property string notificationPopupLocation: "top-center"
             property bool barTransparent: false
         }
     }
