@@ -7,6 +7,7 @@ Item {
 
     required property var appearance
     property bool configOpen: false
+    property string activeStatusPopup: ""
     required property var monitorScreen
     required property var monitors
     required property var workspaceService
@@ -33,6 +34,7 @@ Item {
         anchors.leftMargin: root.appearance.spacing
         anchors.verticalCenter: parent.verticalCenter
         appearance: root.appearance
+        monitorScreen: root.monitorScreen
     }
 
     Workspaces {
@@ -48,6 +50,7 @@ Item {
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         appearance: root.appearance
+        activePopup: root.activeStatusPopup
 
         onPopupRequested: function(popup) {
             root.statusPopupRequested(popup);

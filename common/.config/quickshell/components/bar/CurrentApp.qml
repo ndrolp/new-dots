@@ -7,8 +7,10 @@ Row {
     id: root
 
     required property var appearance
+    required property var monitorScreen
 
     readonly property var rawActiveToplevel: Hyprland.activeToplevel
+    readonly property var monitor: Hyprland.monitorFor(monitorScreen)
     readonly property var activeToplevel: rawActiveToplevel
         && rawActiveToplevel.workspace
         && Hyprland.focusedWorkspace
@@ -16,16 +18,71 @@ Row {
         ? rawActiveToplevel : null
     readonly property string appId: activeToplevel && activeToplevel.wayland
         ? activeToplevel.wayland.appId : ""
-    readonly property string label: appId !== "" ? appId
-        : activeToplevel ? activeToplevel.title : "Desktop"
-    readonly property string iconSource: appId !== ""
-        ? Quickshell.iconPath(appId, true) : ""
+    readonly property bool terminal: isTerminal(appId)
+    readonly property string windowTitle: activeToplevel ? activeToplevel.title.trim() : ""
+    readonly property string label: appId !== ""
+        ? appId + (windowTitle !== "" && windowTitle.toLowerCase() !== appId.toLowerCase()
+            ? ": " + windowTitle : "")
+        : windowTitle !== "" ? windowTitle : "Desktop"
+    readonly property string iconName: terminal ? terminalIconName(windowTitle) : appId
+    readonly property string iconSource: iconName !== ""
+        ? Quickshell.iconPath(iconName, true) : ""
+    readonly property string terminalGlyph: terminal ? terminalIconGlyph(windowTitle) : ""
 
     spacing: appearance.spacing
-    visible: label !== ""
+    visible: label !== "" && monitor !== null && Hyprland.focusedWorkspace
+        && Hyprland.focusedWorkspace.monitor !== null
+        && Hyprland.focusedWorkspace.monitor.name === monitor.name
 
     Config.Theme {
         id: theme
+    }
+
+    function isTerminal(id) {
+        const terminalIds = [
+            "kitty", "foot", "alacritty", "wezterm", "org.wezfurlong.wezterm",
+            "com.mitchellh.ghostty", "gnome-terminal-server", "konsole", "xterm"
+        ];
+
+        return terminalIds.indexOf(id.toLowerCase()) !== -1;
+    }
+
+    function terminalIconName(title) {
+        const command = title.toLowerCase();
+
+        if (command.includes("github copilot") || command.includes("lazygit"))
+            return "github-desktop";
+        if (command.includes("neovim") || command.includes("nvim") || command.includes("vim"))
+            return "nvim";
+        if (command.includes("btop") || command.includes("bashtop"))
+            return "btop";
+        if (command.includes("htop"))
+            return "utilities-system-monitor";
+        if (command.includes("yazi") || command.includes("ranger") || command.includes("lf"))
+            return "system-file-manager";
+        if (command.includes("docker"))
+            return "docker";
+        if (command.includes("ssh"))
+            return "network-server";
+        return "utilities-terminal";
+    }
+
+    function terminalIconGlyph(title) {
+        const command = title.toLowerCase();
+
+        if (command.includes("github copilot") || command.includes("lazygit"))
+            return "󰊤";
+        if (command.includes("neovim") || command.includes("nvim") || command.includes("vim"))
+            return "";
+        if (command.includes("btop") || command.includes("bashtop") || command.includes("htop"))
+            return "󰊚";
+        if (command.includes("yazi") || command.includes("ranger") || command.includes("lf"))
+            return "󰉋";
+        if (command.includes("docker"))
+            return "󰡨";
+        if (command.includes("ssh"))
+            return "󰒋";
+        return "󰆍";
     }
 
     Behavior on width {
@@ -55,16 +112,18 @@ Row {
             id: appContent
 
             anchors.centerIn: parent
-            spacing: root.appearance.spacing
+            spacing: icon.displayedIconSource === ""
+                ? root.appearance.spacing + 2 : root.appearance.spacing
 
             Item {
                 id: icon
 
                 property string displayedIconSource: root.iconSource
+                property string displayedTerminalGlyph: root.terminalGlyph
 
                 visible: root.activeToplevel !== null
                 width: visible ? root.appearance.workspaceButtonSize - 8 : 0
-                height: appName.implicitHeight
+                height: Math.max(appName.implicitHeight, width)
 
                 transform: Translate {
                     id: iconTranslation
@@ -76,17 +135,19 @@ Row {
                     height: icon.width
                     source: icon.displayedIconSource
                     fillMode: Image.PreserveAspectFit
-                    visible: icon.displayedIconSource !== ""
+                    visible: icon.displayedIconSource !== "" && icon.displayedTerminalGlyph === ""
                 }
 
                 Text {
                     anchors.fill: parent
-                    visible: icon.displayedIconSource === ""
+                    visible: icon.displayedTerminalGlyph !== ""
+                        || icon.displayedIconSource === ""
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
-                    text: "󰣆"
-                    color: theme.green
-                    font.pixelSize: appearance.textSize + 1
+                    text: icon.displayedTerminalGlyph !== ""
+                        ? icon.displayedTerminalGlyph : "󰣆"
+                    color: icon.displayedTerminalGlyph !== "" ? theme.blue : theme.text
+                    font.pixelSize: appearance.textSize
                     font.bold: true
                 }
             }
@@ -97,8 +158,10 @@ Row {
                 property string displayedLabel: root.label
 
                 anchors.verticalCenter: parent.verticalCenter
+                width: Math.min(320, implicitWidth)
                 text: displayedLabel
                 color: theme.text
+                elide: Text.ElideRight
                 font.pixelSize: appearance.textSize
                 font.bold: true
 
@@ -132,6 +195,7 @@ Row {
             script: {
                 appName.displayedLabel = root.label;
                 icon.displayedIconSource = root.iconSource;
+                icon.displayedTerminalGlyph = root.terminalGlyph;
                 labelTranslation.x = 12;
                 iconTranslation.x = 12;
             }

@@ -48,6 +48,13 @@ ln -sf "$THEME_FOLDER/waybar/colors.css" "$WAYBAR_COLORS"
 echo "LINKING HYPR COLORS"
 ln -sf "$THEME_FOLDER/hypr/colors.conf" "$HYPRLAND_COLORS"
 
+echo "LINKING QUICKSHELL"
+ln -sf "$THEME_FOLDER/quickshell/Theme.qml" "$HOME/.config/quickshell/config/Theme.qml"
+killall qs
+sleep 0.3
+
+qs & disown
+
 cat "$THEME_FOLDER/hypr/colors.conf"
 
 kitten themes --reload-in=all "$CAPITALIZED_THEME"
@@ -110,3 +117,4 @@ generate_thumbs "$WALLPAPERS_FOLDER/Vertical" "$THUMBS_BASE/Vertical"
 echo "Thumbnails created in $THUMBS_BASE"
 
 exec "$HOME/.dotfiles/scripts/hyprland/wallpaper.sh"
+

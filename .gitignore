@@ -1,4 +1,5 @@
 common/.config/Code/Cache*
+common/.config/Code/agent*
 common/.config/Code/Code Cache*
 common/.config/Code/Dawn*
 common/.config/Code/GPU*

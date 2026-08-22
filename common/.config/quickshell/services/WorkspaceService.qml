@@ -11,13 +11,27 @@ QtObject {
 
     function workspacesForScreen(screen, configuredWorkspaces) {
         const monitor = Hyprland.monitorFor(screen);
-        const workspaceIds = configuredWorkspaces.slice();
+        const workspaceIds = configuredWorkspaces.filter(id => id >= 1 && id <= 21);
         const workspaces = Hyprland.workspaces.values;
 
         for (let index = 0; index < workspaces.length; index++) {
             const workspace = workspaces[index];
 
-            if (workspace.active && monitor !== null && workspace.monitor !== null
+            if (workspace.id >= 1 && workspace.id <= 21
+                    && workspace.active && monitor !== null && workspace.monitor !== null
+                    && workspace.monitor.name === monitor.name
+                    && workspaceIds.indexOf(workspace.id) === -1) {
+                workspaceIds.push(workspace.id);
+            }
+        }
+
+        const toplevels = Hyprland.toplevels.values;
+
+        for (let index = 0; index < toplevels.length; index++) {
+            const workspace = toplevels[index].workspace;
+
+            if (workspace !== null && workspace.id >= 1 && workspace.id <= 21
+                    && monitor !== null && workspace.monitor !== null
                     && workspace.monitor.name === monitor.name
                     && workspaceIds.indexOf(workspace.id) === -1) {
                 workspaceIds.push(workspace.id);

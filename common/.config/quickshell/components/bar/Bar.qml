@@ -18,6 +18,7 @@ Variants {
     signal panelReady(var screen, var panelWindow)
     signal statusPopupRequested(string popup, var panelWindow)
     signal statusPopupClosed(string popup, var panelWindow)
+    signal audioSinkSelected(var sink)
 
     model: Quickshell.screens
 
@@ -86,6 +87,7 @@ Variants {
                         ? panel.appearance.transparentBarTopMargin : 0
                     appearance: panel.appearance
                     configOpen: panel.configOpen
+                    activeStatusPopup: panel.activeStatusPopup
                     monitorScreen: panel.screen
                     monitors: panel.monitors
                     workspaceService: panel.workspaceService
@@ -107,6 +109,10 @@ Variants {
 
                 onPopupClosed: function(popup) {
                     bar.statusPopupClosed(popup, panel);
+                }
+
+                onAudioSinkSelected: function(sink) {
+                    bar.audioSinkSelected(sink);
                 }
             }
 

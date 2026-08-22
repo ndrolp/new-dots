@@ -48,6 +48,12 @@ ShellRoot {
         notificationServer: notificationServer
     }
 
+    Panels.OsdPopup {
+        id: osdPopup
+
+        appearance: appearance
+    }
+
     Panels.ConfigPanelWindow {
         appearance: appearance
         monitors: monitors
@@ -66,6 +72,18 @@ ShellRoot {
 
             if (shell.configScreen === null)
                 shell.configScreen = Quickshell.screens.values[0];
+        }
+    }
+
+    IpcHandler {
+        target: "osd"
+
+        function volume() {
+            osdPopup.showVolume();
+        }
+
+        function brightness() {
+            osdPopup.showBrightness();
         }
     }
 
@@ -109,6 +127,10 @@ ShellRoot {
                 shell.statusPopup = "";
                 shell.statusPopupWindow = null;
             }
+        }
+
+        onAudioSinkSelected: function(sink) {
+            osdPopup.showAudioSink(sink);
         }
     }
 }

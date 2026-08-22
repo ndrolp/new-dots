@@ -2,14 +2,14 @@
     "activeWorkspaceHorizontalPadding": 6,
     "archButtonHorizontalPadding": 6,
     "barHeight": 32,
-    "barTransparent": false,
-    "horizontalPadding": 11,
-    "pillVerticalPadding": 2,
+    "barTransparent": true,
+    "horizontalPadding": 10,
+    "pillVerticalPadding": 4,
     "pillsTransparent": false,
     "radius": 2,
     "spacing": 5,
     "textSize": 14,
-    "transparentBarTopMargin": 5,
+    "transparentBarTopMargin": 7,
     "workspaceButtonSize": 20,
     "workspacePadding": 6
 }

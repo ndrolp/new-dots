@@ -1,7 +1,9 @@
 import Quickshell
+import Quickshell.Bluetooth
 import Quickshell.Networking
 import Quickshell.Services.Mpris
 import Quickshell.Services.Pipewire
+import Quickshell.Services.SystemTray
 import Quickshell.Services.UPower
 import QtQuick
 import "../../config" as Config
@@ -10,6 +12,7 @@ Row {
     id: root
 
     required property var appearance
+    property string activePopup: ""
     signal popupRequested(string popup)
 
     readonly property var audio: Pipewire.defaultAudioSink && Pipewire.defaultAudioSink.audio
@@ -18,6 +21,7 @@ Row {
         ? Pipewire.defaultAudioSink.audio.volume : 0
     readonly property var battery: UPower.displayDevice
     readonly property bool hasBattery: battery && battery.isPresent
+    readonly property var bluetoothAdapter: Bluetooth.defaultAdapter
     property var player: null
     readonly property string playerLabel: player
         ? (player.trackTitle !== "" ? player.trackTitle : player.identity) : ""
@@ -72,6 +76,21 @@ Row {
         return "󰤭";
     }
 
+    function batteryIcon() {
+        if (!battery)
+            return "󰂑";
+        if (battery.state === UPowerDeviceState.Charging
+                || battery.state === UPowerDeviceState.PendingCharge)
+            return "󰂄";
+        if (battery.percentage <= 0.15)
+            return "󰂃";
+        if (battery.percentage <= 0.4)
+            return "󰁻";
+        if (battery.percentage <= 0.7)
+            return "󰁾";
+        return "󰁹";
+    }
+
     Rectangle {
         visible: root.player !== null
         width: mediaContent.implicitWidth + 16
@@ -114,8 +133,10 @@ Row {
                 property string displayedLabel: root.displayedPlayerLabel
 
                 anchors.verticalCenter: parent.verticalCenter
+                width: Math.min(260, implicitWidth)
                 text: displayedLabel
                 color: theme.green
+                elide: Text.ElideRight
                 font.pixelSize: root.appearance.textSize
                 font.bold: true
 
@@ -210,6 +231,62 @@ Row {
         width: root.appearance.workspaceButtonSize
         height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
+        color: bluetoothHover.hovered ? theme.surfaceHover : root.appearance.pillsTransparent ? "transparent" : theme.surface
+
+        Behavior on color {
+            ColorAnimation { duration: 140 }
+        }
+
+        HoverHandler {
+            id: bluetoothHover
+        }
+
+        Text {
+            anchors.centerIn: parent
+            text: root.bluetoothAdapter && root.bluetoothAdapter.enabled ? "󰂯" : "󰂲"
+            color: theme.blue
+            font.pixelSize: root.appearance.textSize
+            font.bold: true
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: root.popupRequested("bluetooth")
+        }
+    }
+
+    Rectangle {
+        width: root.appearance.workspaceButtonSize
+        height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
+        radius: root.appearance.radius
+        color: trayHover.hovered ? theme.surfaceHover : root.appearance.pillsTransparent ? "transparent" : theme.surface
+
+        Behavior on color {
+            ColorAnimation { duration: 140 }
+        }
+
+        HoverHandler {
+            id: trayHover
+        }
+
+        Text {
+            anchors.centerIn: parent
+            text: root.activePopup === "tray" ? "󰄝" : "󰄠"
+            color: theme.green
+            font.pixelSize: root.appearance.textSize
+            font.bold: true
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: root.popupRequested("tray")
+        }
+    }
+
+    Rectangle {
+        width: root.appearance.workspaceButtonSize
+        height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
+        radius: root.appearance.radius
         color: networkHover.hovered ? theme.surfaceHover : root.appearance.pillsTransparent ? "transparent" : theme.surface
 
         Behavior on color {
@@ -257,8 +334,7 @@ Row {
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: root.battery && root.battery.state === UPowerDeviceState.Charging
-                    ? "󰂄" : "󰁹"
+                text: root.batteryIcon()
                 color: theme.yellow
                 font.pixelSize: root.appearance.textSize
                 font.bold: true
@@ -271,6 +347,11 @@ Row {
                 font.pixelSize: root.appearance.textSize
                 font.bold: true
             }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: root.popupRequested("battery")
         }
     }
 

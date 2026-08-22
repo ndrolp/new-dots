@@ -1,7 +1,10 @@
 import Quickshell
+import Quickshell.Bluetooth
 import Quickshell.Networking
 import Quickshell.Services.Mpris
 import Quickshell.Services.Pipewire
+import Quickshell.Services.SystemTray
+import Quickshell.Services.UPower
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
@@ -16,6 +19,7 @@ Item {
     property var player: null
     property var passwordNetwork: null
     signal popupClosed(string popup)
+    signal audioSinkSelected(var sink)
 
     Config.Theme {
         id: theme
@@ -110,6 +114,39 @@ Item {
         }
 
         return "";
+    }
+
+    function bluetoothDeviceName(device) {
+        return device.deviceName || device.name || device.address;
+    }
+
+    function batteryIcon(battery) {
+        if (!battery)
+            return "󰂑";
+        if (battery.state === UPowerDeviceState.Charging
+                || battery.state === UPowerDeviceState.PendingCharge)
+            return "󰂄";
+        if (battery.percentage <= 0.15)
+            return "󰂃";
+        if (battery.percentage <= 0.4)
+            return "󰁻";
+        if (battery.percentage <= 0.7)
+            return "󰁾";
+        return "󰁹";
+    }
+
+    function batteryStateLabel(battery) {
+        if (!battery)
+            return "Battery unavailable";
+        if (battery.state === UPowerDeviceState.Charging)
+            return "Charging";
+        if (battery.state === UPowerDeviceState.FullyCharged)
+            return "Fully charged";
+        if (battery.state === UPowerDeviceState.PendingCharge)
+            return "Waiting to charge";
+        if (battery.state === UPowerDeviceState.PendingDischarge)
+            return "Waiting to discharge";
+        return "Discharging";
     }
 
     component PopupCard: Rectangle {
@@ -379,9 +416,10 @@ Item {
         }
         visible: reveal > 0
         anchor.window: root.barWindow
-        anchor.rect.x: Math.max(root.appearance.horizontalPadding, root.barWindow.width - 380)
+        anchor.rect.x: Math.max(root.appearance.horizontalPadding,
+            root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
         anchor.rect.y: root.appearance.barHeight + root.appearance.spacing
-        implicitWidth: 364
+        implicitWidth: 500
         implicitHeight: sinkList.implicitHeight + 64
         color: "transparent"
 
@@ -513,7 +551,692 @@ Item {
                         TapHandler {
                             onTapped: {
                                 Pipewire.preferredDefaultAudioSink = modelData;
+                                root.audioSinkSelected(modelData);
                                 root.popupClosed("audio");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    PopupWindow {
+        id: trayPopup
+
+        property real reveal: root.activePopup === "tray" ? 1 : 0
+        property var selectedTrayItem: null
+        property var menuStack: []
+        readonly property int visibleItemCount: SystemTray.items.values.length
+            + (selectedTrayItem !== null
+                ? trayMenu.children.values.length + (menuStack.length > 0 ? 1 : 0) : 0)
+
+        function returnToParentMenu() {
+            const parentStack = menuStack.slice(0, -1);
+
+            menuStack = parentStack;
+            trayMenu.menu = parentStack.length > 0
+                ? parentStack[parentStack.length - 1] : selectedTrayItem.menu;
+        }
+
+        function triggerMenuEntry(entry) {
+            entry.triggered();
+            trayActionClose.restart();
+        }
+
+        onVisibleChanged: {
+            if (!visible && root.activePopup === "tray") {
+                selectedTrayItem = null;
+                menuStack = [];
+                root.popupClosed("tray");
+            }
+        }
+        visible: reveal > 0
+        anchor.window: root.barWindow
+        anchor.rect.x: Math.max(root.appearance.horizontalPadding, root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
+        anchor.rect.y: root.appearance.barHeight + root.appearance.spacing
+        implicitWidth: 220
+        implicitHeight: Math.max(88, Math.min(328,
+            visibleItemCount * 44 + 48))
+        color: "transparent"
+
+        QsMenuOpener {
+            id: trayMenu
+        }
+
+        Timer {
+            id: trayActionClose
+
+            interval: 100
+            onTriggered: root.popupClosed("tray")
+        }
+
+        Behavior on reveal {
+            NumberAnimation {
+                duration: 180
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: 12
+            anchors.topMargin: 12 - 12 * (1 - trayPopup.reveal)
+            radius: root.appearance.radius
+            color: theme.surface
+            opacity: trayPopup.reveal
+
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: "#73000000"
+                shadowBlur: 0.65
+                shadowVerticalOffset: 6
+            }
+
+            Column {
+                id: trayList
+
+                anchors.fill: parent
+                anchors.margins: 12
+                spacing: 2
+
+                move: Transition {
+                    NumberAnimation {
+                        properties: "y"
+                        duration: 180
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                Text {
+                    visible: SystemTray.items.values.length === 0
+                    text: "No tray items"
+                    color: theme.textMuted
+                    font.pixelSize: root.appearance.textSize - 1
+                    font.bold: true
+                }
+
+                Repeater {
+                    model: SystemTray.items
+
+                    delegate: Column {
+                        required property var modelData
+
+                        readonly property bool expanded: trayPopup.selectedTrayItem === modelData
+
+                        width: trayList.width
+                        height: trayItemRow.height + (expanded
+                            ? inlineMenu.implicitHeight + spacing : 0)
+                        spacing: 0
+
+                        Behavior on height {
+                            NumberAnimation {
+                                duration: 200
+                                easing.type: Easing.OutCubic
+                            }
+                        }
+
+                        Rectangle {
+                            id: trayItemRow
+
+                            width: parent.width
+                            height: 42
+                            radius: root.appearance.radius
+                            color: trayItemHover.hovered ? theme.surfaceHover
+                                : trayPopup.selectedTrayItem === modelData ? theme.backgroundSecondary : "transparent"
+
+                            Behavior on color {
+                                ColorAnimation { duration: 140 }
+                            }
+
+                            HoverHandler {
+                                id: trayItemHover
+                            }
+
+                            Image {
+                                id: trayIcon
+
+                                anchors.left: parent.left
+                                anchors.leftMargin: 10
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 20
+                                height: 20
+                                source: modelData.icon
+                                fillMode: Image.PreserveAspectFit
+                                visible: status === Image.Ready
+                            }
+
+                            Text {
+                                anchors.left: parent.left
+                                anchors.leftMargin: 10
+                                anchors.verticalCenter: parent.verticalCenter
+                                visible: !trayIcon.visible
+                                text: "󰍜"
+                                color: theme.textMuted
+                                font.pixelSize: root.appearance.textSize
+                                font.bold: true
+                            }
+
+                            Text {
+                                anchors.left: parent.left
+                                anchors.leftMargin: 42
+                                anchors.right: parent.right
+                                anchors.rightMargin: 10
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: modelData.tooltipTitle || modelData.title || modelData.id
+                                color: theme.text
+                                elide: Text.ElideRight
+                                font.pixelSize: root.appearance.textSize - 1
+                                font.bold: true
+                            }
+
+                            TapHandler {
+                                onTapped: {
+                                    if (modelData.hasMenu) {
+                                        if (trayPopup.selectedTrayItem === modelData) {
+                                            trayMenu.menu = null;
+                                            trayPopup.selectedTrayItem = null;
+                                            trayPopup.menuStack = [];
+                                        } else {
+                                            trayPopup.selectedTrayItem = modelData;
+                                            trayPopup.menuStack = [];
+                                            trayMenu.menu = modelData.menu;
+                                            modelData.opened();
+                                        }
+                                    } else {
+                                        modelData.activate();
+                                        root.popupClosed("tray");
+                                    }
+                                }
+                            }
+                        }
+
+                        Column {
+                            id: inlineMenu
+
+                            width: parent.width
+                            height: implicitHeight * (parent.expanded ? 1 : 0)
+                            spacing: 0
+                            opacity: parent.expanded ? 1 : 0
+                            clip: true
+                            visible: height > 0
+
+                            Behavior on height {
+                                NumberAnimation {
+                                    duration: 200
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
+
+                            Behavior on opacity {
+                                NumberAnimation {
+                                    duration: 140
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
+
+                            Rectangle {
+                                visible: trayPopup.menuStack.length > 0
+                                width: parent.width
+                                height: 32
+                                radius: root.appearance.radius
+                                color: trayMenuBackHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+
+                                HoverHandler {
+                                    id: trayMenuBackHover
+                                }
+
+                                Text {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 12
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "󰅁  Back"
+                                    color: theme.textMuted
+                                    font.pixelSize: root.appearance.textSize - 1
+                                    font.bold: true
+                                }
+
+                                TapHandler {
+                                    onTapped: trayPopup.returnToParentMenu()
+                                }
+                            }
+
+                            Repeater {
+                                model: trayMenu.children
+
+                                delegate: Rectangle {
+                                    required property var modelData
+
+                                    width: inlineMenu.width
+                                    height: modelData.isSeparator ? 9 : 40
+                                    radius: root.appearance.radius
+                                    color: !modelData.isSeparator && trayMenuItemHover.hovered
+                                        ? theme.surfaceHover : theme.backgroundSecondary
+
+                                    HoverHandler {
+                                        id: trayMenuItemHover
+                                        enabled: !modelData.isSeparator && modelData.enabled
+                                    }
+
+                                    Rectangle {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: parent.width - 20
+                                        height: 1
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        visible: modelData.isSeparator
+                                        color: theme.border
+                                    }
+
+                                    Text {
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 12
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: 12
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        visible: !modelData.isSeparator
+                                        text: modelData.text + (modelData.hasChildren ? "  ›" : "")
+                                        color: modelData.enabled ? theme.text : theme.textDisabled
+                                        elide: Text.ElideRight
+                                        font.pixelSize: root.appearance.textSize - 1
+                                        font.bold: true
+                                    }
+
+                                    TapHandler {
+                                        enabled: !modelData.isSeparator && modelData.enabled
+                                        onTapped: {
+                                            if (modelData.hasChildren) {
+                                                modelData.opened();
+                                                trayPopup.menuStack = trayPopup.menuStack.concat([modelData]);
+                                                trayMenu.menu = modelData;
+                                            } else {
+                                                trayPopup.triggerMenuEntry(modelData);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    PopupWindow {
+        id: batteryPopup
+
+        readonly property var battery: UPower.displayDevice
+        property real reveal: root.activePopup === "battery" ? 1 : 0
+
+        onVisibleChanged: {
+            if (!visible && root.activePopup === "battery")
+                root.popupClosed("battery");
+        }
+        visible: reveal > 0
+        anchor.window: root.barWindow
+        anchor.rect.x: Math.max(root.appearance.horizontalPadding,
+            root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
+        anchor.rect.y: root.appearance.barHeight + root.appearance.spacing
+        implicitWidth: 300
+        implicitHeight: 216
+        color: "transparent"
+
+        Behavior on reveal {
+            NumberAnimation {
+                duration: 180
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: 12
+            anchors.topMargin: 12 - 12 * (1 - batteryPopup.reveal)
+            radius: root.appearance.radius
+            color: theme.surface
+            opacity: batteryPopup.reveal
+
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: "#73000000"
+                shadowBlur: 0.65
+                shadowVerticalOffset: 6
+            }
+
+            Column {
+                anchors.fill: parent
+                anchors.margins: 18
+                spacing: 14
+
+                Row {
+                    width: parent.width
+                    spacing: 12
+
+                    Rectangle {
+                        width: 48
+                        height: 48
+                        radius: 24
+                        color: batteryPopup.battery
+                            && batteryPopup.battery.state === UPowerDeviceState.Charging
+                            ? theme.yellow : theme.backgroundSecondary
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: root.batteryIcon(batteryPopup.battery)
+                            color: batteryPopup.battery
+                                && batteryPopup.battery.state === UPowerDeviceState.Charging
+                                ? theme.background : theme.yellow
+                            font.pixelSize: 25
+                            font.bold: true
+                        }
+                    }
+
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 2
+
+                        Text {
+                            text: root.batteryStateLabel(batteryPopup.battery)
+                            color: theme.text
+                            font.pixelSize: root.appearance.textSize + 3
+                            font.bold: true
+                        }
+
+                        Text {
+                            text: batteryPopup.battery
+                                ? Math.round(batteryPopup.battery.percentage * 100) + "%"
+                                : "No battery detected"
+                            color: theme.textMuted
+                            font.pixelSize: root.appearance.textSize - 1
+                            font.bold: true
+                        }
+                    }
+                }
+
+                Rectangle {
+                    width: parent.width
+                    height: 8
+                    radius: 4
+                    color: theme.backgroundSecondary
+
+                    Rectangle {
+                        width: parent.width * (batteryPopup.battery
+                            ? Math.max(0, Math.min(1, batteryPopup.battery.percentage)) : 0)
+                        height: parent.height
+                        radius: parent.radius
+                        color: batteryPopup.battery
+                            && batteryPopup.battery.state === UPowerDeviceState.Charging
+                            ? theme.yellow : theme.green
+                    }
+                }
+
+                Rectangle {
+                    width: parent.width
+                    height: 1
+                    color: theme.border
+                }
+
+                Row {
+                    width: parent.width
+
+                    Column {
+                        width: parent.width / 2
+                        spacing: 3
+
+                        Text {
+                            text: "BATTERY HEALTH"
+                            color: theme.textMuted
+                            font.pixelSize: 10
+                            font.bold: true
+                        }
+
+                        Text {
+                            text: batteryPopup.battery && batteryPopup.battery.healthSupported
+                                ? Math.round(batteryPopup.battery.healthPercentage * 100) + "%"
+                                : "Unavailable"
+                            color: theme.text
+                            font.pixelSize: root.appearance.textSize + 1
+                            font.bold: true
+                        }
+                    }
+
+                    Column {
+                        width: parent.width / 2
+                        spacing: 3
+
+                        Text {
+                            text: "POWER DRAW"
+                            color: theme.textMuted
+                            font.pixelSize: 10
+                            font.bold: true
+                        }
+
+                        Text {
+                            text: batteryPopup.battery
+                                ? Math.abs(batteryPopup.battery.changeRate).toFixed(1) + " W"
+                                : "Unavailable"
+                            color: theme.text
+                            font.pixelSize: root.appearance.textSize + 1
+                            font.bold: true
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    PopupWindow {
+        id: bluetoothPopup
+
+        readonly property var adapter: Bluetooth.defaultAdapter
+        property real reveal: root.activePopup === "bluetooth" ? 1 : 0
+
+        onVisibleChanged: {
+            if (!visible && root.activePopup === "bluetooth")
+                root.popupClosed("bluetooth");
+        }
+        visible: reveal > 0
+        anchor.window: root.barWindow
+        anchor.rect.x: Math.max(root.appearance.horizontalPadding,
+            root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
+        anchor.rect.y: root.appearance.barHeight + root.appearance.spacing
+        implicitWidth: 400
+        implicitHeight: Math.max(132, bluetoothList.implicitHeight + 64)
+        color: "transparent"
+
+        onRevealChanged: {
+            if (reveal > 0 && adapter && adapter.enabled)
+                adapter.discovering = true;
+        }
+
+        Behavior on reveal {
+            NumberAnimation {
+                duration: 180
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: 12
+            anchors.topMargin: 12 - 12 * (1 - bluetoothPopup.reveal)
+            radius: root.appearance.radius
+            color: theme.surface
+            opacity: bluetoothPopup.reveal
+
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: "#73000000"
+                shadowBlur: 0.65
+                shadowVerticalOffset: 6
+            }
+
+            Column {
+                id: bluetoothList
+
+                anchors.fill: parent
+                anchors.margins: 16
+                spacing: 10
+
+                Row {
+                    width: parent.width
+                    spacing: 10
+
+                    Rectangle {
+                        width: 38
+                        height: 38
+                        radius: 19
+                        color: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled
+                            ? theme.blue : theme.backgroundSecondary
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "󰂯"
+                            color: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled
+                                ? theme.background : theme.textMuted
+                            font.pixelSize: 20
+                            font.bold: true
+                        }
+                    }
+
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 1
+
+                        Text {
+                            text: "Bluetooth"
+                            color: theme.text
+                            font.pixelSize: root.appearance.textSize + 2
+                            font.bold: true
+                        }
+
+                        Text {
+                            text: !bluetoothPopup.adapter ? "No adapter found"
+                                : !bluetoothPopup.adapter.enabled ? "Bluetooth is off"
+                                : bluetoothPopup.adapter.discovering ? "Scanning for devices"
+                                : "Choose a device"
+                            color: theme.textMuted
+                            font.pixelSize: root.appearance.textSize - 2
+                            font.bold: true
+                        }
+                    }
+
+                    Item {
+                        width: Math.max(0, parent.width - 38 - parent.children[1].implicitWidth
+                            - bluetoothToggle.width - (parent.spacing * 3))
+                        height: 1
+                    }
+
+                    Rectangle {
+                        id: bluetoothToggle
+
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 48
+                        height: 28
+                        radius: root.appearance.radius
+                        color: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled
+                            ? theme.blue : theme.backgroundSecondary
+
+                        Rectangle {
+                            x: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled
+                                ? parent.width - width - 3 : 3
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 22
+                            height: 22
+                            radius: 11
+                            color: theme.text
+
+                            Behavior on x {
+                                NumberAnimation {
+                                    duration: 160
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
+                        }
+
+                        TapHandler {
+                            enabled: bluetoothPopup.adapter !== null
+                            onTapped: bluetoothPopup.adapter.enabled = !bluetoothPopup.adapter.enabled
+                        }
+                    }
+                }
+
+                Text {
+                    visible: bluetoothPopup.adapter !== null
+                        && bluetoothPopup.adapter.enabled
+                        && bluetoothPopup.adapter.devices.values.length === 0
+                    text: "No devices found yet"
+                    color: theme.textMuted
+                    font.pixelSize: root.appearance.textSize - 1
+                    font.bold: true
+                }
+
+                Repeater {
+                    model: bluetoothPopup.adapter ? bluetoothPopup.adapter.devices : []
+
+                    delegate: Rectangle {
+                        required property var modelData
+
+                        width: parent.width
+                        height: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled ? 52 : 0
+                        visible: height > 0
+                        radius: root.appearance.radius
+                        color: modelData.connected || bluetoothDeviceHover.hovered
+                            ? theme.surfaceHover : theme.backgroundSecondary
+
+                        Behavior on color {
+                            ColorAnimation { duration: 140 }
+                        }
+
+                        HoverHandler {
+                            id: bluetoothDeviceHover
+                        }
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 12
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "󰂯"
+                            color: modelData.connected ? theme.blue : theme.textMuted
+                            font.pixelSize: 19
+                            font.bold: true
+                        }
+
+                        Text {
+                            anchors.fill: parent
+                            anchors.leftMargin: 44
+                            anchors.rightMargin: 86
+                            verticalAlignment: Text.AlignVCenter
+                            text: root.bluetoothDeviceName(modelData)
+                            color: modelData.connected ? theme.blue : theme.text
+                            elide: Text.ElideRight
+                            font.pixelSize: root.appearance.textSize
+                            font.bold: true
+                        }
+
+                        Text {
+                            anchors.right: parent.right
+                            anchors.rightMargin: 12
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: modelData.connected ? "Connected"
+                                : modelData.pairing ? "Pairing"
+                                : modelData.paired ? "Connect" : "Pair"
+                            color: modelData.connected ? theme.blue : theme.textMuted
+                            font.pixelSize: root.appearance.textSize - 2
+                            font.bold: true
+                        }
+
+                        TapHandler {
+                            onTapped: {
+                                if (modelData.connected)
+                                    modelData.disconnect();
+                                else if (modelData.paired)
+                                    modelData.connect();
+                                else
+                                    modelData.pair();
                             }
                         }
                     }
@@ -623,7 +1346,8 @@ Item {
                     }
 
                     Item {
-                        width: parent.width - 38 - 10 - parent.children[1].implicitWidth - wifiToggle.width
+                        width: Math.max(0, parent.width - 38 - parent.children[1].implicitWidth
+                            - wifiToggle.width - (parent.spacing * 3))
                         height: 1
                     }
 
