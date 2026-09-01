@@ -15,6 +15,7 @@ end
 
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + S", hl.dsp.workspace.toggle_special("magic"))
+hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_cmd("hyprpicker -a"))
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
 hl.bind(mainMod .. " + SHIFT + q", hl.dsp.window.close())
 hl.bind(mainMod .. " + SHIFT + t", hl.dsp.window.float())
@@ -54,17 +55,23 @@ hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
 hl.bind(
 	"XF86AudioRaiseVolume",
-	hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+; quickshell ipc --path ~/.config/quickshell call osd volume"),
+	hl.dsp.exec_cmd(
+		"wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+; quickshell ipc --path ~/.config/quickshell call osd volume"
+	),
 	{ locked = true, repeating = true }
 )
 hl.bind(
 	"XF86AudioLowerVolume",
-	hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-; quickshell ipc --path ~/.config/quickshell call osd volume"),
+	hl.dsp.exec_cmd(
+		"wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-; quickshell ipc --path ~/.config/quickshell call osd volume"
+	),
 	{ locked = true, repeating = true }
 )
 hl.bind(
 	"XF86AudioMute",
-	hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle; quickshell ipc --path ~/.config/quickshell call osd volume"),
+	hl.dsp.exec_cmd(
+		"wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle; quickshell ipc --path ~/.config/quickshell call osd volume"
+	),
 	{ locked = true, repeating = true }
 )
 hl.bind(
@@ -72,8 +79,16 @@ hl.bind(
 	hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),
 	{ locked = true, repeating = true }
 )
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+; quickshell ipc --path ~/.config/quickshell call osd brightness"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-; quickshell ipc --path ~/.config/quickshell call osd brightness"), { locked = true, repeating = true })
+hl.bind(
+	"XF86MonBrightnessUp",
+	hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+; quickshell ipc --path ~/.config/quickshell call osd brightness"),
+	{ locked = true, repeating = true }
+)
+hl.bind(
+	"XF86MonBrightnessDown",
+	hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-; quickshell ipc --path ~/.config/quickshell call osd brightness"),
+	{ locked = true, repeating = true }
+)
 
 -- Requires playerctl
 hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })

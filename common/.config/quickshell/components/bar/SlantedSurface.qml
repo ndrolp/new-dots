@@ -30,16 +30,16 @@ Canvas {
             context.moveTo(0, 0);
             context.lineTo(width, 0);
             context.bezierCurveTo(
-                width - slant * 0.24, 0,
-                width - slant * 0.7, height,
+                width - slant * 0.7, 0,
+                width - slant * 0.1, height,
                 width - slant, height
             );
             context.lineTo(0, height);
         } else if (keepRightEdge) {
             context.moveTo(0, 0);
             context.bezierCurveTo(
-                slant * 0.24, 0,
-                slant * 0.7, height,
+                slant * 0.7, 0,
+                slant * 0.1, height,
                 slant, height
             );
             context.lineTo(width, height);
@@ -47,14 +47,14 @@ Canvas {
         } else if (slantBothSides) {
             context.moveTo(0, 0);
             context.bezierCurveTo(
-                slant * 0.24, 0,
-                slant * 0.7, height,
+                slant * 0.7, 0,
+                slant * 0.1, height,
                 slant, height
             );
             context.lineTo(width - slant, height);
             context.bezierCurveTo(
-                width - slant * 0.7, height,
-                width - slant * 0.24, 0,
+                width - slant * 0.1, height,
+                width - slant * 0.7, 0,
                 width, 0
             );
             context.lineTo(width, 0);
