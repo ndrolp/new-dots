@@ -100,7 +100,8 @@ Row {
         height: appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
         radius: appearance.radius
         color: appHover.hovered ? theme.surfaceHover
-            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
+            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
+                || root.appearance.statusIsland ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation {

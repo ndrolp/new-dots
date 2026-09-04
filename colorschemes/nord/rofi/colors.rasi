@@ -1,1 +1,7 @@
-@import "~/.config/rofi/custom/colors/nord.rasi"
+* {
+    bg0: #2e3440;
+    bg1: #3b4252;
+    fg: #eceff4;
+    blue: #88c0d0;
+    urgent: #bf616a;
+}

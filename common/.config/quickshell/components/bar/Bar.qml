@@ -41,6 +41,9 @@ Variants {
             Component.onCompleted: bar.panelReady(panel.screen, panel)
 
             screen: modelData
+            visible: bar.monitors.barVisible(
+                bar.workspaceService.monitorDescriptionForScreen(modelData)
+            )
             WlrLayershell.namespace: "ndro-shell-bar"
             color: "transparent"
             mask: Region {
@@ -50,7 +53,8 @@ Variants {
                 height: panel.height
             }
             readonly property int totalBarHeight: panel.appearance.barHeight
-                + (panel.appearance.barTransparent && !panel.appearance.transparentBarSlanted
+                + ((panel.appearance.barTransparent || panel.appearance.statusIsland)
+                    && !panel.appearance.transparentBarSlanted
                     ? panel.appearance.transparentBarTopMargin : 0)
 
             exclusiveZone: totalBarHeight
@@ -73,7 +77,8 @@ Variants {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 height: panel.totalBarHeight
-                color: panel.appearance.barTransparent ? "transparent" : theme.background
+                color: panel.appearance.barTransparent || panel.appearance.statusIsland
+                    ? "transparent" : theme.background
 
                 Behavior on color {
                     ColorAnimation {
@@ -90,7 +95,7 @@ Variants {
                         && panel.appearance.transparentBarSlanted ? 0 : panel.appearance.horizontalPadding
                     anchors.rightMargin: panel.appearance.barTransparent
                         && panel.appearance.transparentBarSlanted ? 0 : panel.appearance.horizontalPadding
-                    anchors.topMargin: panel.appearance.barTransparent
+                    anchors.topMargin: (panel.appearance.barTransparent || panel.appearance.statusIsland)
                         && !panel.appearance.transparentBarSlanted
                         ? panel.appearance.transparentBarTopMargin : 0
                     appearance: panel.appearance
@@ -115,6 +120,7 @@ Variants {
             Panels.StatusPopups {
                 appearance: panel.appearance
                 barWindow: panel
+                popupAnchorProvider: barContent
                 activePopup: panel.activeStatusPopup
                 pomodoro: panel.pomodoro
                 systemMonitor: panel.systemMonitor

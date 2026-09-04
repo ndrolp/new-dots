@@ -132,6 +132,8 @@ PanelWindow {
         radius: root.appearance.radius
         color: theme.surface
         opacity: root.reveal
+        border.color: theme.border
+        border.width: 1
 
         layer.enabled: true
         layer.effect: MultiEffect {

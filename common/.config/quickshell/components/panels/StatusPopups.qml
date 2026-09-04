@@ -22,6 +22,7 @@ Item {
     property real mediaPosition: 0
     property string mediaTrackKey: ""
     property var passwordNetwork: null
+    property var popupAnchorProvider: null
     signal popupClosed(string popup)
     signal audioSinkSelected(var sink)
 
@@ -131,6 +132,26 @@ Item {
         return "";
     }
 
+    function popupX(popup, popupWidth) {
+        const trigger = popupAnchorProvider ? popupAnchorProvider.popupTrigger(popup) : null;
+        const fallback = Math.max(appearance.horizontalPadding,
+            barWindow.width - popupWidth - appearance.horizontalPadding);
+
+        if (!trigger)
+            return fallback;
+
+        return Math.max(appearance.horizontalPadding, Math.min(
+            barWindow.width - popupWidth - appearance.horizontalPadding,
+            popupAnchorProvider.x + trigger.x + (trigger.width - popupWidth) / 2
+        ));
+    }
+
+    function popupY() {
+        return popupAnchorProvider
+            ? popupAnchorProvider.y + popupAnchorProvider.height + appearance.spacing
+            : appearance.barHeight + appearance.spacing;
+    }
+
     function bluetoothDeviceName(device) {
         return device.deviceName || device.name || device.address;
     }
@@ -175,6 +196,7 @@ Item {
         id: systemPopup
 
         property real reveal: root.activePopup === "system" ? 1 : 0
+        grabFocus: true
 
         onVisibleChanged: {
             if (!visible && root.activePopup === "system")
@@ -182,10 +204,12 @@ Item {
         }
         visible: reveal > 0
         anchor.window: root.barWindow
-        anchor.rect.x: root.appearance.horizontalPadding
-        anchor.rect.y: root.appearance.barHeight + root.appearance.spacing
+        anchor.rect.x: root.appearance.statusIsland
+            ? root.popupX("system", implicitWidth) : root.appearance.horizontalPadding
+        anchor.rect.y: root.appearance.statusIsland
+            ? root.popupY() : root.appearance.barHeight + root.appearance.spacing
         implicitWidth: 430
-        implicitHeight: 254
+        implicitHeight: 330
         color: "transparent"
 
         Behavior on reveal {
@@ -198,10 +222,12 @@ Item {
         Rectangle {
             anchors.fill: parent
             anchors.margins: 12
-            anchors.topMargin: 12 - 12 * (1 - systemPopup.reveal)
             radius: root.appearance.radius
             color: theme.surface
             opacity: systemPopup.reveal
+            border.color: theme.border
+            border.width: 1
+            transform: Translate { y: -12 * (1 - systemPopup.reveal) }
 
             layer.enabled: true
             layer.effect: MultiEffect {
@@ -365,6 +391,69 @@ Item {
                         }
                     }
                 }
+
+                Row {
+                    width: parent.width
+                    spacing: 8
+
+                    Repeater {
+                        model: [
+                            {
+                                label: "󰋊 Disk",
+                                value: root.systemMonitor.diskTotalGiB > 0
+                                    ? root.systemMonitor.diskUsedGiB.toFixed(0) + " / "
+                                        + root.systemMonitor.diskTotalGiB.toFixed(0) + " GiB"
+                                    : "--",
+                                color: theme.purple
+                            },
+                            {
+                                label: "󰕒 Network",
+                                value: "↓ " + root.systemMonitor.formatRate(root.systemMonitor.networkDownloadRate)
+                                    + "\n↑ " + root.systemMonitor.formatRate(root.systemMonitor.networkUploadRate),
+                                color: theme.blue
+                            },
+                            {
+                                label: "󰢮 GPU",
+                                value: root.systemMonitor.gpuUsage >= 0
+                                    ? Math.round(root.systemMonitor.gpuUsage) + "% · "
+                                        + Math.round(root.systemMonitor.gpuTemperature) + "°C"
+                                    : "Unavailable",
+                                color: theme.green
+                            }
+                        ]
+
+                        delegate: Rectangle {
+                            required property var modelData
+
+                            width: (parent.width - parent.spacing * 2) / 3
+                            height: 64
+                            radius: root.appearance.radius
+                            color: theme.backgroundSecondary
+
+                            Column {
+                                anchors.fill: parent
+                                anchors.margins: 10
+                                spacing: 5
+
+                                Text {
+                                    text: modelData.label
+                                    color: modelData.color
+                                    font.pixelSize: root.appearance.textSize - 2
+                                    font.bold: true
+                                }
+
+                                Text {
+                                    width: parent.width
+                                    text: modelData.value
+                                    color: theme.text
+                                    elide: Text.ElideRight
+                                    font.pixelSize: root.appearance.textSize - 3
+                                    font.bold: true
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -373,6 +462,7 @@ Item {
         id: pomodoroPopup
 
         property real reveal: root.activePopup === "pomodoro" ? 1 : 0
+        grabFocus: true
 
         onVisibleChanged: {
             if (!visible && root.activePopup === "pomodoro")
@@ -380,11 +470,13 @@ Item {
         }
         visible: reveal > 0
         anchor.window: root.barWindow
-        anchor.rect.x: Math.max(root.appearance.horizontalPadding,
-            root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
-        anchor.rect.y: root.appearance.barHeight + root.appearance.spacing
+        anchor.rect.x: root.appearance.statusIsland
+            ? root.popupX("pomodoro", implicitWidth) : Math.max(root.appearance.horizontalPadding,
+                root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
+        anchor.rect.y: root.appearance.statusIsland
+            ? root.popupY() : root.appearance.barHeight + root.appearance.spacing
         implicitWidth: 356
-        implicitHeight: 326
+        implicitHeight: root.pomodoro.started ? 326 : 282
         color: "transparent"
 
         Behavior on reveal {
@@ -394,13 +486,22 @@ Item {
             }
         }
 
+        Behavior on implicitHeight {
+            NumberAnimation {
+                duration: 160
+                easing.type: Easing.OutCubic
+            }
+        }
+
         Rectangle {
             anchors.fill: parent
             anchors.margins: 12
-            anchors.topMargin: 12 - 12 * (1 - pomodoroPopup.reveal)
             radius: root.appearance.radius
             color: theme.surface
             opacity: pomodoroPopup.reveal
+            border.color: theme.border
+            border.width: 1
+            transform: Translate { y: -12 * (1 - pomodoroPopup.reveal) }
 
             layer.enabled: true
             layer.effect: MultiEffect {
@@ -646,6 +747,7 @@ Item {
 
         property real reveal: root.activePopup === "media" ? 1 : 0
         readonly property var player: root.player
+        grabFocus: true
 
         onVisibleChanged: {
             if (!visible && root.activePopup === "media")
@@ -653,9 +755,11 @@ Item {
         }
         visible: reveal > 0
         anchor.window: root.barWindow
-        anchor.rect.x: Math.max(root.appearance.horizontalPadding,
-            root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
-        anchor.rect.y: root.appearance.barHeight + root.appearance.spacing
+        anchor.rect.x: root.appearance.statusIsland
+            ? root.popupX("media", implicitWidth) : Math.max(root.appearance.horizontalPadding,
+                root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
+        anchor.rect.y: root.appearance.statusIsland
+            ? root.popupY() : root.appearance.barHeight + root.appearance.spacing
         implicitWidth: 480
         implicitHeight: 258
         color: "transparent"
@@ -672,10 +776,12 @@ Item {
 
             anchors.fill: parent
             anchors.margins: 12
-            anchors.topMargin: 12 - 16 * (1 - mediaPopup.reveal)
             radius: root.appearance.radius
             color: theme.surface
             opacity: mediaPopup.reveal
+            border.color: theme.border
+            border.width: 1
+            transform: Translate { y: -16 * (1 - mediaPopup.reveal) }
             clip: true
 
             Image {
@@ -774,6 +880,7 @@ Item {
                                 font.bold: true
                             }
                         }
+
                     }
                 }
 
@@ -955,6 +1062,7 @@ Item {
         id: sinkPopup
 
         property real reveal: root.activePopup === "audio" ? 1 : 0
+        grabFocus: true
 
         onVisibleChanged: {
             if (!visible && root.activePopup === "audio")
@@ -962,9 +1070,11 @@ Item {
         }
         visible: reveal > 0
         anchor.window: root.barWindow
-        anchor.rect.x: Math.max(root.appearance.horizontalPadding,
-            root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
-        anchor.rect.y: root.appearance.barHeight + root.appearance.spacing
+        anchor.rect.x: root.appearance.statusIsland
+            ? root.popupX("audio", implicitWidth) : Math.max(root.appearance.horizontalPadding,
+                root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
+        anchor.rect.y: root.appearance.statusIsland
+            ? root.popupY() : root.appearance.barHeight + root.appearance.spacing
         implicitWidth: 500
         implicitHeight: sinkList.implicitHeight + 64
         color: "transparent"
@@ -979,10 +1089,12 @@ Item {
         Rectangle {
             anchors.fill: parent
             anchors.margins: 12
-            anchors.topMargin: 12 - 12 * (1 - sinkPopup.reveal)
             radius: root.appearance.radius
             color: theme.surface
             opacity: sinkPopup.reveal
+            border.color: theme.border
+            border.width: 1
+            transform: Translate { y: -12 * (1 - sinkPopup.reveal) }
 
             layer.enabled: true
             layer.effect: MultiEffect {
@@ -1113,6 +1225,7 @@ Item {
         property real reveal: root.activePopup === "tray" ? 1 : 0
         property var selectedTrayItem: null
         property var menuStack: []
+        grabFocus: true
         readonly property int visibleItemCount: SystemTray.items.values.length
             + (selectedTrayItem !== null
                 ? trayMenu.children.values.length + (menuStack.length > 0 ? 1 : 0) : 0)
@@ -1139,8 +1252,11 @@ Item {
         }
         visible: reveal > 0
         anchor.window: root.barWindow
-        anchor.rect.x: Math.max(root.appearance.horizontalPadding, root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
-        anchor.rect.y: root.appearance.barHeight + root.appearance.spacing
+        anchor.rect.x: root.appearance.statusIsland
+            ? root.popupX("tray", implicitWidth) : Math.max(root.appearance.horizontalPadding,
+                root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
+        anchor.rect.y: root.appearance.statusIsland
+            ? root.popupY() : root.appearance.barHeight + root.appearance.spacing
         implicitWidth: 220
         implicitHeight: Math.max(88, Math.min(328,
             visibleItemCount * 44 + 48))
@@ -1167,10 +1283,12 @@ Item {
         Rectangle {
             anchors.fill: parent
             anchors.margins: 12
-            anchors.topMargin: 12 - 12 * (1 - trayPopup.reveal)
             radius: root.appearance.radius
             color: theme.surface
             opacity: trayPopup.reveal
+            border.color: theme.border
+            border.width: 1
+            transform: Translate { y: -12 * (1 - trayPopup.reveal) }
 
             layer.enabled: true
             layer.effect: MultiEffect {
@@ -1414,6 +1532,7 @@ Item {
 
         readonly property var battery: UPower.displayDevice
         property real reveal: root.activePopup === "battery" ? 1 : 0
+        grabFocus: true
 
         onVisibleChanged: {
             if (!visible && root.activePopup === "battery")
@@ -1421,10 +1540,12 @@ Item {
         }
         visible: reveal > 0
         anchor.window: root.barWindow
-        anchor.rect.x: Math.max(root.appearance.horizontalPadding,
-            root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
-        anchor.rect.y: root.appearance.barHeight + root.appearance.spacing
-        implicitWidth: 300
+        anchor.rect.x: root.appearance.statusIsland
+            ? root.popupX("battery", implicitWidth) : Math.max(root.appearance.horizontalPadding,
+                root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
+        anchor.rect.y: root.appearance.statusIsland
+            ? root.popupY() : root.appearance.barHeight + root.appearance.spacing
+        implicitWidth: 380
         implicitHeight: 216
         color: "transparent"
 
@@ -1438,10 +1559,12 @@ Item {
         Rectangle {
             anchors.fill: parent
             anchors.margins: 12
-            anchors.topMargin: 12 - 12 * (1 - batteryPopup.reveal)
             radius: root.appearance.radius
             color: theme.surface
             opacity: batteryPopup.reveal
+            border.color: theme.border
+            border.width: 1
+            transform: Translate { y: -12 * (1 - batteryPopup.reveal) }
 
             layer.enabled: true
             layer.effect: MultiEffect {
@@ -1526,9 +1649,10 @@ Item {
 
                 Row {
                     width: parent.width
+                    spacing: 12
 
                     Column {
-                        width: parent.width / 2
+                        width: (parent.width - parent.spacing * 2) / 3
                         spacing: 3
 
                         Text {
@@ -1539,9 +1663,11 @@ Item {
                         }
 
                         Text {
-                            text: batteryPopup.battery && batteryPopup.battery.healthSupported
-                                ? Math.round(batteryPopup.battery.healthPercentage * 100) + "%"
-                                : "Unavailable"
+                            text: root.systemMonitor.batteryHealth !== ""
+                                ? root.systemMonitor.batteryHealth
+                                : batteryPopup.battery && batteryPopup.battery.healthSupported
+                                    ? Math.round(batteryPopup.battery.healthPercentage * 100) + "%"
+                                    : "Unavailable"
                             color: theme.text
                             font.pixelSize: root.appearance.textSize + 1
                             font.bold: true
@@ -1549,7 +1675,7 @@ Item {
                     }
 
                     Column {
-                        width: parent.width / 2
+                        width: (parent.width - parent.spacing * 2) / 3
                         spacing: 3
 
                         Text {
@@ -1568,6 +1694,30 @@ Item {
                             font.bold: true
                         }
                     }
+
+                    Column {
+                        width: (parent.width - parent.spacing * 2) / 3
+                        spacing: 3
+
+                        Text {
+                            text: batteryPopup.battery
+                                && batteryPopup.battery.state === UPowerDeviceState.Charging
+                                ? "TIME TO FULL" : "TIME LEFT"
+                            color: theme.textMuted
+                            font.pixelSize: 10
+                            font.bold: true
+                        }
+
+                        Text {
+                            text: batteryPopup.battery
+                                && batteryPopup.battery.state === UPowerDeviceState.Charging
+                                ? (root.systemMonitor.batteryTimeToFull || "Calculating")
+                                : (root.systemMonitor.batteryTimeToEmpty || "Calculating")
+                            color: theme.text
+                            font.pixelSize: root.appearance.textSize + 1
+                            font.bold: true
+                        }
+                    }
                 }
             }
         }
@@ -1578,6 +1728,7 @@ Item {
 
         readonly property var adapter: Bluetooth.defaultAdapter
         property real reveal: root.activePopup === "bluetooth" ? 1 : 0
+        grabFocus: true
 
         onVisibleChanged: {
             if (!visible && root.activePopup === "bluetooth")
@@ -1585,9 +1736,11 @@ Item {
         }
         visible: reveal > 0
         anchor.window: root.barWindow
-        anchor.rect.x: Math.max(root.appearance.horizontalPadding,
-            root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
-        anchor.rect.y: root.appearance.barHeight + root.appearance.spacing
+        anchor.rect.x: root.appearance.statusIsland
+            ? root.popupX("bluetooth", implicitWidth) : Math.max(root.appearance.horizontalPadding,
+                root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
+        anchor.rect.y: root.appearance.statusIsland
+            ? root.popupY() : root.appearance.barHeight + root.appearance.spacing
         implicitWidth: 400
         implicitHeight: Math.max(132, bluetoothList.implicitHeight + 64)
         color: "transparent"
@@ -1607,10 +1760,12 @@ Item {
         Rectangle {
             anchors.fill: parent
             anchors.margins: 12
-            anchors.topMargin: 12 - 12 * (1 - bluetoothPopup.reveal)
             radius: root.appearance.radius
             color: theme.surface
             opacity: bluetoothPopup.reveal
+            border.color: theme.border
+            border.width: 1
+            transform: Translate { y: -12 * (1 - bluetoothPopup.reveal) }
 
             layer.enabled: true
             layer.effect: MultiEffect {
@@ -1795,8 +1950,9 @@ Item {
         id: networkPopup
 
         readonly property var wifi: root.wifiDevice()
-
         property real reveal: root.activePopup === "network" ? 1 : 0
+        property string searchQuery: ""
+        grabFocus: true
 
         onVisibleChanged: {
             if (!visible && root.activePopup === "network")
@@ -1804,10 +1960,14 @@ Item {
         }
         visible: reveal > 0
         anchor.window: root.barWindow
-        anchor.rect.x: Math.max(root.appearance.horizontalPadding, root.barWindow.width - 380)
-        anchor.rect.y: root.appearance.barHeight + root.appearance.spacing
-        implicitWidth: 364
-        implicitHeight: root.passwordNetwork ? 304 : networkList.implicitHeight + 64
+        anchor.rect.x: root.appearance.statusIsland
+            ? root.popupX("network", implicitWidth) : Math.max(root.appearance.horizontalPadding,
+                root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
+        anchor.rect.y: root.appearance.statusIsland
+            ? root.popupY() : root.appearance.barHeight + root.appearance.spacing
+        implicitWidth: Math.min(420, Math.max(300,
+            root.barWindow.width - root.appearance.horizontalPadding * 2))
+        implicitHeight: root.passwordNetwork ? 304 : networkList.implicitHeight + 56
         color: "transparent"
 
         onRevealChanged: {
@@ -1827,10 +1987,14 @@ Item {
 
             anchors.fill: parent
             anchors.margins: 12
-            anchors.topMargin: 12 - 12 * (1 - networkPopup.reveal)
             radius: root.appearance.radius
             color: theme.surface
             opacity: networkPopup.reveal
+            border.color: theme.border
+            border.width: 1
+            transform: Translate { y: -12 * (1 - networkPopup.reveal) }
+            scale: 0.96 + (0.04 * networkPopup.reveal)
+            transformOrigin: Item.TopRight
 
             layer.enabled: true
             layer.effect: MultiEffect {
@@ -1838,6 +2002,20 @@ Item {
                 shadowColor: "#73000000"
                 shadowBlur: 0.65
                 shadowVerticalOffset: 6
+            }
+
+            Behavior on anchors.topMargin {
+                NumberAnimation {
+                    duration: 180
+                    easing.type: Easing.OutCubic
+                }
+            }
+
+            Behavior on scale {
+                NumberAnimation {
+                    duration: 180
+                    easing.type: Easing.OutCubic
+                }
             }
 
             Column {
@@ -1932,62 +2110,138 @@ Item {
                     }
                 }
 
-                Repeater {
-                    model: networkPopup.wifi ? networkPopup.wifi.networks : []
+                TextField {
+                    id: networkSearch
 
-                    delegate: Rectangle {
-                        required property var modelData
+                    width: parent.width
+                    height: 38
+                    visible: Networking.wifiEnabled
+                    placeholderText: "Search networks"
+                    text: networkPopup.searchQuery
+                    color: theme.text
+                    placeholderTextColor: Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.6)
+                    font.pixelSize: root.appearance.textSize - 1
+                    font.bold: true
+                    leftPadding: 34
+                    rightPadding: 30
 
-                        width: parent.width
-                        height: Networking.wifiEnabled ? 52 : 0
-                        visible: Networking.wifiEnabled
+                    background: Rectangle {
                         radius: root.appearance.radius
-                        color: modelData.connected || networkHover.hovered
-                            ? theme.surfaceHover : theme.backgroundSecondary
+                        color: theme.backgroundSecondary
+                        border.color: networkSearch.activeFocus ? theme.purple : theme.border
+                        border.width: 1
+                    }
 
-                        Behavior on color {
-                            ColorAnimation { duration: 140 }
-                        }
+                    Text {
+                        anchors.left: parent.left
+                        anchors.leftMargin: 11
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "󰍉"
+                        color: theme.textMuted
+                        font.pixelSize: 16
+                    }
 
-                        HoverHandler {
-                            id: networkHover
-                        }
-
-                        Text {
-                            anchors.left: parent.left
-                            anchors.leftMargin: 12
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: root.wifiIcon(modelData)
-                            color: modelData.connected ? theme.purple : theme.textMuted
-                            font.pixelSize: 19
-                            font.bold: true
-                        }
-
-                        Text {
-                            anchors.fill: parent
-                            anchors.leftMargin: 44
-                            anchors.rightMargin: 56
-                            verticalAlignment: Text.AlignVCenter
-                            text: modelData.name
-                            color: modelData.connected ? theme.purple : theme.textMuted
-                            elide: Text.ElideRight
-                            font.pixelSize: root.appearance.textSize
-                            font.bold: true
-                        }
-
-                        Text {
-                            anchors.right: parent.right
-                            anchors.rightMargin: 12
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: modelData.connected ? "󰄬"
-                                : modelData.security === WifiSecurityType.Open ? "" : "󰌾"
-                            color: modelData.connected ? theme.purple : theme.textMuted
-                            font.pixelSize: 16
-                            font.bold: true
-                        }
+                    Text {
+                        anchors.right: parent.right
+                        anchors.rightMargin: 11
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: networkSearch.text !== ""
+                        text: "󰅖"
+                        color: theme.textMuted
+                        font.pixelSize: 15
 
                         TapHandler {
-                            onTapped: root.manageNetwork(modelData)
+                            onTapped: networkSearch.clear()
+                        }
+                    }
+
+                    onTextEdited: networkPopup.searchQuery = text
+                }
+
+                Flickable {
+                    width: parent.width
+                    height: Networking.wifiEnabled
+                        ? Math.min(260, networkRows.implicitHeight) : 0
+                    contentWidth: width
+                    contentHeight: networkRows.implicitHeight
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+                    visible: height > 0
+
+                    Column {
+                        id: networkRows
+
+                        width: parent.width
+                        spacing: 8
+
+                        Repeater {
+                            model: networkPopup.wifi ? networkPopup.wifi.networks : []
+
+                            delegate: Rectangle {
+                                required property var modelData
+
+                                readonly property bool matchesSearch: modelData.name.toLowerCase()
+                                    .includes(networkPopup.searchQuery.trim().toLowerCase())
+
+                                width: parent.width
+                                height: Networking.wifiEnabled && matchesSearch ? 52 : 0
+                                visible: height > 0
+                                radius: root.appearance.radius
+                                color: modelData.connected || networkHover.hovered
+                                    ? theme.surfaceHover : theme.backgroundSecondary
+
+                                Behavior on height {
+                                    NumberAnimation {
+                                        duration: 140
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+
+                                Behavior on color {
+                                    ColorAnimation { duration: 140 }
+                                }
+
+                                HoverHandler {
+                                    id: networkHover
+                                }
+
+                                Text {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 12
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: root.wifiIcon(modelData)
+                                    color: modelData.connected ? theme.purple : theme.textMuted
+                                    font.pixelSize: 19
+                                    font.bold: true
+                                }
+
+                                Text {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 44
+                                    anchors.rightMargin: 56
+                                    verticalAlignment: Text.AlignVCenter
+                                    text: modelData.name
+                                    color: modelData.connected ? theme.purple : theme.textMuted
+                                    elide: Text.ElideRight
+                                    font.pixelSize: root.appearance.textSize
+                                    font.bold: true
+                                }
+
+                                Text {
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: 12
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: modelData.connected ? "󰄬"
+                                        : modelData.security === WifiSecurityType.Open ? "" : "󰌾"
+                                    color: modelData.connected ? theme.purple : theme.textMuted
+                                    font.pixelSize: 16
+                                    font.bold: true
+                                }
+
+                                TapHandler {
+                                    onTapped: root.manageNetwork(modelData)
+                                }
+                            }
                         }
                     }
                 }
@@ -2041,6 +2295,7 @@ Item {
                         echoMode: TextInput.Password
                         placeholderText: "Password"
                         color: theme.text
+                        placeholderTextColor: Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.6)
                         font.pixelSize: root.appearance.textSize
                         font.bold: true
                         selectByMouse: true

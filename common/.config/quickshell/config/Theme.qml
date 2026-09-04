@@ -1,1 +1,1 @@
-/home/ndrolp/.dotfiles/colorschemes/catppuccin/quickshell/Theme.qml
+/home/ndrolp/.dotfiles/colorschemes/everforestdark/quickshell/Theme.qml

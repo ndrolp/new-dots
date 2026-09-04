@@ -56,6 +56,24 @@ Row {
         player = activePlayer();
     }
 
+    function popupTrigger(popup) {
+        if (popup === "media")
+            return mediaButton;
+        if (popup === "audio")
+            return audioButton;
+        if (popup === "bluetooth")
+            return bluetoothButton;
+        if (popup === "tray")
+            return trayButton;
+        if (popup === "network")
+            return networkButton;
+        if (popup === "battery")
+            return batteryButton;
+        if (popup === "pomodoro")
+            return pomodoroButton;
+        return null;
+    }
+
     Component.onCompleted: updatePlayer()
 
     Timer {
@@ -96,12 +114,15 @@ Row {
     }
 
     Rectangle {
+        id: mediaButton
+
         visible: root.player !== null
         width: mediaContent.implicitWidth + 16
         height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
         color: mediaHover.hovered ? theme.surfaceHover
-            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
+            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
+                || root.appearance.statusIsland ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -184,11 +205,14 @@ Row {
     }
 
     Rectangle {
+        id: audioButton
+
         width: 76
         height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
         color: audioHover.hovered ? theme.surfaceHover
-            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
+            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
+                || root.appearance.statusIsland ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -211,6 +235,8 @@ Row {
             }
 
             Rectangle {
+                id: bluetoothButton
+
                 anchors.verticalCenter: parent.verticalCenter
                 width: 34
                 height: 4
@@ -218,6 +244,8 @@ Row {
                 color: theme.surface
 
                 Rectangle {
+                    id: trayButton
+
                     width: parent.width * (root.audio && !root.audio.muted ? root.volumeLevel : 0)
                     height: parent.height
                     radius: parent.radius
@@ -234,11 +262,14 @@ Row {
     }
 
     Rectangle {
+        id: networkButton
+
         width: root.appearance.workspaceButtonSize
         height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
         color: bluetoothHover.hovered ? theme.surfaceHover
-            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
+            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
+                || root.appearance.statusIsland ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -263,11 +294,14 @@ Row {
     }
 
     Rectangle {
+        id: batteryButton
+
         width: root.appearance.workspaceButtonSize
         height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
         color: trayHover.hovered ? theme.surfaceHover
-            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
+            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
+                || root.appearance.statusIsland ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -292,11 +326,14 @@ Row {
     }
 
     Rectangle {
+        id: pomodoroButton
+
         width: root.appearance.workspaceButtonSize
         height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
         color: networkHover.hovered ? theme.surfaceHover
-            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
+            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
+                || root.appearance.statusIsland ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -326,7 +363,8 @@ Row {
         height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
         color: batteryHover.hovered ? theme.surfaceHover
-            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
+            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
+                || root.appearance.statusIsland ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -370,7 +408,8 @@ Row {
         height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
         radius: root.appearance.radius
         color: clockHover.hovered ? theme.surfaceHover
-            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
+            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
+                || root.appearance.statusIsland ? "transparent" : theme.surface
 
         Behavior on color {
             ColorAnimation { duration: 140 }

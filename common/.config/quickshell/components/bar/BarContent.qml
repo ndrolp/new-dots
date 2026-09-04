@@ -1,5 +1,6 @@
 import Quickshell
 import QtQuick
+import QtQuick.Effects
 import "../../config" as Config
 
 Item {
@@ -16,6 +17,27 @@ Item {
 
     signal configRequested(var screen)
     signal statusPopupRequested(string popup)
+    readonly property bool statusIslandEnabled: appearance.statusIsland
+    readonly property real statusIslandGap: appearance.spacing
+    readonly property real leftIslandGroupWidth: archButton.width + systemMonitor.width
+        + currentApp.width + (statusIslandGap * 2)
+    readonly property real islandSideSpacer: Math.max(leftIslandGroupWidth, statusModules.width)
+    readonly property real workspaceIslandSpacer: statusIslandGap * 3
+    readonly property real leftWorkspaceSpacer: workspaceIslandSpacer
+        + islandSideSpacer - leftIslandGroupWidth
+    readonly property real rightWorkspaceSpacer: workspaceIslandSpacer
+        + islandSideSpacer - statusModules.width
+
+    function popupTrigger(popup) {
+        if (popup === "system")
+            return systemMonitor;
+
+        const trigger = statusModules.popupTrigger(popup);
+        return trigger ? {
+            x: statusModules.x + trigger.x,
+            width: trigger.width
+        } : null;
+    }
 
     Config.Theme {
         id: theme
@@ -30,6 +52,7 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
+            && !root.statusIslandEnabled
         appearance: root.appearance
         fillColor: theme.surface
         keepLeftEdge: true
@@ -46,6 +69,7 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
+            && !root.statusIslandEnabled
         appearance: root.appearance
         fillColor: theme.surface
         slantBothSides: true
@@ -61,18 +85,63 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
+            && !root.statusIslandEnabled
         appearance: root.appearance
         fillColor: theme.surface
         keepRightEdge: true
         z: -1
     }
 
+    Rectangle {
+        x: workspaces.x - root.leftWorkspaceSpacer - root.leftIslandGroupWidth
+            - root.appearance.spacing
+        y: 0
+        width: workspaces.width + root.leftIslandGroupWidth + root.leftWorkspaceSpacer
+            + root.rightWorkspaceSpacer + statusModules.width
+            + (root.appearance.spacing * 2)
+        height: parent.height
+        radius: root.appearance.statusIslandRadius
+        color: theme.backgroundSecondary
+        visible: root.statusIslandEnabled
+        z: -1
+
+        layer.enabled: visible
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: "#80000000"
+            shadowBlur: 0.45
+            shadowVerticalOffset: 3
+        }
+
+        Behavior on x {
+            NumberAnimation {
+                duration: 180
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Behavior on width {
+            NumberAnimation {
+                duration: 180
+                easing.type: Easing.OutCubic
+            }
+        }
+    }
+
     ArchButton {
         id: archButton
 
-        anchors.left: parent.left
-        anchors.leftMargin: root.appearance.barTransparent && root.appearance.transparentBarSlanted ? root.appearance.horizontalPadding : 0
         anchors.verticalCenter: parent.verticalCenter
+        x: root.statusIslandEnabled
+            ? workspaces.x - root.leftWorkspaceSpacer - root.leftIslandGroupWidth
+            : root.appearance.barTransparent && root.appearance.transparentBarSlanted
+                ? root.appearance.horizontalPadding : 0
+        Behavior on x {
+            NumberAnimation {
+                duration: 220
+                easing.type: Easing.OutCubic
+            }
+        }
         appearance: root.appearance
         active: root.configOpen
         onClicked: root.configRequested(root.monitorScreen)
@@ -101,8 +170,14 @@ Item {
 
     Workspaces {
         id: workspaces
-        anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
+        x: Math.round((parent.width - width) / 2)
+        Behavior on x {
+            NumberAnimation {
+                duration: 220
+                easing.type: Easing.OutCubic
+            }
+        }
         appearance: root.appearance
         monitorScreen: root.monitorScreen
         monitors: root.monitors
@@ -111,9 +186,17 @@ Item {
 
     StatusModules {
         id: statusModules
-        anchors.right: parent.right
-        anchors.rightMargin: root.appearance.barTransparent && root.appearance.transparentBarSlanted ? root.appearance.horizontalPadding : 0
         anchors.verticalCenter: parent.verticalCenter
+        x: root.statusIslandEnabled
+            ? workspaces.x + workspaces.width + root.rightWorkspaceSpacer
+            : parent.width - width - (root.appearance.barTransparent
+                && root.appearance.transparentBarSlanted ? root.appearance.horizontalPadding : 0)
+        Behavior on x {
+            NumberAnimation {
+                duration: 220
+                easing.type: Easing.OutCubic
+            }
+        }
         appearance: root.appearance
         activePopup: root.activeStatusPopup
         monitorScreen: root.monitorScreen

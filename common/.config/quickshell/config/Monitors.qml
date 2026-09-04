@@ -5,6 +5,7 @@ QtObject {
     id: root
 
     property alias assignments: settings.assignments
+    property alias displaySettings: settings.displaySettings
 
     function rangeFor(monitorName) {
         const assigned = assignments[monitorName];
@@ -39,6 +40,34 @@ QtObject {
         setRange(monitorName, rangeFor(monitorName).from, to);
     }
 
+    function displaySettingsFor(monitorName) {
+        const configured = displaySettings[monitorName];
+        const defaults = displaySettings.default || {};
+
+        return {
+            barVisible: configured && configured.barVisible !== undefined
+                ? configured.barVisible : defaults.barVisible !== false,
+            backgroundClockVisible: configured && configured.backgroundClockVisible !== undefined
+                ? configured.backgroundClockVisible : defaults.backgroundClockVisible !== false
+        };
+    }
+
+    function setDisplaySetting(monitorName, settingName, value) {
+        const updated = Object.assign({}, displaySettings);
+        const monitorSettings = Object.assign({}, displaySettingsFor(monitorName));
+        monitorSettings[settingName] = value;
+        updated[monitorName] = monitorSettings;
+        displaySettings = updated;
+    }
+
+    function barVisible(monitorName) {
+        return displaySettingsFor(monitorName).barVisible;
+    }
+
+    function backgroundClockVisible(monitorName) {
+        return displaySettingsFor(monitorName).backgroundClockVisible;
+    }
+
     function monitorNames() {
         return Object.keys(assignments).filter(name => name !== "default");
     }
@@ -63,6 +92,12 @@ QtObject {
 
             property var assignments: ({
                 "default": { "from": 1, "to": 5 }
+            })
+            property var displaySettings: ({
+                "default": {
+                    "barVisible": true,
+                    "backgroundClockVisible": true
+                }
             })
         }
     }

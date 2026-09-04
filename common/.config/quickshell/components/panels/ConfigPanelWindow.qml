@@ -7,6 +7,7 @@ PopupWindow {
     required property var appearance
     required property var monitors
     required property var wallpapers
+    required property var bookmarks
     property bool open: false
     property var targetWindow
     property real reveal: open ? 1 : 0
@@ -44,6 +45,7 @@ PopupWindow {
         appearance: root.appearance
         monitors: root.monitors
         wallpapers: root.wallpapers
+        bookmarks: root.bookmarks
 
         onCloseRequested: root.closeRequested()
     }

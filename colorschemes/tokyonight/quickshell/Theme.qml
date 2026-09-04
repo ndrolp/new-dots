@@ -1,6 +1,7 @@
 import QtQuick
 
 QtObject {
+    readonly property string fontFamily: "GeistMono Nerd Font Propo"
     // TokyoNight
     readonly property color background: "#1a1b26"
     readonly property color backgroundSecondary: "#16161e"

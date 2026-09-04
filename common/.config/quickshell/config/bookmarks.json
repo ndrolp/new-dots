@@ -1,0 +1,62 @@
+{
+    "activeSearchEngineIndex": 0,
+    "searchEngines": [
+        {
+            "glyph": "󰖟",
+            "label": "Google",
+            "searchUrl": "https://www.google.com/search?q=%s"
+        }
+    ],
+    "items": [
+        {
+            "glyph": "󰝆",
+            "label": "Netflix",
+            "url": "https://www.netflix.com"
+        },
+        {
+            "glyph": "󰗃",
+            "label": "YouTube",
+            "url": "https://www.youtube.com"
+        },
+        {
+            "glyph": "󰛓",
+            "label": "Nerd Fonts",
+            "url": "https://www.nerdfonts.com/cheat-sheet"
+        },
+        {
+            "glyph": "󰆉",
+            "label": "AnimeFLV",
+            "url": "https://www3.animeflv.net"
+        },
+        {
+            "glyph": "󰸉",
+            "label": "Wallhaven",
+            "url": "https://wallhaven.cc"
+        },
+        {
+            "glyph": "󰊤",
+            "label": "GitHub",
+            "url": "https://github.com"
+        },
+        {
+            "glyph": "󰧑",
+            "label": "Copilot Docs",
+            "url": "https://docs.github.com/copilot"
+        },
+        {
+            "glyph": "󰣇",
+            "label": "Arch Wiki",
+            "url": "https://wiki.archlinux.org"
+        },
+        {
+            "glyph": "󰖟",
+            "label": "MDN Web Docs",
+            "url": "https://developer.mozilla.org"
+        },
+        {
+            "glyph": "󰚩",
+            "label": "ChatGPT",
+            "url": "https://chatgpt.com"
+        }
+    ]
+}

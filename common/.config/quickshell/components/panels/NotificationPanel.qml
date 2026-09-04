@@ -51,6 +51,8 @@ PopupWindow {
         radius: root.appearance.radius
         color: theme.surface
         opacity: root.reveal
+        border.color: theme.border
+        border.width: 1
 
         layer.enabled: true
         layer.effect: MultiEffect {
@@ -69,6 +71,7 @@ PopupWindow {
 
             Row {
                 width: parent.width
+                height: 28
 
                 Text {
                     text: "Notifications"
@@ -78,7 +81,32 @@ PopupWindow {
                 }
 
                 Item {
-                    width: parent.width - parent.children[0].implicitWidth - clearButton.width
+                    width: parent.width - parent.children[0].implicitWidth
+                        - doNotDisturbButton.width - clearButton.width - 12
+                    height: 1
+                }
+
+                Text {
+                    id: doNotDisturbButton
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: root.appearance.doNotDisturb ? "󰂛  DND on" : "󰂚  DND off"
+                    color: doNotDisturbHover.hovered ? theme.accent : root.appearance.doNotDisturb
+                        ? theme.accent : theme.textMuted
+                    font.pixelSize: root.appearance.textSize - 1
+                    font.bold: true
+
+                    HoverHandler {
+                        id: doNotDisturbHover
+                    }
+
+                    TapHandler {
+                        onTapped: root.appearance.doNotDisturb = !root.appearance.doNotDisturb
+                    }
+                }
+
+                Item {
+                    width: 12
                     height: 1
                 }
 
@@ -114,67 +142,198 @@ PopupWindow {
                 font.bold: true
             }
 
-            Repeater {
-                model: root.notificationHistory.items
+            Flickable {
+                id: notificationScroller
 
-                delegate: Rectangle {
-                    required property var modelData
+                visible: root.notificationHistory.items.length > 0
+                width: parent.width
+                height: Math.min(520, notificationGroups.implicitHeight)
+                implicitHeight: height
+                contentWidth: width
+                contentHeight: notificationGroups.implicitHeight
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
 
-                    width: notificationList.width
-                    height: 64
-                    radius: root.appearance.radius
-                    color: notificationHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+                Column {
+                    id: notificationGroups
 
-                    Behavior on color {
-                        ColorAnimation { duration: 140 }
-                    }
+                    width: notificationScroller.width
+                    spacing: 12
 
-                    HoverHandler {
-                        id: notificationHover
-                    }
+                    Repeater {
+                        model: root.notificationHistory.groups
 
-                    Text {
-                        anchors.left: parent.left
-                        anchors.leftMargin: 12
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: "󰂚"
-                        color: theme.accent
-                        font.pixelSize: 18
-                        font.bold: true
-                    }
+                        delegate: Column {
+                            required property var modelData
 
-                    Column {
-                        anchors.left: parent.left
-                        anchors.leftMargin: 42
-                        anchors.right: parent.right
-                        anchors.rightMargin: 14
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: 2
+                            width: notificationGroups.width
+                            spacing: 6
 
-                        Text {
-                            width: parent.width
-                            text: modelData.summary || modelData.appName
-                            color: theme.text
-                            elide: Text.ElideRight
-                            font.pixelSize: root.appearance.textSize
-                            font.bold: true
+                            Text {
+                                width: parent.width
+                                text: modelData.appName
+                                color: theme.textMuted
+                                elide: Text.ElideRight
+                                font.pixelSize: root.appearance.textSize - 2
+                                font.bold: true
+                            }
+
+                            Repeater {
+                                model: parent.modelData.items
+
+                                delegate: Rectangle {
+                                    id: notificationEntry
+
+                                    required property var modelData
+
+                                    width: notificationGroups.width
+                                    readonly property var actions: modelData.notification
+                                        ? modelData.notification.actions : []
+                                    height: 64 + (actions.length > 0 ? 36 : 0)
+                                    radius: root.appearance.radius
+                                    color: notificationHover.hovered
+                                        ? theme.surfaceHover : theme.backgroundSecondary
+
+                                    Behavior on color {
+                                        ColorAnimation { duration: 140 }
+                                    }
+
+                                    HoverHandler {
+                                        id: notificationHover
+                                    }
+
+                                    Text {
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 12
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: "󰂚"
+                                        color: theme.accent
+                                        font.pixelSize: 18
+                                        font.bold: true
+                                    }
+
+                                    Rectangle {
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: 10
+                                        anchors.top: parent.top
+                                        anchors.topMargin: 8
+                                        visible: modelData.count > 1
+                                        width: 24
+                                        height: 20
+                                        radius: 10
+                                        color: theme.accent
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: modelData.count
+                                            color: theme.background
+                                            font.pixelSize: root.appearance.textSize - 3
+                                            font.bold: true
+                                        }
+                                    }
+
+                                    Column {
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 42
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: modelData.count > 1 ? 42 : 14
+                                        anchors.top: parent.top
+                                        anchors.topMargin: 11
+                                        spacing: 2
+
+                                        Text {
+                                            width: parent.width
+                                            text: modelData.summary || "Notification"
+                                            color: theme.text
+                                            elide: Text.ElideRight
+                                            font.pixelSize: root.appearance.textSize
+                                            font.bold: true
+                                        }
+
+                                        Text {
+                                            width: parent.width
+                                            visible: text !== ""
+                                            text: modelData.body
+                                            color: theme.textMuted
+                                            textFormat: Text.PlainText
+                                            elide: Text.ElideRight
+                                            font.pixelSize: root.appearance.textSize - 2
+                                            font.bold: true
+                                        }
+                                    }
+
+                                    Row {
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 42
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: 12
+                                        anchors.bottom: parent.bottom
+                                        anchors.bottomMargin: 8
+                                        height: 28
+                                        spacing: 6
+                                        visible: parent.actions.length > 0
+
+                                        Repeater {
+                                            model: notificationEntry.actions
+
+                                            delegate: Rectangle {
+                                                required property var modelData
+
+                                                width: Math.min(140, actionLabel.implicitWidth + 18)
+                                                height: parent.height
+                                                radius: root.appearance.radius
+                                                color: actionHover.hovered ? theme.accentHover : theme.accent
+
+                                                HoverHandler {
+                                                    id: actionHover
+                                                }
+
+                                                Text {
+                                                    id: actionLabel
+
+                                                    anchors.centerIn: parent
+                                                    text: modelData.text
+                                                    color: theme.background
+                                                    font.pixelSize: root.appearance.textSize - 2
+                                                    font.bold: true
+                                                }
+
+                                                TapHandler {
+                                                    onTapped: {
+                                                        modelData.invoke();
+                                                        root.notificationHistory.remove(notificationEntry.modelData.id);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    TapHandler {
+                                        onTapped: {
+                                            if (parent.actions.length === 0)
+                                                root.notificationHistory.remove(modelData.id);
+                                        }
+                                    }
+                                }
+                            }
                         }
-
-                        Text {
-                            width: parent.width
-                            visible: text !== ""
-                            text: modelData.body
-                            color: theme.textMuted
-                            textFormat: Text.PlainText
-                            elide: Text.ElideRight
-                            font.pixelSize: root.appearance.textSize - 2
-                            font.bold: true
-                        }
                     }
+                }
 
-                    TapHandler {
-                        onTapped: root.notificationHistory.remove(modelData.id)
-                    }
+                Rectangle {
+                    id: notificationScrollbar
+
+                    visible: notificationScroller.contentHeight > notificationScroller.height
+                    anchors.right: parent.right
+                    anchors.rightMargin: 2
+                    y: notificationScroller.visibleArea.yPosition
+                        * (notificationScroller.height - notificationScrollbar.height)
+                    width: 3
+                    height: Math.max(28, notificationScroller.visibleArea.heightRatio
+                        * notificationScroller.height)
+                    radius: width / 2
+                    color: theme.accent
+                    opacity: 0.7
                 }
             }
         }

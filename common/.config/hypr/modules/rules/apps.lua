@@ -15,6 +15,14 @@ hl.layer_rule({
 })
 
 hl.layer_rule({
+	name = "ndro-desktop-widgets",
+	match = { namespace = "ndro-shell-desktop-widgets" },
+	ignore_alpha = 0.0,
+	blur = true,
+	dim_around = false,
+})
+
+hl.layer_rule({
 	name = "ndro-bar",
 	match = { class = "maim" },
 	ignore_alpha = 0.0,
@@ -48,5 +56,31 @@ hl.layer_rule({
 	ignore_alpha = 0.0,
 	blur = false,
 	dim_around = true,
+	animation = "popin",
+})
+
+hl.layer_rule({
+	name = "ndro-shell-overlay-blur",
+	match = { namespace = "ndro-shell-application-launcher|ndro-shell-clipboard-selector|ndro-shell-quick-search|ndro-shell-audio-sink-selector|ndro-shell-theme-selector|ndro-shell-command-launcher" },
+	ignore_alpha = 0.0,
+	blur = true,
+	dim_around = false,
+})
+
+hl.layer_rule({
+	name = "ndro-shell-switcher-overlays",
+	match = { namespace = "ndro-shell-window-switcher|ndro-shell-workspace-overview" },
+	ignore_alpha = 0.0,
+	blur = true,
+	dim_around = false,
+	animation = "popin",
+})
+
+hl.layer_rule({
+	name = "ndro-shell-panel-overlays",
+	match = { namespace = "ndro-shell-screen-capture|ndro-shell-control-center" },
+	ignore_alpha = 0.0,
+	blur = true,
+	dim_around = false,
 	animation = "popin",
 })
