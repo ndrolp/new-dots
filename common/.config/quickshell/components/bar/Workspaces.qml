@@ -61,6 +61,7 @@ Rectangle {
                 readonly property int workspaceId: modelData
                 readonly property bool active: root.workspaceService.isActive(workspaceId)
                 readonly property bool occupied: root.workspaceService.isOccupied(workspaceId)
+                readonly property int toplevelCount: root.workspaceService.toplevelCount(workspaceId)
                 readonly property bool urgent: !active
                     && root.workspaceService.isUrgent(workspaceId)
                 readonly property string workspaceGlyph: root.appearance.workspaceGlyphsEnabled
@@ -119,6 +120,30 @@ Rectangle {
                         }
                     }
 
+                }
+
+                Rectangle {
+                    anchors.right: parent.right
+                    anchors.rightMargin: -3
+                    anchors.top: parent.top
+                    anchors.topMargin: -3
+                    width: 12
+                    height: 12
+                    radius: width / 2
+                    color: workspaceButton.urgent ? theme.red : theme.backgroundSecondary
+                    border.color: workspaceButton.urgent ? theme.red : theme.border
+                    border.width: 1
+                    visible: root.appearance.workspaceAppCountVisible
+                        && workspaceButton.occupied && !workspaceButton.active
+                    z: 2
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: workspaceButton.toplevelCount > 9 ? "9+" : workspaceButton.toplevelCount
+                        color: workspaceButton.urgent ? theme.background : theme.textMuted
+                        font.pixelSize: 7
+                        font.bold: true
+                    }
                 }
 
                 HoverHandler {

@@ -1,12 +1,5 @@
 {
     "activeSearchEngineIndex": 0,
-    "searchEngines": [
-        {
-            "glyph": "󰖟",
-            "label": "Google",
-            "searchUrl": "https://www.google.com/search?q=%s"
-        }
-    ],
     "items": [
         {
             "glyph": "󰝆",
@@ -26,7 +19,7 @@
         {
             "glyph": "󰆉",
             "label": "AnimeFLV",
-            "url": "https://www3.animeflv.net"
+            "url": "https://animeflv.or.at/"
         },
         {
             "glyph": "󰸉",
@@ -57,6 +50,13 @@
             "glyph": "󰚩",
             "label": "ChatGPT",
             "url": "https://chatgpt.com"
+        }
+    ],
+    "searchEngines": [
+        {
+            "glyph": "󰖟",
+            "label": "Google",
+            "searchUrl": "https://www.google.com/search?q=%s"
         }
     ]
 }

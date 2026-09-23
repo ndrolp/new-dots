@@ -29,6 +29,7 @@ hl.bind(mainMod .. " + SHIFT + r", hl.dsp.exec_cmd("~/.dotfiles/scripts/hyprland
 hl.bind(mainMod .. " + r", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call command-launcher toggle"))
 hl.bind(mainMod .. " + SHIFT + w", hl.dsp.exec_cmd("~/.dotfiles/scripts/hyprland/move_workspaces.sh"))
 hl.bind(mainMod .. " + g", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call quick-search toggle"))
+hl.bind(mainMod .. " + f", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call unified-search toggle"))
 hl.bind(mainMod .. " + d", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call launcher toggle"))
 hl.bind(mainMod .. " + v", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call clipboard toggle"))
 hl.bind(mainMod .. " + p", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call config toggle"))

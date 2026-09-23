@@ -60,16 +60,21 @@ QtObject {
     }
 
     function isOccupied(id) {
+        return toplevelCount(id) > 0;
+    }
+
+    function toplevelCount(id) {
         const toplevels = Hyprland.toplevels.values;
+        let count = 0;
 
         for (let index = 0; index < toplevels.length; index++) {
             const workspace = toplevels[index].workspace;
 
             if (workspace !== null && workspace.id === id)
-                return true;
+                count++;
         }
 
-        return false;
+        return count;
     }
 
     function isUrgent(id) {

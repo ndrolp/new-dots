@@ -16,7 +16,25 @@ Variants {
 
     model: Quickshell.screens
 
-    readonly property var widgetOrder: ["media", "system", "calendar", "network", "weather"]
+    readonly property var defaultWidgetOrder: ["media", "system", "calendar", "network", "weather"]
+    readonly property var widgetOrder: {
+        const savedOrder = appearance.desktopWidgetOrder || [];
+        const order = [];
+
+        for (let index = 0; index < savedOrder.length; index++) {
+            const widget = savedOrder[index];
+            if (defaultWidgetOrder.indexOf(widget) !== -1 && order.indexOf(widget) === -1)
+                order.push(widget);
+        }
+
+        for (let index = 0; index < defaultWidgetOrder.length; index++) {
+            const widget = defaultWidgetOrder[index];
+            if (order.indexOf(widget) === -1)
+                order.push(widget);
+        }
+
+        return order;
+    }
     readonly property int widgetGap: 10
 
     function widgetEnabled(widget) {
@@ -91,12 +109,12 @@ Variants {
         color: Qt.rgba(cardTheme.surface.r, cardTheme.surface.g, cardTheme.surface.b, 0.78)
         border.color: cardTheme.border
         border.width: 1
-        x: position.endsWith("left") ? 48
-            : position.endsWith("right") ? parent.width - width - 48
+        x: position.endsWith("left") ? 28
+            : position.endsWith("right") ? parent.width - width - 28
             : (parent.width - width) / 2
-        y: position.startsWith("top") ? 82 + root.stackOffset(position, widget)
+        y: position.startsWith("top") ? 62 + root.stackOffset(position, widget)
             : position.startsWith("bottom")
-                ? parent.height - height - 56 - root.stackOffset(position, widget)
+                ? parent.height - height - 36 - root.stackOffset(position, widget)
                 : (parent.height - root.stackHeight(position)) / 2
                     + root.stackOffset(position, widget)
 

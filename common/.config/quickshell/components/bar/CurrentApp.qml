@@ -8,6 +8,7 @@ Row {
 
     required property var appearance
     required property var monitorScreen
+    property bool enabled: true
 
     readonly property var rawActiveToplevel: Hyprland.activeToplevel
     readonly property var monitor: Hyprland.monitorFor(monitorScreen)
@@ -32,7 +33,7 @@ Row {
         ? Math.max(120, Math.min(320, monitorScreen.width * 0.14)) : 320
 
     spacing: appearance.spacing
-    visible: label !== "" && monitor !== null && Hyprland.focusedWorkspace
+    visible: enabled && label !== "" && monitor !== null && Hyprland.focusedWorkspace
         && Hyprland.focusedWorkspace.monitor !== null
         && Hyprland.focusedWorkspace.monitor.name === monitor.name
     width: visible ? implicitWidth : 0

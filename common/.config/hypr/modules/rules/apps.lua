@@ -61,7 +61,7 @@ hl.layer_rule({
 
 hl.layer_rule({
 	name = "ndro-shell-overlay-blur",
-	match = { namespace = "ndro-shell-application-launcher|ndro-shell-clipboard-selector|ndro-shell-quick-search|ndro-shell-audio-sink-selector|ndro-shell-theme-selector|ndro-shell-command-launcher" },
+	match = { namespace = "ndro-shell-application-launcher|ndro-shell-clipboard-selector|ndro-shell-quick-search|ndro-shell-unified-search|ndro-shell-audio-sink-selector|ndro-shell-theme-selector|ndro-shell-command-launcher" },
 	ignore_alpha = 0.0,
 	blur = true,
 	dim_around = false,

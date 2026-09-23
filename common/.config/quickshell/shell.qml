@@ -24,6 +24,7 @@ ShellRoot {
     property bool powerMenuOpen: false
     property bool clipboardSelectorOpen: false
     property bool quickSearchOpen: false
+    property bool unifiedSearchOpen: false
     property bool audioSinkSelectorOpen: false
     property bool commandLauncherOpen: false
     property bool windowSwitcherOpen: false
@@ -218,6 +219,16 @@ ShellRoot {
         open: shell.quickSearchOpen
 
         onCloseRequested: shell.quickSearchOpen = false
+    }
+
+    Panels.UnifiedSearch {
+        appearance: appearance
+        bookmarks: bookmarks
+        clipboardHistory: clipboardHistory
+        workspaceService: workspaceService
+        open: shell.unifiedSearchOpen
+
+        onCloseRequested: shell.unifiedSearchOpen = false
     }
 
     Panels.AudioSinkSelector {
@@ -429,6 +440,14 @@ ShellRoot {
 
         function toggle() {
             shell.quickSearchOpen = !shell.quickSearchOpen;
+        }
+    }
+
+    IpcHandler {
+        target: "unified-search"
+
+        function toggle() {
+            shell.unifiedSearchOpen = !shell.unifiedSearchOpen;
         }
     }
 

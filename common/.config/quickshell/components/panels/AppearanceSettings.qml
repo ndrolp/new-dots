@@ -14,6 +14,72 @@ Column {
         id: theme
     }
 
+    Rectangle {
+        width: parent.width
+        height: 44
+        radius: root.appearance.radius
+        color: densityHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+
+        HoverHandler {
+            id: densityHover
+        }
+
+        Text {
+            anchors.left: parent.left
+            anchors.leftMargin: 12
+            anchors.verticalCenter: parent.verticalCenter
+            text: "DENSITY PRESET"
+            color: theme.text
+            font.pixelSize: root.appearance.textSize - 1
+            font.bold: true
+        }
+
+        ComboBox {
+            id: densitySelector
+
+            anchors.right: parent.right
+            anchors.rightMargin: 6
+            anchors.verticalCenter: parent.verticalCenter
+            width: 150
+            height: 32
+            textRole: "label"
+            model: [
+                { label: "Compact", value: "compact" },
+                { label: "Balanced", value: "balanced" },
+                { label: "Spacious", value: "spacious" }
+            ]
+            currentIndex: root.appearance.densityPreset === "compact" ? 0
+                : root.appearance.densityPreset === "spacious" ? 2 : 1
+
+            contentItem: Text {
+                leftPadding: 10
+                rightPadding: 30
+                verticalAlignment: Text.AlignVCenter
+                text: densitySelector.displayText
+                color: theme.accent
+                elide: Text.ElideRight
+                font.pixelSize: root.appearance.textSize - 1
+                font.bold: true
+            }
+
+            indicator: Text {
+                anchors.right: parent.right
+                anchors.rightMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                text: "󰅂"
+                color: theme.accent
+                font.pixelSize: root.appearance.textSize - 1
+            }
+
+            background: Rectangle {
+                radius: root.appearance.radius
+                color: theme.surface
+            }
+
+            onActivated: root.appearance.applyDensityPreset(model[index].value)
+        }
+    }
+
     Repeater {
         model: [
             { label: "Bar height", from: 24, to: 56, propertyName: "barHeight" },
@@ -71,6 +137,7 @@ Column {
             { label: "BACKGROUND CLOCK", propertyName: "backgroundClockEnabled" },
             { label: "CLOCK CALENDAR", propertyName: "backgroundClockCalendarEnabled" },
             { label: "HIDE EMPTY WORKSPACES", propertyName: "hideEmptyWorkspaces" },
+            { label: "SHOW WORKSPACE APP COUNTS", propertyName: "workspaceAppCountVisible" },
             { label: "TRANSPARENT PILLS", propertyName: "pillsTransparent" }
         ]
 

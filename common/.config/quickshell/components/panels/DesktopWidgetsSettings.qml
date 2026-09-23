@@ -10,6 +10,43 @@ Column {
     width: parent ? parent.width : 0
     spacing: 12
 
+    readonly property var defaultWidgetOrder: ["media", "system", "calendar", "network", "weather"]
+    readonly property var widgetOrder: {
+        const savedOrder = appearance.desktopWidgetOrder || [];
+        const order = [];
+
+        for (let index = 0; index < savedOrder.length; index++) {
+            const widget = savedOrder[index];
+            if (defaultWidgetOrder.indexOf(widget) !== -1 && order.indexOf(widget) === -1)
+                order.push(widget);
+        }
+
+        for (let index = 0; index < defaultWidgetOrder.length; index++) {
+            const widget = defaultWidgetOrder[index];
+            if (order.indexOf(widget) === -1)
+                order.push(widget);
+        }
+
+        return order;
+    }
+
+    function labelForWidget(widget) {
+        return widget.toUpperCase();
+    }
+
+    function moveWidget(widget, offset) {
+        const order = widgetOrder.slice();
+        const from = order.indexOf(widget);
+        const to = from + offset;
+
+        if (from < 0 || to < 0 || to >= order.length)
+            return;
+
+        order.splice(from, 1);
+        order.splice(to, 0, widget);
+        appearance.desktopWidgetOrder = order;
+    }
+
     Config.Theme {
         id: theme
     }
@@ -150,11 +187,116 @@ Column {
         }
     }
 
+    component WidgetOrderRow: Rectangle {
+        id: orderRow
+
+        required property string widget
+        required property int orderIndex
+
+        width: root.width
+        height: 40
+        radius: root.appearance.radius
+        color: theme.backgroundSecondary
+
+        Text {
+            anchors.left: parent.left
+            anchors.leftMargin: 12
+            anchors.verticalCenter: parent.verticalCenter
+            text: (parent.orderIndex + 1) + ".  " + root.labelForWidget(parent.widget)
+            color: theme.text
+            font.pixelSize: root.appearance.textSize - 1
+            font.bold: true
+        }
+
+        Row {
+            anchors.right: parent.right
+            anchors.rightMargin: 6
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 4
+
+            Rectangle {
+                width: 30
+                height: 28
+                radius: root.appearance.radius
+                color: upHover.hovered && orderRow.orderIndex > 0 ? theme.surfaceHover : theme.surface
+                opacity: orderRow.orderIndex > 0 ? 1 : 0.45
+
+                HoverHandler {
+                    id: upHover
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "Up"
+                    color: theme.accent
+                    font.pixelSize: root.appearance.textSize - 3
+                    font.bold: true
+                }
+
+                TapHandler {
+                    enabled: orderRow.orderIndex > 0
+                    onTapped: root.moveWidget(orderRow.widget, -1)
+                }
+            }
+
+            Rectangle {
+                width: 42
+                height: 28
+                radius: root.appearance.radius
+                color: downHover.hovered && orderRow.orderIndex < root.widgetOrder.length - 1
+                    ? theme.surfaceHover : theme.surface
+                opacity: orderRow.orderIndex < root.widgetOrder.length - 1 ? 1 : 0.45
+
+                HoverHandler {
+                    id: downHover
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "Down"
+                    color: theme.accent
+                    font.pixelSize: root.appearance.textSize - 3
+                    font.bold: true
+                }
+
+                TapHandler {
+                    enabled: orderRow.orderIndex < root.widgetOrder.length - 1
+                    onTapped: root.moveWidget(orderRow.widget, 1)
+                }
+            }
+        }
+    }
+
     Text {
         text: "Enable a widget, then choose where it appears on the desktop."
         color: theme.textMuted
         font.pixelSize: root.appearance.textSize - 1
         wrapMode: Text.Wrap
+    }
+
+    Text {
+        text: "STACK ORDER"
+        color: theme.textMuted
+        font.pixelSize: root.appearance.textSize - 2
+        font.bold: true
+    }
+
+    Text {
+        text: "Sets top-to-bottom order when widgets share a position."
+        color: theme.textMuted
+        font.pixelSize: root.appearance.textSize - 1
+        wrapMode: Text.Wrap
+    }
+
+    Repeater {
+        model: root.widgetOrder
+
+        delegate: WidgetOrderRow {
+            required property string modelData
+
+            widget: modelData
+            orderIndex: index
+        }
     }
 
     WidgetToggle { label: "MEDIA"; propertyName: "desktopMediaEnabled" }

@@ -3,6 +3,7 @@ import Quickshell.Io
 
 QtObject {
     property alias barHeight: settings.barHeight
+    property alias densityPreset: settings.densityPreset
     property alias horizontalPadding: settings.horizontalPadding
     property alias spacing: settings.spacing
     property alias radius: settings.radius
@@ -14,6 +15,7 @@ QtObject {
     property alias workspacePadding: settings.workspacePadding
     property alias workspaceGlyphsEnabled: settings.workspaceGlyphsEnabled
     property alias hideEmptyWorkspaces: settings.hideEmptyWorkspaces
+    property alias workspaceAppCountVisible: settings.workspaceAppCountVisible
     property alias workspaceGlyphs: settings.workspaceGlyphs
     property alias pillsTransparent: settings.pillsTransparent
     property alias transparentBarTopMargin: settings.transparentBarTopMargin
@@ -37,9 +39,43 @@ QtObject {
     property alias desktopWeatherEnabled: settings.desktopWeatherEnabled
     property alias desktopWeatherPosition: settings.desktopWeatherPosition
     property alias desktopWeatherLocation: settings.desktopWeatherLocation
+    property alias desktopWidgetOrder: settings.desktopWidgetOrder
+    property alias statusModuleOrder: settings.statusModuleOrder
+    property alias statusModuleEnabled: settings.statusModuleEnabled
+    property alias statusModuleGroups: settings.statusModuleGroups
+    property alias statusModulePlacement: settings.statusModulePlacement
+    property alias barElementEnabled: settings.barElementEnabled
+    property alias barElementPlacement: settings.barElementPlacement
     property alias notificationPopupLocation: settings.notificationPopupLocation
     property alias doNotDisturb: settings.doNotDisturb
     property alias barTransparent: settings.barTransparent
+
+    function applyDensityPreset(preset) {
+        densityPreset = preset;
+
+        if (preset === "compact") {
+            barHeight = 30;
+            horizontalPadding = 8;
+            spacing = 4;
+            pillVerticalPadding = 2;
+            workspacePadding = 3;
+            textSize = 13;
+        } else if (preset === "spacious") {
+            barHeight = 38;
+            horizontalPadding = 16;
+            spacing = 12;
+            pillVerticalPadding = 5;
+            workspacePadding = 5;
+            textSize = 15;
+        } else {
+            barHeight = 34;
+            horizontalPadding = 12;
+            spacing = 8;
+            pillVerticalPadding = 3;
+            workspacePadding = 4;
+            textSize = 14;
+        }
+    }
 
     property var settingsFile: FileView {
         id: settingsFile
@@ -60,6 +96,7 @@ QtObject {
             id: settings
 
             property int barHeight: 32
+            property string densityPreset: "balanced"
             property int horizontalPadding: 12
             property int spacing: 8
             property int radius: 8
@@ -71,6 +108,7 @@ QtObject {
             property int workspacePadding: 4
             property bool workspaceGlyphsEnabled: false
             property bool hideEmptyWorkspaces: false
+            property bool workspaceAppCountVisible: true
             property var workspaceGlyphs: [
                 "", "", "", "", "", "", "", "", "", "",
                 "", "", "", "", "", "", "", "", "", ""
@@ -97,6 +135,26 @@ QtObject {
             property bool desktopWeatherEnabled: false
             property string desktopWeatherPosition: "top-center"
             property string desktopWeatherLocation: "Ourense, ES"
+            property var desktopWidgetOrder: ["media", "system", "calendar", "network", "weather"]
+            property var statusModuleOrder: ["media", "audio", "bluetooth", "tray", "network", "battery", "clock"]
+            property var statusModuleEnabled: {
+                "media": true,
+                "audio": true,
+                "bluetooth": true,
+                "tray": true,
+                "network": true,
+                "battery": true,
+                "clock": true
+            }
+            property var statusModuleGroups: {}
+            property var statusModulePlacement: {}
+            property var barElementEnabled: {
+                "arch": true,
+                "system": true,
+                "currentApp": true,
+                "workspaces": true
+            }
+            property var barElementPlacement: {}
             property string notificationPopupLocation: "top-center"
             property bool doNotDisturb: false
             property bool barTransparent: false

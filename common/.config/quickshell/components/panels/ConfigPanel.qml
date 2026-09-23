@@ -12,6 +12,7 @@ Rectangle {
     required property var bookmarks
 
     property string currentSection: "Appearance"
+    property string pendingSection: ""
     property string wallpaperView: "Selection"
     property string selectedWallpaperMonitor: ""
 
@@ -33,6 +34,8 @@ Rectangle {
             properties.bookmarks = root.bookmarks;
         } else if (currentSection === "Widgets") {
             source = "DesktopWidgetsSettings.qml";
+        } else if (currentSection === "Status") {
+            source = "StatusLayoutSettings.qml";
         } else if (currentSection === "Session") {
             source = "SessionSettings.qml";
         } else {
@@ -47,7 +50,14 @@ Rectangle {
     }
 
     Component.onCompleted: loadCurrentSection()
-    onCurrentSectionChanged: loadCurrentSection()
+
+    function selectSection(section) {
+        if (section === currentSection || sectionTransition.running)
+            return;
+
+        pendingSection = section;
+        sectionTransition.start();
+    }
 
     implicitWidth: 900
     implicitHeight: 500
@@ -136,6 +146,7 @@ Rectangle {
                         { label: "Workspace Labels", icon: "󰌌", section: "Labels" },
                         { label: "Quick Search", icon: "󰍉", section: "Bookmarks" },
                         { label: "Desktop Widgets", icon: "󰖕", section: "Widgets" },
+                        { label: "Status Bar", icon: "󰍛", section: "Status" },
                         { label: "Session", icon: "󰌾", section: "Session" },
                         { label: "Wallpapers", icon: "󰸉", section: "Wallpapers" }
                     ]
@@ -180,7 +191,7 @@ Rectangle {
                         }
 
                         TapHandler {
-                            onTapped: root.currentSection = modelData.section
+                            onTapped: root.selectSection(modelData.section)
                         }
                     }
                 }
@@ -206,6 +217,7 @@ Rectangle {
                                 : root.currentSection === "Labels" ? "Workspace Labels"
                                     : root.currentSection === "Bookmarks" ? "Quick Search"
                                         : root.currentSection === "Widgets" ? "Desktop Widgets"
+                                        : root.currentSection === "Status" ? "Status Bar"
                                         : root.currentSection === "Session" ? "Session"
                                             : "Wallpapers"
                         color: theme.text
@@ -223,6 +235,8 @@ Rectangle {
                                         ? "Manage quick-search bookmarks and search engines."
                                     : root.currentSection === "Widgets"
                                         ? "Enable desktop widgets and choose their placement."
+                                    : root.currentSection === "Status"
+                                        ? "Arrange, show, and group status modules."
                                     : root.currentSection === "Session"
                                         ? "Control the active session and review idle behavior."
                                         : "Choose a wallpaper for each display."
@@ -258,6 +272,33 @@ Rectangle {
                     }
                 }
             }
+        }
+    }
+
+    SequentialAnimation {
+        id: sectionTransition
+
+        NumberAnimation {
+            target: sectionLoader
+            property: "opacity"
+            to: 0
+            duration: 100
+            easing.type: Easing.OutCubic
+        }
+
+        ScriptAction {
+            script: {
+                root.currentSection = root.pendingSection;
+                root.loadCurrentSection();
+            }
+        }
+
+        NumberAnimation {
+            target: sectionLoader
+            property: "opacity"
+            to: 1
+            duration: 180
+            easing.type: Easing.OutCubic
         }
     }
 
