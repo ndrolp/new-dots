@@ -123,6 +123,74 @@ Column {
                         )
                     }
                 }
+
+                Rectangle {
+                    width: parent.width
+                    height: 38
+                    radius: root.appearance.radius
+                    color: profileHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+
+                    HoverHandler {
+                        id: profileHover
+                    }
+
+                    Text {
+                        anchors.left: parent.left
+                        anchors.leftMargin: 12
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "BAR PROFILE"
+                        color: theme.text
+                        font.pixelSize: root.appearance.textSize - 1
+                        font.bold: true
+                    }
+
+                    ComboBox {
+                        id: profileSelector
+
+                        anchors.right: parent.right
+                        anchors.rightMargin: 6
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 144
+                        height: 30
+                        textRole: "label"
+                        model: [
+                            { label: "Use active", value: "" },
+                            { label: "Minimal", value: "minimal" },
+                            { label: "Work", value: "work" },
+                            { label: "Media", value: "media" },
+                            { label: "Presentation", value: "presentation" }
+                        ]
+                        currentIndex: {
+                            const profile = root.monitors.displaySettingsFor(monitorDescription).barProfile;
+                            for (let index = 0; index < model.length; index++) {
+                                if (model[index].value === profile)
+                                    return index;
+                            }
+
+                            return 0;
+                        }
+
+                        contentItem: Text {
+                            leftPadding: 8
+                            verticalAlignment: Text.AlignVCenter
+                            text: profileSelector.displayText
+                            color: theme.accent
+                            font.pixelSize: root.appearance.textSize - 2
+                            font.bold: true
+                        }
+
+                        indicator: Item {}
+
+                        background: Rectangle {
+                            radius: root.appearance.radius
+                            color: theme.surface
+                        }
+
+                        onActivated: root.monitors.setDisplaySetting(
+                            monitorDescription, "barProfile", model[index].value
+                        )
+                    }
+                }
             }
         }
     }

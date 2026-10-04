@@ -21,7 +21,23 @@ hl.layer_rule({
 hl.window_rule({
 	name = "transparent",
 	match = {
-		class = "nemo|Spotify",
+		class = "nemo|Spotify|md.obsidian.Obsidian",
 	},
 	opacity = 0.9,
+})
+
+hl.window_rule({
+	name = "to-workspace-2",
+	match = {
+		class = "firefox|qutebrowser|Brave-browser|chromium|google-chrome|vivaldi|microsoft-edge|librewolf|waterfox",
+	},
+	workspace = 2,
+})
+
+hl.window_rule({
+	name = "to-workspace-4",
+	match = {
+		class = "discord|dmd.obsidian.Obsidian|obsidian|Obsidian|obsidian-app|obsidian-app-qt|obsidian-app-qt5|obsidian-app-qt6",
+	},
+	workspace = 4,
 })

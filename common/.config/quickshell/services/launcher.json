@@ -3,10 +3,18 @@
         "code"
     ],
     "recent": [
+        "proton.vpn.app.gtk",
+        "blueman-manager",
+        "ranger",
+        "org.gnome.Software",
+        "openlogi",
+        "org.gnome.Weather",
         "obsidian",
+        "org.gnome.Calendar",
+        "bssh",
+        "org.kde.filelight",
         "org.gnome.Snapshot",
         "rawtherapee",
-        "org.kde.filelight",
         "nemo",
         "org.kde.dolphin",
         "libreoffice-writer",
@@ -14,13 +22,6 @@
         "com.rtosta.zapzap",
         "wps-office-et",
         "nwg-look",
-        "org.inkscape.Inkscape",
-        "arandr",
-        "code",
-        "android-studio",
-        "firefox",
-        "blueman-manager",
-        "bssh",
-        "org.gnome.Nautilus"
+        "org.inkscape.Inkscape"
     ]
 }

@@ -104,6 +104,9 @@ Row {
             : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
                 || root.appearance.statusIsland ? "transparent" : theme.surface
 
+        border.width: appearance.barTransparentBorder ? 1 : 0
+        border.color: appearance.barTransparentBorder ? theme.border : "transparent"
+
         Behavior on color {
             ColorAnimation {
                 duration: 140

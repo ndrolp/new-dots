@@ -23,24 +23,38 @@ hl.bind(mainMod .. " + SHIFT + f", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
 hl.bind(win .. " + SHIFT + S", hl.dsp.exec_cmd("~/.dotfiles/scripts/screenshots/basic.sh"))
 hl.bind(mainMod .. " + SHIFT + e", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call power toggle"))
-hl.bind(mainMod .. " + SHIFT + a", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call audio-sinks toggle"))
+hl.bind(
+	mainMod .. " + SHIFT + a",
+	hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call audio-sinks toggle")
+)
 hl.bind(win .. " + t", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call themes toggle"))
 hl.bind(mainMod .. " + SHIFT + r", hl.dsp.exec_cmd("~/.dotfiles/scripts/hyprland/reload.sh"))
 hl.bind(mainMod .. " + r", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call command-launcher toggle"))
 hl.bind(mainMod .. " + SHIFT + w", hl.dsp.exec_cmd("~/.dotfiles/scripts/hyprland/move_workspaces.sh"))
 hl.bind(mainMod .. " + g", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call quick-search toggle"))
 hl.bind(mainMod .. " + f", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call unified-search toggle"))
+hl.bind(mainMod .. " + CTRL + 1", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call bar-profiles minimal"))
+hl.bind(mainMod .. " + CTRL + 2", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call bar-profiles work"))
+hl.bind(mainMod .. " + CTRL + 3", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call bar-profiles media"))
+hl.bind(mainMod .. " + CTRL + 4", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call bar-profiles presentation"))
 hl.bind(mainMod .. " + d", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call launcher toggle"))
 hl.bind(mainMod .. " + v", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call clipboard toggle"))
 hl.bind(mainMod .. " + p", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call config toggle"))
 hl.bind(mainMod .. " + c", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call control-center toggle"))
+hl.bind(mainMod .. " + q", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call quick-settings toggle"))
 hl.bind(mainMod .. " + n", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call notifications toggle"))
 hl.bind(mainMod .. " + b", hl.dsp.exec_cmd("pypr expose"))
 hl.bind(mainMod .. " + SHIFT + b", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call wallpapers toggle"))
-hl.bind(mainMod .. " + SHIFT + x", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call screen-capture toggle"))
+hl.bind(
+	mainMod .. " + SHIFT + x",
+	hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call screen-capture toggle")
+)
 hl.bind(win .. " + b", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call workspace-overview toggle"))
 hl.bind(mainMod .. " + TAB", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call window-switcher next"))
-hl.bind(mainMod .. " + SHIFT + TAB", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call window-switcher previous"))
+hl.bind(
+	mainMod .. " + SHIFT + TAB",
+	hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call window-switcher previous")
+)
 hl.bind(win .. " + l", hl.dsp.exec_cmd("hyprlock"))
 hl.bind(mainMod .. " + left", hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
@@ -77,6 +91,12 @@ hl.bind(
 	),
 	{ locked = true, repeating = true }
 )
+hl.bind(
+	"XF86PowerOff",
+	hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call power toggle"),
+	{ locked = true, repeating = true }
+)
+
 hl.bind(
 	"XF86AudioMute",
 	hl.dsp.exec_cmd(

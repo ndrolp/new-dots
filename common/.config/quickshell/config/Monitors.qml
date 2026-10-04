@@ -48,7 +48,9 @@ QtObject {
             barVisible: configured && configured.barVisible !== undefined
                 ? configured.barVisible : defaults.barVisible !== false,
             backgroundClockVisible: configured && configured.backgroundClockVisible !== undefined
-                ? configured.backgroundClockVisible : defaults.backgroundClockVisible !== false
+                ? configured.backgroundClockVisible : defaults.backgroundClockVisible !== false,
+            barProfile: configured && configured.barProfile !== undefined
+                ? configured.barProfile : defaults.barProfile || ""
         };
     }
 
@@ -66,6 +68,10 @@ QtObject {
 
     function backgroundClockVisible(monitorName) {
         return displaySettingsFor(monitorName).backgroundClockVisible;
+    }
+
+    function barProfileFor(monitorName, fallbackProfile) {
+        return displaySettingsFor(monitorName).barProfile || fallbackProfile;
     }
 
     function monitorNames() {
@@ -96,7 +102,8 @@ QtObject {
             property var displaySettings: ({
                 "default": {
                     "barVisible": true,
-                    "backgroundClockVisible": true
+                    "backgroundClockVisible": true,
+                    "barProfile": ""
                 }
             })
         }

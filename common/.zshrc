@@ -213,6 +213,7 @@ alias bf="~/.dotfiles/scripts/lenovo/battery_max_charge.sh"
 alias wg="~/.dotfiles/scripts/wallpapers/wallpaper-generator.sh"
 alias wgd='~/.dotfiles/scripts/wallpapers/wallpaper-generator.sh "$HOME/Pictures/Wallpapers/[01] - Default/Default/"'
 alias s="paru -Ss"
+alias copilot_shell="copilot --resume=8759e196-980d-4fa5-9c70-9b5fc4dfdaeb"
 
 
 # Created by `pipx` on 2025-07-27 12:40:09

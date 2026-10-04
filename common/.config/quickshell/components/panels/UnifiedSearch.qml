@@ -12,10 +12,12 @@ Variants {
     required property var appearance
     required property var bookmarks
     required property var clipboardHistory
+    required property var monitors
     required property var workspaceService
     property bool open: false
 
     signal closeRequested()
+    signal settingsRequested()
 
     model: Quickshell.screens
 
@@ -28,6 +30,11 @@ Variants {
             && Hyprland.focusedWorkspace.monitor && monitor
             && Hyprland.focusedWorkspace.monitor.name === monitor.name
         property string searchQuery: ""
+        readonly property var categories: [
+            "ALL", "APPLICATIONS", "BOOKMARKS", "CLIPBOARD", "WINDOWS", "ACTIONS"
+        ]
+        property int selectedCategoryIndex: 0
+        readonly property string selectedCategory: categories[selectedCategoryIndex]
         readonly property var searchEngines: root.bookmarks.searchEngines
         property int selectedSearchEngineIndex: root.bookmarks.activeSearchEngineIndex
         readonly property var selectedSearchEngine: searchEngines.length > 0
@@ -102,12 +109,42 @@ Variants {
             return template + (template.includes("?") ? "&q=" : "?q=") + encodedQuery;
         }
 
-        function buildResults() {
+        function queryPrefix() {
+            const first = searchQuery.trim().charAt(0);
+            return first === ">" || first === "?" || first === "@" ? first : "";
+        }
+
+        function queryText() {
             const query = searchQuery.trim();
+            return queryPrefix() !== "" ? query.slice(1).trim() : query;
+        }
+
+        function categoryAllowed(category) {
+            const prefix = queryPrefix();
+
+            if (prefix === ">")
+                return category === "ACTIONS";
+            if (prefix === "?")
+                return category === "ACTIONS";
+            if (prefix === "@")
+                return category === "WINDOWS";
+
+            return selectedCategory === "ALL" || selectedCategory === category;
+        }
+
+        function selectCategory(offset) {
+            selectedCategoryIndex = (selectedCategoryIndex + offset + categories.length)
+                % categories.length;
+            resultList.currentIndex = 0;
+        }
+
+        function buildResults() {
+            const query = queryText();
             const normalizedQuery = query.toLowerCase();
             const results = [];
             const limit = 7;
-            const applications = DesktopEntries.applications.values.map(application => {
+            const applications = categoryAllowed("APPLICATIONS")
+                ? DesktopEntries.applications.values.map(application => {
                 if (application.noDisplay)
                     return null;
 
@@ -131,10 +168,10 @@ Variants {
             }).filter(result => result !== null)
                 .sort((first, second) => second.score - first.score
                     || first.title.localeCompare(second.title))
-                .slice(0, limit);
+                .slice(0, limit) : [];
             results.push(...applications);
 
-            const bookmarks = root.bookmarks.items.map(bookmark => {
+            const bookmarks = categoryAllowed("BOOKMARKS") ? root.bookmarks.items.map(bookmark => {
                 const searchable = (textValue(bookmark.label) + " "
                     + textValue(bookmark.url)).toLowerCase();
                 const score = fuzzyScore(searchable, normalizedQuery);
@@ -153,13 +190,13 @@ Variants {
             }).filter(result => result !== null)
                 .sort((first, second) => second.score - first.score
                     || first.title.localeCompare(second.title))
-                .slice(0, limit);
+                .slice(0, limit) : [];
             results.push(...bookmarks);
 
-            if (query !== "") {
+            if (query !== "" && categoryAllowed("ACTIONS") && queryPrefix() !== ">") {
                 results.push({
                     type: "search",
-                    category: "WEB SEARCH",
+                    category: "ACTIONS",
                     title: "Search " + selectedSearchEngine.label + " for “" + query + "”",
                     subtitle: selectedSearchEngine.searchUrl,
                     glyph: selectedSearchEngine.glyph || "󰖟",
@@ -167,7 +204,7 @@ Variants {
                 });
             }
 
-            const clipboard = root.clipboardHistory.orderedEntries.map(entry => {
+            const clipboard = categoryAllowed("CLIPBOARD") ? root.clipboardHistory.orderedEntries.map(entry => {
                 const preview = textValue(entry.preview);
                 const score = fuzzyScore(preview.toLowerCase(), normalizedQuery);
                 if (normalizedQuery !== "" && score < 0)
@@ -184,10 +221,10 @@ Variants {
                 };
             }).filter(result => result !== null)
                 .sort((first, second) => second.score - first.score)
-                .slice(0, limit);
+                .slice(0, limit) : [];
             results.push(...clipboard);
 
-            const toplevels = root.workspaceService.switcherToplevels().map(toplevel => {
+            const toplevels = categoryAllowed("WINDOWS") ? root.workspaceService.switcherToplevels().map(toplevel => {
                 const appClass = textValue(toplevel.lastIpcObject?.class
                     || toplevel.lastIpcObject?.initialClass || "application");
                 const title = textValue(toplevel.title) || appClass;
@@ -207,18 +244,56 @@ Variants {
                 };
             }).filter(result => result !== null)
                 .sort((first, second) => second.score - first.score)
-                .slice(0, limit);
+                .slice(0, limit) : [];
             results.push(...toplevels);
 
-            if (query !== "") {
+            if (query !== "" && categoryAllowed("ACTIONS") && queryPrefix() !== "?") {
                 results.push({
                     type: "command",
-                    category: "COMMAND",
+                    category: "ACTIONS",
                     title: "Run “" + query + "” in Kitty",
                     subtitle: "Open an interactive terminal",
                     glyph: "",
                     command: query
                 });
+            }
+
+            if (categoryAllowed("ACTIONS") && queryPrefix() === "") {
+                const actionItems = [
+                    {
+                        type: "settings",
+                        category: "ACTIONS",
+                        title: "Open shell settings",
+                        subtitle: "Configure appearance, displays, widgets, and status bar",
+                        glyph: "󰒓"
+                    }
+                ];
+                const workspaceIds = root.workspaceService.workspacesForScreen(
+                    modelData,
+                    root.monitors.workspacesFor(
+                        root.workspaceService.monitorDescriptionForScreen(modelData)
+                    )
+                );
+
+                for (let index = 0; index < workspaceIds.length; index++) {
+                    const workspaceId = workspaceIds[index];
+                    actionItems.push({
+                        type: "workspace",
+                        category: "ACTIONS",
+                        title: "Focus workspace " + workspaceId,
+                        subtitle: root.workspaceService.isActive(workspaceId)
+                            ? "Current workspace" : root.workspaceService.toplevelCount(workspaceId)
+                                + " open windows",
+                        glyph: "󰍹",
+                        workspaceId: workspaceId
+                    });
+                }
+
+                results.push(...actionItems.filter(result => {
+                    const score = fuzzyScore((result.title + " " + result.subtitle).toLowerCase(),
+                        normalizedQuery);
+                    return normalizedQuery === "" || score >= 0;
+                }).slice(0, limit));
             }
 
             return results;
@@ -276,6 +351,10 @@ Variants {
             } else if (result.type === "command") {
                 actionProcess.command = ["kitty", "-e", "sh", "-lc", result.command];
                 actionProcess.running = true;
+            } else if (result.type === "settings") {
+                root.settingsRequested();
+            } else if (result.type === "workspace") {
+                root.workspaceService.switchTo(result.workspaceId);
             } else {
                 return;
             }
@@ -288,6 +367,7 @@ Variants {
                 return;
 
             searchQuery = "";
+            selectedCategoryIndex = 0;
             selectedSearchEngineIndex = Math.max(0, Math.min(
                 root.bookmarks.activeSearchEngineIndex, searchEngines.length - 1));
             root.clipboardHistory.refresh();
@@ -424,6 +504,10 @@ Variants {
                             searchPanel.selectRelative(1);
                         } else if (event.key === Qt.Key_Up) {
                             searchPanel.selectRelative(-1);
+                        } else if (event.key === Qt.Key_Tab) {
+                            searchPanel.selectCategory(
+                                event.modifiers & Qt.ShiftModifier ? -1 : 1
+                            );
                         } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                             searchPanel.activateCurrent();
                         } else if (event.key === Qt.Key_Escape) {
@@ -441,7 +525,8 @@ Variants {
                     height: 18
 
                     Text {
-                        text: "UNIFIED SEARCH"
+                        text: searchPanel.selectedCategory === "ALL"
+                            ? "UNIFIED SEARCH" : searchPanel.selectedCategory
                         color: theme.text
                         font.family: theme.fontFamily
                         font.pixelSize: root.appearance.textSize - 3
@@ -450,7 +535,7 @@ Variants {
 
                     Text {
                         anchors.right: parent.right
-                        text: "↑↓ select  •  Enter open  •  Ctrl+←/→ search engine"
+                        text: "Tab category  •  > command  •  ? web  •  @ windows"
                         color: theme.textMuted
                         font.family: theme.fontFamily
                         font.pixelSize: root.appearance.textSize - 4

@@ -18,6 +18,7 @@ PanelWindow {
     property real reveal: 0
     property string sinkName: ""
     property string sinkType: ""
+    property string profileName: ""
     readonly property bool compact: mode === "caps"
 
     readonly property var audio: Pipewire.defaultAudioSink && Pipewire.defaultAudioSink.audio
@@ -30,6 +31,8 @@ PanelWindow {
         : mode === "sink" ? Math.min(460, Math.max(292, osdLabel.implicitWidth + 86)) : 292
     implicitHeight: compact ? 74 : 92
     WlrLayershell.namespace: "ndro-shell-osd"
+
+    mask: Region {}
 
     anchors {
         bottom: true
@@ -62,6 +65,13 @@ PanelWindow {
         mode = "sink";
         sinkName = description !== "" ? description : "Audio output";
         sinkType = description.toLowerCase();
+        reveal = 1;
+        dismissTimer.restart();
+    }
+
+    function showBarProfile(name) {
+        mode = "profile";
+        profileName = name;
         reveal = 1;
         dismissTimer.restart();
     }
@@ -184,11 +194,12 @@ PanelWindow {
                                 ? "󰋋"
                                 : root.sinkType.includes("hdmi") || root.sinkType.includes("displayport")
                                     ? "󰍹" : "󰓃")
+                            : root.mode === "profile" ? "󰘳"
                             : "󰪛"
                     color: root.mode === "caps" && root.capsLocked ? theme.background
                         : root.mode === "volume" ? theme.blue
                         : root.mode === "brightness" ? theme.yellow
-                        : root.mode === "sink" ? theme.accent : theme.textMuted
+                        : root.mode === "sink" || root.mode === "profile" ? theme.accent : theme.textMuted
                     font.pixelSize: 21
                     font.bold: true
                 }
@@ -206,6 +217,7 @@ PanelWindow {
                     text: root.mode === "volume" ? "Volume"
                         : root.mode === "brightness" ? "Brightness"
                         : root.mode === "sink" ? sinkName
+                        : root.mode === "profile" ? profileName + " bar profile"
                         : root.capsLocked ? "Caps Lock on" : "Caps Lock off"
                     color: theme.text
                     elide: Text.ElideRight

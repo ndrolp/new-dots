@@ -12,21 +12,15 @@ Item {
     required property var monitorScreen
     required property var monitors
     required property var pomodoro
+    required property var notificationHistory
+    required property var screenCapture
     required property var systemMonitor
     required property var workspaceService
 
     signal configRequested(var screen)
     signal statusPopupRequested(string popup)
+    signal notificationRequested()
     readonly property bool statusIslandEnabled: appearance.statusIsland
-    readonly property real statusIslandGap: appearance.spacing
-    readonly property real leftIslandGroupWidth: archButton.width + systemMonitor.width
-        + currentApp.width + leftStatusModules.width + (statusIslandGap * 3)
-    readonly property real islandSideSpacer: Math.max(leftIslandGroupWidth, statusModules.width)
-    readonly property real workspaceIslandSpacer: statusIslandGap * 3
-    readonly property real leftWorkspaceSpacer: workspaceIslandSpacer
-        + islandSideSpacer - leftIslandGroupWidth
-    readonly property real rightWorkspaceSpacer: workspaceIslandSpacer
-        + islandSideSpacer - statusModules.width
     readonly property real centerStatusGap: centerStatusModules.width > 0 ? appearance.spacing : 0
     readonly property real centeredContentWidth: workspaces.width + centerStatusGap
         + centerStatusModules.width
@@ -68,15 +62,64 @@ Item {
         return width;
     }
 
+    function statusZoneWidth(zone) {
+        if (zone === "left")
+            return leftStatusModules.width;
+        if (zone === "center")
+            return centerStatusModules.width;
+        return statusModules.width;
+    }
+
+    function zoneWidth(zone) {
+        const structuralWidth = structuralZoneWidth(zone);
+        const modulesWidth = statusZoneWidth(zone);
+        return structuralWidth + modulesWidth
+            + (structuralWidth > 0 && modulesWidth > 0 ? appearance.spacing : 0);
+    }
+
+    function statusIslandContentWidth() {
+        const zones = ["left", "center", "right"];
+        let width = 0;
+
+        for (let index = 0; index < zones.length; index++) {
+            const nextWidth = zoneWidth(zones[index]);
+            if (nextWidth > 0)
+                width += nextWidth + (width > 0 ? appearance.spacing : 0);
+        }
+
+        return width;
+    }
+
+    function statusIslandZoneStart(zone) {
+        const zones = ["left", "center", "right"];
+        let x = Math.round((root.width - statusIslandContentWidth()) / 2);
+
+        for (let index = 0; index < zones.length; index++) {
+            const candidate = zones[index];
+            const candidateWidth = zoneWidth(candidate);
+
+            if (candidate === zone)
+                return x;
+            if (candidateWidth > 0)
+                x += candidateWidth + (zoneWidth(zone) > 0 ? appearance.spacing : 0);
+        }
+
+        return x;
+    }
+
     function statusZoneX(zone, modules) {
+        const structuralWidth = structuralZoneWidth(zone);
+        const gap = structuralWidth > 0 && modules.width > 0 ? appearance.spacing : 0;
+
+        if (statusIslandEnabled)
+            return statusIslandZoneStart(zone) + structuralWidth + gap;
+
         const padding = appearance.barTransparent && appearance.transparentBarSlanted
             ? appearance.horizontalPadding : 0;
 
         if (zone === "right")
             return root.width - modules.width - padding;
 
-        const structuralWidth = structuralZoneWidth(zone);
-        const gap = structuralWidth > 0 && modules.width > 0 ? appearance.spacing : 0;
         const start = zone === "left" ? padding
             : Math.round((root.width - structuralWidth - gap - modules.width) / 2);
         return start + structuralWidth + gap;
@@ -84,7 +127,22 @@ Item {
 
     function structuralX(element) {
         const zone = elementPlacement(element);
-        const zoneModules = zone === "left" ? leftStatusModules : centerStatusModules;
+
+        if (statusIslandEnabled) {
+            let x = statusIslandZoneStart(zone);
+
+            for (let index = 0; index < structuralOrder.length; index++) {
+                const candidate = structuralOrder[index];
+                if (!elementVisible(candidate) || elementPlacement(candidate) !== zone)
+                    continue;
+                if (candidate === element)
+                    return x;
+                x += elementWidth(candidate) + appearance.spacing;
+            }
+
+            return x;
+        }
+
         const padding = appearance.barTransparent && appearance.transparentBarSlanted
             ? appearance.horizontalPadding : 0;
         let x = zone === "right"
@@ -105,6 +163,38 @@ Item {
         }
 
         return x;
+    }
+
+    function statusIslandLeft() {
+        const items = [
+            archButton, systemMonitor, currentApp, workspaces,
+            leftStatusModules, centerStatusModules, statusModules
+        ];
+        let left = root.width;
+
+        for (let index = 0; index < items.length; index++) {
+            const item = items[index];
+            if (item.visible && item.width > 0)
+                left = Math.min(left, item.x);
+        }
+
+        return Math.max(0, left - appearance.spacing);
+    }
+
+    function statusIslandRight() {
+        const items = [
+            archButton, systemMonitor, currentApp, workspaces,
+            leftStatusModules, centerStatusModules, statusModules
+        ];
+        let right = 0;
+
+        for (let index = 0; index < items.length; index++) {
+            const item = items[index];
+            if (item.visible && item.width > 0)
+                right = Math.max(right, item.x + item.width);
+        }
+
+        return Math.min(root.width, right + appearance.spacing);
     }
 
     function popupTrigger(popup) {
@@ -179,13 +269,9 @@ Item {
     }
 
     Rectangle {
-        x: workspaces.x - root.leftWorkspaceSpacer - root.leftIslandGroupWidth
-            - root.appearance.spacing
+        x: root.statusIslandLeft()
         y: 0
-        width: workspaces.width + root.leftIslandGroupWidth + root.leftWorkspaceSpacer
-            + root.centerStatusGap + centerStatusModules.width + root.rightWorkspaceSpacer
-            + statusModules.width
-            + (root.appearance.spacing * 2)
+        width: Math.max(0, root.statusIslandRight() - x)
         height: parent.height
         radius: root.appearance.statusIslandRadius
         color: theme.backgroundSecondary
@@ -279,11 +365,15 @@ Item {
         activePopup: root.activeStatusPopup
         monitorScreen: root.monitorScreen
         pomodoro: root.pomodoro
+        notificationHistory: root.notificationHistory
+        screenCapture: root.screenCapture
         placement: "left"
 
         onPopupRequested: function(popup) {
             root.statusPopupRequested(popup);
         }
+
+        onNotificationRequested: root.notificationRequested()
     }
 
     StatusModules {
@@ -295,11 +385,15 @@ Item {
         activePopup: root.activeStatusPopup
         monitorScreen: root.monitorScreen
         pomodoro: root.pomodoro
+        notificationHistory: root.notificationHistory
+        screenCapture: root.screenCapture
         placement: "center"
 
         onPopupRequested: function(popup) {
             root.statusPopupRequested(popup);
         }
+
+        onNotificationRequested: root.notificationRequested()
     }
 
     StatusModules {
@@ -316,10 +410,14 @@ Item {
         activePopup: root.activeStatusPopup
         monitorScreen: root.monitorScreen
         pomodoro: root.pomodoro
+        notificationHistory: root.notificationHistory
+        screenCapture: root.screenCapture
         placement: "right"
 
         onPopupRequested: function(popup) {
             root.statusPopupRequested(popup);
         }
+
+        onNotificationRequested: root.notificationRequested()
     }
 }

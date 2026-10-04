@@ -14,9 +14,12 @@ Item {
     required property var appearance
     required property var monitorScreen
     required property var pomodoro
+    required property var notificationHistory
+    required property var screenCapture
     property string placement: "right"
     property string activePopup: ""
     signal popupRequested(string popup)
+    signal notificationRequested()
 
     readonly property var audio: Pipewire.defaultAudioSink && Pipewire.defaultAudioSink.audio
         ? Pipewire.defaultAudioSink.audio : null
@@ -32,7 +35,8 @@ Item {
         ? (player.trackTitle !== "" ? player.trackTitle : player.identity) : ""
     property string displayedPlayerLabel: playerLabel
     readonly property var defaultModuleOrder: [
-        "media", "audio", "bluetooth", "tray", "network", "battery", "clock"
+        "notifications", "recording", "media", "audio", "bluetooth", "tray", "network",
+        "battery", "clock"
     ]
     readonly property var moduleOrder: {
         const savedOrder = appearance.statusModuleOrder || [];
@@ -127,10 +131,16 @@ Item {
             return player !== null;
         if (module === "battery")
             return hasBattery;
+        if (module === "recording")
+            return screenCapture.recording;
         return true;
     }
 
     function moduleWidth(module) {
+        if (module === "notifications")
+            return notificationButton.width;
+        if (module === "recording")
+            return recordingButton.width;
         if (module === "media")
             return mediaButton.width;
         if (module === "audio")
@@ -276,8 +286,116 @@ Item {
     }
 
     Rectangle {
+        id: notificationButton
+
+        visible: root.moduleVisible("notifications")
+        x: root.moduleX("notifications")
+        width: notificationContent.implicitWidth + 16
+        height: root.moduleHeight
+        radius: root.appearance.radius
+        color: notificationHover.hovered ? theme.surfaceHover
+            : root.isGrouped("notifications") || root.appearance.pillsTransparent
+                || root.appearance.transparentBarSlanted || root.appearance.statusIsland
+                ? "transparent" : theme.surface
+        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+
+        Behavior on color {
+            ColorAnimation { duration: 140 }
+        }
+
+        HoverHandler {
+            id: notificationHover
+        }
+
+        Row {
+            id: notificationContent
+
+            anchors.centerIn: parent
+            spacing: 5
+
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: root.appearance.doNotDisturb ? "󰂛" : "󰂚"
+                color: root.appearance.doNotDisturb ? theme.yellow
+                    : root.notificationHistory.unreadCount > 0 ? theme.accent : theme.textMuted
+                font.pixelSize: root.appearance.textSize
+                font.bold: true
+            }
+
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: root.notificationHistory.unreadCount > 0
+                text: root.notificationHistory.unreadCount > 99 ? "99+"
+                    : root.notificationHistory.unreadCount
+                color: root.appearance.doNotDisturb ? theme.yellow : theme.accent
+                font.pixelSize: root.appearance.textSize - 2
+                font.bold: true
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: root.notificationRequested()
+        }
+    }
+
+    Rectangle {
+        id: recordingButton
+
+        visible: root.moduleVisible("recording")
+        x: root.moduleX("recording")
+        width: recordingContent.implicitWidth + 16
+        height: root.moduleHeight
+        radius: root.appearance.radius
+        color: recordingHover.hovered ? theme.surfaceHover
+            : root.isGrouped("recording") || root.appearance.pillsTransparent
+                || root.appearance.transparentBarSlanted || root.appearance.statusIsland
+                ? "transparent" : theme.surface
+        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+
+        Behavior on color {
+            ColorAnimation { duration: 140 }
+        }
+
+        HoverHandler {
+            id: recordingHover
+        }
+
+        Row {
+            id: recordingContent
+
+            anchors.centerIn: parent
+            spacing: 5
+
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "󰑋"
+                color: theme.red
+                font.pixelSize: root.appearance.textSize
+                font.bold: true
+            }
+
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "REC"
+                color: theme.red
+                font.pixelSize: root.appearance.textSize - 2
+                font.bold: true
+            }
+        }
+
+        TapHandler {
+            onTapped: root.screenCapture.stopRecording()
+        }
+    }
+
+    Rectangle {
         id: mediaButton
 
+        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
         visible: root.moduleVisible("media")
         x: root.moduleX("media")
         width: mediaContent.implicitWidth + 16
@@ -286,6 +404,7 @@ Item {
         color: mediaHover.hovered ? theme.surfaceHover
             : root.isGrouped("media") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
                 || root.appearance.statusIsland ? "transparent" : theme.surface
+
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -379,6 +498,9 @@ Item {
             : root.isGrouped("audio") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
                 || root.appearance.statusIsland ? "transparent" : theme.surface
 
+        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+
         Behavior on color {
             ColorAnimation { duration: 140 }
         }
@@ -434,6 +556,9 @@ Item {
             : root.isGrouped("bluetooth") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
                 || root.appearance.statusIsland ? "transparent" : theme.surface
 
+        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+
         Behavior on color {
             ColorAnimation { duration: 140 }
         }
@@ -467,6 +592,9 @@ Item {
         color: trayHover.hovered ? theme.surfaceHover
             : root.isGrouped("tray") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
                 || root.appearance.statusIsland ? "transparent" : theme.surface
+
+        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -502,6 +630,9 @@ Item {
             : root.isGrouped("network") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
                 || root.appearance.statusIsland ? "transparent" : theme.surface
 
+        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+
         Behavior on color {
             ColorAnimation { duration: 140 }
         }
@@ -535,6 +666,9 @@ Item {
         color: batteryHover.hovered ? theme.surfaceHover
             : root.isGrouped("battery") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
                 || root.appearance.statusIsland ? "transparent" : theme.surface
+
+        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
             ColorAnimation { duration: 140 }
@@ -584,6 +718,9 @@ Item {
         color: clockHover.hovered ? theme.surfaceHover
             : root.isGrouped("clock") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
                 || root.appearance.statusIsland ? "transparent" : theme.surface
+
+        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
             ColorAnimation { duration: 140 }

@@ -50,6 +50,18 @@ Variants {
         close();
     }
 
+    function createWorkspace(screen) {
+        const ids = workspaceIds(screen);
+        const nextId = ids.length > 0 ? Math.min(21, Math.max(...ids) + 1) : 1;
+
+        if (ids.indexOf(nextId) !== -1)
+            return;
+
+        selectedWorkspaceId = nextId;
+        workspaceService.switchTo(nextId);
+        close();
+    }
+
     function close() {
         if (!open)
             return;
@@ -124,6 +136,17 @@ Variants {
                 } else if (event.key === Qt.Key_Up) {
                     root.selectRelative(-columns, modelData);
                     event.accepted = true;
+                } else if (event.key === Qt.Key_Home) {
+                    const ids = root.workspaceIds(modelData);
+                    root.selectedWorkspaceId = ids.length > 0 ? ids[0] : -1;
+                    event.accepted = true;
+                } else if (event.key === Qt.Key_End) {
+                    const ids = root.workspaceIds(modelData);
+                    root.selectedWorkspaceId = ids.length > 0 ? ids[ids.length - 1] : -1;
+                    event.accepted = true;
+                } else if (event.key === Qt.Key_N) {
+                    root.createWorkspace(modelData);
+                    event.accepted = true;
                 } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter
                         || event.key === Qt.Key_Space) {
                     root.activateSelected();
@@ -153,7 +176,7 @@ Variants {
 
                 Item {
                     width: parent.width
-                    height: 21
+                    height: 28
 
                     Text {
                         anchors.left: parent.left
@@ -167,9 +190,37 @@ Variants {
                     Text {
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
-                        text: "Arrow keys to select · Enter to focus"
+                        anchors.rightMargin: newWorkspaceButton.width + 10
+                        text: "Arrows select · Enter focus · N new"
                         color: theme.textMuted
                         font.pixelSize: root.appearance.textSize - 3
+                    }
+
+                    Rectangle {
+                        id: newWorkspaceButton
+
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 30
+                        height: 26
+                        radius: root.appearance.radius
+                        color: newWorkspaceHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+
+                        HoverHandler {
+                            id: newWorkspaceHover
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "+"
+                            color: theme.accent
+                            font.pixelSize: root.appearance.textSize + 2
+                            font.bold: true
+                        }
+
+                        TapHandler {
+                            onTapped: root.createWorkspace(overview.modelData)
+                        }
                     }
                 }
 
@@ -233,6 +284,48 @@ Variants {
                                     color: workspaceTile.active ? theme.accent : theme.textMuted
                                     font.pixelSize: root.appearance.textSize - 4
                                     font.bold: workspaceTile.active
+                                }
+                            }
+
+                            Row {
+                                width: parent.width
+                                height: 18
+                                spacing: 4
+                                visible: workspaceTile.windows.length > 0
+
+                                Repeater {
+                                    model: workspaceTile.windows.slice(0, 6)
+
+                                    delegate: Rectangle {
+                                        required property var modelData
+                                        readonly property string appClass: String(
+                                            modelData.lastIpcObject?.class
+                                                || modelData.lastIpcObject?.initialClass
+                                                || "application"
+                                        ).toLowerCase()
+
+                                        width: 18
+                                        height: 18
+                                        radius: root.appearance.radius
+                                        color: theme.surface
+
+                                        IconImage {
+                                            anchors.centerIn: parent
+                                            width: 13
+                                            height: 13
+                                            source: "image://icon/" + parent.appClass
+                                                + "?fallback=application-x-executable"
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    visible: workspaceTile.windows.length > 6
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "+" + (workspaceTile.windows.length - 6)
+                                    color: theme.textMuted
+                                    font.pixelSize: root.appearance.textSize - 4
+                                    font.bold: true
                                 }
                             }
 

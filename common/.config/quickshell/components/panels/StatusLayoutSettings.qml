@@ -10,7 +10,10 @@ Column {
     width: parent ? parent.width : 0
     spacing: 8
 
-    readonly property var defaultOrder: ["media", "audio", "bluetooth", "tray", "network", "battery", "clock"]
+    readonly property var defaultOrder: [
+        "notifications", "recording", "media", "audio", "bluetooth", "tray", "network",
+        "battery", "clock"
+    ]
     readonly property var modules: {
         const savedOrder = appearance.statusModuleOrder || [];
         const order = [];
@@ -32,6 +35,8 @@ Column {
 
     function labelFor(module) {
         const labels = {
+            "notifications": "NOTIFICATIONS",
+            "recording": "SCREEN RECORDING",
             "media": "MEDIA",
             "audio": "AUDIO",
             "bluetooth": "BLUETOOTH",

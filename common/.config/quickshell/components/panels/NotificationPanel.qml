@@ -12,12 +12,21 @@ PopupWindow {
     property bool open: false
     property var targetWindow
     property real reveal: open ? 1 : 0
+    property string searchText: ""
+    property bool unreadOnly: false
+    property double currentTime: Date.now()
+    readonly property var filteredGroups: notificationHistory.filteredGroups(searchText, unreadOnly)
 
     signal closeRequested()
 
     onVisibleChanged: {
         if (!visible && open)
             closeRequested();
+    }
+
+    onOpenChanged: {
+        if (open)
+            notificationHistory.markAllRead();
     }
 
     visible: reveal > 0 && targetWindow !== null
@@ -27,7 +36,7 @@ PopupWindow {
     color: "transparent"
     grabFocus: true
     implicitWidth: 424
-    implicitHeight: notificationList.implicitHeight + 48
+    implicitHeight: Math.min(notificationList.implicitHeight + 48, 640)
 
     Config.Theme {
         id: theme
@@ -37,11 +46,31 @@ PopupWindow {
         notificationHistory.clear();
     }
 
+    function relativeTime(timestamp) {
+        const elapsedSeconds = Math.max(0, Math.floor((currentTime - timestamp) / 1000));
+
+        if (elapsedSeconds < 60)
+            return "now";
+        if (elapsedSeconds < 3600)
+            return Math.floor(elapsedSeconds / 60) + "m";
+        if (elapsedSeconds < 86400)
+            return Math.floor(elapsedSeconds / 3600) + "h";
+        return Math.floor(elapsedSeconds / 86400) + "d";
+    }
+
     Behavior on reveal {
         NumberAnimation {
             duration: 200
             easing.type: Easing.OutCubic
         }
+    }
+
+    Timer {
+        interval: 60000
+        running: root.visible
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: root.currentTime = Date.now()
     }
 
     Rectangle {
@@ -80,8 +109,19 @@ PopupWindow {
                     font.bold: true
                 }
 
+                Text {
+                    id: unreadLabel
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: root.notificationHistory.unreadCount > 0
+                        ? root.notificationHistory.unreadCount + " unread" : ""
+                    color: theme.accent
+                    font.pixelSize: root.appearance.textSize - 2
+                    font.bold: true
+                }
+
                 Item {
-                    width: parent.width - parent.children[0].implicitWidth
+                    width: parent.width - parent.children[0].implicitWidth - unreadLabel.width
                         - doNotDisturbButton.width - clearButton.width - 12
                     height: 1
                 }
@@ -113,7 +153,7 @@ PopupWindow {
                 Text {
                     id: clearButton
 
-                    visible: root.notificationHistory.items.length > 0
+                    visible: root.filteredGroups.length > 0
                     anchors.verticalCenter: parent.verticalCenter
                     text: "Clear all"
                     color: clearHover.hovered ? theme.accent : theme.textMuted
@@ -130,13 +170,72 @@ PopupWindow {
                 }
             }
 
+            Row {
+                width: parent.width
+                height: 30
+                spacing: 6
+
+                Rectangle {
+                    width: parent.width - unreadFilter.width - 6
+                    height: parent.height
+                    radius: root.appearance.radius
+                    color: theme.backgroundSecondary
+
+                    TextInput {
+                        id: searchInput
+
+                        anchors.fill: parent
+                        anchors.leftMargin: 10
+                        anchors.rightMargin: 10
+                        verticalAlignment: TextInput.AlignVCenter
+                        color: theme.text
+                        font.pixelSize: root.appearance.textSize - 1
+                        selectByMouse: true
+                        clip: true
+                        onTextChanged: root.searchText = text
+
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            visible: searchInput.text === ""
+                            text: "Search notifications"
+                            color: theme.textMuted
+                            font.pixelSize: root.appearance.textSize - 1
+                        }
+                    }
+                }
+
+                Rectangle {
+                    id: unreadFilter
+
+                    width: unreadFilterLabel.implicitWidth + 18
+                    height: parent.height
+                    radius: root.appearance.radius
+                    color: root.unreadOnly ? theme.accent : theme.backgroundSecondary
+
+                    Text {
+                        id: unreadFilterLabel
+
+                        anchors.centerIn: parent
+                        text: "Unread"
+                        color: root.unreadOnly ? theme.background : theme.textMuted
+                        font.pixelSize: root.appearance.textSize - 2
+                        font.bold: true
+                    }
+
+                    TapHandler {
+                        onTapped: root.unreadOnly = !root.unreadOnly
+                    }
+                }
+            }
+
             Text {
-                visible: root.notificationHistory.items.length === 0
+                visible: root.filteredGroups.length === 0
                 width: parent.width
                 height: 64
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
-                text: "No notifications"
+                text: root.notificationHistory.items.length === 0 ? "No notifications"
+                    : "No matching notifications"
                 color: theme.textMuted
                 font.pixelSize: root.appearance.textSize
                 font.bold: true
@@ -161,7 +260,7 @@ PopupWindow {
                     spacing: 12
 
                     Repeater {
-                        model: root.notificationHistory.groups
+                        model: root.filteredGroups
 
                         delegate: Column {
                             required property var modelData
@@ -189,7 +288,7 @@ PopupWindow {
                                     width: notificationGroups.width
                                     readonly property var actions: modelData.notification
                                         ? modelData.notification.actions : []
-                                    height: 64 + (actions.length > 0 ? 36 : 0)
+                                    height: 70 + (actions.length > 0 ? 36 : 0)
                                     radius: root.appearance.radius
                                     color: notificationHover.hovered
                                         ? theme.surfaceHover : theme.backgroundSecondary
@@ -207,7 +306,7 @@ PopupWindow {
                                         anchors.leftMargin: 12
                                         anchors.verticalCenter: parent.verticalCenter
                                         text: "󰂚"
-                                        color: theme.accent
+                                        color: modelData.unread ? theme.accent : theme.textMuted
                                         font.pixelSize: 18
                                         font.bold: true
                                     }
@@ -260,6 +359,17 @@ PopupWindow {
                                             font.pixelSize: root.appearance.textSize - 2
                                             font.bold: true
                                         }
+                                    }
+
+                                    Text {
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: modelData.count > 1 ? 42 : 14
+                                        anchors.bottom: parent.bottom
+                                        anchors.bottomMargin: parent.actions.length > 0 ? 38 : 9
+                                        text: root.relativeTime(modelData.timestamp)
+                                        color: theme.textMuted
+                                        font.pixelSize: root.appearance.textSize - 3
+                                        font.bold: true
                                     }
 
                                     Row {

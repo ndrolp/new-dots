@@ -18,6 +18,108 @@ Column {
         width: parent.width
         height: 44
         radius: root.appearance.radius
+        color: profileHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+
+        HoverHandler {
+            id: profileHover
+        }
+
+        Text {
+            anchors.left: parent.left
+            anchors.leftMargin: 12
+            anchors.verticalCenter: parent.verticalCenter
+            text: "APPEARANCE PROFILE"
+            color: theme.text
+            font.pixelSize: root.appearance.textSize - 1
+            font.bold: true
+        }
+
+        Row {
+            anchors.right: parent.right
+            anchors.rightMargin: 6
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 6
+
+            ComboBox {
+                id: profileSelector
+
+                width: 132
+                height: 32
+                textRole: "label"
+                model: [
+                    { label: "Minimal", value: "minimal" },
+                    { label: "Work", value: "work" },
+                    { label: "Media", value: "media" },
+                    { label: "Presentation", value: "presentation" }
+                ]
+                currentIndex: {
+                    for (let index = 0; index < model.length; index++) {
+                        if (model[index].value === root.appearance.activeBarProfile)
+                            return index;
+                    }
+
+                    return 1;
+                }
+
+                contentItem: Text {
+                    leftPadding: 10
+                    rightPadding: 8
+                    verticalAlignment: Text.AlignVCenter
+                    text: profileSelector.displayText
+                    color: theme.accent
+                    elide: Text.ElideRight
+                    font.pixelSize: root.appearance.textSize - 1
+                    font.bold: true
+                }
+
+                indicator: Item {}
+
+                background: Rectangle {
+                    radius: root.appearance.radius
+                    color: theme.surface
+                }
+
+                onActivated: root.appearance.applyBarProfile(model[index].value)
+            }
+
+            Rectangle {
+                width: 48
+                height: 32
+                radius: root.appearance.radius
+                color: saveHover.hovered ? theme.accentHover : theme.accent
+
+                HoverHandler {
+                    id: saveHover
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "Save"
+                    color: theme.background
+                    font.pixelSize: root.appearance.textSize - 3
+                    font.bold: true
+                }
+
+                TapHandler {
+                    onTapped: root.appearance.saveBarProfile(profileSelector.model[
+                        profileSelector.currentIndex].value)
+                }
+            }
+        }
+    }
+
+    Text {
+        width: parent.width
+        text: "Save snapshots this page's bar, desktop widget, clock, and notification settings."
+        color: theme.textMuted
+        wrapMode: Text.WordWrap
+        font.pixelSize: root.appearance.textSize - 2
+    }
+
+    Rectangle {
+        width: parent.width
+        height: 44
+        radius: root.appearance.radius
         color: densityHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
 
         HoverHandler {
@@ -132,6 +234,7 @@ Column {
     Repeater {
         model: [
             { label: "TRANSPARENT BAR", propertyName: "barTransparent" },
+            { label: "TRANSPARENT BAR BORDER", propertyName: "barTransparentBorder" },
             { label: "DOCKED ISLAND BAR", propertyName: "transparentBarSlanted" },
             { label: "STATUS ISLAND", propertyName: "statusIsland" },
             { label: "BACKGROUND CLOCK", propertyName: "backgroundClockEnabled" },

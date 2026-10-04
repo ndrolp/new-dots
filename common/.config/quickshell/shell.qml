@@ -31,6 +31,7 @@ ShellRoot {
     property bool workspaceOverviewOpen: false
     property bool screenCaptureOpen: false
     property bool controlCenterOpen: false
+    property bool quickSettingsOpen: false
     property bool lowBatteryNotificationSent: false
 
     Config.Theme {
@@ -39,6 +40,11 @@ ShellRoot {
 
     Config.Appearance {
         id: appearance
+    }
+
+    function setBarProfile(profileName) {
+        appearance.applyBarProfile(profileName);
+        osdPopup.showBarProfile(profileName.charAt(0).toUpperCase() + profileName.slice(1));
     }
 
     Config.Monitors {
@@ -225,10 +231,17 @@ ShellRoot {
         appearance: appearance
         bookmarks: bookmarks
         clipboardHistory: clipboardHistory
+        monitors: monitors
         workspaceService: workspaceService
         open: shell.unifiedSearchOpen
 
         onCloseRequested: shell.unifiedSearchOpen = false
+        onSettingsRequested: {
+            shell.unifiedSearchOpen = false;
+            shell.configOpen = true;
+            if (shell.configScreen === null)
+                shell.configScreen = Quickshell.screens.values[0];
+        }
     }
 
     Panels.AudioSinkSelector {
@@ -287,6 +300,7 @@ ShellRoot {
             shell.controlCenterOpen = false;
             shell.clipboardSelectorOpen = true;
         }
+
         onPowerMenuRequested: {
             shell.controlCenterOpen = false;
             shell.powerMenuOpen = true;
@@ -294,6 +308,43 @@ ShellRoot {
         onScreenCaptureRequested: {
             shell.controlCenterOpen = false;
             shell.screenCaptureOpen = true;
+        }
+    }
+
+    Panels.QuickSettings {
+        appearance: appearance
+        open: shell.quickSettingsOpen
+
+        onCloseRequested: shell.quickSettingsOpen = false
+        onAudioSinksRequested: {
+            shell.quickSettingsOpen = false;
+            shell.audioSinkSelectorOpen = true;
+        }
+        onControlCenterRequested: {
+            shell.quickSettingsOpen = false;
+            shell.controlCenterOpen = true;
+        }
+        onSettingsRequested: {
+            shell.quickSettingsOpen = false;
+            shell.configOpen = true;
+            if (shell.configScreen === null)
+                shell.configScreen = Quickshell.screens.values[0];
+        }
+        onThemeSelectorRequested: {
+            shell.quickSettingsOpen = false;
+            shell.themeSelectorOpen = true;
+        }
+        onWallpaperSelectorRequested: {
+            shell.quickSettingsOpen = false;
+            shell.wallpaperSelectorOpen = true;
+        }
+        onPowerMenuRequested: {
+            shell.quickSettingsOpen = false;
+            shell.powerMenuOpen = true;
+        }
+        onProfileRequested: profile => {
+            shell.quickSettingsOpen = false;
+            shell.setBarProfile(profile);
         }
     }
 
@@ -412,6 +463,14 @@ ShellRoot {
     }
 
     IpcHandler {
+        target: "quick-settings"
+
+        function toggle() {
+            shell.quickSettingsOpen = !shell.quickSettingsOpen;
+        }
+    }
+
+    IpcHandler {
         target: "launcher"
 
         function toggle() {
@@ -451,6 +510,26 @@ ShellRoot {
         }
     }
 
+    IpcHandler {
+        target: "bar-profiles"
+
+        function minimal() {
+            shell.setBarProfile("minimal");
+        }
+
+        function work() {
+            shell.setBarProfile("work");
+        }
+
+        function media() {
+            shell.setBarProfile("media");
+        }
+
+        function presentation() {
+            shell.setBarProfile("presentation");
+        }
+    }
+
     Bar.Bar {
         appearance: appearance
         configOpen: shell.configOpen
@@ -458,6 +537,8 @@ ShellRoot {
         activeStatusPopupWindow: shell.statusPopupWindow
         monitors: monitors
         pomodoro: pomodoro
+        notificationHistory: notificationHistory
+        screenCapture: screenCapture
         systemMonitor: systemMonitor
         workspaceService: workspaceService
 
@@ -498,5 +579,7 @@ ShellRoot {
         onAudioSinkSelected: function(sink) {
             osdPopup.showAudioSink(sink);
         }
+
+        onNotificationRequested: shell.notificationPanelOpen = !shell.notificationPanelOpen
     }
 }

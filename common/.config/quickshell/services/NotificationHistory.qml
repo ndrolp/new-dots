@@ -6,6 +6,8 @@ QtObject {
     property var items: []
     property var groups: []
     property int nextId: 0
+    readonly property int unreadCount: items.reduce((count, item) => count
+        + (item.unread ? item.count : 0), 0)
 
     function updateItems(updatedItems) {
         items = updatedItems;
@@ -30,10 +32,37 @@ QtObject {
         groups = groupedItems;
     }
 
+    function filteredGroups(query, unreadOnly) {
+        const normalizedQuery = query.trim().toLowerCase();
+        const filteredItems = items.filter(item => {
+            const matchesQuery = normalizedQuery === ""
+                || item.appName.toLowerCase().indexOf(normalizedQuery) !== -1
+                || item.summary.toLowerCase().indexOf(normalizedQuery) !== -1
+                || item.body.toLowerCase().indexOf(normalizedQuery) !== -1;
+            return matchesQuery && (!unreadOnly || item.unread);
+        });
+        const filteredGroups = [];
+
+        filteredItems.forEach(item => {
+            const appName = item.appName || "Unknown application";
+            let group = filteredGroups.find(candidate => candidate.appName === appName);
+
+            if (!group) {
+                group = { appName: appName, items: [] };
+                filteredGroups.push(group);
+            }
+
+            group.items.push(item);
+        });
+
+        return filteredGroups;
+    }
+
     function add(notification) {
         const appName = notification.appName || "";
         const summary = notification.summary || "";
         const body = notification.body || "";
+        const timestamp = Date.now();
         const existingIndex = items.findIndex(item => item.appName === appName
             && item.summary === summary && item.body === body);
 
@@ -47,7 +76,9 @@ QtObject {
                 summary: summary,
                 body: body,
                 notification: notification,
-                count: existing.count + 1
+                count: existing.count + 1,
+                unread: true,
+                timestamp: timestamp
             });
             updateItems(updatedItems);
             return;
@@ -59,11 +90,18 @@ QtObject {
             summary: summary,
             body: body,
             notification: notification,
-            count: 1
+            count: 1,
+            unread: true,
+            timestamp: timestamp
         };
-        const updatedItems = [entry].concat(items);
+        updateItems([entry].concat(items).slice(0, 50));
+    }
 
-        updateItems(updatedItems.slice(0, 50));
+    function markAllRead() {
+        if (unreadCount === 0)
+            return;
+
+        updateItems(items.map(item => Object.assign({}, item, { unread: false })));
     }
 
     function remove(id) {
