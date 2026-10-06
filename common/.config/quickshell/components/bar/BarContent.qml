@@ -274,11 +274,17 @@ Item {
         width: Math.max(0, root.statusIslandRight() - x)
         height: parent.height
         radius: root.appearance.statusIslandRadius
-        color: theme.surface
-        border.width: root.appearance.barTransparentBorder ? 1 : 0
-        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+        color: theme.backgroundSecondary
         visible: root.statusIslandEnabled
         z: -1
+
+        layer.enabled: visible
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: "#80000000"
+            shadowBlur: 0.45
+            shadowVerticalOffset: 3
+        }
 
         Behavior on x {
             NumberAnimation {

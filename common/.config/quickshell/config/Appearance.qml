@@ -110,9 +110,6 @@ QtObject {
     }
 
     function barProfileValue(profileName, key) {
-        if (profileName === activeBarProfile)
-            return settings[key];
-
         const profile = barProfiles[profileName];
         return profile && profile[key] !== undefined ? profile[key] : settings[key];
     }
