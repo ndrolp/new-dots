@@ -37,7 +37,7 @@
             },
             "barHeight": 34,
             "barTransparent": true,
-            "barTransparentBorder": false,
+            "barTransparentBorder": true,
             "densityPreset": "balanced",
             "desktopCalendarEnabled": false,
             "desktopCalendarPosition": "top-left",
@@ -71,7 +71,7 @@
                 "battery": true,
                 "bluetooth": false,
                 "clock": true,
-                "media": false,
+                "media": true,
                 "network": true,
                 "tray": false
             },
@@ -127,16 +127,16 @@
             "backgroundClockSize": 96,
             "barElementEnabled": {
                 "arch": true,
-                "currentApp": false,
-                "system": false,
+                "currentApp": true,
+                "system": true,
                 "workspaces": true
             },
             "barElementPlacement": {
             },
-            "barHeight": 30,
+            "barHeight": 34,
             "barTransparent": false,
             "barTransparentBorder": false,
-            "densityPreset": "compact",
+            "densityPreset": "balanced",
             "desktopCalendarEnabled": false,
             "desktopCalendarPosition": "top-left",
             "desktopMediaEnabled": true,
@@ -181,10 +181,10 @@
                 "network",
                 "battery",
                 "clock",
-                "notifications",
                 "recording",
                 "bluetooth",
-                "tray"
+                "tray",
+                "notifications"
             ],
             "statusModulePlacement": {
             },
@@ -216,7 +216,7 @@
                 ""
             ],
             "workspaceGlyphsEnabled": false,
-            "workspacePadding": 5
+            "workspacePadding": 4
         },
         "presentation": {
             "activeWorkspaceHorizontalPadding": 5,
@@ -435,15 +435,9 @@
     "statusModuleGroups": {
     },
     "statusModuleOrder": [
-        "media",
-        "audio",
         "network",
         "battery",
-        "clock",
-        "recording",
-        "bluetooth",
-        "tray",
-        "notifications"
+        "clock"
     ],
     "statusModulePlacement": {
     },
@@ -475,5 +469,5 @@
         ""
     ],
     "workspaceGlyphsEnabled": false,
-    "workspacePadding": 5
+    "workspacePadding": 3
 }

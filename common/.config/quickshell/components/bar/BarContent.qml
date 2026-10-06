@@ -280,14 +280,6 @@ Item {
         visible: root.statusIslandEnabled
         z: -1
 
-        layer.enabled: visible
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: "#80000000"
-            shadowBlur: 0.45
-            shadowVerticalOffset: 3
-        }
-
         Behavior on x {
             NumberAnimation {
                 duration: 180
