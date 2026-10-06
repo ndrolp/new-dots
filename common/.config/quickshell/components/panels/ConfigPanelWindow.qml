@@ -21,8 +21,9 @@ PopupWindow {
 
     visible: reveal > 0 && targetWindow !== null
     anchor.window: root.targetWindow
-    anchor.rect.x: root.appearance.horizontalPadding
-    anchor.rect.y: root.appearance.barHeight + root.appearance.spacing
+    anchor.rect.x: targetWindow ? (targetWindow.width - implicitWidth) / 2 : 0
+    anchor.rect.y: targetWindow && targetWindow.screen
+        ? (targetWindow.screen.height - implicitHeight) / 2 : 0
     color: "transparent"
     grabFocus: true
     implicitWidth: configPanel.implicitWidth + 24

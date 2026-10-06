@@ -297,7 +297,7 @@ Item {
             : root.isGrouped("notifications") || root.appearance.pillsTransparent
                 || root.appearance.transparentBarSlanted || root.appearance.statusIsland
                 ? "transparent" : theme.surface
-        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.width: root.appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -352,7 +352,7 @@ Item {
             : root.isGrouped("recording") || root.appearance.pillsTransparent
                 || root.appearance.transparentBarSlanted || root.appearance.statusIsland
                 ? "transparent" : theme.surface
-        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.width: root.appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -394,7 +394,7 @@ Item {
     Rectangle {
         id: mediaButton
 
-        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.width: root.appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
         visible: root.moduleVisible("media")
         x: root.moduleX("media")
@@ -498,7 +498,7 @@ Item {
             : root.isGrouped("audio") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
                 || root.appearance.statusIsland ? "transparent" : theme.surface
 
-        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.width: root.appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -556,7 +556,7 @@ Item {
             : root.isGrouped("bluetooth") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
                 || root.appearance.statusIsland ? "transparent" : theme.surface
 
-        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.width: root.appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -593,7 +593,7 @@ Item {
             : root.isGrouped("tray") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
                 || root.appearance.statusIsland ? "transparent" : theme.surface
 
-        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.width: root.appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -630,7 +630,7 @@ Item {
             : root.isGrouped("network") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
                 || root.appearance.statusIsland ? "transparent" : theme.surface
 
-        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.width: root.appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -667,7 +667,7 @@ Item {
             : root.isGrouped("battery") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
                 || root.appearance.statusIsland ? "transparent" : theme.surface
 
-        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.width: root.appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -719,7 +719,7 @@ Item {
             : root.isGrouped("clock") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
                 || root.appearance.statusIsland ? "transparent" : theme.surface
 
-        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.width: root.appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
