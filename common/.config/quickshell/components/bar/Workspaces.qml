@@ -17,7 +17,7 @@ Rectangle {
     radius: appearance.radius
     color: appearance.barTransparent && !appearance.pillsTransparent
         && !appearance.transparentBarSlanted && !appearance.statusIsland ? theme.surface : "transparent"
-    border.width: appearance.barTransparentBorder ? 1 : 0
+    border.width: appearance.barTransparentBorder && !appearance.statusIsland ? 1 : 0
     border.color: appearance.barTransparentBorder ? theme.border : "transparent"
 
     Behavior on color {

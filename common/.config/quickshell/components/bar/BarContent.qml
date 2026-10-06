@@ -274,7 +274,9 @@ Item {
         width: Math.max(0, root.statusIslandRight() - x)
         height: parent.height
         radius: root.appearance.statusIslandRadius
-        color: theme.backgroundSecondary
+        color: theme.surface
+        border.width: root.appearance.barTransparentBorder ? 1 : 0
+        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
         visible: root.statusIslandEnabled
         z: -1
 
