@@ -1,4 +1,5 @@
 import Quickshell.Hyprland
+import Quickshell
 import QtQuick
 import "../../config" as Config
 
@@ -7,21 +8,24 @@ Column {
 
     property var appearance
     property var monitors
-    readonly property var connectedMonitors: Hyprland.monitors.values
-
     width: parent ? parent.width : 0
     spacing: 12
+
+    function monitorDescriptionForScreen(screen) {
+        const monitor = Hyprland.monitorFor(screen);
+        return monitor !== null && monitor.description !== "" ? monitor.description : screen.name;
+    }
 
     Config.Theme {
         id: theme
     }
 
     Repeater {
-        model: root.connectedMonitors
+        model: Quickshell.screens
 
         delegate: Column {
             required property var modelData
-            readonly property string monitorDescription: modelData.description
+            readonly property string monitorDescription: root.monitorDescriptionForScreen(modelData)
 
             width: parent.width
             spacing: 5

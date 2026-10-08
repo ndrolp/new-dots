@@ -36,13 +36,8 @@ PanelWindow {
         }
     }
 
-    Rectangle {
-        anchors.fill: parent
-        color: "transparent"
-
-        TapHandler {
-            onTapped: root.closeRequested()
-        }
+    mask: Region {
+        item: configPanel
     }
 
     ConfigPanel {
