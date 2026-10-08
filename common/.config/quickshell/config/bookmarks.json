@@ -50,6 +50,11 @@
             "glyph": "󰚩",
             "label": "ChatGPT",
             "url": "https://chatgpt.com"
+        },
+        {
+            "glyph": "",
+            "label": "Amazon",
+            "url": "https://www.amazon.es/"
         }
     ],
     "searchEngines": [

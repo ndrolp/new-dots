@@ -4,7 +4,7 @@
     "archButtonHorizontalPadding": 6,
     "backgroundClockCalendarEnabled": true,
     "backgroundClockDateFormat": "full",
-    "backgroundClockEnabled": false,
+    "backgroundClockEnabled": true,
     "backgroundClockOpacity": 100,
     "backgroundClockPosition": "bottom-right",
     "backgroundClockSize": 96,
@@ -127,16 +127,16 @@
             "backgroundClockSize": 96,
             "barElementEnabled": {
                 "arch": true,
-                "currentApp": false,
-                "system": false,
+                "currentApp": true,
+                "system": true,
                 "workspaces": true
             },
             "barElementPlacement": {
             },
-            "barHeight": 30,
+            "barHeight": 34,
             "barTransparent": false,
             "barTransparentBorder": false,
-            "densityPreset": "compact",
+            "densityPreset": "balanced",
             "desktopCalendarEnabled": false,
             "desktopCalendarPosition": "top-left",
             "desktopMediaEnabled": true,
@@ -145,7 +145,7 @@
             "desktopNetworkPosition": "bottom-left",
             "desktopSystemEnabled": true,
             "desktopSystemPosition": "bottom-left",
-            "desktopWeatherEnabled": true,
+            "desktopWeatherEnabled": false,
             "desktopWeatherLocation": "Ourense, ES",
             "desktopWeatherPosition": "bottom-left",
             "desktopWidgetOrder": [
@@ -158,11 +158,11 @@
             "hideEmptyWorkspaces": false,
             "horizontalPadding": 12,
             "notificationPopupLocation": "top-right",
-            "pillVerticalPadding": 4,
+            "pillVerticalPadding": 5,
             "pillsTransparent": false,
             "radius": 8,
             "spacing": 8,
-            "statusIsland": true,
+            "statusIsland": false,
             "statusIslandRadius": 12,
             "statusModuleEnabled": {
                 "audio": true,
@@ -216,7 +216,7 @@
                 ""
             ],
             "workspaceGlyphsEnabled": false,
-            "workspacePadding": 5
+            "workspacePadding": 4
         },
         "presentation": {
             "activeWorkspaceHorizontalPadding": 5,
@@ -294,7 +294,7 @@
             "archButtonHorizontalPadding": 6,
             "backgroundClockCalendarEnabled": true,
             "backgroundClockDateFormat": "full",
-            "backgroundClockEnabled": false,
+            "backgroundClockEnabled": true,
             "backgroundClockOpacity": 100,
             "backgroundClockPosition": "bottom-right",
             "backgroundClockSize": 96,
@@ -310,7 +310,7 @@
             "barTransparent": true,
             "barTransparentBorder": true,
             "densityPreset": "balanced",
-            "desktopCalendarEnabled": true,
+            "desktopCalendarEnabled": false,
             "desktopCalendarPosition": "top-left",
             "desktopMediaEnabled": true,
             "desktopMediaPosition": "bottom-left",
@@ -340,11 +340,11 @@
             "statusModuleEnabled": {
                 "audio": true,
                 "battery": true,
-                "bluetooth": false,
+                "bluetooth": true,
                 "clock": true,
                 "media": true,
                 "network": true,
-                "tray": false
+                "tray": true
             },
             "statusModuleGroups": {
             },
@@ -395,7 +395,7 @@
     "barTransparent": true,
     "barTransparentBorder": true,
     "densityPreset": "balanced",
-    "desktopCalendarEnabled": true,
+    "desktopCalendarEnabled": false,
     "desktopCalendarPosition": "top-left",
     "desktopMediaEnabled": true,
     "desktopMediaPosition": "bottom-left",
@@ -426,11 +426,11 @@
     "statusModuleEnabled": {
         "audio": true,
         "battery": true,
-        "bluetooth": false,
+        "bluetooth": true,
         "clock": true,
         "media": true,
         "network": true,
-        "tray": false
+        "tray": true
     },
     "statusModuleGroups": {
     },

@@ -3,6 +3,13 @@
         "code"
     ],
     "recent": [
+        "ai.storyteller.photocraft",
+        "chromium",
+        "com.valvesoftware.SteamLink",
+        "gimp",
+        "steam",
+        "org.gnome.Snapshot",
+        "com.microsoft.VSCode",
         "proton.vpn.app.gtk",
         "blueman-manager",
         "ranger",
@@ -13,15 +20,8 @@
         "org.gnome.Calendar",
         "bssh",
         "org.kde.filelight",
-        "org.gnome.Snapshot",
         "rawtherapee",
         "nemo",
-        "org.kde.dolphin",
-        "libreoffice-writer",
-        "wps-office-wps",
-        "com.rtosta.zapzap",
-        "wps-office-et",
-        "nwg-look",
-        "org.inkscape.Inkscape"
+        "org.kde.dolphin"
     ]
 }
