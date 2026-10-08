@@ -15,6 +15,46 @@ Rectangle {
     property string pendingSection: ""
     property string wallpaperView: "Selection"
     property string selectedWallpaperMonitor: ""
+    property string sectionQuery: ""
+    readonly property var sections: [
+        {
+            label: "Bar Appearance", icon: "󰔉", section: "Appearance",
+            keywords: "profile density transparent island clock"
+        },
+        {
+            label: "Displays", icon: "󰍹", section: "Monitors",
+            keywords: "monitor screen workspace range bar profile"
+        },
+        {
+            label: "Workspace Labels", icon: "󰌌", section: "Labels",
+            keywords: "workspace names icons"
+        },
+        {
+            label: "Quick Search", icon: "󰍉", section: "Bookmarks",
+            keywords: "bookmarks links search engines"
+        },
+        {
+            label: "Desktop Widgets", icon: "󰖕", section: "Widgets",
+            keywords: "media calendar system network weather"
+        },
+        {
+            label: "Status Bar", icon: "󰍛", section: "Status",
+            keywords: "modules layout notifications battery clock"
+        },
+        {
+            label: "Session", icon: "󰌾", section: "Session",
+            keywords: "idle lock power"
+        },
+        {
+            label: "Wallpapers", icon: "󰸉", section: "Wallpapers",
+            keywords: "background image monitor"
+        }
+    ]
+    readonly property var filteredSections: {
+        const query = sectionQuery.trim().toLowerCase();
+        return sections.filter(section => query === ""
+            || (section.label + " " + section.keywords).toLowerCase().includes(query));
+    }
 
     signal closeRequested()
 
@@ -59,8 +99,8 @@ Rectangle {
         sectionTransition.start();
     }
 
-    implicitWidth: 900
-    implicitHeight: 500
+    implicitWidth: 980
+    implicitHeight: 560
     radius: appearance.radius
     color: theme.surface
     border.color: theme.border
@@ -96,7 +136,39 @@ Rectangle {
             }
 
             Item {
-                width: parent.width - title.implicitWidth - doneButton.width
+                width: parent.width - title.implicitWidth - sectionSearch.width - doneButton.width - 16
+                height: 1
+            }
+
+            TextField {
+                id: sectionSearch
+
+                width: 244
+                height: 34
+                placeholderText: "Search settings"
+                text: root.sectionQuery
+                color: theme.text
+                placeholderTextColor: theme.textMuted
+                font.pixelSize: root.appearance.textSize - 1
+                font.bold: true
+                selectByMouse: true
+
+                background: Rectangle {
+                    radius: root.appearance.radius
+                    color: theme.backgroundSecondary
+                    border.color: sectionSearch.activeFocus ? theme.accent : theme.border
+                    border.width: 1
+                }
+
+                onTextEdited: root.sectionQuery = text
+                onAccepted: {
+                    if (root.filteredSections.length > 0)
+                        root.selectSection(root.filteredSections[0].section);
+                }
+            }
+
+            Item {
+                width: 16
                 height: 1
             }
 
@@ -140,16 +212,7 @@ Rectangle {
                 spacing: 6
 
                 Repeater {
-                    model: [
-                        { label: "Bar Appearance", icon: "󰔉", section: "Appearance" },
-                        { label: "Displays", icon: "󰍹", section: "Monitors" },
-                        { label: "Workspace Labels", icon: "󰌌", section: "Labels" },
-                        { label: "Quick Search", icon: "󰍉", section: "Bookmarks" },
-                        { label: "Desktop Widgets", icon: "󰖕", section: "Widgets" },
-                        { label: "Status Bar", icon: "󰍛", section: "Status" },
-                        { label: "Session", icon: "󰌾", section: "Session" },
-                        { label: "Wallpapers", icon: "󰸉", section: "Wallpapers" }
-                    ]
+                    model: root.filteredSections
 
                     delegate: Rectangle {
                         required property var modelData
@@ -194,6 +257,16 @@ Rectangle {
                             onTapped: root.selectSection(modelData.section)
                         }
                     }
+                }
+
+                Text {
+                    width: parent.width
+                    visible: root.filteredSections.length === 0
+                    text: "No settings match this search."
+                    color: theme.textMuted
+                    wrapMode: Text.WordWrap
+                    font.pixelSize: root.appearance.textSize - 1
+                    font.bold: true
                 }
             }
 

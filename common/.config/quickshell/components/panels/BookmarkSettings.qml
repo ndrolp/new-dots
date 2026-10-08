@@ -191,7 +191,7 @@ Column {
                     width: parent.width
                     appearance: root.appearance
                     text: modelData.label
-                    onTextEdited: root.bookmarks.update(index, "label", text)
+                    onEditingFinished: root.bookmarks.update(index, "label", text)
                 }
 
                 Row {
@@ -226,7 +226,7 @@ Column {
                         text: modelData.glyph
                         maximumLength: 4
                         horizontalAlignment: TextInput.AlignHCenter
-                        onTextEdited: root.bookmarks.update(index, "glyph", text)
+                        onEditingFinished: root.bookmarks.update(index, "glyph", text)
                     }
 
                     SettingsInput {
@@ -234,7 +234,7 @@ Column {
                         appearance: root.appearance
                         text: modelData.url
                         placeholderText: "https://example.com"
-                        onTextEdited: root.bookmarks.update(index, "url", text)
+                        onEditingFinished: root.bookmarks.update(index, "url", text)
                     }
 
                 }
@@ -432,7 +432,7 @@ Column {
                     width: parent.width
                     appearance: root.appearance
                     text: modelData.label
-                    onTextEdited: root.bookmarks.updateSearchEngine(index, "label", text)
+                    onEditingFinished: root.bookmarks.updateSearchEngine(index, "label", text)
                 }
 
                 Row {
@@ -467,7 +467,7 @@ Column {
                         text: modelData.glyph
                         maximumLength: 4
                         horizontalAlignment: TextInput.AlignHCenter
-                        onTextEdited: root.bookmarks.updateSearchEngine(index, "glyph", text)
+                        onEditingFinished: root.bookmarks.updateSearchEngine(index, "glyph", text)
                     }
 
                     SettingsInput {
@@ -475,7 +475,7 @@ Column {
                         appearance: root.appearance
                         text: modelData.searchUrl
                         placeholderText: "https://example.com/search?q=%s"
-                        onTextEdited: root.bookmarks.updateSearchEngine(index, "searchUrl", text)
+                        onEditingFinished: root.bookmarks.updateSearchEngine(index, "searchUrl", text)
                     }
 
                 }

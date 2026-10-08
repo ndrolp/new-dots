@@ -40,6 +40,7 @@ hl.bind(mainMod .. " + CTRL + 4", hl.dsp.exec_cmd("quickshell ipc --path ~/.conf
 hl.bind(mainMod .. " + d", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call launcher toggle"))
 hl.bind(mainMod .. " + v", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call clipboard toggle"))
 hl.bind(mainMod .. " + p", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call config toggle"))
+hl.bind(win .. " + p", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call config toggle"))
 hl.bind(mainMod .. " + c", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call control-center toggle"))
 hl.bind(mainMod .. " + q", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call quick-settings toggle"))
 hl.bind(mainMod .. " + n", hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call notifications toggle"))

@@ -1,7 +1,8 @@
 import Quickshell
+import Quickshell.Wayland
 import QtQuick
 
-PopupWindow {
+PanelWindow {
     id: root
 
     required property var appearance
@@ -14,20 +15,19 @@ PopupWindow {
 
     signal closeRequested()
 
-    onVisibleChanged: {
-        if (!visible && open)
-            closeRequested();
-    }
-
     visible: reveal > 0 && targetWindow !== null
-    anchor.window: root.targetWindow
-    anchor.rect.x: targetWindow ? (targetWindow.width - implicitWidth) / 2 : 0
-    anchor.rect.y: targetWindow && targetWindow.screen
-        ? (targetWindow.screen.height - implicitHeight) / 2 : 0
+    screen: targetWindow ? targetWindow.screen : null
     color: "transparent"
-    grabFocus: true
-    implicitWidth: configPanel.implicitWidth + 24
-    implicitHeight: configPanel.implicitHeight + 24
+    exclusionMode: ExclusionMode.Ignore
+    WlrLayershell.namespace: "ndro-shell-settings"
+    WlrLayershell.layer: WlrLayer.Overlay
+
+    anchors {
+        top: true
+        bottom: true
+        left: true
+        right: true
+    }
 
     Behavior on reveal {
         NumberAnimation {
@@ -36,13 +36,23 @@ PopupWindow {
         }
     }
 
+    Rectangle {
+        anchors.fill: parent
+        color: "transparent"
+
+        TapHandler {
+            onTapped: root.closeRequested()
+        }
+    }
+
     ConfigPanel {
         id: configPanel
 
-        anchors.fill: parent
-        anchors.margins: 12
-        anchors.topMargin: 12 - 16 * (1 - root.reveal)
+        anchors.centerIn: parent
         opacity: root.reveal
+        transform: Translate {
+            y: -16 * (1 - root.reveal)
+        }
         appearance: root.appearance
         monitors: root.monitors
         wallpapers: root.wallpapers

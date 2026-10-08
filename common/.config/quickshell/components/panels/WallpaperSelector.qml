@@ -197,7 +197,7 @@ Variants {
 
                         width: selector.portrait ? 260 : 480
                         height: selector.portrait ? 400 : 270
-                        anchors.verticalCenter: parent.verticalCenter
+                        y: parent ? (parent.height - height) / 2 : 0
                         radius: 0
                         color: theme.backgroundSecondary
                         border.color: selected ? theme.accent : theme.border
@@ -228,10 +228,21 @@ Variants {
                             color: "transparent"
 
                             Image {
+                                id: wallpaperPreview
+
                                 anchors.fill: parent
                                 source: "file://" + wallpaperTile.wallpaperPath
                                 fillMode: Image.PreserveAspectCrop
                                 asynchronous: true
+                            }
+
+                            Text {
+                                anchors.centerIn: parent
+                                visible: wallpaperPreview.status === Image.Error
+                                text: "Preview unavailable"
+                                color: theme.textMuted
+                                font.pixelSize: root.appearance.textSize - 1
+                                font.bold: true
                             }
                         }
 

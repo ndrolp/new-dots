@@ -397,10 +397,21 @@ Column {
                     color: "transparent"
 
                     Image {
+                        id: wallpaperPreview
+
                         anchors.fill: parent
                         source: "file://" + wallpaperTile.wallpaperPath
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
+                    }
+
+                    Text {
+                        anchors.centerIn: parent
+                        visible: wallpaperPreview.status === Image.Error
+                        text: "Preview unavailable"
+                        color: theme.textMuted
+                        font.pixelSize: root.appearance.textSize - 2
+                        font.bold: true
                     }
                 }
 

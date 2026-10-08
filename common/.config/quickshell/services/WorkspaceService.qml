@@ -6,13 +6,16 @@ QtObject {
     id: root
 
     function monitorDescriptionForScreen(screen) {
+        if (screen === null || screen === undefined)
+            return "default";
+
         const monitor = Hyprland.monitorFor(screen);
         return monitor !== null && monitor.description !== "" ? monitor.description : screen.name;
     }
 
     function workspacesForScreen(screen, configuredWorkspaces) {
         const monitor = Hyprland.monitorFor(screen);
-        const workspaceIds = configuredWorkspaces.filter(id => id >= 1 && id <= 21);
+        const workspaceIds = (configuredWorkspaces || []).filter(id => id >= 1 && id <= 21);
         const workspaces = Hyprland.workspaces.values;
 
         for (let index = 0; index < workspaces.length; index++) {
