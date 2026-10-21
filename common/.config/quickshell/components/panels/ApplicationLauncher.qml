@@ -11,6 +11,7 @@ Variants {
 
     required property var appearance
     required property var launcherHistory
+    property bool enabled: true
     property bool open: false
 
     signal closeRequested()
@@ -80,7 +81,7 @@ Variants {
         }
 
         screen: modelData
-        visible: reveal > 0 && focusedMonitor
+        visible: root.enabled && reveal > 0 && focusedMonitor
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         focusable: true

@@ -326,7 +326,8 @@ Item {
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
-                visible: root.notificationHistory.unreadCount > 0
+                visible: root.appearance.notificationBadgeVisible !== false
+                    && root.notificationHistory.unreadCount > 0
                 text: root.notificationHistory.unreadCount > 99 ? "99+"
                     : root.notificationHistory.unreadCount
                 color: root.appearance.doNotDisturb ? theme.yellow : theme.accent
@@ -442,6 +443,7 @@ Item {
                 property string displayedLabel: root.displayedPlayerLabel
 
                 anchors.verticalCenter: parent.verticalCenter
+                visible: root.appearance.mediaTitleVisible !== false
                 width: Math.min(root.mediaTitleMaximumWidth, implicitWidth)
                 text: displayedLabel
                 color: theme.green
@@ -524,6 +526,7 @@ Item {
 
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
+                visible: root.appearance.audioMeterVisible !== false
                 width: 34
                 height: 4
                 radius: 2
@@ -695,6 +698,7 @@ Item {
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
+                visible: root.appearance.batteryPercentageVisible !== false
                 text: Math.round(root.battery.percentage * 100) + "%"
                 color: theme.yellow
                 font.pixelSize: root.appearance.textSize

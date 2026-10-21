@@ -1,6 +1,7 @@
 import Quickshell.Hyprland
 import Quickshell
 import QtQuick
+import QtQuick.Controls
 import "../../config" as Config
 
 Column {

@@ -6,6 +6,7 @@ QtObject {
 
     property alias favorites: settings.favorites
     property alias recent: settings.recent
+    property int recentLimit: 20
 
     function isFavorite(applicationId) {
         return favorites.includes(applicationId);
@@ -35,7 +36,8 @@ QtObject {
     }
 
     function recordLaunch(applicationId) {
-        recent = [applicationId].concat(recent.filter(id => id !== applicationId)).slice(0, 20);
+        recent = [applicationId].concat(recent.filter(id => id !== applicationId))
+            .slice(0, Math.max(0, recentLimit));
     }
 
     function recentIndex(applicationId) {

@@ -54,6 +54,10 @@ QtObject {
     property alias barTransparent: settings.barTransparent
     property alias barTransparentBorder: settings.barTransparentBorder
     property alias barOpacity: settings.barOpacity
+    property alias notificationBadgeVisible: settings.notificationBadgeVisible
+    property alias mediaTitleVisible: settings.mediaTitleVisible
+    property alias audioMeterVisible: settings.audioMeterVisible
+    property alias batteryPercentageVisible: settings.batteryPercentageVisible
 
     readonly property var barProfileKeys: [
         "densityPreset", "barHeight", "horizontalPadding", "spacing", "radius",
@@ -64,6 +68,8 @@ QtObject {
         "workspaceGlyphs", "pillsTransparent", "transparentBarTopMargin",
         "transparentBarSlanted", "statusIsland", "statusIslandRadius", "barTransparent",
         "barTransparentBorder", "barOpacity", "statusModuleOrder", "statusModuleEnabled",
+        "notificationBadgeVisible", "mediaTitleVisible", "audioMeterVisible",
+        "batteryPercentageVisible",
         "statusModuleGroups", "statusModulePlacement", "barElementEnabled",
         "barElementPlacement", "backgroundClockEnabled",
         "backgroundClockCalendarEnabled", "backgroundClockPosition",
@@ -351,6 +357,10 @@ QtObject {
             property bool barTransparent: false
             property bool barTransparentBorder: false
             property int barOpacity: 100
+            property bool notificationBadgeVisible: true
+            property bool mediaTitleVisible: true
+            property bool audioMeterVisible: true
+            property bool batteryPercentageVisible: true
         }
     }
 }

@@ -11,6 +11,7 @@ Variants {
 
     required property var appearance
     required property var clipboardHistory
+    property bool imagePreviewsEnabled: true
     property bool open: false
 
     signal closeRequested()
@@ -133,7 +134,7 @@ Variants {
         function updatePreview() {
             const entry = historyList.currentItem ? historyList.currentItem.entry : null;
 
-            if (!entry || !entry.image) {
+            if (!root.imagePreviewsEnabled || !entry || !entry.image) {
                 previewEntryId = -1;
                 previewSource = "";
                 return;
@@ -146,6 +147,15 @@ Variants {
                 "cliphist",
                 String(entry.id), previewPath];
             imagePreview.running = true;
+        }
+
+        Connections {
+            target: root
+
+            function onImagePreviewsEnabledChanged() {
+                if (!root.imagePreviewsEnabled)
+                    selector.previewSource = "";
+            }
         }
 
         onVisibleChanged: {

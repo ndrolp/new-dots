@@ -9,6 +9,7 @@ PanelWindow {
     required property var monitors
     required property var wallpapers
     required property var bookmarks
+    required property var plugins
     property bool open: false
     property var targetWindow
     property real reveal: open ? 1 : 0
@@ -53,6 +54,7 @@ PanelWindow {
         monitors: root.monitors
         wallpapers: root.wallpapers
         bookmarks: root.bookmarks
+        plugins: root.plugins
 
         onCloseRequested: root.closeRequested()
     }

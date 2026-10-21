@@ -60,6 +60,54 @@ ShellRoot {
         id: bookmarks
     }
 
+    Config.Plugins {
+        id: plugins
+    }
+
+    Connections {
+        target: plugins
+
+        function onApplicationLauncherEnabledChanged() {
+            if (!plugins.applicationLauncherEnabled)
+                shell.applicationLauncherOpen = false;
+        }
+
+        function onClipboardEnabledChanged() {
+            if (!plugins.clipboardEnabled)
+                shell.clipboardSelectorOpen = false;
+        }
+
+        function onQuickSearchEnabledChanged() {
+            if (!plugins.quickSearchEnabled)
+                shell.quickSearchOpen = false;
+        }
+
+        function onUnifiedSearchEnabledChanged() {
+            if (!plugins.unifiedSearchEnabled)
+                shell.unifiedSearchOpen = false;
+        }
+
+        function onCommandLauncherEnabledChanged() {
+            if (!plugins.commandLauncherEnabled)
+                shell.commandLauncherOpen = false;
+        }
+
+        function onQuickSettingsEnabledChanged() {
+            if (!plugins.quickSettingsEnabled)
+                shell.quickSettingsOpen = false;
+        }
+
+        function onScreenCaptureEnabledChanged() {
+            if (!plugins.screenCaptureEnabled)
+                shell.screenCaptureOpen = false;
+        }
+
+        function onControlCenterEnabledChanged() {
+            if (!plugins.controlCenterEnabled)
+                shell.controlCenterOpen = false;
+        }
+    }
+
     Services.WorkspaceService {
         id: workspaceService
     }
@@ -82,6 +130,8 @@ ShellRoot {
 
     Services.LauncherHistory {
         id: launcherHistory
+
+        recentLimit: plugins.launcherRecentLimit
     }
 
     Services.ScreenCapture {
@@ -200,7 +250,8 @@ ShellRoot {
     Panels.ApplicationLauncher {
         appearance: appearance
         launcherHistory: launcherHistory
-        open: shell.applicationLauncherOpen
+        enabled: plugins.applicationLauncherEnabled
+        open: shell.applicationLauncherOpen && plugins.applicationLauncherEnabled
 
         onCloseRequested: shell.applicationLauncherOpen = false
     }
@@ -215,7 +266,8 @@ ShellRoot {
     Panels.ClipboardSelector {
         appearance: appearance
         clipboardHistory: clipboardHistory
-        open: shell.clipboardSelectorOpen
+        imagePreviewsEnabled: plugins.clipboardImagePreviewsEnabled
+        open: shell.clipboardSelectorOpen && plugins.clipboardEnabled
 
         onCloseRequested: shell.clipboardSelectorOpen = false
     }
@@ -223,7 +275,7 @@ ShellRoot {
     Panels.QuickSearch {
         appearance: appearance
         bookmarks: bookmarks
-        open: shell.quickSearchOpen
+        open: shell.quickSearchOpen && plugins.quickSearchEnabled
 
         onCloseRequested: shell.quickSearchOpen = false
     }
@@ -234,7 +286,7 @@ ShellRoot {
         clipboardHistory: clipboardHistory
         monitors: monitors
         workspaceService: workspaceService
-        open: shell.unifiedSearchOpen
+        open: shell.unifiedSearchOpen && plugins.unifiedSearchEnabled
 
         onCloseRequested: shell.unifiedSearchOpen = false
         onSettingsRequested: {
@@ -255,7 +307,7 @@ ShellRoot {
 
     Panels.CommandLauncher {
         appearance: appearance
-        open: shell.commandLauncherOpen
+        open: shell.commandLauncherOpen && plugins.commandLauncherEnabled
 
         onCloseRequested: shell.commandLauncherOpen = false
     }
@@ -283,7 +335,7 @@ ShellRoot {
     Panels.ScreenCapture {
         appearance: appearance
         screenCapture: screenCapture
-        open: shell.screenCaptureOpen
+        open: shell.screenCaptureOpen && plugins.screenCaptureEnabled
 
         onCloseRequested: shell.screenCaptureOpen = false
     }
@@ -293,11 +345,14 @@ ShellRoot {
         clipboardHistory: clipboardHistory
         screenCapture: screenCapture
         systemMonitor: systemMonitor
-        open: shell.controlCenterOpen
+        open: shell.controlCenterOpen && plugins.controlCenterEnabled
 
         onCloseRequested: shell.controlCenterOpen = false
         onAudioSinksRequested: shell.audioSinkSelectorOpen = true
         onClipboardRequested: {
+            if (!plugins.clipboardEnabled)
+                return;
+
             shell.controlCenterOpen = false;
             shell.clipboardSelectorOpen = true;
         }
@@ -307,6 +362,9 @@ ShellRoot {
             shell.powerMenuOpen = true;
         }
         onScreenCaptureRequested: {
+            if (!plugins.screenCaptureEnabled)
+                return;
+
             shell.controlCenterOpen = false;
             shell.screenCaptureOpen = true;
         }
@@ -314,7 +372,7 @@ ShellRoot {
 
     Panels.QuickSettings {
         appearance: appearance
-        open: shell.quickSettingsOpen
+        open: shell.quickSettingsOpen && plugins.quickSettingsEnabled
 
         onCloseRequested: shell.quickSettingsOpen = false
         onAudioSinksRequested: {
@@ -322,6 +380,9 @@ ShellRoot {
             shell.audioSinkSelectorOpen = true;
         }
         onControlCenterRequested: {
+            if (!plugins.controlCenterEnabled)
+                return;
+
             shell.quickSettingsOpen = false;
             shell.controlCenterOpen = true;
         }
@@ -354,6 +415,7 @@ ShellRoot {
         monitors: monitors
         wallpapers: wallpapers
         bookmarks: bookmarks
+        plugins: plugins
         open: shell.configOpen
         targetWindow: shell.configWindow
 
@@ -421,6 +483,9 @@ ShellRoot {
         target: "command-launcher"
 
         function toggle() {
+            if (!plugins.commandLauncherEnabled)
+                return;
+
             shell.commandLauncherOpen = !shell.commandLauncherOpen;
         }
     }
@@ -453,6 +518,9 @@ ShellRoot {
         target: "screen-capture"
 
         function toggle() {
+            if (!plugins.screenCaptureEnabled)
+                return;
+
             shell.screenCaptureOpen = !shell.screenCaptureOpen;
         }
     }
@@ -461,6 +529,9 @@ ShellRoot {
         target: "control-center"
 
         function toggle() {
+            if (!plugins.controlCenterEnabled)
+                return;
+
             shell.controlCenterOpen = !shell.controlCenterOpen;
         }
     }
@@ -469,6 +540,9 @@ ShellRoot {
         target: "quick-settings"
 
         function toggle() {
+            if (!plugins.quickSettingsEnabled)
+                return;
+
             shell.quickSettingsOpen = !shell.quickSettingsOpen;
         }
     }
@@ -477,6 +551,9 @@ ShellRoot {
         target: "launcher"
 
         function toggle() {
+            if (!plugins.applicationLauncherEnabled)
+                return;
+
             shell.applicationLauncherOpen = !shell.applicationLauncherOpen;
         }
     }
@@ -493,6 +570,9 @@ ShellRoot {
         target: "clipboard"
 
         function toggle() {
+            if (!plugins.clipboardEnabled)
+                return;
+
             shell.clipboardSelectorOpen = !shell.clipboardSelectorOpen;
         }
     }
@@ -501,6 +581,9 @@ ShellRoot {
         target: "quick-search"
 
         function toggle() {
+            if (!plugins.quickSearchEnabled)
+                return;
+
             shell.quickSearchOpen = !shell.quickSearchOpen;
         }
     }
@@ -509,6 +592,9 @@ ShellRoot {
         target: "unified-search"
 
         function toggle() {
+            if (!plugins.unifiedSearchEnabled)
+                return;
+
             shell.unifiedSearchOpen = !shell.unifiedSearchOpen;
         }
     }

@@ -10,6 +10,7 @@ Rectangle {
     required property var monitors
     required property var wallpapers
     required property var bookmarks
+    required property var plugins
 
     property string currentSection: "Appearance"
     property string pendingSection: ""
@@ -34,12 +35,16 @@ Rectangle {
             keywords: "bookmarks links search engines"
         },
         {
+            label: "Plugins", icon: "󰏗", section: "Plugins",
+            keywords: "launcher clipboard search command capture control center"
+        },
+        {
             label: "Desktop Widgets", icon: "󰖕", section: "Widgets",
             keywords: "media calendar system network weather"
         },
         {
-            label: "Status Bar", icon: "󰍛", section: "Status",
-            keywords: "modules layout notifications battery clock"
+            label: "Bar Widgets", icon: "󰍛", section: "Status",
+            keywords: "bar data modules widgets notifications battery clock media network"
         },
         {
             label: "Session", icon: "󰌾", section: "Session",
@@ -72,6 +77,9 @@ Rectangle {
         } else if (currentSection === "Bookmarks") {
             source = "BookmarkSettings.qml";
             properties.bookmarks = root.bookmarks;
+        } else if (currentSection === "Plugins") {
+            source = "PluginSettings.qml";
+            properties.plugins = root.plugins;
         } else if (currentSection === "Widgets") {
             source = "DesktopWidgetsSettings.qml";
         } else if (currentSection === "Status") {
@@ -289,8 +297,9 @@ Rectangle {
                             : root.currentSection === "Monitors" ? "Displays"
                                 : root.currentSection === "Labels" ? "Workspace Labels"
                                     : root.currentSection === "Bookmarks" ? "Quick Search"
+                                    : root.currentSection === "Plugins" ? "Plugins"
                                         : root.currentSection === "Widgets" ? "Desktop Widgets"
-                                        : root.currentSection === "Status" ? "Status Bar"
+                                        : root.currentSection === "Status" ? "Bar Widgets"
                                         : root.currentSection === "Session" ? "Session"
                                             : "Wallpapers"
                         color: theme.text
@@ -306,10 +315,12 @@ Rectangle {
                                     ? "Choose labels for workspaces 1 through 20."
                                     : root.currentSection === "Bookmarks"
                                         ? "Manage quick-search bookmarks and search engines."
+                                    : root.currentSection === "Plugins"
+                                        ? "Enable shell integrations and tune their behavior."
                                     : root.currentSection === "Widgets"
                                         ? "Enable desktop widgets and choose their placement."
                                     : root.currentSection === "Status"
-                                        ? "Arrange, show, and group status modules."
+                                        ? "Choose, place, order, and group the data shown on the bar."
                                     : root.currentSection === "Session"
                                         ? "Control the active session and review idle behavior."
                                         : "Choose a wallpaper for each display."

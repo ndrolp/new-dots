@@ -1,0 +1,12 @@
+{
+    "applicationLauncherEnabled": true,
+    "clipboardEnabled": true,
+    "clipboardImagePreviewsEnabled": true,
+    "commandLauncherEnabled": true,
+    "controlCenterEnabled": true,
+    "launcherRecentLimit": 20,
+    "quickSearchEnabled": true,
+    "quickSettingsEnabled": true,
+    "screenCaptureEnabled": true,
+    "unifiedSearchEnabled": true
+}
