@@ -15,6 +15,7 @@ ShellRoot {
     property bool configOpen: false
     property var configScreen: null
     property var configWindow: null
+    property var notificationWindow: null
     property string statusPopup: ""
     property var statusPopupWindow: null
     property bool notificationPanelOpen: false
@@ -160,7 +161,7 @@ ShellRoot {
         notificationServer: notificationServer
         notificationHistory: notificationHistory
         open: shell.notificationPanelOpen
-        targetWindow: shell.configWindow
+        targetWindow: shell.notificationWindow
 
         onCloseRequested: shell.notificationPanelOpen = false
     }
@@ -386,6 +387,8 @@ ShellRoot {
         target: "notifications"
 
         function toggle() {
+            if (shell.notificationWindow === null)
+                shell.notificationWindow = shell.configWindow;
             shell.notificationPanelOpen = !shell.notificationPanelOpen;
         }
     }
@@ -557,6 +560,9 @@ ShellRoot {
                 shell.configScreen = screen;
                 shell.configWindow = panelWindow;
             }
+
+            if (shell.notificationWindow === null)
+                shell.notificationWindow = panelWindow;
         }
 
         onStatusPopupRequested: function(popup, panelWindow) {
@@ -580,6 +586,9 @@ ShellRoot {
             osdPopup.showAudioSink(sink);
         }
 
-        onNotificationRequested: shell.notificationPanelOpen = !shell.notificationPanelOpen
+        onNotificationRequested: function(panelWindow) {
+            shell.notificationWindow = panelWindow;
+            shell.notificationPanelOpen = !shell.notificationPanelOpen;
+        }
     }
 }

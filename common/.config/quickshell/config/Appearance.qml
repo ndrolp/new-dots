@@ -15,6 +15,7 @@ QtObject {
     property alias activeWorkspaceHorizontalPadding: settings.activeWorkspaceHorizontalPadding
     property alias pillVerticalPadding: settings.pillVerticalPadding
     property alias workspacePadding: settings.workspacePadding
+    property alias structuralVerticalPadding: settings.structuralVerticalPadding
     property alias workspaceGlyphsEnabled: settings.workspaceGlyphsEnabled
     property alias hideEmptyWorkspaces: settings.hideEmptyWorkspaces
     property alias workspaceAppCountVisible: settings.workspaceAppCountVisible
@@ -52,15 +53,17 @@ QtObject {
     property alias doNotDisturb: settings.doNotDisturb
     property alias barTransparent: settings.barTransparent
     property alias barTransparentBorder: settings.barTransparentBorder
+    property alias barOpacity: settings.barOpacity
 
     readonly property var barProfileKeys: [
         "densityPreset", "barHeight", "horizontalPadding", "spacing", "radius",
         "workspaceButtonSize", "textSize", "archButtonHorizontalPadding",
         "activeWorkspaceHorizontalPadding", "pillVerticalPadding", "workspacePadding",
+        "structuralVerticalPadding",
         "workspaceGlyphsEnabled", "hideEmptyWorkspaces", "workspaceAppCountVisible",
         "workspaceGlyphs", "pillsTransparent", "transparentBarTopMargin",
         "transparentBarSlanted", "statusIsland", "statusIslandRadius", "barTransparent",
-        "barTransparentBorder", "statusModuleOrder", "statusModuleEnabled",
+        "barTransparentBorder", "barOpacity", "statusModuleOrder", "statusModuleEnabled",
         "statusModuleGroups", "statusModulePlacement", "barElementEnabled",
         "barElementPlacement", "backgroundClockEnabled",
         "backgroundClockCalendarEnabled", "backgroundClockPosition",
@@ -288,6 +291,7 @@ QtObject {
             property int activeWorkspaceHorizontalPadding: 6
             property int pillVerticalPadding: 3
             property int workspacePadding: 4
+            property int structuralVerticalPadding: 5
             property bool workspaceGlyphsEnabled: false
             property bool hideEmptyWorkspaces: false
             property bool workspaceAppCountVisible: true
@@ -346,6 +350,7 @@ QtObject {
             property bool doNotDisturb: false
             property bool barTransparent: false
             property bool barTransparentBorder: false
+            property int barOpacity: 100
         }
     }
 }

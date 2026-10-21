@@ -16,6 +16,10 @@ TextField {
     font.bold: true
     selectByMouse: true
 
+    TapHandler {
+        onTapped: control.forceActiveFocus()
+    }
+
     Config.Theme {
         id: theme
     }

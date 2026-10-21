@@ -73,8 +73,9 @@ Item {
 
         return contentWidth;
     }
-    readonly property real moduleHeight: appearance.workspaceButtonSize
-        + (appearance.pillVerticalPadding * 2)
+    readonly property real moduleHeight: appearance.barTransparent || appearance.statusIsland
+        ? appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
+        : Math.max(1, appearance.barHeight - (appearance.structuralVerticalPadding * 2))
 
     width: contentWidth
     height: moduleHeight
@@ -399,7 +400,7 @@ Item {
         visible: root.moduleVisible("media")
         x: root.moduleX("media")
         width: mediaContent.implicitWidth + 16
-        height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
+        height: root.moduleHeight
         radius: root.appearance.radius
         color: mediaHover.hovered ? theme.surfaceHover
             : root.isGrouped("media") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
@@ -492,7 +493,7 @@ Item {
         visible: root.moduleVisible("audio")
         x: root.moduleX("audio")
         width: 76
-        height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
+        height: root.moduleHeight
         radius: root.appearance.radius
         color: audioHover.hovered ? theme.surfaceHover
             : root.isGrouped("audio") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
@@ -550,7 +551,7 @@ Item {
         visible: root.moduleVisible("bluetooth")
         x: root.moduleX("bluetooth")
         width: root.appearance.workspaceButtonSize
-        height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
+        height: root.moduleHeight
         radius: root.appearance.radius
         color: bluetoothHover.hovered ? theme.surfaceHover
             : root.isGrouped("bluetooth") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
@@ -587,7 +588,7 @@ Item {
         visible: root.moduleVisible("tray")
         x: root.moduleX("tray")
         width: root.appearance.workspaceButtonSize
-        height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
+        height: root.moduleHeight
         radius: root.appearance.radius
         color: trayHover.hovered ? theme.surfaceHover
             : root.isGrouped("tray") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
@@ -624,7 +625,7 @@ Item {
         visible: root.moduleVisible("network")
         x: root.moduleX("network")
         width: root.appearance.workspaceButtonSize
-        height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
+        height: root.moduleHeight
         radius: root.appearance.radius
         color: networkHover.hovered ? theme.surfaceHover
             : root.isGrouped("network") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
@@ -661,7 +662,7 @@ Item {
         visible: root.moduleVisible("battery")
         x: root.moduleX("battery")
         width: batteryContent.implicitWidth + 16
-        height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
+        height: root.moduleHeight
         radius: root.appearance.radius
         color: batteryHover.hovered ? theme.surfaceHover
             : root.isGrouped("battery") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
@@ -713,7 +714,7 @@ Item {
         visible: root.moduleVisible("clock")
         x: root.moduleX("clock")
         width: clockContent.implicitWidth + 16
-        height: root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
+        height: root.moduleHeight
         radius: root.appearance.radius
         color: clockHover.hovered ? theme.surfaceHover
             : root.isGrouped("clock") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted

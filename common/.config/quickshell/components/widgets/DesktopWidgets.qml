@@ -106,7 +106,7 @@ Variants {
 
         visible: active
         radius: root.appearance.radius
-        color: Qt.rgba(cardTheme.surface.r, cardTheme.surface.g, cardTheme.surface.b, 0.78)
+        color: Qt.rgba(cardTheme.surface.r, cardTheme.surface.g, cardTheme.surface.b, 0.70)
         border.color: cardTheme.border
         border.width: 1
         x: position.endsWith("left") ? 28

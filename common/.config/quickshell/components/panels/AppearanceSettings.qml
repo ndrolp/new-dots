@@ -185,9 +185,11 @@ Column {
     Repeater {
         model: [
             { label: "Bar height", from: 24, to: 56, propertyName: "barHeight" },
+            { label: "Bar opacity", from: 20, to: 100, propertyName: "barOpacity" },
             { label: "Horizontal padding", from: 0, to: 48, propertyName: "horizontalPadding" },
             { label: "Pill vertical padding", from: 0, to: 8, propertyName: "pillVerticalPadding" },
             { label: "Workspace bar padding", from: 0, to: 10, propertyName: "workspacePadding" },
+            { label: "Bar vertical padding", from: 0, to: 16, propertyName: "structuralVerticalPadding" },
             { label: "Transparent bar top margin", from: 0, to: 32, propertyName: "transparentBarTopMargin" },
             { label: "Corner radius", from: 0, to: 24, propertyName: "radius" },
             { label: "Status island radius", from: 0, to: 32, propertyName: "statusIslandRadius" },
@@ -270,6 +272,94 @@ Column {
                 color: theme.text
                 font.pixelSize: root.appearance.textSize - 1
                 font.bold: true
+            }
+
+            Text {
+                width: parent.width
+                text: "BAR ITEMS"
+                color: theme.textMuted
+                font.pixelSize: root.appearance.textSize - 2
+                font.bold: true
+            }
+
+            Text {
+                width: parent.width
+                text: "Choose which structural items appear in this profile. Use Status Bar for their placement."
+                color: theme.textMuted
+                font.pixelSize: root.appearance.textSize - 1
+                wrapMode: Text.WordWrap
+            }
+
+            Repeater {
+                model: [
+                    { label: "ARCH ICON", propertyName: "arch" },
+                    { label: "HARDWARE INFO", propertyName: "system" },
+                    { label: "CURRENT APP", propertyName: "currentApp" },
+                    { label: "WORKSPACES", propertyName: "workspaces" }
+                ]
+
+                delegate: Rectangle {
+                    id: barItemToggle
+
+                    required property var modelData
+
+                    width: parent.width
+                    height: 44
+                    radius: root.appearance.radius
+                    color: barItemHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+
+                    HoverHandler {
+                        id: barItemHover
+                    }
+
+                    Text {
+                        anchors.left: parent.left
+                        anchors.leftMargin: 12
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: barItemToggle.modelData.label
+                        color: theme.text
+                        font.pixelSize: root.appearance.textSize - 1
+                        font.bold: true
+                    }
+
+                    Rectangle {
+                        anchors.right: parent.right
+                        anchors.rightMargin: 10
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 48
+                        height: 28
+                        radius: root.appearance.radius
+                        readonly property bool itemEnabled: (root.appearance.barElementEnabled || {})[
+                            barItemToggle.modelData.propertyName] !== false
+                        color: itemEnabled ? theme.accent : theme.surface
+
+                        Rectangle {
+                            x: parent.itemEnabled ? parent.width - width - 3 : 3
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 22
+                            height: 22
+                            radius: 11
+                            color: theme.text
+
+                            Behavior on x {
+                                NumberAnimation {
+                                    duration: 160
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
+                        }
+                    }
+
+                    TapHandler {
+                        onTapped: {
+                            const values = Object.assign({}, root.appearance.barElementEnabled || {});
+                            values[barItemToggle.modelData.propertyName]
+                                = (root.appearance.barElementEnabled || {})[
+                                    barItemToggle.modelData.propertyName] === false;
+                            root.appearance.barElementEnabled = values;
+                        }
+                    }
+                }
             }
 
             Rectangle {

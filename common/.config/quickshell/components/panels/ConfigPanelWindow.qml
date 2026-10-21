@@ -19,6 +19,7 @@ PanelWindow {
     screen: targetWindow ? targetWindow.screen : null
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
+    focusable: true
     WlrLayershell.namespace: "ndro-shell-settings"
     WlrLayershell.layer: WlrLayer.Overlay
 

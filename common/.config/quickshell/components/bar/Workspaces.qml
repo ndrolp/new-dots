@@ -10,8 +10,10 @@ Rectangle {
     required property var workspaceService
 
     implicitWidth: workspaceRow.implicitWidth + (appearance.barTransparent ? 16 : 0)
-    implicitHeight: workspaceRow.implicitHeight + (appearance.barTransparent
-        ? (appearance.pillVerticalPadding + 2) * 2 : 0)
+    implicitHeight: appearance.barTransparent || appearance.statusIsland
+        ? workspaceRow.implicitHeight + (appearance.barTransparent
+            ? (appearance.pillVerticalPadding + 2) * 2 : 0)
+        : Math.max(1, appearance.barHeight - (appearance.structuralVerticalPadding * 2))
     width: implicitWidth
     height: implicitHeight
     radius: appearance.radius
@@ -74,9 +76,10 @@ Rectangle {
                 width: active
                     ? appearance.workspaceButtonSize + (appearance.activeWorkspaceHorizontalPadding * 2)
                     : appearance.workspaceButtonSize
-                height: appearance.barTransparent
+                height: appearance.barTransparent || appearance.statusIsland
                     ? appearance.workspaceButtonSize - 2
-                    : appearance.barHeight - (appearance.workspacePadding * 2)
+                    : Math.max(1, appearance.barHeight
+                        - (appearance.structuralVerticalPadding * 2))
                 radius: appearance.radius
                 color: active ? theme.accent : urgent
                     ? Qt.rgba(theme.red.r, theme.red.g, theme.red.b, 0.22)

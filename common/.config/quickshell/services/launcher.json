@@ -3,25 +3,25 @@
         "code"
     ],
     "recent": [
+        "obsidian",
+        "com.microsoft.VSCode",
+        "blueman-manager",
+        "org.gnome.Calculator",
+        "com.rtosta.zapzap",
         "ai.storyteller.photocraft",
         "chromium",
         "com.valvesoftware.SteamLink",
         "gimp",
         "steam",
         "org.gnome.Snapshot",
-        "com.microsoft.VSCode",
         "proton.vpn.app.gtk",
-        "blueman-manager",
         "ranger",
         "org.gnome.Software",
         "openlogi",
         "org.gnome.Weather",
-        "obsidian",
         "org.gnome.Calendar",
         "bssh",
         "org.kde.filelight",
-        "rawtherapee",
-        "nemo",
-        "org.kde.dolphin"
+        "rawtherapee"
     ]
 }

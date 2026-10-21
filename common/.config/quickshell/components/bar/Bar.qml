@@ -23,7 +23,7 @@ Variants {
     signal statusPopupRequested(string popup, var panelWindow)
     signal statusPopupClosed(string popup, var panelWindow)
     signal audioSinkSelected(var sink)
-    signal notificationRequested()
+    signal notificationRequested(var panelWindow)
 
     model: Quickshell.screens
 
@@ -47,6 +47,7 @@ Variants {
                 property int activeWorkspaceHorizontalPadding: bar.appearance.barProfileValue(panel.profileName, "activeWorkspaceHorizontalPadding")
                 property int pillVerticalPadding: bar.appearance.barProfileValue(panel.profileName, "pillVerticalPadding")
                 property int workspacePadding: bar.appearance.barProfileValue(panel.profileName, "workspacePadding")
+                property int structuralVerticalPadding: bar.appearance.barProfileValue(panel.profileName, "structuralVerticalPadding")
                 property bool workspaceGlyphsEnabled: bar.appearance.barProfileValue(panel.profileName, "workspaceGlyphsEnabled")
                 property bool hideEmptyWorkspaces: bar.appearance.barProfileValue(panel.profileName, "hideEmptyWorkspaces")
                 property bool workspaceAppCountVisible: bar.appearance.barProfileValue(panel.profileName, "workspaceAppCountVisible")
@@ -58,6 +59,7 @@ Variants {
                 property int statusIslandRadius: bar.appearance.barProfileValue(panel.profileName, "statusIslandRadius")
                 property bool barTransparent: bar.appearance.barProfileValue(panel.profileName, "barTransparent")
                 property bool barTransparentBorder: bar.appearance.barProfileValue(panel.profileName, "barTransparentBorder")
+                property int barOpacity: bar.appearance.barProfileValue(panel.profileName, "barOpacity")
                 property var statusModuleOrder: bar.appearance.barProfileValue(panel.profileName, "statusModuleOrder")
                 property var statusModuleEnabled: bar.appearance.barProfileValue(panel.profileName, "statusModuleEnabled")
                 property var statusModuleGroups: bar.appearance.barProfileValue(panel.profileName, "statusModuleGroups")
@@ -82,6 +84,7 @@ Variants {
                 monitorDescription
             )
             WlrLayershell.namespace: "ndro-shell-bar"
+            WlrLayershell.layer: WlrLayer.Top
             color: "transparent"
             mask: Region {
                 x: 0
@@ -115,7 +118,8 @@ Variants {
                 anchors.right: parent.right
                 height: panel.totalBarHeight
                 color: panel.barAppearance.barTransparent || panel.barAppearance.statusIsland
-                    ? "transparent" : theme.background
+                    ? "transparent" : Qt.rgba(theme.background.r, theme.background.g,
+                        theme.background.b, panel.barAppearance.barOpacity / 100)
 
                 Behavior on color {
                     ColorAnimation {
@@ -154,7 +158,7 @@ Variants {
                         bar.statusPopupRequested(popup, panel);
                     }
 
-                    onNotificationRequested: bar.notificationRequested()
+                    onNotificationRequested: bar.notificationRequested(panel)
                 }
             }
 

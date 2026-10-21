@@ -387,4 +387,5 @@ Rectangle {
             root.selectedWallpaperMonitor = sectionLoader.item.selectedWallpaperMonitor;
         }
     }
+
 }

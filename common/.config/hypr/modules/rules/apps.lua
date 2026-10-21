@@ -8,8 +8,8 @@ hl.layer_rule({
 hl.layer_rule({
 	name = "ndro-bar",
 	match = { namespace = "ndro-shell-bar" },
-	ignore_alpha = 0.1,
-	blur = false,
+	ignore_alpha = 0.0,
+	blur = true,
 	dim_around = false,
 	animation = "spring",
 })
