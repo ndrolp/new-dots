@@ -182,6 +182,14 @@ Column {
         }
     }
 
+    Text {
+        text: "SIZE & SPACING"
+        color: theme.textMuted
+        font.pixelSize: root.appearance.textSize - 2
+        font.bold: true
+        topPadding: 4
+    }
+
     Repeater {
         model: [
             { label: "Bar height", from: 24, to: 56, propertyName: "barHeight" },
@@ -233,6 +241,14 @@ Column {
         }
     }
 
+    Text {
+        text: "BAR STYLE"
+        color: theme.textMuted
+        font.pixelSize: root.appearance.textSize - 2
+        font.bold: true
+        topPadding: 8
+    }
+
     Repeater {
         model: [
             { label: "TRANSPARENT BAR", propertyName: "barTransparent" },
@@ -274,94 +290,6 @@ Column {
                 font.bold: true
             }
 
-            Text {
-                width: parent.width
-                text: "BAR ITEMS"
-                color: theme.textMuted
-                font.pixelSize: root.appearance.textSize - 2
-                font.bold: true
-            }
-
-            Text {
-                width: parent.width
-                text: "Choose which structural items appear in this profile. Use Status Bar for their placement."
-                color: theme.textMuted
-                font.pixelSize: root.appearance.textSize - 1
-                wrapMode: Text.WordWrap
-            }
-
-            Repeater {
-                model: [
-                    { label: "ARCH ICON", propertyName: "arch" },
-                    { label: "HARDWARE INFO", propertyName: "system" },
-                    { label: "CURRENT APP", propertyName: "currentApp" },
-                    { label: "WORKSPACES", propertyName: "workspaces" }
-                ]
-
-                delegate: Rectangle {
-                    id: barItemToggle
-
-                    required property var modelData
-
-                    width: parent.width
-                    height: 44
-                    radius: root.appearance.radius
-                    color: barItemHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-
-                    HoverHandler {
-                        id: barItemHover
-                    }
-
-                    Text {
-                        anchors.left: parent.left
-                        anchors.leftMargin: 12
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: barItemToggle.modelData.label
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize - 1
-                        font.bold: true
-                    }
-
-                    Rectangle {
-                        anchors.right: parent.right
-                        anchors.rightMargin: 10
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: 48
-                        height: 28
-                        radius: root.appearance.radius
-                        readonly property bool itemEnabled: (root.appearance.barElementEnabled || {})[
-                            barItemToggle.modelData.propertyName] !== false
-                        color: itemEnabled ? theme.accent : theme.surface
-
-                        Rectangle {
-                            x: parent.itemEnabled ? parent.width - width - 3 : 3
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 22
-                            height: 22
-                            radius: 11
-                            color: theme.text
-
-                            Behavior on x {
-                                NumberAnimation {
-                                    duration: 160
-                                    easing.type: Easing.OutCubic
-                                }
-                            }
-                        }
-                    }
-
-                    TapHandler {
-                        onTapped: {
-                            const values = Object.assign({}, root.appearance.barElementEnabled || {});
-                            values[barItemToggle.modelData.propertyName]
-                                = (root.appearance.barElementEnabled || {})[
-                                    barItemToggle.modelData.propertyName] === false;
-                            root.appearance.barElementEnabled = values;
-                        }
-                    }
-                }
-            }
-
             Rectangle {
                 anchors.right: parent.right
                 anchors.rightMargin: 10
@@ -393,6 +321,102 @@ Column {
                     = !root.appearance[settingToggle.modelData.propertyName]
             }
         }
+    }
+
+    Text {
+        text: "BAR ELEMENTS"
+        color: theme.textMuted
+        font.pixelSize: root.appearance.textSize - 2
+        font.bold: true
+        topPadding: 8
+    }
+
+    Text {
+        width: parent.width
+        text: "Choose the structural items shown on the bar. Set their placement in Bar Widgets."
+        color: theme.textMuted
+        font.pixelSize: root.appearance.textSize - 1
+        wrapMode: Text.WordWrap
+    }
+
+    Repeater {
+        model: [
+            { label: "ARCH ICON", propertyName: "arch" },
+            { label: "HARDWARE INFO", propertyName: "system" },
+            { label: "CURRENT APP", propertyName: "currentApp" },
+            { label: "WORKSPACES", propertyName: "workspaces" }
+        ]
+
+        delegate: Rectangle {
+            id: barItemToggle
+
+            required property var modelData
+
+            width: parent.width
+            height: 44
+            radius: root.appearance.radius
+            color: barItemHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+
+            HoverHandler {
+                id: barItemHover
+            }
+
+            Text {
+                anchors.left: parent.left
+                anchors.leftMargin: 12
+                anchors.verticalCenter: parent.verticalCenter
+                text: barItemToggle.modelData.label
+                color: theme.text
+                font.pixelSize: root.appearance.textSize - 1
+                font.bold: true
+            }
+
+            Rectangle {
+                anchors.right: parent.right
+                anchors.rightMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                width: 48
+                height: 28
+                radius: root.appearance.radius
+                readonly property bool itemEnabled: (root.appearance.barElementEnabled || {})[
+                    barItemToggle.modelData.propertyName] !== false
+                color: itemEnabled ? theme.accent : theme.surface
+
+                Rectangle {
+                    x: parent.itemEnabled ? parent.width - width - 3 : 3
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 22
+                    height: 22
+                    radius: 11
+                    color: theme.text
+
+                    Behavior on x {
+                        NumberAnimation {
+                            duration: 160
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                }
+            }
+
+            TapHandler {
+                onTapped: {
+                    const values = Object.assign({}, root.appearance.barElementEnabled || {});
+                    values[barItemToggle.modelData.propertyName]
+                        = (root.appearance.barElementEnabled || {})[
+                            barItemToggle.modelData.propertyName] === false;
+                    root.appearance.barElementEnabled = values;
+                }
+            }
+        }
+    }
+
+    Text {
+        text: "DESKTOP CLOCK"
+        color: theme.textMuted
+        font.pixelSize: root.appearance.textSize - 2
+        font.bold: true
+        topPadding: 8
     }
 
     Rectangle {
@@ -548,6 +572,14 @@ Column {
 
             onActivated: root.appearance.backgroundClockPosition = model[index].value
         }
+    }
+
+    Text {
+        text: "NOTIFICATIONS"
+        color: theme.textMuted
+        font.pixelSize: root.appearance.textSize - 2
+        font.bold: true
+        topPadding: 8
     }
 
     Rectangle {

@@ -12,7 +12,7 @@
     "barElementEnabled": {
         "arch": true,
         "currentApp": true,
-        "system": true,
+        "system": false,
         "workspaces": true
     },
     "barElementPlacement": {
@@ -136,7 +136,7 @@
             "barElementEnabled": {
                 "arch": true,
                 "currentApp": true,
-                "system": true,
+                "system": false,
                 "workspaces": true
             },
             "barElementPlacement": {
@@ -173,8 +173,8 @@
             "mediaTitleVisible": true,
             "notificationBadgeVisible": true,
             "notificationPopupLocation": "top-right",
-            "pillVerticalPadding": 5,
-            "pillsTransparent": false,
+            "pillVerticalPadding": 4,
+            "pillsTransparent": true,
             "radius": 3,
             "spacing": 8,
             "statusIsland": false,
@@ -182,11 +182,11 @@
             "statusModuleEnabled": {
                 "audio": true,
                 "battery": true,
-                "bluetooth": false,
+                "bluetooth": true,
                 "clock": true,
-                "media": false,
+                "media": true,
                 "network": true,
-                "tray": false
+                "tray": true
             },
             "statusModuleGroups": {
             },
@@ -205,7 +205,7 @@
             },
             "structuralVerticalPadding": 8,
             "textSize": 15,
-            "transparentBarSlanted": false,
+            "transparentBarSlanted": true,
             "transparentBarTopMargin": 7,
             "workspaceAppCountVisible": false,
             "workspaceButtonSize": 18,
@@ -479,7 +479,7 @@
     "notificationBadgeVisible": true,
     "notificationPopupLocation": "top-right",
     "pillVerticalPadding": 4,
-    "pillsTransparent": false,
+    "pillsTransparent": true,
     "radius": 3,
     "spacing": 8,
     "statusIsland": false,
@@ -510,7 +510,7 @@
     },
     "structuralVerticalPadding": 8,
     "textSize": 15,
-    "transparentBarSlanted": false,
+    "transparentBarSlanted": true,
     "transparentBarTopMargin": 7,
     "workspaceAppCountVisible": false,
     "workspaceButtonSize": 18,
