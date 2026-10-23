@@ -107,15 +107,6 @@ TestCase {
             "work"), null);
     }
 
-    function test_aProfileOnlyTheDefaultEntryUsesIsAssigned() {
-        const fixture = started();
-
-        compare(BarProfileModel.monitorsUsingProfile({ "default": { barProfile: "work" } },
-            "work"), ["default"]);
-        compare(BarProfileModel.deleteProfile(fixture.appearance,
-            { "default": { barProfile: "work" } }, "work"), null);
-    }
-
     function test_deletingTheLastProfileIsRejected() {
         const state = started().appearance;
         state.barProfiles = { "work": state.barProfiles.work };

@@ -9,8 +9,7 @@ function cloneValue(value) {
 }
 
 // Desktop widgets: configured per monitor in monitors.json under
-// displaySettings[monitor].desktopWidgets (the "default" entry is the template
-// for monitors without their own entry).
+// displaySettings[monitor].desktopWidgets.
 
 const desktopWidgetNames = ["media", "system", "calendar", "network", "weather"];
 
@@ -44,15 +43,10 @@ function completeDesktopWidgets(widgets) {
     return complete;
 }
 
-// The desktop widgets of a monitor, completed from the "default" entry.
+// The desktop widgets of a monitor, completed with the built-in defaults.
 function desktopWidgetsFor(displaySettings, monitorName) {
-    const configured = displaySettings[monitorName];
-    const defaults = displaySettings["default"];
-
-    if (configured && configured.desktopWidgets)
-        return completeDesktopWidgets(configured.desktopWidgets);
-
-    return completeDesktopWidgets(defaults && defaults.desktopWidgets);
+    const configured = (displaySettings || {})[monitorName];
+    return completeDesktopWidgets(configured && configured.desktopWidgets);
 }
 
 function withDesktopWidgets(displaySettings, monitorName, widgets) {

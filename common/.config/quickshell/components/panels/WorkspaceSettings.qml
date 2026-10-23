@@ -157,12 +157,10 @@ Column {
                         width: 144
                         height: 30
                         textRole: "label"
-                        model: [
-                            { label: "Minimal", value: "minimal" },
-                            { label: "Work", value: "work" },
-                            { label: "Media", value: "media" },
-                            { label: "Presentation", value: "presentation" }
-                        ]
+                        model: Object.keys(root.appearance.barProfiles || {}).sort().map(name => ({
+                            label: name.charAt(0).toUpperCase() + name.slice(1),
+                            value: name
+                        }))
                         currentIndex: {
                             const profile = root.monitors.displaySettingsFor(monitorDescription).barProfile;
                             for (let index = 0; index < model.length; index++) {

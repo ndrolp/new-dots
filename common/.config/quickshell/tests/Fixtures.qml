@@ -22,7 +22,7 @@ QtObject {
         const barProfiles = migrated().appearance.barProfiles;
         return {
             barProfiles: barProfiles,
-            editingBarProfile: BarProfileModel.initialEditingProfile(barProfiles),
+            editingBarProfile: BarProfileModel.defaultProfileName(barProfiles),
             pendingProfile: null
         };
     }

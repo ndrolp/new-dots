@@ -28,10 +28,6 @@ Column {
             ? profileName.charAt(0).toUpperCase() + profileName.slice(1) : "";
     }
 
-    function monitorLabel(monitorName) {
-        return monitorName === "default" ? "new monitors (default)" : monitorName;
-    }
-
     function startDuplicate() {
         duplicateName.text = appearance.suggestedDuplicateName();
         action = "duplicate";
@@ -57,7 +53,7 @@ Column {
         if (deleteRejection === "assigned")
             return "Can't delete \"" + displayName(appearance.editingBarProfile)
                 + "\": used by " + BarProfileModel.monitorsUsingProfile(
-                    displaySettings, appearance.editingBarProfile).map(monitorLabel).join(", ")
+                    displaySettings, appearance.editingBarProfile).join(", ")
                 + ". Assign another profile to them first.";
         if (deleteRejection === "last")
             return "Can't delete the last bar profile.";

@@ -132,9 +132,9 @@ function completeProfile(profile) {
     return complete;
 }
 
-// The profile edited first: the default one if it exists, else the first by
-// name ("" without profiles).
-function initialEditingProfile(barProfiles) {
+// The profile edited first and given to new monitors: the default one if it
+// exists, else the first by name ("" without profiles).
+function defaultProfileName(barProfiles) {
     if (barProfiles && barProfiles[defaultBarProfile])
         return defaultBarProfile;
 
@@ -238,8 +238,7 @@ function duplicateProfile(state, profileName, newName) {
     return { barProfiles: profiles, editingBarProfile: newName, pendingProfile: null };
 }
 
-// The display settings entries (monitors, and "default" for monitors nobody
-// has configured) that draw `profileName`.
+// The monitors that draw `profileName`.
 function monitorsUsingProfile(displaySettings, profileName) {
     return Object.keys(displaySettings || {}).filter(monitorName =>
         monitorDisplaySettings(displaySettings, monitorName).barProfile === profileName);
@@ -272,7 +271,7 @@ function deleteProfile(state, displaySettings, profileName) {
 
     return {
         barProfiles: profiles,
-        editingBarProfile: initialEditingProfile(profiles),
+        editingBarProfile: defaultProfileName(profiles),
         pendingProfile: null
     };
 }
@@ -329,18 +328,31 @@ function matchingDensityPreset(profile) {
     return "";
 }
 
-// Display settings of a monitor, completed from the "default" entry. A monitor
-// always has a bar profile: its own, the default entry's, or the default one.
+// Display settings of a monitor. Every monitor has its own entry with an
+// explicit bar profile (see assignNewMonitor); until a new monitor gets one
+// its bar profile is "" and its bar shows the default settings.
 function monitorDisplaySettings(displaySettings, monitorName) {
-    const configured = displaySettings[monitorName];
-    const defaults = displaySettings["default"] || {};
+    const configured = (displaySettings || {})[monitorName] || {};
 
     return {
-        barVisible: configured && configured.barVisible !== undefined
-            ? configured.barVisible : defaults.barVisible !== false,
-        barProfile: configured && configured.barProfile
-            ? configured.barProfile : defaults.barProfile || defaultBarProfile
+        barVisible: configured.barVisible !== false,
+        barProfile: configured.barProfile || ""
     };
+}
+
+// New displaySettings in which `monitorName`, a monitor without a bar
+// profile, draws the default profile (see defaultProfileName) with its bar
+// visible; null when it already has a profile.
+function assignNewMonitor(displaySettings, monitorName, barProfiles) {
+    const configured = (displaySettings || {})[monitorName] || {};
+
+    if (configured.barProfile)
+        return null;
+
+    const updated = Object.assign({}, displaySettings);
+    updated[monitorName] = Object.assign({ barVisible: true }, configured,
+        { barProfile: defaultProfileName(barProfiles) });
+    return updated;
 }
 
 // The bar profile a monitor draws.

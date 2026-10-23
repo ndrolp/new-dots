@@ -1,6 +1,5 @@
 import QtQuick
 import QtTest
-import "../config/BarProfileModel.js" as BarProfileModel
 import "../config/SchemaMigrations.js" as SchemaMigrations
 import "../config/DesktopWidgetsModel.js" as DesktopWidgetsModel
 
@@ -52,7 +51,6 @@ TestCase {
         compare(displaySettings[aoc].desktopWidgets, liveDesktop);
         compare(displaySettings[philips].desktopWidgets, liveDesktop);
         compare(displaySettings[samsung].desktopWidgets, liveDesktop);
-        compare(displaySettings["default"].desktopWidgets, liveDesktop);
     }
 
     function test_monitorsKeepTheirOtherDisplaySettings() {
@@ -174,16 +172,16 @@ TestCase {
     function test_changingTheBarProfileDoesNotTouchDesktopWidgets() {
         const migrated = migrateFixtures();
 
-        const changes = BarProfileModel.editProfile(migrated.appearance, "media");
+        const media = migrated.appearance.barProfiles.media;
 
-        verify(!("backgroundClockEnabled" in changes));
-        verify(!("desktopWeatherEnabled" in changes));
-        verify(!("notificationPopupLocation" in changes));
+        verify(!("backgroundClockEnabled" in media));
+        verify(!("desktopWeatherEnabled" in media));
+        verify(!("notificationPopupLocation" in media));
     }
 
-    function test_aMonitorWithoutSettingsUsesTheDefaultDesktop() {
+    function test_aMonitorWithoutSettingsUsesTheBuiltInDesktop() {
         const displaySettings = migrateFixtures().monitors.displaySettings;
-        displaySettings["default"].desktopWidgets.media.enabled = false;
+        displaySettings["default"] = { desktopWidgets: { media: { enabled: true } } };
 
         compare(DesktopWidgetsModel.desktopWidgetsFor(displaySettings, "HDMI-9").media.enabled, false);
         compare(DesktopWidgetsModel.desktopWidgetsFor({}, "HDMI-9").backgroundClock.enabled, true);
@@ -212,14 +210,14 @@ TestCase {
         compare(DesktopWidgetsModel.moveDesktopWidget(updated, aoc, "media", -1), updated);
     }
 
-    function test_editingAMonitorWithoutSettingsStartsFromTheDefaultDesktop() {
+    function test_editingAMonitorWithoutSettingsStartsFromTheBuiltInDesktop() {
         const displaySettings = migrateFixtures().monitors.displaySettings;
 
         const updated = DesktopWidgetsModel.setDesktopWidgetSetting(
             displaySettings, "HDMI-9", "weather", "location", "Vigo, ES");
 
         compare(updated["HDMI-9"].desktopWidgets.weather.location, "Vigo, ES");
-        compare(updated["HDMI-9"].desktopWidgets.media, liveDesktop.media);
-        compare(updated["default"].desktopWidgets.weather.location, "Ourense, ES");
+        compare(updated["HDMI-9"].desktopWidgets.media, { enabled: false, position: "bottom-left" });
+        compare(updated[aoc].desktopWidgets.weather.location, "Ourense, ES");
     }
 }

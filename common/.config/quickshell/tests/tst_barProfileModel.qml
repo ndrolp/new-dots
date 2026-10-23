@@ -87,33 +87,53 @@ TestCase {
         });
     }
 
-    function test_aMonitorUsesItsAssignedProfileOrTheDefaultEntry() {
+    function test_aMonitorUsesItsAssignedProfile() {
         const displaySettings = {
-            "default": { barProfile: "work" },
-            "DP-1": { barProfile: "presentation" },
-            "DP-2": { barVisible: true }
+            "DP-1": { barProfile: "presentation", barVisible: false },
+            "DP-2": { barProfile: "work" }
         };
 
         compare(BarProfileModel.profileForMonitor(displaySettings, "DP-1"), "presentation");
-        compare(BarProfileModel.profileForMonitor(displaySettings, "DP-2"), "work");
-        compare(BarProfileModel.profileForMonitor(displaySettings, "HDMI-9"), "work");
-    }
-
-    function test_aNewMonitorGetsTheDefaultProfile() {
-        compare(BarProfileModel.profileForMonitor({}, "HDMI-9"), "minimal");
-        compare(BarProfileModel.monitorDisplaySettings({ "default": { barProfile: "" } }, "HDMI-9"),
-            { barVisible: true, barProfile: "minimal" });
-    }
-
-    function test_monitorDisplaySettingsFallBackToTheDefaultEntry() {
-        const displaySettings = {
-            "default": { barVisible: false, barProfile: "media" },
-            "DP-1": { barVisible: true }
-        };
-
         compare(BarProfileModel.monitorDisplaySettings(displaySettings, "DP-1"),
-            { barVisible: true, barProfile: "media" });
-        compare(BarProfileModel.monitorDisplaySettings({}, "DP-2"),
-            { barVisible: true, barProfile: "minimal" });
+            { barVisible: false, barProfile: "presentation" });
+        compare(BarProfileModel.monitorDisplaySettings(displaySettings, "DP-2"),
+            { barVisible: true, barProfile: "work" });
+    }
+
+    function test_noOtherEntryStandsInForAMonitor() {
+        const displaySettings = { "default": { barProfile: "work", barVisible: false } };
+
+        compare(BarProfileModel.monitorDisplaySettings(displaySettings, "HDMI-9"),
+            { barVisible: true, barProfile: "" });
+    }
+
+    function test_aNeverSeenMonitorIsAssignedTheDefaultProfile() {
+        const barProfiles = fixtures.startedBarState().barProfiles;
+
+        const updated = BarProfileModel.assignNewMonitor({ "DP-1": { barProfile: "work" } },
+            "HDMI-9", barProfiles);
+
+        compare(updated["HDMI-9"], { barVisible: true, barProfile: "minimal" });
+        compare(updated["DP-1"], { barProfile: "work" });
+    }
+
+    function test_withoutMinimalANewMonitorGetsTheFirstProfile() {
+        const updated = BarProfileModel.assignNewMonitor({}, "HDMI-9", { work: {}, media: {} });
+
+        compare(updated["HDMI-9"].barProfile, "media");
+    }
+
+    function test_aMonitorWithAProfileIsNotReassigned() {
+        const displaySettings = { "DP-1": { barProfile: "work" } };
+
+        compare(BarProfileModel.assignNewMonitor(displaySettings, "DP-1",
+            fixtures.startedBarState().barProfiles), null);
+    }
+
+    function test_aMonitorWithOtherSettingsButNoProfileGetsOne() {
+        const updated = BarProfileModel.assignNewMonitor(
+            { "DP-1": { barVisible: false, desktopWidgets: {} } }, "DP-1", { work: {} });
+
+        compare(updated["DP-1"], { barVisible: false, desktopWidgets: {}, barProfile: "work" });
     }
 }

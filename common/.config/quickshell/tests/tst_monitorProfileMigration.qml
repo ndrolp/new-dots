@@ -1,5 +1,6 @@
 import QtQuick
 import QtTest
+import "../config/BarProfileModel.js" as BarProfileModel
 import "../config/SchemaMigrations.js" as SchemaMigrations
 
 TestCase {
@@ -27,7 +28,32 @@ TestCase {
         compare(displaySettings[philips].barProfile, "minimal");
         compare(displaySettings[aoc].barProfile, "minimal");
         compare(displaySettings[samsung].barProfile, "minimal");
-        compare(displaySettings["default"].barProfile, "minimal");
+    }
+
+    function test_everyKnownMonitorGetsAnExplicitEntryAndNoDefaultEntryIsLeft() {
+        const displaySettings = migrateFixtures().monitors.displaySettings;
+
+        compare(Object.keys(displaySettings).sort(), [aoc, philips, samsung]);
+        for (const name of [aoc, philips, samsung]) {
+            compare(displaySettings[name].barVisible, true, name);
+            verify(displaySettings[name].desktopWidgets !== undefined, name);
+        }
+    }
+
+    function test_monitorsOnlyKnownThroughTheDefaultEntryKeepItsBarVisibility() {
+        const displaySettings = migrateFixtures((appearance, monitors) => {
+            monitors.displaySettings["default"].barVisible = false;
+        }).monitors.displaySettings;
+
+        compare(displaySettings[aoc].barVisible, false);
+        compare(displaySettings[philips].barVisible, true);
+    }
+
+    function test_onlyRealMonitorsUseAProfile() {
+        const displaySettings = migrateFixtures().monitors.displaySettings;
+
+        compare(BarProfileModel.monitorsUsingProfile(displaySettings, "minimal").sort(),
+            [aoc, philips, samsung]);
     }
 
     function test_explicitAssignmentsAreKept() {

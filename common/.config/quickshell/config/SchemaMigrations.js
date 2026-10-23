@@ -375,9 +375,36 @@ function foldLiveSettingsIntoProfiles(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
+// Step 7: every monitor has its own explicit entry; the "default" entry that
+// stood in for monitors without one goes away. Monitors only known by their
+// workspace range take what the default entry gave them.
+function explicitMonitorEntries(appearance, monitors) {
+    const migrated = cloneValue(monitors) || {};
+    const displaySettings = migrated.displaySettings || {};
+    const defaults = displaySettings["default"] || {};
+    const names = Object.keys(displaySettings).concat(Object.keys(migrated.assignments || {}))
+        .filter((name, index, all) => name !== "default" && all.indexOf(name) === index);
+
+    for (const name of names) {
+        const monitorSettings = displaySettings[name] || {};
+        if (monitorSettings.barVisible === undefined)
+            monitorSettings.barVisible = defaults.barVisible !== false;
+        if (!monitorSettings.barProfile)
+            monitorSettings.barProfile = defaults.barProfile
+                || BarProfileModel.defaultProfileName(appearance.barProfiles);
+        if (monitorSettings.desktopWidgets === undefined && defaults.desktopWidgets !== undefined)
+            monitorSettings.desktopWidgets = cloneValue(defaults.desktopWidgets);
+        displaySettings[name] = monitorSettings;
+    }
+
+    delete displaySettings["default"];
+    migrated.displaySettings = displaySettings;
+    return { appearance: appearance, monitors: migrated };
+}
+
 const migrationSteps = [
     migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
-    migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles
+    migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles, explicitMonitorEntries
 ];
 const schemaVersion = migrationSteps.length;
 

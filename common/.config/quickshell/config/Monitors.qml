@@ -48,11 +48,26 @@ QtObject {
 
     function setDisplaySetting(monitorName, settingName, value) {
         const updated = Object.assign({}, displaySettings);
-        const monitorSettings = Object.assign({}, displaySettings[monitorName],
-            displaySettingsFor(monitorName));
+        const monitorSettings = Object.assign({}, displaySettings[monitorName]);
         monitorSettings[settingName] = value;
         updated[monitorName] = monitorSettings;
         displaySettings = updated;
+    }
+
+    // Gives every monitor in `monitorNames` without a bar profile the default
+    // one (see BarProfileModel.assignNewMonitor). Skipped until the file is
+    // loaded, and after a migration rewrote it until the adapter reloads it,
+    // so a stale copy never overwrites it.
+    function assignNewMonitors(monitorNames, barProfiles) {
+        if (!loaded || reloadPending)
+            return;
+
+        let updated = displaySettings;
+        for (const monitorName of monitorNames)
+            updated = BarProfileModel.assignNewMonitor(updated, monitorName, barProfiles) || updated;
+
+        if (updated !== displaySettings)
+            displaySettings = updated;
     }
 
     function barVisible(monitorName) {
@@ -87,6 +102,7 @@ QtObject {
     }
 
     property bool loaded: false
+    property bool reloadPending: false
 
     // The file as stored, including keys the adapter does not declare.
     function rawState() {
@@ -99,6 +115,7 @@ QtObject {
 
     // Replaces the file with a migrated state in a single write.
     function applyMigratedState(state) {
+        reloadPending = true;
         settingsFile.setText(JSON.stringify(state, null, 4));
     }
 
@@ -111,7 +128,10 @@ QtObject {
 
         onFileChanged: reload()
         onAdapterUpdated: writeAdapter()
-        onLoaded: root.loaded = true
+        onLoaded: {
+            root.reloadPending = false;
+            root.loaded = true;
+        }
 
         onLoadFailed: error => {
             if (error === FileViewError.FileNotFound)
@@ -125,12 +145,8 @@ QtObject {
             property var assignments: ({
                 "default": { "from": 1, "to": 5 }
             })
-            property var displaySettings: ({
-                "default": {
-                    "barVisible": true,
-                    "barProfile": BarProfileModel.defaultBarProfile
-                }
-            })
+            // Every monitor gets its own entry when it first appears.
+            property var displaySettings: ({})
         }
     }
 }

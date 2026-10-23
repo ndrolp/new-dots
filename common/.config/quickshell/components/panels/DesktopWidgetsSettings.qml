@@ -44,7 +44,7 @@ Column {
         const names = connectedMonitorNames();
 
         if (names.indexOf(selectedMonitor) === -1)
-            selectedMonitor = names.length > 0 ? names[0] : "default";
+            selectedMonitor = names.length > 0 ? names[0] : "";
     }
 
     Component.onCompleted: ensureSelectedMonitor()

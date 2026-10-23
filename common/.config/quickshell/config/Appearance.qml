@@ -156,7 +156,7 @@ QtObject {
         if (settings.barProfiles[editingBarProfile] !== undefined)
             return;
 
-        editingBarProfile = BarProfileModel.initialEditingProfile(settings.barProfiles);
+        editingBarProfile = BarProfileModel.defaultProfileName(settings.barProfiles);
         pendingProfile = null;
     }
 
