@@ -15,7 +15,10 @@ common/.config/quickshell/tests/run.sh
   (schema version 0, from before bar profiles were reworked). Read them with
   the shared `Fixtures` helper (`Fixtures.qml`): declare
   `Fixtures { id: fixtures }` in the test and call
-  `fixtures.read("appearance.json")`.
+  `fixtures.read("appearance.json")`. It also gives the fixtures migrated to
+  the current schema (`migrated()`), the in-memory bar profile state Quickshell
+  starts with (`startedBarState()`), and helpers to apply the changes the
+  model returns (`withChanges`, `edited`).
 - The script uses the Qt 6 `qmltestrunner` (`/usr/lib/qt6/bin/qmltestrunner`;
   override with `QMLTESTRUNNER`). Extra arguments go to `qmltestrunner`, e.g.
   `run.sh test_savingUnderANewNameAddsAProfile`.
