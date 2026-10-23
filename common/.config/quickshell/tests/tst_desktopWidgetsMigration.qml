@@ -130,8 +130,8 @@ TestCase {
         const migrated = migrateFixtures();
 
         compare(migrated.appearance.barProfiles.media.barHeight, 34);
-        compare(migrated.appearance.barProfiles.media.statusModuleGroups,
-            original.barProfiles.media.statusModuleGroups);
+        compare(migrated.appearance.barProfiles.media.groupRadius,
+            original.barProfiles.media.statusIslandRadius);
         compare(migrated.appearance.barProfiles.work.barOpacity, original.barProfiles.work.barOpacity);
     }
 

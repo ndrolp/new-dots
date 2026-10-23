@@ -54,14 +54,12 @@ Variants {
                 property bool pillsTransparent: bar.appearance.barProfileValue(panel.profileName, "pillsTransparent")
                 property int transparentBarTopMargin: bar.appearance.barProfileValue(panel.profileName, "transparentBarTopMargin")
                 property bool transparentBarSlanted: bar.appearance.barProfileValue(panel.profileName, "transparentBarSlanted")
-                property bool statusIsland: bar.appearance.barProfileValue(panel.profileName, "statusIsland")
-                property int statusIslandRadius: bar.appearance.barProfileValue(panel.profileName, "statusIslandRadius")
+                property int groupRadius: bar.appearance.barProfileValue(panel.profileName, "groupRadius")
                 property bool barTransparent: bar.appearance.barProfileValue(panel.profileName, "barTransparent")
                 property bool barTransparentBorder: bar.appearance.barProfileValue(panel.profileName, "barTransparentBorder")
                 property int barOpacity: bar.appearance.barProfileValue(panel.profileName, "barOpacity")
                 property var barElements: BarProfileModel.normalizeBarElements(
                     bar.appearance.barProfileValue(panel.profileName, "barElements"))
-                property var statusModuleGroups: bar.appearance.barProfileValue(panel.profileName, "statusModuleGroups")
             }
             property bool configOpen: bar.configOpen
             property string activeStatusPopup: bar.activeStatusPopupWindow === panel
@@ -89,7 +87,7 @@ Variants {
                 height: panel.height
             }
             readonly property int totalBarHeight: panel.barAppearance.barHeight
-                + ((panel.barAppearance.barTransparent || panel.barAppearance.statusIsland)
+                + (panel.barAppearance.barTransparent
                     && !panel.barAppearance.transparentBarSlanted
                     ? panel.barAppearance.transparentBarTopMargin : 0)
 
@@ -113,7 +111,7 @@ Variants {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 height: panel.totalBarHeight
-                color: panel.barAppearance.barTransparent || panel.barAppearance.statusIsland
+                color: panel.barAppearance.barTransparent
                     ? "transparent" : Qt.rgba(theme.background.r, theme.background.g,
                         theme.background.b, panel.barAppearance.barOpacity / 100)
 
@@ -132,7 +130,7 @@ Variants {
                         && panel.barAppearance.transparentBarSlanted ? 0 : panel.barAppearance.horizontalPadding
                     anchors.rightMargin: panel.barAppearance.barTransparent
                         && panel.barAppearance.transparentBarSlanted ? 0 : panel.barAppearance.horizontalPadding
-                    anchors.topMargin: (panel.barAppearance.barTransparent || panel.barAppearance.statusIsland)
+                    anchors.topMargin: panel.barAppearance.barTransparent
                         && !panel.barAppearance.transparentBarSlanted
                         ? panel.barAppearance.transparentBarTopMargin : 0
                     appearance: panel.barAppearance

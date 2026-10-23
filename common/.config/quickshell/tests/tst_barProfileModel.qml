@@ -35,7 +35,7 @@ TestCase {
         compare(changes.editingBarProfile, "presentation");
         compare(changes.barHeight, 30);
         compare(changes.horizontalPadding, 12);
-        compare(changes.statusIsland, false);
+        compare(changes.transparentBarSlanted, true);
         compare(changes.transparentBarTopMargin, 8);
     }
 

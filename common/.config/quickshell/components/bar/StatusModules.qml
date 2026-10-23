@@ -20,6 +20,8 @@ Item {
     property string activePopup: ""
     // Where each module goes, provided by the bar's single walk per zone.
     property var elementX: module => 0
+    // Whether a module sits in a group, provided by the bar's walk.
+    property var elementGrouped: module => false
     signal popupRequested(string popup)
     signal notificationRequested()
 
@@ -36,11 +38,7 @@ Item {
     readonly property string playerLabel: player
         ? (player.trackTitle !== "" ? player.trackTitle : player.identity) : ""
     property string displayedPlayerLabel: playerLabel
-    readonly property var moduleOrder: [
-        "notifications", "recording", "media", "audio", "bluetooth", "tray", "network",
-        "battery", "clock"
-    ]
-    readonly property real moduleHeight: appearance.barTransparent || appearance.statusIsland
+    readonly property real moduleHeight: appearance.barTransparent
         ? appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
         : Math.max(1, appearance.barHeight - (appearance.structuralVerticalPadding * 2))
 
@@ -98,10 +96,6 @@ Item {
         return popupTrigger(module);
     }
 
-    function moduleZone(module) {
-        return BarProfileModel.elementZone(appearance.barElements, module);
-    }
-
     function moduleVisible(module) {
         if (!BarProfileModel.elementEnabled(appearance.barElements, module))
             return false;
@@ -114,76 +108,8 @@ Item {
         return true;
     }
 
-    function moduleWidth(module) {
-        if (module === "notifications")
-            return notificationButton.width;
-        if (module === "recording")
-            return recordingButton.width;
-        if (module === "media")
-            return mediaButton.width;
-        if (module === "audio")
-            return audioButton.width;
-        if (module === "bluetooth")
-            return bluetoothButton.width;
-        if (module === "tray")
-            return trayButton.width;
-        if (module === "network")
-            return networkButton.width;
-        if (module === "battery")
-            return batteryButton.width;
-        return pomodoroButton.width;
-    }
-
-    function moduleGroup(module) {
-        return (appearance.statusModuleGroups || {})[module] || 0;
-    }
-
-    function isGrouped(module) {
-        const group = moduleGroup(module);
-
-        if (group === 0)
-            return false;
-
-        let count = 0;
-        for (let index = 0; index < moduleOrder.length; index++) {
-            const candidate = moduleOrder[index];
-            if (moduleVisible(candidate) && moduleGroup(candidate) === group
-                    && moduleZone(candidate) === moduleZone(module))
-                count++;
-        }
-
-        return count > 1;
-    }
-
-    // Gap between two adjacent bar elements of a zone: modules of one group
-    // sit close together.
-    function moduleGap(previousModule, module) {
-        const modules = moduleOrder.indexOf(previousModule) !== -1
-            && moduleOrder.indexOf(module) !== -1;
-        return modules && isGrouped(previousModule) && isGrouped(module)
-            && moduleGroup(previousModule) === moduleGroup(module) ? 2 : appearance.spacing;
-    }
-
     function moduleX(module) {
         return elementX(module);
-    }
-
-    // Extent of a numbered group within one zone; a group split across zones
-    // gets one background per zone.
-    function groupExtent(group, zone) {
-        let start = -1;
-        let end = 0;
-
-        for (let index = 0; index < moduleOrder.length; index++) {
-            const module = moduleOrder[index];
-            if (moduleVisible(module) && moduleGroup(module) === group && moduleZone(module) === zone) {
-                const x = moduleX(module);
-                start = start === -1 ? x : Math.min(start, x);
-                end = Math.max(end, x + moduleWidth(module));
-            }
-        }
-
-        return start === -1 ? { x: 0, width: 0 } : { x: start - 5, width: end - start + 10 };
     }
 
     Component.onCompleted: updatePlayer()
@@ -196,31 +122,6 @@ Item {
     }
 
     onPlayerLabelChanged: mediaLabelTransition.restart()
-
-    Repeater {
-        model: {
-            const extents = [];
-            for (const group of [1, 2, 3]) {
-                for (const zone of ["left", "center", "right"])
-                    extents.push({ group: group, zone: zone });
-            }
-            return extents;
-        }
-
-        delegate: Rectangle {
-            required property var modelData
-            readonly property var extent: root.groupExtent(modelData.group, modelData.zone)
-
-            x: extent.x
-            anchors.verticalCenter: parent.verticalCenter
-            width: extent.width
-            height: root.moduleHeight
-            radius: root.appearance.radius
-            color: theme.surface
-            visible: extent.width > 0
-            z: -1
-        }
-    }
 
     function networkIcon() {
         const devices = Networking.devices.values;
@@ -259,10 +160,10 @@ Item {
         height: root.moduleHeight
         radius: root.appearance.radius
         color: notificationHover.hovered ? theme.surfaceHover
-            : root.isGrouped("notifications") || root.appearance.pillsTransparent
-                || root.appearance.transparentBarSlanted || root.appearance.statusIsland
+            : root.elementGrouped("notifications") || root.appearance.pillsTransparent
+                || root.appearance.transparentBarSlanted
                 ? "transparent" : theme.surface
-        border.width: root.appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
+        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("notifications") ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -315,10 +216,10 @@ Item {
         height: root.moduleHeight
         radius: root.appearance.radius
         color: recordingHover.hovered ? theme.surfaceHover
-            : root.isGrouped("recording") || root.appearance.pillsTransparent
-                || root.appearance.transparentBarSlanted || root.appearance.statusIsland
+            : root.elementGrouped("recording") || root.appearance.pillsTransparent
+                || root.appearance.transparentBarSlanted
                 ? "transparent" : theme.surface
-        border.width: root.appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
+        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("recording") ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -360,7 +261,7 @@ Item {
     Rectangle {
         id: mediaButton
 
-        border.width: root.appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
+        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("media") ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
         visible: root.moduleVisible("media")
         x: root.moduleX("media")
@@ -368,8 +269,8 @@ Item {
         height: root.moduleHeight
         radius: root.appearance.radius
         color: mediaHover.hovered ? theme.surfaceHover
-            : root.isGrouped("media") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
-                || root.appearance.statusIsland ? "transparent" : theme.surface
+            : root.elementGrouped("media") || root.appearance.pillsTransparent
+                || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
 
         Behavior on color {
@@ -462,10 +363,10 @@ Item {
         height: root.moduleHeight
         radius: root.appearance.radius
         color: audioHover.hovered ? theme.surfaceHover
-            : root.isGrouped("audio") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
-                || root.appearance.statusIsland ? "transparent" : theme.surface
+            : root.elementGrouped("audio") || root.appearance.pillsTransparent
+                || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
-        border.width: root.appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
+        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("audio") ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -521,10 +422,10 @@ Item {
         height: root.moduleHeight
         radius: root.appearance.radius
         color: bluetoothHover.hovered ? theme.surfaceHover
-            : root.isGrouped("bluetooth") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
-                || root.appearance.statusIsland ? "transparent" : theme.surface
+            : root.elementGrouped("bluetooth") || root.appearance.pillsTransparent
+                || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
-        border.width: root.appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
+        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("bluetooth") ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -558,10 +459,10 @@ Item {
         height: root.moduleHeight
         radius: root.appearance.radius
         color: trayHover.hovered ? theme.surfaceHover
-            : root.isGrouped("tray") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
-                || root.appearance.statusIsland ? "transparent" : theme.surface
+            : root.elementGrouped("tray") || root.appearance.pillsTransparent
+                || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
-        border.width: root.appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
+        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("tray") ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -595,10 +496,10 @@ Item {
         height: root.moduleHeight
         radius: root.appearance.radius
         color: networkHover.hovered ? theme.surfaceHover
-            : root.isGrouped("network") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
-                || root.appearance.statusIsland ? "transparent" : theme.surface
+            : root.elementGrouped("network") || root.appearance.pillsTransparent
+                || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
-        border.width: root.appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
+        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("network") ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -632,10 +533,10 @@ Item {
         height: root.moduleHeight
         radius: root.appearance.radius
         color: batteryHover.hovered ? theme.surfaceHover
-            : root.isGrouped("battery") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
-                || root.appearance.statusIsland ? "transparent" : theme.surface
+            : root.elementGrouped("battery") || root.appearance.pillsTransparent
+                || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
-        border.width: root.appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
+        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("battery") ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -685,10 +586,10 @@ Item {
         height: root.moduleHeight
         radius: root.appearance.radius
         color: clockHover.hovered ? theme.surfaceHover
-            : root.isGrouped("clock") || root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
-                || root.appearance.statusIsland ? "transparent" : theme.surface
+            : root.elementGrouped("clock") || root.appearance.pillsTransparent
+                || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
-        border.width: root.appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
+        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("clock") ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {

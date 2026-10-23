@@ -27,10 +27,8 @@ QtObject {
     property alias pillsTransparent: settings.pillsTransparent
     property alias transparentBarTopMargin: settings.transparentBarTopMargin
     property alias transparentBarSlanted: settings.transparentBarSlanted
-    property alias statusIsland: settings.statusIsland
-    property alias statusIslandRadius: settings.statusIslandRadius
+    property alias groupRadius: settings.groupRadius
     property alias barElements: settings.barElements
-    property alias statusModuleGroups: settings.statusModuleGroups
     property alias notificationPopupLocation: settings.notificationPopupLocation
     property alias doNotDisturb: settings.doNotDisturb
     property alias barTransparent: settings.barTransparent
@@ -78,6 +76,10 @@ QtObject {
         settings.barElements = BarProfileModel.moveElement(liveBarElements(), element, offset);
     }
 
+    function setBarElementJoined(element, joined) {
+        settings.barElements = BarProfileModel.setElementJoined(liveBarElements(), element, joined);
+    }
+
     function moveBarElementToZone(element, zone) {
         settings.barElements = BarProfileModel.moveElementToZone(liveBarElements(), element, zone);
     }
@@ -115,9 +117,10 @@ QtObject {
         onLoadFailed: error => {
             if (error === FileViewError.FileNotFound) {
                 // A new file starts from the defaults, in the current schema.
-                settings.barProfiles = BarProfileModel.migrateElementOrder({
-                    barProfiles: settings.barProfiles
-                }).barProfiles;
+                settings.barProfiles = BarProfileModel.migrateGroups(
+                    BarProfileModel.migrateElementOrder({
+                        barProfiles: settings.barProfiles
+                    })).barProfiles;
                 settings.schemaVersion = BarProfileModel.schemaVersion;
                 writeAdapter();
             }
@@ -265,9 +268,7 @@ QtObject {
             property bool pillsTransparent: false
             property int transparentBarTopMargin: 0
             property bool transparentBarSlanted: false
-            property bool statusIsland: false
-            property int statusIslandRadius: 12
-            property var statusModuleGroups: ({})
+            property int groupRadius: 8
             property var barElements: ({
                 "left": [
                     { "id": "arch", "enabled": true },
