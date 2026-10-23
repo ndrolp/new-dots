@@ -83,25 +83,21 @@ Column {
         id: theme
     }
 
-    BarProfileSelector {
-        appearance: root.appearance
+    Text {
+        text: "ELEMENTS"
+        color: theme.textMuted
+        font.pixelSize: root.appearance.textSize - 2
+        font.bold: true
+        topPadding: 6
     }
 
-        Text {
-            text: "ELEMENTS"
-            color: theme.textMuted
-            font.pixelSize: root.appearance.textSize - 2
-            font.bold: true
-            topPadding: 6
-        }
-
-        Text {
-            width: root.width
-            text: "Every piece of the bar. Turn it on or off, pick its zone (L/C/R) and order it within the zone. Join joins an element with the one above it: joined elements form a group with one shared background."
-            color: theme.textMuted
-            font.pixelSize: root.appearance.textSize - 1
-            wrapMode: Text.Wrap
-        }
+    Text {
+        width: root.width
+        text: "Every piece of the bar. Turn it on or off, pick its zone (L/C/R) and order it within the zone. Join joins an element with the one above it: joined elements form a group with one shared background."
+        color: theme.textMuted
+        font.pixelSize: root.appearance.textSize - 1
+        wrapMode: Text.Wrap
+    }
 
     Repeater {
         model: root.zones

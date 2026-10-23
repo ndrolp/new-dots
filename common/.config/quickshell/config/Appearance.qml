@@ -9,7 +9,6 @@ QtObject {
     property alias barHeight: settings.barHeight
     property alias editingBarProfile: settings.editingBarProfile
     property alias barProfiles: settings.barProfiles
-    property alias densityPreset: settings.densityPreset
     property alias horizontalPadding: settings.horizontalPadding
     property alias spacing: settings.spacing
     property alias radius: settings.radius
@@ -70,6 +69,10 @@ QtObject {
     function barProfileValue(profileName, key) {
         return BarProfileModel.profileValue(settings, profileName, key);
     }
+
+    // The density preset the live sizes match ("" if none): presets are a
+    // shortcut, so the matching one is derived instead of stored.
+    readonly property string matchingDensityPreset: BarProfileModel.matchingDensityPreset(settings)
 
     function applyDensityPreset(preset) {
         applyChanges(BarProfileModel.densityPresetChanges(preset));
@@ -174,7 +177,6 @@ QtObject {
             property string editingBarProfile: BarProfileModel.defaultBarProfile
             property var barProfiles: ({
                 "minimal": {
-                    "densityPreset": "compact",
                     "barHeight": 30,
                     "horizontalPadding": 10,
                     "spacing": 4,
@@ -212,7 +214,6 @@ QtObject {
                 },
                 "work": {},
                 "media": {
-                    "densityPreset": "balanced",
                     "barHeight": 34,
                     "horizontalPadding": 12,
                     "spacing": 8,
@@ -249,7 +250,6 @@ QtObject {
                     "barElementPlacement": {}
                 },
                 "presentation": {
-                    "densityPreset": "compact",
                     "barHeight": 30,
                     "horizontalPadding": 12,
                     "spacing": 5,
@@ -286,7 +286,6 @@ QtObject {
                     "barElementPlacement": {}
                 }
             })
-            property string densityPreset: "balanced"
             property int horizontalPadding: 12
             property int spacing: 8
             property int radius: 8

@@ -113,15 +113,15 @@ TestCase {
 
     function test_densityPresetsFillInTheBarSizes() {
         compare(BarProfileModel.densityPresetChanges("compact"), {
-            densityPreset: "compact", barHeight: 30, horizontalPadding: 8, spacing: 4,
+            barHeight: 30, horizontalPadding: 8, spacing: 4,
             pillVerticalPadding: 2, workspacePadding: 3, textSize: 13
         });
         compare(BarProfileModel.densityPresetChanges("spacious"), {
-            densityPreset: "spacious", barHeight: 38, horizontalPadding: 16, spacing: 12,
+            barHeight: 38, horizontalPadding: 16, spacing: 12,
             pillVerticalPadding: 5, workspacePadding: 5, textSize: 15
         });
         compare(BarProfileModel.densityPresetChanges("balanced"), {
-            densityPreset: "balanced", barHeight: 34, horizontalPadding: 12, spacing: 8,
+            barHeight: 34, horizontalPadding: 12, spacing: 8,
             pillVerticalPadding: 3, workspacePadding: 4, textSize: 14
         });
     }

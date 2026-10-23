@@ -4,7 +4,7 @@
 // Functions take state and return the changes to persist; they never mutate.
 
 const profileKeys = [
-    "densityPreset", "barHeight", "horizontalPadding", "spacing", "radius",
+    "barHeight", "horizontalPadding", "spacing", "radius",
     "workspaceButtonSize", "textSize", "archButtonHorizontalPadding",
     "activeWorkspaceHorizontalPadding", "pillVerticalPadding", "workspacePadding",
     "structuralVerticalPadding",
@@ -148,15 +148,32 @@ const densityPresets = {
     }
 };
 
-// Changes that apply a density preset; unknown presets use balanced sizes.
+// Changes that fill in the bar sizes of a density preset (a shortcut: the
+// preset itself is not stored); unknown presets use balanced sizes.
 function densityPresetChanges(preset) {
-    const changes = { densityPreset: preset };
+    const changes = {};
     const sizes = densityPresets[preset] || densityPresets.balanced;
 
     for (const key in sizes)
         changes[key] = sizes[key];
 
     return changes;
+}
+
+// The density preset whose sizes the state has, or "" when none matches.
+function matchingDensityPreset(state) {
+    for (const preset in densityPresets) {
+        const sizes = densityPresets[preset];
+        let matches = true;
+        for (const key in sizes) {
+            if (state[key] !== sizes[key])
+                matches = false;
+        }
+        if (matches)
+            return preset;
+    }
+
+    return "";
 }
 
 // Display settings of a monitor, completed from the "default" entry. A monitor
@@ -761,9 +778,20 @@ function migrateBarGroups(appearance, monitors) {
     return { appearance: migrateGroups(appearance), monitors: monitors };
 }
 
+// Step 5: density presets are only a shortcut; the stored preset goes away
+// from the live settings and every profile.
+function dropDensityPreset(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+    delete migrated.densityPreset;
+    for (const profileName in migrated.barProfiles || {})
+        delete migrated.barProfiles[profileName].densityPreset;
+
+    return { appearance: migrated, monitors: monitors };
+}
+
 const migrationSteps = [
     migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
-    migrateBarGroups
+    migrateBarGroups, dropDensityPreset
 ];
 const schemaVersion = migrationSteps.length;
 
