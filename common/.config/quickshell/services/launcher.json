@@ -3,6 +3,9 @@
         "code"
     ],
     "recent": [
+        "org.gnome.Nautilus",
+        "org.kde.plasma.emojier",
+        "com.github.th-ch.youtube-music",
         "obsidian",
         "com.microsoft.VSCode",
         "blueman-manager",
@@ -19,9 +22,6 @@
         "org.gnome.Software",
         "openlogi",
         "org.gnome.Weather",
-        "org.gnome.Calendar",
-        "bssh",
-        "org.kde.filelight",
-        "rawtherapee"
+        "org.gnome.Calendar"
     ]
 }
