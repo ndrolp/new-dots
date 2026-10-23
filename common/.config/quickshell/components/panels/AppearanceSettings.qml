@@ -200,7 +200,7 @@ Column {
             { label: "Bar vertical padding", from: 0, to: 16, propertyName: "structuralVerticalPadding" },
             { label: "Transparent bar top margin", from: 0, to: 32, propertyName: "transparentBarTopMargin" },
             { label: "Corner radius", from: 0, to: 24, propertyName: "radius" },
-            { label: "Status island radius", from: 0, to: 32, propertyName: "statusIslandRadius" },
+            { label: "Group radius", from: 0, to: 32, propertyName: "groupRadius" },
             { label: "Component spacing", from: 0, to: 24, propertyName: "spacing" }
         ]
 
@@ -252,7 +252,6 @@ Column {
             { label: "TRANSPARENT BAR", propertyName: "barTransparent" },
             { label: "TRANSPARENT BAR BORDER", propertyName: "barTransparentBorder" },
             { label: "DOCKED ISLAND BAR", propertyName: "transparentBarSlanted" },
-            { label: "STATUS ISLAND", propertyName: "statusIsland" },
             { label: "TRANSPARENT PILLS", propertyName: "pillsTransparent" }
         ]
 

@@ -21,10 +21,11 @@ Item {
     signal configRequested(var screen)
     signal statusPopupRequested(string popup)
     signal notificationRequested()
-    readonly property bool statusIslandEnabled: appearance.statusIsland
     readonly property var zoneNames: ["left", "center", "right"]
     readonly property real slantedPadding: appearance.barTransparent && appearance.transparentBarSlanted
         ? appearance.horizontalPadding : 0
+    // Room between a group's shared background and its first and last element.
+    readonly property real groupPadding: appearance.spacing
 
     // Bar elements are drawn with one walk per zone, in the order the profile
     // lists them; enabled elements with nothing to show take no space.
@@ -44,68 +45,47 @@ Item {
         return BarProfileModel.elementEnabled(appearance.barElements, element);
     }
 
-    function zoneItems(zone) {
-        const elements = (appearance.barElements || {})[zone] || [];
-        const shown = [];
-
-        for (let index = 0; index < elements.length; index++) {
-            const element = elements[index].id;
-            const item = elementItem(element);
-            if (elements[index].enabled !== false && item && item.visible && item.width > 0)
-                shown.push(element);
-        }
-
-        return shown;
+    function elementShown(element) {
+        const item = elementItem(element);
+        return item !== null && item.visible && item.width > 0;
     }
 
-    function elementGap(previous, element) {
-        return statusModules.moduleGap(previous, element);
+    // Positions within a zone, relative to its start, and one background per
+    // group of two or more shown elements.
+    function zoneLayout(zone) {
+        const groups = BarProfileModel.zoneGroups(appearance.barElements, zone,
+            element => root.elementShown(element));
+        const positions = {};
+        const backgrounds = [];
+        let x = 0;
+
+        for (let groupIndex = 0; groupIndex < groups.length; groupIndex++) {
+            const group = groups[groupIndex];
+            const grouped = group.length > 1;
+            const start = groupIndex > 0 ? x + appearance.spacing : 0;
+
+            x = start + (grouped ? groupPadding : 0);
+            for (let index = 0; index < group.length; index++) {
+                if (index > 0)
+                    x += appearance.spacing;
+                positions[group[index]] = { x: x, grouped: grouped };
+                x += elementItem(group[index]).width;
+            }
+
+            if (grouped) {
+                x += groupPadding;
+                backgrounds.push({ x: start, width: x - start });
+            }
+        }
+
+        return { positions: positions, backgrounds: backgrounds, width: x };
     }
 
     function zoneWidth(zone) {
-        const shown = zoneItems(zone);
-        let width = 0;
-
-        for (let index = 0; index < shown.length; index++) {
-            if (index > 0)
-                width += elementGap(shown[index - 1], shown[index]);
-            width += elementItem(shown[index]).width;
-        }
-
-        return width;
-    }
-
-    function statusIslandContentWidth() {
-        let width = 0;
-
-        for (let index = 0; index < zoneNames.length; index++) {
-            const nextWidth = zoneWidth(zoneNames[index]);
-            if (nextWidth > 0)
-                width += nextWidth + (width > 0 ? appearance.spacing : 0);
-        }
-
-        return width;
-    }
-
-    function statusIslandZoneStart(zone) {
-        let x = Math.round((root.width - statusIslandContentWidth()) / 2);
-
-        for (let index = 0; index < zoneNames.length; index++) {
-            const candidate = zoneNames[index];
-            const candidateWidth = zoneWidth(candidate);
-
-            if (candidate === zone)
-                return x;
-            if (candidateWidth > 0)
-                x += candidateWidth + (zoneWidth(zone) > 0 ? appearance.spacing : 0);
-        }
-
-        return x;
+        return zoneLayout(zone).width;
     }
 
     function zoneStart(zone) {
-        if (statusIslandEnabled)
-            return statusIslandZoneStart(zone);
         if (zone === "left")
             return slantedPadding;
         if (zone === "right")
@@ -117,42 +97,27 @@ Item {
         return zoneStart(zone) + zoneWidth(zone);
     }
 
+    function elementPosition(element) {
+        const zone = BarProfileModel.elementZone(appearance.barElements, element);
+        return zone === "" ? null : zoneLayout(zone).positions[element] || null;
+    }
+
     function elementX(element) {
         const zone = BarProfileModel.elementZone(appearance.barElements, element);
-        const shown = zoneItems(zone);
-        let x = zoneStart(zone);
-
-        for (let index = 0; index < shown.length; index++) {
-            if (index > 0)
-                x += elementGap(shown[index - 1], shown[index]);
-            if (shown[index] === element)
-                return x;
-            x += elementItem(shown[index]).width;
-        }
-
-        return x;
+        const position = elementPosition(element);
+        return zoneStart(zone) + (position ? position.x : 0);
     }
 
-    function statusIslandLeft() {
-        let left = root.width;
-
-        for (let index = 0; index < zoneNames.length; index++) {
-            if (zoneWidth(zoneNames[index]) > 0)
-                left = Math.min(left, zoneStart(zoneNames[index]));
-        }
-
-        return Math.max(0, left - appearance.spacing);
+    // Grouped elements drop their own pill: the group draws one background.
+    function elementGrouped(element) {
+        const position = elementPosition(element);
+        return position !== null && position.grouped;
     }
 
-    function statusIslandRight() {
-        let right = 0;
-
-        for (let index = 0; index < zoneNames.length; index++) {
-            if (zoneWidth(zoneNames[index]) > 0)
-                right = Math.max(right, zoneEnd(zoneNames[index]));
-        }
-
-        return Math.min(root.width, right + appearance.spacing);
+    // Popups of center elements open under them; the others at the bar edge.
+    function popupNearTrigger(popup) {
+        const element = popup === "system" ? "systemMonitor" : popup === "pomodoro" ? "clock" : popup;
+        return BarProfileModel.elementZone(appearance.barElements, element) === "center";
     }
 
     function popupTrigger(popup) {
@@ -175,7 +140,6 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
-            && !root.statusIslandEnabled
         appearance: root.appearance
         fillColor: theme.surface
         keepLeftEdge: true
@@ -190,7 +154,6 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
-            && !root.statusIslandEnabled
         appearance: root.appearance
         fillColor: theme.surface
         slantBothSides: true
@@ -205,36 +168,56 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
-            && !root.statusIslandEnabled
         appearance: root.appearance
         fillColor: theme.surface
         keepRightEdge: true
         z: -1
     }
 
-    Rectangle {
-        x: root.statusIslandLeft()
-        y: 0
-        width: Math.max(0, root.statusIslandRight() - x)
-        height: parent.height
-        radius: root.appearance.statusIslandRadius
-        color: theme.surface
-        border.width: root.appearance.barTransparentBorder ? 1 : 0
-        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
-        visible: root.statusIslandEnabled
-        z: -1
+    // One shared background per group.
+    Repeater {
+        model: root.zoneNames
 
-        Behavior on x {
-            NumberAnimation {
-                duration: 180
-                easing.type: Easing.OutCubic
-            }
-        }
+        delegate: Item {
+            id: zoneBackgrounds
 
-        Behavior on width {
-            NumberAnimation {
-                duration: 180
-                easing.type: Easing.OutCubic
+            required property string modelData
+            readonly property var backgrounds: root.zoneLayout(modelData).backgrounds
+
+            anchors.fill: parent
+            z: -1
+
+            Repeater {
+                model: zoneBackgrounds.backgrounds.length
+
+                delegate: Rectangle {
+                    required property int index
+                    readonly property var background: zoneBackgrounds.backgrounds[index]
+                        || { x: 0, width: 0 }
+
+                    x: root.zoneStart(zoneBackgrounds.modelData) + background.x
+                    y: 0
+                    width: background.width
+                    height: parent.height
+                    radius: root.appearance.groupRadius
+                    color: theme.surface
+                    border.width: root.appearance.barTransparentBorder ? 1 : 0
+                    border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+
+                    Behavior on x {
+                        NumberAnimation {
+                            duration: 180
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+
+                    Behavior on width {
+                        NumberAnimation {
+                            duration: 180
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                }
             }
         }
     }
@@ -245,6 +228,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         visible: root.elementVisible("arch")
         x: root.elementX("arch")
+        grouped: root.elementGrouped("arch")
         Behavior on x {
             NumberAnimation {
                 duration: 220
@@ -261,6 +245,7 @@ Item {
 
         anchors.verticalCenter: parent.verticalCenter
         x: root.elementX("currentApp")
+        grouped: root.elementGrouped("currentApp")
         appearance: root.appearance
         monitorScreen: root.monitorScreen
         enabled: root.elementVisible("currentApp")
@@ -272,6 +257,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         visible: root.elementVisible("systemMonitor")
         x: root.elementX("systemMonitor")
+        grouped: root.elementGrouped("systemMonitor")
         appearance: root.appearance
         systemMonitor: root.systemMonitor
         onClicked: root.statusPopupRequested("system")
@@ -282,6 +268,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         visible: root.elementVisible("workspaces")
         x: root.elementX("workspaces")
+        grouped: root.elementGrouped("workspaces")
         Behavior on x {
             NumberAnimation {
                 duration: 220
@@ -307,6 +294,7 @@ Item {
         notificationHistory: root.notificationHistory
         screenCapture: root.screenCapture
         elementX: element => root.elementX(element)
+        elementGrouped: element => root.elementGrouped(element)
 
         onPopupRequested: function(popup) {
             root.statusPopupRequested(popup);

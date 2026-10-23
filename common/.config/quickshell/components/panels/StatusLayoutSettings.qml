@@ -72,22 +72,6 @@ Column {
         return options[element] || [];
     }
 
-    // Numbered groups still only join former status modules.
-    function groupable(element) {
-        return ["arch", "systemMonitor", "currentApp", "workspaces"].indexOf(element) === -1;
-    }
-
-    function setGroup(module, group) {
-        const values = Object.assign({
-        }, appearance.statusModuleGroups || {
-        });
-        if (group === 0)
-            delete values[module];
-        else
-            values[module] = group;
-        appearance.statusModuleGroups = values;
-    }
-
     function toggleWidgetOption(propertyName) {
         appearance[propertyName] = appearance[propertyName] === false;
     }
@@ -220,7 +204,7 @@ Column {
 
         Text {
             width: root.width
-            text: "Every piece of the bar. Turn it on or off, pick its zone (L/C/R) and order it within the zone. Elements in the same group share one background surface."
+            text: "Every piece of the bar. Turn it on or off, pick its zone (L/C/R) and order it within the zone. Join joins an element with the one above it: joined elements form a group with one shared background."
             color: theme.textMuted
             font.pixelSize: root.appearance.textSize - 1
             wrapMode: Text.Wrap
@@ -302,47 +286,31 @@ Column {
                             anchors.verticalCenter: parent.verticalCenter
                             spacing: 5
 
-                            ComboBox {
-                                id: groupSelector
+                            // "Join previous": shares one background with the element above.
+                            Rectangle {
+                                readonly property bool joined: elementDelegate.modelData.joinPrevious === true
 
-                                visible: root.groupable(elementDelegate.element)
-                                width: 82
-                                height: 32
-                                textRole: "label"
-                                model: [{
-                                    "label": "Separate",
-                                    "value": 0
-                                }, {
-                                    "label": "Group 1",
-                                    "value": 1
-                                }, {
-                                    "label": "Group 2",
-                                    "value": 2
-                                }, {
-                                    "label": "Group 3",
-                                    "value": 3
-                                }]
-                                currentIndex: (root.appearance.statusModuleGroups || {
-                                })[elementDelegate.element] || 0
-                                onActivated: root.setGroup(elementDelegate.element, model[index].value)
+                                visible: elementDelegate.index > 0
+                                width: 56
+                                height: 30
+                                radius: root.appearance.radius
+                                color: joined ? theme.accent : joinHover.hovered ? theme.surfaceHover : theme.surface
 
-                                contentItem: Text {
-                                    leftPadding: 8
-                                    rightPadding: 6
-                                    verticalAlignment: Text.AlignVCenter
-                                    text: groupSelector.displayText
-                                    color: theme.accent
-                                    elide: Text.ElideRight
+                                HoverHandler {
+                                    id: joinHover
+                                }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "󰌷 Join"
+                                    color: parent.joined ? theme.background : theme.textMuted
                                     font.pixelSize: root.appearance.textSize - 3
                                     font.bold: true
                                 }
 
-                                indicator: Item {
-                                }
-
-                                background: Rectangle {
-                                    radius: root.appearance.radius
-                                    color: theme.surface
+                                TapHandler {
+                                    onTapped: root.appearance.setBarElementJoined(elementDelegate.element,
+                                        !parent.joined)
                                 }
 
                             }

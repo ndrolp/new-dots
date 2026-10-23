@@ -7,6 +7,8 @@ Row {
     id: root
 
     required property var appearance
+    // Inside a group the shared background replaces this element's pill.
+    property bool grouped: false
     required property var monitorScreen
     property bool enabled: true
 
@@ -98,15 +100,15 @@ Row {
 
     Rectangle {
         width: appContent.implicitWidth + 16
-        height: appearance.barTransparent || appearance.statusIsland
+        height: appearance.barTransparent
             ? appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
             : Math.max(1, appearance.barHeight - (appearance.structuralVerticalPadding * 2))
         radius: appearance.radius
         color: appHover.hovered ? theme.surfaceHover
             : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
-                || root.appearance.statusIsland ? "transparent" : theme.surface
+                || root.grouped ? "transparent" : theme.surface
 
-        border.width: appearance.barTransparentBorder && !root.appearance.statusIsland ? 1 : 0
+        border.width: appearance.barTransparentBorder && !root.grouped ? 1 : 0
         border.color: appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {

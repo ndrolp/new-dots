@@ -20,7 +20,7 @@ Rectangle {
     readonly property var sections: [
         {
             label: "Bar Appearance", icon: "󰔉", section: "Appearance",
-            keywords: "profile density transparent island notifications popup"
+            keywords: "profile density transparent island group radius notifications popup"
         },
         {
             label: "Displays", icon: "󰍹", section: "Monitors",
@@ -44,7 +44,7 @@ Rectangle {
         },
         {
             label: "Bar Widgets", icon: "󰍛", section: "Status",
-            keywords: "bar elements data modules widgets order zone arch workspaces system monitor notifications battery clock media network"
+            keywords: "bar elements data modules widgets order zone group join island arch workspaces system monitor notifications battery clock media network"
         },
         {
             label: "Session", icon: "󰌾", section: "Session",

@@ -10,11 +10,10 @@ const profileKeys = [
     "structuralVerticalPadding",
     "workspaceGlyphsEnabled", "hideEmptyWorkspaces", "workspaceAppCountVisible",
     "workspaceGlyphs", "pillsTransparent", "transparentBarTopMargin",
-    "transparentBarSlanted", "statusIsland", "statusIslandRadius", "barTransparent",
+    "transparentBarSlanted", "groupRadius", "barTransparent",
     "barTransparentBorder", "barOpacity", "barElements",
     "notificationBadgeVisible", "mediaTitleVisible", "audioMeterVisible",
-    "batteryPercentageVisible",
-    "statusModuleGroups"
+    "batteryPercentageVisible"
 ];
 
 // The bar profile of a monitor nobody has configured yet.
@@ -181,7 +180,7 @@ function profileForMonitor(displaySettings, monitorName) {
 
 // Bar elements: every piece of the bar, one type. A profile stores them as
 // `barElements`: { left: [...], center: [...], right: [...] }, each entry
-// { id, enabled }. Order within a zone is the order of the list.
+// { id, enabled, joinPrevious? }. Order within a zone is the order of the list.
 const zoneNames = ["left", "center", "right"];
 
 const elementIds = [
@@ -287,7 +286,12 @@ function moveElementToZone(barElements, id, zoneName) {
     if (!found || found.zone === zoneName || zoneNames.indexOf(zoneName) === -1)
         return updated;
 
-    const element = updated[found.zone].splice(found.index, 1)[0];
+    const source = updated[found.zone];
+    const tokens = groupTokens(source);
+    const element = source.splice(found.index, 1)[0];
+    tokens.splice(found.index, 1);
+    relink(source, tokens);
+    delete element.joinPrevious;
     updated[zoneName].push(element);
     return updated;
 }
@@ -305,8 +309,56 @@ function moveElement(barElements, id, offset) {
     if (target < 0 || target >= list.length)
         return updated;
 
-    const element = list.splice(found.index, 1)[0];
-    list.splice(target, 0, element);
+    const tokens = groupTokens(list);
+    list.splice(target, 0, list.splice(found.index, 1)[0]);
+    tokens.splice(target, 0, tokens.splice(found.index, 1)[0]);
+    relink(list, tokens);
+    return updated;
+}
+
+// The group each entry of a zone list belongs to, as a number: an entry that
+// joins the previous one shares its number.
+function groupTokens(list) {
+    let token = -1;
+    return list.map((element, index) => index > 0 && element.joinPrevious ? token : ++token);
+}
+
+// Sets "join previous" on `list` (in place) from its group numbers, so a move
+// keeps groups contiguous: an element that steps out of its group leaves it
+// and one that steps into a group does not join it.
+function relink(list, tokens) {
+    for (let index = 0; index < list.length; index++) {
+        if (index > 0 && tokens[index] === tokens[index - 1])
+            list[index].joinPrevious = true;
+        else
+            delete list[index].joinPrevious;
+    }
+}
+
+// Whether an element can join the previous one: not the first of its zone.
+function canJoinPrevious(barElements, id) {
+    const found = findElement(barElements || {}, id);
+    return found !== null && found.index > 0;
+}
+
+function elementJoined(barElements, id) {
+    const found = findElement(barElements || {}, id);
+    return found !== null && found.index > 0
+        && barElements[found.zone][found.index].joinPrevious === true;
+}
+
+// Turns "join previous" on or off; no effect on the first element of a zone.
+function setElementJoined(barElements, id, joined) {
+    const updated = cloneValue(barElements);
+    const found = findElement(updated, id);
+
+    if (!found || found.index === 0)
+        return updated;
+
+    if (joined)
+        updated[found.zone][found.index].joinPrevious = true;
+    else
+        delete updated[found.zone][found.index].joinPrevious;
     return updated;
 }
 
@@ -322,7 +374,10 @@ function normalizeBarElements(barElements) {
             if (elementIds.indexOf(element.id) === -1 || seen.indexOf(element.id) !== -1)
                 continue;
             seen.push(element.id);
-            normalized[zoneName].push(cloneValue(element));
+            const copy = cloneValue(element);
+            if (normalized[zoneName].length === 0 || !copy.joinPrevious)
+                delete copy.joinPrevious;
+            normalized[zoneName].push(copy);
         }
     }
 
@@ -357,6 +412,110 @@ function migrateElementOrder(state) {
 
     if (state.barProfiles !== undefined)
         migrated.barProfiles = profiles;
+    return migrated;
+}
+
+// Groups: an element with `joinPrevious` shares one background with the
+// enabled element before it in its zone. Disabled elements belong to no group
+// and the first enabled element of a zone joins nothing. `isShown` narrows
+// the elements further (the bar passes what it actually draws).
+function zoneGroups(barElements, zoneName, isShown) {
+    const result = [];
+
+    for (const element of (barElements || {})[zoneName] || []) {
+        if (element.enabled === false || (isShown && !isShown(element.id)))
+            continue;
+        if (element.joinPrevious && result.length > 0)
+            result[result.length - 1].push(element.id);
+        else
+            result.push([element.id]);
+    }
+
+    return result;
+}
+
+const legacyGroupKeys = ["statusIsland", "statusIslandRadius", "statusModuleGroups"];
+
+function isLegacyGroupLayout(layout) {
+    return legacyGroupKeys.some(key => layout[key] !== undefined);
+}
+
+// A former status island packed every zone, left to right, into one centered
+// surface: the same as a center zone holding all elements in one group.
+function islandElements(barElements) {
+    const center = [].concat(barElements.left, barElements.center, barElements.right);
+
+    return {
+        left: [],
+        center: center.map((element, index) => index > 0
+            ? Object.assign({}, element, { joinPrevious: true }) : element),
+        right: []
+    };
+}
+
+// Numbered groups: an element joins the previous enabled element of its zone
+// when both had the same group number.
+function numberedGroupElements(barElements, numberedGroups) {
+    const updated = {};
+
+    for (const zoneName of zoneNames) {
+        let previousGroup = 0;
+        updated[zoneName] = (barElements[zoneName] || []).map(element => {
+            const copy = Object.assign({}, element);
+            const group = numberedGroups[element.id] || 0;
+
+            delete copy.joinPrevious;
+            if (element.enabled === false)
+                return copy;
+            if (group !== 0 && group === previousGroup)
+                copy.joinPrevious = true;
+            previousGroup = group;
+            return copy;
+        });
+    }
+
+    return updated;
+}
+
+function migrateLayoutGroups(layout) {
+    if (!isLegacyGroupLayout(layout) || layout.barElements === undefined)
+        return cloneValue(layout);
+
+    const migrated = cloneValue(layout);
+    migrated.barElements = numberedGroupElements(migrated.barElements,
+        layout.statusModuleGroups || {});
+
+    if (layout.statusIsland) {
+        migrated.barElements = islandElements(migrated.barElements);
+        migrated.groupRadius = layout.statusIslandRadius !== undefined
+            ? layout.statusIslandRadius : 12;
+        migrated.barTransparent = true;
+        migrated.transparentBarSlanted = false;
+    } else if (layout.radius !== undefined) {
+        // Numbered groups were drawn with the corner radius.
+        migrated.groupRadius = layout.radius;
+    }
+
+    for (const key of legacyGroupKeys)
+        delete migrated[key];
+    return migrated;
+}
+
+// Migration step, chained after migrateElementOrder: numbered groups become
+// "join previous" and an active status island becomes a group filling the
+// center zone, for the live bar and every saved profile. Already migrated
+// layouts are kept.
+function migrateGroups(state) {
+    const profiles = state.barProfiles;
+    const live = Object.assign({}, state);
+    delete live.barProfiles;
+
+    const migrated = migrateLayoutGroups(live);
+    if (profiles !== undefined) {
+        migrated.barProfiles = {};
+        for (const profileName in profiles)
+            migrated.barProfiles[profileName] = migrateLayoutGroups(profiles[profileName]);
+    }
     return migrated;
 }
 
@@ -597,8 +756,14 @@ function assignActiveProfileToMonitors(appearance, monitors) {
     return { appearance: migratedAppearance, monitors: migratedMonitors };
 }
 
+// Step 4: numbered groups and the status island become "join previous" groups.
+function migrateBarGroups(appearance, monitors) {
+    return { appearance: migrateGroups(appearance), monitors: monitors };
+}
+
 const migrationSteps = [
-    migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors
+    migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
+    migrateBarGroups
 ];
 const schemaVersion = migrationSteps.length;
 
