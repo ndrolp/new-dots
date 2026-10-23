@@ -143,6 +143,14 @@ TestCase {
         verify(!("desktopWidgetOrder" in migrated.appearance));
     }
 
+    function test_migrationAlsoConvertsTheBarElements() {
+        const migrated = migrateFixtures();
+
+        verify(migrated.appearance.barElements !== undefined);
+        verify(migrated.appearance.barProfiles.media.barElements !== undefined);
+        verify(!("statusModuleOrder" in migrated.appearance.barProfiles.media));
+    }
+
     function test_migrationDoesNotChangeItsInput() {
         const appearance = readFixture("appearance.json");
         const monitors = readFixture("monitors.json");

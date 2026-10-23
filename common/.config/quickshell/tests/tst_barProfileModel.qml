@@ -20,9 +20,8 @@ TestCase {
         compare(changes.activeBarProfile, "presentation");
         compare(changes.barHeight, 30);
         compare(changes.horizontalPadding, 12);
-        compare(changes.statusModuleOrder, ["media", "audio", "network", "battery", "clock",
-            "notifications", "recording", "bluetooth", "tray"]);
-        compare(changes.barElementEnabled.arch, false);
+        compare(changes.statusIsland, false);
+        compare(changes.transparentBarTopMargin, 8);
     }
 
     function test_applyingAProfileLeavesSettingsItDoesNotSaveUntouched() {
@@ -45,9 +44,9 @@ TestCase {
         const state = readFixture("appearance.json");
 
         const changes = BarProfileModel.applyProfile(state, "presentation");
-        changes.barElementEnabled.arch = true;
+        changes.workspaceGlyphs[0] = "x";
 
-        compare(state.barProfiles.presentation.barElementEnabled.arch, false);
+        compare(state.barProfiles.presentation.workspaceGlyphs[0], "");
     }
 
     function test_savingStoresTheLiveBarIntoTheProfileAndMakesItActive() {

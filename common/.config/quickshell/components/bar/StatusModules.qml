@@ -7,6 +7,7 @@ import Quickshell.Services.SystemTray
 import Quickshell.Services.UPower
 import QtQuick
 import "../../config" as Config
+import "../../config/BarProfileModel.js" as BarProfileModel
 
 Item {
     id: root
@@ -16,8 +17,9 @@ Item {
     required property var pomodoro
     required property var notificationHistory
     required property var screenCapture
-    property string placement: "right"
     property string activePopup: ""
+    // Where each module goes, provided by the bar's single walk per zone.
+    property var elementX: module => 0
     signal popupRequested(string popup)
     signal notificationRequested()
 
@@ -34,52 +36,15 @@ Item {
     readonly property string playerLabel: player
         ? (player.trackTitle !== "" ? player.trackTitle : player.identity) : ""
     property string displayedPlayerLabel: playerLabel
-    readonly property var defaultModuleOrder: [
+    readonly property var moduleOrder: [
         "notifications", "recording", "media", "audio", "bluetooth", "tray", "network",
         "battery", "clock"
     ]
-    readonly property var moduleOrder: {
-        const savedOrder = appearance.statusModuleOrder || [];
-        const order = [];
-
-        for (let index = 0; index < savedOrder.length; index++) {
-            const module = savedOrder[index];
-            if (defaultModuleOrder.indexOf(module) !== -1 && order.indexOf(module) === -1)
-                order.push(module);
-        }
-
-        for (let index = 0; index < defaultModuleOrder.length; index++) {
-            const module = defaultModuleOrder[index];
-            if (order.indexOf(module) === -1)
-                order.push(module);
-        }
-
-        return order;
-    }
-    readonly property real contentWidth: {
-        let contentWidth = 0;
-        let previousModule = "";
-
-        for (let index = 0; index < moduleOrder.length; index++) {
-            const module = moduleOrder[index];
-            if (!moduleVisible(module))
-                continue;
-
-            if (previousModule !== "")
-                contentWidth += moduleGap(previousModule, module);
-            contentWidth += moduleWidth(module);
-            previousModule = module;
-        }
-
-        return contentWidth;
-    }
     readonly property real moduleHeight: appearance.barTransparent || appearance.statusIsland
         ? appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
         : Math.max(1, appearance.barHeight - (appearance.structuralVerticalPadding * 2))
 
-    width: contentWidth
     height: moduleHeight
-    implicitWidth: contentWidth
     implicitHeight: moduleHeight
 
     Config.Theme {
@@ -123,10 +88,22 @@ Item {
         return null;
     }
 
+    function moduleItem(module) {
+        if (module === "notifications")
+            return notificationButton;
+        if (module === "recording")
+            return recordingButton;
+        if (module === "clock")
+            return pomodoroButton;
+        return popupTrigger(module);
+    }
+
+    function moduleZone(module) {
+        return BarProfileModel.elementZone(appearance.barElements, module);
+    }
+
     function moduleVisible(module) {
-        if ((appearance.statusModuleEnabled || {})[module] === false)
-            return false;
-        if (((appearance.statusModulePlacement || {})[module] || "right") !== placement)
+        if (!BarProfileModel.elementEnabled(appearance.barElements, module))
             return false;
         if (module === "media")
             return player !== null;
@@ -170,64 +147,43 @@ Item {
         let count = 0;
         for (let index = 0; index < moduleOrder.length; index++) {
             const candidate = moduleOrder[index];
-            if (moduleVisible(candidate) && moduleGroup(candidate) === group)
+            if (moduleVisible(candidate) && moduleGroup(candidate) === group
+                    && moduleZone(candidate) === moduleZone(module))
                 count++;
         }
 
         return count > 1;
     }
 
+    // Gap between two adjacent bar elements of a zone: modules of one group
+    // sit close together.
     function moduleGap(previousModule, module) {
-        return isGrouped(previousModule) && isGrouped(module)
+        const modules = moduleOrder.indexOf(previousModule) !== -1
+            && moduleOrder.indexOf(module) !== -1;
+        return modules && isGrouped(previousModule) && isGrouped(module)
             && moduleGroup(previousModule) === moduleGroup(module) ? 2 : appearance.spacing;
     }
 
     function moduleX(module) {
-        let x = 0;
-        let previousModule = "";
-
-        for (let index = 0; index < moduleOrder.length; index++) {
-            const candidate = moduleOrder[index];
-            if (!moduleVisible(candidate))
-                continue;
-
-            if (previousModule !== "")
-                x += moduleGap(previousModule, candidate);
-            if (candidate === module)
-                return x;
-
-            x += moduleWidth(candidate);
-            previousModule = candidate;
-        }
-
-        return 0;
+        return elementX(module);
     }
 
-    function groupStart(group) {
-        for (let index = 0; index < moduleOrder.length; index++) {
-            const module = moduleOrder[index];
-            if (moduleVisible(module) && moduleGroup(module) === group)
-                return moduleX(module) - 5;
-        }
-
-        return 0;
-    }
-
-    function groupWidth(group) {
+    // Extent of a numbered group within one zone; a group split across zones
+    // gets one background per zone.
+    function groupExtent(group, zone) {
         let start = -1;
         let end = 0;
 
         for (let index = 0; index < moduleOrder.length; index++) {
             const module = moduleOrder[index];
-            if (moduleVisible(module) && moduleGroup(module) === group) {
+            if (moduleVisible(module) && moduleGroup(module) === group && moduleZone(module) === zone) {
                 const x = moduleX(module);
-                if (start === -1)
-                    start = x;
-                end = x + moduleWidth(module);
+                start = start === -1 ? x : Math.min(start, x);
+                end = Math.max(end, x + moduleWidth(module));
             }
         }
 
-        return start === -1 ? 0 : end - start + 10;
+        return start === -1 ? { x: 0, width: 0 } : { x: start - 5, width: end - start + 10 };
     }
 
     Component.onCompleted: updatePlayer()
@@ -242,18 +198,26 @@ Item {
     onPlayerLabelChanged: mediaLabelTransition.restart()
 
     Repeater {
-        model: [1, 2, 3]
+        model: {
+            const extents = [];
+            for (const group of [1, 2, 3]) {
+                for (const zone of ["left", "center", "right"])
+                    extents.push({ group: group, zone: zone });
+            }
+            return extents;
+        }
 
         delegate: Rectangle {
-            required property int modelData
+            required property var modelData
+            readonly property var extent: root.groupExtent(modelData.group, modelData.zone)
 
-            x: root.groupStart(modelData)
+            x: extent.x
             anchors.verticalCenter: parent.verticalCenter
-            width: root.groupWidth(modelData)
+            width: extent.width
             height: root.moduleHeight
             radius: root.appearance.radius
             color: theme.surface
-            visible: root.groupWidth(modelData) > 0
+            visible: extent.width > 0
             z: -1
         }
     }

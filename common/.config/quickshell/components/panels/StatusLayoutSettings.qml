@@ -1,4 +1,5 @@
 import "../../config" as Config
+import "../../config/BarProfileModel.js" as BarProfileModel
 import QtQuick
 import QtQuick.Controls
 
@@ -7,27 +8,27 @@ Column {
 
     property var appearance
     property string expandedWidget: ""
-    readonly property var defaultOrder: ["notifications", "recording", "media", "audio", "bluetooth", "tray", "network", "battery", "clock"]
-    readonly property var modules: {
-        const savedOrder = appearance.statusModuleOrder || [];
-        const order = [];
-        for (let index = 0; index < savedOrder.length; index++) {
-            const module = savedOrder[index];
-            if (defaultOrder.indexOf(module) !== -1 && order.indexOf(module) === -1)
-                order.push(module);
+    readonly property var barElements: BarProfileModel.normalizeBarElements(appearance.barElements)
+    readonly property var zones: [{
+        "label": "LEFT",
+        "short": "L",
+        "value": "left"
+    }, {
+        "label": "CENTER",
+        "short": "C",
+        "value": "center"
+    }, {
+        "label": "RIGHT",
+        "short": "R",
+        "value": "right"
+    }]
 
-        }
-        for (let index = 0; index < defaultOrder.length; index++) {
-            const module = defaultOrder[index];
-            if (order.indexOf(module) === -1)
-                order.push(module);
-
-        }
-        return order;
-    }
-
-    function labelFor(module) {
+    function labelFor(element) {
         const labels = {
+            "arch": "ARCH ICON",
+            "systemMonitor": "SYSTEM MONITOR",
+            "currentApp": "CURRENT APP",
+            "workspaces": "WORKSPACES",
             "notifications": "NOTIFICATIONS",
             "recording": "SCREEN RECORDING",
             "media": "MEDIA",
@@ -38,27 +39,42 @@ Column {
             "battery": "BATTERY",
             "clock": "CLOCK & POMODORO"
         };
-        return labels[module] || module.toUpperCase();
+        return labels[element] || element.toUpperCase();
     }
 
-    function moveModule(module, offset) {
-        const order = modules.slice();
-        const from = order.indexOf(module);
-        const to = from + offset;
-        if (from < 0 || to < 0 || to >= order.length)
-            return ;
-
-        order.splice(from, 1);
-        order.splice(to, 0, module);
-        appearance.statusModuleOrder = order;
+    // Element options, shown next to the element they belong to.
+    function optionsFor(element) {
+        const options = {
+            "workspaces": [{
+                "label": "HIDE EMPTY WORKSPACES",
+                "propertyName": "hideEmptyWorkspaces"
+            }, {
+                "label": "SHOW WORKSPACE APP COUNTS",
+                "propertyName": "workspaceAppCountVisible"
+            }],
+            "notifications": [{
+                "label": "SHOW UNREAD BADGE",
+                "propertyName": "notificationBadgeVisible"
+            }],
+            "media": [{
+                "label": "SHOW TRACK TITLE",
+                "propertyName": "mediaTitleVisible"
+            }],
+            "audio": [{
+                "label": "SHOW VOLUME METER",
+                "propertyName": "audioMeterVisible"
+            }],
+            "battery": [{
+                "label": "SHOW PERCENTAGE",
+                "propertyName": "batteryPercentageVisible"
+            }]
+        };
+        return options[element] || [];
     }
 
-    function setEnabled(module, enabled) {
-        const values = Object.assign({
-        }, appearance.statusModuleEnabled || {
-        });
-        values[module] = enabled;
-        appearance.statusModuleEnabled = values;
+    // Numbered groups still only join former status modules.
+    function groupable(element) {
+        return ["arch", "systemMonitor", "currentApp", "workspaces"].indexOf(element) === -1;
     }
 
     function setGroup(module, group) {
@@ -70,42 +86,6 @@ Column {
         else
             values[module] = group;
         appearance.statusModuleGroups = values;
-    }
-
-    function setPlacement(module, placement) {
-        const values = Object.assign({
-        }, appearance.statusModulePlacement || {
-        });
-        if (placement === "right")
-            delete values[module];
-        else
-            values[module] = placement;
-        appearance.statusModulePlacement = values;
-    }
-
-    function setElementEnabled(element, enabled) {
-        const values = Object.assign({
-        }, appearance.barElementEnabled || {
-        });
-        values[element] = enabled;
-        appearance.barElementEnabled = values;
-    }
-
-    function setElementPlacement(element, placement) {
-        const values = Object.assign({
-        }, appearance.barElementPlacement || {
-        });
-        const defaults = {
-            "arch": "left",
-            "system": "left",
-            "currentApp": "left",
-            "workspaces": "center"
-        };
-        if (placement === defaults[element])
-            delete values[element];
-        else
-            values[element] = placement;
-        appearance.barElementPlacement = values;
     }
 
     function toggleWidgetOption(propertyName) {
@@ -231,7 +211,7 @@ Column {
         }
 
         Text {
-            text: "GROUPS"
+            text: "ELEMENTS"
             color: theme.textMuted
             font.pixelSize: root.appearance.textSize - 2
             font.bold: true
@@ -239,272 +219,226 @@ Column {
         }
 
         Text {
-            text: "Choose the status data to show. Modules in the same group share one background surface."
+            width: root.width
+            text: "Every piece of the bar. Turn it on or off, pick its zone (L/C/R) and order it within the zone. Elements in the same group share one background surface."
             color: theme.textMuted
             font.pixelSize: root.appearance.textSize - 1
             wrapMode: Text.Wrap
-        }
-
-        Text {
-            text: "BAR ELEMENTS"
-            color: theme.textMuted
-            font.pixelSize: root.appearance.textSize - 2
-            font.bold: true
-            topPadding: 8
-        }
-
-        Text {
-            text: "Choose the structural data shown on the bar: Arch icon, hardware monitor, current app, and workspaces."
-            color: theme.textMuted
-            font.pixelSize: root.appearance.textSize - 1
-            wrapMode: Text.Wrap
-        }
-
-        Repeater {
-            model: [{
-                "label": "ARCH ICON",
-                "value": "arch",
-                "defaultPlacement": "left"
-            }, {
-                "label": "HARDWARE INFO",
-                "value": "system",
-                "defaultPlacement": "left"
-            }, {
-                "label": "CURRENT APP",
-                "value": "currentApp",
-                "defaultPlacement": "left"
-            }, {
-                "label": "WORKSPACES",
-                "value": "workspaces",
-                "defaultPlacement": "center"
-            }]
-
-            delegate: Rectangle {
-                id: elementRow
-
-                required property var modelData
-                readonly property string placement: (root.appearance.barElementPlacement || {
-                })[modelData.value] || modelData.defaultPlacement
-
-                width: root.width
-                height: 44
-                radius: root.appearance.radius
-                color: elementHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-
-                HoverHandler {
-                    id: elementHover
-                }
-
-                Text {
-                    anchors.left: parent.left
-                    anchors.leftMargin: 12
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: parent.modelData.label
-                    color: theme.text
-                    font.pixelSize: root.appearance.textSize - 1
-                    font.bold: true
-                }
-
-                Row {
-                    anchors.right: parent.right
-                    anchors.rightMargin: 6
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: 3
-
-                    Repeater {
-                        model: [{
-                            "label": "L",
-                            "value": "left"
-                        }, {
-                            "label": "C",
-                            "value": "center"
-                        }, {
-                            "label": "R",
-                            "value": "right"
-                        }]
-
-                        delegate: Rectangle {
-                            required property var modelData
-
-                            width: 28
-                            height: 28
-                            radius: root.appearance.radius
-                            color: elementRow.placement === modelData.value ? theme.accent : theme.surface
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: parent.modelData.label
-                                color: elementRow.placement === parent.modelData.value ? theme.background : theme.textMuted
-                                font.pixelSize: root.appearance.textSize - 3
-                                font.bold: true
-                            }
-
-                            TapHandler {
-                                onTapped: root.setElementPlacement(elementRow.modelData.value, parent.modelData.value)
-                            }
-
-                        }
-
-                    }
-
-                }
-
-                Rectangle {
-                    width: 36
-                    height: 28
-                    radius: root.appearance.radius
-                    color: (root.appearance.barElementEnabled || {
-                    })[elementRow.modelData.value] === false ? theme.surface : theme.accent
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: (root.appearance.barElementEnabled || {
-                        })[elementRow.modelData.value] === false ? "Off" : "On"
-                        color: (root.appearance.barElementEnabled || {
-                        })[elementRow.modelData.value] === false ? theme.textMuted : theme.background
-                        font.pixelSize: root.appearance.textSize - 3
-                        font.bold: true
-                    }
-
-                    TapHandler {
-                        onTapped: root.setElementEnabled(elementRow.modelData.value, (root.appearance.barElementEnabled || {
-                        })[elementRow.modelData.value] === false)
-                    }
-
-                }
-
-            }
-
         }
 
     Repeater {
-        model: root.modules
+        model: root.zones
 
         delegate: Column {
-            id: moduleDelegate
+            id: zoneDelegate
 
-            required property string modelData
+            required property var modelData
+            readonly property var elements: root.barElements[modelData.value] || []
 
             width: root.width
             spacing: 4
 
-            Rectangle {
-                id: moduleRow
+            Text {
+                text: zoneDelegate.modelData.label
+                color: theme.textMuted
+                font.pixelSize: root.appearance.textSize - 3
+                font.bold: true
+                topPadding: 4
+            }
 
-                readonly property int moduleIndex: root.modules.indexOf(moduleDelegate.modelData)
+            Text {
+                visible: zoneDelegate.elements.length === 0
+                text: "No elements"
+                color: theme.textMuted
+                font.pixelSize: root.appearance.textSize - 2
+            }
 
-                width: parent.width
-                height: 46
-                radius: root.appearance.radius
-                color: rowHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+            Repeater {
+                model: zoneDelegate.elements
 
-                HoverHandler {
-                    id: rowHover
-                }
+                delegate: Column {
+                    id: elementDelegate
 
-                Text {
-                    anchors.left: parent.left
-                    anchors.leftMargin: 12
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: root.labelFor(moduleDelegate.modelData) + (root.expandedWidget === moduleDelegate.modelData ? " 󰅀" : " 󰅂")
-                    color: theme.text
-                    font.pixelSize: root.appearance.textSize - 1
-                    font.bold: true
+                    required property var modelData
+                    required property int index
+                    readonly property string element: modelData.id
+                    readonly property bool elementOn: modelData.enabled !== false
+                    readonly property var options: root.optionsFor(element)
 
-                    TapHandler {
-                        onTapped: root.expandedWidget = root.expandedWidget === moduleDelegate.modelData ? "" : moduleDelegate.modelData
-                    }
+                    width: root.width
+                    spacing: 4
 
-                }
+                    Rectangle {
+                        width: parent.width
+                        height: 46
+                        radius: root.appearance.radius
+                        color: rowHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
 
-                Row {
-                    anchors.right: parent.right
-                    anchors.rightMargin: 6
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: 5
-
-                    ComboBox {
-                        id: groupSelector
-
-                        width: 82
-                        height: 32
-                        textRole: "label"
-                        model: [{
-                            "label": "Separate",
-                            "value": 0
-                        }, {
-                            "label": "Group 1",
-                            "value": 1
-                        }, {
-                            "label": "Group 2",
-                            "value": 2
-                        }, {
-                            "label": "Group 3",
-                            "value": 3
-                        }]
-                        currentIndex: {
-                            const group = (root.appearance.statusModuleGroups || {
-                            })[moduleDelegate.modelData] || 0;
-                            return group;
+                        HoverHandler {
+                            id: rowHover
                         }
-                        onActivated: root.setGroup(moduleDelegate.modelData, model[index].value)
 
-                        contentItem: Text {
-                            leftPadding: 8
-                            rightPadding: 6
-                            verticalAlignment: Text.AlignVCenter
-                            text: groupSelector.displayText
-                            color: theme.accent
-                            elide: Text.ElideRight
-                            font.pixelSize: root.appearance.textSize - 3
+                        Text {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 12
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: root.labelFor(elementDelegate.element)
+                                + (elementDelegate.options.length === 0 ? ""
+                                    : root.expandedWidget === elementDelegate.element ? " 󰅀" : " 󰅂")
+                            color: elementDelegate.elementOn ? theme.text : theme.textMuted
+                            font.pixelSize: root.appearance.textSize - 1
                             font.bold: true
+
+                            TapHandler {
+                                enabled: elementDelegate.options.length > 0
+                                onTapped: root.expandedWidget = root.expandedWidget === elementDelegate.element
+                                    ? "" : elementDelegate.element
+                            }
                         }
 
-                        indicator: Item {
-                        }
+                        Row {
+                            anchors.right: parent.right
+                            anchors.rightMargin: 6
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 5
 
-                        background: Rectangle {
-                            radius: root.appearance.radius
-                            color: theme.surface
-                        }
+                            ComboBox {
+                                id: groupSelector
 
-                    }
+                                visible: root.groupable(elementDelegate.element)
+                                width: 82
+                                height: 32
+                                textRole: "label"
+                                model: [{
+                                    "label": "Separate",
+                                    "value": 0
+                                }, {
+                                    "label": "Group 1",
+                                    "value": 1
+                                }, {
+                                    "label": "Group 2",
+                                    "value": 2
+                                }, {
+                                    "label": "Group 3",
+                                    "value": 3
+                                }]
+                                currentIndex: (root.appearance.statusModuleGroups || {
+                                })[elementDelegate.element] || 0
+                                onActivated: root.setGroup(elementDelegate.element, model[index].value)
 
-                    Row {
-                        spacing: 2
+                                contentItem: Text {
+                                    leftPadding: 8
+                                    rightPadding: 6
+                                    verticalAlignment: Text.AlignVCenter
+                                    text: groupSelector.displayText
+                                    color: theme.accent
+                                    elide: Text.ElideRight
+                                    font.pixelSize: root.appearance.textSize - 3
+                                    font.bold: true
+                                }
 
-                        Repeater {
-                            model: [{
-                                "label": "L",
-                                "value": "left"
-                            }, {
-                                "label": "C",
-                                "value": "center"
-                            }, {
-                                "label": "R",
-                                "value": "right"
-                            }]
+                                indicator: Item {
+                                }
 
-                            delegate: Rectangle {
-                                required property var modelData
-                                readonly property bool selected: ((root.appearance.statusModulePlacement || {
-                                })[moduleDelegate.modelData] || "right") === modelData.value
+                                background: Rectangle {
+                                    radius: root.appearance.radius
+                                    color: theme.surface
+                                }
 
-                                width: 26
+                            }
+
+                            Row {
+                                spacing: 2
+
+                                Repeater {
+                                    model: root.zones
+
+                                    delegate: Rectangle {
+                                        required property var modelData
+                                        readonly property bool selected: zoneDelegate.modelData.value === modelData.value
+
+                                        width: 26
+                                        height: 30
+                                        radius: root.appearance.radius
+                                        color: selected ? theme.accent : theme.surface
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: parent.modelData.short
+                                            color: parent.selected ? theme.background : theme.textMuted
+                                            font.pixelSize: root.appearance.textSize - 3
+                                            font.bold: true
+                                        }
+
+                                        TapHandler {
+                                            onTapped: root.appearance.moveBarElementToZone(elementDelegate.element,
+                                                parent.modelData.value)
+                                        }
+
+                                    }
+
+                                }
+
+                            }
+
+                            Repeater {
+                                model: [{
+                                    "label": "▲",
+                                    "offset": -1
+                                }, {
+                                    "label": "▼",
+                                    "offset": 1
+                                }]
+
+                                delegate: Rectangle {
+                                    required property var modelData
+                                    readonly property bool movable: modelData.offset < 0
+                                        ? elementDelegate.index > 0
+                                        : elementDelegate.index < zoneDelegate.elements.length - 1
+
+                                    width: 30
+                                    height: 30
+                                    radius: root.appearance.radius
+                                    color: moveHover.hovered && movable ? theme.surfaceHover : theme.surface
+
+                                    HoverHandler {
+                                        id: moveHover
+                                    }
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: parent.modelData.label
+                                        color: parent.movable ? theme.accent : theme.textMuted
+                                        font.pixelSize: root.appearance.textSize - 3
+                                        font.bold: true
+                                    }
+
+                                    TapHandler {
+                                        onTapped: root.appearance.moveBarElement(elementDelegate.element,
+                                            parent.modelData.offset)
+                                    }
+
+                                }
+
+                            }
+
+                            Rectangle {
+                                width: 36
                                 height: 30
                                 radius: root.appearance.radius
-                                color: selected ? theme.accent : theme.surface
+                                color: elementDelegate.elementOn ? theme.accent : theme.surface
 
                                 Text {
                                     anchors.centerIn: parent
-                                    text: parent.modelData.label
-                                    color: parent.selected ? theme.background : theme.textMuted
+                                    text: elementDelegate.elementOn ? "On" : "Off"
+                                    color: elementDelegate.elementOn ? theme.background : theme.textMuted
                                     font.pixelSize: root.appearance.textSize - 3
                                     font.bold: true
                                 }
 
                                 TapHandler {
-                                    onTapped: root.setPlacement(moduleDelegate.modelData, parent.modelData.value)
+                                    onTapped: root.appearance.setBarElementEnabled(elementDelegate.element,
+                                        !elementDelegate.elementOn)
                                 }
 
                             }
@@ -514,173 +448,61 @@ Column {
                     }
 
                     Rectangle {
-                        width: 30
-                        height: 30
+                        width: parent.width
+                        height: root.expandedWidget === elementDelegate.element
+                            ? elementDelegate.options.length * 38 + 16 : 0
+                        visible: height > 0
                         radius: root.appearance.radius
-                        color: moduleRowHover.hovered ? theme.surfaceHover : theme.surface
+                        color: theme.surface
+                        clip: true
 
-                        HoverHandler {
-                            id: moduleRowHover
-                        }
+                        Column {
+                            anchors.fill: parent
+                            anchors.margins: 8
+                            spacing: 4
 
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Up"
-                            color: theme.accent
-                            font.pixelSize: root.appearance.textSize - 3
-                            font.bold: true
-                        }
+                            Repeater {
+                                model: elementDelegate.options
 
-                        TapHandler {
-                            enabled: moduleRow.moduleIndex > 0
-                            onTapped: root.moveModule(moduleDelegate.modelData, -1)
-                        }
+                                delegate: Rectangle {
+                                    required property var modelData
 
-                    }
+                                    width: parent.width
+                                    height: 34
+                                    radius: root.appearance.radius
+                                    color: optionHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
 
-                    Rectangle {
-                        width: 42
-                        height: 30
-                        radius: root.appearance.radius
-                        color: downHover.hovered ? theme.surfaceHover : theme.surface
+                                    HoverHandler {
+                                        id: optionHover
+                                    }
 
-                        HoverHandler {
-                            id: downHover
-                        }
+                                    Text {
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 10
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: parent.modelData.label
+                                        color: theme.text
+                                        font.pixelSize: root.appearance.textSize - 2
+                                        font.bold: true
+                                    }
 
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Down"
-                            color: theme.accent
-                            font.pixelSize: root.appearance.textSize - 3
-                            font.bold: true
-                        }
+                                    Text {
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: 10
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: root.appearance[parent.modelData.propertyName] !== false ? "On" : "Off"
+                                        color: root.appearance[parent.modelData.propertyName] !== false
+                                            ? theme.accent : theme.textMuted
+                                        font.pixelSize: root.appearance.textSize - 2
+                                        font.bold: true
+                                    }
 
-                        TapHandler {
-                            enabled: moduleRow.moduleIndex < root.modules.length - 1
-                            onTapped: root.moveModule(moduleDelegate.modelData, 1)
-                        }
+                                    TapHandler {
+                                        onTapped: root.toggleWidgetOption(parent.modelData.propertyName)
+                                    }
 
-                    }
+                                }
 
-                    Rectangle {
-                        width: 36
-                        height: 30
-                        radius: root.appearance.radius
-                        color: (root.appearance.statusModuleEnabled || {
-                        })[moduleDelegate.modelData] === false ? theme.surface : theme.accent
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: (root.appearance.statusModuleEnabled || {
-                            })[moduleDelegate.modelData] === false ? "Off" : "On"
-                            color: (root.appearance.statusModuleEnabled || {
-                            })[moduleDelegate.modelData] === false ? theme.textMuted : theme.background
-                            font.pixelSize: root.appearance.textSize - 3
-                            font.bold: true
-                        }
-
-                        TapHandler {
-                            onTapped: root.setEnabled(moduleDelegate.modelData, (root.appearance.statusModuleEnabled || {
-                            })[moduleDelegate.modelData] === false)
-                        }
-
-                    }
-
-                }
-
-            }
-
-            Rectangle {
-                readonly property var options: {
-                    if (moduleDelegate.modelData === "notifications")
-                        return [{
-                        "label": "SHOW UNREAD BADGE",
-                        "propertyName": "notificationBadgeVisible"
-                    }];
-
-                    if (moduleDelegate.modelData === "media")
-                        return [{
-                        "label": "SHOW TRACK TITLE",
-                        "propertyName": "mediaTitleVisible"
-                    }];
-
-                    if (moduleDelegate.modelData === "audio")
-                        return [{
-                        "label": "SHOW VOLUME METER",
-                        "propertyName": "audioMeterVisible"
-                    }];
-
-                    if (moduleDelegate.modelData === "battery")
-                        return [{
-                        "label": "SHOW PERCENTAGE",
-                        "propertyName": "batteryPercentageVisible"
-                    }];
-
-                    return [];
-                }
-
-                width: parent.width
-                height: root.expandedWidget === moduleDelegate.modelData ? (options.length > 0 ? options.length * 38 + 16 : 44) : 0
-                visible: height > 0
-                radius: root.appearance.radius
-                color: theme.surface
-                clip: true
-
-                Text {
-                    anchors.fill: parent
-                    anchors.margins: 12
-                    visible: parent.options.length === 0
-                    text: "This widget uses the visibility, placement, group, and order controls above."
-                    color: theme.textMuted
-                    verticalAlignment: Text.AlignVCenter
-                    font.pixelSize: root.appearance.textSize - 2
-                    wrapMode: Text.WordWrap
-                }
-
-                Column {
-                    anchors.fill: parent
-                    anchors.margins: 8
-                    spacing: 4
-                    visible: parent.options.length > 0
-
-                    Repeater {
-                        model: parent.parent.options
-
-                        delegate: Rectangle {
-                            required property var modelData
-
-                            width: parent.width
-                            height: 34
-                            radius: root.appearance.radius
-                            color: optionHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-
-                            HoverHandler {
-                                id: optionHover
-                            }
-
-                            Text {
-                                anchors.left: parent.left
-                                anchors.leftMargin: 10
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: parent.modelData.label
-                                color: theme.text
-                                font.pixelSize: root.appearance.textSize - 2
-                                font.bold: true
-                            }
-
-                            Text {
-                                anchors.right: parent.right
-                                anchors.rightMargin: 10
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: root.appearance[parent.modelData.propertyName] !== false ? "On" : "Off"
-                                color: root.appearance[parent.modelData.propertyName] !== false ? theme.accent : theme.textMuted
-                                font.pixelSize: root.appearance.textSize - 2
-                                font.bold: true
-                            }
-
-                            TapHandler {
-                                onTapped: root.toggleWidgetOption(parent.modelData.propertyName)
                             }
 
                         }

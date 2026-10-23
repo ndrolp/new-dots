@@ -92,7 +92,7 @@ QtObject {
         try {
             return JSON.parse(settingsFile.text());
         } catch (error) {
-            return {};
+            return null;
         }
     }
 

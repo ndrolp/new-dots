@@ -29,12 +29,8 @@ QtObject {
     property alias transparentBarSlanted: settings.transparentBarSlanted
     property alias statusIsland: settings.statusIsland
     property alias statusIslandRadius: settings.statusIslandRadius
-    property alias statusModuleOrder: settings.statusModuleOrder
-    property alias statusModuleEnabled: settings.statusModuleEnabled
+    property alias barElements: settings.barElements
     property alias statusModuleGroups: settings.statusModuleGroups
-    property alias statusModulePlacement: settings.statusModulePlacement
-    property alias barElementEnabled: settings.barElementEnabled
-    property alias barElementPlacement: settings.barElementPlacement
     property alias notificationPopupLocation: settings.notificationPopupLocation
     property alias doNotDisturb: settings.doNotDisturb
     property alias barTransparent: settings.barTransparent
@@ -69,19 +65,37 @@ QtObject {
         applyChanges(BarProfileModel.densityPresetChanges(preset));
     }
 
+    function liveBarElements() {
+        return BarProfileModel.normalizeBarElements(settings.barElements);
+    }
+
+    function setBarElementEnabled(element, enabled) {
+        settings.barElements = BarProfileModel.setElementEnabled(liveBarElements(), element, enabled);
+    }
+
+    function moveBarElement(element, offset) {
+        settings.barElements = BarProfileModel.moveElement(liveBarElements(), element, offset);
+    }
+
+    function moveBarElementToZone(element, zone) {
+        settings.barElements = BarProfileModel.moveElementToZone(liveBarElements(), element, zone);
+    }
+
     property bool loaded: false
 
-    // The file as stored, including keys the adapter does not declare.
+    // The file as stored, including keys the adapter does not declare; null
+    // when it is empty or unreadable.
     function rawState() {
         try {
             return JSON.parse(settingsFile.text());
         } catch (error) {
-            return {};
+            return null;
         }
     }
 
-    // Replaces the file with a migrated state in a single write, which the
-    // adapter then loads (per-property writes would race with reloads).
+    // Replaces the file with a migrated state (see SchemaMigration) in a
+    // single write, which the adapter then loads; per-property writes would
+    // race with reloads.
     function applyMigratedState(state) {
         settingsFile.setText(JSON.stringify(state, null, 4));
     }
@@ -98,8 +112,14 @@ QtObject {
         onLoaded: root.loaded = true
 
         onLoadFailed: error => {
-            if (error === FileViewError.FileNotFound)
+            if (error === FileViewError.FileNotFound) {
+                // A new file starts from the defaults, in the current schema.
+                settings.barProfiles = BarProfileModel.migrateElementOrder({
+                    barProfiles: settings.barProfiles
+                }).barProfiles;
+                settings.schemaVersion = BarProfileModel.schemaVersion;
                 writeAdapter();
+            }
             root.loaded = true;
         }
 
@@ -246,30 +266,28 @@ QtObject {
             property bool transparentBarSlanted: false
             property bool statusIsland: false
             property int statusIslandRadius: 12
-            property var statusModuleOrder: [
-                "notifications", "recording", "media", "audio", "bluetooth", "tray", "network",
-                "battery", "clock"
-            ]
-            property var statusModuleEnabled: {
-                "notifications": true,
-                "recording": true,
-                "media": true,
-                "audio": true,
-                "bluetooth": true,
-                "tray": true,
-                "network": true,
-                "battery": true,
-                "clock": true
-            }
-            property var statusModuleGroups: {}
-            property var statusModulePlacement: {}
-            property var barElementEnabled: {
-                "arch": true,
-                "system": true,
-                "currentApp": true,
-                "workspaces": true
-            }
-            property var barElementPlacement: {}
+            property var statusModuleGroups: ({})
+            property var barElements: ({
+                "left": [
+                    { "id": "arch", "enabled": true },
+                    { "id": "systemMonitor", "enabled": true },
+                    { "id": "currentApp", "enabled": true }
+                ],
+                "center": [
+                    { "id": "workspaces", "enabled": true }
+                ],
+                "right": [
+                    { "id": "notifications", "enabled": true },
+                    { "id": "recording", "enabled": true },
+                    { "id": "media", "enabled": true },
+                    { "id": "audio", "enabled": true },
+                    { "id": "bluetooth", "enabled": true },
+                    { "id": "tray", "enabled": true },
+                    { "id": "network", "enabled": true },
+                    { "id": "battery", "enabled": true },
+                    { "id": "clock", "enabled": true }
+                ]
+            })
             property string notificationPopupLocation: "top-center"
             property bool doNotDisturb: false
             property bool barTransparent: false

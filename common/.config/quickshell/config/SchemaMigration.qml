@@ -16,10 +16,10 @@ QtObject {
             return;
 
         const appearanceState = appearance.rawState();
-        if (!BarProfileModel.needsMigration(appearanceState))
+        if (!appearanceState || !BarProfileModel.needsMigration(appearanceState))
             return;
 
-        const migrated = BarProfileModel.migrate(appearanceState, monitors.rawState());
+        const migrated = BarProfileModel.migrate(appearanceState, monitors.rawState() || {});
         console.info("Migrating settings to schema version " + BarProfileModel.schemaVersion);
         // Monitors first: the appearance file carries the schema version.
         monitors.applyMigratedState(migrated.monitors);
