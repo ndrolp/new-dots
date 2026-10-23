@@ -131,8 +131,15 @@ Column {
                 enabled: !root.modified
                 opacity: enabled ? 1 : 0.6
                 model: root.profileNames
-                currentIndex: root.profileNames.indexOf(root.appearance.editingBarProfile)
-                displayText: root.displayName(currentText)
+                // Always the edited profile, also when the model picks another
+                // one (e.g. after deleting the edited profile).
+                displayText: root.displayName(root.appearance.editingBarProfile)
+
+                // A Binding, unlike a plain binding, survives the user picking
+                // an entry.
+                Binding on currentIndex {
+                    value: root.profileNames.indexOf(root.appearance.editingBarProfile)
+                }
 
                 contentItem: Text {
                     leftPadding: 10

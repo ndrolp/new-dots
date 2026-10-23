@@ -258,7 +258,8 @@ function deleteRejection(state, displaySettings, profileName) {
 }
 
 // Changes that remove `profileName`; null when deleteRejection refuses.
-// Deleting the edited profile edits the default one (or the first left).
+// Deleting the edited profile edits the first remaining one by name, as the
+// panel lists them.
 function deleteProfile(state, displaySettings, profileName) {
     if (deleteRejection(state, displaySettings, profileName) !== "")
         return null;
@@ -271,7 +272,7 @@ function deleteProfile(state, displaySettings, profileName) {
 
     return {
         barProfiles: profiles,
-        editingBarProfile: defaultProfileName(profiles),
+        editingBarProfile: Object.keys(profiles).sort()[0],
         pendingProfile: null
     };
 }

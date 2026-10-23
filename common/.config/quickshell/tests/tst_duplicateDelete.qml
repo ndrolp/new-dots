@@ -80,18 +80,20 @@ TestCase {
         compare(after.editingBarProfile, fixture.appearance.editingBarProfile);
     }
 
-    function test_deletingTheEditedProfileEditsTheDefaultOne() {
+    function test_deletingTheEditedProfileEditsTheFirstRemainingOne() {
         const fixture = started();
         const editing = fixtures.withChanges(fixture.appearance,
             BarProfileModel.editProfile(fixture.appearance, "presentation"));
 
-        const after = fixtures.withChanges(editing,
-            BarProfileModel.deleteProfile(editing, fixture.displaySettings, "presentation"));
+        const changes = BarProfileModel.deleteProfile(editing, fixture.displaySettings,
+            "presentation");
+        const after = fixtures.withChanges(editing, changes);
 
         verify(after.barProfiles.presentation === undefined);
-        compare(after.editingBarProfile, "minimal");
+        // Returned explicitly, so the panel shows the profile it now edits.
+        compare(changes.editingBarProfile, "media");
         compare(BarProfileModel.editedProfile(after).barHeight,
-            fixture.appearance.barProfiles.minimal.barHeight);
+            fixture.appearance.barProfiles.media.barHeight);
         verify(!BarProfileModel.isModified(after));
     }
 
