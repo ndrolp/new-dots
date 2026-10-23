@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell.Io
+import "BarProfileModel.js" as BarProfileModel
 
 QtObject {
     property alias barHeight: settings.barHeight
@@ -59,98 +60,28 @@ QtObject {
     property alias audioMeterVisible: settings.audioMeterVisible
     property alias batteryPercentageVisible: settings.batteryPercentageVisible
 
-    readonly property var barProfileKeys: [
-        "densityPreset", "barHeight", "horizontalPadding", "spacing", "radius",
-        "workspaceButtonSize", "textSize", "archButtonHorizontalPadding",
-        "activeWorkspaceHorizontalPadding", "pillVerticalPadding", "workspacePadding",
-        "structuralVerticalPadding",
-        "workspaceGlyphsEnabled", "hideEmptyWorkspaces", "workspaceAppCountVisible",
-        "workspaceGlyphs", "pillsTransparent", "transparentBarTopMargin",
-        "transparentBarSlanted", "statusIsland", "statusIslandRadius", "barTransparent",
-        "barTransparentBorder", "barOpacity", "statusModuleOrder", "statusModuleEnabled",
-        "notificationBadgeVisible", "mediaTitleVisible", "audioMeterVisible",
-        "batteryPercentageVisible",
-        "statusModuleGroups", "statusModulePlacement", "barElementEnabled",
-        "barElementPlacement", "backgroundClockEnabled",
-        "backgroundClockCalendarEnabled", "backgroundClockPosition",
-        "backgroundClockSize", "backgroundClockOpacity", "backgroundClockDateFormat",
-        "desktopMediaEnabled", "desktopMediaPosition", "desktopSystemEnabled",
-        "desktopSystemPosition", "desktopCalendarEnabled", "desktopCalendarPosition",
-        "desktopNetworkEnabled", "desktopNetworkPosition", "desktopWeatherEnabled",
-        "desktopWeatherPosition", "desktopWeatherLocation", "desktopWidgetOrder",
-        "notificationPopupLocation"
-    ]
+    function applyChanges(changes) {
+        if (!changes)
+            return;
 
-    function cloneValue(value) {
-        return JSON.parse(JSON.stringify(value));
-    }
-
-    function currentBarLayout() {
-        const layout = {};
-
-        for (let index = 0; index < barProfileKeys.length; index++) {
-            const key = barProfileKeys[index];
-            layout[key] = cloneValue(settings[key]);
-        }
-
-        return layout;
+        for (const key in changes)
+            settings[key] = changes[key];
     }
 
     function applyBarProfile(profileName) {
-        const profile = barProfiles[profileName];
-
-        if (!profile)
-            return;
-
-        for (let index = 0; index < barProfileKeys.length; index++) {
-            const key = barProfileKeys[index];
-            if (profile[key] !== undefined)
-                settings[key] = cloneValue(profile[key]);
-        }
-
-        activeBarProfile = profileName;
+        applyChanges(BarProfileModel.applyProfile(settings, profileName));
     }
 
     function saveBarProfile(profileName) {
-        const profiles = cloneValue(barProfiles);
-        profiles[profileName] = currentBarLayout();
-        barProfiles = profiles;
-        activeBarProfile = profileName;
+        applyChanges(BarProfileModel.saveProfile(settings, profileName));
     }
 
     function barProfileValue(profileName, key) {
-        if (profileName === activeBarProfile)
-            return settings[key];
-
-        const profile = barProfiles[profileName];
-        return profile && profile[key] !== undefined ? profile[key] : settings[key];
+        return BarProfileModel.profileValue(settings, profileName, key);
     }
 
     function applyDensityPreset(preset) {
-        densityPreset = preset;
-
-        if (preset === "compact") {
-            barHeight = 30;
-            horizontalPadding = 8;
-            spacing = 4;
-            pillVerticalPadding = 2;
-            workspacePadding = 3;
-            textSize = 13;
-        } else if (preset === "spacious") {
-            barHeight = 38;
-            horizontalPadding = 16;
-            spacing = 12;
-            pillVerticalPadding = 5;
-            workspacePadding = 5;
-            textSize = 15;
-        } else {
-            barHeight = 34;
-            horizontalPadding = 12;
-            spacing = 8;
-            pillVerticalPadding = 3;
-            workspacePadding = 4;
-            textSize = 14;
-        }
+        applyChanges(BarProfileModel.densityPresetChanges(preset));
     }
 
     property var settingsFile: FileView {

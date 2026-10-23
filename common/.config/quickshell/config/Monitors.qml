@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell.Io
+import "BarProfileModel.js" as BarProfileModel
 
 QtObject {
     id: root
@@ -41,17 +42,7 @@ QtObject {
     }
 
     function displaySettingsFor(monitorName) {
-        const configured = displaySettings[monitorName];
-        const defaults = displaySettings.default || {};
-
-        return {
-            barVisible: configured && configured.barVisible !== undefined
-                ? configured.barVisible : defaults.barVisible !== false,
-            backgroundClockVisible: configured && configured.backgroundClockVisible !== undefined
-                ? configured.backgroundClockVisible : defaults.backgroundClockVisible !== false,
-            barProfile: configured && configured.barProfile !== undefined
-                ? configured.barProfile : defaults.barProfile || ""
-        };
+        return BarProfileModel.monitorDisplaySettings(displaySettings, monitorName);
     }
 
     function setDisplaySetting(monitorName, settingName, value) {
@@ -71,7 +62,7 @@ QtObject {
     }
 
     function barProfileFor(monitorName, fallbackProfile) {
-        return displaySettingsFor(monitorName).barProfile || fallbackProfile;
+        return BarProfileModel.profileForMonitor(displaySettings, monitorName, fallbackProfile);
     }
 
     function monitorNames() {
