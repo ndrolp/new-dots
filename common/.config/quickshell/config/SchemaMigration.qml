@@ -1,5 +1,5 @@
 import QtQuick
-import "BarProfileModel.js" as BarProfileModel
+import "SchemaMigrations.js" as SchemaMigrations
 
 // Brings appearance.json and monitors.json to the current schema version once
 // both are loaded. Already migrated files are left untouched.
@@ -16,11 +16,11 @@ QtObject {
             return;
 
         const appearanceState = appearance.rawState();
-        if (!appearanceState || !BarProfileModel.needsMigration(appearanceState))
+        if (!appearanceState || !SchemaMigrations.needsMigration(appearanceState))
             return;
 
-        const migrated = BarProfileModel.migrate(appearanceState, monitors.rawState() || {});
-        console.info("Migrating settings to schema version " + BarProfileModel.schemaVersion);
+        const migrated = SchemaMigrations.migrate(appearanceState, monitors.rawState() || {});
+        console.info("Migrating settings to schema version " + SchemaMigrations.schemaVersion);
         // Monitors first: the appearance file carries the schema version.
         monitors.applyMigratedState(migrated.monitors);
         appearance.applyMigratedState(migrated.appearance);

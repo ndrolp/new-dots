@@ -1,16 +1,14 @@
 import QtQuick
 import QtTest
 import "../config/BarProfileModel.js" as BarProfileModel
+import "../config/SchemaMigrations.js" as SchemaMigrations
 
 // Duplicating and deleting bar profiles from the panel.
 TestCase {
     name: "DuplicateDelete"
 
-    function readFixture(fileName) {
-        const request = new XMLHttpRequest();
-        request.open("GET", Qt.resolvedUrl("fixtures/" + fileName), false);
-        request.send(null);
-        return JSON.parse(request.responseText);
+    Fixtures {
+        id: fixtures
     }
 
     function withChanges(state, changes) {
@@ -22,8 +20,8 @@ TestCase {
 
     // The fixtures, migrated, as Quickshell starts them: no pending changes.
     function started() {
-        const migrated = BarProfileModel.migrate(readFixture("appearance.json"),
-            readFixture("monitors.json"));
+        const migrated = SchemaMigrations.migrate(fixtures.read("appearance.json"),
+            fixtures.read("monitors.json"));
         const appearance = withChanges(migrated.appearance,
             BarProfileModel.discardChanges(migrated.appearance));
         return { appearance: appearance, displaySettings: migrated.monitors.displaySettings };

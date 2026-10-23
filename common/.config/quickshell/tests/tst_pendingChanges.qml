@@ -1,16 +1,14 @@
 import QtQuick
 import QtTest
 import "../config/BarProfileModel.js" as BarProfileModel
+import "../config/SchemaMigrations.js" as SchemaMigrations
 
 // Editing a bar profile: pending changes, Save, Discard and the locked selector.
 TestCase {
     name: "PendingChanges"
 
-    function readFixture(fileName) {
-        const request = new XMLHttpRequest();
-        request.open("GET", Qt.resolvedUrl("fixtures/" + fileName), false);
-        request.send(null);
-        return JSON.parse(request.responseText);
+    Fixtures {
+        id: fixtures
     }
 
     function withChanges(state, changes) {
@@ -22,8 +20,8 @@ TestCase {
 
     // The fixture, migrated, as Quickshell starts it: no pending changes.
     function startedState() {
-        const migrated = BarProfileModel.migrate(readFixture("appearance.json"),
-            readFixture("monitors.json")).appearance;
+        const migrated = SchemaMigrations.migrate(fixtures.read("appearance.json"),
+            fixtures.read("monitors.json")).appearance;
         return withChanges(migrated, BarProfileModel.discardChanges(migrated));
     }
 

@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell.Io
 import "BarProfileModel.js" as BarProfileModel
+import "SchemaMigrations.js" as SchemaMigrations
 
 QtObject {
     id: root
@@ -129,7 +130,7 @@ QtObject {
     property bool pendingChangesDropped: false
 
     function dropPendingChangesOnStart() {
-        if (pendingChangesDropped || settings.schemaVersion !== BarProfileModel.schemaVersion)
+        if (pendingChangesDropped || settings.schemaVersion !== SchemaMigrations.schemaVersion)
             return;
 
         pendingChangesDropped = true;
@@ -182,11 +183,11 @@ QtObject {
         onLoadFailed: error => {
             if (error === FileViewError.FileNotFound) {
                 // A new file starts from the defaults, in the current schema.
-                settings.barProfiles = BarProfileModel.migrateGroups(
-                    BarProfileModel.migrateElementOrder({
+                settings.barProfiles = SchemaMigrations.migrateGroups(
+                    SchemaMigrations.migrateElementOrder({
                         barProfiles: settings.barProfiles
                     })).barProfiles;
-                settings.schemaVersion = BarProfileModel.schemaVersion;
+                settings.schemaVersion = SchemaMigrations.schemaVersion;
                 writeAdapter();
             }
             root.pendingChangesDropped = true;

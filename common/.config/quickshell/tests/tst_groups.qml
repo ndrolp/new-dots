@@ -1,20 +1,18 @@
 import QtQuick
 import QtTest
 import "../config/BarProfileModel.js" as BarProfileModel
+import "../config/SchemaMigrations.js" as SchemaMigrations
 
 TestCase {
     name: "Groups"
 
-    function readFixture(fileName) {
-        const request = new XMLHttpRequest();
-        request.open("GET", Qt.resolvedUrl("fixtures/" + fileName), false);
-        request.send(null);
-        return JSON.parse(request.responseText);
+    Fixtures {
+        id: fixtures
     }
 
     // The real profiles after the element order step, as the group step sees them.
     function migratedState() {
-        return BarProfileModel.migrateElementOrder(readFixture("appearance.json"));
+        return SchemaMigrations.migrateElementOrder(fixtures.read("appearance.json"));
     }
 
     // Groups of a zone as "+"-joined ids; ungrouped elements stand alone.
@@ -23,7 +21,7 @@ TestCase {
     }
 
     function test_anActiveIslandBecomesAGroupFillingTheCenterZone() {
-        const media = BarProfileModel.migrateGroups(migratedState()).barProfiles.media;
+        const media = SchemaMigrations.migrateGroups(migratedState()).barProfiles.media;
 
         compare(media.barElements.left, []);
         compare(media.barElements.right, []);
@@ -32,7 +30,7 @@ TestCase {
     }
 
     function test_anIslandKeepsItsLookAndDropsItsOwnSettings() {
-        const media = BarProfileModel.migrateGroups(migratedState()).barProfiles.media;
+        const media = SchemaMigrations.migrateGroups(migratedState()).barProfiles.media;
 
         compare(media.groupRadius, 12);
         compare(media.barTransparent, true);
@@ -46,7 +44,7 @@ TestCase {
     function test_profilesWithoutAnIslandKeepTheirBarAndUseTheCornerRadiusForGroups() {
         const state = migratedState();
 
-        const work = BarProfileModel.migrateGroups(state).barProfiles.work;
+        const work = SchemaMigrations.migrateGroups(state).barProfiles.work;
 
         compare(work.barElements, state.barProfiles.work.barElements);
         compare(groups(work.barElements, "center"), ["arch", "workspaces", "notifications"]);
@@ -56,11 +54,11 @@ TestCase {
     }
 
     function test_theLiveBarIsMigratedToo() {
-        const migrated = BarProfileModel.migrateGroups(migratedState());
+        const migrated = SchemaMigrations.migrateGroups(migratedState());
 
         compare(groups(migrated.barElements, "left"), ["arch", "workspaces"]);
         verify(!("statusIsland" in migrated));
-        compare(migrated.doNotDisturb, readFixture("appearance.json").doNotDisturb);
+        compare(migrated.doNotDisturb, fixtures.read("appearance.json").doNotDisturb);
     }
 
     function test_numberedGroupsBecomeJoinPrevious() {
@@ -70,7 +68,7 @@ TestCase {
             "bluetooth": 3, "systemMonitor": 3
         };
 
-        const minimal = BarProfileModel.migrateGroups(state).barProfiles.minimal;
+        const minimal = SchemaMigrations.migrateGroups(state).barProfiles.minimal;
 
         compare(groups(minimal.barElements, "right"), ["media", "audio+network+battery",
             "clock+notifications", "recording", "bluetooth", "tray"]);
@@ -80,39 +78,39 @@ TestCase {
         const state = migratedState();
         state.barProfiles.minimal.statusModuleGroups = { "media": 1, "network": 1 };
 
-        const minimal = BarProfileModel.migrateGroups(state).barProfiles.minimal;
+        const minimal = SchemaMigrations.migrateGroups(state).barProfiles.minimal;
 
         compare(groups(minimal.barElements, "right").slice(0, 3), ["media", "audio", "network"]);
     }
 
     function test_theGroupMigrationLeavesMigratedDataUntouched() {
-        const migrated = BarProfileModel.migrateGroups(migratedState());
+        const migrated = SchemaMigrations.migrateGroups(migratedState());
 
-        compare(BarProfileModel.migrateGroups(migrated), migrated);
+        compare(SchemaMigrations.migrateGroups(migrated), migrated);
     }
 
     function test_theGroupMigrationDoesNotChangeItsInput() {
         const state = migratedState();
         const before = JSON.stringify(state);
 
-        BarProfileModel.migrateGroups(state);
+        SchemaMigrations.migrateGroups(state);
 
         compare(JSON.stringify(state), before);
     }
 
     function test_theSchemaMigrationRunsTheGroupStepOnce() {
-        const migrated = BarProfileModel.migrate(readFixture("appearance.json"),
-            readFixture("monitors.json"));
+        const migrated = SchemaMigrations.migrate(fixtures.read("appearance.json"),
+            fixtures.read("monitors.json"));
 
         compare(groups(migrated.appearance.barProfiles.media.barElements, "center"),
             ["arch+workspaces+audio+network+battery+clock+notifications+recording"]);
         verify(!("statusIsland" in migrated.appearance.barProfiles.media));
-        compare(BarProfileModel.migrate(migrated.appearance, migrated.monitors), migrated);
+        compare(SchemaMigrations.migrate(migrated.appearance, migrated.monitors), migrated);
     }
 
     // minimal's left zone is arch, workspaces; right starts -systemMonitor, media, audio, network.
     function minimalElements() {
-        return BarProfileModel.migrateGroups(migratedState()).barProfiles.minimal.barElements;
+        return SchemaMigrations.migrateGroups(migratedState()).barProfiles.minimal.barElements;
     }
 
     function test_anElementCanJoinThePreviousOne() {
@@ -202,7 +200,7 @@ TestCase {
     }
 
     function test_groupRadiusIsPartOfAProfile() {
-        const state = BarProfileModel.migrateGroups(migratedState());
+        const state = SchemaMigrations.migrateGroups(migratedState());
 
         compare(BarProfileModel.editProfile(state, "media").groupRadius, 12);
         verify(!("statusIsland" in BarProfileModel.editProfile(state, "media")));

@@ -1,6 +1,8 @@
 import QtQuick
 import QtTest
 import "../config/BarProfileModel.js" as BarProfileModel
+import "../config/SchemaMigrations.js" as SchemaMigrations
+import "../config/DesktopWidgetsModel.js" as DesktopWidgetsModel
 
 TestCase {
     name: "DesktopWidgetsMigration"
@@ -9,19 +11,16 @@ TestCase {
     readonly property string philips: "Philips Consumer Electronics Company PHL 243V7 0x00009A4C"
     readonly property string samsung: "Samsung Display Corp. ATNA40HQ01-0"
 
-    function readFixture(fileName) {
-        const request = new XMLHttpRequest();
-        request.open("GET", Qt.resolvedUrl("fixtures/" + fileName), false);
-        request.send(null);
-        return JSON.parse(request.responseText);
+    Fixtures {
+        id: fixtures
     }
 
     function migrateFixtures(prepare) {
-        const appearance = readFixture("appearance.json");
-        const monitors = readFixture("monitors.json");
+        const appearance = fixtures.read("appearance.json");
+        const monitors = fixtures.read("monitors.json");
         if (prepare)
             prepare(appearance, monitors);
-        return BarProfileModel.migrate(appearance, monitors);
+        return SchemaMigrations.migrate(appearance, monitors);
     }
 
     // What the real desktop showed: the live (top-level) values of the active
@@ -42,8 +41,8 @@ TestCase {
     function test_migrationMarksTheFilesWithTheSchemaVersion() {
         const migrated = migrateFixtures();
 
-        compare(migrated.appearance.schemaVersion, BarProfileModel.schemaVersion);
-        verify(BarProfileModel.schemaVersion >= 1);
+        compare(migrated.appearance.schemaVersion, SchemaMigrations.schemaVersion);
+        verify(SchemaMigrations.schemaVersion >= 1);
     }
 
     function test_unassignedMonitorsKeepTheDesktopTheyShowed() {
@@ -60,7 +59,7 @@ TestCase {
         const migrated = migrateFixtures();
 
         compare(migrated.monitors.displaySettings[philips].barVisible, true);
-        compare(migrated.monitors.assignments, readFixture("monitors.json").assignments);
+        compare(migrated.monitors.assignments, fixtures.read("monitors.json").assignments);
     }
 
     function test_aMonitorReceivesTheDesktopOfItsAssignedProfile() {
@@ -126,7 +125,7 @@ TestCase {
     }
 
     function test_barProfilesKeepEverythingAboutTheBar() {
-        const original = readFixture("appearance.json");
+        const original = fixtures.read("appearance.json");
         const migrated = migrateFixtures();
 
         compare(migrated.appearance.barProfiles.media.barHeight, 34);
@@ -152,24 +151,24 @@ TestCase {
     }
 
     function test_migrationDoesNotChangeItsInput() {
-        const appearance = readFixture("appearance.json");
-        const monitors = readFixture("monitors.json");
+        const appearance = fixtures.read("appearance.json");
+        const monitors = fixtures.read("monitors.json");
 
-        BarProfileModel.migrate(appearance, monitors);
+        SchemaMigrations.migrate(appearance, monitors);
 
-        compare(appearance, readFixture("appearance.json"));
-        compare(monitors, readFixture("monitors.json"));
+        compare(appearance, fixtures.read("appearance.json"));
+        compare(monitors, fixtures.read("monitors.json"));
     }
 
     function test_aMigratedFileDoesNotChangeWhenLoadedAgain() {
         const once = migrateFixtures();
         const onceCopy = JSON.parse(JSON.stringify(once));
 
-        const twice = BarProfileModel.migrate(once.appearance, once.monitors);
+        const twice = SchemaMigrations.migrate(once.appearance, once.monitors);
 
         compare(twice, onceCopy);
-        verify(!BarProfileModel.needsMigration(once.appearance));
-        verify(BarProfileModel.needsMigration(readFixture("appearance.json")));
+        verify(!SchemaMigrations.needsMigration(once.appearance));
+        verify(SchemaMigrations.needsMigration(fixtures.read("appearance.json")));
     }
 
     function test_changingTheBarProfileDoesNotTouchDesktopWidgets() {
@@ -186,14 +185,14 @@ TestCase {
         const displaySettings = migrateFixtures().monitors.displaySettings;
         displaySettings["default"].desktopWidgets.media.enabled = false;
 
-        compare(BarProfileModel.desktopWidgetsFor(displaySettings, "HDMI-9").media.enabled, false);
-        compare(BarProfileModel.desktopWidgetsFor({}, "HDMI-9").backgroundClock.enabled, true);
+        compare(DesktopWidgetsModel.desktopWidgetsFor(displaySettings, "HDMI-9").media.enabled, false);
+        compare(DesktopWidgetsModel.desktopWidgetsFor({}, "HDMI-9").backgroundClock.enabled, true);
     }
 
     function test_editingADesktopWidgetOnlyChangesThatMonitor() {
         const displaySettings = migrateFixtures().monitors.displaySettings;
 
-        const updated = BarProfileModel.setDesktopWidgetSetting(
+        const updated = DesktopWidgetsModel.setDesktopWidgetSetting(
             displaySettings, philips, "backgroundClock", "enabled", false);
 
         compare(updated[philips].desktopWidgets.backgroundClock.enabled, false);
@@ -205,18 +204,18 @@ TestCase {
     function test_reorderingDesktopWidgetsOnlyChangesThatMonitor() {
         const displaySettings = migrateFixtures().monitors.displaySettings;
 
-        const updated = BarProfileModel.moveDesktopWidget(displaySettings, aoc, "media", -1);
+        const updated = DesktopWidgetsModel.moveDesktopWidget(displaySettings, aoc, "media", -1);
 
-        compare(BarProfileModel.desktopWidgetOrder(updated[aoc].desktopWidgets),
+        compare(DesktopWidgetsModel.desktopWidgetOrder(updated[aoc].desktopWidgets),
             ["media", "calendar", "weather", "network", "system"]);
         compare(updated[samsung].desktopWidgets.order, liveDesktop.order);
-        compare(BarProfileModel.moveDesktopWidget(updated, aoc, "media", -1), updated);
+        compare(DesktopWidgetsModel.moveDesktopWidget(updated, aoc, "media", -1), updated);
     }
 
     function test_editingAMonitorWithoutSettingsStartsFromTheDefaultDesktop() {
         const displaySettings = migrateFixtures().monitors.displaySettings;
 
-        const updated = BarProfileModel.setDesktopWidgetSetting(
+        const updated = DesktopWidgetsModel.setDesktopWidgetSetting(
             displaySettings, "HDMI-9", "weather", "location", "Vigo, ES");
 
         compare(updated["HDMI-9"].desktopWidgets.weather.location, "Vigo, ES");

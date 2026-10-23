@@ -1,15 +1,13 @@
 import QtQuick
 import QtTest
 import "../config/BarProfileModel.js" as BarProfileModel
+import "../config/SchemaMigrations.js" as SchemaMigrations
 
 TestCase {
     name: "BarElements"
 
-    function readFixture(fileName) {
-        const request = new XMLHttpRequest();
-        request.open("GET", Qt.resolvedUrl("fixtures/" + fileName), false);
-        request.send(null);
-        return JSON.parse(request.responseText);
+    Fixtures {
+        id: fixtures
     }
 
     // A zone as ids in order; disabled elements are prefixed with "-".
@@ -18,9 +16,9 @@ TestCase {
     }
 
     function test_migratingMinimalKeepsTheBarItShowedBefore() {
-        const profile = readFixture("appearance.json").barProfiles.minimal;
+        const profile = fixtures.read("appearance.json").barProfiles.minimal;
 
-        const barElements = BarProfileModel.migrateBarElements(profile);
+        const barElements = SchemaMigrations.migrateBarElements(profile);
 
         compare(zone(barElements, "left"), ["arch", "workspaces"]);
         compare(zone(barElements, "center"), ["currentApp"]);
@@ -29,9 +27,9 @@ TestCase {
     }
 
     function test_migratingMediaKeepsTheBarItShowedBefore() {
-        const profile = readFixture("appearance.json").barProfiles.media;
+        const profile = fixtures.read("appearance.json").barProfiles.media;
 
-        const barElements = BarProfileModel.migrateBarElements(profile);
+        const barElements = SchemaMigrations.migrateBarElements(profile);
 
         compare(zone(barElements, "left"), ["arch", "-systemMonitor", "-currentApp"]);
         compare(zone(barElements, "center"), ["workspaces"]);
@@ -40,9 +38,9 @@ TestCase {
     }
 
     function test_migratingPresentationKeepsTheBarItShowedBefore() {
-        const profile = readFixture("appearance.json").barProfiles.presentation;
+        const profile = fixtures.read("appearance.json").barProfiles.presentation;
 
-        const barElements = BarProfileModel.migrateBarElements(profile);
+        const barElements = SchemaMigrations.migrateBarElements(profile);
 
         compare(zone(barElements, "left"), ["-arch", "-systemMonitor", "-currentApp",
             "workspaces", "-media"]);
@@ -52,9 +50,9 @@ TestCase {
     }
 
     function test_migratingWorkKeepsTheBarItShowedBefore() {
-        const profile = readFixture("appearance.json").barProfiles.work;
+        const profile = fixtures.read("appearance.json").barProfiles.work;
 
-        const barElements = BarProfileModel.migrateBarElements(profile);
+        const barElements = SchemaMigrations.migrateBarElements(profile);
 
         compare(zone(barElements, "left"), ["systemMonitor", "currentApp"]);
         compare(zone(barElements, "center"), ["arch", "workspaces", "notifications"]);
@@ -63,9 +61,9 @@ TestCase {
     }
 
     function test_theElementOrderMigrationStepConvertsTheLiveBarAndEveryProfile() {
-        const state = readFixture("appearance.json");
+        const state = fixtures.read("appearance.json");
 
-        const migrated = BarProfileModel.migrateElementOrder(state);
+        const migrated = SchemaMigrations.migrateElementOrder(state);
 
         compare(zone(migrated.barElements, "center"), ["currentApp"]);
         compare(zone(migrated.barProfiles.work.barElements, "left"), ["systemMonitor", "currentApp"]);
@@ -83,14 +81,14 @@ TestCase {
     }
 
     function test_theElementOrderMigrationStepLeavesMigratedDataUntouched() {
-        const migrated = BarProfileModel.migrateElementOrder(readFixture("appearance.json"));
+        const migrated = SchemaMigrations.migrateElementOrder(fixtures.read("appearance.json"));
         migrated.barElements.left.reverse();
 
-        compare(BarProfileModel.migrateElementOrder(migrated), migrated);
+        compare(SchemaMigrations.migrateElementOrder(migrated), migrated);
     }
 
     function minimalElements() {
-        return BarProfileModel.migrateBarElements(readFixture("appearance.json").barProfiles.minimal);
+        return SchemaMigrations.migrateBarElements(fixtures.read("appearance.json").barProfiles.minimal);
     }
 
     function test_movingAnElementToAnotherZonePutsItAtTheEnd() {
@@ -169,7 +167,7 @@ TestCase {
     }
 
     function test_editingAMigratedProfileCopiesItsBarElements() {
-        const state = BarProfileModel.migrateElementOrder(readFixture("appearance.json"));
+        const state = SchemaMigrations.migrateElementOrder(fixtures.read("appearance.json"));
 
         const changes = BarProfileModel.editProfile(state, "work");
 
@@ -179,7 +177,7 @@ TestCase {
     }
 
     function test_savingAProfileStoresTheLiveBarElements() {
-        const state = BarProfileModel.migrateElementOrder(readFixture("appearance.json"));
+        const state = SchemaMigrations.migrateElementOrder(fixtures.read("appearance.json"));
         state.barElements = BarProfileModel.moveElementToZone(state.barElements, "battery", "left");
 
         const changes = BarProfileModel.saveProfile(state, "minimal");

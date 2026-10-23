@@ -5,16 +5,13 @@ import "../config/BarProfileModel.js" as BarProfileModel
 TestCase {
     name: "BarProfileModel"
 
-    function readFixture(fileName) {
-        const request = new XMLHttpRequest();
-        request.open("GET", Qt.resolvedUrl("fixtures/" + fileName), false);
-        request.send(null);
-        return JSON.parse(request.responseText);
+    Fixtures {
+        id: fixtures
     }
 
     // The appearance fixture after "activeBarProfile" became the edited profile.
     function editingState() {
-        const state = readFixture("appearance.json");
+        const state = fixtures.read("appearance.json");
         state.editingBarProfile = state.activeBarProfile;
         delete state.activeBarProfile;
         return state;

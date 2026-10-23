@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell.Io
 import "BarProfileModel.js" as BarProfileModel
+import "DesktopWidgetsModel.js" as DesktopWidgetsModel
 
 QtObject {
     id: root
@@ -60,20 +61,20 @@ QtObject {
 
     // Desktop widgets (incl. the background clock) of a monitor.
     function desktopWidgetsFor(monitorName) {
-        return BarProfileModel.desktopWidgetsFor(displaySettings, monitorName);
+        return DesktopWidgetsModel.desktopWidgetsFor(displaySettings, monitorName);
     }
 
     function desktopWidgetOrder(monitorName) {
-        return BarProfileModel.desktopWidgetOrder(desktopWidgetsFor(monitorName));
+        return DesktopWidgetsModel.desktopWidgetOrder(desktopWidgetsFor(monitorName));
     }
 
     function setDesktopWidgetSetting(monitorName, widget, key, value) {
-        displaySettings = BarProfileModel.setDesktopWidgetSetting(
+        displaySettings = DesktopWidgetsModel.setDesktopWidgetSetting(
             displaySettings, monitorName, widget, key, value);
     }
 
     function moveDesktopWidget(monitorName, widget, offset) {
-        displaySettings = BarProfileModel.moveDesktopWidget(
+        displaySettings = DesktopWidgetsModel.moveDesktopWidget(
             displaySettings, monitorName, widget, offset);
     }
 

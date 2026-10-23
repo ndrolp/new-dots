@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import "../config/BarProfileModel.js" as BarProfileModel
+import "../config/SchemaMigrations.js" as SchemaMigrations
 
 TestCase {
     name: "MonitorProfileMigration"
@@ -9,19 +9,16 @@ TestCase {
     readonly property string philips: "Philips Consumer Electronics Company PHL 243V7 0x00009A4C"
     readonly property string samsung: "Samsung Display Corp. ATNA40HQ01-0"
 
-    function readFixture(fileName) {
-        const request = new XMLHttpRequest();
-        request.open("GET", Qt.resolvedUrl("fixtures/" + fileName), false);
-        request.send(null);
-        return JSON.parse(request.responseText);
+    Fixtures {
+        id: fixtures
     }
 
     function migrateFixtures(prepare) {
-        const appearance = readFixture("appearance.json");
-        const monitors = readFixture("monitors.json");
+        const appearance = fixtures.read("appearance.json");
+        const monitors = fixtures.read("monitors.json");
         if (prepare)
             prepare(appearance, monitors);
-        return BarProfileModel.migrate(appearance, monitors);
+        return SchemaMigrations.migrate(appearance, monitors);
     }
 
     function test_unassignedMonitorsGetTheOldActiveProfile() {
@@ -53,7 +50,7 @@ TestCase {
 
     function test_migratedStateIsLeftUntouched() {
         const once = migrateFixtures();
-        const twice = BarProfileModel.migrate(once.appearance, once.monitors);
+        const twice = SchemaMigrations.migrate(once.appearance, once.monitors);
 
         compare(twice, once);
     }

@@ -6,7 +6,7 @@ import Quickshell.Services.Mpris
 import Quickshell.Wayland
 import QtQuick
 import "../../config" as Config
-import "../../config/BarProfileModel.js" as BarProfileModel
+import "../../config/DesktopWidgetsModel.js" as DesktopWidgetsModel
 
 Variants {
     id: root
@@ -43,7 +43,7 @@ Variants {
     function stackOffset(desktop, position, widget) {
         if (!desktop)
             return 0;
-        const widgetOrder = BarProfileModel.desktopWidgetOrder(desktop);
+        const widgetOrder = DesktopWidgetsModel.desktopWidgetOrder(desktop);
         let offset = 0;
 
         for (let index = 0; index < widgetOrder.length; index++) {
@@ -60,7 +60,7 @@ Variants {
     function stackHeight(desktop, position) {
         if (!desktop)
             return 0;
-        const widgetOrder = BarProfileModel.desktopWidgetOrder(desktop);
+        const widgetOrder = DesktopWidgetsModel.desktopWidgetOrder(desktop);
         let height = 0;
 
         for (let index = 0; index < widgetOrder.length; index++) {
@@ -74,7 +74,7 @@ Variants {
 
     component DesktopCard: Rectangle {
         required property string widget
-        property var desktop: BarProfileModel.desktopWidgetsFor({}, "")
+        property var desktop: DesktopWidgetsModel.desktopWidgetsFor({}, "")
         readonly property string position: desktop ? desktop[widget].position : "center"
         property bool active: !!desktop && desktop[widget].enabled
 

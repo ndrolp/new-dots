@@ -1,17 +1,15 @@
 import QtQuick
 import QtTest
 import "../config/BarProfileModel.js" as BarProfileModel
+import "../config/SchemaMigrations.js" as SchemaMigrations
 
 // Density presets are a shortcut that fills in the bar sizes of the edited
 // profile; the preset itself is never stored.
 TestCase {
     name: "DensityPresets"
 
-    function readFixture(fileName) {
-        const request = new XMLHttpRequest();
-        request.open("GET", Qt.resolvedUrl("fixtures/" + fileName), false);
-        request.send(null);
-        return JSON.parse(request.responseText);
+    Fixtures {
+        id: fixtures
     }
 
     function withChanges(state, changes) {
@@ -22,8 +20,8 @@ TestCase {
     }
 
     function startedState() {
-        const migrated = BarProfileModel.migrate(readFixture("appearance.json"),
-            readFixture("monitors.json")).appearance;
+        const migrated = SchemaMigrations.migrate(fixtures.read("appearance.json"),
+            fixtures.read("monitors.json")).appearance;
         return withChanges(migrated, BarProfileModel.discardChanges(migrated));
     }
 
@@ -69,10 +67,10 @@ TestCase {
     }
 
     function test_migrationRemovesTheStoredPresetFromEveryProfile() {
-        const fixture = readFixture("appearance.json");
+        const fixture = fixtures.read("appearance.json");
         verify(fixture.densityPreset !== undefined);
 
-        const migrated = BarProfileModel.migrate(fixture, readFixture("monitors.json")).appearance;
+        const migrated = SchemaMigrations.migrate(fixture, fixtures.read("monitors.json")).appearance;
 
         compare(migrated.densityPreset, undefined);
         for (const name in migrated.barProfiles) {
@@ -85,7 +83,7 @@ TestCase {
         const version4 = { schemaVersion: 4, densityPreset: "compact", barHeight: 31,
             barProfiles: { work: { densityPreset: "spacious", barHeight: 40 } } };
 
-        const migrated = BarProfileModel.migrate(version4, {}).appearance;
+        const migrated = SchemaMigrations.migrate(version4, {}).appearance;
 
         compare(migrated, { schemaVersion: 5, barHeight: 31,
             barProfiles: { work: { barHeight: 40 } } });
