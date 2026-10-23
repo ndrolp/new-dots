@@ -17,19 +17,30 @@ const profileKeys = [
     "statusModuleGroups"
 ];
 
+// The bar profile of a monitor nobody has configured yet.
+const defaultBarProfile = "minimal";
+
 function cloneValue(value) {
     return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
 }
 
-// Changes that make `profileName` the active profile, copying its saved values
-// over the live settings. Returns null when the profile does not exist.
-function applyProfile(state, profileName) {
+// Profiles are edited through the live settings: they hold the profile being
+// edited (`editingBarProfile`), and monitors that draw it read them directly.
+
+// Changes that make `profileName` the edited profile: the live settings of the
+// previous one are stored first, so no monitor changes, then the saved values
+// of `profileName` are loaded. Returns null when the profile does not exist.
+function editProfile(state, profileName) {
     const profile = state.barProfiles[profileName];
 
     if (!profile)
         return null;
 
     const changes = {};
+    if (state.editingBarProfile && state.barProfiles[state.editingBarProfile]) {
+        changes.barProfiles = cloneValue(state.barProfiles);
+        changes.barProfiles[state.editingBarProfile] = currentLayout(state);
+    }
 
     for (let index = 0; index < profileKeys.length; index++) {
         const key = profileKeys[index];
@@ -37,7 +48,7 @@ function applyProfile(state, profileName) {
             changes[key] = cloneValue(profile[key]);
     }
 
-    changes.activeBarProfile = profileName;
+    changes.editingBarProfile = profileName;
     return changes;
 }
 
@@ -53,21 +64,21 @@ function currentLayout(state) {
     return layout;
 }
 
-// Changes that store the live settings as `profileName` and make it active.
+// Changes that store the live settings as `profileName` and edit it.
 function saveProfile(state, profileName) {
     const profiles = cloneValue(state.barProfiles);
     profiles[profileName] = currentLayout(state);
 
     return {
         barProfiles: profiles,
-        activeBarProfile: profileName
+        editingBarProfile: profileName
     };
 }
 
-// The value of `key` for `profileName`: live while the profile is active,
+// The value of `key` for `profileName`: live while the profile is edited,
 // otherwise its saved value, falling back to the live one if it has none.
 function profileValue(state, profileName, key) {
-    if (profileName === state.activeBarProfile)
+    if (profileName === state.editingBarProfile)
         return state[key];
 
     const profile = state.barProfiles[profileName];
@@ -100,7 +111,8 @@ function densityPresetChanges(preset) {
     return changes;
 }
 
-// Display settings of a monitor, completed from the "default" entry.
+// Display settings of a monitor, completed from the "default" entry. A monitor
+// always has a bar profile: its own, the default entry's, or the default one.
 function monitorDisplaySettings(displaySettings, monitorName) {
     const configured = displaySettings[monitorName];
     const defaults = displaySettings["default"] || {};
@@ -108,14 +120,14 @@ function monitorDisplaySettings(displaySettings, monitorName) {
     return {
         barVisible: configured && configured.barVisible !== undefined
             ? configured.barVisible : defaults.barVisible !== false,
-        barProfile: configured && configured.barProfile !== undefined
-            ? configured.barProfile : defaults.barProfile || ""
+        barProfile: configured && configured.barProfile
+            ? configured.barProfile : defaults.barProfile || defaultBarProfile
     };
 }
 
-// The bar profile a monitor draws, or `fallbackProfile` when it has none.
-function profileForMonitor(displaySettings, monitorName, fallbackProfile) {
-    return monitorDisplaySettings(displaySettings, monitorName).barProfile || fallbackProfile;
+// The bar profile a monitor draws.
+function profileForMonitor(displaySettings, monitorName) {
+    return monitorDisplaySettings(displaySettings, monitorName).barProfile;
 }
 
 // Bar elements: every piece of the bar, one type. A profile stores them as
@@ -509,7 +521,36 @@ function migrateBarElementOrder(appearance, monitors) {
     return { appearance: migrateElementOrder(appearance), monitors: monitors };
 }
 
-const migrationSteps = [migrateDesktopWidgetsPerMonitor, migrateBarElementOrder];
+// Step 3: no global active profile. Every monitor (and the "default" entry)
+// without a bar profile gets the one that was active, explicitly; the active
+// profile becomes the profile the panel edits.
+function assignActiveProfileToMonitors(appearance, monitors) {
+    const active = appearance.activeBarProfile || defaultBarProfile;
+    const displaySettings = cloneValue(monitors.displaySettings) || {};
+    const names = Object.keys(displaySettings)
+        .concat(Object.keys(monitors.assignments || {}), ["default"]);
+
+    for (let index = 0; index < names.length; index++) {
+        const monitorSettings = displaySettings[names[index]] || {};
+        if (!monitorSettings.barProfile)
+            monitorSettings.barProfile = active;
+        displaySettings[names[index]] = monitorSettings;
+    }
+
+    const migratedAppearance = cloneValue(appearance);
+    delete migratedAppearance.activeBarProfile;
+    if (!migratedAppearance.editingBarProfile)
+        migratedAppearance.editingBarProfile = active;
+
+    const migratedMonitors = cloneValue(monitors) || {};
+    migratedMonitors.displaySettings = displaySettings;
+
+    return { appearance: migratedAppearance, monitors: migratedMonitors };
+}
+
+const migrationSteps = [
+    migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors
+];
 const schemaVersion = migrationSteps.length;
 
 function stateVersion(appearance) {

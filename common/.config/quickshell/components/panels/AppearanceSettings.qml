@@ -28,7 +28,7 @@ Column {
             anchors.left: parent.left
             anchors.leftMargin: 12
             anchors.verticalCenter: parent.verticalCenter
-            text: "APPEARANCE PROFILE"
+            text: "EDITING PROFILE"
             color: theme.text
             font.pixelSize: root.appearance.textSize - 1
             font.bold: true
@@ -54,7 +54,7 @@ Column {
                 ]
                 currentIndex: {
                     for (let index = 0; index < model.length; index++) {
-                        if (model[index].value === root.appearance.activeBarProfile)
+                        if (model[index].value === root.appearance.editingBarProfile)
                             return index;
                     }
 
@@ -79,7 +79,7 @@ Column {
                     color: theme.surface
                 }
 
-                onActivated: root.appearance.applyBarProfile(model[index].value)
+                onActivated: root.appearance.editBarProfile(model[index].value)
             }
 
             Rectangle {

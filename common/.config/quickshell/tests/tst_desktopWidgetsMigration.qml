@@ -175,7 +175,7 @@ TestCase {
     function test_changingTheBarProfileDoesNotTouchDesktopWidgets() {
         const migrated = migrateFixtures();
 
-        const changes = BarProfileModel.applyProfile(migrated.appearance, "media");
+        const changes = BarProfileModel.editProfile(migrated.appearance, "media");
 
         verify(!("backgroundClockEnabled" in changes));
         verify(!("desktopWeatherEnabled" in changes));

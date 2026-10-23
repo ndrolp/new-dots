@@ -158,7 +158,6 @@ Column {
                         height: 30
                         textRole: "label"
                         model: [
-                            { label: "Use active", value: "" },
                             { label: "Minimal", value: "minimal" },
                             { label: "Work", value: "work" },
                             { label: "Media", value: "media" },
@@ -171,7 +170,7 @@ Column {
                                     return index;
                             }
 
-                            return 0;
+                            return -1;
                         }
 
                         contentItem: Text {

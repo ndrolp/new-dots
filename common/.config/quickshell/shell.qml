@@ -43,8 +43,10 @@ ShellRoot {
         id: appearance
     }
 
+    // Assigns a bar profile to the focused monitor.
     function setBarProfile(profileName) {
-        appearance.applyBarProfile(profileName);
+        monitors.setDisplaySetting(workspaceService.focusedMonitorDescription(),
+            "barProfile", profileName);
         osdPopup.showBarProfile(profileName.charAt(0).toUpperCase() + profileName.slice(1));
     }
 

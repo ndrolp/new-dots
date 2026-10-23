@@ -77,8 +77,8 @@ QtObject {
             displaySettings, monitorName, widget, offset);
     }
 
-    function barProfileFor(monitorName, fallbackProfile) {
-        return BarProfileModel.profileForMonitor(displaySettings, monitorName, fallbackProfile);
+    function barProfileFor(monitorName) {
+        return BarProfileModel.profileForMonitor(displaySettings, monitorName);
     }
 
     function monitorNames() {
@@ -127,7 +127,7 @@ QtObject {
             property var displaySettings: ({
                 "default": {
                     "barVisible": true,
-                    "barProfile": ""
+                    "barProfile": BarProfileModel.defaultBarProfile
                 }
             })
         }

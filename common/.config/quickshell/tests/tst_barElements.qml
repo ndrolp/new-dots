@@ -168,10 +168,10 @@ TestCase {
         compare(BarProfileModel.normalizeBarElements(minimalElements()), minimalElements());
     }
 
-    function test_applyingAMigratedProfileCopiesItsBarElements() {
+    function test_editingAMigratedProfileCopiesItsBarElements() {
         const state = BarProfileModel.migrateElementOrder(readFixture("appearance.json"));
 
-        const changes = BarProfileModel.applyProfile(state, "work");
+        const changes = BarProfileModel.editProfile(state, "work");
 
         compare(zone(changes.barElements, "center"), ["arch", "workspaces", "notifications"]);
         verify(!("statusModuleOrder" in changes));

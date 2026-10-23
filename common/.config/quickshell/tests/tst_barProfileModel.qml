@@ -12,50 +12,78 @@ TestCase {
         return JSON.parse(request.responseText);
     }
 
-    function test_applyingAProfileCopiesItsSavedValuesAndMakesItActive() {
+    // The appearance fixture after "activeBarProfile" became the edited profile.
+    function editingState() {
         const state = readFixture("appearance.json");
+        state.editingBarProfile = state.activeBarProfile;
+        delete state.activeBarProfile;
+        return state;
+    }
 
-        const changes = BarProfileModel.applyProfile(state, "presentation");
+    function withChanges(state, changes) {
+        const updated = Object.assign({}, state);
+        for (const key in changes)
+            updated[key] = changes[key];
+        return updated;
+    }
 
-        compare(changes.activeBarProfile, "presentation");
+    function test_editingAProfileLoadsItsSavedValues() {
+        const state = editingState();
+
+        const changes = BarProfileModel.editProfile(state, "presentation");
+
+        compare(changes.editingBarProfile, "presentation");
         compare(changes.barHeight, 30);
         compare(changes.horizontalPadding, 12);
         compare(changes.statusIsland, false);
         compare(changes.transparentBarTopMargin, 8);
     }
 
-    function test_applyingAProfileLeavesSettingsItDoesNotSaveUntouched() {
-        const state = readFixture("appearance.json");
+    function test_editingAProfileLeavesSettingsItDoesNotSaveUntouched() {
+        const state = editingState();
 
-        const changes = BarProfileModel.applyProfile(state, "work");
+        const changes = BarProfileModel.editProfile(state, "work");
 
         compare(changes.barHeight, 30);
         verify(!("barOpacity" in changes));
         verify(!("doNotDisturb" in changes));
     }
 
-    function test_applyingAnUnknownProfileChangesNothing() {
-        const state = readFixture("appearance.json");
+    function test_editingAnUnknownProfileChangesNothing() {
+        const state = editingState();
 
-        compare(BarProfileModel.applyProfile(state, "missing"), null);
+        compare(BarProfileModel.editProfile(state, "missing"), null);
     }
 
-    function test_applyingAProfileDoesNotShareObjectsWithTheSavedProfile() {
-        const state = readFixture("appearance.json");
+    function test_editingAProfileDoesNotShareObjectsWithTheSavedProfile() {
+        const state = editingState();
 
-        const changes = BarProfileModel.applyProfile(state, "presentation");
+        const changes = BarProfileModel.editProfile(state, "presentation");
         changes.workspaceGlyphs[0] = "x";
 
         compare(state.barProfiles.presentation.workspaceGlyphs[0], "");
     }
 
-    function test_savingStoresTheLiveBarIntoTheProfileAndMakesItActive() {
-        const state = readFixture("appearance.json");
+    function test_switchingTheEditedProfileChangesNoMonitor() {
+        const state = editingState();
+        state.barHeight = 41;
+
+        const changes = BarProfileModel.editProfile(state, "presentation");
+        const after = withChanges(state, changes);
+
+        compare(changes.barProfiles.minimal.barHeight, 41);
+        compare(BarProfileModel.profileValue(after, "minimal", "barHeight"), 41);
+        compare(BarProfileModel.profileValue(after, "presentation", "barHeight"), 30);
+        compare(state.barProfiles.minimal.barHeight, 34);
+    }
+
+    function test_savingStoresTheLiveBarIntoTheProfileAndEditsIt() {
+        const state = editingState();
         state.barHeight = 41;
 
         const changes = BarProfileModel.saveProfile(state, "work");
 
-        compare(changes.activeBarProfile, "work");
+        compare(changes.editingBarProfile, "work");
         compare(changes.barProfiles.work.barHeight, 41);
         compare(changes.barProfiles.work.barOpacity, 90);
         verify(!("doNotDisturb" in changes.barProfiles.work));
@@ -64,7 +92,7 @@ TestCase {
     }
 
     function test_savingUnderANewNameAddsAProfile() {
-        const state = readFixture("appearance.json");
+        const state = editingState();
 
         const changes = BarProfileModel.saveProfile(state, "laptop");
 
@@ -73,22 +101,22 @@ TestCase {
         compare(changes.barProfiles.laptop.horizontalPadding, 16);
     }
 
-    function test_readingTheActiveProfileReturnsTheLiveValue() {
-        const state = readFixture("appearance.json");
+    function test_readingTheEditedProfileReturnsTheLiveValue() {
+        const state = editingState();
         state.barHeight = 41;
 
         compare(BarProfileModel.profileValue(state, "minimal", "barHeight"), 41);
     }
 
-    function test_readingAnInactiveProfileReturnsItsSavedValue() {
-        const state = readFixture("appearance.json");
+    function test_readingAProfileNotBeingEditedReturnsItsSavedValue() {
+        const state = editingState();
         state.barHeight = 41;
 
         compare(BarProfileModel.profileValue(state, "presentation", "barHeight"), 30);
     }
 
-    function test_readingAKeyAnInactiveProfileDoesNotSaveFallsBackToTheLiveValue() {
-        const state = readFixture("appearance.json");
+    function test_readingAKeyAProfileNotBeingEditedDoesNotSaveFallsBackToTheLiveValue() {
+        const state = editingState();
         state.barOpacity = 75;
 
         compare(BarProfileModel.profileValue(state, "work", "barOpacity"), 75);
@@ -110,14 +138,22 @@ TestCase {
         });
     }
 
-    function test_aMonitorUsesItsAssignedProfileOrTheFallback() {
-        const displaySettings = readFixture("monitors.json").displaySettings;
-        displaySettings["DP-1"] = { barProfile: "presentation" };
+    function test_aMonitorUsesItsAssignedProfileOrTheDefaultEntry() {
+        const displaySettings = {
+            "default": { barProfile: "work" },
+            "DP-1": { barProfile: "presentation" },
+            "DP-2": { barVisible: true }
+        };
 
-        compare(BarProfileModel.profileForMonitor(displaySettings, "DP-1", "minimal"), "presentation");
-        compare(BarProfileModel.profileForMonitor(displaySettings,
-            "Philips Consumer Electronics Company PHL 243V7 0x00009A4C", "minimal"), "minimal");
-        compare(BarProfileModel.profileForMonitor(displaySettings, "HDMI-9", "work"), "work");
+        compare(BarProfileModel.profileForMonitor(displaySettings, "DP-1"), "presentation");
+        compare(BarProfileModel.profileForMonitor(displaySettings, "DP-2"), "work");
+        compare(BarProfileModel.profileForMonitor(displaySettings, "HDMI-9"), "work");
+    }
+
+    function test_aNewMonitorGetsTheDefaultProfile() {
+        compare(BarProfileModel.profileForMonitor({}, "HDMI-9"), "minimal");
+        compare(BarProfileModel.monitorDisplaySettings({ "default": { barProfile: "" } }, "HDMI-9"),
+            { barVisible: true, barProfile: "minimal" });
     }
 
     function test_monitorDisplaySettingsFallBackToTheDefaultEntry() {
@@ -129,6 +165,6 @@ TestCase {
         compare(BarProfileModel.monitorDisplaySettings(displaySettings, "DP-1"),
             { barVisible: true, barProfile: "media" });
         compare(BarProfileModel.monitorDisplaySettings({}, "DP-2"),
-            { barVisible: true, barProfile: "" });
+            { barVisible: true, barProfile: "minimal" });
     }
 }

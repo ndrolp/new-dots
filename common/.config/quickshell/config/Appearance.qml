@@ -7,7 +7,7 @@ QtObject {
 
     property alias schemaVersion: settings.schemaVersion
     property alias barHeight: settings.barHeight
-    property alias activeBarProfile: settings.activeBarProfile
+    property alias editingBarProfile: settings.editingBarProfile
     property alias barProfiles: settings.barProfiles
     property alias densityPreset: settings.densityPreset
     property alias horizontalPadding: settings.horizontalPadding
@@ -49,8 +49,9 @@ QtObject {
             settings[key] = changes[key];
     }
 
-    function applyBarProfile(profileName) {
-        applyChanges(BarProfileModel.applyProfile(settings, profileName));
+    // Picks the profile the settings panel edits; no monitor changes.
+    function editBarProfile(profileName) {
+        applyChanges(BarProfileModel.editProfile(settings, profileName));
     }
 
     function saveBarProfile(profileName) {
@@ -128,7 +129,7 @@ QtObject {
 
             property int schemaVersion: 0
             property int barHeight: 32
-            property string activeBarProfile: "work"
+            property string editingBarProfile: BarProfileModel.defaultBarProfile
             property var barProfiles: ({
                 "minimal": {
                     "densityPreset": "compact",

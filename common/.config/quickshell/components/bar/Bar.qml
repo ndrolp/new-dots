@@ -34,9 +34,7 @@ Variants {
 
             required property var modelData
             readonly property string monitorDescription: bar.workspaceService.monitorDescriptionForScreen(modelData)
-            readonly property string profileName: bar.monitors.barProfileFor(
-                monitorDescription, bar.appearance.activeBarProfile
-            )
+            readonly property string profileName: bar.monitors.barProfileFor(monitorDescription)
             property var barAppearance: QtObject {
                 property int barHeight: bar.appearance.barProfileValue(panel.profileName, "barHeight")
                 property int horizontalPadding: bar.appearance.barProfileValue(panel.profileName, "horizontalPadding")
