@@ -25,22 +25,51 @@ function cloneValue(value) {
 }
 
 // Profiles are edited through the live settings: they hold the profile being
-// edited (`editingBarProfile`), and monitors that draw it read them directly.
+// edited (`editingBarProfile`) plus its pending changes, and monitors that draw
+// it read them directly; every other monitor draws its saved profile. The live
+// settings are only a buffer: Quickshell discards them on start (see
+// discardChanges), so pending changes never outlive a restart.
 
-// Changes that make `profileName` the edited profile: the live settings of the
-// previous one are stored first, so no monitor changes, then the saved values
-// of `profileName` are loaded. Returns null when the profile does not exist.
-function editProfile(state, profileName) {
-    const profile = state.barProfiles[profileName];
+function sameValue(left, right) {
+    return JSON.stringify(left) === JSON.stringify(right);
+}
+
+// True when the live settings differ from the saved edited profile, i.e. the
+// profile has pending changes. A key the profile does not save has none.
+function isModified(state) {
+    const profile = state.barProfiles && state.barProfiles[state.editingBarProfile];
 
     if (!profile)
-        return null;
+        return false;
 
-    const changes = {};
-    if (state.editingBarProfile && state.barProfiles[state.editingBarProfile]) {
-        changes.barProfiles = cloneValue(state.barProfiles);
-        changes.barProfiles[state.editingBarProfile] = currentLayout(state);
+    for (let index = 0; index < profileKeys.length; index++) {
+        const key = profileKeys[index];
+        if (profile[key] !== undefined && !sameValue(profile[key], state[key]))
+            return true;
     }
+
+    return false;
+}
+
+// Changes that load the saved values of `profileName` into the live settings.
+// Keys a profile does not save are first stored with the value its monitors
+// draw today (the live one), so pending changes never leak into them.
+function loadProfile(state, profileName) {
+    const profiles = cloneValue(state.barProfiles);
+    let completed = false;
+
+    for (const name in profiles) {
+        for (let index = 0; index < profileKeys.length; index++) {
+            const key = profileKeys[index];
+            if (profiles[name][key] === undefined && state[key] !== undefined) {
+                profiles[name][key] = cloneValue(state[key]);
+                completed = true;
+            }
+        }
+    }
+
+    const changes = completed ? { barProfiles: profiles } : {};
+    const profile = profiles[profileName];
 
     for (let index = 0; index < profileKeys.length; index++) {
         const key = profileKeys[index];
@@ -50,6 +79,26 @@ function editProfile(state, profileName) {
 
     changes.editingBarProfile = profileName;
     return changes;
+}
+
+// Changes that make `profileName` the edited profile. Rejected (null) when the
+// profile does not exist or the edited one has pending changes: they must be
+// saved or discarded first.
+function editProfile(state, profileName) {
+    if (!state.barProfiles[profileName] || isModified(state))
+        return null;
+
+    return loadProfile(state, profileName);
+}
+
+// Changes that drop the pending changes: the live settings go back to the
+// saved edited profile (or the default one if it no longer exists).
+function discardChanges(state) {
+    const profileName = state.barProfiles[state.editingBarProfile]
+        ? state.editingBarProfile
+        : state.barProfiles[defaultBarProfile] ? defaultBarProfile : Object.keys(state.barProfiles)[0];
+
+    return profileName === undefined ? {} : loadProfile(state, profileName);
 }
 
 // The live settings that a bar profile stores.

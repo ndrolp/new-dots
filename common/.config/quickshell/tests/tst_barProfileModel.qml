@@ -45,7 +45,8 @@ TestCase {
         const changes = BarProfileModel.editProfile(state, "work");
 
         compare(changes.barHeight, 30);
-        verify(!("barOpacity" in changes));
+        // "work" saves no opacity: it keeps the one its monitors drew.
+        compare(withChanges(state, changes).barOpacity, state.barOpacity);
         verify(!("doNotDisturb" in changes));
     }
 
@@ -62,19 +63,6 @@ TestCase {
         changes.workspaceGlyphs[0] = "x";
 
         compare(state.barProfiles.presentation.workspaceGlyphs[0], "");
-    }
-
-    function test_switchingTheEditedProfileChangesNoMonitor() {
-        const state = editingState();
-        state.barHeight = 41;
-
-        const changes = BarProfileModel.editProfile(state, "presentation");
-        const after = withChanges(state, changes);
-
-        compare(changes.barProfiles.minimal.barHeight, 41);
-        compare(BarProfileModel.profileValue(after, "minimal", "barHeight"), 41);
-        compare(BarProfileModel.profileValue(after, "presentation", "barHeight"), 30);
-        compare(state.barProfiles.minimal.barHeight, 34);
     }
 
     function test_savingStoresTheLiveBarIntoTheProfileAndEditsIt() {
