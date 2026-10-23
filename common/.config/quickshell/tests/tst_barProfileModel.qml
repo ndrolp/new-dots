@@ -123,13 +123,13 @@ TestCase {
 
     function test_monitorDisplaySettingsFallBackToTheDefaultEntry() {
         const displaySettings = {
-            "default": { barVisible: false, backgroundClockVisible: true, barProfile: "media" },
+            "default": { barVisible: false, barProfile: "media" },
             "DP-1": { barVisible: true }
         };
 
         compare(BarProfileModel.monitorDisplaySettings(displaySettings, "DP-1"),
-            { barVisible: true, backgroundClockVisible: true, barProfile: "media" });
+            { barVisible: true, barProfile: "media" });
         compare(BarProfileModel.monitorDisplaySettings({}, "DP-2"),
-            { barVisible: true, backgroundClockVisible: true, barProfile: "" });
+            { barVisible: true, barProfile: "" });
     }
 }

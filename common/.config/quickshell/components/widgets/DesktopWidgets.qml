@@ -6,6 +6,7 @@ import Quickshell.Services.Mpris
 import Quickshell.Wayland
 import QtQuick
 import "../../config" as Config
+import "../../config/BarProfileModel.js" as BarProfileModel
 
 Variants {
     id: root
@@ -16,49 +17,15 @@ Variants {
 
     model: Quickshell.screens
 
-    readonly property var defaultWidgetOrder: ["media", "system", "calendar", "network", "weather"]
-    readonly property var widgetOrder: {
-        const savedOrder = appearance.desktopWidgetOrder || [];
-        const order = [];
-
-        for (let index = 0; index < savedOrder.length; index++) {
-            const widget = savedOrder[index];
-            if (defaultWidgetOrder.indexOf(widget) !== -1 && order.indexOf(widget) === -1)
-                order.push(widget);
-        }
-
-        for (let index = 0; index < defaultWidgetOrder.length; index++) {
-            const widget = defaultWidgetOrder[index];
-            if (order.indexOf(widget) === -1)
-                order.push(widget);
-        }
-
-        return order;
-    }
     readonly property int widgetGap: 10
 
-    function widgetEnabled(widget) {
+    // `desktop` is the desktop widgets configuration of one monitor.
+    function widgetEnabled(desktop, widget) {
+        if (!desktop)
+            return false;
         if (widget === "media")
-            return appearance.desktopMediaEnabled && Mpris.players.values.length > 0;
-        if (widget === "system")
-            return appearance.desktopSystemEnabled;
-        if (widget === "calendar")
-            return appearance.desktopCalendarEnabled;
-        if (widget === "network")
-            return appearance.desktopNetworkEnabled;
-        return appearance.desktopWeatherEnabled;
-    }
-
-    function widgetPosition(widget) {
-        if (widget === "media")
-            return appearance.desktopMediaPosition;
-        if (widget === "system")
-            return appearance.desktopSystemPosition;
-        if (widget === "calendar")
-            return appearance.desktopCalendarPosition;
-        if (widget === "network")
-            return appearance.desktopNetworkPosition;
-        return appearance.desktopWeatherPosition;
+            return desktop.media.enabled && Mpris.players.values.length > 0;
+        return desktop[widget].enabled;
     }
 
     function widgetHeight(widget) {
@@ -73,26 +40,32 @@ Variants {
         return 72;
     }
 
-    function stackOffset(position, widget) {
+    function stackOffset(desktop, position, widget) {
+        if (!desktop)
+            return 0;
+        const widgetOrder = BarProfileModel.desktopWidgetOrder(desktop);
         let offset = 0;
 
         for (let index = 0; index < widgetOrder.length; index++) {
             const candidate = widgetOrder[index];
             if (candidate === widget)
                 break;
-            if (widgetEnabled(candidate) && widgetPosition(candidate) === position)
+            if (widgetEnabled(desktop, candidate) && desktop[candidate].position === position)
                 offset += widgetHeight(candidate) + widgetGap;
         }
 
         return offset;
     }
 
-    function stackHeight(position) {
+    function stackHeight(desktop, position) {
+        if (!desktop)
+            return 0;
+        const widgetOrder = BarProfileModel.desktopWidgetOrder(desktop);
         let height = 0;
 
         for (let index = 0; index < widgetOrder.length; index++) {
             const widget = widgetOrder[index];
-            if (widgetEnabled(widget) && widgetPosition(widget) === position)
+            if (widgetEnabled(desktop, widget) && desktop[widget].position === position)
                 height += widgetHeight(widget) + (height > 0 ? widgetGap : 0);
         }
 
@@ -101,8 +74,9 @@ Variants {
 
     component DesktopCard: Rectangle {
         required property string widget
-        required property string position
-        property bool active: false
+        property var desktop: BarProfileModel.desktopWidgetsFor({}, "")
+        readonly property string position: desktop ? desktop[widget].position : "center"
+        property bool active: !!desktop && desktop[widget].enabled
 
         visible: active
         radius: root.appearance.radius
@@ -112,11 +86,11 @@ Variants {
         x: position.endsWith("left") ? 28
             : position.endsWith("right") ? parent.width - width - 28
             : (parent.width - width) / 2
-        y: position.startsWith("top") ? 62 + root.stackOffset(position, widget)
+        y: position.startsWith("top") ? 62 + root.stackOffset(desktop, position, widget)
             : position.startsWith("bottom")
-                ? parent.height - height - 36 - root.stackOffset(position, widget)
-                : (parent.height - root.stackHeight(position)) / 2
-                    + root.stackOffset(position, widget)
+                ? parent.height - height - 36 - root.stackOffset(desktop, position, widget)
+                : (parent.height - root.stackHeight(desktop, position)) / 2
+                    + root.stackOffset(desktop, position, widget)
 
         Config.Theme {
             id: cardTheme
@@ -136,6 +110,7 @@ Variants {
             const devices = Networking.devices.values;
             return devices.find(device => DeviceType.toString(device.type) === "Wifi") || null;
         }
+        readonly property var desktop: root.monitors.desktopWidgetsFor(monitorDescription)
         property date currentTime: new Date()
         property string weather: "Weather unavailable"
         property real mediaPosition: 0
@@ -155,7 +130,6 @@ Variants {
         }
 
         screen: modelData
-        visible: root.monitors.backgroundClockVisible(monitorDescription)
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.namespace: "ndro-shell-desktop-widgets"
@@ -187,7 +161,7 @@ Variants {
 
         Timer {
             interval: 900000
-            running: widgetWindow.visible && root.appearance.desktopWeatherEnabled
+            running: widgetWindow.visible && widgetWindow.desktop.weather.enabled
             repeat: true
             triggeredOnStart: true
             onTriggered: {
@@ -200,7 +174,7 @@ Variants {
             id: weatherQuery
 
             command: ["curl", "-fsSL", "--max-time", "5",
-                "https://wttr.in/" + encodeURIComponent(root.appearance.desktopWeatherLocation)
+                "https://wttr.in/" + encodeURIComponent(widgetWindow.desktop.weather.location)
                     + "?format=%C+%t"]
             stdout: SplitParser {
                 onRead: data => widgetWindow.weather = data.trim() || "Weather unavailable"
@@ -215,8 +189,8 @@ Variants {
             widget: "media"
             width: 290
             height: 74
-            position: root.appearance.desktopMediaPosition
-            active: root.appearance.desktopMediaEnabled && widgetWindow.player !== null
+            desktop: widgetWindow.desktop
+            active: !!desktop && desktop.media.enabled && widgetWindow.player !== null
 
             Row {
                 anchors.fill: parent
@@ -286,8 +260,7 @@ Variants {
             widget: "system"
             width: 178
             height: 96
-            position: root.appearance.desktopSystemPosition
-            active: root.appearance.desktopSystemEnabled
+            desktop: widgetWindow.desktop
 
             Column {
                 anchors.fill: parent
@@ -325,8 +298,7 @@ Variants {
             widget: "calendar"
             width: 204
             height: 74
-            position: root.appearance.desktopCalendarPosition
-            active: root.appearance.desktopCalendarEnabled
+            desktop: widgetWindow.desktop
 
             Column {
                 anchors.centerIn: parent
@@ -354,8 +326,7 @@ Variants {
             widget: "network"
             width: 206
             height: 72
-            position: root.appearance.desktopNetworkPosition
-            active: root.appearance.desktopNetworkEnabled
+            desktop: widgetWindow.desktop
 
             Column {
                 anchors.fill: parent
@@ -384,8 +355,7 @@ Variants {
             widget: "weather"
             width: 222
             height: 62
-            position: root.appearance.desktopWeatherPosition
-            active: root.appearance.desktopWeatherEnabled
+            desktop: widgetWindow.desktop
 
             Column {
                 anchors.centerIn: parent
@@ -393,7 +363,7 @@ Variants {
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: root.appearance.desktopWeatherLocation.toUpperCase()
+                    text: widgetWindow.desktop.weather.location.toUpperCase()
                     color: theme.textMuted
                     font.pixelSize: root.appearance.textSize - 4
                     font.bold: true

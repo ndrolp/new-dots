@@ -110,7 +110,7 @@ Column {
 
     Text {
         width: parent.width
-        text: "Save snapshots this page's bar, desktop widget, clock, and notification settings."
+        text: "Save snapshots this page's bar settings. The background clock and desktop widgets are set per monitor in Desktop Widgets; the notification position applies to every profile."
         color: theme.textMuted
         wrapMode: Text.WordWrap
         font.pixelSize: root.appearance.textSize - 2
@@ -201,9 +201,7 @@ Column {
             { label: "Transparent bar top margin", from: 0, to: 32, propertyName: "transparentBarTopMargin" },
             { label: "Corner radius", from: 0, to: 24, propertyName: "radius" },
             { label: "Status island radius", from: 0, to: 32, propertyName: "statusIslandRadius" },
-            { label: "Component spacing", from: 0, to: 24, propertyName: "spacing" },
-            { label: "Clock size", from: 48, to: 160, propertyName: "backgroundClockSize" },
-            { label: "Clock opacity", from: 20, to: 100, propertyName: "backgroundClockOpacity" }
+            { label: "Component spacing", from: 0, to: 24, propertyName: "spacing" }
         ]
 
         delegate: Column {
@@ -255,8 +253,6 @@ Column {
             { label: "TRANSPARENT BAR BORDER", propertyName: "barTransparentBorder" },
             { label: "DOCKED ISLAND BAR", propertyName: "transparentBarSlanted" },
             { label: "STATUS ISLAND", propertyName: "statusIsland" },
-            { label: "BACKGROUND CLOCK", propertyName: "backgroundClockEnabled" },
-            { label: "CLOCK CALENDAR", propertyName: "backgroundClockCalendarEnabled" },
             { label: "HIDE EMPTY WORKSPACES", propertyName: "hideEmptyWorkspaces" },
             { label: "SHOW WORKSPACE APP COUNTS", propertyName: "workspaceAppCountVisible" },
             { label: "TRANSPARENT PILLS", propertyName: "pillsTransparent" }
@@ -408,169 +404,6 @@ Column {
                     root.appearance.barElementEnabled = values;
                 }
             }
-        }
-    }
-
-    Text {
-        text: "DESKTOP CLOCK"
-        color: theme.textMuted
-        font.pixelSize: root.appearance.textSize - 2
-        font.bold: true
-        topPadding: 8
-    }
-
-    Rectangle {
-        width: parent.width
-        height: 44
-        radius: root.appearance.radius
-        color: clockDateFormatHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-
-        HoverHandler {
-            id: clockDateFormatHover
-        }
-
-        Text {
-            anchors.left: parent.left
-            anchors.leftMargin: 12
-            anchors.verticalCenter: parent.verticalCenter
-            text: "CLOCK DATE FORMAT"
-            color: theme.text
-            font.pixelSize: root.appearance.textSize - 1
-            font.bold: true
-        }
-
-        ComboBox {
-            id: clockDateFormatSelector
-
-            anchors.right: parent.right
-            anchors.rightMargin: 6
-            anchors.verticalCenter: parent.verticalCenter
-            width: 168
-            height: 32
-            textRole: "label"
-            model: [
-                { label: "Full date", value: "full" },
-                { label: "Short date", value: "short" },
-                { label: "Numeric date", value: "numeric" },
-                { label: "Hidden", value: "none" }
-            ]
-            currentIndex: {
-                for (let index = 0; index < model.length; index++) {
-                    if (model[index].value === root.appearance.backgroundClockDateFormat)
-                        return index;
-                }
-
-                return 0;
-            }
-
-            contentItem: Text {
-                leftPadding: 10
-                rightPadding: 30
-                verticalAlignment: Text.AlignVCenter
-                text: clockDateFormatSelector.displayText
-                color: theme.accent
-                elide: Text.ElideRight
-                font.pixelSize: root.appearance.textSize - 1
-                font.bold: true
-            }
-
-            indicator: Text {
-                anchors.right: parent.right
-                anchors.rightMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                text: "󰅂"
-                color: theme.accent
-                font.pixelSize: root.appearance.textSize - 1
-            }
-
-            background: Rectangle {
-                radius: root.appearance.radius
-                color: theme.surface
-            }
-
-            onActivated: root.appearance.backgroundClockDateFormat = model[index].value
-        }
-    }
-
-    Rectangle {
-        width: parent.width
-        height: 44
-        radius: root.appearance.radius
-        color: clockPositionHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-
-        Behavior on color {
-            ColorAnimation { duration: 140 }
-        }
-
-        HoverHandler {
-            id: clockPositionHover
-        }
-
-        Text {
-            anchors.left: parent.left
-            anchors.leftMargin: 12
-            anchors.verticalCenter: parent.verticalCenter
-            text: "CLOCK POSITION"
-            color: theme.text
-            font.pixelSize: root.appearance.textSize - 1
-            font.bold: true
-        }
-
-        ComboBox {
-            id: clockPositionSelector
-
-            anchors.right: parent.right
-            anchors.rightMargin: 6
-            anchors.verticalCenter: parent.verticalCenter
-            width: 168
-            height: 32
-            textRole: "label"
-            model: [
-                { label: "Top left", value: "top-left" },
-                { label: "Top center", value: "top-center" },
-                { label: "Top right", value: "top-right" },
-                { label: "Center left", value: "center-left" },
-                { label: "Center", value: "center" },
-                { label: "Center right", value: "center-right" },
-                { label: "Bottom left", value: "bottom-left" },
-                { label: "Bottom center", value: "bottom-center" },
-                { label: "Bottom right", value: "bottom-right" }
-            ]
-            currentIndex: {
-                for (let index = 0; index < model.length; index++) {
-                    if (model[index].value === root.appearance.backgroundClockPosition)
-                        return index;
-                }
-
-                return 4;
-            }
-
-            contentItem: Text {
-                leftPadding: 10
-                rightPadding: 30
-                verticalAlignment: Text.AlignVCenter
-                text: clockPositionSelector.displayText
-                color: theme.accent
-                elide: Text.ElideRight
-                font.pixelSize: root.appearance.textSize - 1
-                font.bold: true
-            }
-
-            indicator: Text {
-                anchors.right: parent.right
-                anchors.rightMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                text: "󰅂"
-                color: theme.accent
-                font.pixelSize: root.appearance.textSize - 1
-            }
-
-            background: Rectangle {
-                radius: root.appearance.radius
-                color: theme.surface
-            }
-
-            onActivated: root.appearance.backgroundClockPosition = model[index].value
         }
     }
 

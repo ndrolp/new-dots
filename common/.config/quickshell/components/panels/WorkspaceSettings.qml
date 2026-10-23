@@ -64,8 +64,7 @@ Column {
 
             Repeater {
                 model: [
-                    { label: "BAR", propertyName: "barVisible" },
-                    { label: "BACKGROUND CLOCK", propertyName: "backgroundClockVisible" }
+                    { label: "BAR", propertyName: "barVisible" }
                 ]
 
                 delegate: Rectangle {

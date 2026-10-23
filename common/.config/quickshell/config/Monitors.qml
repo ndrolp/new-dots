@@ -47,7 +47,8 @@ QtObject {
 
     function setDisplaySetting(monitorName, settingName, value) {
         const updated = Object.assign({}, displaySettings);
-        const monitorSettings = Object.assign({}, displaySettingsFor(monitorName));
+        const monitorSettings = Object.assign({}, displaySettings[monitorName],
+            displaySettingsFor(monitorName));
         monitorSettings[settingName] = value;
         updated[monitorName] = monitorSettings;
         displaySettings = updated;
@@ -57,8 +58,23 @@ QtObject {
         return displaySettingsFor(monitorName).barVisible;
     }
 
-    function backgroundClockVisible(monitorName) {
-        return displaySettingsFor(monitorName).backgroundClockVisible;
+    // Desktop widgets (incl. the background clock) of a monitor.
+    function desktopWidgetsFor(monitorName) {
+        return BarProfileModel.desktopWidgetsFor(displaySettings, monitorName);
+    }
+
+    function desktopWidgetOrder(monitorName) {
+        return BarProfileModel.desktopWidgetOrder(desktopWidgetsFor(monitorName));
+    }
+
+    function setDesktopWidgetSetting(monitorName, widget, key, value) {
+        displaySettings = BarProfileModel.setDesktopWidgetSetting(
+            displaySettings, monitorName, widget, key, value);
+    }
+
+    function moveDesktopWidget(monitorName, widget, offset) {
+        displaySettings = BarProfileModel.moveDesktopWidget(
+            displaySettings, monitorName, widget, offset);
     }
 
     function barProfileFor(monitorName, fallbackProfile) {
@@ -67,6 +83,22 @@ QtObject {
 
     function monitorNames() {
         return Object.keys(assignments).filter(name => name !== "default");
+    }
+
+    property bool loaded: false
+
+    // The file as stored, including keys the adapter does not declare.
+    function rawState() {
+        try {
+            return JSON.parse(settingsFile.text());
+        } catch (error) {
+            return {};
+        }
+    }
+
+    // Replaces the file with a migrated state in a single write.
+    function applyMigratedState(state) {
+        settingsFile.setText(JSON.stringify(state, null, 4));
     }
 
     property var settingsFile: FileView {
@@ -78,10 +110,12 @@ QtObject {
 
         onFileChanged: reload()
         onAdapterUpdated: writeAdapter()
+        onLoaded: root.loaded = true
 
         onLoadFailed: error => {
             if (error === FileViewError.FileNotFound)
                 writeAdapter();
+            root.loaded = true;
         }
 
         adapter: JsonAdapter {
@@ -93,7 +127,6 @@ QtObject {
             property var displaySettings: ({
                 "default": {
                     "barVisible": true,
-                    "backgroundClockVisible": true,
                     "barProfile": ""
                 }
             })

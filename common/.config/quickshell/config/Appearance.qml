@@ -3,6 +3,9 @@ import Quickshell.Io
 import "BarProfileModel.js" as BarProfileModel
 
 QtObject {
+    id: root
+
+    property alias schemaVersion: settings.schemaVersion
     property alias barHeight: settings.barHeight
     property alias activeBarProfile: settings.activeBarProfile
     property alias barProfiles: settings.barProfiles
@@ -26,24 +29,6 @@ QtObject {
     property alias transparentBarSlanted: settings.transparentBarSlanted
     property alias statusIsland: settings.statusIsland
     property alias statusIslandRadius: settings.statusIslandRadius
-    property alias backgroundClockEnabled: settings.backgroundClockEnabled
-    property alias backgroundClockCalendarEnabled: settings.backgroundClockCalendarEnabled
-    property alias backgroundClockPosition: settings.backgroundClockPosition
-    property alias backgroundClockSize: settings.backgroundClockSize
-    property alias backgroundClockOpacity: settings.backgroundClockOpacity
-    property alias backgroundClockDateFormat: settings.backgroundClockDateFormat
-    property alias desktopMediaEnabled: settings.desktopMediaEnabled
-    property alias desktopMediaPosition: settings.desktopMediaPosition
-    property alias desktopSystemEnabled: settings.desktopSystemEnabled
-    property alias desktopSystemPosition: settings.desktopSystemPosition
-    property alias desktopCalendarEnabled: settings.desktopCalendarEnabled
-    property alias desktopCalendarPosition: settings.desktopCalendarPosition
-    property alias desktopNetworkEnabled: settings.desktopNetworkEnabled
-    property alias desktopNetworkPosition: settings.desktopNetworkPosition
-    property alias desktopWeatherEnabled: settings.desktopWeatherEnabled
-    property alias desktopWeatherPosition: settings.desktopWeatherPosition
-    property alias desktopWeatherLocation: settings.desktopWeatherLocation
-    property alias desktopWidgetOrder: settings.desktopWidgetOrder
     property alias statusModuleOrder: settings.statusModuleOrder
     property alias statusModuleEnabled: settings.statusModuleEnabled
     property alias statusModuleGroups: settings.statusModuleGroups
@@ -84,6 +69,23 @@ QtObject {
         applyChanges(BarProfileModel.densityPresetChanges(preset));
     }
 
+    property bool loaded: false
+
+    // The file as stored, including keys the adapter does not declare.
+    function rawState() {
+        try {
+            return JSON.parse(settingsFile.text());
+        } catch (error) {
+            return {};
+        }
+    }
+
+    // Replaces the file with a migrated state in a single write, which the
+    // adapter then loads (per-property writes would race with reloads).
+    function applyMigratedState(state) {
+        settingsFile.setText(JSON.stringify(state, null, 4));
+    }
+
     property var settingsFile: FileView {
         id: settingsFile
 
@@ -93,15 +95,18 @@ QtObject {
 
         onFileChanged: reload()
         onAdapterUpdated: writeAdapter()
+        onLoaded: root.loaded = true
 
         onLoadFailed: error => {
             if (error === FileViewError.FileNotFound)
                 writeAdapter();
+            root.loaded = true;
         }
 
         adapter: JsonAdapter {
             id: settings
 
+            property int schemaVersion: 0
             property int barHeight: 32
             property string activeBarProfile: "work"
             property var barProfiles: ({
@@ -241,24 +246,6 @@ QtObject {
             property bool transparentBarSlanted: false
             property bool statusIsland: false
             property int statusIslandRadius: 12
-            property bool backgroundClockEnabled: true
-            property bool backgroundClockCalendarEnabled: false
-            property string backgroundClockPosition: "center"
-            property int backgroundClockSize: 96
-            property int backgroundClockOpacity: 100
-            property string backgroundClockDateFormat: "full"
-            property bool desktopMediaEnabled: false
-            property string desktopMediaPosition: "bottom-left"
-            property bool desktopSystemEnabled: false
-            property string desktopSystemPosition: "top-right"
-            property bool desktopCalendarEnabled: false
-            property string desktopCalendarPosition: "top-left"
-            property bool desktopNetworkEnabled: false
-            property string desktopNetworkPosition: "bottom-right"
-            property bool desktopWeatherEnabled: false
-            property string desktopWeatherPosition: "top-center"
-            property string desktopWeatherLocation: "Ourense, ES"
-            property var desktopWidgetOrder: ["media", "system", "calendar", "network", "weather"]
             property var statusModuleOrder: [
                 "notifications", "recording", "media", "audio", "bluetooth", "tray", "network",
                 "battery", "clock"

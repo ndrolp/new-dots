@@ -52,6 +52,11 @@ ShellRoot {
         id: monitors
     }
 
+    Config.SchemaMigration {
+        appearance: appearance
+        monitors: monitors
+    }
+
     Config.Wallpapers {
         id: wallpapers
     }

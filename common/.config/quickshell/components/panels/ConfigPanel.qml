@@ -20,7 +20,7 @@ Rectangle {
     readonly property var sections: [
         {
             label: "Bar Appearance", icon: "󰔉", section: "Appearance",
-            keywords: "profile density transparent island clock"
+            keywords: "profile density transparent island notifications popup"
         },
         {
             label: "Displays", icon: "󰍹", section: "Monitors",
@@ -40,7 +40,7 @@ Rectangle {
         },
         {
             label: "Desktop Widgets", icon: "󰖕", section: "Widgets",
-            keywords: "media calendar system network weather"
+            keywords: "media calendar system network weather background clock monitor"
         },
         {
             label: "Bar Widgets", icon: "󰍛", section: "Status",
@@ -82,6 +82,7 @@ Rectangle {
             properties.plugins = root.plugins;
         } else if (currentSection === "Widgets") {
             source = "DesktopWidgetsSettings.qml";
+            properties.monitors = root.monitors;
         } else if (currentSection === "Status") {
             source = "StatusLayoutSettings.qml";
         } else if (currentSection === "Session") {
