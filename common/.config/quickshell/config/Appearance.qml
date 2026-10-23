@@ -67,6 +67,30 @@ QtObject {
         applyChanges(BarProfileModel.discardChanges(settings));
     }
 
+    // Copies the edited profile as `newName` and edits the copy. Ignored with
+    // pending changes or a name duplicateNameError refuses.
+    function duplicateBarProfile(newName) {
+        applyChanges(BarProfileModel.duplicateProfile(settings, settings.editingBarProfile, newName));
+    }
+
+    // Removes `profileName` unless deleteBarProfileRejection refuses;
+    // `displaySettings` comes from monitors.json.
+    function deleteBarProfile(profileName, displaySettings) {
+        applyChanges(BarProfileModel.deleteProfile(settings, displaySettings, profileName));
+    }
+
+    function suggestedDuplicateName() {
+        return BarProfileModel.suggestedDuplicateName(settings, settings.editingBarProfile);
+    }
+
+    function duplicateNameError(newName) {
+        return BarProfileModel.duplicateNameError(settings, newName);
+    }
+
+    function deleteBarProfileRejection(profileName, displaySettings) {
+        return BarProfileModel.deleteRejection(settings, displaySettings, profileName);
+    }
+
     function barProfileValue(profileName, key) {
         return BarProfileModel.profileValue(settings, profileName, key);
     }

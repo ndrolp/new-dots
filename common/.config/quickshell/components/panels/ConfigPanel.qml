@@ -69,6 +69,7 @@ Rectangle {
 
         if (currentSection === "Appearance") {
             source = "AppearanceSettings.qml";
+            properties.monitors = root.monitors;
         } else if (currentSection === "Monitors") {
             source = "WorkspaceSettings.qml";
             properties.monitors = root.monitors;
@@ -85,6 +86,7 @@ Rectangle {
             properties.monitors = root.monitors;
         } else if (currentSection === "Status") {
             source = "StatusLayoutSettings.qml";
+            properties.monitors = root.monitors;
         } else if (currentSection === "Session") {
             source = "SessionSettings.qml";
         } else {

@@ -7,6 +7,7 @@ Column {
     id: root
 
     property var appearance
+    property var monitors
     property string expandedWidget: ""
     readonly property var barElements: BarProfileModel.normalizeBarElements(appearance.barElements)
     readonly property var zones: [{
@@ -85,6 +86,7 @@ Column {
 
     BarProfileSelector {
         appearance: root.appearance
+        monitors: root.monitors
     }
 
         Text {
