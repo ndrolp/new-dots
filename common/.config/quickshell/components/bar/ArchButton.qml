@@ -14,7 +14,7 @@ Rectangle {
     width: appearance.workspaceButtonSize + (appearance.archButtonHorizontalPadding * 2)
     height: appearance.barTransparent
         ? appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
-        : Math.max(1, appearance.barHeight - (appearance.structuralVerticalPadding * 2))
+        : Math.max(1, appearance.barHeight - (appearance.elementVerticalPadding * 2))
     radius: appearance.radius
     color: hover.hovered ? theme.surfaceHover
         : appearance.pillsTransparent || appearance.transparentBarSlanted || root.grouped

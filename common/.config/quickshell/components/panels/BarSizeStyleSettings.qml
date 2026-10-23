@@ -88,7 +88,7 @@ Column {
             { label: "Horizontal padding", from: 0, to: 48, propertyName: "horizontalPadding" },
             { label: "Pill vertical padding", from: 0, to: 8, propertyName: "pillVerticalPadding" },
             { label: "Workspace bar padding", from: 0, to: 10, propertyName: "workspacePadding" },
-            { label: "Bar vertical padding", from: 0, to: 16, propertyName: "structuralVerticalPadding" },
+            { label: "Bar vertical padding", from: 0, to: 16, propertyName: "elementVerticalPadding" },
             { label: "Transparent bar top margin", from: 0, to: 32, propertyName: "transparentBarTopMargin" },
             { label: "Corner radius", from: 0, to: 24, propertyName: "radius" },
             { label: "Group radius", from: 0, to: 32, propertyName: "groupRadius" },
@@ -142,7 +142,7 @@ Column {
         model: [
             { label: "TRANSPARENT BAR", propertyName: "barTransparent" },
             { label: "TRANSPARENT BAR BORDER", propertyName: "barTransparentBorder" },
-            { label: "DOCKED ISLAND BAR", propertyName: "transparentBarSlanted" },
+            { label: "DOCKED BAR", propertyName: "transparentBarSlanted" },
             { label: "TRANSPARENT PILLS", propertyName: "pillsTransparent" }
         ]
 

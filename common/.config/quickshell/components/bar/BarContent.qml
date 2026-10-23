@@ -27,18 +27,28 @@ Item {
     // Room between a group's shared background and its first and last element.
     readonly property real groupPadding: appearance.spacing
 
+    // The item of every bar element, by element id.
+    readonly property var elementItems: Object.assign({
+        "arch": archButton,
+        "systemMonitor": systemMonitor,
+        "currentApp": currentApp,
+        "workspaces": workspaces
+    }, barElementItems.items)
+
+    // The bar element each popup opens from, when its name differs.
+    readonly property var popupElements: ({
+        "system": "systemMonitor",
+        "pomodoro": "clock"
+    })
+
     // Bar elements are drawn with one walk per zone, in the order the profile
     // lists them; enabled elements with nothing to show take no space.
     function elementItem(element) {
-        if (element === "arch")
-            return archButton;
-        if (element === "systemMonitor")
-            return systemMonitor;
-        if (element === "currentApp")
-            return currentApp;
-        if (element === "workspaces")
-            return workspaces;
-        return statusModules.moduleItem(element);
+        return elementItems[element] || null;
+    }
+
+    function popupElement(popup) {
+        return popupElements[popup] || popup;
     }
 
     function elementVisible(element) {
@@ -116,16 +126,17 @@ Item {
 
     // Popups of center elements open under them; the others at the bar edge.
     function popupNearTrigger(popup) {
-        const element = popup === "system" ? "systemMonitor" : popup === "pomodoro" ? "clock" : popup;
-        return BarProfileModel.elementZone(appearance.barElements, element) === "center";
+        return BarProfileModel.elementZone(appearance.barElements, popupElement(popup)) === "center";
     }
 
+    // Where the element a popup opens from sits in the bar.
     function popupTrigger(popup) {
-        if (popup === "system")
-            return systemMonitor;
+        const item = elementItem(popupElement(popup));
+        if (!item)
+            return null;
 
-        const trigger = statusModules.popupTrigger(popup);
-        return trigger ? { x: statusModules.x + trigger.x, width: trigger.width } : null;
+        const offset = item.parent === barElementItems ? barElementItems.x : 0;
+        return { x: offset + item.x, width: item.width };
     }
 
     Config.Theme {
@@ -281,8 +292,8 @@ Item {
         workspaceService: root.workspaceService
     }
 
-    StatusModules {
-        id: statusModules
+    BarElementItems {
+        id: barElementItems
 
         x: 0
         width: root.width

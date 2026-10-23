@@ -38,7 +38,7 @@ QtObject {
     readonly property int activeWorkspaceHorizontalPadding: editedBarProfile.activeWorkspaceHorizontalPadding
     readonly property int pillVerticalPadding: editedBarProfile.pillVerticalPadding
     readonly property int workspacePadding: editedBarProfile.workspacePadding
-    readonly property int structuralVerticalPadding: editedBarProfile.structuralVerticalPadding
+    readonly property int elementVerticalPadding: editedBarProfile.elementVerticalPadding
     readonly property bool pillsTransparent: editedBarProfile.pillsTransparent
     readonly property int transparentBarTopMargin: editedBarProfile.transparentBarTopMargin
     readonly property bool transparentBarSlanted: editedBarProfile.transparentBarSlanted

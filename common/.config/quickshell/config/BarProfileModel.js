@@ -72,7 +72,7 @@ const defaultProfile = {
     activeWorkspaceHorizontalPadding: 6,
     pillVerticalPadding: 3,
     workspacePadding: 4,
-    structuralVerticalPadding: 5,
+    elementVerticalPadding: 5,
     pillsTransparent: false,
     transparentBarTopMargin: 0,
     transparentBarSlanted: false,

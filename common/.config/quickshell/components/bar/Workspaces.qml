@@ -19,7 +19,7 @@ Rectangle {
     implicitHeight: appearance.barTransparent
         ? workspaceRow.implicitHeight + (ownPill
             ? (appearance.pillVerticalPadding + 2) * 2 : 0)
-        : Math.max(1, appearance.barHeight - (appearance.structuralVerticalPadding * 2))
+        : Math.max(1, appearance.barHeight - (appearance.elementVerticalPadding * 2))
     width: implicitWidth
     height: implicitHeight
     radius: appearance.radius
@@ -84,7 +84,7 @@ Rectangle {
                 height: appearance.barTransparent
                     ? appearance.workspaceButtonSize - 2
                     : Math.max(1, appearance.barHeight
-                        - (appearance.structuralVerticalPadding * 2))
+                        - (appearance.elementVerticalPadding * 2))
                 radius: appearance.radius
                 color: active ? theme.accent : urgent
                     ? Qt.rgba(theme.red.r, theme.red.g, theme.red.b, 0.22)

@@ -440,10 +440,26 @@ function moveOptionsOntoElements(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
+// Step 9: bar elements are all of one type, so the vertical padding of the
+// former "structural" elements becomes the vertical padding of every element.
+function renameElementVerticalPadding(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+
+    for (const profileName in migrated.barProfiles || {}) {
+        const profile = migrated.barProfiles[profileName];
+        if (profile.structuralVerticalPadding === undefined)
+            continue;
+        profile.elementVerticalPadding = profile.structuralVerticalPadding;
+        delete profile.structuralVerticalPadding;
+    }
+
+    return { appearance: migrated, monitors: monitors };
+}
+
 const migrationSteps = [
     migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
     migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles, explicitMonitorEntries,
-    moveOptionsOntoElements
+    moveOptionsOntoElements, renameElementVerticalPadding
 ];
 const schemaVersion = migrationSteps.length;
 

@@ -9,6 +9,9 @@ import QtQuick
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 
+// The bar elements that need no component of their own (notifications,
+// recording, media, audio, bluetooth, tray, network, battery and clock),
+// placed by the bar's single walk per zone (see BarContent).
 Item {
     id: root
 
@@ -18,10 +21,10 @@ Item {
     required property var notificationHistory
     required property var screenCapture
     property string activePopup: ""
-    // Where each module goes, provided by the bar's single walk per zone.
-    property var elementX: module => 0
-    // Whether a module sits in a group, provided by the bar's walk.
-    property var elementGrouped: module => false
+    // Where each element goes, provided by the bar's single walk per zone.
+    property var elementX: element => 0
+    // Whether an element sits in a group, provided by the bar's walk.
+    property var elementGrouped: element => false
     signal popupRequested(string popup)
     signal notificationRequested()
 
@@ -38,12 +41,12 @@ Item {
     readonly property string playerLabel: player
         ? (player.trackTitle !== "" ? player.trackTitle : player.identity) : ""
     property string displayedPlayerLabel: playerLabel
-    readonly property real moduleHeight: appearance.barTransparent
+    readonly property real itemHeight: appearance.barTransparent
         ? appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
-        : Math.max(1, appearance.barHeight - (appearance.structuralVerticalPadding * 2))
+        : Math.max(1, appearance.barHeight - (appearance.elementVerticalPadding * 2))
 
-    height: moduleHeight
-    implicitHeight: moduleHeight
+    height: itemHeight
+    implicitHeight: itemHeight
 
     Config.Theme {
         id: theme
@@ -68,48 +71,31 @@ Item {
         player = activePlayer();
     }
 
-    function popupTrigger(popup) {
-        if (popup === "media")
-            return mediaButton;
-        if (popup === "audio")
-            return audioButton;
-        if (popup === "bluetooth")
-            return bluetoothButton;
-        if (popup === "tray")
-            return trayButton;
-        if (popup === "network")
-            return networkButton;
-        if (popup === "battery")
-            return batteryButton;
-        if (popup === "pomodoro")
-            return pomodoroButton;
-        return null;
-    }
+    // The item of each bar element drawn here, by element id.
+    readonly property var items: ({
+        "notifications": notificationButton,
+        "recording": recordingButton,
+        "media": mediaButton,
+        "audio": audioButton,
+        "bluetooth": bluetoothButton,
+        "tray": trayButton,
+        "network": networkButton,
+        "battery": batteryButton,
+        "clock": pomodoroButton
+    })
 
-    function moduleItem(module) {
-        if (module === "notifications")
-            return notificationButton;
-        if (module === "recording")
-            return recordingButton;
-        if (module === "clock")
-            return pomodoroButton;
-        return popupTrigger(module);
-    }
-
-    function moduleVisible(module) {
-        if (!BarProfileModel.elementEnabled(appearance.barElements, module))
+    // Enabled elements with nothing to show (no player, battery or
+    // recording) are hidden.
+    function itemVisible(element) {
+        if (!BarProfileModel.elementEnabled(appearance.barElements, element))
             return false;
-        if (module === "media")
+        if (element === "media")
             return player !== null;
-        if (module === "battery")
+        if (element === "battery")
             return hasBattery;
-        if (module === "recording")
+        if (element === "recording")
             return screenCapture.recording;
         return true;
-    }
-
-    function moduleX(module) {
-        return elementX(module);
     }
 
     Component.onCompleted: updatePlayer()
@@ -154,10 +140,10 @@ Item {
     Rectangle {
         id: notificationButton
 
-        visible: root.moduleVisible("notifications")
-        x: root.moduleX("notifications")
+        visible: root.itemVisible("notifications")
+        x: root.elementX("notifications")
         width: notificationContent.implicitWidth + 16
-        height: root.moduleHeight
+        height: root.itemHeight
         radius: root.appearance.radius
         color: notificationHover.hovered ? theme.surfaceHover
             : root.elementGrouped("notifications") || root.appearance.pillsTransparent
@@ -210,10 +196,10 @@ Item {
     Rectangle {
         id: recordingButton
 
-        visible: root.moduleVisible("recording")
-        x: root.moduleX("recording")
+        visible: root.itemVisible("recording")
+        x: root.elementX("recording")
         width: recordingContent.implicitWidth + 16
-        height: root.moduleHeight
+        height: root.itemHeight
         radius: root.appearance.radius
         color: recordingHover.hovered ? theme.surfaceHover
             : root.elementGrouped("recording") || root.appearance.pillsTransparent
@@ -263,10 +249,10 @@ Item {
 
         border.width: root.appearance.barTransparentBorder && !root.elementGrouped("media") ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
-        visible: root.moduleVisible("media")
-        x: root.moduleX("media")
+        visible: root.itemVisible("media")
+        x: root.elementX("media")
         width: mediaContent.implicitWidth + 16
-        height: root.moduleHeight
+        height: root.itemHeight
         radius: root.appearance.radius
         color: mediaHover.hovered ? theme.surfaceHover
             : root.elementGrouped("media") || root.appearance.pillsTransparent
@@ -357,10 +343,10 @@ Item {
     Rectangle {
         id: audioButton
 
-        visible: root.moduleVisible("audio")
-        x: root.moduleX("audio")
+        visible: root.itemVisible("audio")
+        x: root.elementX("audio")
         width: 76
-        height: root.moduleHeight
+        height: root.itemHeight
         radius: root.appearance.radius
         color: audioHover.hovered ? theme.surfaceHover
             : root.elementGrouped("audio") || root.appearance.pillsTransparent
@@ -416,10 +402,10 @@ Item {
     Rectangle {
         id: bluetoothButton
 
-        visible: root.moduleVisible("bluetooth")
-        x: root.moduleX("bluetooth")
+        visible: root.itemVisible("bluetooth")
+        x: root.elementX("bluetooth")
         width: root.appearance.workspaceButtonSize
-        height: root.moduleHeight
+        height: root.itemHeight
         radius: root.appearance.radius
         color: bluetoothHover.hovered ? theme.surfaceHover
             : root.elementGrouped("bluetooth") || root.appearance.pillsTransparent
@@ -453,10 +439,10 @@ Item {
     Rectangle {
         id: trayButton
 
-        visible: root.moduleVisible("tray")
-        x: root.moduleX("tray")
+        visible: root.itemVisible("tray")
+        x: root.elementX("tray")
         width: root.appearance.workspaceButtonSize
-        height: root.moduleHeight
+        height: root.itemHeight
         radius: root.appearance.radius
         color: trayHover.hovered ? theme.surfaceHover
             : root.elementGrouped("tray") || root.appearance.pillsTransparent
@@ -490,10 +476,10 @@ Item {
     Rectangle {
         id: networkButton
 
-        visible: root.moduleVisible("network")
-        x: root.moduleX("network")
+        visible: root.itemVisible("network")
+        x: root.elementX("network")
         width: root.appearance.workspaceButtonSize
-        height: root.moduleHeight
+        height: root.itemHeight
         radius: root.appearance.radius
         color: networkHover.hovered ? theme.surfaceHover
             : root.elementGrouped("network") || root.appearance.pillsTransparent
@@ -527,10 +513,10 @@ Item {
     Rectangle {
         id: batteryButton
 
-        visible: root.moduleVisible("battery")
-        x: root.moduleX("battery")
+        visible: root.itemVisible("battery")
+        x: root.elementX("battery")
         width: batteryContent.implicitWidth + 16
-        height: root.moduleHeight
+        height: root.itemHeight
         radius: root.appearance.radius
         color: batteryHover.hovered ? theme.surfaceHover
             : root.elementGrouped("battery") || root.appearance.pillsTransparent
@@ -580,10 +566,10 @@ Item {
     Rectangle {
         id: pomodoroButton
 
-        visible: root.moduleVisible("clock")
-        x: root.moduleX("clock")
+        visible: root.itemVisible("clock")
+        x: root.elementX("clock")
         width: clockContent.implicitWidth + 16
-        height: root.moduleHeight
+        height: root.itemHeight
         radius: root.appearance.radius
         color: clockHover.hovered ? theme.surfaceHover
             : root.elementGrouped("clock") || root.appearance.pillsTransparent

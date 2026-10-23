@@ -155,4 +155,16 @@ TestCase {
 
         compare(migrated.barProfiles.work.barOpacity, fixture.barOpacity);
     }
+
+    function test_theBarVerticalPaddingIsRenamedForEveryProfile() {
+        const fixture = fixtures.read("appearance.json");
+
+        const profiles = fixtures.migrated().appearance.barProfiles;
+
+        for (const name in profiles) {
+            compare(profiles[name].elementVerticalPadding,
+                fixture.barProfiles[name].structuralVerticalPadding, name);
+            verify(!("structuralVerticalPadding" in profiles[name]), name);
+        }
+    }
 }
