@@ -39,10 +39,6 @@ QtObject {
     readonly property int pillVerticalPadding: editedBarProfile.pillVerticalPadding
     readonly property int workspacePadding: editedBarProfile.workspacePadding
     readonly property int structuralVerticalPadding: editedBarProfile.structuralVerticalPadding
-    readonly property bool workspaceGlyphsEnabled: editedBarProfile.workspaceGlyphsEnabled
-    readonly property bool hideEmptyWorkspaces: editedBarProfile.hideEmptyWorkspaces
-    readonly property bool workspaceAppCountVisible: editedBarProfile.workspaceAppCountVisible
-    readonly property var workspaceGlyphs: editedBarProfile.workspaceGlyphs
     readonly property bool pillsTransparent: editedBarProfile.pillsTransparent
     readonly property int transparentBarTopMargin: editedBarProfile.transparentBarTopMargin
     readonly property bool transparentBarSlanted: editedBarProfile.transparentBarSlanted
@@ -51,10 +47,6 @@ QtObject {
     readonly property bool barTransparent: editedBarProfile.barTransparent
     readonly property bool barTransparentBorder: editedBarProfile.barTransparentBorder
     readonly property int barOpacity: editedBarProfile.barOpacity
-    readonly property bool notificationBadgeVisible: editedBarProfile.notificationBadgeVisible
-    readonly property bool mediaTitleVisible: editedBarProfile.mediaTitleVisible
-    readonly property bool audioMeterVisible: editedBarProfile.audioMeterVisible
-    readonly property bool batteryPercentageVisible: editedBarProfile.batteryPercentageVisible
 
     // Applies changes returned by BarProfileModel: saved profiles go to the
     // file, the edited profile and pending changes stay in memory.
@@ -144,6 +136,17 @@ QtObject {
 
     function setBarElementJoined(element, joined) {
         setBarSetting("barElements", BarProfileModel.setElementJoined(barElements, element, joined));
+    }
+
+    // An option of a bar element of the edited profile (see
+    // BarProfileModel.elementOptionDefaults).
+    function barElementOption(element, option) {
+        return BarProfileModel.elementOption(barElements, element, option);
+    }
+
+    function setBarElementOption(element, option, value) {
+        setBarSetting("barElements", BarProfileModel.setElementOption(barElements, element,
+            option, value));
     }
 
     function moveBarElementToZone(element, zone) {

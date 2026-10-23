@@ -402,9 +402,48 @@ function explicitMonitorEntries(appearance, monitors) {
     return { appearance: appearance, monitors: migrated };
 }
 
+// Former flat profile settings that are options of one bar element:
+// key -> [element id, option].
+const legacyElementOptionKeys = {
+    "workspaceGlyphsEnabled": ["workspaces", "glyphsEnabled"],
+    "workspaceGlyphs": ["workspaces", "glyphs"],
+    "hideEmptyWorkspaces": ["workspaces", "hideEmpty"],
+    "workspaceAppCountVisible": ["workspaces", "appCountVisible"],
+    "notificationBadgeVisible": ["notifications", "badgeVisible"],
+    "mediaTitleVisible": ["media", "titleVisible"],
+    "audioMeterVisible": ["audio", "meterVisible"],
+    "batteryPercentageVisible": ["battery", "percentageVisible"]
+};
+
+// Step 8: each bar element keeps its own options in `barElements` instead of
+// flat profile settings.
+function moveOptionsOntoElements(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+
+    for (const profileName in migrated.barProfiles || {}) {
+        const profile = migrated.barProfiles[profileName];
+        let barElements = profile.barElements || {};
+
+        for (const key in legacyElementOptionKeys) {
+            if (profile[key] === undefined)
+                continue;
+            const target = legacyElementOptionKeys[key];
+            barElements = BarProfileModel.setElementOption(barElements, target[0], target[1],
+                profile[key]);
+            delete profile[key];
+        }
+
+        if (profile.barElements !== undefined)
+            profile.barElements = barElements;
+    }
+
+    return { appearance: migrated, monitors: monitors };
+}
+
 const migrationSteps = [
     migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
-    migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles, explicitMonitorEntries
+    migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles, explicitMonitorEntries,
+    moveOptionsOntoElements
 ];
 const schemaVersion = migrationSteps.length;
 

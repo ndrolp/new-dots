@@ -47,33 +47,33 @@ Column {
         const options = {
             "workspaces": [{
                 "label": "HIDE EMPTY WORKSPACES",
-                "propertyName": "hideEmptyWorkspaces"
+                "option": "hideEmpty"
             }, {
                 "label": "SHOW WORKSPACE APP COUNTS",
-                "propertyName": "workspaceAppCountVisible"
+                "option": "appCountVisible"
             }],
             "notifications": [{
                 "label": "SHOW UNREAD BADGE",
-                "propertyName": "notificationBadgeVisible"
+                "option": "badgeVisible"
             }],
             "media": [{
                 "label": "SHOW TRACK TITLE",
-                "propertyName": "mediaTitleVisible"
+                "option": "titleVisible"
             }],
             "audio": [{
                 "label": "SHOW VOLUME METER",
-                "propertyName": "audioMeterVisible"
+                "option": "meterVisible"
             }],
             "battery": [{
                 "label": "SHOW PERCENTAGE",
-                "propertyName": "batteryPercentageVisible"
+                "option": "percentageVisible"
             }]
         };
-        return options[element] || [];
+        return (options[element] || []).map(entry => Object.assign({ "element": element }, entry));
     }
 
-    function toggleWidgetOption(propertyName) {
-        appearance.setBarSetting(propertyName, appearance[propertyName] === false);
+    function toggleElementOption(element, option) {
+        appearance.setBarElementOption(element, option, !appearance.barElementOption(element, option));
     }
 
     width: parent ? parent.width : 0
@@ -347,15 +347,17 @@ Column {
                                         anchors.right: parent.right
                                         anchors.rightMargin: 10
                                         anchors.verticalCenter: parent.verticalCenter
-                                        text: root.appearance[parent.modelData.propertyName] !== false ? "On" : "Off"
-                                        color: root.appearance[parent.modelData.propertyName] !== false
+                                        text: root.appearance.barElementOption(parent.modelData.element,
+                                            parent.modelData.option) ? "On" : "Off"
+                                        color: root.appearance.barElementOption(parent.modelData.element,
+                                            parent.modelData.option)
                                             ? theme.accent : theme.textMuted
                                         font.pixelSize: root.appearance.textSize - 2
                                         font.bold: true
                                     }
 
                                     TapHandler {
-                                        onTapped: root.toggleWidgetOption(parent.modelData.propertyName)
+                                        onTapped: root.toggleElementOption(parent.modelData.element, parent.modelData.option)
                                     }
 
                                 }

@@ -24,9 +24,15 @@ TestCase {
     function test_theEditedProfileDoesNotShareObjectsWithTheSavedProfile() {
         const state = fixtures.startedBarState();
 
-        BarProfileModel.editedProfile(state).workspaceGlyphs[0] = "x";
+        const edited = BarProfileModel.editedProfile(state);
+        const workspaces = [].concat(edited.barElements.left, edited.barElements.center,
+            edited.barElements.right).find(element => element.id === "workspaces");
+        workspaces.options.glyphs[0] = "x";
+        edited.barHeight = 99;
 
-        compare(state.barProfiles.minimal.workspaceGlyphs[0], "");
+        compare(BarProfileModel.elementOption(BarProfileModel.editedProfile(state).barElements,
+            "workspaces", "glyphs")[0], "");
+        compare(state.barProfiles.minimal.barHeight, 34);
     }
 
     function test_savingStoresOnlyBarSettings() {

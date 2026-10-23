@@ -12,7 +12,8 @@
 
 // Bar elements: every piece of the bar, one type. A profile stores them as
 // `barElements`: { left: [...], center: [...], right: [...] }, each entry
-// { id, enabled, joinPrevious? }. Order within a zone is the order of the list.
+// { id, enabled, joinPrevious?, options? }. Order within a zone is the order
+// of the list.
 const zoneNames = ["left", "center", "right"];
 
 // Every bar element, in its default order; the first ones default to the
@@ -26,19 +27,36 @@ const defaultElementZones = {
     "arch": "left", "systemMonitor": "left", "currentApp": "left", "workspaces": "center"
 };
 
+// The options of the elements that have any, with their defaults.
+const elementOptionDefaults = {
+    "workspaces": {
+        glyphsEnabled: false,
+        glyphs: ["", "", "", "", "", "", "", "", "", "",
+            "", "", "", "", "", "", "", "", "", ""],
+        hideEmpty: false,
+        appCountVisible: true
+    },
+    "notifications": { badgeVisible: true },
+    "media": { titleVisible: true },
+    "audio": { meterVisible: true },
+    "battery": { percentageVisible: true }
+};
+
 // Bar elements with every element listed in its default zone and order,
-// enabled unless listed in `disabledIds`.
-function defaultBarElements(disabledIds) {
+// enabled unless listed in `disabledIds`, with `options` ({ id: options })
+// over the default options.
+function defaultBarElements(disabledIds, options) {
     const barElements = { left: [], center: [], right: [] };
 
     for (const id of elementIds) {
         barElements[defaultElementZones[id] || "right"].push({
             id: id,
-            enabled: (disabledIds || []).indexOf(id) === -1
+            enabled: (disabledIds || []).indexOf(id) === -1,
+            options: (options || {})[id]
         });
     }
 
-    return barElements;
+    return normalizeBarElements(barElements);
 }
 
 // Every setting a bar profile stores, with the value a profile that lacks it
@@ -55,11 +73,6 @@ const defaultProfile = {
     pillVerticalPadding: 3,
     workspacePadding: 4,
     structuralVerticalPadding: 5,
-    workspaceGlyphsEnabled: false,
-    hideEmptyWorkspaces: false,
-    workspaceAppCountVisible: true,
-    workspaceGlyphs: ["", "", "", "", "", "", "", "", "", "",
-        "", "", "", "", "", "", "", "", "", ""],
     pillsTransparent: false,
     transparentBarTopMargin: 0,
     transparentBarSlanted: false,
@@ -67,11 +80,7 @@ const defaultProfile = {
     barTransparent: false,
     barTransparentBorder: false,
     barOpacity: 100,
-    barElements: defaultBarElements([]),
-    notificationBadgeVisible: true,
-    mediaTitleVisible: true,
-    audioMeterVisible: true,
-    batteryPercentageVisible: true
+    barElements: defaultBarElements([])
 };
 
 const profileKeys = Object.keys(defaultProfile);
@@ -81,23 +90,23 @@ const defaultBarProfile = "minimal";
 
 // The bar profiles of a new appearance.json, in the current schema.
 function defaultBarProfiles() {
-    function profile(values, disabledIds) {
+    function profile(values, disabledIds, options) {
         return Object.assign(cloneValue(defaultProfile), values,
-            { barElements: defaultBarElements(disabledIds) });
+            { barElements: defaultBarElements(disabledIds, options) });
     }
 
     const compact = {
         barHeight: 30, horizontalPadding: 10, spacing: 4, radius: 6,
         workspaceButtonSize: 18, textSize: 13, archButtonHorizontalPadding: 5,
-        activeWorkspaceHorizontalPadding: 5, pillVerticalPadding: 2, workspacePadding: 3,
-        hideEmptyWorkspaces: true, workspaceAppCountVisible: false
+        activeWorkspaceHorizontalPadding: 5, pillVerticalPadding: 2, workspacePadding: 3
     };
+    const compactOptions = { "workspaces": { hideEmpty: true, appCountVisible: false } };
 
     return {
         "minimal": profile(Object.assign({}, compact, {
             pillsTransparent: true, transparentBarTopMargin: 6, barTransparent: true,
             barTransparentBorder: true, groupRadius: 6
-        }), ["systemMonitor", "currentApp", "media", "bluetooth", "tray"]),
+        }), ["systemMonitor", "currentApp", "media", "bluetooth", "tray"], compactOptions),
         "work": profile({}, []),
         "media": profile({
             barHeight: 34, transparentBarTopMargin: 7, barTransparent: true,
@@ -107,7 +116,7 @@ function defaultBarProfiles() {
             pillsTransparent: true, transparentBarTopMargin: 8, barTransparent: true,
             barTransparentBorder: true, groupRadius: 6
         }), ["arch", "systemMonitor", "currentApp", "workspaces", "media", "audio",
-            "bluetooth", "tray"])
+            "bluetooth", "tray"], compactOptions)
     };
 }
 
@@ -476,9 +485,42 @@ function setElementJoined(barElements, id, joined) {
     return updated;
 }
 
+// The options of element `id`, completed with their defaults ({} for an
+// element without options), as a fresh object.
+function elementOptions(barElements, id) {
+    const found = findElement(barElements || {}, id);
+    const stored = found ? barElements[found.zone][found.index].options || {} : {};
+    const options = cloneValue(elementOptionDefaults[id] || {});
+
+    for (const option in options) {
+        if (stored[option] !== undefined)
+            options[option] = cloneValue(stored[option]);
+    }
+
+    return options;
+}
+
+function elementOption(barElements, id, option) {
+    return elementOptions(barElements, id)[option];
+}
+
+// Sets an option of element `id`; options the element does not have are
+// ignored.
+function setElementOption(barElements, id, option, value) {
+    const updated = cloneValue(barElements);
+    const found = findElement(updated, id);
+
+    if (found && elementOptionDefaults[id] && option in elementOptionDefaults[id]) {
+        const options = elementOptions(updated, id);
+        options[option] = cloneValue(value);
+        updated[found.zone][found.index].options = options;
+    }
+    return updated;
+}
+
 // Every known element listed exactly once: unknown and repeated entries are
 // dropped (the first one wins) and missing elements are added, enabled, at
-// the end of the right zone.
+// the end of the right zone. Elements with options get all of them.
 function normalizeBarElements(barElements) {
     const normalized = { left: [], center: [], right: [] };
     const seen = [];
@@ -491,6 +533,7 @@ function normalizeBarElements(barElements) {
             const copy = cloneValue(element);
             if (normalized[zoneName].length === 0 || !copy.joinPrevious)
                 delete copy.joinPrevious;
+            delete copy.options;
             normalized[zoneName].push(copy);
         }
     }
@@ -498,6 +541,13 @@ function normalizeBarElements(barElements) {
     for (const id of elementIds) {
         if (seen.indexOf(id) === -1)
             normalized.right.push({ id: id, enabled: true });
+    }
+
+    for (const zoneName of zoneNames) {
+        for (const element of normalized[zoneName]) {
+            if (elementOptionDefaults[element.id])
+                element.options = elementOptions(barElements, element.id);
+        }
     }
 
     return normalized;

@@ -163,7 +163,8 @@ TestCase {
         compare(zone(normalized, "right"), ["arch", "systemMonitor", "currentApp", "workspaces",
             "notifications", "recording", "media", "audio", "bluetooth", "tray", "network",
             "battery"]);
-        compare(BarProfileModel.normalizeBarElements(minimalElements()), minimalElements());
+        const once = BarProfileModel.normalizeBarElements(minimalElements());
+        compare(BarProfileModel.normalizeBarElements(once), once);
     }
 
     function test_editingAMigratedProfileShowsItsBarElements() {
@@ -188,5 +189,65 @@ TestCase {
         compare(zone(changes.barProfiles.minimal.barElements, "left"),
             ["arch", "workspaces", "battery"]);
         verify(!("statusModuleOrder" in changes.barProfiles.minimal));
+    }
+
+    function element(barElements, id) {
+        for (const zoneName of ["left", "center", "right"]) {
+            const found = barElements[zoneName].find(entry => entry.id === id);
+            if (found)
+                return found;
+        }
+        return null;
+    }
+
+    function test_migrationStoresElementOptionsOnTheirElements() {
+        const minimal = fixtures.migrated().appearance.barProfiles.minimal;
+
+        compare(element(minimal.barElements, "audio").options, { meterVisible: false });
+        compare(element(minimal.barElements, "battery").options, { percentageVisible: true });
+        compare(element(minimal.barElements, "workspaces").options.appCountVisible, false);
+        compare(element(minimal.barElements, "workspaces").options.hideEmpty, false);
+        compare(element(minimal.barElements, "workspaces").options.glyphs.length, 20);
+        for (const key of ["audioMeterVisible", "batteryPercentageVisible", "mediaTitleVisible",
+                "notificationBadgeVisible", "workspaceGlyphsEnabled", "workspaceGlyphs",
+                "hideEmptyWorkspaces", "workspaceAppCountVisible"])
+            verify(!(key in minimal), key);
+    }
+
+    function test_optionsAProfileDidNotSaveKeepWhatItsMonitorsDrew() {
+        const work = fixtures.migrated().appearance.barProfiles.work;
+
+        // "work" saved no meter setting; its monitors drew the top-level one.
+        compare(element(work.barElements, "audio").options.meterVisible, false);
+    }
+
+    function test_anElementOptionNobodySetHasItsDefault() {
+        const barElements = BarProfileModel.normalizeBarElements({
+            right: [{ id: "battery", enabled: true }]
+        });
+
+        compare(BarProfileModel.elementOption(barElements, "battery", "percentageVisible"), true);
+        compare(BarProfileModel.elementOption(barElements, "workspaces", "hideEmpty"), false);
+    }
+
+    function test_settingAnElementOptionOnlyChangesThatElement() {
+        const barElements = BarProfileModel.editedProfile(fixtures.startedBarState()).barElements;
+
+        const updated = BarProfileModel.setElementOption(barElements, "battery",
+            "percentageVisible", false);
+
+        compare(BarProfileModel.elementOption(updated, "battery", "percentageVisible"), false);
+        compare(BarProfileModel.elementOption(barElements, "battery", "percentageVisible"), true);
+        compare(element(updated, "audio"), element(barElements, "audio"));
+    }
+
+    function test_changingAnElementOptionIsAPendingChange() {
+        const state = fixtures.startedBarState();
+        const barElements = BarProfileModel.editedProfile(state).barElements;
+
+        const after = fixtures.edited(state, { barElements: BarProfileModel.setElementOption(
+            barElements, "audio", "meterVisible", true) });
+
+        verify(BarProfileModel.isModified(after));
     }
 }

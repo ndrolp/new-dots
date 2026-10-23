@@ -1,5 +1,6 @@
 import QtQuick
 import "../../config" as Config
+import "../../config/BarProfileModel.js" as BarProfileModel
 
 Rectangle {
     id: root
@@ -12,6 +13,7 @@ Rectangle {
     required property var workspaceService
 
     readonly property bool ownPill: appearance.barTransparent && !grouped
+    readonly property var options: BarProfileModel.elementOptions(appearance.barElements, "workspaces")
 
     implicitWidth: workspaceRow.implicitWidth + (ownPill ? 16 : 0)
     implicitHeight: appearance.barTransparent
@@ -57,7 +59,7 @@ Rectangle {
             model: root.workspaceService.workspacesForScreen(
                 root.monitorScreen,
                 root.monitors.workspacesFor(root.workspaceService.monitorDescriptionForScreen(root.monitorScreen))
-            ).filter(workspaceId => !root.appearance.hideEmptyWorkspaces
+            ).filter(workspaceId => !root.options.hideEmpty
                 || root.workspaceService.isActive(workspaceId)
                 || root.workspaceService.isOccupied(workspaceId)
                 || root.workspaceService.isUrgent(workspaceId))
@@ -72,10 +74,9 @@ Rectangle {
                 readonly property int toplevelCount: root.workspaceService.toplevelCount(workspaceId)
                 readonly property bool urgent: !active
                     && root.workspaceService.isUrgent(workspaceId)
-                readonly property string workspaceGlyph: root.appearance.workspaceGlyphsEnabled
-                    && root.appearance.workspaceGlyphs
-                    && root.appearance.workspaceGlyphs.length >= workspaceId
-                    ? String(root.appearance.workspaceGlyphs[workspaceId - 1]).trim() : ""
+                readonly property string workspaceGlyph: root.options.glyphsEnabled
+                    && root.options.glyphs.length >= workspaceId
+                    ? String(root.options.glyphs[workspaceId - 1]).trim() : ""
 
                 width: active
                     ? appearance.workspaceButtonSize + (appearance.activeWorkspaceHorizontalPadding * 2)
@@ -142,7 +143,7 @@ Rectangle {
                     color: workspaceButton.urgent ? theme.red : theme.backgroundSecondary
                     border.color: workspaceButton.urgent ? theme.red : theme.border
                     border.width: 1
-                    visible: root.appearance.workspaceAppCountVisible
+                    visible: root.options.appCountVisible
                         && workspaceButton.occupied && !workspaceButton.active
                     z: 2
 
