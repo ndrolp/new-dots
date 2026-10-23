@@ -2,6 +2,7 @@ import Quickshell
 import QtQuick
 import QtQuick.Effects
 import "../../config" as Config
+import "../../config/BarProfileModel.js" as BarProfileModel
 
 Item {
     id: root
@@ -21,68 +22,64 @@ Item {
     signal statusPopupRequested(string popup)
     signal notificationRequested()
     readonly property bool statusIslandEnabled: appearance.statusIsland
-    readonly property real centerStatusGap: centerStatusModules.width > 0 ? appearance.spacing : 0
-    readonly property real centeredContentWidth: workspaces.width + centerStatusGap
-        + centerStatusModules.width
-    readonly property var structuralOrder: ["arch", "system", "currentApp", "workspaces"]
+    readonly property var zoneNames: ["left", "center", "right"]
+    readonly property real slantedPadding: appearance.barTransparent && appearance.transparentBarSlanted
+        ? appearance.horizontalPadding : 0
 
-    function elementPlacement(element) {
-        const defaults = {
-            "arch": "left",
-            "system": "left",
-            "currentApp": "left",
-            "workspaces": "center"
-        };
-        return (appearance.barElementPlacement || {})[element] || defaults[element];
+    // Bar elements are drawn with one walk per zone, in the order the profile
+    // lists them; enabled elements with nothing to show take no space.
+    function elementItem(element) {
+        if (element === "arch")
+            return archButton;
+        if (element === "systemMonitor")
+            return systemMonitor;
+        if (element === "currentApp")
+            return currentApp;
+        if (element === "workspaces")
+            return workspaces;
+        return statusModules.moduleItem(element);
     }
 
     function elementVisible(element) {
-        return (appearance.barElementEnabled || {})[element] !== false;
+        return BarProfileModel.elementEnabled(appearance.barElements, element);
     }
 
-    function elementWidth(element) {
-        if (element === "arch")
-            return archButton.width;
-        if (element === "system")
-            return systemMonitor.width;
-        if (element === "currentApp")
-            return currentApp.width;
-        return workspaces.width;
+    function zoneItems(zone) {
+        const elements = (appearance.barElements || {})[zone] || [];
+        const shown = [];
+
+        for (let index = 0; index < elements.length; index++) {
+            const element = elements[index].id;
+            const item = elementItem(element);
+            if (elements[index].enabled !== false && item && item.visible && item.width > 0)
+                shown.push(element);
+        }
+
+        return shown;
     }
 
-    function structuralZoneWidth(zone) {
+    function elementGap(previous, element) {
+        return statusModules.moduleGap(previous, element);
+    }
+
+    function zoneWidth(zone) {
+        const shown = zoneItems(zone);
         let width = 0;
 
-        for (let index = 0; index < structuralOrder.length; index++) {
-            const element = structuralOrder[index];
-            if (elementVisible(element) && elementPlacement(element) === zone)
-                width += elementWidth(element) + (width > 0 ? appearance.spacing : 0);
+        for (let index = 0; index < shown.length; index++) {
+            if (index > 0)
+                width += elementGap(shown[index - 1], shown[index]);
+            width += elementItem(shown[index]).width;
         }
 
         return width;
     }
 
-    function statusZoneWidth(zone) {
-        if (zone === "left")
-            return leftStatusModules.width;
-        if (zone === "center")
-            return centerStatusModules.width;
-        return statusModules.width;
-    }
-
-    function zoneWidth(zone) {
-        const structuralWidth = structuralZoneWidth(zone);
-        const modulesWidth = statusZoneWidth(zone);
-        return structuralWidth + modulesWidth
-            + (structuralWidth > 0 && modulesWidth > 0 ? appearance.spacing : 0);
-    }
-
     function statusIslandContentWidth() {
-        const zones = ["left", "center", "right"];
         let width = 0;
 
-        for (let index = 0; index < zones.length; index++) {
-            const nextWidth = zoneWidth(zones[index]);
+        for (let index = 0; index < zoneNames.length; index++) {
+            const nextWidth = zoneWidth(zoneNames[index]);
             if (nextWidth > 0)
                 width += nextWidth + (width > 0 ? appearance.spacing : 0);
         }
@@ -91,11 +88,10 @@ Item {
     }
 
     function statusIslandZoneStart(zone) {
-        const zones = ["left", "center", "right"];
         let x = Math.round((root.width - statusIslandContentWidth()) / 2);
 
-        for (let index = 0; index < zones.length; index++) {
-            const candidate = zones[index];
+        for (let index = 0; index < zoneNames.length; index++) {
+            const candidate = zoneNames[index];
             const candidateWidth = zoneWidth(candidate);
 
             if (candidate === zone)
@@ -107,91 +103,53 @@ Item {
         return x;
     }
 
-    function statusZoneX(zone, modules) {
-        const structuralWidth = structuralZoneWidth(zone);
-        const gap = structuralWidth > 0 && modules.width > 0 ? appearance.spacing : 0;
-
+    function zoneStart(zone) {
         if (statusIslandEnabled)
-            return statusIslandZoneStart(zone) + structuralWidth + gap;
-
-        const padding = appearance.barTransparent && appearance.transparentBarSlanted
-            ? appearance.horizontalPadding : 0;
-
+            return statusIslandZoneStart(zone);
+        if (zone === "left")
+            return slantedPadding;
         if (zone === "right")
-            return root.width - modules.width - padding;
-
-        const start = zone === "left" ? padding
-            : Math.round((root.width - structuralWidth - gap - modules.width) / 2);
-        return start + structuralWidth + gap;
+            return root.width - zoneWidth("right") - slantedPadding;
+        return Math.round((root.width - zoneWidth("center")) / 2);
     }
 
-    function structuralX(element) {
-        const zone = elementPlacement(element);
+    function zoneEnd(zone) {
+        return zoneStart(zone) + zoneWidth(zone);
+    }
 
-        if (statusIslandEnabled) {
-            let x = statusIslandZoneStart(zone);
+    function elementX(element) {
+        const zone = BarProfileModel.elementZone(appearance.barElements, element);
+        const shown = zoneItems(zone);
+        let x = zoneStart(zone);
 
-            for (let index = 0; index < structuralOrder.length; index++) {
-                const candidate = structuralOrder[index];
-                if (!elementVisible(candidate) || elementPlacement(candidate) !== zone)
-                    continue;
-                if (candidate === element)
-                    return x;
-                x += elementWidth(candidate) + appearance.spacing;
-            }
-
-            return x;
-        }
-
-        const padding = appearance.barTransparent && appearance.transparentBarSlanted
-            ? appearance.horizontalPadding : 0;
-        let x = zone === "right"
-            ? root.width - statusModules.width - padding - structuralZoneWidth("right")
-                - (statusModules.width > 0 && structuralZoneWidth("right") > 0 ? appearance.spacing : 0)
-            : zone === "left" ? padding
-                : Math.round((root.width - structuralZoneWidth("center")
-                    - (centerStatusModules.width > 0 && structuralZoneWidth("center") > 0
-                        ? appearance.spacing : 0) - centerStatusModules.width) / 2);
-
-        for (let index = 0; index < structuralOrder.length; index++) {
-            const candidate = structuralOrder[index];
-            if (!elementVisible(candidate) || elementPlacement(candidate) !== zone)
-                continue;
-            if (candidate === element)
+        for (let index = 0; index < shown.length; index++) {
+            if (index > 0)
+                x += elementGap(shown[index - 1], shown[index]);
+            if (shown[index] === element)
                 return x;
-            x += elementWidth(candidate) + appearance.spacing;
+            x += elementItem(shown[index]).width;
         }
 
         return x;
     }
 
     function statusIslandLeft() {
-        const items = [
-            archButton, systemMonitor, currentApp, workspaces,
-            leftStatusModules, centerStatusModules, statusModules
-        ];
         let left = root.width;
 
-        for (let index = 0; index < items.length; index++) {
-            const item = items[index];
-            if (item.visible && item.width > 0)
-                left = Math.min(left, item.x);
+        for (let index = 0; index < zoneNames.length; index++) {
+            if (zoneWidth(zoneNames[index]) > 0)
+                left = Math.min(left, zoneStart(zoneNames[index]));
         }
 
         return Math.max(0, left - appearance.spacing);
     }
 
     function statusIslandRight() {
-        const items = [
-            archButton, systemMonitor, currentApp, workspaces,
-            leftStatusModules, centerStatusModules, statusModules
-        ];
         let right = 0;
 
-        for (let index = 0; index < items.length; index++) {
-            const item = items[index];
-            if (item.visible && item.width > 0)
-                right = Math.max(right, item.x + item.width);
+        for (let index = 0; index < zoneNames.length; index++) {
+            if (zoneWidth(zoneNames[index]) > 0)
+                right = Math.max(right, zoneEnd(zoneNames[index]));
         }
 
         return Math.min(root.width, right + appearance.spacing);
@@ -201,18 +159,8 @@ Item {
         if (popup === "system")
             return systemMonitor;
 
-        const modules = [leftStatusModules, centerStatusModules, statusModules];
-        for (let index = 0; index < modules.length; index++) {
-            const trigger = modules[index].popupTrigger(popup);
-            if (trigger) {
-                return {
-                    x: modules[index].x + trigger.x,
-                    width: trigger.width
-                };
-            }
-        }
-
-        return null;
+        const trigger = statusModules.popupTrigger(popup);
+        return trigger ? { x: statusModules.x + trigger.x, width: trigger.width } : null;
     }
 
     Config.Theme {
@@ -222,9 +170,8 @@ Item {
     SlantedSurface {
         id: leftSurface
 
-        anchors.left: parent.left
-        anchors.right: leftStatusModules.width > 0 ? leftStatusModules.right : currentApp.right
-        anchors.rightMargin: -leftSurface.slant
+        x: 0
+        width: root.zoneEnd("left") + leftSurface.slant
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
@@ -238,10 +185,8 @@ Item {
     SlantedSurface {
         id: centerSurface
 
-        anchors.left: workspaces.left
-        anchors.leftMargin: -centerSurface.slant
-        anchors.right: centerStatusModules.width > 0 ? centerStatusModules.right : workspaces.right
-        anchors.rightMargin: -centerSurface.slant
+        x: root.zoneStart("center") - centerSurface.slant
+        width: root.zoneWidth("center") + centerSurface.slant * 2
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
@@ -255,9 +200,8 @@ Item {
     SlantedSurface {
         id: rightSurface
 
-        anchors.left: statusModules.left
-        anchors.leftMargin: -rightSurface.slant
-        anchors.right: parent.right
+        x: root.zoneStart("right") - rightSurface.slant
+        width: root.width - x
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
@@ -300,7 +244,7 @@ Item {
 
         anchors.verticalCenter: parent.verticalCenter
         visible: root.elementVisible("arch")
-        x: root.structuralX("arch")
+        x: root.elementX("arch")
         Behavior on x {
             NumberAnimation {
                 duration: 220
@@ -316,7 +260,7 @@ Item {
         id: currentApp
 
         anchors.verticalCenter: parent.verticalCenter
-        x: root.structuralX("currentApp")
+        x: root.elementX("currentApp")
         appearance: root.appearance
         monitorScreen: root.monitorScreen
         enabled: root.elementVisible("currentApp")
@@ -326,8 +270,8 @@ Item {
         id: systemMonitor
 
         anchors.verticalCenter: parent.verticalCenter
-        visible: root.elementVisible("system")
-        x: root.structuralX("system")
+        visible: root.elementVisible("systemMonitor")
+        x: root.elementX("systemMonitor")
         appearance: root.appearance
         systemMonitor: root.systemMonitor
         onClicked: root.statusPopupRequested("system")
@@ -337,7 +281,7 @@ Item {
         id: workspaces
         anchors.verticalCenter: parent.verticalCenter
         visible: root.elementVisible("workspaces")
-        x: root.structuralX("workspaces")
+        x: root.elementX("workspaces")
         Behavior on x {
             NumberAnimation {
                 duration: 220
@@ -351,62 +295,18 @@ Item {
     }
 
     StatusModules {
-        id: leftStatusModules
-
-        anchors.verticalCenter: parent.verticalCenter
-        x: root.statusZoneX("left", leftStatusModules)
-        appearance: root.appearance
-        activePopup: root.activeStatusPopup
-        monitorScreen: root.monitorScreen
-        pomodoro: root.pomodoro
-        notificationHistory: root.notificationHistory
-        screenCapture: root.screenCapture
-        placement: "left"
-
-        onPopupRequested: function(popup) {
-            root.statusPopupRequested(popup);
-        }
-
-        onNotificationRequested: root.notificationRequested()
-    }
-
-    StatusModules {
-        id: centerStatusModules
-
-        anchors.verticalCenter: parent.verticalCenter
-        x: root.statusZoneX("center", centerStatusModules)
-        appearance: root.appearance
-        activePopup: root.activeStatusPopup
-        monitorScreen: root.monitorScreen
-        pomodoro: root.pomodoro
-        notificationHistory: root.notificationHistory
-        screenCapture: root.screenCapture
-        placement: "center"
-
-        onPopupRequested: function(popup) {
-            root.statusPopupRequested(popup);
-        }
-
-        onNotificationRequested: root.notificationRequested()
-    }
-
-    StatusModules {
         id: statusModules
+
+        x: 0
+        width: root.width
         anchors.verticalCenter: parent.verticalCenter
-        x: root.statusZoneX("right", statusModules)
-        Behavior on x {
-            NumberAnimation {
-                duration: 220
-                easing.type: Easing.OutCubic
-            }
-        }
         appearance: root.appearance
         activePopup: root.activeStatusPopup
         monitorScreen: root.monitorScreen
         pomodoro: root.pomodoro
         notificationHistory: root.notificationHistory
         screenCapture: root.screenCapture
-        placement: "right"
+        elementX: element => root.elementX(element)
 
         onPopupRequested: function(popup) {
             root.statusPopupRequested(popup);

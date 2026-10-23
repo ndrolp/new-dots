@@ -44,12 +44,8 @@ QtObject {
     property alias desktopWeatherPosition: settings.desktopWeatherPosition
     property alias desktopWeatherLocation: settings.desktopWeatherLocation
     property alias desktopWidgetOrder: settings.desktopWidgetOrder
-    property alias statusModuleOrder: settings.statusModuleOrder
-    property alias statusModuleEnabled: settings.statusModuleEnabled
+    property alias barElements: settings.barElements
     property alias statusModuleGroups: settings.statusModuleGroups
-    property alias statusModulePlacement: settings.statusModulePlacement
-    property alias barElementEnabled: settings.barElementEnabled
-    property alias barElementPlacement: settings.barElementPlacement
     property alias notificationPopupLocation: settings.notificationPopupLocation
     property alias doNotDisturb: settings.doNotDisturb
     property alias barTransparent: settings.barTransparent
@@ -84,6 +80,42 @@ QtObject {
         applyChanges(BarProfileModel.densityPresetChanges(preset));
     }
 
+    function liveBarElements() {
+        return BarProfileModel.normalizeBarElements(settings.barElements);
+    }
+
+    function setBarElementEnabled(element, enabled) {
+        settings.barElements = BarProfileModel.setElementEnabled(liveBarElements(), element, enabled);
+    }
+
+    function moveBarElement(element, offset) {
+        settings.barElements = BarProfileModel.moveElement(liveBarElements(), element, offset);
+    }
+
+    function moveBarElementToZone(element, zone) {
+        settings.barElements = BarProfileModel.moveElementToZone(liveBarElements(), element, zone);
+    }
+
+    // Files written before bar elements existed get the element order step.
+    function migrateLoadedFile() {
+        let raw = null;
+
+        try {
+            raw = JSON.parse(settingsFile.text());
+        } catch (error) {
+            return;
+        }
+
+        if (!raw || raw.barElements !== undefined)
+            return;
+
+        const migrated = BarProfileModel.migrateElementOrder(raw);
+        applyChanges({
+            barElements: migrated.barElements,
+            barProfiles: migrated.barProfiles
+        });
+    }
+
     property var settingsFile: FileView {
         id: settingsFile
 
@@ -93,10 +125,15 @@ QtObject {
 
         onFileChanged: reload()
         onAdapterUpdated: writeAdapter()
+        onLoaded: migrateLoadedFile()
 
         onLoadFailed: error => {
-            if (error === FileViewError.FileNotFound)
+            if (error === FileViewError.FileNotFound) {
+                settings.barProfiles = BarProfileModel.migrateElementOrder({
+                    barProfiles: settings.barProfiles
+                }).barProfiles;
                 writeAdapter();
+            }
         }
 
         adapter: JsonAdapter {
@@ -259,30 +296,28 @@ QtObject {
             property string desktopWeatherPosition: "top-center"
             property string desktopWeatherLocation: "Ourense, ES"
             property var desktopWidgetOrder: ["media", "system", "calendar", "network", "weather"]
-            property var statusModuleOrder: [
-                "notifications", "recording", "media", "audio", "bluetooth", "tray", "network",
-                "battery", "clock"
-            ]
-            property var statusModuleEnabled: {
-                "notifications": true,
-                "recording": true,
-                "media": true,
-                "audio": true,
-                "bluetooth": true,
-                "tray": true,
-                "network": true,
-                "battery": true,
-                "clock": true
-            }
-            property var statusModuleGroups: {}
-            property var statusModulePlacement: {}
-            property var barElementEnabled: {
-                "arch": true,
-                "system": true,
-                "currentApp": true,
-                "workspaces": true
-            }
-            property var barElementPlacement: {}
+            property var statusModuleGroups: ({})
+            property var barElements: ({
+                "left": [
+                    { "id": "arch", "enabled": true },
+                    { "id": "systemMonitor", "enabled": true },
+                    { "id": "currentApp", "enabled": true }
+                ],
+                "center": [
+                    { "id": "workspaces", "enabled": true }
+                ],
+                "right": [
+                    { "id": "notifications", "enabled": true },
+                    { "id": "recording", "enabled": true },
+                    { "id": "media", "enabled": true },
+                    { "id": "audio", "enabled": true },
+                    { "id": "bluetooth", "enabled": true },
+                    { "id": "tray", "enabled": true },
+                    { "id": "network", "enabled": true },
+                    { "id": "battery", "enabled": true },
+                    { "id": "clock", "enabled": true }
+                ]
+            })
             property string notificationPopupLocation: "top-center"
             property bool doNotDisturb: false
             property bool barTransparent: false

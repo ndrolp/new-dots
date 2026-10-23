@@ -44,7 +44,7 @@ Rectangle {
         },
         {
             label: "Bar Widgets", icon: "󰍛", section: "Status",
-            keywords: "bar data modules widgets notifications battery clock media network"
+            keywords: "bar elements data modules widgets order zone arch workspaces system monitor notifications battery clock media network"
         },
         {
             label: "Session", icon: "󰌾", section: "Session",
