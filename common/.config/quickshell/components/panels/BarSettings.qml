@@ -6,12 +6,14 @@ Column {
     id: root
 
     property var appearance
+    property var monitors
 
     width: parent ? parent.width : 0
     spacing: 12
 
     BarProfileSelector {
         appearance: root.appearance
+        monitors: root.monitors
     }
 
     BarSizeStyleSettings {

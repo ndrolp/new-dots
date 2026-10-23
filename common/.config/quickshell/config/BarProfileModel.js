@@ -123,6 +123,83 @@ function saveProfile(state, profileName) {
     };
 }
 
+// The name offered when duplicating `profileName`: the first free
+// "<name> N", counting from 2.
+function suggestedDuplicateName(state, profileName) {
+    let number = 2;
+    while (state.barProfiles[profileName + " " + number] !== undefined)
+        number++;
+    return profileName + " " + number;
+}
+
+// Duplicate and Delete need the saved profiles: unavailable while the edited
+// profile has pending changes.
+function canDuplicateOrDelete(state) {
+    return !isModified(state);
+}
+
+// Why `newName` cannot name a new profile: "empty", "exists", or "" if it can.
+// Names are trimmed.
+function duplicateNameError(state, newName) {
+    const name = String(newName || "").trim();
+
+    if (name.length === 0)
+        return "empty";
+    return state.barProfiles[name] !== undefined ? "exists" : "";
+}
+
+// Changes that copy the saved `profileName` as `newName` (trimmed) and edit
+// the copy. Rejected (null) with pending changes, an unknown profile or a
+// name duplicateNameError refuses.
+function duplicateProfile(state, profileName, newName) {
+    if (!canDuplicateOrDelete(state) || !state.barProfiles[profileName]
+            || duplicateNameError(state, newName) !== "")
+        return null;
+
+    newName = String(newName).trim();
+    const profiles = cloneValue(state.barProfiles);
+    profiles[newName] = cloneValue(profiles[profileName]);
+
+    const withCopy = Object.assign({}, state, { barProfiles: profiles });
+    return Object.assign({ barProfiles: profiles }, loadProfile(withCopy, newName));
+}
+
+// The display settings entries (monitors, and "default" for monitors nobody
+// has configured) that draw `profileName`.
+function monitorsUsingProfile(displaySettings, profileName) {
+    return Object.keys(displaySettings || {}).filter(monitorName =>
+        monitorDisplaySettings(displaySettings, monitorName).barProfile === profileName);
+}
+
+// Why `profileName` cannot be deleted: "pending" (pending changes), "missing",
+// "last" (the only profile left), "assigned" (a monitor draws it, see
+// monitorsUsingProfile), or "" if it can.
+function deleteRejection(state, displaySettings, profileName) {
+    if (!canDuplicateOrDelete(state))
+        return "pending";
+    if (!state.barProfiles[profileName])
+        return "missing";
+    if (Object.keys(state.barProfiles).length <= 1)
+        return "last";
+    return monitorsUsingProfile(displaySettings, profileName).length > 0 ? "assigned" : "";
+}
+
+// Changes that remove `profileName`; null when deleteRejection refuses.
+// Deleting the edited profile edits the default one (or the first left).
+function deleteProfile(state, displaySettings, profileName) {
+    if (deleteRejection(state, displaySettings, profileName) !== "")
+        return null;
+
+    const profiles = cloneValue(state.barProfiles);
+    delete profiles[profileName];
+
+    if (profileName !== state.editingBarProfile)
+        return { barProfiles: profiles };
+
+    const remaining = Object.assign({}, state, { barProfiles: profiles });
+    return Object.assign({ barProfiles: profiles }, discardChanges(remaining));
+}
+
 // The value of `key` for `profileName`: live while the profile is edited,
 // otherwise its saved value, falling back to the live one if it has none.
 function profileValue(state, profileName, key) {

@@ -70,6 +70,7 @@ Rectangle {
 
         if (currentSection === "Bar") {
             source = "BarSettings.qml";
+            properties.monitors = root.monitors;
         } else if (currentSection === "Notifications") {
             source = "NotificationSettings.qml";
         } else if (currentSection === "Monitors") {
