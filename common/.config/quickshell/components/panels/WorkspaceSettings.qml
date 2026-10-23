@@ -64,8 +64,7 @@ Column {
 
             Repeater {
                 model: [
-                    { label: "BAR", propertyName: "barVisible" },
-                    { label: "BACKGROUND CLOCK", propertyName: "backgroundClockVisible" }
+                    { label: "BAR", propertyName: "barVisible" }
                 ]
 
                 delegate: Rectangle {
@@ -158,13 +157,10 @@ Column {
                         width: 144
                         height: 30
                         textRole: "label"
-                        model: [
-                            { label: "Use active", value: "" },
-                            { label: "Minimal", value: "minimal" },
-                            { label: "Work", value: "work" },
-                            { label: "Media", value: "media" },
-                            { label: "Presentation", value: "presentation" }
-                        ]
+                        model: Object.keys(root.appearance.barProfiles || {}).sort().map(name => ({
+                            label: name.charAt(0).toUpperCase() + name.slice(1),
+                            value: name
+                        }))
                         currentIndex: {
                             const profile = root.monitors.displaySettingsFor(monitorDescription).barProfile;
                             for (let index = 0; index < model.length; index++) {
@@ -172,7 +168,7 @@ Column {
                                     return index;
                             }
 
-                            return 0;
+                            return -1;
                         }
 
                         contentItem: Text {

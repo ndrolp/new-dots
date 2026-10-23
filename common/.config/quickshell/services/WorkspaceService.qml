@@ -13,6 +13,15 @@ QtObject {
         return monitor !== null && monitor.description !== "" ? monitor.description : screen.name;
     }
 
+    // The monitor with keyboard focus, named like monitorDescriptionForScreen.
+    function focusedMonitorDescription() {
+        const monitor = Hyprland.focusedMonitor;
+        if (monitor === null)
+            return "default";
+
+        return monitor.description !== "" ? monitor.description : monitor.name;
+    }
+
     function workspacesForScreen(screen, configuredWorkspaces) {
         const monitor = Hyprland.monitorFor(screen);
         const workspaceIds = (configuredWorkspaces || []).filter(id => id >= 1 && id <= 21);

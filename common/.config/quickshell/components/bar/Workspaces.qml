@@ -1,25 +1,31 @@
 import QtQuick
 import "../../config" as Config
+import "../../config/BarProfileModel.js" as BarProfileModel
 
 Rectangle {
     id: root
 
     required property var appearance
+    // Inside a group the shared background replaces this element's pill.
+    property bool grouped: false
     required property var monitorScreen
     required property var monitors
     required property var workspaceService
 
-    implicitWidth: workspaceRow.implicitWidth + (appearance.barTransparent ? 16 : 0)
-    implicitHeight: appearance.barTransparent || appearance.statusIsland
-        ? workspaceRow.implicitHeight + (appearance.barTransparent
+    readonly property bool ownPill: appearance.barTransparent && !grouped
+    readonly property var options: BarProfileModel.elementOptions(appearance.barElements, "workspaces")
+
+    implicitWidth: workspaceRow.implicitWidth + (ownPill ? 16 : 0)
+    implicitHeight: appearance.barTransparent
+        ? workspaceRow.implicitHeight + (ownPill
             ? (appearance.pillVerticalPadding + 2) * 2 : 0)
-        : Math.max(1, appearance.barHeight - (appearance.structuralVerticalPadding * 2))
+        : Math.max(1, appearance.barHeight - (appearance.elementVerticalPadding * 2))
     width: implicitWidth
     height: implicitHeight
     radius: appearance.radius
     color: appearance.barTransparent && !appearance.pillsTransparent
-        && !appearance.transparentBarSlanted && !appearance.statusIsland ? theme.surface : "transparent"
-    border.width: appearance.barTransparentBorder && !appearance.statusIsland ? 1 : 0
+        && !appearance.transparentBarSlanted && !grouped ? theme.surface : "transparent"
+    border.width: appearance.barTransparentBorder && !grouped ? 1 : 0
     border.color: appearance.barTransparentBorder ? theme.border : "transparent"
 
     Behavior on color {
@@ -53,7 +59,7 @@ Rectangle {
             model: root.workspaceService.workspacesForScreen(
                 root.monitorScreen,
                 root.monitors.workspacesFor(root.workspaceService.monitorDescriptionForScreen(root.monitorScreen))
-            ).filter(workspaceId => !root.appearance.hideEmptyWorkspaces
+            ).filter(workspaceId => !root.options.hideEmpty
                 || root.workspaceService.isActive(workspaceId)
                 || root.workspaceService.isOccupied(workspaceId)
                 || root.workspaceService.isUrgent(workspaceId))
@@ -68,23 +74,22 @@ Rectangle {
                 readonly property int toplevelCount: root.workspaceService.toplevelCount(workspaceId)
                 readonly property bool urgent: !active
                     && root.workspaceService.isUrgent(workspaceId)
-                readonly property string workspaceGlyph: root.appearance.workspaceGlyphsEnabled
-                    && root.appearance.workspaceGlyphs
-                    && root.appearance.workspaceGlyphs.length >= workspaceId
-                    ? String(root.appearance.workspaceGlyphs[workspaceId - 1]).trim() : ""
+                readonly property string workspaceGlyph: root.options.glyphsEnabled
+                    && root.options.glyphs.length >= workspaceId
+                    ? String(root.options.glyphs[workspaceId - 1]).trim() : ""
 
                 width: active
                     ? appearance.workspaceButtonSize + (appearance.activeWorkspaceHorizontalPadding * 2)
                     : appearance.workspaceButtonSize
-                height: appearance.barTransparent || appearance.statusIsland
+                height: appearance.barTransparent
                     ? appearance.workspaceButtonSize - 2
                     : Math.max(1, appearance.barHeight
-                        - (appearance.structuralVerticalPadding * 2))
+                        - (appearance.elementVerticalPadding * 2))
                 radius: appearance.radius
                 color: active ? theme.accent : urgent
                     ? Qt.rgba(theme.red.r, theme.red.g, theme.red.b, 0.22)
                     : occupied && !appearance.pillsTransparent && !appearance.transparentBarSlanted
-                        && !appearance.statusIsland
+                        && !root.grouped
                         ? theme.surface : "transparent"
                 border.color: urgent ? theme.red : "transparent"
                 border.width: urgent ? 1 : 0
@@ -138,7 +143,7 @@ Rectangle {
                     color: workspaceButton.urgent ? theme.red : theme.backgroundSecondary
                     border.color: workspaceButton.urgent ? theme.red : theme.border
                     border.width: 1
-                    visible: root.appearance.workspaceAppCountVisible
+                    visible: root.options.appCountVisible
                         && workspaceButton.occupied && !workspaceButton.active
                     z: 2
 

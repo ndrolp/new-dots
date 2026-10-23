@@ -1,4 +1,5 @@
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Services.Notifications
 import Quickshell.Services.UPower
@@ -7,6 +8,7 @@ import "components/bar" as Bar
 import "components/panels" as Panels
 import "components/widgets" as Widgets
 import "config" as Config
+import "config/SchemaMigrations.js" as SchemaMigrations
 import "services" as Services
 
 ShellRoot {
@@ -43,13 +45,73 @@ ShellRoot {
         id: appearance
     }
 
+    // Assigns a bar profile to the focused monitor.
     function setBarProfile(profileName) {
-        appearance.applyBarProfile(profileName);
+        monitors.setDisplaySetting(workspaceService.focusedMonitorDescription(),
+            "barProfile", profileName);
         osdPopup.showBarProfile(profileName.charAt(0).toUpperCase() + profileName.slice(1));
     }
 
     Config.Monitors {
         id: monitors
+    }
+
+    Config.SchemaMigration {
+        appearance: appearance
+        monitors: monitors
+    }
+
+    // A monitor seen for the first time gets the default bar profile,
+    // explicitly, once both files are loaded in the current schema.
+    function assignNewMonitors() {
+        if (!appearance.loaded || appearance.schemaVersion !== SchemaMigrations.schemaVersion)
+            return;
+
+        // Hyprland fills in descriptions after listing a monitor; until then
+        // the monitor is not named the way monitors.json names it.
+        const names = Hyprland.monitors.values.filter(monitor => monitor.description !== "")
+            .map(monitor => monitor.description);
+        monitors.assignNewMonitors(names, appearance.barProfiles);
+    }
+
+    Variants {
+        model: Hyprland.monitors.values
+
+        delegate: QtObject {
+            required property var modelData
+            readonly property string description: modelData.description
+
+            onDescriptionChanged: shell.assignNewMonitors()
+            Component.onCompleted: shell.assignNewMonitors()
+        }
+    }
+
+    Connections {
+        target: appearance
+
+        function onSchemaVersionChanged() {
+            shell.assignNewMonitors();
+        }
+
+        function onLoadedChanged() {
+            shell.assignNewMonitors();
+        }
+    }
+
+    Connections {
+        target: monitors
+
+        function onLoadedChanged() {
+            shell.assignNewMonitors();
+        }
+
+        function onReloadPendingChanged() {
+            shell.assignNewMonitors();
+        }
+
+        function onDisplaySettingsChanged() {
+            shell.assignNewMonitors();
+        }
     }
 
     Config.Wallpapers {

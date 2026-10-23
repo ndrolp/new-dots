@@ -1,156 +1,185 @@
 import QtQuick
 import Quickshell.Io
+import "BarProfileModel.js" as BarProfileModel
+import "SchemaMigrations.js" as SchemaMigrations
 
+// Saved bar profiles and global settings (appearance.json), plus the bar
+// profile the settings panel edits and its pending changes, which live in
+// memory only (see BarProfileModel).
 QtObject {
-    property alias barHeight: settings.barHeight
-    property alias activeBarProfile: settings.activeBarProfile
+    id: root
+
+    property alias schemaVersion: settings.schemaVersion
     property alias barProfiles: settings.barProfiles
-    property alias densityPreset: settings.densityPreset
-    property alias horizontalPadding: settings.horizontalPadding
-    property alias spacing: settings.spacing
-    property alias radius: settings.radius
-    property alias workspaceButtonSize: settings.workspaceButtonSize
-    property alias textSize: settings.textSize
-    property alias archButtonHorizontalPadding: settings.archButtonHorizontalPadding
-    property alias activeWorkspaceHorizontalPadding: settings.activeWorkspaceHorizontalPadding
-    property alias pillVerticalPadding: settings.pillVerticalPadding
-    property alias workspacePadding: settings.workspacePadding
-    property alias structuralVerticalPadding: settings.structuralVerticalPadding
-    property alias workspaceGlyphsEnabled: settings.workspaceGlyphsEnabled
-    property alias hideEmptyWorkspaces: settings.hideEmptyWorkspaces
-    property alias workspaceAppCountVisible: settings.workspaceAppCountVisible
-    property alias workspaceGlyphs: settings.workspaceGlyphs
-    property alias pillsTransparent: settings.pillsTransparent
-    property alias transparentBarTopMargin: settings.transparentBarTopMargin
-    property alias transparentBarSlanted: settings.transparentBarSlanted
-    property alias statusIsland: settings.statusIsland
-    property alias statusIslandRadius: settings.statusIslandRadius
-    property alias backgroundClockEnabled: settings.backgroundClockEnabled
-    property alias backgroundClockCalendarEnabled: settings.backgroundClockCalendarEnabled
-    property alias backgroundClockPosition: settings.backgroundClockPosition
-    property alias backgroundClockSize: settings.backgroundClockSize
-    property alias backgroundClockOpacity: settings.backgroundClockOpacity
-    property alias backgroundClockDateFormat: settings.backgroundClockDateFormat
-    property alias desktopMediaEnabled: settings.desktopMediaEnabled
-    property alias desktopMediaPosition: settings.desktopMediaPosition
-    property alias desktopSystemEnabled: settings.desktopSystemEnabled
-    property alias desktopSystemPosition: settings.desktopSystemPosition
-    property alias desktopCalendarEnabled: settings.desktopCalendarEnabled
-    property alias desktopCalendarPosition: settings.desktopCalendarPosition
-    property alias desktopNetworkEnabled: settings.desktopNetworkEnabled
-    property alias desktopNetworkPosition: settings.desktopNetworkPosition
-    property alias desktopWeatherEnabled: settings.desktopWeatherEnabled
-    property alias desktopWeatherPosition: settings.desktopWeatherPosition
-    property alias desktopWeatherLocation: settings.desktopWeatherLocation
-    property alias desktopWidgetOrder: settings.desktopWidgetOrder
-    property alias statusModuleOrder: settings.statusModuleOrder
-    property alias statusModuleEnabled: settings.statusModuleEnabled
-    property alias statusModuleGroups: settings.statusModuleGroups
-    property alias statusModulePlacement: settings.statusModulePlacement
-    property alias barElementEnabled: settings.barElementEnabled
-    property alias barElementPlacement: settings.barElementPlacement
     property alias notificationPopupLocation: settings.notificationPopupLocation
     property alias doNotDisturb: settings.doNotDisturb
-    property alias barTransparent: settings.barTransparent
-    property alias barTransparentBorder: settings.barTransparentBorder
-    property alias barOpacity: settings.barOpacity
-    property alias notificationBadgeVisible: settings.notificationBadgeVisible
-    property alias mediaTitleVisible: settings.mediaTitleVisible
-    property alias audioMeterVisible: settings.audioMeterVisible
-    property alias batteryPercentageVisible: settings.batteryPercentageVisible
 
-    readonly property var barProfileKeys: [
-        "densityPreset", "barHeight", "horizontalPadding", "spacing", "radius",
-        "workspaceButtonSize", "textSize", "archButtonHorizontalPadding",
-        "activeWorkspaceHorizontalPadding", "pillVerticalPadding", "workspacePadding",
-        "structuralVerticalPadding",
-        "workspaceGlyphsEnabled", "hideEmptyWorkspaces", "workspaceAppCountVisible",
-        "workspaceGlyphs", "pillsTransparent", "transparentBarTopMargin",
-        "transparentBarSlanted", "statusIsland", "statusIslandRadius", "barTransparent",
-        "barTransparentBorder", "barOpacity", "statusModuleOrder", "statusModuleEnabled",
-        "notificationBadgeVisible", "mediaTitleVisible", "audioMeterVisible",
-        "batteryPercentageVisible",
-        "statusModuleGroups", "statusModulePlacement", "barElementEnabled",
-        "barElementPlacement", "backgroundClockEnabled",
-        "backgroundClockCalendarEnabled", "backgroundClockPosition",
-        "backgroundClockSize", "backgroundClockOpacity", "backgroundClockDateFormat",
-        "desktopMediaEnabled", "desktopMediaPosition", "desktopSystemEnabled",
-        "desktopSystemPosition", "desktopCalendarEnabled", "desktopCalendarPosition",
-        "desktopNetworkEnabled", "desktopNetworkPosition", "desktopWeatherEnabled",
-        "desktopWeatherPosition", "desktopWeatherLocation", "desktopWidgetOrder",
-        "notificationPopupLocation"
-    ]
+    // Not stored: a restart edits the default profile with nothing pending.
+    property string editingBarProfile: ""
+    property var pendingProfile: null
 
-    function cloneValue(value) {
-        return JSON.parse(JSON.stringify(value));
-    }
+    readonly property var barProfileState: ({
+        barProfiles: settings.barProfiles,
+        editingBarProfile: root.editingBarProfile,
+        pendingProfile: root.pendingProfile
+    })
 
-    function currentBarLayout() {
-        const layout = {};
+    // The edited profile with its pending changes. The settings panel reads
+    // the bar settings below from it and changes them with setBarSetting.
+    readonly property var editedBarProfile: BarProfileModel.editedProfile(barProfileState)
 
-        for (let index = 0; index < barProfileKeys.length; index++) {
-            const key = barProfileKeys[index];
-            layout[key] = cloneValue(settings[key]);
-        }
+    readonly property int barHeight: editedBarProfile.barHeight
+    readonly property int horizontalPadding: editedBarProfile.horizontalPadding
+    readonly property int spacing: editedBarProfile.spacing
+    readonly property int radius: editedBarProfile.radius
+    readonly property int workspaceButtonSize: editedBarProfile.workspaceButtonSize
+    readonly property int textSize: editedBarProfile.textSize
+    readonly property int archButtonHorizontalPadding: editedBarProfile.archButtonHorizontalPadding
+    readonly property int activeWorkspaceHorizontalPadding: editedBarProfile.activeWorkspaceHorizontalPadding
+    readonly property int pillVerticalPadding: editedBarProfile.pillVerticalPadding
+    readonly property int workspacePadding: editedBarProfile.workspacePadding
+    readonly property int elementVerticalPadding: editedBarProfile.elementVerticalPadding
+    readonly property bool pillsTransparent: editedBarProfile.pillsTransparent
+    readonly property int transparentBarTopMargin: editedBarProfile.transparentBarTopMargin
+    readonly property bool transparentBarSlanted: editedBarProfile.transparentBarSlanted
+    readonly property int groupRadius: editedBarProfile.groupRadius
+    readonly property var barElements: editedBarProfile.barElements
+    readonly property bool barTransparent: editedBarProfile.barTransparent
+    readonly property bool barTransparentBorder: editedBarProfile.barTransparentBorder
+    readonly property int barOpacity: editedBarProfile.barOpacity
 
-        return layout;
-    }
-
-    function applyBarProfile(profileName) {
-        const profile = barProfiles[profileName];
-
-        if (!profile)
+    // Applies changes returned by BarProfileModel: saved profiles go to the
+    // file, the edited profile and pending changes stay in memory.
+    function applyChanges(changes) {
+        if (!changes)
             return;
 
-        for (let index = 0; index < barProfileKeys.length; index++) {
-            const key = barProfileKeys[index];
-            if (profile[key] !== undefined)
-                settings[key] = cloneValue(profile[key]);
-        }
-
-        activeBarProfile = profileName;
+        if (changes.barProfiles !== undefined)
+            settings.barProfiles = changes.barProfiles;
+        if (changes.editingBarProfile !== undefined)
+            root.editingBarProfile = changes.editingBarProfile;
+        if (changes.pendingProfile !== undefined)
+            root.pendingProfile = changes.pendingProfile;
     }
 
-    function saveBarProfile(profileName) {
-        const profiles = cloneValue(barProfiles);
-        profiles[profileName] = currentBarLayout();
-        barProfiles = profiles;
-        activeBarProfile = profileName;
+    // Sets a bar setting of the edited profile, as a pending change.
+    function setBarSetting(key, value) {
+        const values = {};
+        values[key] = value;
+        applyChanges(BarProfileModel.setValues(barProfileState, values));
     }
 
+    // The edited profile has pending changes. Only monitors drawing it show them.
+    readonly property bool barProfileModified: BarProfileModel.isModified(barProfileState)
+
+    // Picks the profile the settings panel edits; no monitor changes. Ignored
+    // while the edited profile has pending changes.
+    function editBarProfile(profileName) {
+        applyChanges(BarProfileModel.editProfile(barProfileState, profileName));
+    }
+
+    // Writes the pending changes into the edited profile.
+    function saveBarProfile() {
+        applyChanges(BarProfileModel.saveProfile(barProfileState));
+    }
+
+    // Drops the pending changes: back to the saved edited profile.
+    function discardBarProfileChanges() {
+        applyChanges(BarProfileModel.discardChanges(barProfileState));
+    }
+
+    // Copies the edited profile as `newName` and edits the copy. Ignored with
+    // pending changes or a name duplicateNameError refuses.
+    function duplicateBarProfile(newName) {
+        applyChanges(BarProfileModel.duplicateProfile(barProfileState, editingBarProfile, newName));
+    }
+
+    // Removes `profileName` unless deleteBarProfileRejection refuses;
+    // `displaySettings` comes from monitors.json.
+    function deleteBarProfile(profileName, displaySettings) {
+        applyChanges(BarProfileModel.deleteProfile(barProfileState, displaySettings, profileName));
+    }
+
+    function suggestedDuplicateName() {
+        return BarProfileModel.suggestedDuplicateName(barProfileState, editingBarProfile);
+    }
+
+    function duplicateNameError(newName) {
+        return BarProfileModel.duplicateNameError(barProfileState, newName);
+    }
+
+    function deleteBarProfileRejection(profileName, displaySettings) {
+        return BarProfileModel.deleteRejection(barProfileState, displaySettings, profileName);
+    }
+
+    // What a monitor drawing `profileName` shows for `key`.
     function barProfileValue(profileName, key) {
-        if (profileName === activeBarProfile)
-            return settings[key];
-
-        const profile = barProfiles[profileName];
-        return profile && profile[key] !== undefined ? profile[key] : settings[key];
+        return BarProfileModel.profileValue(barProfileState, profileName, key);
     }
+
+    // The density preset the edited sizes match ("" if none): presets are a
+    // shortcut, so the matching one is derived instead of stored.
+    readonly property string matchingDensityPreset: BarProfileModel.matchingDensityPreset(editedBarProfile)
 
     function applyDensityPreset(preset) {
-        densityPreset = preset;
+        applyChanges(BarProfileModel.setValues(barProfileState,
+            BarProfileModel.densityPresetChanges(preset)));
+    }
 
-        if (preset === "compact") {
-            barHeight = 30;
-            horizontalPadding = 8;
-            spacing = 4;
-            pillVerticalPadding = 2;
-            workspacePadding = 3;
-            textSize = 13;
-        } else if (preset === "spacious") {
-            barHeight = 38;
-            horizontalPadding = 16;
-            spacing = 12;
-            pillVerticalPadding = 5;
-            workspacePadding = 5;
-            textSize = 15;
-        } else {
-            barHeight = 34;
-            horizontalPadding = 12;
-            spacing = 8;
-            pillVerticalPadding = 3;
-            workspacePadding = 4;
-            textSize = 14;
+    function setBarElementEnabled(element, enabled) {
+        setBarSetting("barElements", BarProfileModel.setElementEnabled(barElements, element, enabled));
+    }
+
+    function moveBarElement(element, offset) {
+        setBarSetting("barElements", BarProfileModel.moveElement(barElements, element, offset));
+    }
+
+    function setBarElementJoined(element, joined) {
+        setBarSetting("barElements", BarProfileModel.setElementJoined(barElements, element, joined));
+    }
+
+    // An option of a bar element of the edited profile (see
+    // BarProfileModel.elementOptionDefaults).
+    function barElementOption(element, option) {
+        return BarProfileModel.elementOption(barElements, element, option);
+    }
+
+    function setBarElementOption(element, option, value) {
+        setBarSetting("barElements", BarProfileModel.setElementOption(barElements, element,
+            option, value));
+    }
+
+    function moveBarElementToZone(element, zone) {
+        setBarSetting("barElements", BarProfileModel.moveElementToZone(barElements, element, zone));
+    }
+
+    // Keeps the edited profile one that exists, e.g. after the first load or
+    // when another instance deleted it.
+    function ensureEditedProfile() {
+        if (settings.barProfiles[editingBarProfile] !== undefined)
+            return;
+
+        editingBarProfile = BarProfileModel.defaultProfileName(settings.barProfiles);
+        pendingProfile = null;
+    }
+
+    property bool loaded: false
+
+    // The file as stored, including keys the adapter does not declare; null
+    // when it is empty or unreadable.
+    function rawState() {
+        try {
+            return JSON.parse(settingsFile.text());
+        } catch (error) {
+            return null;
         }
+    }
+
+    // Replaces the file with a migrated state (see SchemaMigration) in a
+    // single write, which the adapter then loads; per-property writes would
+    // race with reloads.
+    function applyMigratedState(state) {
+        settingsFile.setText(JSON.stringify(state, null, 4));
     }
 
     property var settingsFile: FileView {
@@ -162,205 +191,28 @@ QtObject {
 
         onFileChanged: reload()
         onAdapterUpdated: writeAdapter()
+        onLoaded: {
+            root.ensureEditedProfile();
+            root.loaded = true;
+        }
 
         onLoadFailed: error => {
-            if (error === FileViewError.FileNotFound)
+            if (error === FileViewError.FileNotFound) {
+                // The defaults are already in the current schema.
+                settings.schemaVersion = SchemaMigrations.schemaVersion;
                 writeAdapter();
+            }
+            root.ensureEditedProfile();
+            root.loaded = true;
         }
 
         adapter: JsonAdapter {
             id: settings
 
-            property int barHeight: 32
-            property string activeBarProfile: "work"
-            property var barProfiles: ({
-                "minimal": {
-                    "densityPreset": "compact",
-                    "barHeight": 30,
-                    "horizontalPadding": 10,
-                    "spacing": 4,
-                    "radius": 6,
-                    "workspaceButtonSize": 18,
-                    "textSize": 13,
-                    "archButtonHorizontalPadding": 5,
-                    "activeWorkspaceHorizontalPadding": 5,
-                    "pillVerticalPadding": 2,
-                    "workspacePadding": 3,
-                    "workspaceGlyphsEnabled": false,
-                    "hideEmptyWorkspaces": true,
-                    "workspaceAppCountVisible": false,
-                    "workspaceGlyphs": ["", "", "", "", "", "", "", "", "", "",
-                        "", "", "", "", "", "", "", "", "", ""],
-                    "pillsTransparent": true,
-                    "transparentBarTopMargin": 6,
-                    "transparentBarSlanted": false,
-                    "statusIsland": false,
-                    "statusIslandRadius": 12,
-                    "barTransparent": true,
-                    "barTransparentBorder": true,
-                    "statusModuleOrder": ["notifications", "recording", "audio", "network", "battery", "clock"],
-                    "statusModuleEnabled": {
-                        "notifications": true, "recording": true, "media": false, "audio": true,
-                        "bluetooth": false, "tray": false,
-                        "network": true, "battery": true, "clock": true
-                    },
-                    "statusModuleGroups": {},
-                    "statusModulePlacement": {},
-                    "barElementEnabled": {
-                        "arch": true, "system": false, "currentApp": false, "workspaces": true
-                    },
-                    "barElementPlacement": {}
-                },
-                "work": {},
-                "media": {
-                    "densityPreset": "balanced",
-                    "barHeight": 34,
-                    "horizontalPadding": 12,
-                    "spacing": 8,
-                    "radius": 8,
-                    "workspaceButtonSize": 20,
-                    "textSize": 14,
-                    "archButtonHorizontalPadding": 6,
-                    "activeWorkspaceHorizontalPadding": 6,
-                    "pillVerticalPadding": 3,
-                    "workspacePadding": 4,
-                    "workspaceGlyphsEnabled": false,
-                    "hideEmptyWorkspaces": false,
-                    "workspaceAppCountVisible": true,
-                    "workspaceGlyphs": ["", "", "", "", "", "", "", "", "", "",
-                        "", "", "", "", "", "", "", "", "", ""],
-                    "pillsTransparent": false,
-                    "transparentBarTopMargin": 7,
-                    "transparentBarSlanted": false,
-                    "statusIsland": true,
-                    "statusIslandRadius": 14,
-                    "barTransparent": true,
-                    "barTransparentBorder": true,
-                    "statusModuleOrder": ["notifications", "recording", "media", "audio", "network", "battery", "clock"],
-                    "statusModuleEnabled": {
-                        "notifications": true, "recording": true, "media": true, "audio": true,
-                        "bluetooth": false, "tray": false,
-                        "network": true, "battery": true, "clock": true
-                    },
-                    "statusModuleGroups": { "media": 1, "audio": 1 },
-                    "statusModulePlacement": { "media": "center" },
-                    "barElementEnabled": {
-                        "arch": true, "system": true, "currentApp": true, "workspaces": true
-                    },
-                    "barElementPlacement": {}
-                },
-                "presentation": {
-                    "densityPreset": "compact",
-                    "barHeight": 30,
-                    "horizontalPadding": 12,
-                    "spacing": 5,
-                    "radius": 6,
-                    "workspaceButtonSize": 18,
-                    "textSize": 13,
-                    "archButtonHorizontalPadding": 5,
-                    "activeWorkspaceHorizontalPadding": 5,
-                    "pillVerticalPadding": 2,
-                    "workspacePadding": 3,
-                    "workspaceGlyphsEnabled": false,
-                    "hideEmptyWorkspaces": true,
-                    "workspaceAppCountVisible": false,
-                    "workspaceGlyphs": ["", "", "", "", "", "", "", "", "", "",
-                        "", "", "", "", "", "", "", "", "", ""],
-                    "pillsTransparent": true,
-                    "transparentBarTopMargin": 8,
-                    "transparentBarSlanted": false,
-                    "statusIsland": false,
-                    "statusIslandRadius": 12,
-                    "barTransparent": true,
-                    "barTransparentBorder": true,
-                    "statusModuleOrder": ["notifications", "recording", "network", "battery", "clock"],
-                    "statusModuleEnabled": {
-                        "notifications": true, "recording": true, "media": false, "audio": false,
-                        "bluetooth": false, "tray": false,
-                        "network": true, "battery": true, "clock": true
-                    },
-                    "statusModuleGroups": {},
-                    "statusModulePlacement": {},
-                    "barElementEnabled": {
-                        "arch": false, "system": false, "currentApp": false, "workspaces": false
-                    },
-                    "barElementPlacement": {}
-                }
-            })
-            property string densityPreset: "balanced"
-            property int horizontalPadding: 12
-            property int spacing: 8
-            property int radius: 8
-            property int workspaceButtonSize: 20
-            property int textSize: 14
-            property int archButtonHorizontalPadding: 6
-            property int activeWorkspaceHorizontalPadding: 6
-            property int pillVerticalPadding: 3
-            property int workspacePadding: 4
-            property int structuralVerticalPadding: 5
-            property bool workspaceGlyphsEnabled: false
-            property bool hideEmptyWorkspaces: false
-            property bool workspaceAppCountVisible: true
-            property var workspaceGlyphs: [
-                "", "", "", "", "", "", "", "", "", "",
-                "", "", "", "", "", "", "", "", "", ""
-            ]
-            property bool pillsTransparent: false
-            property int transparentBarTopMargin: 0
-            property bool transparentBarSlanted: false
-            property bool statusIsland: false
-            property int statusIslandRadius: 12
-            property bool backgroundClockEnabled: true
-            property bool backgroundClockCalendarEnabled: false
-            property string backgroundClockPosition: "center"
-            property int backgroundClockSize: 96
-            property int backgroundClockOpacity: 100
-            property string backgroundClockDateFormat: "full"
-            property bool desktopMediaEnabled: false
-            property string desktopMediaPosition: "bottom-left"
-            property bool desktopSystemEnabled: false
-            property string desktopSystemPosition: "top-right"
-            property bool desktopCalendarEnabled: false
-            property string desktopCalendarPosition: "top-left"
-            property bool desktopNetworkEnabled: false
-            property string desktopNetworkPosition: "bottom-right"
-            property bool desktopWeatherEnabled: false
-            property string desktopWeatherPosition: "top-center"
-            property string desktopWeatherLocation: "Ourense, ES"
-            property var desktopWidgetOrder: ["media", "system", "calendar", "network", "weather"]
-            property var statusModuleOrder: [
-                "notifications", "recording", "media", "audio", "bluetooth", "tray", "network",
-                "battery", "clock"
-            ]
-            property var statusModuleEnabled: {
-                "notifications": true,
-                "recording": true,
-                "media": true,
-                "audio": true,
-                "bluetooth": true,
-                "tray": true,
-                "network": true,
-                "battery": true,
-                "clock": true
-            }
-            property var statusModuleGroups: {}
-            property var statusModulePlacement: {}
-            property var barElementEnabled: {
-                "arch": true,
-                "system": true,
-                "currentApp": true,
-                "workspaces": true
-            }
-            property var barElementPlacement: {}
+            property int schemaVersion: 0
+            property var barProfiles: BarProfileModel.defaultBarProfiles()
             property string notificationPopupLocation: "top-center"
             property bool doNotDisturb: false
-            property bool barTransparent: false
-            property bool barTransparentBorder: false
-            property int barOpacity: 100
-            property bool notificationBadgeVisible: true
-            property bool mediaTitleVisible: true
-            property bool audioMeterVisible: true
-            property bool batteryPercentageVisible: true
         }
     }
 }

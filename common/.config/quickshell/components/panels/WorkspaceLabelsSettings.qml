@@ -55,10 +55,10 @@ Column {
                 width: 48
                 height: 28
                 radius: root.appearance.radius
-                color: root.appearance.workspaceGlyphsEnabled ? theme.accent : theme.surface
+                color: root.appearance.barElementOption("workspaces", "glyphsEnabled") ? theme.accent : theme.surface
 
                 Rectangle {
-                    x: root.appearance.workspaceGlyphsEnabled ? parent.width - width - 3 : 3
+                    x: root.appearance.barElementOption("workspaces", "glyphsEnabled") ? parent.width - width - 3 : 3
                     anchors.verticalCenter: parent.verticalCenter
                     width: 22
                     height: 22
@@ -75,8 +75,8 @@ Column {
             }
 
             TapHandler {
-                onTapped: root.appearance.workspaceGlyphsEnabled
-                    = !root.appearance.workspaceGlyphsEnabled
+                onTapped: root.appearance.setBarElementOption("workspaces", "glyphsEnabled",
+                    !root.appearance.barElementOption("workspaces", "glyphsEnabled"))
             }
         }
 
@@ -114,16 +114,14 @@ Column {
                     SettingsInput {
                         width: parent.width
                         appearance: root.appearance
-                        text: root.appearance.workspaceGlyphs
-                            && root.appearance.workspaceGlyphs.length >= modelData
-                            ? root.appearance.workspaceGlyphs[modelData - 1] : ""
+                        text: root.appearance.barElementOption("workspaces", "glyphs")[modelData - 1] || ""
                         placeholderText: String(modelData)
                         maximumLength: 4
 
                         onTextEdited: {
-                            const glyphs = root.appearance.workspaceGlyphs.slice();
+                            const glyphs = root.appearance.barElementOption("workspaces", "glyphs");
                             glyphs[modelData - 1] = text;
-                            root.appearance.workspaceGlyphs = glyphs;
+                            root.appearance.setBarElementOption("workspaces", "glyphs", glyphs);
                         }
                     }
                 }

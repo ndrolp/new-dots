@@ -56,14 +56,15 @@ Variants {
             onTriggered: clockWindow.currentTime = new Date()
         }
 
-        visible: root.appearance.backgroundClockEnabled
-            && root.monitors.backgroundClockVisible(monitorDescription)
+        readonly property var clock: root.monitors.desktopWidgetsFor(monitorDescription).backgroundClock
+
+        visible: clock.enabled
 
         Column {
             id: clockContent
 
             x: {
-                const position = root.appearance.backgroundClockPosition;
+                const position = clockWindow.clock ? clockWindow.clock.position : "center";
                 if (position.endsWith("left"))
                     return 48;
                 if (position.endsWith("right"))
@@ -71,15 +72,15 @@ Variants {
                 return (parent.width - width) / 2;
             }
             y: {
-                const position = root.appearance.backgroundClockPosition;
+                const position = clockWindow.clock ? clockWindow.clock.position : "center";
                 if (position.startsWith("top"))
                     return 82;
                 if (position.startsWith("bottom"))
                     return parent.height - height - 56;
                 return (parent.height - height) / 2;
             }
-            spacing: root.appearance.backgroundClockCalendarEnabled ? 10 : 4
-            opacity: root.appearance.backgroundClockOpacity / 100
+            spacing: clockWindow.clock.calendarEnabled ? 10 : 4
+            opacity: clockWindow.clock.opacity / 100
 
             layer.enabled: true
             layer.effect: MultiEffect {
@@ -95,14 +96,14 @@ Variants {
                 text: Qt.formatTime(clockWindow.currentTime, "HH:mm")
                 color: theme.text
                 font.family: theme.fontFamily
-                font.pixelSize: root.appearance.backgroundClockSize
+                font.pixelSize: clockWindow.clock.size
                 font.bold: true
             }
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: {
-                    switch (root.appearance.backgroundClockDateFormat) {
+                    switch (clockWindow.clock.dateFormat) {
                     case "short":
                         return Qt.formatDate(clockWindow.currentTime, "ddd, MMM d");
                     case "numeric":
@@ -123,7 +124,7 @@ Variants {
             Column {
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 5
-                visible: root.appearance.backgroundClockCalendarEnabled
+                visible: clockWindow.clock.calendarEnabled
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter

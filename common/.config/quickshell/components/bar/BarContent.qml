@@ -2,6 +2,7 @@ import Quickshell
 import QtQuick
 import QtQuick.Effects
 import "../../config" as Config
+import "../../config/BarProfileModel.js" as BarProfileModel
 
 Item {
     id: root
@@ -20,199 +21,122 @@ Item {
     signal configRequested(var screen)
     signal statusPopupRequested(string popup)
     signal notificationRequested()
-    readonly property bool statusIslandEnabled: appearance.statusIsland
-    readonly property real centerStatusGap: centerStatusModules.width > 0 ? appearance.spacing : 0
-    readonly property real centeredContentWidth: workspaces.width + centerStatusGap
-        + centerStatusModules.width
-    readonly property var structuralOrder: ["arch", "system", "currentApp", "workspaces"]
+    readonly property var zoneNames: ["left", "center", "right"]
+    readonly property real slantedPadding: appearance.barTransparent && appearance.transparentBarSlanted
+        ? appearance.horizontalPadding : 0
+    // Room between a group's shared background and its first and last element.
+    readonly property real groupPadding: appearance.spacing
 
-    function elementPlacement(element) {
-        const defaults = {
-            "arch": "left",
-            "system": "left",
-            "currentApp": "left",
-            "workspaces": "center"
-        };
-        return (appearance.barElementPlacement || {})[element] || defaults[element];
+    // The item of every bar element, by element id.
+    readonly property var elementItems: Object.assign({
+        "arch": archButton,
+        "systemMonitor": systemMonitor,
+        "currentApp": currentApp,
+        "workspaces": workspaces
+    }, barElementItems.items)
+
+    // The bar element each popup opens from, when its name differs.
+    readonly property var popupElements: ({
+        "system": "systemMonitor",
+        "pomodoro": "clock"
+    })
+
+    // Bar elements are drawn with one walk per zone, in the order the profile
+    // lists them; enabled elements with nothing to show take no space.
+    function elementItem(element) {
+        return elementItems[element] || null;
+    }
+
+    function popupElement(popup) {
+        return popupElements[popup] || popup;
     }
 
     function elementVisible(element) {
-        return (appearance.barElementEnabled || {})[element] !== false;
+        return BarProfileModel.elementEnabled(appearance.barElements, element);
     }
 
-    function elementWidth(element) {
-        if (element === "arch")
-            return archButton.width;
-        if (element === "system")
-            return systemMonitor.width;
-        if (element === "currentApp")
-            return currentApp.width;
-        return workspaces.width;
+    function elementShown(element) {
+        const item = elementItem(element);
+        return item !== null && item.visible && item.width > 0;
     }
 
-    function structuralZoneWidth(zone) {
-        let width = 0;
+    // Positions within a zone, relative to its start, and one background per
+    // group of two or more shown elements.
+    function zoneLayout(zone) {
+        const groups = BarProfileModel.zoneGroups(appearance.barElements, zone,
+            element => root.elementShown(element));
+        const positions = {};
+        const backgrounds = [];
+        let x = 0;
 
-        for (let index = 0; index < structuralOrder.length; index++) {
-            const element = structuralOrder[index];
-            if (elementVisible(element) && elementPlacement(element) === zone)
-                width += elementWidth(element) + (width > 0 ? appearance.spacing : 0);
+        for (let groupIndex = 0; groupIndex < groups.length; groupIndex++) {
+            const group = groups[groupIndex];
+            const grouped = group.length > 1;
+            const start = groupIndex > 0 ? x + appearance.spacing : 0;
+
+            x = start + (grouped ? groupPadding : 0);
+            for (let index = 0; index < group.length; index++) {
+                if (index > 0)
+                    x += appearance.spacing;
+                positions[group[index]] = { x: x, grouped: grouped };
+                x += elementItem(group[index]).width;
+            }
+
+            if (grouped) {
+                x += groupPadding;
+                backgrounds.push({ x: start, width: x - start });
+            }
         }
 
-        return width;
-    }
-
-    function statusZoneWidth(zone) {
-        if (zone === "left")
-            return leftStatusModules.width;
-        if (zone === "center")
-            return centerStatusModules.width;
-        return statusModules.width;
+        return { positions: positions, backgrounds: backgrounds, width: x };
     }
 
     function zoneWidth(zone) {
-        const structuralWidth = structuralZoneWidth(zone);
-        const modulesWidth = statusZoneWidth(zone);
-        return structuralWidth + modulesWidth
-            + (structuralWidth > 0 && modulesWidth > 0 ? appearance.spacing : 0);
+        return zoneLayout(zone).width;
     }
 
-    function statusIslandContentWidth() {
-        const zones = ["left", "center", "right"];
-        let width = 0;
-
-        for (let index = 0; index < zones.length; index++) {
-            const nextWidth = zoneWidth(zones[index]);
-            if (nextWidth > 0)
-                width += nextWidth + (width > 0 ? appearance.spacing : 0);
-        }
-
-        return width;
-    }
-
-    function statusIslandZoneStart(zone) {
-        const zones = ["left", "center", "right"];
-        let x = Math.round((root.width - statusIslandContentWidth()) / 2);
-
-        for (let index = 0; index < zones.length; index++) {
-            const candidate = zones[index];
-            const candidateWidth = zoneWidth(candidate);
-
-            if (candidate === zone)
-                return x;
-            if (candidateWidth > 0)
-                x += candidateWidth + (zoneWidth(zone) > 0 ? appearance.spacing : 0);
-        }
-
-        return x;
-    }
-
-    function statusZoneX(zone, modules) {
-        const structuralWidth = structuralZoneWidth(zone);
-        const gap = structuralWidth > 0 && modules.width > 0 ? appearance.spacing : 0;
-
-        if (statusIslandEnabled)
-            return statusIslandZoneStart(zone) + structuralWidth + gap;
-
-        const padding = appearance.barTransparent && appearance.transparentBarSlanted
-            ? appearance.horizontalPadding : 0;
-
+    function zoneStart(zone) {
+        if (zone === "left")
+            return slantedPadding;
         if (zone === "right")
-            return root.width - modules.width - padding;
-
-        const start = zone === "left" ? padding
-            : Math.round((root.width - structuralWidth - gap - modules.width) / 2);
-        return start + structuralWidth + gap;
+            return root.width - zoneWidth("right") - slantedPadding;
+        return Math.round((root.width - zoneWidth("center")) / 2);
     }
 
-    function structuralX(element) {
-        const zone = elementPlacement(element);
-
-        if (statusIslandEnabled) {
-            let x = statusIslandZoneStart(zone);
-
-            for (let index = 0; index < structuralOrder.length; index++) {
-                const candidate = structuralOrder[index];
-                if (!elementVisible(candidate) || elementPlacement(candidate) !== zone)
-                    continue;
-                if (candidate === element)
-                    return x;
-                x += elementWidth(candidate) + appearance.spacing;
-            }
-
-            return x;
-        }
-
-        const padding = appearance.barTransparent && appearance.transparentBarSlanted
-            ? appearance.horizontalPadding : 0;
-        let x = zone === "right"
-            ? root.width - statusModules.width - padding - structuralZoneWidth("right")
-                - (statusModules.width > 0 && structuralZoneWidth("right") > 0 ? appearance.spacing : 0)
-            : zone === "left" ? padding
-                : Math.round((root.width - structuralZoneWidth("center")
-                    - (centerStatusModules.width > 0 && structuralZoneWidth("center") > 0
-                        ? appearance.spacing : 0) - centerStatusModules.width) / 2);
-
-        for (let index = 0; index < structuralOrder.length; index++) {
-            const candidate = structuralOrder[index];
-            if (!elementVisible(candidate) || elementPlacement(candidate) !== zone)
-                continue;
-            if (candidate === element)
-                return x;
-            x += elementWidth(candidate) + appearance.spacing;
-        }
-
-        return x;
+    function zoneEnd(zone) {
+        return zoneStart(zone) + zoneWidth(zone);
     }
 
-    function statusIslandLeft() {
-        const items = [
-            archButton, systemMonitor, currentApp, workspaces,
-            leftStatusModules, centerStatusModules, statusModules
-        ];
-        let left = root.width;
-
-        for (let index = 0; index < items.length; index++) {
-            const item = items[index];
-            if (item.visible && item.width > 0)
-                left = Math.min(left, item.x);
-        }
-
-        return Math.max(0, left - appearance.spacing);
+    function elementPosition(element) {
+        const zone = BarProfileModel.elementZone(appearance.barElements, element);
+        return zone === "" ? null : zoneLayout(zone).positions[element] || null;
     }
 
-    function statusIslandRight() {
-        const items = [
-            archButton, systemMonitor, currentApp, workspaces,
-            leftStatusModules, centerStatusModules, statusModules
-        ];
-        let right = 0;
-
-        for (let index = 0; index < items.length; index++) {
-            const item = items[index];
-            if (item.visible && item.width > 0)
-                right = Math.max(right, item.x + item.width);
-        }
-
-        return Math.min(root.width, right + appearance.spacing);
+    function elementX(element) {
+        const zone = BarProfileModel.elementZone(appearance.barElements, element);
+        const position = elementPosition(element);
+        return zoneStart(zone) + (position ? position.x : 0);
     }
 
+    // Grouped elements drop their own pill: the group draws one background.
+    function elementGrouped(element) {
+        const position = elementPosition(element);
+        return position !== null && position.grouped;
+    }
+
+    // Popups of center elements open under them; the others at the bar edge.
+    function popupNearTrigger(popup) {
+        return BarProfileModel.elementZone(appearance.barElements, popupElement(popup)) === "center";
+    }
+
+    // Where the element a popup opens from sits in the bar.
     function popupTrigger(popup) {
-        if (popup === "system")
-            return systemMonitor;
+        const item = elementItem(popupElement(popup));
+        if (!item)
+            return null;
 
-        const modules = [leftStatusModules, centerStatusModules, statusModules];
-        for (let index = 0; index < modules.length; index++) {
-            const trigger = modules[index].popupTrigger(popup);
-            if (trigger) {
-                return {
-                    x: modules[index].x + trigger.x,
-                    width: trigger.width
-                };
-            }
-        }
-
-        return null;
+        const offset = item.parent === barElementItems ? barElementItems.x : 0;
+        return { x: offset + item.x, width: item.width };
     }
 
     Config.Theme {
@@ -222,13 +146,11 @@ Item {
     SlantedSurface {
         id: leftSurface
 
-        anchors.left: parent.left
-        anchors.right: leftStatusModules.width > 0 ? leftStatusModules.right : currentApp.right
-        anchors.rightMargin: -leftSurface.slant
+        x: 0
+        width: root.zoneEnd("left") + leftSurface.slant
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
-            && !root.statusIslandEnabled
         appearance: root.appearance
         fillColor: theme.surface
         keepLeftEdge: true
@@ -238,14 +160,11 @@ Item {
     SlantedSurface {
         id: centerSurface
 
-        anchors.left: workspaces.left
-        anchors.leftMargin: -centerSurface.slant
-        anchors.right: centerStatusModules.width > 0 ? centerStatusModules.right : workspaces.right
-        anchors.rightMargin: -centerSurface.slant
+        x: root.zoneStart("center") - centerSurface.slant
+        width: root.zoneWidth("center") + centerSurface.slant * 2
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
-            && !root.statusIslandEnabled
         appearance: root.appearance
         fillColor: theme.surface
         slantBothSides: true
@@ -255,42 +174,61 @@ Item {
     SlantedSurface {
         id: rightSurface
 
-        anchors.left: statusModules.left
-        anchors.leftMargin: -rightSurface.slant
-        anchors.right: parent.right
+        x: root.zoneStart("right") - rightSurface.slant
+        width: root.width - x
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
-            && !root.statusIslandEnabled
         appearance: root.appearance
         fillColor: theme.surface
         keepRightEdge: true
         z: -1
     }
 
-    Rectangle {
-        x: root.statusIslandLeft()
-        y: 0
-        width: Math.max(0, root.statusIslandRight() - x)
-        height: parent.height
-        radius: root.appearance.statusIslandRadius
-        color: theme.surface
-        border.width: root.appearance.barTransparentBorder ? 1 : 0
-        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
-        visible: root.statusIslandEnabled
-        z: -1
+    // One shared background per group.
+    Repeater {
+        model: root.zoneNames
 
-        Behavior on x {
-            NumberAnimation {
-                duration: 180
-                easing.type: Easing.OutCubic
-            }
-        }
+        delegate: Item {
+            id: zoneBackgrounds
 
-        Behavior on width {
-            NumberAnimation {
-                duration: 180
-                easing.type: Easing.OutCubic
+            required property string modelData
+            readonly property var backgrounds: root.zoneLayout(modelData).backgrounds
+
+            anchors.fill: parent
+            z: -1
+
+            Repeater {
+                model: zoneBackgrounds.backgrounds.length
+
+                delegate: Rectangle {
+                    required property int index
+                    readonly property var background: zoneBackgrounds.backgrounds[index]
+                        || { x: 0, width: 0 }
+
+                    x: root.zoneStart(zoneBackgrounds.modelData) + background.x
+                    y: 0
+                    width: background.width
+                    height: parent.height
+                    radius: root.appearance.groupRadius
+                    color: theme.surface
+                    border.width: root.appearance.barTransparentBorder ? 1 : 0
+                    border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+
+                    Behavior on x {
+                        NumberAnimation {
+                            duration: 180
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+
+                    Behavior on width {
+                        NumberAnimation {
+                            duration: 180
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                }
             }
         }
     }
@@ -300,7 +238,8 @@ Item {
 
         anchors.verticalCenter: parent.verticalCenter
         visible: root.elementVisible("arch")
-        x: root.structuralX("arch")
+        x: root.elementX("arch")
+        grouped: root.elementGrouped("arch")
         Behavior on x {
             NumberAnimation {
                 duration: 220
@@ -316,7 +255,8 @@ Item {
         id: currentApp
 
         anchors.verticalCenter: parent.verticalCenter
-        x: root.structuralX("currentApp")
+        x: root.elementX("currentApp")
+        grouped: root.elementGrouped("currentApp")
         appearance: root.appearance
         monitorScreen: root.monitorScreen
         enabled: root.elementVisible("currentApp")
@@ -326,8 +266,9 @@ Item {
         id: systemMonitor
 
         anchors.verticalCenter: parent.verticalCenter
-        visible: root.elementVisible("system")
-        x: root.structuralX("system")
+        visible: root.elementVisible("systemMonitor")
+        x: root.elementX("systemMonitor")
+        grouped: root.elementGrouped("systemMonitor")
         appearance: root.appearance
         systemMonitor: root.systemMonitor
         onClicked: root.statusPopupRequested("system")
@@ -337,7 +278,8 @@ Item {
         id: workspaces
         anchors.verticalCenter: parent.verticalCenter
         visible: root.elementVisible("workspaces")
-        x: root.structuralX("workspaces")
+        x: root.elementX("workspaces")
+        grouped: root.elementGrouped("workspaces")
         Behavior on x {
             NumberAnimation {
                 duration: 220
@@ -350,63 +292,20 @@ Item {
         workspaceService: root.workspaceService
     }
 
-    StatusModules {
-        id: leftStatusModules
+    BarElementItems {
+        id: barElementItems
 
+        x: 0
+        width: root.width
         anchors.verticalCenter: parent.verticalCenter
-        x: root.statusZoneX("left", leftStatusModules)
         appearance: root.appearance
         activePopup: root.activeStatusPopup
         monitorScreen: root.monitorScreen
         pomodoro: root.pomodoro
         notificationHistory: root.notificationHistory
         screenCapture: root.screenCapture
-        placement: "left"
-
-        onPopupRequested: function(popup) {
-            root.statusPopupRequested(popup);
-        }
-
-        onNotificationRequested: root.notificationRequested()
-    }
-
-    StatusModules {
-        id: centerStatusModules
-
-        anchors.verticalCenter: parent.verticalCenter
-        x: root.statusZoneX("center", centerStatusModules)
-        appearance: root.appearance
-        activePopup: root.activeStatusPopup
-        monitorScreen: root.monitorScreen
-        pomodoro: root.pomodoro
-        notificationHistory: root.notificationHistory
-        screenCapture: root.screenCapture
-        placement: "center"
-
-        onPopupRequested: function(popup) {
-            root.statusPopupRequested(popup);
-        }
-
-        onNotificationRequested: root.notificationRequested()
-    }
-
-    StatusModules {
-        id: statusModules
-        anchors.verticalCenter: parent.verticalCenter
-        x: root.statusZoneX("right", statusModules)
-        Behavior on x {
-            NumberAnimation {
-                duration: 220
-                easing.type: Easing.OutCubic
-            }
-        }
-        appearance: root.appearance
-        activePopup: root.activeStatusPopup
-        monitorScreen: root.monitorScreen
-        pomodoro: root.pomodoro
-        notificationHistory: root.notificationHistory
-        screenCapture: root.screenCapture
-        placement: "right"
+        elementX: element => root.elementX(element)
+        elementGrouped: element => root.elementGrouped(element)
 
         onPopupRequested: function(popup) {
             root.statusPopupRequested(popup);

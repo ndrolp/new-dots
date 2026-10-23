@@ -146,6 +146,11 @@ Item {
         ));
     }
 
+    // Popups of center bar elements open under them, the rest at the bar edge.
+    function nearTrigger(popup) {
+        return popupAnchorProvider ? popupAnchorProvider.popupNearTrigger(popup) : false;
+    }
+
     function popupY() {
         return popupAnchorProvider
             ? popupAnchorProvider.y + popupAnchorProvider.height + appearance.spacing
@@ -204,9 +209,9 @@ Item {
         }
         visible: reveal > 0
         anchor.window: root.barWindow
-        anchor.rect.x: root.appearance.statusIsland
+        anchor.rect.x: root.nearTrigger("system")
             ? root.popupX("system", implicitWidth) : root.appearance.horizontalPadding
-        anchor.rect.y: root.appearance.statusIsland
+        anchor.rect.y: root.nearTrigger("system")
             ? root.popupY() : root.appearance.barHeight + root.appearance.spacing
         implicitWidth: 430
         implicitHeight: 330
@@ -470,10 +475,10 @@ Item {
         }
         visible: reveal > 0
         anchor.window: root.barWindow
-        anchor.rect.x: root.appearance.statusIsland
+        anchor.rect.x: root.nearTrigger("pomodoro")
             ? root.popupX("pomodoro", implicitWidth) : Math.max(root.appearance.horizontalPadding,
                 root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
-        anchor.rect.y: root.appearance.statusIsland
+        anchor.rect.y: root.nearTrigger("pomodoro")
             ? root.popupY() : root.appearance.barHeight + root.appearance.spacing
         implicitWidth: 356
         implicitHeight: root.pomodoro.started ? 326 : 282
@@ -755,10 +760,10 @@ Item {
         }
         visible: reveal > 0
         anchor.window: root.barWindow
-        anchor.rect.x: root.appearance.statusIsland
+        anchor.rect.x: root.nearTrigger("media")
             ? root.popupX("media", implicitWidth) : Math.max(root.appearance.horizontalPadding,
                 root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
-        anchor.rect.y: root.appearance.statusIsland
+        anchor.rect.y: root.nearTrigger("media")
             ? root.popupY() : root.appearance.barHeight + root.appearance.spacing
         implicitWidth: 480
         implicitHeight: 258
@@ -1070,10 +1075,10 @@ Item {
         }
         visible: reveal > 0
         anchor.window: root.barWindow
-        anchor.rect.x: root.appearance.statusIsland
+        anchor.rect.x: root.nearTrigger("audio")
             ? root.popupX("audio", implicitWidth) : Math.max(root.appearance.horizontalPadding,
                 root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
-        anchor.rect.y: root.appearance.statusIsland
+        anchor.rect.y: root.nearTrigger("audio")
             ? root.popupY() : root.appearance.barHeight + root.appearance.spacing
         implicitWidth: 500
         implicitHeight: sinkList.implicitHeight + 64
@@ -1252,10 +1257,10 @@ Item {
         }
         visible: reveal > 0
         anchor.window: root.barWindow
-        anchor.rect.x: root.appearance.statusIsland
+        anchor.rect.x: root.nearTrigger("tray")
             ? root.popupX("tray", implicitWidth) : Math.max(root.appearance.horizontalPadding,
                 root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
-        anchor.rect.y: root.appearance.statusIsland
+        anchor.rect.y: root.nearTrigger("tray")
             ? root.popupY() : root.appearance.barHeight + root.appearance.spacing
         implicitWidth: 220
         implicitHeight: Math.max(88, Math.min(328,
@@ -1540,10 +1545,10 @@ Item {
         }
         visible: reveal > 0
         anchor.window: root.barWindow
-        anchor.rect.x: root.appearance.statusIsland
+        anchor.rect.x: root.nearTrigger("battery")
             ? root.popupX("battery", implicitWidth) : Math.max(root.appearance.horizontalPadding,
                 root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
-        anchor.rect.y: root.appearance.statusIsland
+        anchor.rect.y: root.nearTrigger("battery")
             ? root.popupY() : root.appearance.barHeight + root.appearance.spacing
         implicitWidth: 380
         implicitHeight: 216
@@ -1736,10 +1741,10 @@ Item {
         }
         visible: reveal > 0
         anchor.window: root.barWindow
-        anchor.rect.x: root.appearance.statusIsland
+        anchor.rect.x: root.nearTrigger("bluetooth")
             ? root.popupX("bluetooth", implicitWidth) : Math.max(root.appearance.horizontalPadding,
                 root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
-        anchor.rect.y: root.appearance.statusIsland
+        anchor.rect.y: root.nearTrigger("bluetooth")
             ? root.popupY() : root.appearance.barHeight + root.appearance.spacing
         implicitWidth: 400
         implicitHeight: Math.max(132, bluetoothList.implicitHeight + 64)
@@ -1960,10 +1965,10 @@ Item {
         }
         visible: reveal > 0
         anchor.window: root.barWindow
-        anchor.rect.x: root.appearance.statusIsland
+        anchor.rect.x: root.nearTrigger("network")
             ? root.popupX("network", implicitWidth) : Math.max(root.appearance.horizontalPadding,
                 root.barWindow.width - implicitWidth - root.appearance.horizontalPadding)
-        anchor.rect.y: root.appearance.statusIsland
+        anchor.rect.y: root.nearTrigger("network")
             ? root.popupY() : root.appearance.barHeight + root.appearance.spacing
         implicitWidth: Math.min(420, Math.max(300,
             root.barWindow.width - root.appearance.horizontalPadding * 2))

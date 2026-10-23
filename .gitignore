@@ -20,3 +20,6 @@ common/.config/Code/mach*
 common/.config/Code/Service Worker*
 common/.config/Code/WebStorage*
 common/.config/Code/Cache Storage*
+
+# Claude Code agent worktrees
+.claude/worktrees/

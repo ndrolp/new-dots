@@ -12,15 +12,20 @@ Rectangle {
     required property var bookmarks
     required property var plugins
 
-    property string currentSection: "Appearance"
+    property string currentSection: "Bar"
     property string pendingSection: ""
     property string wallpaperView: "Selection"
     property string selectedWallpaperMonitor: ""
     property string sectionQuery: ""
     readonly property var sections: [
         {
-            label: "Bar Appearance", icon: "󰔉", section: "Appearance",
-            keywords: "profile density transparent island clock"
+            // Old section names and terms stay as keywords so searches still land here.
+            label: "Bar", icon: "󰔉", section: "Bar",
+            keywords: "bar appearance bar widgets profile duplicate delete save discard density preset compact balanced spacious size spacing height padding style transparent opacity island docked pills group radius join elements data modules widgets order zone arch workspaces system monitor current app notifications badge battery clock media audio network tray bluetooth recording"
+        },
+        {
+            label: "Notifications", icon: "󰂚", section: "Notifications",
+            keywords: "notification popup location position"
         },
         {
             label: "Displays", icon: "󰍹", section: "Monitors",
@@ -40,11 +45,7 @@ Rectangle {
         },
         {
             label: "Desktop Widgets", icon: "󰖕", section: "Widgets",
-            keywords: "media calendar system network weather"
-        },
-        {
-            label: "Bar Widgets", icon: "󰍛", section: "Status",
-            keywords: "bar data modules widgets notifications battery clock media network"
+            keywords: "media calendar system network weather background clock monitor"
         },
         {
             label: "Session", icon: "󰌾", section: "Session",
@@ -67,8 +68,11 @@ Rectangle {
         let source;
         let properties = { appearance: root.appearance };
 
-        if (currentSection === "Appearance") {
-            source = "AppearanceSettings.qml";
+        if (currentSection === "Bar") {
+            source = "BarSettings.qml";
+            properties.monitors = root.monitors;
+        } else if (currentSection === "Notifications") {
+            source = "NotificationSettings.qml";
         } else if (currentSection === "Monitors") {
             source = "WorkspaceSettings.qml";
             properties.monitors = root.monitors;
@@ -82,8 +86,7 @@ Rectangle {
             properties.plugins = root.plugins;
         } else if (currentSection === "Widgets") {
             source = "DesktopWidgetsSettings.qml";
-        } else if (currentSection === "Status") {
-            source = "StatusLayoutSettings.qml";
+            properties.monitors = root.monitors;
         } else if (currentSection === "Session") {
             source = "SessionSettings.qml";
         } else {
@@ -293,13 +296,13 @@ Rectangle {
                     spacing: 8
 
                     Text {
-                        text: root.currentSection === "Appearance" ? "Bar Appearance"
+                        text: root.currentSection === "Bar" ? "Bar"
+                            : root.currentSection === "Notifications" ? "Notifications"
                             : root.currentSection === "Monitors" ? "Displays"
                                 : root.currentSection === "Labels" ? "Workspace Labels"
                                     : root.currentSection === "Bookmarks" ? "Quick Search"
                                     : root.currentSection === "Plugins" ? "Plugins"
                                         : root.currentSection === "Widgets" ? "Desktop Widgets"
-                                        : root.currentSection === "Status" ? "Bar Widgets"
                                         : root.currentSection === "Session" ? "Session"
                                             : "Wallpapers"
                         color: theme.text
@@ -308,7 +311,10 @@ Rectangle {
                     }
 
                     Text {
-                        text: root.currentSection === "Appearance" ? "Fine-tune the shell layout."
+                        text: root.currentSection === "Bar"
+                            ? "Edit a bar profile: its sizes, style and elements."
+                            : root.currentSection === "Notifications"
+                                ? "Choose where notification popups appear."
                             : root.currentSection === "Monitors"
                                 ? "Set workspace ranges and shell visibility for each monitor."
                                 : root.currentSection === "Labels"
@@ -319,8 +325,6 @@ Rectangle {
                                         ? "Enable shell integrations and tune their behavior."
                                     : root.currentSection === "Widgets"
                                         ? "Enable desktop widgets and choose their placement."
-                                    : root.currentSection === "Status"
-                                        ? "Choose, place, order, and group the data shown on the bar."
                                     : root.currentSection === "Session"
                                         ? "Control the active session and review idle behavior."
                                         : "Choose a wallpaper for each display."

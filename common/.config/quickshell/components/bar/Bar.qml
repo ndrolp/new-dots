@@ -33,9 +33,7 @@ Variants {
 
             required property var modelData
             readonly property string monitorDescription: bar.workspaceService.monitorDescriptionForScreen(modelData)
-            readonly property string profileName: bar.monitors.barProfileFor(
-                monitorDescription, bar.appearance.activeBarProfile
-            )
+            readonly property string profileName: bar.monitors.barProfileFor(monitorDescription)
             property var barAppearance: QtObject {
                 property int barHeight: bar.appearance.barProfileValue(panel.profileName, "barHeight")
                 property int horizontalPadding: bar.appearance.barProfileValue(panel.profileName, "horizontalPadding")
@@ -47,25 +45,17 @@ Variants {
                 property int activeWorkspaceHorizontalPadding: bar.appearance.barProfileValue(panel.profileName, "activeWorkspaceHorizontalPadding")
                 property int pillVerticalPadding: bar.appearance.barProfileValue(panel.profileName, "pillVerticalPadding")
                 property int workspacePadding: bar.appearance.barProfileValue(panel.profileName, "workspacePadding")
-                property int structuralVerticalPadding: bar.appearance.barProfileValue(panel.profileName, "structuralVerticalPadding")
-                property bool workspaceGlyphsEnabled: bar.appearance.barProfileValue(panel.profileName, "workspaceGlyphsEnabled")
-                property bool hideEmptyWorkspaces: bar.appearance.barProfileValue(panel.profileName, "hideEmptyWorkspaces")
-                property bool workspaceAppCountVisible: bar.appearance.barProfileValue(panel.profileName, "workspaceAppCountVisible")
-                property var workspaceGlyphs: bar.appearance.barProfileValue(panel.profileName, "workspaceGlyphs")
+                property int elementVerticalPadding: bar.appearance.barProfileValue(panel.profileName, "elementVerticalPadding")
                 property bool pillsTransparent: bar.appearance.barProfileValue(panel.profileName, "pillsTransparent")
                 property int transparentBarTopMargin: bar.appearance.barProfileValue(panel.profileName, "transparentBarTopMargin")
                 property bool transparentBarSlanted: bar.appearance.barProfileValue(panel.profileName, "transparentBarSlanted")
-                property bool statusIsland: bar.appearance.barProfileValue(panel.profileName, "statusIsland")
-                property int statusIslandRadius: bar.appearance.barProfileValue(panel.profileName, "statusIslandRadius")
+                property int groupRadius: bar.appearance.barProfileValue(panel.profileName, "groupRadius")
                 property bool barTransparent: bar.appearance.barProfileValue(panel.profileName, "barTransparent")
                 property bool barTransparentBorder: bar.appearance.barProfileValue(panel.profileName, "barTransparentBorder")
                 property int barOpacity: bar.appearance.barProfileValue(panel.profileName, "barOpacity")
-                property var statusModuleOrder: bar.appearance.barProfileValue(panel.profileName, "statusModuleOrder")
-                property var statusModuleEnabled: bar.appearance.barProfileValue(panel.profileName, "statusModuleEnabled")
-                property var statusModuleGroups: bar.appearance.barProfileValue(panel.profileName, "statusModuleGroups")
-                property var statusModulePlacement: bar.appearance.barProfileValue(panel.profileName, "statusModulePlacement")
-                property var barElementEnabled: bar.appearance.barProfileValue(panel.profileName, "barElementEnabled")
-                property var barElementPlacement: bar.appearance.barProfileValue(panel.profileName, "barElementPlacement")
+                property var barElements: bar.appearance.barProfileValue(panel.profileName, "barElements")
+                // Global, not part of the bar profile.
+                property bool doNotDisturb: bar.appearance.doNotDisturb
             }
             property bool configOpen: bar.configOpen
             property string activeStatusPopup: bar.activeStatusPopupWindow === panel
@@ -93,7 +83,7 @@ Variants {
                 height: panel.height
             }
             readonly property int totalBarHeight: panel.barAppearance.barHeight
-                + ((panel.barAppearance.barTransparent || panel.barAppearance.statusIsland)
+                + (panel.barAppearance.barTransparent
                     && !panel.barAppearance.transparentBarSlanted
                     ? panel.barAppearance.transparentBarTopMargin : 0)
 
@@ -117,7 +107,7 @@ Variants {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 height: panel.totalBarHeight
-                color: panel.barAppearance.barTransparent || panel.barAppearance.statusIsland
+                color: panel.barAppearance.barTransparent
                     ? "transparent" : Qt.rgba(theme.background.r, theme.background.g,
                         theme.background.b, panel.barAppearance.barOpacity / 100)
 
@@ -136,7 +126,7 @@ Variants {
                         && panel.barAppearance.transparentBarSlanted ? 0 : panel.barAppearance.horizontalPadding
                     anchors.rightMargin: panel.barAppearance.barTransparent
                         && panel.barAppearance.transparentBarSlanted ? 0 : panel.barAppearance.horizontalPadding
-                    anchors.topMargin: (panel.barAppearance.barTransparent || panel.barAppearance.statusIsland)
+                    anchors.topMargin: panel.barAppearance.barTransparent
                         && !panel.barAppearance.transparentBarSlanted
                         ? panel.barAppearance.transparentBarTopMargin : 0
                     appearance: panel.barAppearance
