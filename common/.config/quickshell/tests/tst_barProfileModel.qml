@@ -9,103 +9,67 @@ TestCase {
         id: fixtures
     }
 
-    // The appearance fixture after "activeBarProfile" became the edited profile.
-    function editingState() {
-        const state = fixtures.read("appearance.json");
-        state.editingBarProfile = state.activeBarProfile;
-        delete state.activeBarProfile;
-        return state;
+    function test_editingAProfileShowsItsSavedValues() {
+        const state = fixtures.startedBarState();
+
+        const after = fixtures.withChanges(state, BarProfileModel.editProfile(state, "presentation"));
+
+        const edited = BarProfileModel.editedProfile(after);
+        compare(edited.barHeight, 30);
+        compare(edited.horizontalPadding, 12);
+        compare(edited.transparentBarSlanted, true);
+        compare(edited.transparentBarTopMargin, 8);
     }
 
-    function withChanges(state, changes) {
-        const updated = Object.assign({}, state);
-        for (const key in changes)
-            updated[key] = changes[key];
-        return updated;
+    function test_theEditedProfileDoesNotShareObjectsWithTheSavedProfile() {
+        const state = fixtures.startedBarState();
+
+        BarProfileModel.editedProfile(state).workspaceGlyphs[0] = "x";
+
+        compare(state.barProfiles.minimal.workspaceGlyphs[0], "");
     }
 
-    function test_editingAProfileLoadsItsSavedValues() {
-        const state = editingState();
+    function test_savingStoresOnlyBarSettings() {
+        const state = fixtures.edited(fixtures.startedBarState(), { barHeight: 41 });
 
-        const changes = BarProfileModel.editProfile(state, "presentation");
+        const changes = BarProfileModel.saveProfile(state);
 
-        compare(changes.editingBarProfile, "presentation");
-        compare(changes.barHeight, 30);
-        compare(changes.horizontalPadding, 12);
-        compare(changes.transparentBarSlanted, true);
-        compare(changes.transparentBarTopMargin, 8);
-    }
-
-    function test_editingAProfileLeavesSettingsItDoesNotSaveUntouched() {
-        const state = editingState();
-
-        const changes = BarProfileModel.editProfile(state, "work");
-
-        compare(changes.barHeight, 30);
-        // "work" saves no opacity: it keeps the one its monitors drew.
-        compare(withChanges(state, changes).barOpacity, state.barOpacity);
-        verify(!("doNotDisturb" in changes));
-    }
-
-    function test_editingAnUnknownProfileChangesNothing() {
-        const state = editingState();
-
-        compare(BarProfileModel.editProfile(state, "missing"), null);
-    }
-
-    function test_editingAProfileDoesNotShareObjectsWithTheSavedProfile() {
-        const state = editingState();
-
-        const changes = BarProfileModel.editProfile(state, "presentation");
-        changes.workspaceGlyphs[0] = "x";
-
-        compare(state.barProfiles.presentation.workspaceGlyphs[0], "");
-    }
-
-    function test_savingStoresTheLiveBarIntoTheProfileAndEditsIt() {
-        const state = editingState();
-        state.barHeight = 41;
-
-        const changes = BarProfileModel.saveProfile(state, "work");
-
-        compare(changes.editingBarProfile, "work");
-        compare(changes.barProfiles.work.barHeight, 41);
-        compare(changes.barProfiles.work.barOpacity, 90);
-        verify(!("doNotDisturb" in changes.barProfiles.work));
+        compare(changes.barProfiles.minimal.barHeight, 41);
+        verify(!("doNotDisturb" in changes.barProfiles.minimal));
         compare(changes.barProfiles.media.barHeight, 34);
-        compare(state.barProfiles.work.barHeight, 30);
     }
 
-    function test_savingUnderANewNameAddsAProfile() {
-        const state = editingState();
+    function test_settingsOtherThanBarSettingsAreNotPendingChanges() {
+        const state = fixtures.startedBarState();
 
-        const changes = BarProfileModel.saveProfile(state, "laptop");
-
-        compare(Object.keys(changes.barProfiles).sort(),
-            ["laptop", "media", "minimal", "presentation", "work"]);
-        compare(changes.barProfiles.laptop.horizontalPadding, 16);
+        verify(!BarProfileModel.isModified(fixtures.edited(state, { doNotDisturb: true })));
     }
 
-    function test_readingTheEditedProfileReturnsTheLiveValue() {
-        const state = editingState();
-        state.barHeight = 41;
+    function test_readingTheEditedProfileReturnsThePendingValue() {
+        const state = fixtures.edited(fixtures.startedBarState(), { barHeight: 41 });
 
         compare(BarProfileModel.profileValue(state, "minimal", "barHeight"), 41);
     }
 
     function test_readingAProfileNotBeingEditedReturnsItsSavedValue() {
-        const state = editingState();
-        state.barHeight = 41;
+        const state = fixtures.edited(fixtures.startedBarState(), { barHeight: 41 });
 
         compare(BarProfileModel.profileValue(state, "presentation", "barHeight"), 30);
     }
 
-    function test_readingAKeyAProfileNotBeingEditedDoesNotSaveFallsBackToTheLiveValue() {
-        const state = editingState();
-        state.barOpacity = 75;
+    function test_readingAnUnknownProfileReturnsTheDefaults() {
+        const state = fixtures.startedBarState();
 
-        compare(BarProfileModel.profileValue(state, "work", "barOpacity"), 75);
-        compare(BarProfileModel.profileValue(state, "missing", "barHeight"), 34);
+        compare(BarProfileModel.profileValue(state, "missing", "barHeight"),
+            BarProfileModel.defaultProfile.barHeight);
+    }
+
+    function test_theDefaultProfilesAreInTheCurrentSchema() {
+        const profiles = BarProfileModel.defaultBarProfiles();
+
+        compare(Object.keys(profiles).sort(), ["media", "minimal", "presentation", "work"]);
+        for (const name in profiles)
+            compare(profiles[name], BarProfileModel.completeProfile(profiles[name]), name);
     }
 
     function test_densityPresetsFillInTheBarSizes() {

@@ -131,7 +131,8 @@ TestCase {
         compare(migrated.appearance.barProfiles.media.barHeight, 34);
         compare(migrated.appearance.barProfiles.media.groupRadius,
             original.barProfiles.media.statusIslandRadius);
-        compare(migrated.appearance.barProfiles.work.barOpacity, original.barProfiles.work.barOpacity);
+        // "work" saved no opacity: it keeps the one its monitors drew.
+        compare(migrated.appearance.barProfiles.work.barOpacity, original.barOpacity);
     }
 
     function test_theNotificationPopupLocationBecomesGlobal() {
@@ -145,7 +146,6 @@ TestCase {
     function test_migrationAlsoConvertsTheBarElements() {
         const migrated = migrateFixtures();
 
-        verify(migrated.appearance.barElements !== undefined);
         verify(migrated.appearance.barProfiles.media.barElements !== undefined);
         verify(!("statusModuleOrder" in migrated.appearance.barProfiles.media));
     }

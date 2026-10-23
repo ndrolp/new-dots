@@ -12,58 +12,45 @@ TestCase {
         id: fixtures
     }
 
-    function withChanges(state, changes) {
-        const updated = Object.assign({}, state);
-        for (const key in changes)
-            updated[key] = changes[key];
-        return updated;
-    }
-
-    function startedState() {
-        const migrated = SchemaMigrations.migrate(fixtures.read("appearance.json"),
-            fixtures.read("monitors.json")).appearance;
-        return withChanges(migrated, BarProfileModel.discardChanges(migrated));
-    }
-
     function test_applyingAPresetFillsTheSizesAndMarksTheProfileModified() {
-        const state = startedState();
-        const preset = state.barHeight === 38 ? "compact" : "spacious";
+        const state = fixtures.startedBarState();
 
-        const after = withChanges(state, BarProfileModel.densityPresetChanges(preset));
+        const after = fixtures.edited(state, BarProfileModel.densityPresetChanges("spacious"));
 
-        compare(after.barHeight, preset === "compact" ? 30 : 38);
+        compare(BarProfileModel.editedProfile(after).barHeight, 38);
+        compare(BarProfileModel.editedProfile(after).textSize, 15);
         verify(BarProfileModel.isModified(after));
     }
 
     function test_savingAfterAPresetLeavesNoTraceOfThePreset() {
-        const state = startedState();
-        const applied = withChanges(state, BarProfileModel.densityPresetChanges("compact"));
+        const applied = fixtures.edited(fixtures.startedBarState(),
+            BarProfileModel.densityPresetChanges("compact"));
 
-        const saved = withChanges(applied,
-            BarProfileModel.saveProfile(applied, applied.editingBarProfile));
+        const saved = fixtures.withChanges(applied, BarProfileModel.saveProfile(applied));
 
         const profile = saved.barProfiles[saved.editingBarProfile];
         compare(profile.barHeight, 30);
         compare(profile.densityPreset, undefined);
-        compare(saved.densityPreset, undefined);
     }
 
     function test_discardingAfterAPresetRestoresTheSavedSizes() {
-        const state = startedState();
-        const applied = withChanges(state, BarProfileModel.densityPresetChanges("spacious"));
+        const state = fixtures.startedBarState();
+        const applied = fixtures.edited(state, BarProfileModel.densityPresetChanges("spacious"));
 
-        const discarded = withChanges(applied, BarProfileModel.discardChanges(applied));
+        const discarded = fixtures.withChanges(applied, BarProfileModel.discardChanges(applied));
 
-        compare(discarded.barHeight, state.barHeight);
+        compare(BarProfileModel.editedProfile(discarded).barHeight, 34);
         verify(!BarProfileModel.isModified(discarded));
     }
 
     function test_theMatchingPresetIsDerivedFromTheSizes() {
-        const state = withChanges(startedState(), BarProfileModel.densityPresetChanges("spacious"));
-        compare(BarProfileModel.matchingDensityPreset(state), "spacious");
+        const state = fixtures.edited(fixtures.startedBarState(),
+            BarProfileModel.densityPresetChanges("spacious"));
+        compare(BarProfileModel.matchingDensityPreset(BarProfileModel.editedProfile(state)),
+            "spacious");
 
-        state.barHeight = 99;
-        compare(BarProfileModel.matchingDensityPreset(state), "");
+        const changed = fixtures.edited(state, { barHeight: 99 });
+        compare(BarProfileModel.matchingDensityPreset(BarProfileModel.editedProfile(changed)), "");
     }
 
     function test_migrationRemovesTheStoredPresetFromEveryProfile() {
@@ -85,7 +72,8 @@ TestCase {
 
         const migrated = SchemaMigrations.migrate(version4, {}).appearance;
 
-        compare(migrated, { schemaVersion: 5, barHeight: 31,
-            barProfiles: { work: { barHeight: 40 } } });
+        compare(migrated.densityPreset, undefined);
+        compare(migrated.barProfiles.work.densityPreset, undefined);
+        compare(migrated.barProfiles.work.barHeight, 40);
     }
 }

@@ -11,20 +11,12 @@ TestCase {
         id: fixtures
     }
 
-    function withChanges(state, changes) {
-        const updated = Object.assign({}, state);
-        for (const key in changes)
-            updated[key] = changes[key];
-        return updated;
-    }
-
     // The fixtures, migrated, as Quickshell starts them: no pending changes.
     function started() {
-        const migrated = SchemaMigrations.migrate(fixtures.read("appearance.json"),
-            fixtures.read("monitors.json"));
-        const appearance = withChanges(migrated.appearance,
-            BarProfileModel.discardChanges(migrated.appearance));
-        return { appearance: appearance, displaySettings: migrated.monitors.displaySettings };
+        return {
+            appearance: fixtures.startedBarState(),
+            displaySettings: fixtures.migrated().monitors.displaySettings
+        };
     }
 
     function test_theSuggestedNameIsTheFirstFreeNumberedName() {
@@ -39,12 +31,12 @@ TestCase {
     function test_duplicatingCopiesTheProfileAndEditsTheCopy() {
         const state = started().appearance;
 
-        const after = withChanges(state,
+        const after = fixtures.withChanges(state,
             BarProfileModel.duplicateProfile(state, "presentation", "talks"));
 
         compare(after.editingBarProfile, "talks");
         compare(after.barProfiles.talks.barHeight, 30);
-        compare(after.barHeight, 30);
+        compare(BarProfileModel.editedProfile(after).barHeight, 30);
         compare(after.barProfiles.presentation, state.barProfiles.presentation);
         verify(!BarProfileModel.isModified(after));
     }
@@ -63,7 +55,7 @@ TestCase {
     function test_theNameIsTrimmed() {
         const state = started().appearance;
 
-        const after = withChanges(state,
+        const after = fixtures.withChanges(state,
             BarProfileModel.duplicateProfile(state, "work", "  talks "));
 
         compare(after.editingBarProfile, "talks");
@@ -71,8 +63,7 @@ TestCase {
     }
 
     function test_duplicatingIsUnavailableWithPendingChanges() {
-        const state = started().appearance;
-        state.barHeight = state.barHeight + 5;
+        const state = fixtures.edited(started().appearance, { barHeight: 44 });
 
         verify(!BarProfileModel.canDuplicateOrDelete(state));
         compare(BarProfileModel.duplicateProfile(state, state.editingBarProfile, "talks"), null);
@@ -82,7 +73,7 @@ TestCase {
         const fixture = started();
         compare(BarProfileModel.monitorsUsingProfile(fixture.displaySettings, "work"), []);
 
-        const after = withChanges(fixture.appearance, BarProfileModel.deleteProfile(
+        const after = fixtures.withChanges(fixture.appearance, BarProfileModel.deleteProfile(
             fixture.appearance, fixture.displaySettings, "work"));
 
         compare(Object.keys(after.barProfiles).sort(), ["media", "minimal", "presentation"]);
@@ -91,15 +82,16 @@ TestCase {
 
     function test_deletingTheEditedProfileEditsTheDefaultOne() {
         const fixture = started();
-        const editing = withChanges(fixture.appearance,
+        const editing = fixtures.withChanges(fixture.appearance,
             BarProfileModel.editProfile(fixture.appearance, "presentation"));
 
-        const after = withChanges(editing,
+        const after = fixtures.withChanges(editing,
             BarProfileModel.deleteProfile(editing, fixture.displaySettings, "presentation"));
 
         verify(after.barProfiles.presentation === undefined);
         compare(after.editingBarProfile, "minimal");
-        compare(after.barHeight, fixture.appearance.barProfiles.minimal.barHeight);
+        compare(BarProfileModel.editedProfile(after).barHeight,
+            fixture.appearance.barProfiles.minimal.barHeight);
         verify(!BarProfileModel.isModified(after));
     }
 
@@ -134,7 +126,7 @@ TestCase {
 
     function test_deletingIsUnavailableWithPendingChanges() {
         const fixture = started();
-        fixture.appearance.barHeight = fixture.appearance.barHeight + 5;
+        fixture.appearance = fixtures.edited(fixture.appearance, { barHeight: 44 });
 
         compare(BarProfileModel.deleteRejection(fixture.appearance, fixture.displaySettings,
             "work"), "pending");

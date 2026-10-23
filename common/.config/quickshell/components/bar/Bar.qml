@@ -2,7 +2,6 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 import "../../config" as Config
-import "../../config/BarProfileModel.js" as BarProfileModel
 import "../panels" as Panels
 
 Variants {
@@ -58,8 +57,9 @@ Variants {
                 property bool barTransparent: bar.appearance.barProfileValue(panel.profileName, "barTransparent")
                 property bool barTransparentBorder: bar.appearance.barProfileValue(panel.profileName, "barTransparentBorder")
                 property int barOpacity: bar.appearance.barProfileValue(panel.profileName, "barOpacity")
-                property var barElements: BarProfileModel.normalizeBarElements(
-                    bar.appearance.barProfileValue(panel.profileName, "barElements"))
+                property var barElements: bar.appearance.barProfileValue(panel.profileName, "barElements")
+                // Global, not part of the bar profile.
+                property bool doNotDisturb: bar.appearance.doNotDisturb
             }
             property bool configOpen: bar.configOpen
             property string activeStatusPopup: bar.activeStatusPopupWindow === panel

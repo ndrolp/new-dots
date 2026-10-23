@@ -202,10 +202,10 @@ TestCase {
     function test_groupRadiusIsPartOfAProfile() {
         const state = SchemaMigrations.migrateGroups(migratedState());
 
-        compare(BarProfileModel.editProfile(state, "media").groupRadius, 12);
-        verify(!("statusIsland" in BarProfileModel.editProfile(state, "media")));
-        state.groupRadius = 20;
-        const saved = BarProfileModel.saveProfile(state, "minimal").barProfiles.minimal;
+        compare(state.barProfiles.media.groupRadius, 12);
+        verify(!("statusIsland" in state.barProfiles.media));
+        const barState = fixtures.edited(fixtures.startedBarState(), { groupRadius: 20 });
+        const saved = BarProfileModel.saveProfile(barState).barProfiles.minimal;
         compare(saved.groupRadius, 20);
         verify(!("statusIsland" in saved));
         verify(!("statusModuleGroups" in saved));

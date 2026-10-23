@@ -39,13 +39,13 @@ TestCase {
         compare(displaySettings[aoc].barProfile, "minimal");
     }
 
-    function test_theActiveProfileBecomesTheEditedProfile() {
+    function test_noActiveOrEditedProfileIsStored() {
         const appearance = migrateFixtures(appearance => {
             appearance.activeBarProfile = "media";
         }).appearance;
 
         compare(appearance.activeBarProfile, undefined);
-        compare(appearance.editingBarProfile, "media");
+        compare(appearance.editingBarProfile, undefined);
     }
 
     function test_migratedStateIsLeftUntouched() {

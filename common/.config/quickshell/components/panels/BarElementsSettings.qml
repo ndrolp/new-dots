@@ -73,7 +73,7 @@ Column {
     }
 
     function toggleWidgetOption(propertyName) {
-        appearance[propertyName] = appearance[propertyName] === false;
+        appearance.setBarSetting(propertyName, appearance[propertyName] === false);
     }
 
     width: parent ? parent.width : 0

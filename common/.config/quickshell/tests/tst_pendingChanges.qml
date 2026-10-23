@@ -3,7 +3,8 @@ import QtTest
 import "../config/BarProfileModel.js" as BarProfileModel
 import "../config/SchemaMigrations.js" as SchemaMigrations
 
-// Editing a bar profile: pending changes, Save, Discard and the locked selector.
+// Editing a bar profile: pending changes live in memory, Save, Discard and
+// the locked selector.
 TestCase {
     name: "PendingChanges"
 
@@ -11,123 +12,147 @@ TestCase {
         id: fixtures
     }
 
-    function withChanges(state, changes) {
-        const updated = Object.assign({}, state);
-        for (const key in changes)
-            updated[key] = changes[key];
-        return updated;
-    }
-
-    // The fixture, migrated, as Quickshell starts it: no pending changes.
-    function startedState() {
-        const migrated = SchemaMigrations.migrate(fixtures.read("appearance.json"),
-            fixtures.read("monitors.json")).appearance;
-        return withChanges(migrated, BarProfileModel.discardChanges(migrated));
-    }
-
     function test_aFreshStartHasNoPendingChanges() {
-        verify(!BarProfileModel.isModified(startedState()));
+        const state = fixtures.startedBarState();
+
+        compare(state.editingBarProfile, "minimal");
+        verify(!BarProfileModel.isModified(state));
     }
 
     function test_changingABarSettingMarksTheEditedProfileModified() {
-        const state = startedState();
-        state.barHeight = state.barHeight + 5;
+        const state = fixtures.startedBarState();
 
-        verify(BarProfileModel.isModified(state));
+        const after = fixtures.edited(state, { barHeight: 44 });
+
+        verify(BarProfileModel.isModified(after));
+        compare(BarProfileModel.editedProfile(after).barHeight, 44);
+    }
+
+    function test_pendingChangesAreNotStoredInTheProfiles() {
+        const state = fixtures.startedBarState();
+
+        const changes = BarProfileModel.setValues(state, { barHeight: 44 });
+
+        compare(Object.keys(changes), ["pendingProfile"]);
+        compare(state.barProfiles.minimal.barHeight, 34);
+    }
+
+    function test_settingTheSavedValueBackLeavesNoPendingChanges() {
+        const state = fixtures.edited(fixtures.startedBarState(), { barHeight: 44 });
+
+        const after = fixtures.edited(state, { barHeight: 34 });
+
+        verify(!BarProfileModel.isModified(after));
     }
 
     function test_theProfileSelectorIsLockedWhileThereArePendingChanges() {
-        const state = startedState();
-        state.barHeight = state.barHeight + 5;
+        const state = fixtures.edited(fixtures.startedBarState(), { barHeight: 44 });
 
         compare(BarProfileModel.editProfile(state, "presentation"), null);
     }
 
     function test_withoutPendingChangesAnotherProfileCanBeEdited() {
-        const state = startedState();
+        const state = fixtures.startedBarState();
 
-        const after = withChanges(state, BarProfileModel.editProfile(state, "presentation"));
+        const after = fixtures.withChanges(state, BarProfileModel.editProfile(state, "presentation"));
 
         compare(after.editingBarProfile, "presentation");
-        compare(after.barHeight, 30);
+        compare(BarProfileModel.editedProfile(after).barHeight, 30);
         verify(!BarProfileModel.isModified(after));
+    }
+
+    function test_editingAnUnknownProfileChangesNothing() {
+        compare(BarProfileModel.editProfile(fixtures.startedBarState(), "missing"), null);
     }
 
     function test_joiningAnElementIsAPendingChange() {
-        const state = startedState();
-        const right = state.barElements.right;
-        const second = right.filter(element => element.enabled)[1].id;
-        state.barElements = BarProfileModel.setElementJoined(state.barElements, second,
-            !BarProfileModel.elementJoined(state.barElements, second));
+        const state = fixtures.startedBarState();
+        const barElements = BarProfileModel.editedProfile(state).barElements;
+        const second = barElements.right.filter(element => element.enabled)[1].id;
 
-        verify(BarProfileModel.isModified(state));
-    }
+        const after = fixtures.edited(state, { barElements: BarProfileModel.setElementJoined(
+            barElements, second, !BarProfileModel.elementJoined(barElements, second)) });
 
-    function test_changingTheGroupRadiusIsAPendingChange() {
-        const state = startedState();
-        state.groupRadius = state.groupRadius + 3;
-
-        verify(BarProfileModel.isModified(state));
+        verify(BarProfileModel.isModified(after));
     }
 
     function test_applyingADensityPresetIsAPendingChange() {
-        const state = startedState();
-        const preset = state.barHeight === 38 ? "compact" : "spacious";
+        const state = fixtures.startedBarState();
 
-        verify(BarProfileModel.isModified(withChanges(state,
-            BarProfileModel.densityPresetChanges(preset))));
+        verify(BarProfileModel.isModified(fixtures.edited(state,
+            BarProfileModel.densityPresetChanges("spacious"))));
     }
 
     function test_savingStoresThePendingChangesAndClearsTheIndicator() {
-        const state = startedState();
-        state.barHeight = 44;
+        const state = fixtures.edited(fixtures.startedBarState(), { barHeight: 44 });
 
-        const after = withChanges(state, BarProfileModel.saveProfile(state, state.editingBarProfile));
+        const after = fixtures.withChanges(state, BarProfileModel.saveProfile(state));
 
-        compare(after.barProfiles[state.editingBarProfile].barHeight, 44);
+        compare(after.barProfiles.minimal.barHeight, 44);
+        compare(after.pendingProfile, null);
         verify(!BarProfileModel.isModified(after));
-        compare(state.barProfiles[state.editingBarProfile].barHeight, startedState().barHeight);
+        compare(state.barProfiles.minimal.barHeight, 34);
     }
 
     function test_discardingRestoresTheSavedValuesAndClearsTheIndicator() {
-        const state = startedState();
-        const savedHeight = state.barHeight;
-        state.barHeight = savedHeight + 9;
-        state.groupRadius = state.groupRadius + 3;
+        const state = fixtures.edited(fixtures.startedBarState(), { barHeight: 39, groupRadius: 3 });
 
-        const after = withChanges(state, BarProfileModel.discardChanges(state));
+        const after = fixtures.withChanges(state, BarProfileModel.discardChanges(state));
 
-        compare(after.barHeight, savedHeight);
-        compare(after.groupRadius, startedState().groupRadius);
+        compare(BarProfileModel.editedProfile(after).barHeight, 34);
         verify(!BarProfileModel.isModified(after));
-        compare(after.editingBarProfile, state.editingBarProfile);
+        compare(after.editingBarProfile, "minimal");
     }
 
     function test_monitorsWithAnotherProfileDoNotSeePendingChanges() {
-        const state = startedState();
-        verify(state.editingBarProfile !== "work");
-        const before = {};
-        for (const key of BarProfileModel.profileKeys)
-            before[key] = BarProfileModel.profileValue(state, "work", key);
+        const state = fixtures.startedBarState();
+        const before = BarProfileModel.profileValue(state, "work", "barHeight");
 
-        for (const key of ["barHeight", "barOpacity", "groupRadius", "audioMeterVisible"])
-            state[key] = typeof state[key] === "boolean" ? !state[key] : state[key] + 7;
+        const after = fixtures.edited(state, { barHeight: 44 });
 
-        for (const key of BarProfileModel.profileKeys)
-            compare(BarProfileModel.profileValue(state, "work", key), before[key], key);
-        compare(BarProfileModel.profileValue(state, state.editingBarProfile, "barHeight"),
-            state.barHeight);
+        compare(BarProfileModel.profileValue(after, "work", "barHeight"), before);
+        compare(BarProfileModel.profileValue(after, "minimal", "barHeight"), 44);
     }
 
-    function test_aRestartDropsPendingChanges() {
-        // The live settings are persisted as a buffer; starting discards them.
-        const state = startedState();
-        const savedHeight = state.barHeight;
-        state.barHeight = savedHeight + 9;
+    function test_savedProfilesChangingOnDiskKeepThePendingChanges() {
+        // Another Quickshell instance saving its profiles must not wipe edits.
+        const state = fixtures.edited(fixtures.startedBarState(), { barHeight: 44 });
+        const reloaded = JSON.parse(JSON.stringify(state.barProfiles));
+        reloaded.work.barHeight = 40;
 
-        const restarted = withChanges(state, BarProfileModel.discardChanges(state));
+        const after = fixtures.withChanges(state, { barProfiles: reloaded });
 
-        compare(restarted.barHeight, savedHeight);
-        verify(!BarProfileModel.isModified(restarted));
+        compare(BarProfileModel.editedProfile(after).barHeight, 44);
+        compare(BarProfileModel.profileValue(after, "work", "barHeight"), 40);
+    }
+
+    function test_theMigratedFileHoldsOnlyProfilesAndGlobalSettings() {
+        const appearance = fixtures.migrated().appearance;
+
+        compare(Object.keys(appearance).sort(),
+            ["barProfiles", "doNotDisturb", "notificationPopupLocation", "schemaVersion"]);
+    }
+
+    function test_theOldActiveProfilesTopLevelValuesWinOverItsSavedCopy() {
+        // Story 59: the top-level values were what the active profile showed.
+        const appearance = fixtures.read("appearance.json");
+        appearance.barHeight = 99;
+        appearance.textSize = 20;
+
+        const migrated = SchemaMigrations.migrate(appearance,
+            fixtures.read("monitors.json")).appearance;
+
+        compare(migrated.barProfiles.minimal.barHeight, 99);
+        compare(migrated.barProfiles.minimal.textSize, 20);
+        compare(migrated.barProfiles.work.barHeight, 30);
+    }
+
+    function test_settingsAnOldProfileDidNotSaveKeepWhatItsMonitorsDrew() {
+        const fixture = fixtures.read("appearance.json");
+        verify(fixture.barProfiles.work.barOpacity === undefined);
+
+        const migrated = fixtures.migrated().appearance;
+
+        compare(migrated.barProfiles.work.barOpacity, fixture.barOpacity);
     }
 }

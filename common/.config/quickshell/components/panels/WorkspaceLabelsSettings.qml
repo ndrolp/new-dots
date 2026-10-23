@@ -75,8 +75,8 @@ Column {
             }
 
             TapHandler {
-                onTapped: root.appearance.workspaceGlyphsEnabled
-                    = !root.appearance.workspaceGlyphsEnabled
+                onTapped: root.appearance.setBarSetting("workspaceGlyphsEnabled",
+                    !root.appearance.workspaceGlyphsEnabled)
             }
         }
 
@@ -123,7 +123,7 @@ Column {
                         onTextEdited: {
                             const glyphs = root.appearance.workspaceGlyphs.slice();
                             glyphs[modelData - 1] = text;
-                            root.appearance.workspaceGlyphs = glyphs;
+                            root.appearance.setBarSetting("workspaceGlyphs", glyphs);
                         }
                     }
                 }

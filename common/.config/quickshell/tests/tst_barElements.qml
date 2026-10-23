@@ -166,21 +166,24 @@ TestCase {
         compare(BarProfileModel.normalizeBarElements(minimalElements()), minimalElements());
     }
 
-    function test_editingAMigratedProfileCopiesItsBarElements() {
-        const state = SchemaMigrations.migrateElementOrder(fixtures.read("appearance.json"));
+    function test_editingAMigratedProfileShowsItsBarElements() {
+        const state = fixtures.startedBarState();
 
-        const changes = BarProfileModel.editProfile(state, "work");
+        const after = fixtures.withChanges(state, BarProfileModel.editProfile(state, "work"));
 
-        compare(zone(changes.barElements, "center"), ["arch", "workspaces", "notifications"]);
-        verify(!("statusModuleOrder" in changes));
-        verify(!("barElementEnabled" in changes));
+        const edited = BarProfileModel.editedProfile(after);
+        compare(zone(edited.barElements, "center"), ["arch", "workspaces", "notifications"]);
+        verify(!("statusModuleOrder" in edited));
+        verify(!("barElementEnabled" in edited));
     }
 
-    function test_savingAProfileStoresTheLiveBarElements() {
-        const state = SchemaMigrations.migrateElementOrder(fixtures.read("appearance.json"));
-        state.barElements = BarProfileModel.moveElementToZone(state.barElements, "battery", "left");
+    function test_savingAProfileStoresItsPendingBarElements() {
+        const state = fixtures.startedBarState();
+        const barElements = BarProfileModel.editedProfile(state).barElements;
+        const moved = fixtures.edited(state,
+            { barElements: BarProfileModel.moveElementToZone(barElements, "battery", "left") });
 
-        const changes = BarProfileModel.saveProfile(state, "minimal");
+        const changes = BarProfileModel.saveProfile(moved);
 
         compare(zone(changes.barProfiles.minimal.barElements, "left"),
             ["arch", "workspaces", "battery"]);

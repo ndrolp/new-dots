@@ -333,9 +333,51 @@ function dropDensityPreset(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
+// The settings a bar profile stored up to schema version 5; until then the
+// top level of appearance.json also held them, as the live settings of the
+// edited profile.
+const version5ProfileKeys = [
+    "barHeight", "horizontalPadding", "spacing", "radius",
+    "workspaceButtonSize", "textSize", "archButtonHorizontalPadding",
+    "activeWorkspaceHorizontalPadding", "pillVerticalPadding", "workspacePadding",
+    "structuralVerticalPadding", "workspaceGlyphsEnabled", "hideEmptyWorkspaces",
+    "workspaceAppCountVisible", "workspaceGlyphs", "pillsTransparent",
+    "transparentBarTopMargin", "transparentBarSlanted", "groupRadius", "barTransparent",
+    "barTransparentBorder", "barOpacity", "barElements", "notificationBadgeVisible",
+    "mediaTitleVisible", "audioMeterVisible", "batteryPercentageVisible"
+];
+
+// Step 6: pending changes live in memory, so the file keeps only the saved
+// profiles and the global settings. The top-level values were what the edited
+// (formerly active) profile showed: they win over its saved copy. Other
+// profiles keep their saved values and take the top-level ones only for
+// settings they did not save, which their monitors drew from the top level.
+function foldLiveSettingsIntoProfiles(appearance, monitors) {
+    const edited = appearance.editingBarProfile || defaultBarProfile;
+    const migrated = cloneValue(appearance);
+    const profiles = migrated.barProfiles || {};
+
+    if (!profiles[edited])
+        profiles[edited] = {};
+
+    for (const key of version5ProfileKeys) {
+        if (appearance[key] === undefined)
+            continue;
+        for (const profileName in profiles) {
+            if (profileName === edited || profiles[profileName][key] === undefined)
+                profiles[profileName][key] = cloneValue(appearance[key]);
+        }
+        delete migrated[key];
+    }
+
+    migrated.barProfiles = profiles;
+    delete migrated.editingBarProfile;
+    return { appearance: migrated, monitors: monitors };
+}
+
 const migrationSteps = [
     migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
-    migrateBarGroups, dropDensityPreset
+    migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles
 ];
 const schemaVersion = migrationSteps.length;
 

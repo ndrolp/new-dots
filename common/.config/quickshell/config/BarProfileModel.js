@@ -1,83 +1,178 @@
 .pragma library
 
-// Bar profile model: pure logic over plain appearance state, no Quickshell.
-// Functions take state and return the changes to persist; they never mutate.
+// Bar profile model: pure logic over plain state, no Quickshell. Functions
+// take state and return the changes to apply; they never mutate.
+//
+// State: { barProfiles, editingBarProfile, pendingProfile }. `barProfiles`
+// are the saved profiles (appearance.json). The profile the settings panel
+// edits and its pending changes live in memory only: `pendingProfile` is the
+// edited profile with its pending changes, or null when there are none.
+// Monitors drawing the edited profile show its pending changes; every other
+// monitor draws its saved profile.
 
-const profileKeys = [
-    "barHeight", "horizontalPadding", "spacing", "radius",
-    "workspaceButtonSize", "textSize", "archButtonHorizontalPadding",
-    "activeWorkspaceHorizontalPadding", "pillVerticalPadding", "workspacePadding",
-    "structuralVerticalPadding",
-    "workspaceGlyphsEnabled", "hideEmptyWorkspaces", "workspaceAppCountVisible",
-    "workspaceGlyphs", "pillsTransparent", "transparentBarTopMargin",
-    "transparentBarSlanted", "groupRadius", "barTransparent",
-    "barTransparentBorder", "barOpacity", "barElements",
-    "notificationBadgeVisible", "mediaTitleVisible", "audioMeterVisible",
-    "batteryPercentageVisible"
+// Bar elements: every piece of the bar, one type. A profile stores them as
+// `barElements`: { left: [...], center: [...], right: [...] }, each entry
+// { id, enabled, joinPrevious? }. Order within a zone is the order of the list.
+const zoneNames = ["left", "center", "right"];
+
+// Every bar element, in its default order; the first ones default to the
+// zone in defaultElementZones, the rest to the right.
+const elementIds = [
+    "arch", "systemMonitor", "currentApp", "workspaces",
+    "notifications", "recording", "media", "audio", "bluetooth", "tray",
+    "network", "battery", "clock"
 ];
+const defaultElementZones = {
+    "arch": "left", "systemMonitor": "left", "currentApp": "left", "workspaces": "center"
+};
 
-// The bar profile of a monitor nobody has configured yet.
+// Bar elements with every element listed in its default zone and order,
+// enabled unless listed in `disabledIds`.
+function defaultBarElements(disabledIds) {
+    const barElements = { left: [], center: [], right: [] };
+
+    for (const id of elementIds) {
+        barElements[defaultElementZones[id] || "right"].push({
+            id: id,
+            enabled: (disabledIds || []).indexOf(id) === -1
+        });
+    }
+
+    return barElements;
+}
+
+// Every setting a bar profile stores, with the value a profile that lacks it
+// gets.
+const defaultProfile = {
+    barHeight: 32,
+    horizontalPadding: 12,
+    spacing: 8,
+    radius: 8,
+    workspaceButtonSize: 20,
+    textSize: 14,
+    archButtonHorizontalPadding: 6,
+    activeWorkspaceHorizontalPadding: 6,
+    pillVerticalPadding: 3,
+    workspacePadding: 4,
+    structuralVerticalPadding: 5,
+    workspaceGlyphsEnabled: false,
+    hideEmptyWorkspaces: false,
+    workspaceAppCountVisible: true,
+    workspaceGlyphs: ["", "", "", "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", "", "", ""],
+    pillsTransparent: false,
+    transparentBarTopMargin: 0,
+    transparentBarSlanted: false,
+    groupRadius: 8,
+    barTransparent: false,
+    barTransparentBorder: false,
+    barOpacity: 100,
+    barElements: defaultBarElements([]),
+    notificationBadgeVisible: true,
+    mediaTitleVisible: true,
+    audioMeterVisible: true,
+    batteryPercentageVisible: true
+};
+
+const profileKeys = Object.keys(defaultProfile);
+
+// The profile that is edited first and that new monitors draw, if it exists.
 const defaultBarProfile = "minimal";
+
+// The bar profiles of a new appearance.json, in the current schema.
+function defaultBarProfiles() {
+    function profile(values, disabledIds) {
+        return Object.assign(cloneValue(defaultProfile), values,
+            { barElements: defaultBarElements(disabledIds) });
+    }
+
+    const compact = {
+        barHeight: 30, horizontalPadding: 10, spacing: 4, radius: 6,
+        workspaceButtonSize: 18, textSize: 13, archButtonHorizontalPadding: 5,
+        activeWorkspaceHorizontalPadding: 5, pillVerticalPadding: 2, workspacePadding: 3,
+        hideEmptyWorkspaces: true, workspaceAppCountVisible: false
+    };
+
+    return {
+        "minimal": profile(Object.assign({}, compact, {
+            pillsTransparent: true, transparentBarTopMargin: 6, barTransparent: true,
+            barTransparentBorder: true, groupRadius: 6
+        }), ["systemMonitor", "currentApp", "media", "bluetooth", "tray"]),
+        "work": profile({}, []),
+        "media": profile({
+            barHeight: 34, transparentBarTopMargin: 7, barTransparent: true,
+            barTransparentBorder: true
+        }, ["bluetooth", "tray"]),
+        "presentation": profile(Object.assign({}, compact, {
+            pillsTransparent: true, transparentBarTopMargin: 8, barTransparent: true,
+            barTransparentBorder: true, groupRadius: 6
+        }), ["arch", "systemMonitor", "currentApp", "workspaces", "media", "audio",
+            "bluetooth", "tray"])
+    };
+}
 
 function cloneValue(value) {
     return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
 }
 
-// Profiles are edited through the live settings: they hold the profile being
-// edited (`editingBarProfile`) plus its pending changes, and monitors that draw
-// it read them directly; every other monitor draws its saved profile. The live
-// settings are only a buffer: Quickshell discards them on start (see
-// discardChanges), so pending changes never outlive a restart.
-
 function sameValue(left, right) {
     return JSON.stringify(left) === JSON.stringify(right);
 }
 
-// True when the live settings differ from the saved edited profile, i.e. the
-// profile has pending changes. A key the profile does not save has none.
-function isModified(state) {
-    const profile = state.barProfiles && state.barProfiles[state.editingBarProfile];
+// `profile` with every profile setting, as a fresh object: missing settings
+// take their default and the bar elements are normalized. Other keys are
+// dropped.
+function completeProfile(profile) {
+    const source = profile || {};
+    const complete = {};
 
-    if (!profile)
-        return false;
-
-    for (let index = 0; index < profileKeys.length; index++) {
-        const key = profileKeys[index];
-        if (profile[key] !== undefined && !sameValue(profile[key], state[key]))
-            return true;
-    }
-
-    return false;
+    for (const key of profileKeys)
+        complete[key] = cloneValue(source[key] !== undefined ? source[key] : defaultProfile[key]);
+    complete.barElements = normalizeBarElements(complete.barElements);
+    return complete;
 }
 
-// Changes that load the saved values of `profileName` into the live settings.
-// Keys a profile does not save are first stored with the value its monitors
-// draw today (the live one), so pending changes never leak into them.
-function loadProfile(state, profileName) {
-    const profiles = cloneValue(state.barProfiles);
-    let completed = false;
+// The profile edited first: the default one if it exists, else the first by
+// name ("" without profiles).
+function initialEditingProfile(barProfiles) {
+    if (barProfiles && barProfiles[defaultBarProfile])
+        return defaultBarProfile;
 
-    for (const name in profiles) {
-        for (let index = 0; index < profileKeys.length; index++) {
-            const key = profileKeys[index];
-            if (profiles[name][key] === undefined && state[key] !== undefined) {
-                profiles[name][key] = cloneValue(state[key]);
-                completed = true;
-            }
-        }
+    const names = Object.keys(barProfiles || {}).sort();
+    return names.length > 0 ? names[0] : "";
+}
+
+// The saved values of `profileName`, completed.
+function savedProfile(state, profileName) {
+    return completeProfile(state.barProfiles && state.barProfiles[profileName]);
+}
+
+// The edited profile as monitors drawing it show it: with its pending changes.
+function editedProfile(state) {
+    return state.pendingProfile
+        ? completeProfile(state.pendingProfile)
+        : savedProfile(state, state.editingBarProfile);
+}
+
+// True when the edited profile has pending changes.
+function isModified(state) {
+    return !!state.pendingProfile
+        && !sameValue(completeProfile(state.pendingProfile),
+            savedProfile(state, state.editingBarProfile));
+}
+
+// Changes that set `values` (profile settings) on the edited profile as
+// pending changes. Back at the saved values, nothing is pending.
+function setValues(state, values) {
+    const pending = editedProfile(state);
+
+    for (const key in values) {
+        if (profileKeys.indexOf(key) !== -1)
+            pending[key] = cloneValue(values[key]);
     }
 
-    const changes = completed ? { barProfiles: profiles } : {};
-    const profile = profiles[profileName];
-
-    for (let index = 0; index < profileKeys.length; index++) {
-        const key = profileKeys[index];
-        if (profile[key] !== undefined)
-            changes[key] = cloneValue(profile[key]);
-    }
-
-    changes.editingBarProfile = profileName;
-    return changes;
+    const pendingState = Object.assign({}, state, { pendingProfile: pending });
+    return { pendingProfile: isModified(pendingState) ? pending : null };
 }
 
 // Changes that make `profileName` the edited profile. Rejected (null) when the
@@ -87,40 +182,20 @@ function editProfile(state, profileName) {
     if (!state.barProfiles[profileName] || isModified(state))
         return null;
 
-    return loadProfile(state, profileName);
+    return { editingBarProfile: profileName, pendingProfile: null };
 }
 
-// Changes that drop the pending changes: the live settings go back to the
-// saved edited profile (or the default one if it no longer exists).
+// Changes that drop the pending changes.
 function discardChanges(state) {
-    const profileName = state.barProfiles[state.editingBarProfile]
-        ? state.editingBarProfile
-        : state.barProfiles[defaultBarProfile] ? defaultBarProfile : Object.keys(state.barProfiles)[0];
-
-    return profileName === undefined ? {} : loadProfile(state, profileName);
+    return { pendingProfile: null };
 }
 
-// The live settings that a bar profile stores.
-function currentLayout(state) {
-    const layout = {};
-
-    for (let index = 0; index < profileKeys.length; index++) {
-        const key = profileKeys[index];
-        layout[key] = cloneValue(state[key]);
-    }
-
-    return layout;
-}
-
-// Changes that store the live settings as `profileName` and edit it.
-function saveProfile(state, profileName) {
+// Changes that store the pending changes in the edited profile.
+function saveProfile(state) {
     const profiles = cloneValue(state.barProfiles);
-    profiles[profileName] = currentLayout(state);
+    profiles[state.editingBarProfile] = editedProfile(state);
 
-    return {
-        barProfiles: profiles,
-        editingBarProfile: profileName
-    };
+    return { barProfiles: profiles, pendingProfile: null };
 }
 
 // The name offered when duplicating `profileName`: the first free
@@ -160,8 +235,7 @@ function duplicateProfile(state, profileName, newName) {
     const profiles = cloneValue(state.barProfiles);
     profiles[newName] = cloneValue(profiles[profileName]);
 
-    const withCopy = Object.assign({}, state, { barProfiles: profiles });
-    return Object.assign({ barProfiles: profiles }, loadProfile(withCopy, newName));
+    return { barProfiles: profiles, editingBarProfile: newName, pendingProfile: null };
 }
 
 // The display settings entries (monitors, and "default" for monitors nobody
@@ -196,18 +270,20 @@ function deleteProfile(state, displaySettings, profileName) {
     if (profileName !== state.editingBarProfile)
         return { barProfiles: profiles };
 
-    const remaining = Object.assign({}, state, { barProfiles: profiles });
-    return Object.assign({ barProfiles: profiles }, discardChanges(remaining));
+    return {
+        barProfiles: profiles,
+        editingBarProfile: initialEditingProfile(profiles),
+        pendingProfile: null
+    };
 }
 
-// The value of `key` for `profileName`: live while the profile is edited,
-// otherwise its saved value, falling back to the live one if it has none.
+// The value of `key` a monitor drawing `profileName` shows: with the pending
+// changes while the profile is edited, otherwise its saved value (the
+// default for unknown profiles and keys).
 function profileValue(state, profileName, key) {
-    if (profileName === state.editingBarProfile)
-        return state[key];
-
-    const profile = state.barProfiles[profileName];
-    return profile && profile[key] !== undefined ? profile[key] : state[key];
+    const profile = profileName === state.editingBarProfile
+        ? editedProfile(state) : savedProfile(state, profileName);
+    return profile[key];
 }
 
 const densityPresets = {
@@ -237,13 +313,13 @@ function densityPresetChanges(preset) {
     return changes;
 }
 
-// The density preset whose sizes the state has, or "" when none matches.
-function matchingDensityPreset(state) {
+// The density preset whose sizes `profile` has, or "" when none matches.
+function matchingDensityPreset(profile) {
     for (const preset in densityPresets) {
         const sizes = densityPresets[preset];
         let matches = true;
         for (const key in sizes) {
-            if (state[key] !== sizes[key])
+            if (profile[key] !== sizes[key])
                 matches = false;
         }
         if (matches)
@@ -272,16 +348,6 @@ function profileForMonitor(displaySettings, monitorName) {
     return monitorDisplaySettings(displaySettings, monitorName).barProfile;
 }
 
-// Bar elements: every piece of the bar, one type. A profile stores them as
-// `barElements`: { left: [...], center: [...], right: [...] }, each entry
-// { id, enabled, joinPrevious? }. Order within a zone is the order of the list.
-const zoneNames = ["left", "center", "right"];
-
-const elementIds = [
-    "arch", "systemMonitor", "currentApp", "workspaces",
-    "notifications", "recording", "media", "audio", "bluetooth", "tray",
-    "network", "battery", "clock"
-];
 
 function findElement(barElements, id) {
     for (const zoneName of zoneNames) {

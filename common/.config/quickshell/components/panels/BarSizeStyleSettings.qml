@@ -116,7 +116,7 @@ Column {
                     bottom: modelData.from
                     top: modelData.to
                 }
-                onEditingFinished: root.appearance[modelData.propertyName] = Number(text)
+                onEditingFinished: root.appearance.setBarSetting(modelData.propertyName, Number(text))
             }
 
             SettingsSlider {
@@ -125,7 +125,7 @@ Column {
                 to: modelData.to
                 stepSize: 1
                 value: root.appearance[modelData.propertyName]
-                onMoved: root.appearance[modelData.propertyName] = Math.round(value)
+                onMoved: root.appearance.setBarSetting(modelData.propertyName, Math.round(value))
             }
         }
     }
@@ -201,8 +201,8 @@ Column {
             }
 
             TapHandler {
-                onTapped: root.appearance[settingToggle.modelData.propertyName]
-                    = !root.appearance[settingToggle.modelData.propertyName]
+                onTapped: root.appearance.setBarSetting(settingToggle.modelData.propertyName,
+                    !root.appearance[settingToggle.modelData.propertyName])
             }
         }
     }
