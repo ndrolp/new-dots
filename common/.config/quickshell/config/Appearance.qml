@@ -47,13 +47,24 @@ QtObject {
             settings[key] = changes[key];
     }
 
-    // Picks the profile the settings panel edits; no monitor changes.
+    // The edited profile has pending changes: the live settings differ from
+    // what it saves. Only monitors drawing it show them.
+    readonly property bool barProfileModified: BarProfileModel.isModified(settings)
+
+    // Picks the profile the settings panel edits; no monitor changes. Ignored
+    // while the edited profile has pending changes.
     function editBarProfile(profileName) {
         applyChanges(BarProfileModel.editProfile(settings, profileName));
     }
 
-    function saveBarProfile(profileName) {
-        applyChanges(BarProfileModel.saveProfile(settings, profileName));
+    // Writes the pending changes into the edited profile.
+    function saveBarProfile() {
+        applyChanges(BarProfileModel.saveProfile(settings, settings.editingBarProfile));
+    }
+
+    // Drops the pending changes: back to the saved edited profile.
+    function discardBarProfileChanges() {
+        applyChanges(BarProfileModel.discardChanges(settings));
     }
 
     function barProfileValue(profileName, key) {
@@ -86,6 +97,30 @@ QtObject {
 
     property bool loaded: false
 
+    // Pending changes live in memory only: the live settings in the file are a
+    // buffer, so the first load in the current schema drops them (one write).
+    property bool pendingChangesDropped: false
+
+    function dropPendingChangesOnStart() {
+        if (pendingChangesDropped || settings.schemaVersion !== BarProfileModel.schemaVersion)
+            return;
+
+        pendingChangesDropped = true;
+        const state = rawState();
+        if (!state || !state.barProfiles)
+            return;
+
+        // Nothing to write unless there were pending changes or profiles that
+        // had to be completed (see BarProfileModel.loadProfile).
+        const changes = BarProfileModel.discardChanges(state);
+        if (!BarProfileModel.isModified(state) && !changes.barProfiles)
+            return;
+
+        for (const key in changes)
+            state[key] = changes[key];
+        settingsFile.setText(JSON.stringify(state, null, 4));
+    }
+
     // The file as stored, including keys the adapter does not declare; null
     // when it is empty or unreadable.
     function rawState() {
@@ -112,7 +147,10 @@ QtObject {
 
         onFileChanged: reload()
         onAdapterUpdated: writeAdapter()
-        onLoaded: root.loaded = true
+        onLoaded: {
+            root.loaded = true;
+            root.dropPendingChangesOnStart();
+        }
 
         onLoadFailed: error => {
             if (error === FileViewError.FileNotFound) {
@@ -124,6 +162,7 @@ QtObject {
                 settings.schemaVersion = BarProfileModel.schemaVersion;
                 writeAdapter();
             }
+            root.pendingChangesDropped = true;
             root.loaded = true;
         }
 
