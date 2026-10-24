@@ -1,5 +1,6 @@
 import QtQuick
 import "." as Panels
+import "../../config/BarProfileModel.js" as BarProfileModel
 
 // One monitor's settings in the Displays section: the workspaces it shows and
 // what the shell draws on it. Kept apart from WorkspaceSettings, which lists
@@ -68,10 +69,7 @@ Column {
         Panels.SettingsChoice {
             width: Math.min(parent.width, 120 * Math.max(1, options.length))
             appearance: root.appearance
-            options: Object.keys(root.appearance.barProfiles || {}).sort().map(name => ({
-                label: name.charAt(0).toUpperCase() + name.slice(1),
-                value: name
-            }))
+            options: BarProfileModel.profileChoices(root.appearance.barProfiles)
             value: root.displaySettings.barProfile
             onChosen: profile => root.monitors.setDisplaySetting(root.monitorDescription, "barProfile", profile)
         }

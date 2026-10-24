@@ -151,6 +151,17 @@ function defaultProfileName(barProfiles) {
     return names.length > 0 ? names[0] : "";
 }
 
+// How a bar profile is shown: its name with a capital first letter.
+function profileDisplayName(profileName) {
+    return profileName.length > 0 ? profileName.charAt(0).toUpperCase() + profileName.slice(1) : "";
+}
+
+// Every bar profile as an option to choose, { label, value }, in name order.
+function profileChoices(barProfiles) {
+    return Object.keys(barProfiles || {}).sort()
+        .map(name => ({ label: profileDisplayName(name), value: name }));
+}
+
 // The saved values of `profileName`, completed.
 function savedProfile(state, profileName) {
     return completeProfile(state.barProfiles && state.barProfiles[profileName]);
