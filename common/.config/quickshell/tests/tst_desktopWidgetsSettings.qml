@@ -39,7 +39,7 @@ TestCase {
     // A fake of the shell's monitors over the real desktop widgets model, so
     // what is saved shows up again in the section.
     Component {
-        id: page
+        id: sectionArea
 
         Item {
             property alias monitors: monitors
@@ -89,7 +89,7 @@ TestCase {
     }
 
     function make() {
-        const built = createTemporaryObject(page, this);
+        const built = createTemporaryObject(sectionArea, this);
         return { monitors: built.monitors, item: built.section };
     }
 

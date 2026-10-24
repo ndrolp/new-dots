@@ -33,10 +33,10 @@ TestCase {
         return all(item, child => child.label === label && child.switchItem !== undefined)[0];
     }
 
-    // The settings panel's page: the section sizes itself to it. A fake
-    // plugins object stands in for the shell's; the section writes to it.
+    // Where the settings panel shows a section: the section sizes itself to it. A
+    // fake plugins object stands in for the shell's; the section writes to it.
     Component {
-        id: page
+        id: sectionArea
 
         Item {
             property alias plugins: plugins
@@ -76,7 +76,7 @@ TestCase {
     }
 
     function make() {
-        const built = createTemporaryObject(page, this);
+        const built = createTemporaryObject(sectionArea, this);
         return { plugins: built.plugins, item: built.section };
     }
 

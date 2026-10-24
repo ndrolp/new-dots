@@ -279,7 +279,7 @@ Rectangle {
                     }
 
                     ScrollView {
-                        id: pageScroll
+                        id: sectionScroll
 
                         width: parent.width
                         height: parent.height - 56
@@ -299,7 +299,7 @@ Rectangle {
                         Loader {
                             id: sectionLoader
 
-                            width: pageScroll.availableWidth - 12
+                            width: sectionScroll.availableWidth - 12
                             height: item ? item.implicitHeight : 0
                         }
                     }

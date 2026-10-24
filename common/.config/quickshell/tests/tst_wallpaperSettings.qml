@@ -47,11 +47,11 @@ TestCase {
         return all(item, child => child.wallpaperPath !== undefined);
     }
 
-    // The settings panel's page: the section sizes itself to it. Fake
-    // wallpapers stand in for the shell's and record what is applied; the
+    // Where the settings panel shows a section: the section sizes itself to it.
+    // Fake wallpapers stand in for the shell's and record what is applied; the
     // folders are plain lists of file names.
     Component {
-        id: page
+        id: sectionArea
 
         Item {
             property alias wallpapers: wallpapers
@@ -115,7 +115,7 @@ TestCase {
     }
 
     function make() {
-        const built = createTemporaryObject(page, this);
+        const built = createTemporaryObject(sectionArea, this);
         return { wallpapers: built.wallpapers, item: built.section };
     }
 

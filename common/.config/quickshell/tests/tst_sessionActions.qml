@@ -31,7 +31,7 @@ TestCase {
     }
 
     Component {
-        id: page
+        id: sectionArea
 
         Item {
             property alias actions: actions
@@ -56,7 +56,7 @@ TestCase {
     }
 
     function make() {
-        return createTemporaryObject(page, this);
+        return createTemporaryObject(sectionArea, this);
     }
 
     function sameLine(item, first, second) {

@@ -46,10 +46,10 @@ TestCase {
         return all(item, child => child.label === label && child.activated !== undefined)[0];
     }
 
-    // The settings panel's page: the section sizes itself to it. A fake
-    // bookmarks store stands in for the shell's and records what is asked.
+    // Where the settings panel shows a section: the section sizes itself to it. A
+    // fake bookmarks store stands in for the shell's and records what is asked.
     Component {
-        id: page
+        id: sectionArea
 
         Item {
             property alias bookmarks: bookmarks
@@ -102,7 +102,7 @@ TestCase {
     }
 
     function make() {
-        const built = createTemporaryObject(page, this);
+        const built = createTemporaryObject(sectionArea, this);
         return { bookmarks: built.bookmarks, item: built.section };
     }
 

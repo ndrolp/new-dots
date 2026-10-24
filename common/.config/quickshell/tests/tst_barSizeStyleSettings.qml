@@ -38,10 +38,10 @@ TestCase {
         return all(item, child => child.label === label && child.switchItem !== undefined)[0];
     }
 
-    // The settings panel's page: the section sizes itself to it. A fake
-    // appearance stands in for the shell's and records what is saved.
+    // Where the settings panel shows a section: the section sizes itself to it. A
+    // fake appearance stands in for the shell's and records what is saved.
     Component {
-        id: page
+        id: sectionArea
 
         Item {
             property alias appearance: appearance
@@ -89,7 +89,7 @@ TestCase {
     }
 
     function make() {
-        const built = createTemporaryObject(page, this);
+        const built = createTemporaryObject(sectionArea, this);
         return { appearance: built.appearance, item: built.section };
     }
 

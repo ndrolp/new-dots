@@ -38,11 +38,11 @@ TestCase {
         return all(item, child => child.label === label && child.switchItem !== undefined)[0];
     }
 
-    // The settings panel's page: the monitor's settings size themselves to
-    // it. Fake appearance and monitors stand in for the shell's and record
-    // what is saved.
+    // Where the settings panel shows a section: the monitor's settings size
+    // themselves to it. Fake appearance and monitors stand in for the shell's and
+    // record what is saved.
     Component {
-        id: page
+        id: sectionArea
 
         Item {
             property alias monitors: monitors
@@ -95,7 +95,7 @@ TestCase {
     }
 
     function make() {
-        const built = createTemporaryObject(page, this);
+        const built = createTemporaryObject(sectionArea, this);
         return { monitors: built.monitors, item: built.section };
     }
 

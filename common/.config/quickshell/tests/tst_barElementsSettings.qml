@@ -52,7 +52,7 @@ TestCase {
 
     // A fake appearance stands in for the shell's and records what is asked.
     Component {
-        id: page
+        id: sectionArea
 
         Item {
             property alias appearance: appearance
@@ -113,7 +113,7 @@ TestCase {
     }
 
     function make() {
-        const built = createTemporaryObject(page, this);
+        const built = createTemporaryObject(sectionArea, this);
         return { appearance: built.appearance, item: built.section };
     }
 
