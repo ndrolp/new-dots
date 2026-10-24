@@ -15,6 +15,8 @@ Item {
     required property var pomodoro
     required property var notificationHistory
     required property var screenCapture
+    required property var cava
+    property bool barVisible: true
     required property var systemMonitor
     required property var workspaceService
 
@@ -302,6 +304,8 @@ Item {
         pomodoro: root.pomodoro
         notificationHistory: root.notificationHistory
         screenCapture: root.screenCapture
+        cava: root.cava
+        barVisible: root.barVisible
         elementX: element => root.elementX(element)
         elementGrouped: element => root.elementGrouped(element)
 

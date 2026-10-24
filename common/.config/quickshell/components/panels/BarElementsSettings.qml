@@ -28,6 +28,7 @@ Column {
             "notifications": "Notifications",
             "recording": "Screen recording",
             "media": "Media",
+            "cava": "Cava",
             "audio": "Audio",
             "bluetooth": "Bluetooth",
             "tray": "System tray",

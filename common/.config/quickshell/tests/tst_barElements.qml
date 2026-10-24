@@ -161,8 +161,8 @@ TestCase {
         compare(zone(normalized, "left"), ["clock"]);
         compare(zone(normalized, "center"), []);
         compare(zone(normalized, "right"), ["arch", "systemMonitor", "currentApp", "workspaces",
-            "notifications", "recording", "media", "audio", "bluetooth", "tray", "network",
-            "battery"]);
+            "notifications", "recording", "media", "-cava", "audio", "bluetooth", "tray",
+            "network", "battery"]);
         const once = BarProfileModel.normalizeBarElements(minimalElements());
         compare(BarProfileModel.normalizeBarElements(once), once);
     }
@@ -239,6 +239,36 @@ TestCase {
         compare(BarProfileModel.elementOption(updated, "battery", "percentageVisible"), false);
         compare(BarProfileModel.elementOption(barElements, "battery", "percentageVisible"), true);
         compare(element(updated, "audio"), element(barElements, "audio"));
+    }
+
+    function test_cavaIsInEveryDefaultProfileDisabledNextToMediaAndAudio() {
+        const profiles = BarProfileModel.defaultBarProfiles();
+
+        for (const name in profiles) {
+            const right = zone(profiles[name].barElements, "right").map(id => id.replace("-", ""));
+            compare(right.indexOf("cava"), right.indexOf("media") + 1, name);
+            compare(right.indexOf("audio"), right.indexOf("cava") + 1, name);
+            compare(BarProfileModel.elementEnabled(profiles[name].barElements, "cava"), false, name);
+        }
+    }
+
+    function test_aProfileSavedBeforeCavaExistedShowsItDisabled() {
+        const state = fixtures.startedBarState();
+
+        for (const name in state.barProfiles) {
+            const barElements = BarProfileModel.savedProfile(state, name).barElements;
+            compare(BarProfileModel.elementZone(barElements, "cava"), "right", name);
+            compare(BarProfileModel.elementEnabled(barElements, "cava"), false, name);
+        }
+    }
+
+    function test_aProfileThatListsCavaKeepsItEnabled() {
+        const barElements = BarProfileModel.normalizeBarElements({
+            left: [{ id: "cava", enabled: true }]
+        });
+
+        compare(BarProfileModel.elementZone(barElements, "cava"), "left");
+        compare(BarProfileModel.elementEnabled(barElements, "cava"), true);
     }
 
     function test_changingAnElementOptionIsAPendingChange() {
