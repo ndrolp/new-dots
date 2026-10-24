@@ -1,10 +1,13 @@
 import QtQuick
 import "." as Panels
 
+// The Bar section's sizes and style for the edited bar profile: a density
+// preset, the sizes as number settings and the style as switch rows, two
+// per line.
 Column {
     id: root
 
-    property var appearance
+    required property var appearance
 
     width: parent ? parent.width : 0
     spacing: 14

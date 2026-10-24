@@ -11,8 +11,8 @@ import "../../config/BarProfileModel.js" as BarProfileModel
 Column {
     id: root
 
-    property var appearance
-    property string expandedWidget: ""
+    required property var appearance
+    property string expandedElement: ""
     readonly property var barElements: BarProfileModel.normalizeBarElements(appearance.barElements)
     readonly property var zones: [
         { label: "Left", short: "L", value: "left" },
@@ -115,7 +115,7 @@ Column {
                     readonly property bool elementOn: modelData.enabled !== false
                     readonly property bool joined: modelData.joinPrevious === true
                     readonly property var options: root.optionsFor(element)
-                    readonly property bool expanded: root.expandedWidget === element
+                    readonly property bool expanded: root.expandedElement === element
 
                     width: root.width
                     spacing: 2
@@ -143,7 +143,7 @@ Column {
 
                                 TapHandler {
                                     enabled: elementDelegate.options.length > 0
-                                    onTapped: root.expandedWidget = elementDelegate.expanded
+                                    onTapped: root.expandedElement = elementDelegate.expanded
                                         ? "" : elementDelegate.element
                                 }
                             }

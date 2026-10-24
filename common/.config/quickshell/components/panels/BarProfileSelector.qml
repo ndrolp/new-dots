@@ -9,7 +9,7 @@ import "../../config/BarProfileModel.js" as BarProfileModel
 Column {
     id: root
 
-    property var appearance
+    required property var appearance
     // Config.Monitors: Delete is refused for profiles a monitor draws.
     property var monitors
     readonly property bool modified: appearance.barProfileModified

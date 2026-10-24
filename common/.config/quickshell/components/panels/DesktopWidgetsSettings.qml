@@ -6,7 +6,7 @@ import "." as Panels
 Column {
     id: root
 
-    property var appearance
+    required property var appearance
     property var monitors
 
     width: parent ? parent.width : 0

@@ -7,7 +7,7 @@ import "." as Panels
 Column {
     id: root
 
-    property var appearance
+    required property var appearance
 
     width: parent ? parent.width : 0
     spacing: 14

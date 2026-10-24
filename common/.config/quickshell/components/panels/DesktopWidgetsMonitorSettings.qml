@@ -7,7 +7,7 @@ import "../../config/DesktopWidgetsModel.js" as DesktopWidgetsModel
 Column {
     id: root
 
-    property var appearance
+    required property var appearance
     property var monitors
     property string monitorName: ""
 

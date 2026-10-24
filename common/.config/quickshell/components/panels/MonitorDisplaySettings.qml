@@ -8,7 +8,7 @@ import "../../config/BarProfileModel.js" as BarProfileModel
 Column {
     id: root
 
-    property var appearance
+    required property var appearance
     // Config.Monitors: reads and saves this monitor's settings.
     property var monitors
     property string monitorDescription: ""

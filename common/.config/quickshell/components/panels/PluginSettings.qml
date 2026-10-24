@@ -1,10 +1,12 @@
 import QtQuick
 import "." as Panels
 
+// The Plugins section: each plugin turned on or off with a switch row and
+// what it does underneath, then the plugins' own settings.
 Column {
     id: root
 
-    property var appearance
+    required property var appearance
     property var plugins
 
     width: parent ? parent.width : 0

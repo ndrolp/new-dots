@@ -2,10 +2,12 @@ import QtQuick
 import "../../config" as Config
 import "." as Panels
 
+// The Quick Search section: the bookmarks and the search engines of the
+// quick-search panel, each a list of settings rows with Add below it.
 Column {
     id: root
 
-    property var appearance
+    required property var appearance
     property var bookmarks
 
     width: parent ? parent.width : 0

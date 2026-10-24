@@ -8,7 +8,7 @@ import "." as Panels
 Column {
     id: root
 
-    property var appearance
+    required property var appearance
     property var wallpapers
     property var displays: []
     property string wallpaperView: "Selection"
