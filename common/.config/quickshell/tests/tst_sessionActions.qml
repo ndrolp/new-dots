@@ -68,9 +68,9 @@ TestCase {
     function test_eachActionIsAQuietButtonThatRunsItsCommand() {
         const built = make();
         const expected = [
-            ["Lock now", ["loginctl", "lock-session"]],
-            ["Turn displays off", ["hyprctl", "dispatch", "dpms", "off"]],
-            ["Suspend", ["systemctl", "suspend"]]
+            ["󰌾  Lock now", ["loginctl", "lock-session"]],
+            ["󰍹  Turn displays off", ["hyprctl", "dispatch", "dpms", "off"]],
+            ["󰤄  Suspend", ["systemctl", "suspend"]]
         ];
 
         for (const [label, command] of expected) {
@@ -85,8 +85,8 @@ TestCase {
     function test_actionsSitTwoPerLine() {
         const built = make();
 
-        verify(sameLine(built.actions, button(built.actions, "Lock now"),
-            button(built.actions, "Turn displays off")));
+        verify(sameLine(built.actions, button(built.actions, "󰌾  Lock now"),
+            button(built.actions, "󰍹  Turn displays off")));
     }
 
     function test_nothingIsBoldAndNoFilledCardsRemain() {

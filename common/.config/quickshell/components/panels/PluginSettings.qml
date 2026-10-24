@@ -89,12 +89,23 @@ Column {
             onEdited: number => root.plugins.launcherRecentLimit = number
         }
 
-        Panels.SettingsSwitchRow {
+        Column {
             width: parent.cellWidth
-            appearance: root.appearance
-            label: "Clipboard image previews"
-            checked: root.plugins.clipboardImagePreviewsEnabled
-            onToggled: root.plugins.clipboardImagePreviewsEnabled = !root.plugins.clipboardImagePreviewsEnabled
+
+            Panels.SettingsSwitchRow {
+                width: parent.width
+                appearance: root.appearance
+                label: "Clipboard image previews"
+                checked: root.plugins.clipboardImagePreviewsEnabled
+                onToggled: root.plugins.clipboardImagePreviewsEnabled = !root.plugins.clipboardImagePreviewsEnabled
+            }
+
+            Panels.SettingsHint {
+                x: 12
+                width: parent.width - 24
+                appearance: root.appearance
+                text: "Decode copied images for preview in clipboard history."
+            }
         }
     }
 }

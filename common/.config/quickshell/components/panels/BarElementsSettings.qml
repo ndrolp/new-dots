@@ -167,7 +167,7 @@ Column {
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: elementDelegate.index > 0
                                 appearance: root.appearance
-                                label: "Join"
+                                label: "󰌷  Join"
                                 labelColor: elementDelegate.joined ? theme.accent : theme.textMuted
                                 onActivated: root.appearance.setBarElementJoined(elementDelegate.element,
                                     !elementDelegate.joined)

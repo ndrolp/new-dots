@@ -111,6 +111,17 @@ TestCase {
         return a.y === b.y && a.x < b.x;
     }
 
+    function textShown(item, text) {
+        return all(item, child => child.text === text && child.font !== undefined
+            && !(child instanceof TextInput)).length > 0;
+    }
+
+    function test_clipboardImagePreviewsSayWhatTheyDo() {
+        const built = make();
+
+        verify(textShown(built.item, "Decode copied images for preview in clipboard history."));
+    }
+
     function test_thePluginsOwnSettingsSitTwoPerLineAndStillSave() {
         const built = make();
         const recent = numberCell(built.item, "Launcher recent apps");

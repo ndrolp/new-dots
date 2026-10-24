@@ -182,10 +182,10 @@ TestCase {
         const battery = elementRow(built.item, "Battery");
         const audio = elementRow(built.item, "Audio");
 
-        verify(!button(audio, "Join"), "the first element of a zone cannot join");
-        compare(button(battery, "Join").labelColor, theme.accent);
+        verify(!button(audio, "󰌷  Join"), "the first element of a zone cannot join");
+        compare(button(battery, "󰌷  Join").labelColor, theme.accent);
 
-        button(battery, "Join").activated();
+        button(battery, "󰌷  Join").activated();
         compare(built.appearance.calls, [["joined", "battery", false]]);
     }
 
