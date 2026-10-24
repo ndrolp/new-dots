@@ -163,7 +163,7 @@ Item {
     }
 
     // A popup of this bar, open while it is the active one.
-    component StatusPopup: PopupFrame {
+    component BarPopup: PopupFrame {
         appearance: root.appearance
         barWindow: root.barWindow
         anchorProvider: root.popupAnchorProvider
@@ -171,7 +171,7 @@ Item {
         onDismissed: root.popupClosed(popup)
     }
 
-    StatusPopup {
+    BarPopup {
         id: systemPopup
 
         popup: "system"
@@ -253,7 +253,7 @@ Item {
         }
     }
 
-    StatusPopup {
+    BarPopup {
         id: pomodoroPopup
 
         popup: "pomodoro"
@@ -362,7 +362,7 @@ Item {
         }
     }
 
-    StatusPopup {
+    BarPopup {
         id: mediaPopup
 
         readonly property var player: root.player
@@ -505,7 +505,7 @@ Item {
         }
     }
 
-    StatusPopup {
+    BarPopup {
         id: sinkPopup
 
         popup: "audio"
@@ -578,7 +578,7 @@ Item {
         }
     }
 
-    StatusPopup {
+    BarPopup {
         id: trayPopup
 
         property var selectedTrayItem: null
@@ -818,7 +818,7 @@ Item {
         }
     }
 
-    StatusPopup {
+    BarPopup {
         id: batteryPopup
 
         readonly property var battery: UPower.displayDevice
@@ -901,7 +901,7 @@ Item {
         }
     }
 
-    StatusPopup {
+    BarPopup {
         id: bluetoothPopup
 
         readonly property var adapter: Bluetooth.defaultAdapter
@@ -1080,7 +1080,7 @@ Item {
         }
     }
 
-    StatusPopup {
+    BarPopup {
         id: networkPopup
 
         readonly property var wifi: root.wifiDevice()
