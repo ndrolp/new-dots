@@ -3,8 +3,8 @@ import "../../config" as Config
 import "." as Panels
 
 // The Wallpapers section without Hyprland: `displays` are the connected
-// monitors, each { description, portrait }, so it can be built and tested
-// outside of the shell. The wallpaper lists are the `wallpapers` folders.
+// monitors, each { description, name, portrait }, so it can be built and
+// tested outside of the shell. The wallpaper lists are the `wallpapers` folders.
 Column {
     id: root
 
@@ -26,14 +26,6 @@ Column {
         const display = displays.find(display => display.description === monitorDescription);
         return display !== undefined && display.portrait;
     }
-
-    function ensureWallpaperMonitor() {
-        if (!displays.some(display => display.description === selectedWallpaperMonitor))
-            selectedWallpaperMonitor = displays.length > 0 ? displays[0].description : "";
-    }
-
-    Component.onCompleted: ensureWallpaperMonitor()
-    onDisplaysChanged: ensureWallpaperMonitor()
 
     Panels.SettingsChoice {
         width: Math.min(parent.width, 360)
@@ -121,13 +113,10 @@ Column {
         spacing: 10
         visible: root.wallpaperView === "Selection"
 
-        Panels.SettingsChoice {
+        Panels.SettingsMonitorChoice {
             width: parent.width
             appearance: root.appearance
-            options: root.displays.map(display => ({
-                label: (display.portrait ? "󰍹 " : "󰍺 ") + display.description,
-                value: display.description
-            }))
+            displays: root.displays
             value: root.selectedWallpaperMonitor
             onChosen: description => root.selectedWallpaperMonitor = description
         }

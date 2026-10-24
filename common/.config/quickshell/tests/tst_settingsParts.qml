@@ -139,6 +139,24 @@ TestCase {
     }
 
     Component {
+        id: monitorChoice
+
+        Panels.SettingsMonitorChoice {
+            width: 400
+            displays: [
+                { description: "Dell Inc. DELL U2720Q 1234", name: "DELL U2720Q", portrait: false },
+                { description: "Philips Consumer Electronics 243V 5678", name: "243V", portrait: true }
+            ]
+        }
+    }
+
+    SignalSpy {
+        id: chosenSpy
+
+        signalName: "chosen"
+    }
+
+    Component {
         id: grid
 
         Panels.SettingsGrid {
@@ -465,6 +483,32 @@ TestCase {
         verify(down.enabled);
         item.canMoveDown = false;
         verify(!down.enabled);
+    }
+
+    // A connected monitor is chosen by its short name, with an icon for how
+    // it stands, so the options don't elide; settings are stored under its
+    // description.
+    function test_aMonitorChoiceNamesEachMonitorShortly() {
+        const item = make(monitorChoice, { value: "Philips Consumer Electronics 243V 5678" });
+
+        compare(item.options, [
+            { label: "󰍺 DELL U2720Q", value: "Dell Inc. DELL U2720Q 1234" },
+            { label: "󰍹 243V", value: "Philips Consumer Electronics 243V 5678" }
+        ]);
+        compare(textOf(item, "󰍹 243V").color, theme.accent);
+    }
+
+    // A monitor that isn't connected (or none chosen yet) gives way to the
+    // first connected one.
+    function test_aMonitorChoiceAsksForTheFirstMonitorWhenTheChosenOneIsGone() {
+        const item = make(monitorChoice, { value: "Philips Consumer Electronics 243V 5678" });
+        chosenSpy.target = item;
+        chosenSpy.clear();
+
+        item.displays = item.displays.slice(0, 1);
+
+        compare(chosenSpy.count, 1);
+        compare(chosenSpy.signalArguments[0][0], "Dell Inc. DELL U2720Q 1234");
     }
 
     // Short controls sit two per line, in columns of equal width with a gap

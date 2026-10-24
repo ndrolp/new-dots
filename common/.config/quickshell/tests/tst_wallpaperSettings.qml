@@ -107,8 +107,8 @@ TestCase {
                 }
                 wallpapers: wallpapers
                 displays: [
-                    { description: "AOC", portrait: false },
-                    { description: "Philips", portrait: true }
+                    { description: "AOC", name: "Q27G2", portrait: false },
+                    { description: "Philips", name: "243V", portrait: true }
                 ]
             }
         }
@@ -126,8 +126,8 @@ TestCase {
         verify(choice);
         compare(choice.options.map(option => option.value), ["AOC", "Philips"]);
         compare(choice.value, "AOC");
-        compare(textOf(choice, "󰍺 AOC").color, theme.accent);
-        verify(textOf(choice, "󰍹 Philips"));
+        compare(textOf(choice, "󰍺 Q27G2").color, theme.accent);
+        verify(textOf(choice, "󰍹 243V"));
     }
 
     function test_choosingAMonitorShowsTheWallpapersOfItsOrientation() {
