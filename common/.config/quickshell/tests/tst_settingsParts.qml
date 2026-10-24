@@ -33,6 +33,30 @@ TestCase {
         }
     }
 
+    Component {
+        id: heading
+
+        Panels.SettingsHeading {
+            text: "Size & spacing"
+        }
+    }
+
+    Component {
+        id: label
+
+        Panels.SettingsLabel {
+            text: "Bar height"
+        }
+    }
+
+    Component {
+        id: hint
+
+        Panels.SettingsHint {
+            text: "Fills in the sizes below"
+        }
+    }
+
     function make(component, properties) {
         return createTemporaryObject(component, this, Object.assign({ appearance: barAppearance }, properties || {}));
     }
@@ -53,5 +77,34 @@ TestCase {
 
         item.forceActiveFocus();
         compare(item.background.border.color, theme.accent);
+    }
+
+    // Group headings are small, muted and uppercase; setting labels are in
+    // the normal text color; hints and values are muted. None is bold.
+    function test_aGroupHeadingIsSmallMutedUppercase() {
+        const item = make(heading);
+
+        compare(item.font.capitalization, Font.AllUppercase);
+        compare(item.font.pixelSize, 11);
+        compare(item.color, theme.textMuted);
+        verify(!item.font.bold);
+    }
+
+    function test_aSettingLabelIsRegularInTheNormalTextColor() {
+        const item = make(label);
+
+        compare(item.font.capitalization, Font.MixedCase);
+        compare(item.font.pixelSize, 13);
+        compare(item.color, theme.text);
+        verify(!item.font.bold);
+        compare(item.font.family, theme.fontFamily);
+    }
+
+    function test_aHintIsMutedAndSlightlySmaller() {
+        const item = make(hint);
+
+        compare(item.font.pixelSize, 12);
+        compare(item.color, theme.textMuted);
+        verify(!item.font.bold);
     }
 }
