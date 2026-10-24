@@ -85,7 +85,7 @@ TestCase {
         compare(setting(config, "output", "frame_delimiter"), "10");
     }
 
-    function test_theConfigDrawsOneSpectrumNotTwoMirroredChannels() {
+    function test_theConfigDrawsOneSetOfFrequencyBarsNotTwoMirroredChannels() {
         compare(setting(CavaOutput.config(12), "output", "channels"), "mono");
     }
 

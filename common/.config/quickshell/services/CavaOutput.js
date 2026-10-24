@@ -8,8 +8,8 @@ const maxRange = 1000;
 
 // cava's config for `barCount` bars: it listens to the monitor of the default
 // audio output (pipewire's "auto" source) and prints one frame per line,
-// bars separated by ";" (59), as text. One mono spectrum: in stereo cava
-// mirrors the two channels.
+// bars separated by ";" (59), as text. One set of mono frequency bars: in
+// stereo cava mirrors the two channels.
 function config(barCount) {
     return [
         "[general]",
