@@ -2,6 +2,7 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick
 import Qt.labs.folderlistmodel
+import "WallpaperModel.js" as WallpaperModel
 
 QtObject {
     id: root
@@ -24,22 +25,18 @@ QtObject {
     }
 
     function setWallpaper(monitorDescription, path) {
+        if (monitorDescription === "")
+            return;
+
         const localWallpaperPath = localPath(path);
-        const updated = Object.assign({}, assignments);
-        updated[monitorDescription] = localWallpaperPath;
-        assignments = updated;
+        assignments = WallpaperModel.withAssignment(
+            assignments, monitorDescription, localWallpaperPath);
         apply(monitorDescription, localWallpaperPath);
     }
 
     function isPortraitMonitor(monitor) {
-        const transform = Number(monitor.lastIpcObject.transform);
-
-        if (transform === 1 || transform === 3)
-            return true;
-        if (transform === 0 || transform === 2)
-            return false;
-
-        return monitor.height > monitor.width;
+        return WallpaperModel.isPortrait(
+            monitor.lastIpcObject.transform, monitor.width, monitor.height);
     }
 
     function nextWallpaper(model, folder, currentPath) {
@@ -84,7 +81,7 @@ QtObject {
             if (monitors[index].description === monitorDescription) {
                 const command = [
                     "awww", "img", "-o", monitors[index].name, path,
-                    "--transition-type", "wipe"
+                    "--transition-type", "grow", "--transition-pos", "center"
                 ];
                 console.info("Executing:", command.join(" "));
                 image.command = command;
