@@ -5,7 +5,9 @@ import "../config" as Config
 
 // The Quick Search section, built from the settings parts: bookmarks and
 // search engines as full-width rows, transparent until hovered, with their
-// short fields paired on one line.
+// short fields paired on one line. Pointer events don't reach items under
+// qmltestrunner offscreen, so buttons are pressed by their signal and a
+// button that can't be pressed is checked by being disabled.
 TestCase {
     name: "BookmarkSettings"
     width: 800
@@ -103,6 +105,17 @@ TestCase {
         return a.y === b.y && a.x < b.x;
     }
 
+    function press(item) {
+        verify(item.enabled, item.label);
+        item.activated();
+    }
+
+    // Leaving a field also finishes its edit, so the same save can be asked
+    // twice in a row; that is harmless and not what these tests are about.
+    function distinct(calls) {
+        return calls.filter((call, i) => i === 0 || JSON.stringify(call) !== JSON.stringify(calls[i - 1]));
+    }
+
     function typeInto(input, text) {
         input.forceActiveFocus();
         input.selectAll();
@@ -120,5 +133,86 @@ TestCase {
             compare(row.width, built.item.width);
             compare(row.color, Qt.rgba(0, 0, 0, 0));
         }
+    }
+
+    function test_aBookmarksGlyphAndNameSitOnOneLineAndItsUrlBelow() {
+        const built = make();
+        const row = rows(built.item, "bookmark")[0];
+        const glyph = field(row, "glyph");
+        const name = field(row, "label");
+        const url = field(row, "url");
+
+        verify(sameLine(built.item, glyph, name));
+        verify(url.mapToItem(built.item, 0, 0).y > name.mapToItem(built.item, 0, 0).y);
+        compare(glyph.background.color, Qt.rgba(0, 0, 0, 0));
+        compare(glyph.background.border.color, theme.border);
+    }
+
+    function test_editingABookmarkStillSavesIt() {
+        const built = make();
+        const row = rows(built.item, "bookmark")[1];
+
+        typeInto(field(row, "label"), "Inbox");
+        typeInto(field(row, "url"), "https://x.io");
+
+        compare(distinct(built.bookmarks.calls), [
+            ["update", 1, "label", "Inbox"],
+            ["update", 1, "url", "https://x.io"]
+        ]);
+    }
+
+    function test_addingMovingAndRemovingBookmarksStillWork() {
+        const built = make();
+        const [first, second] = rows(built.item, "bookmark");
+
+        press(button(built.item, "󰐕  Add bookmark"));
+        press(button(first, "󰁅"));
+        press(button(second, "󰁝"));
+        press(button(second, "Remove"));
+
+        compare(built.bookmarks.calls, [["add"], ["move", 0, 1], ["move", 1, 0], ["remove", 1]]);
+    }
+
+    function test_theEndBookmarksCannotMovePastTheEnds() {
+        const built = make();
+        const [first, last] = rows(built.item, "bookmark");
+
+        verify(!button(first, "󰁝").enabled);
+        verify(!button(last, "󰁅").enabled);
+    }
+
+    function test_searchEnginesAreEditedAddedAndMovedLikeBookmarks() {
+        const built = make();
+        const row = rows(built.item, "searchEngine")[0];
+
+        compare(row.width, built.item.width);
+        verify(sameLine(built.item, field(row, "glyph"), field(row, "label")));
+        typeInto(field(row, "searchUrl"), "q=%s");
+        press(button(built.item, "󰐕  Add search engine"));
+
+        compare(distinct(built.bookmarks.calls), [["updateSearchEngine", 0, "searchUrl", "q=%s"], ["addSearchEngine"]]);
+    }
+
+    function test_theLastSearchEngineCannotBeRemoved() {
+        const built = make();
+        const row = rows(built.item, "searchEngine")[0];
+
+        verify(!button(row, "Remove").enabled);
+
+        built.bookmarks.searchEngines = built.bookmarks.searchEngines.concat([
+            { label: "Wiki", glyph: "W", searchUrl: "https://wiki.example.com/?q=%s" }
+        ]);
+        press(button(rows(built.item, "searchEngine")[1], "Remove"));
+        compare(built.bookmarks.calls, [["removeSearchEngine", 1]]);
+    }
+
+    function test_nothingIsBoldAndNoFilledCardsRemain() {
+        const built = make();
+        const bold = all(built.item, child => child.font !== undefined && child.font.bold);
+        const filled = all(built.item, child => child instanceof Rectangle && child.visible
+            && child.color.a > 0);
+
+        compare(bold.length, 0);
+        compare(filled.length, 0);
     }
 }
