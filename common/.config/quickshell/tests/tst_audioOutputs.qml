@@ -41,4 +41,36 @@ TestCase {
         compare(AudioOutputs.label(output({})), "");
         compare(AudioOutputs.label(null), "");
     }
+
+    // The port (PipeWire `device.profile.description`) is the secondary line
+    // under the nickname, so outputs sharing a sound card stay distinguishable.
+    function test_anOutputsPortIsItsProfileDescription() {
+        compare(AudioOutputs.port(output({
+            nickname: "Q27G42XE",
+            properties: {
+                "device.profile.description": "HDMI / DisplayPort 1 Output"
+            }
+        })), "HDMI / DisplayPort 1 Output");
+    }
+
+    function test_aPortThatRepeatsTheLabelIsHidden() {
+        compare(AudioOutputs.port(output({
+            nickname: "Headphones",
+            description: "Core Ultra 200V Series Processors HD Audio Headphones",
+            properties: {
+                "device.profile.description": "Headphones"
+            }
+        })), "");
+    }
+
+    function test_anOutputWithoutAPortHasAnEmptyPort() {
+        compare(AudioOutputs.port(output({
+            nickname: "Q27G42XE"
+        })), "");
+        compare(AudioOutputs.port(output({
+            nickname: "Q27G42XE",
+            properties: {}
+        })), "");
+        compare(AudioOutputs.port(null), "");
+    }
 }

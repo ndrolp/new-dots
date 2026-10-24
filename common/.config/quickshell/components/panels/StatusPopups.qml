@@ -534,14 +534,17 @@ Item {
                 model: Pipewire.nodes.values
 
                 delegate: PopupRow {
+                    id: sinkRow
+
                     required property var modelData
 
                     readonly property bool selected: Pipewire.defaultAudioSink === modelData
+                    readonly property string port: AudioOutputs.port(modelData)
 
                     appearance: root.appearance
                     visible: modelData.isSink
                     width: parent.width
-                    height: 36
+                    height: port !== "" ? 42 : 36
 
                     Panels.Text {
                         id: sinkIconLabel
@@ -556,16 +559,29 @@ Item {
                         font.pixelSize: 16
                     }
 
-                    Panels.Text {
+                    Column {
                         anchors.left: sinkIconLabel.right
                         anchors.leftMargin: 10
                         anchors.right: parent.right
                         anchors.rightMargin: 8
                         anchors.verticalCenter: parent.verticalCenter
-                        text: AudioOutputs.label(modelData)
-                        color: parent.selected ? theme.accent : theme.text
-                        elide: Text.ElideRight
-                        font.pixelSize: root.appearance.textSize - 1
+
+                        Panels.Text {
+                            width: parent.width
+                            text: AudioOutputs.label(modelData)
+                            color: sinkRow.selected ? theme.accent : theme.text
+                            elide: Text.ElideRight
+                            font.pixelSize: root.appearance.textSize - 1
+                        }
+
+                        Panels.Text {
+                            width: parent.width
+                            visible: text !== ""
+                            text: sinkRow.port
+                            color: theme.textMuted
+                            elide: Text.ElideRight
+                            font.pixelSize: root.appearance.textSize - 3
+                        }
                     }
 
                     TapHandler {
