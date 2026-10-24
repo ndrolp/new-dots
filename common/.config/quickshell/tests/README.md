@@ -8,8 +8,9 @@ outline of an attached popup (`PopupOutline.js`), the surface every popup
 draws on (`PopupSurface.qml`), the shared popup parts (`PopupTitle`,
 `PopupHeader`, `PopupRow`…), the Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
-(`AudioOutputs.js`) and how the volume is shown as text
-(`components/VolumeText.js`). They run with QtTest outside of `qs`:
+(`AudioOutputs.js`), how the volume is shown as text
+(`components/VolumeText.js`) and what the audio bar element shows and how
+wide it is (`components/bar/AudioLevel.qml`). They run with QtTest outside of `qs`:
 
 ```sh
 common/.config/quickshell/tests/run.sh

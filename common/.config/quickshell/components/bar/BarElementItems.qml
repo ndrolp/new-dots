@@ -8,7 +8,6 @@ import Quickshell.Services.UPower
 import QtQuick
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
-import "../VolumeText.js" as VolumeText
 
 // The bar elements that need no component of their own (notifications,
 // recording, media, audio, bluetooth, tray, network, battery and clock),
@@ -344,12 +343,9 @@ Item {
     Rectangle {
         id: audioButton
 
-        readonly property bool meterVisible: BarProfileModel.elementOption(root.appearance.barElements,
-            "audio", "meterVisible")
-
         visible: root.itemVisible("audio")
         x: root.elementX("audio")
-        width: 76
+        width: audioContent.implicitWidth + 16
         height: root.itemHeight
         radius: root.appearance.radius
         color: audioHover.hovered ? theme.surfaceHover
@@ -367,43 +363,14 @@ Item {
             id: audioHover
         }
 
-        Row {
+        AudioLevel {
+            id: audioContent
+
             anchors.centerIn: parent
-            spacing: 7
-
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                text: !root.audio || root.audio.muted ? "󰝟" : "󰕾"
-                color: theme.blue
-                font.pixelSize: root.appearance.textSize
-                font.bold: true
-            }
-
-            Rectangle {
-                anchors.verticalCenter: parent.verticalCenter
-                visible: audioButton.meterVisible
-                width: 34
-                height: 4
-                radius: 2
-                color: theme.surface
-
-                Rectangle {
-                    width: parent.width * (root.audio && !root.audio.muted ? root.volumeLevel : 0)
-                    height: parent.height
-                    radius: parent.radius
-                    color: theme.blue
-                }
-
-            }
-
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                visible: !audioButton.meterVisible
-                text: VolumeText.percentage(root.volumeLevel)
-                color: !root.audio || root.audio.muted ? theme.textMuted : theme.blue
-                font.pixelSize: root.appearance.textSize
-                font.bold: true
-            }
+            appearance: root.appearance
+            volume: root.volumeLevel
+            muted: !root.audio || root.audio.muted
+            meterVisible: BarProfileModel.elementOption(root.appearance.barElements, "audio", "meterVisible")
         }
 
         MouseArea {
