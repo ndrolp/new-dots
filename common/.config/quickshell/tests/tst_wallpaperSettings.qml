@@ -158,6 +158,32 @@ TestCase {
         verify(textOf(built.item, "Wallpaper folders").visible);
     }
 
+    function test_theScheduleIsASwitchRowANumberAndAQuietButton() {
+        const built = make();
+        viewChoice(built.item).chosen("Schedule");
+        const rotation = all(built.item, child => child.label === "Scheduled rotation"
+            && child.switchItem !== undefined)[0];
+        const interval = all(built.item, child => child.label === "Interval (minutes)"
+            && child.field !== undefined)[0];
+        const advance = all(built.item, child => child.label === "Advance now"
+            && child.activated !== undefined)[0];
+
+        compare(rotation.color, Qt.rgba(0, 0, 0, 0));
+        rotation.toggled();
+        verify(built.wallpapers.dynamicEnabled);
+        verify(rotation.checked);
+
+        compare(interval.from, 1);
+        compare(interval.to, 240);
+        compare(interval.field.text, "30");
+        interval.edited(45);
+        compare(built.wallpapers.dynamicIntervalMinutes, 45);
+
+        compare(advance.color, Qt.rgba(0, 0, 0, 0));
+        advance.activated();
+        compare(built.wallpapers.advanced, 1);
+    }
+
     function test_theWallpaperListStaysFullWidth() {
         const built = make();
         const list = all(built.item, child => child instanceof GridView)[0];

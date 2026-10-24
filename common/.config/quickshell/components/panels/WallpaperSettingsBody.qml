@@ -77,130 +77,42 @@ Column {
         spacing: 10
         visible: root.wallpaperView === "Schedule"
 
-        Text {
-            text: "DYNAMIC WALLPAPERS"
-            color: theme.textMuted
-            font.pixelSize: 11
-            font.bold: true
+        Panels.SettingsHeading {
+            width: parent.width
+            appearance: root.appearance
+            text: "Dynamic wallpapers"
+            topPadding: 4
         }
 
-        Text {
+        Panels.SettingsHint {
             width: parent.width
+            appearance: root.appearance
             text: "Rotate each connected display through its horizontal or vertical folder. "
                 + "Theme selection is not changed."
-            color: theme.textMuted
-            font.pixelSize: root.appearance.textSize - 2
-            wrapMode: Text.Wrap
         }
 
-        Rectangle {
+        Panels.SettingsSwitchRow {
             width: parent.width
-            height: 44
-            radius: root.appearance.radius
-            color: dynamicHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-
-            HoverHandler {
-                id: dynamicHover
-            }
-
-            Text {
-                anchors.left: parent.left
-                anchors.leftMargin: 12
-                anchors.verticalCenter: parent.verticalCenter
-                text: "Enable scheduled rotation"
-                color: theme.text
-                font.pixelSize: root.appearance.textSize
-                font.bold: true
-            }
-
-            Rectangle {
-                anchors.right: parent.right
-                anchors.rightMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                width: 42
-                height: 24
-                radius: 12
-                color: root.wallpapers.dynamicEnabled ? theme.accent : theme.border
-
-                Rectangle {
-                    anchors.verticalCenter: parent.verticalCenter
-                    x: root.wallpapers.dynamicEnabled ? parent.width - width - 3 : 3
-                    width: 18
-                    height: 18
-                    radius: 9
-                    color: theme.background
-
-                    Behavior on x {
-                        NumberAnimation { duration: 140 }
-                    }
-                }
-            }
-
-            TapHandler {
-                onTapped: root.wallpapers.dynamicEnabled = !root.wallpapers.dynamicEnabled
-            }
+            appearance: root.appearance
+            label: "Scheduled rotation"
+            checked: root.wallpapers.dynamicEnabled
+            onToggled: root.wallpapers.dynamicEnabled = !root.wallpapers.dynamicEnabled
         }
 
-        Row {
-            width: parent.width
-            spacing: 12
-
-            Text {
-                width: 130
-                anchors.verticalCenter: parent.verticalCenter
-                text: "INTERVAL"
-                color: theme.textMuted
-                font.pixelSize: 11
-                font.bold: true
-            }
-
-            SettingsSlider {
-                id: dynamicInterval
-
-                width: parent.width - intervalLabel.width - 142
-                anchors.verticalCenter: parent.verticalCenter
-                from: 1
-                to: 240
-                stepSize: 1
-                value: root.wallpapers.dynamicIntervalMinutes
-                onMoved: root.wallpapers.dynamicIntervalMinutes = Math.round(value)
-            }
-
-            Text {
-                id: intervalLabel
-
-                width: 64
-                anchors.verticalCenter: parent.verticalCenter
-                text: Math.round(dynamicInterval.value) + " min"
-                color: theme.text
-                font.pixelSize: root.appearance.textSize - 1
-                font.bold: true
-            }
+        Panels.SettingsNumber {
+            width: Math.min(parent.width, 360)
+            appearance: root.appearance
+            label: "Interval (minutes)"
+            from: 1
+            to: 240
+            value: root.wallpapers.dynamicIntervalMinutes
+            onEdited: minutes => root.wallpapers.dynamicIntervalMinutes = minutes
         }
 
-        Rectangle {
-            width: advanceLabel.implicitWidth + 24
-            height: 34
-            radius: root.appearance.radius
-            color: advanceHover.hovered ? theme.accentHover : theme.accent
-
-            HoverHandler {
-                id: advanceHover
-            }
-
-            Text {
-                id: advanceLabel
-
-                anchors.centerIn: parent
-                text: "Advance now"
-                color: theme.background
-                font.pixelSize: root.appearance.textSize - 1
-                font.bold: true
-            }
-
-            TapHandler {
-                onTapped: root.wallpapers.advanceAll()
-            }
+        Panels.SettingsButton {
+            appearance: root.appearance
+            label: "Advance now"
+            onActivated: root.wallpapers.advanceAll()
         }
     }
 
