@@ -99,6 +99,24 @@ TestCase {
         }
     }
 
+    Component {
+        id: outputName
+
+        Panels.AudioOutputName {
+            appearance: barAppearance
+            width: 200
+        }
+    }
+
+    function audioOutput(nickname, port) {
+        return {
+            nickname: nickname,
+            description: "Core Ultra 200V Series Processors HD Audio",
+            name: "alsa_output.pci-0000_00_1f.3",
+            properties: { "device.profile.description": port }
+        };
+    }
+
     // The text item showing `text` inside `item`.
     function textOf(item, text) {
         if (item.text === text)
@@ -188,5 +206,40 @@ TestCase {
         compare(item.children[0].width, 50);
         item.fraction = 3;
         compare(item.children[0].width, 200);
+    }
+
+    // An audio output is named on two lines, its label over its muted port,
+    // in a row tall enough for both.
+    function test_anAudioOutputShowsItsPortUnderItsLabel() {
+        const item = make(outputName, { output: audioOutput("Q27G42XE", "HDMI / DisplayPort 1 Output") });
+        const outputLabel = textOf(item, "Q27G42XE");
+        const outputPort = textOf(item, "HDMI / DisplayPort 1 Output");
+
+        compare(outputLabel.color, theme.text);
+        compare(outputLabel.font.pixelSize, 13);
+        verify(outputPort !== null);
+        compare(outputPort.color, theme.textMuted);
+        compare(outputPort.font.pixelSize, 10);
+        compare(item.rowHeight, 42);
+    }
+
+    function test_anAudioOutputWithoutAPortIsASingleLineInAShorterRow() {
+        const item = make(outputName, { output: audioOutput("Headphones", "Headphones") });
+
+        compare(textOf(item, "Headphones"), item.children[0]);
+        compare(item.children[1].text, "");
+        compare(item.rowHeight, 36);
+    }
+
+    function test_aHighlightedAudioOutputHasItsLabelInTheAccent() {
+        const item = make(outputName, {
+            output: audioOutput("Q27G42XE", ""),
+            highlighted: true,
+            labelSize: 12
+        });
+        const outputLabel = textOf(item, "Q27G42XE");
+
+        compare(outputLabel.color, theme.accent);
+        compare(outputLabel.font.pixelSize, 12);
     }
 }

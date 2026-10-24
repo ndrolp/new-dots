@@ -540,7 +540,7 @@ Item {
                     appearance: root.appearance
                     visible: modelData.isSink
                     width: parent.width
-                    height: 36
+                    height: outputName.rowHeight
 
                     Panels.Text {
                         id: sinkIconLabel
@@ -555,16 +555,18 @@ Item {
                         font.pixelSize: 16
                     }
 
-                    Panels.Text {
+                    Panels.AudioOutputName {
+                        id: outputName
+
                         anchors.left: sinkIconLabel.right
                         anchors.leftMargin: 10
                         anchors.right: parent.right
                         anchors.rightMargin: 8
                         anchors.verticalCenter: parent.verticalCenter
-                        text: modelData.description
-                        color: parent.selected ? theme.accent : theme.text
-                        elide: Text.ElideRight
-                        font.pixelSize: root.appearance.textSize - 1
+                        appearance: root.appearance
+                        output: modelData
+                        highlighted: parent.selected
+                        labelSize: root.appearance.textSize - 1
                     }
 
                     TapHandler {

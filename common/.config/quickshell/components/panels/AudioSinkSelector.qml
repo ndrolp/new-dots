@@ -173,7 +173,7 @@ Variants {
 
                         appearance: root.appearance
                         width: sinkList.width
-                        height: 36
+                        height: outputName.rowHeight
                         color: selected || hovered ? theme.surfaceHover : "transparent"
 
                         Panels.Text {
@@ -187,16 +187,17 @@ Variants {
                             font.pixelSize: root.appearance.textSize + 3
                         }
 
-                        Panels.Text {
+                        Panels.AudioOutputName {
+                            id: outputName
+
                             anchors.left: sinkIcon.right
                             anchors.leftMargin: 10
                             anchors.right: activeMark.left
                             anchors.rightMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
-                            text: sinkTile.sink.description || sinkTile.sink.name
-                            color: sinkTile.active ? theme.accent : theme.text
-                            elide: Text.ElideRight
-                            font.pixelSize: root.appearance.textSize
+                            appearance: root.appearance
+                            output: sinkTile.sink
+                            highlighted: sinkTile.active
                         }
 
                         Panels.Text {

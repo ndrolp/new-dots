@@ -8,6 +8,7 @@ import Quickshell.Services.UPower
 import QtQuick
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
+import "../VolumeText.js" as VolumeText
 
 // The bar elements that need no component of their own (notifications,
 // recording, media, audio, bluetooth, tray, network, battery and clock),
@@ -343,6 +344,9 @@ Item {
     Rectangle {
         id: audioButton
 
+        readonly property bool meterVisible: BarProfileModel.elementOption(root.appearance.barElements,
+            "audio", "meterVisible")
+
         visible: root.itemVisible("audio")
         x: root.elementX("audio")
         width: 76
@@ -377,7 +381,7 @@ Item {
 
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
-                visible: BarProfileModel.elementOption(root.appearance.barElements, "audio", "meterVisible")
+                visible: audioButton.meterVisible
                 width: 34
                 height: 4
                 radius: 2
@@ -390,6 +394,15 @@ Item {
                     color: theme.blue
                 }
 
+            }
+
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: !audioButton.meterVisible
+                text: VolumeText.percentage(root.volumeLevel)
+                color: !root.audio || root.audio.muted ? theme.textMuted : theme.blue
+                font.pixelSize: root.appearance.textSize
+                font.bold: true
             }
         }
 
