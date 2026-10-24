@@ -1,11 +1,11 @@
 import QtQuick
-import QtQuick.Controls
+import "." as Panels
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 
-// The bar profile being edited, its "modified" indicator, Save/Discard and
-// Duplicate/Delete. While there are pending changes the selector, Duplicate
-// and Delete are locked.
+// The bar profile being edited, as a choice between the bar profiles, its
+// "modified" indicator, Save/Discard and Duplicate/Delete. While there are
+// pending changes the choice is locked and Duplicate and Delete are hidden.
 Column {
     id: root
 
@@ -65,195 +65,84 @@ Column {
     onModifiedChanged: if (modified) action = ""
 
     width: parent ? parent.width : 0
-    spacing: 6
+    spacing: 10
 
     Config.Theme {
         id: theme
     }
 
-    Rectangle {
+    Row {
+        spacing: 8
+
+        Panels.SettingsLabel {
+            appearance: root.appearance
+            text: "Editing profile"
+        }
+
+        Panels.SettingsHint {
+            visible: root.modified
+            appearance: root.appearance
+            text: "modified"
+            color: theme.accent
+        }
+    }
+
+    Item {
         width: parent.width
-        height: 44
-        radius: root.appearance.radius
-        color: profileHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+        height: Math.max(profileChoice.height, profileActions.height)
 
-        HoverHandler {
-            id: profileHover
-        }
+        Panels.SettingsChoice {
+            id: profileChoice
 
-        Row {
-            anchors.left: parent.left
-            anchors.leftMargin: 12
             anchors.verticalCenter: parent.verticalCenter
-            spacing: 8
-
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                text: "EDITING PROFILE"
-                color: theme.text
-                font.pixelSize: root.appearance.textSize - 1
-                font.bold: true
-            }
-
-            Rectangle {
-                anchors.verticalCenter: parent.verticalCenter
-                visible: root.modified
-                width: modifiedLabel.implicitWidth + 12
-                height: modifiedLabel.implicitHeight + 4
-                radius: height / 2
-                color: theme.surface
-                border.width: 1
-                border.color: theme.accent
-
-                Text {
-                    id: modifiedLabel
-
-                    anchors.centerIn: parent
-                    text: "modified"
-                    color: theme.accent
-                    font.pixelSize: root.appearance.textSize - 3
-                    font.bold: true
-                }
+            width: Math.min(root.profileNames.length * 96,
+                parent.width - profileActions.width - 12)
+            appearance: root.appearance
+            enabled: !root.modified
+            opacity: enabled ? 1 : 0.6
+            options: root.profileNames.map(name => ({ label: root.displayName(name), value: name }))
+            value: root.appearance.editingBarProfile
+            onChosen: profile => {
+                root.action = "";
+                root.appearance.editBarProfile(profile);
             }
         }
 
         Row {
+            id: profileActions
+
             anchors.right: parent.right
-            anchors.rightMargin: 6
             anchors.verticalCenter: parent.verticalCenter
-            spacing: 6
+            spacing: 4
 
-            ComboBox {
-                id: profileSelector
-
-                width: 132
-                height: 32
-                enabled: !root.modified
-                opacity: enabled ? 1 : 0.6
-                model: root.profileNames
-                // Always the edited profile, also when the model picks another
-                // one (e.g. after deleting the edited profile).
-                displayText: root.displayName(root.appearance.editingBarProfile)
-
-                // A Binding, unlike a plain binding, survives the user picking
-                // an entry.
-                Binding on currentIndex {
-                    value: root.profileNames.indexOf(root.appearance.editingBarProfile)
-                }
-
-                contentItem: Text {
-                    leftPadding: 10
-                    rightPadding: 8
-                    verticalAlignment: Text.AlignVCenter
-                    text: profileSelector.displayText
-                    color: theme.accent
-                    elide: Text.ElideRight
-                    font.pixelSize: root.appearance.textSize - 1
-                    font.bold: true
-                }
-
-                indicator: Item {}
-
-                background: Rectangle {
-                    radius: root.appearance.radius
-                    color: theme.surface
-                }
-
-                onActivated: index => {
-                    root.action = "";
-                    root.appearance.editBarProfile(root.profileNames[index]);
-                }
+            Panels.SettingsButton {
+                visible: !root.modified
+                appearance: root.appearance
+                label: "Duplicate"
+                onActivated: root.action === "duplicate" ? root.action = "" : root.startDuplicate()
             }
 
-            Repeater {
-                model: root.modified ? [] : [
-                    { label: "Duplicate", action: "duplicate", width: 76 },
-                    { label: "Delete", action: "delete", width: 58 }
-                ]
-
-                delegate: Rectangle {
-                    id: actionButton
-
-                    required property var modelData
-
-                    width: modelData.width
-                    height: 32
-                    radius: root.appearance.radius
-                    color: root.action === modelData.action || actionHover.hovered
-                        ? theme.surfaceHover : theme.surface
-
-                    HoverHandler {
-                        id: actionHover
-                    }
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: actionButton.modelData.label
-                        color: actionButton.modelData.action === "delete" ? theme.red : theme.text
-                        font.pixelSize: root.appearance.textSize - 3
-                        font.bold: true
-                    }
-
-                    TapHandler {
-                        onTapped: {
-                            if (root.action === actionButton.modelData.action)
-                                root.action = "";
-                            else if (actionButton.modelData.action === "duplicate")
-                                root.startDuplicate();
-                            else
-                                root.action = "delete";
-                        }
-                    }
-                }
+            Panels.SettingsButton {
+                visible: !root.modified
+                appearance: root.appearance
+                label: "Delete"
+                labelColor: theme.red
+                onActivated: root.action = root.action === "delete" ? "" : "delete"
             }
 
-            Rectangle {
+            Panels.SettingsButton {
                 visible: root.modified
-                width: 64
-                height: 32
-                radius: root.appearance.radius
-                color: discardHover.hovered ? theme.surfaceHover : theme.surface
-
-                HoverHandler {
-                    id: discardHover
-                }
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "Discard"
-                    color: theme.text
-                    font.pixelSize: root.appearance.textSize - 3
-                    font.bold: true
-                }
-
-                TapHandler {
-                    onTapped: root.appearance.discardBarProfileChanges()
-                }
+                appearance: root.appearance
+                label: "Discard"
+                onActivated: root.appearance.discardBarProfileChanges()
             }
 
-            Rectangle {
-                width: 48
-                height: 32
-                radius: root.appearance.radius
-                opacity: root.modified ? 1 : 0.5
-                color: saveHover.hovered && root.modified ? theme.accentHover : theme.accent
-
-                HoverHandler {
-                    id: saveHover
-                }
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "Save"
-                    color: theme.background
-                    font.pixelSize: root.appearance.textSize - 3
-                    font.bold: true
-                }
-
-                TapHandler {
-                    enabled: root.modified
-                    onTapped: root.appearance.saveBarProfile()
-                }
+            Panels.SettingsButton {
+                visible: root.modified
+                appearance: root.appearance
+                label: "Save"
+                labelColor: theme.accent
+                onActivated: root.appearance.saveBarProfile()
             }
         }
     }
@@ -261,153 +150,91 @@ Column {
     Row {
         visible: root.action === "duplicate"
         width: parent.width
-        spacing: 6
+        spacing: 4
 
-        SettingsInput {
+        Panels.SettingsInput {
             id: duplicateName
 
-            width: parent.width - createButton.width - cancelDuplicate.width - parent.spacing * 2
+            width: parent.width - createButton.width - cancelDuplicate.width - parent.spacing * 2 - 8
             appearance: root.appearance
             placeholderText: "New profile name"
             onAccepted: root.confirmDuplicate()
             Keys.onEscapePressed: root.action = ""
         }
 
-        Rectangle {
-            id: createButton
-
-            width: 64
-            height: 36
-            radius: root.appearance.radius
-            opacity: root.duplicateError === "" ? 1 : 0.5
-            color: createHover.hovered && root.duplicateError === "" ? theme.accentHover : theme.accent
-
-            HoverHandler {
-                id: createHover
-            }
-
-            Text {
-                anchors.centerIn: parent
-                text: "Create"
-                color: theme.background
-                font.pixelSize: root.appearance.textSize - 3
-                font.bold: true
-            }
-
-            TapHandler {
-                enabled: root.duplicateError === ""
-                onTapped: root.confirmDuplicate()
-            }
+        Item {
+            width: 8
+            height: 1
         }
 
-        Rectangle {
+        Panels.SettingsButton {
+            id: createButton
+
+            appearance: root.appearance
+            label: "Create"
+            labelColor: theme.accent
+            opacity: root.duplicateError === "" ? 1 : 0.5
+            onActivated: root.confirmDuplicate()
+        }
+
+        Panels.SettingsButton {
             id: cancelDuplicate
 
-            width: 64
-            height: 36
-            radius: root.appearance.radius
-            color: cancelDuplicateHover.hovered ? theme.surfaceHover : theme.surface
-
-            HoverHandler {
-                id: cancelDuplicateHover
-            }
-
-            Text {
-                anchors.centerIn: parent
-                text: "Cancel"
-                color: theme.text
-                font.pixelSize: root.appearance.textSize - 3
-                font.bold: true
-            }
-
-            TapHandler {
-                onTapped: root.action = ""
-            }
+            appearance: root.appearance
+            label: "Cancel"
+            onActivated: root.action = ""
         }
     }
 
-    Text {
+    Panels.SettingsHint {
         visible: root.action === "duplicate" && root.duplicateError !== ""
         width: parent.width
+        appearance: root.appearance
         text: root.duplicateError === "empty"
             ? "Enter a name for the copy."
             : "A profile with that name already exists."
         color: theme.red
-        wrapMode: Text.WordWrap
-        font.pixelSize: root.appearance.textSize - 2
     }
 
     Row {
         visible: root.action === "delete"
         width: parent.width
-        spacing: 6
+        spacing: 4
 
-        Text {
+        Panels.SettingsHint {
             width: parent.width - (confirmDeleteButton.visible ? confirmDeleteButton.width
                 + cancelDelete.width + parent.spacing * 2 : 0)
             anchors.verticalCenter: parent.verticalCenter
+            appearance: root.appearance
             text: root.deleteMessage()
             color: root.deleteRejection === "" ? theme.text : theme.red
-            wrapMode: Text.WordWrap
-            font.pixelSize: root.appearance.textSize - 2
         }
 
-        Rectangle {
+        Panels.SettingsButton {
             id: confirmDeleteButton
 
             visible: root.deleteRejection === ""
-            width: 64
-            height: 32
-            radius: root.appearance.radius
-            color: theme.red
-
-            Text {
-                anchors.centerIn: parent
-                text: "Delete"
-                color: theme.background
-                font.pixelSize: root.appearance.textSize - 3
-                font.bold: true
-            }
-
-            TapHandler {
-                onTapped: root.confirmDelete()
-            }
+            appearance: root.appearance
+            label: "Delete permanently"
+            labelColor: theme.red
+            onActivated: root.confirmDelete()
         }
 
-        Rectangle {
+        Panels.SettingsButton {
             id: cancelDelete
 
             visible: root.deleteRejection === ""
-            width: 64
-            height: 32
-            radius: root.appearance.radius
-            color: cancelDeleteHover.hovered ? theme.surfaceHover : theme.surface
-
-            HoverHandler {
-                id: cancelDeleteHover
-            }
-
-            Text {
-                anchors.centerIn: parent
-                text: "Cancel"
-                color: theme.text
-                font.pixelSize: root.appearance.textSize - 3
-                font.bold: true
-            }
-
-            TapHandler {
-                onTapped: root.action = ""
-            }
+            appearance: root.appearance
+            label: "Cancel"
+            onActivated: root.action = ""
         }
     }
 
-    Text {
+    Panels.SettingsHint {
         width: parent.width
+        appearance: root.appearance
         text: root.modified
             ? "Unsaved changes show only on monitors using this profile. Save or discard them to edit another profile."
             : "Changes show live on monitors using this profile until you save or discard them."
-        color: theme.textMuted
-        wrapMode: Text.WordWrap
-        font.pixelSize: root.appearance.textSize - 2
     }
 }
