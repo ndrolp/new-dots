@@ -3,6 +3,7 @@
         "code"
     ],
     "recent": [
+        "com.obsproject.Studio",
         "org.gnome.Nautilus",
         "org.kde.plasma.emojier",
         "com.github.th-ch.youtube-music",
@@ -21,7 +22,6 @@
         "ranger",
         "org.gnome.Software",
         "openlogi",
-        "org.gnome.Weather",
-        "org.gnome.Calendar"
+        "org.gnome.Weather"
     ]
 }

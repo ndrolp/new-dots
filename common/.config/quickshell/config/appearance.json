@@ -1,541 +1,505 @@
 {
-    "activeBarProfile": "minimal",
-    "activeWorkspaceHorizontalPadding": 5,
-    "archButtonHorizontalPadding": 6,
-    "audioMeterVisible": false,
-    "backgroundClockCalendarEnabled": true,
-    "backgroundClockDateFormat": "full",
-    "backgroundClockEnabled": true,
-    "backgroundClockOpacity": 100,
-    "backgroundClockPosition": "bottom-right",
-    "backgroundClockSize": 96,
-    "barElementEnabled": {
-        "arch": true,
-        "currentApp": true,
-        "system": false,
-        "workspaces": true
-    },
-    "barElementPlacement": {
-        "currentApp": "center",
-        "system": "right",
-        "workspaces": "left"
-    },
-    "barHeight": 34,
-    "barOpacity": 90,
     "barProfiles": {
         "media": {
             "activeWorkspaceHorizontalPadding": 6,
             "archButtonHorizontalPadding": 6,
-            "backgroundClockCalendarEnabled": true,
-            "backgroundClockDateFormat": "full",
-            "backgroundClockEnabled": false,
-            "backgroundClockOpacity": 100,
-            "backgroundClockPosition": "bottom-right",
-            "backgroundClockSize": 96,
-            "barElementEnabled": {
-                "arch": true,
-                "currentApp": false,
-                "system": false,
-                "workspaces": true
+            "barElements": {
+                "center": [
+                    {
+                        "enabled": true,
+                        "id": "arch"
+                    },
+                    {
+                        "enabled": false,
+                        "id": "systemMonitor",
+                        "joinPrevious": true
+                    },
+                    {
+                        "enabled": false,
+                        "id": "currentApp",
+                        "joinPrevious": true
+                    },
+                    {
+                        "enabled": true,
+                        "id": "workspaces",
+                        "joinPrevious": true,
+                        "options": {
+                            "appCountVisible": false,
+                            "glyphs": [
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                ""
+                            ],
+                            "glyphsEnabled": false,
+                            "hideEmpty": false
+                        }
+                    },
+                    {
+                        "enabled": false,
+                        "id": "media",
+                        "joinPrevious": true,
+                        "options": {
+                            "titleVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "audio",
+                        "joinPrevious": true,
+                        "options": {
+                            "meterVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "network",
+                        "joinPrevious": true
+                    },
+                    {
+                        "enabled": true,
+                        "id": "battery",
+                        "joinPrevious": true,
+                        "options": {
+                            "percentageVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "clock",
+                        "joinPrevious": true
+                    },
+                    {
+                        "enabled": true,
+                        "id": "notifications",
+                        "joinPrevious": true,
+                        "options": {
+                            "badgeVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "recording",
+                        "joinPrevious": true
+                    },
+                    {
+                        "enabled": false,
+                        "id": "bluetooth",
+                        "joinPrevious": true
+                    },
+                    {
+                        "enabled": false,
+                        "id": "tray",
+                        "joinPrevious": true
+                    }
+                ],
+                "left": [
+                ],
+                "right": [
+                ]
             },
-            "barElementPlacement": {
-            },
-            "barHeight": 34,
+            "barHeight": 30,
             "barOpacity": 90,
-            "barTransparent": false,
+            "barTransparent": true,
             "barTransparentBorder": true,
-            "densityPreset": "compact",
-            "desktopCalendarEnabled": false,
-            "desktopCalendarPosition": "top-left",
-            "desktopMediaEnabled": true,
-            "desktopMediaPosition": "bottom-left",
-            "desktopNetworkEnabled": true,
-            "desktopNetworkPosition": "bottom-left",
-            "desktopSystemEnabled": true,
-            "desktopSystemPosition": "bottom-left",
-            "desktopWeatherEnabled": true,
-            "desktopWeatherLocation": "Ourense, ES",
-            "desktopWeatherPosition": "bottom-left",
-            "desktopWidgetOrder": [
-                "calendar",
-                "media",
-                "weather",
-                "network",
-                "system"
-            ],
-            "hideEmptyWorkspaces": false,
+            "elementVerticalPadding": 8,
+            "groupRadius": 12,
             "horizontalPadding": 8,
-            "notificationPopupLocation": "top-right",
             "pillVerticalPadding": 2,
             "pillsTransparent": true,
-            "radius": 8,
-            "spacing": 2,
-            "statusIsland": true,
-            "statusIslandRadius": 12,
-            "statusModuleEnabled": {
-                "audio": true,
-                "battery": true,
-                "bluetooth": false,
-                "clock": true,
-                "media": false,
-                "network": true,
-                "tray": false
-            },
-            "statusModuleGroups": {
-            },
-            "statusModuleOrder": [
-                "media",
-                "audio",
-                "network",
-                "battery",
-                "clock"
-            ],
-            "statusModulePlacement": {
-            },
-            "structuralVerticalPadding": 8,
+            "radius": 20,
+            "spacing": 4,
             "textSize": 13,
             "transparentBarSlanted": false,
             "transparentBarTopMargin": 7,
-            "workspaceAppCountVisible": false,
             "workspaceButtonSize": 18,
-            "workspaceGlyphs": [
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                ""
-            ],
-            "workspaceGlyphsEnabled": false,
-            "workspacePadding": 4
+            "workspacePadding": 3
         },
         "minimal": {
             "activeWorkspaceHorizontalPadding": 5,
             "archButtonHorizontalPadding": 6,
-            "audioMeterVisible": false,
-            "backgroundClockCalendarEnabled": true,
-            "backgroundClockDateFormat": "full",
-            "backgroundClockEnabled": true,
-            "backgroundClockOpacity": 100,
-            "backgroundClockPosition": "bottom-right",
-            "backgroundClockSize": 96,
-            "barElementEnabled": {
-                "arch": true,
-                "currentApp": true,
-                "system": false,
-                "workspaces": true
+            "barElements": {
+                "center": [
+                    {
+                        "enabled": true,
+                        "id": "workspaces",
+                        "options": {
+                            "appCountVisible": false,
+                            "glyphs": [
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                ""
+                            ],
+                            "glyphsEnabled": false,
+                            "hideEmpty": false
+                        }
+                    }
+                ],
+                "left": [
+                    {
+                        "enabled": true,
+                        "id": "arch"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "currentApp"
+                    }
+                ],
+                "right": [
+                    {
+                        "enabled": false,
+                        "id": "systemMonitor"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "media",
+                        "options": {
+                            "titleVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "audio",
+                        "options": {
+                            "meterVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "network"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "battery",
+                        "options": {
+                            "percentageVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "clock"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "notifications",
+                        "options": {
+                            "badgeVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "recording"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "bluetooth"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "tray"
+                    }
+                ]
             },
-            "barElementPlacement": {
-                "currentApp": "center",
-                "system": "right",
-                "workspaces": "left"
-            },
-            "barHeight": 34,
+            "barHeight": 30,
             "barOpacity": 90,
             "barTransparent": false,
             "barTransparentBorder": false,
-            "batteryPercentageVisible": true,
-            "densityPreset": "spacious",
-            "desktopCalendarEnabled": false,
-            "desktopCalendarPosition": "top-left",
-            "desktopMediaEnabled": true,
-            "desktopMediaPosition": "bottom-left",
-            "desktopNetworkEnabled": true,
-            "desktopNetworkPosition": "bottom-left",
-            "desktopSystemEnabled": true,
-            "desktopSystemPosition": "bottom-left",
-            "desktopWeatherEnabled": false,
-            "desktopWeatherLocation": "Ourense, ES",
-            "desktopWeatherPosition": "bottom-left",
-            "desktopWidgetOrder": [
-                "calendar",
-                "media",
-                "weather",
-                "network",
-                "system"
-            ],
-            "hideEmptyWorkspaces": false,
-            "horizontalPadding": 16,
-            "mediaTitleVisible": true,
-            "notificationBadgeVisible": true,
-            "notificationPopupLocation": "top-right",
-            "pillVerticalPadding": 4,
+            "elementVerticalPadding": 8,
+            "groupRadius": 3,
+            "horizontalPadding": 8,
+            "pillVerticalPadding": 2,
             "pillsTransparent": true,
             "radius": 3,
-            "spacing": 8,
-            "statusIsland": false,
-            "statusIslandRadius": 12,
-            "statusModuleEnabled": {
-                "audio": true,
-                "battery": true,
-                "bluetooth": true,
-                "clock": true,
-                "media": true,
-                "network": true,
-                "tray": true
-            },
-            "statusModuleGroups": {
-            },
-            "statusModuleOrder": [
-                "media",
-                "audio",
-                "network",
-                "battery",
-                "clock",
-                "notifications",
-                "recording",
-                "bluetooth",
-                "tray"
-            ],
-            "statusModulePlacement": {
-            },
-            "structuralVerticalPadding": 8,
-            "textSize": 15,
-            "transparentBarSlanted": true,
+            "spacing": 4,
+            "textSize": 13,
+            "transparentBarSlanted": false,
             "transparentBarTopMargin": 7,
-            "workspaceAppCountVisible": false,
             "workspaceButtonSize": 18,
-            "workspaceGlyphs": [
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                ""
-            ],
-            "workspaceGlyphsEnabled": false,
-            "workspacePadding": 4
+            "workspacePadding": 3
         },
         "presentation": {
             "activeWorkspaceHorizontalPadding": 5,
             "archButtonHorizontalPadding": 5,
-            "audioMeterVisible": false,
-            "backgroundClockCalendarEnabled": true,
-            "backgroundClockDateFormat": "full",
-            "backgroundClockEnabled": false,
-            "backgroundClockOpacity": 100,
-            "backgroundClockPosition": "bottom-right",
-            "backgroundClockSize": 96,
-            "barElementEnabled": {
-                "arch": false,
-                "currentApp": false,
-                "system": false,
-                "workspaces": true
-            },
-            "barElementPlacement": {
-                "workspaces": "left"
+            "barElements": {
+                "center": [
+                    {
+                        "enabled": true,
+                        "id": "currentApp"
+                    }
+                ],
+                "left": [
+                    {
+                        "enabled": false,
+                        "id": "arch"
+                    },
+                    {
+                        "enabled": false,
+                        "id": "systemMonitor"
+                    },
+                    {
+                        "enabled": false,
+                        "id": "media",
+                        "options": {
+                            "titleVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "workspaces",
+                        "options": {
+                            "appCountVisible": false,
+                            "glyphs": [
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                ""
+                            ],
+                            "glyphsEnabled": false,
+                            "hideEmpty": false
+                        }
+                    }
+                ],
+                "right": [
+                    {
+                        "enabled": false,
+                        "id": "audio",
+                        "options": {
+                            "meterVisible": false
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "network"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "battery",
+                        "options": {
+                            "percentageVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "clock"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "notifications",
+                        "options": {
+                            "badgeVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "recording"
+                    },
+                    {
+                        "enabled": false,
+                        "id": "bluetooth"
+                    },
+                    {
+                        "enabled": false,
+                        "id": "tray"
+                    }
+                ]
             },
             "barHeight": 30,
             "barOpacity": 90,
             "barTransparent": true,
             "barTransparentBorder": false,
-            "batteryPercentageVisible": true,
-            "densityPreset": "compact",
-            "desktopCalendarEnabled": false,
-            "desktopCalendarPosition": "top-left",
-            "desktopMediaEnabled": true,
-            "desktopMediaPosition": "bottom-left",
-            "desktopNetworkEnabled": true,
-            "desktopNetworkPosition": "bottom-left",
-            "desktopSystemEnabled": true,
-            "desktopSystemPosition": "bottom-left",
-            "desktopWeatherEnabled": true,
-            "desktopWeatherLocation": "Ourense, ES",
-            "desktopWeatherPosition": "bottom-left",
-            "desktopWidgetOrder": [
-                "calendar",
-                "media",
-                "weather",
-                "network",
-                "system"
-            ],
-            "hideEmptyWorkspaces": false,
-            "horizontalPadding": 12,
-            "mediaTitleVisible": true,
-            "notificationBadgeVisible": true,
-            "notificationPopupLocation": "top-right",
+            "elementVerticalPadding": 8,
+            "groupRadius": 8,
+            "horizontalPadding": 8,
             "pillVerticalPadding": 2,
             "pillsTransparent": true,
             "radius": 8,
-            "spacing": 5,
-            "statusIsland": false,
-            "statusIslandRadius": 12,
-            "statusModuleEnabled": {
-                "audio": false,
-                "battery": true,
-                "bluetooth": false,
-                "clock": true,
-                "media": false,
-                "network": true,
-                "tray": false
-            },
-            "statusModuleGroups": {
-            },
-            "statusModuleOrder": [
-                "media",
-                "audio",
-                "network",
-                "battery",
-                "clock",
-                "notifications",
-                "recording",
-                "bluetooth",
-                "tray"
-            ],
-            "statusModulePlacement": {
-                "media": "left"
-            },
-            "structuralVerticalPadding": 8,
+            "spacing": 4,
             "textSize": 13,
             "transparentBarSlanted": true,
             "transparentBarTopMargin": 8,
-            "workspaceAppCountVisible": false,
             "workspaceButtonSize": 18,
-            "workspaceGlyphs": [
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                ""
-            ],
-            "workspaceGlyphsEnabled": false,
             "workspacePadding": 3
         },
         "work": {
             "activeWorkspaceHorizontalPadding": 5,
             "archButtonHorizontalPadding": 6,
-            "backgroundClockCalendarEnabled": true,
-            "backgroundClockDateFormat": "full",
-            "backgroundClockEnabled": true,
-            "backgroundClockOpacity": 100,
-            "backgroundClockPosition": "bottom-right",
-            "backgroundClockSize": 96,
-            "barElementEnabled": {
-                "arch": true,
-                "currentApp": true,
-                "system": true,
-                "workspaces": true
-            },
-            "barElementPlacement": {
-                "arch": "center"
+            "barElements": {
+                "center": [
+                    {
+                        "enabled": true,
+                        "id": "arch"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "workspaces",
+                        "joinPrevious": true,
+                        "options": {
+                            "appCountVisible": false,
+                            "glyphs": [
+                                "I",
+                                "II",
+                                "III",
+                                "IV",
+                                "V",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                ""
+                            ],
+                            "glyphsEnabled": false,
+                            "hideEmpty": false
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "notifications",
+                        "joinPrevious": true,
+                        "options": {
+                            "badgeVisible": true
+                        }
+                    }
+                ],
+                "left": [
+                    {
+                        "enabled": true,
+                        "id": "systemMonitor"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "currentApp",
+                        "joinPrevious": true
+                    }
+                ],
+                "right": [
+                    {
+                        "enabled": true,
+                        "id": "media",
+                        "options": {
+                            "titleVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "audio",
+                        "joinPrevious": true,
+                        "options": {
+                            "meterVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "network",
+                        "joinPrevious": true
+                    },
+                    {
+                        "enabled": true,
+                        "id": "battery",
+                        "joinPrevious": true,
+                        "options": {
+                            "percentageVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "clock",
+                        "joinPrevious": true
+                    },
+                    {
+                        "enabled": true,
+                        "id": "recording",
+                        "joinPrevious": true
+                    },
+                    {
+                        "enabled": true,
+                        "id": "bluetooth",
+                        "joinPrevious": true
+                    },
+                    {
+                        "enabled": true,
+                        "id": "tray",
+                        "joinPrevious": true
+                    }
+                ]
             },
             "barHeight": 30,
+            "barOpacity": 90,
             "barTransparent": true,
-            "barTransparentBorder": true,
-            "densityPreset": "balanced",
-            "desktopCalendarEnabled": false,
-            "desktopCalendarPosition": "top-left",
-            "desktopMediaEnabled": true,
-            "desktopMediaPosition": "bottom-left",
-            "desktopNetworkEnabled": true,
-            "desktopNetworkPosition": "bottom-left",
-            "desktopSystemEnabled": true,
-            "desktopSystemPosition": "bottom-left",
-            "desktopWeatherEnabled": false,
-            "desktopWeatherLocation": "Ourense, ES",
-            "desktopWeatherPosition": "bottom-left",
-            "desktopWidgetOrder": [
-                "calendar",
-                "media",
-                "weather",
-                "network",
-                "system"
-            ],
-            "hideEmptyWorkspaces": false,
-            "horizontalPadding": 12,
-            "notificationPopupLocation": "top-right",
-            "pillVerticalPadding": 4,
+            "barTransparentBorder": false,
+            "elementVerticalPadding": 5,
+            "groupRadius": 3,
+            "horizontalPadding": 10,
+            "pillVerticalPadding": 2,
             "pillsTransparent": false,
             "radius": 3,
-            "spacing": 8,
-            "statusIsland": false,
-            "statusIslandRadius": 12,
-            "statusModuleEnabled": {
-                "audio": true,
-                "battery": true,
-                "bluetooth": true,
-                "clock": true,
-                "media": true,
-                "network": true,
-                "tray": true
-            },
-            "statusModuleGroups": {
-            },
-            "statusModuleOrder": [
-                "media",
-                "audio",
-                "network",
-                "battery",
-                "clock",
-                "notifications",
-                "recording",
-                "bluetooth",
-                "tray"
-            ],
-            "statusModulePlacement": {
-                "notifications": "center"
-            },
-            "structuralVerticalPadding": 5,
-            "textSize": 14,
+            "spacing": 4,
+            "textSize": 13,
             "transparentBarSlanted": false,
             "transparentBarTopMargin": 7,
-            "workspaceAppCountVisible": false,
             "workspaceButtonSize": 18,
-            "workspaceGlyphs": [
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                ""
-            ],
-            "workspaceGlyphsEnabled": false,
-            "workspacePadding": 5
+            "workspacePadding": 3
         }
     },
-    "barTransparent": false,
-    "barTransparentBorder": false,
-    "batteryPercentageVisible": true,
-    "densityPreset": "spacious",
-    "desktopCalendarEnabled": false,
-    "desktopCalendarPosition": "top-left",
-    "desktopMediaEnabled": true,
-    "desktopMediaPosition": "bottom-left",
-    "desktopNetworkEnabled": true,
-    "desktopNetworkPosition": "bottom-left",
-    "desktopSystemEnabled": true,
-    "desktopSystemPosition": "bottom-left",
-    "desktopWeatherEnabled": false,
-    "desktopWeatherLocation": "Ourense, ES",
-    "desktopWeatherPosition": "bottom-left",
-    "desktopWidgetOrder": [
-        "calendar",
-        "media",
-        "weather",
-        "network",
-        "system"
-    ],
     "doNotDisturb": false,
-    "hideEmptyWorkspaces": false,
-    "horizontalPadding": 16,
-    "mediaTitleVisible": true,
-    "notificationBadgeVisible": true,
     "notificationPopupLocation": "top-right",
-    "pillVerticalPadding": 4,
-    "pillsTransparent": true,
-    "radius": 3,
-    "spacing": 8,
-    "statusIsland": false,
-    "statusIslandRadius": 12,
-    "statusModuleEnabled": {
-        "audio": true,
-        "battery": true,
-        "bluetooth": true,
-        "clock": true,
-        "media": true,
-        "network": true,
-        "tray": true
-    },
-    "statusModuleGroups": {
-    },
-    "statusModuleOrder": [
-        "media",
-        "audio",
-        "network",
-        "battery",
-        "clock",
-        "notifications",
-        "recording",
-        "bluetooth",
-        "tray"
-    ],
-    "statusModulePlacement": {
-    },
-    "structuralVerticalPadding": 8,
-    "textSize": 15,
-    "transparentBarSlanted": true,
-    "transparentBarTopMargin": 7,
-    "workspaceAppCountVisible": false,
-    "workspaceButtonSize": 18,
-    "workspaceGlyphs": [
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        ""
-    ],
-    "workspaceGlyphsEnabled": false,
-    "workspacePadding": 4
+    "schemaVersion": 9
 }

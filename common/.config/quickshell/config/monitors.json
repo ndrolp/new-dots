@@ -18,13 +18,131 @@
         }
     },
     "displaySettings": {
-        "Philips Consumer Electronics Company PHL 243V7 0x00009A4C": {
-            "backgroundClockVisible": true,
-            "barVisible": true
+        "AOC Q27G42XE 2S6S1HA031479": {
+            "barProfile": "media",
+            "barVisible": true,
+            "desktopWidgets": {
+                "backgroundClock": {
+                    "calendarEnabled": true,
+                    "dateFormat": "full",
+                    "enabled": true,
+                    "opacity": 100,
+                    "position": "bottom-right",
+                    "size": 96
+                },
+                "calendar": {
+                    "enabled": false,
+                    "position": "top-left"
+                },
+                "media": {
+                    "enabled": false,
+                    "position": "bottom-left"
+                },
+                "network": {
+                    "enabled": false,
+                    "position": "bottom-left"
+                },
+                "order": [
+                    "calendar",
+                    "media",
+                    "weather",
+                    "network",
+                    "system"
+                ],
+                "system": {
+                    "enabled": false,
+                    "position": "bottom-left"
+                },
+                "weather": {
+                    "enabled": false,
+                    "location": "Ourense, ES",
+                    "position": "bottom-left"
+                }
+            }
         },
-        "default": {
-            "backgroundClockVisible": true,
-            "barVisible": true
+        "Philips Consumer Electronics Company PHL 243V7 0x00009A4C": {
+            "barProfile": "presentation",
+            "barVisible": true,
+            "desktopWidgets": {
+                "backgroundClock": {
+                    "calendarEnabled": true,
+                    "dateFormat": "full",
+                    "enabled": true,
+                    "opacity": 100,
+                    "position": "top-center",
+                    "size": 96
+                },
+                "calendar": {
+                    "enabled": false,
+                    "position": "top-left"
+                },
+                "media": {
+                    "enabled": true,
+                    "position": "bottom-left"
+                },
+                "network": {
+                    "enabled": true,
+                    "position": "bottom-left"
+                },
+                "order": [
+                    "calendar",
+                    "media",
+                    "weather",
+                    "network",
+                    "system"
+                ],
+                "system": {
+                    "enabled": false,
+                    "position": "bottom-left"
+                },
+                "weather": {
+                    "enabled": false,
+                    "location": "Ourense, ES",
+                    "position": "bottom-left"
+                }
+            }
+        },
+        "Samsung Display Corp. ATNA40HQ01-0": {
+            "barProfile": "work",
+            "barVisible": true,
+            "desktopWidgets": {
+                "backgroundClock": {
+                    "calendarEnabled": true,
+                    "dateFormat": "full",
+                    "enabled": true,
+                    "opacity": 100,
+                    "position": "bottom-right",
+                    "size": 96
+                },
+                "calendar": {
+                    "enabled": false,
+                    "position": "top-left"
+                },
+                "media": {
+                    "enabled": true,
+                    "position": "bottom-left"
+                },
+                "network": {
+                    "enabled": false,
+                    "position": "bottom-left"
+                },
+                "order": [
+                    "calendar",
+                    "media",
+                    "weather",
+                    "network",
+                    "system"
+                ],
+                "system": {
+                    "enabled": true,
+                    "position": "bottom-left"
+                },
+                "weather": {
+                    "enabled": false,
+                    "location": "Ourense, ES",
+                    "position": "bottom-left"
+                }
+            }
         }
     }
 }
