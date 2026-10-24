@@ -97,9 +97,88 @@ TestCase {
     }
 
     // The shell runs cava through sh, which exits 127 when cava isn't found.
-    function test_aFailedCavaExplainsWhetherItIsMissingOrFailedToStart() {
-        compare(CavaOutput.failureHint(127), "cava isn't installed, so the bars stay flat.");
-        compare(CavaOutput.failureHint(1), "cava failed to start, so the bars stay flat. Trying again in a few seconds.");
-        compare(CavaOutput.failureHint(-1), "cava failed to start, so the bars stay flat. Trying again in a few seconds.");
+    function test_aFailedCavaExplainsWhetherItIsMissingFailedToStartOrStopped() {
+        compare(CavaOutput.failureHint(127, false, 3000), "cava isn't installed, so the bars stay flat.");
+        compare(CavaOutput.failureHint(1, false, 3000),
+            "cava failed to start, so the bars stay flat. Trying again in 3 seconds.");
+        compare(CavaOutput.failureHint(-1, false, 60000),
+            "cava failed to start, so the bars stay flat. Trying again in 60 seconds.");
+        compare(CavaOutput.failureHint(1, true, 3000),
+            "cava stopped unexpectedly, so the bars stay flat. Trying again in 3 seconds.");
+    }
+
+    // What the one shared cava does as bars start and stop drawing Cava, as
+    // the default output or bar count changes and as cava exits.
+    function test_cavaRunsOnlyWhileSomeBarDrawsCava() {
+        const drawn = CavaOutput.drawnChanged(CavaOutput.stopped, true);
+        verify(drawn.running);
+
+        const notDrawn = CavaOutput.drawnChanged(drawn, false);
+        verify(!notDrawn.running);
+        verify(!CavaOutput.stopped.running);
+    }
+
+    // A new default output or bar count: cava stops and starts again once it
+    // exited, without counting that exit as a failure.
+    function test_cavaRestartsWhenTheDefaultOutputOrBarCountChanges() {
+        const running = CavaOutput.drawnChanged(CavaOutput.stopped, true);
+
+        const stopping = CavaOutput.restartAsked(running);
+        verify(!stopping.running);
+
+        const restarted = CavaOutput.exited(stopping, 0);
+        verify(restarted.running);
+        verify(!restarted.retrying);
+        compare(restarted.failureHint, "");
+        compare(restarted.failures, 0);
+    }
+
+    function test_cavaIsTriedAgainAWhileAfterAnExitNobodyAskedFor() {
+        const failed = CavaOutput.exited(CavaOutput.drawnChanged(CavaOutput.stopped, true), 1);
+        verify(!failed.running);
+        verify(failed.retrying);
+        compare(failed.retryDelay, 3000);
+        compare(failed.failureHint, "cava failed to start, so the bars stay flat. Trying again in 3 seconds.");
+
+        const retried = CavaOutput.retryDue(failed);
+        verify(retried.running);
+        verify(!retried.retrying);
+
+        const failedAgain = CavaOutput.exited(retried, 1);
+        compare(failedAgain.retryDelay, 6000);
+        compare(failedAgain.failureHint, "cava failed to start, so the bars stay flat. Trying again in 6 seconds.");
+    }
+
+    function test_aCavaThatPrintedFramesAndExitedStoppedUnexpectedly() {
+        const printing = CavaOutput.framePrinted(CavaOutput.drawnChanged(CavaOutput.stopped, true));
+        compare(printing.failureHint, "");
+
+        const crashed = CavaOutput.exited(printing, 139);
+        verify(crashed.retrying);
+        compare(crashed.retryDelay, 3000);
+        compare(crashed.failureHint, "cava stopped unexpectedly, so the bars stay flat. Trying again in 3 seconds.");
+    }
+
+    function test_aFrameClearsTheHintAndTheFailures() {
+        const failed = CavaOutput.exited(CavaOutput.drawnChanged(CavaOutput.stopped, true), 1);
+        const printing = CavaOutput.framePrinted(CavaOutput.retryDue(failed));
+
+        compare(printing.failureHint, "");
+        compare(printing.failures, 0);
+    }
+
+    function test_cavaStopsBeingTriedAgainOnceNoBarDrawsIt() {
+        const failed = CavaOutput.exited(CavaOutput.drawnChanged(CavaOutput.stopped, true), 1);
+
+        const notDrawn = CavaOutput.drawnChanged(failed, false);
+        verify(!notDrawn.running);
+        verify(!notDrawn.retrying);
+        compare(notDrawn.failureHint, "");
+        verify(!CavaOutput.retryDue(notDrawn).running);
+        verify(!CavaOutput.exited(CavaOutput.drawnChanged(failed, false), 1).retrying);
+    }
+
+    function test_aRestartWhileCavaIsntRunningStartsNothing() {
+        compare(CavaOutput.restartAsked(CavaOutput.stopped), CavaOutput.stopped);
     }
 }
