@@ -140,6 +140,17 @@ TestCase {
         compare(placement.horizontal.value, "center");
     }
 
+    // Each placement is named after its desktop widget, so the choices don't
+    // stand alone.
+    function test_eachPlacementIsLabelledWithItsDesktopWidget() {
+        const built = make();
+
+        compare(placementOf(switchRow(built.item, "Background clock")).label, "Clock position");
+        compare(placementOf(switchRow(built.item, "Media")).label, "Media position");
+        compare(placementOf(switchRow(built.item, "Weather")).label, "Weather position");
+        verify(textShown(built.item, "Clock position"));
+    }
+
     function sameLine(item, first, second) {
         const a = first.mapToItem(item, 0, 0);
         const b = second.mapToItem(item, 0, 0);

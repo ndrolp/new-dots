@@ -24,9 +24,10 @@ Column {
         monitors.setDesktopWidgetSetting(monitorName, widget, key, value);
     }
 
-    // Where a desktop widget sits on the monitor, as two segmented choices: the
-    // row (top, center, bottom) and the column (left, center, right).
-    component Placement: Row {
+    // Where a desktop widget sits on the monitor, under its label, as two
+    // segmented choices: the row (top, center, bottom) and the column (left,
+    // center, right).
+    component Placement: Panels.SettingsField {
         id: placement
 
         required property string widget
@@ -34,40 +35,43 @@ Column {
         readonly property alias vertical: verticalChoice
         readonly property alias horizontal: horizontalChoice
 
-        spacing: 8
+        appearance: root.appearance
 
         function place(vertical, horizontal) {
             root.setWidget(widget, "position", DesktopWidgetsModel.positionOf(vertical, horizontal));
         }
 
-        Panels.SettingsChoice {
-            id: verticalChoice
+        Row {
+            width: parent.width
+            spacing: 8
 
-            width: (placement.width - placement.spacing) / 2
-            anchors.verticalCenter: parent.verticalCenter
-            appearance: root.appearance
-            options: [
-                { label: "Top", value: "top" },
-                { label: "Center", value: "center" },
-                { label: "Bottom", value: "bottom" }
-            ]
-            value: placement.parts.vertical
-            onChosen: vertical => placement.place(vertical, placement.parts.horizontal)
-        }
+            Panels.SettingsChoice {
+                id: verticalChoice
 
-        Panels.SettingsChoice {
-            id: horizontalChoice
+                width: (parent.width - parent.spacing) / 2
+                appearance: root.appearance
+                options: [
+                    { label: "Top", value: "top" },
+                    { label: "Center", value: "center" },
+                    { label: "Bottom", value: "bottom" }
+                ]
+                value: placement.parts.vertical
+                onChosen: vertical => placement.place(vertical, placement.parts.horizontal)
+            }
 
-            width: (placement.width - placement.spacing) / 2
-            anchors.verticalCenter: parent.verticalCenter
-            appearance: root.appearance
-            options: [
-                { label: "Left", value: "left" },
-                { label: "Center", value: "center" },
-                { label: "Right", value: "right" }
-            ]
-            value: placement.parts.horizontal
-            onChosen: horizontal => placement.place(placement.parts.vertical, horizontal)
+            Panels.SettingsChoice {
+                id: horizontalChoice
+
+                width: (parent.width - parent.spacing) / 2
+                appearance: root.appearance
+                options: [
+                    { label: "Left", value: "left" },
+                    { label: "Center", value: "center" },
+                    { label: "Right", value: "right" }
+                ]
+                value: placement.parts.horizontal
+                onChosen: horizontal => placement.place(placement.parts.vertical, horizontal)
+            }
         }
     }
 
@@ -92,7 +96,7 @@ Column {
 
         Placement {
             width: clockGrid.cellWidth
-            height: 40
+            label: "Clock position"
             widget: "backgroundClock"
         }
 
@@ -172,7 +176,7 @@ Column {
 
             Placement {
                 width: widgetGrid.cellWidth
-                height: 40
+                label: widgetGrid.modelData.label + " position"
                 widget: widgetGrid.modelData.widget
             }
 
