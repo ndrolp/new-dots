@@ -3,6 +3,7 @@ import QtQuick
 QtObject {
     // Catppuccin Mocha
     readonly property string fontFamily: "GeistMono Nerd Font Propo"
+    readonly property int radius: 8
     readonly property color background: "#1e1e2e"
     readonly property color backgroundSecondary: "#181825"
     readonly property color surface: "#313244"

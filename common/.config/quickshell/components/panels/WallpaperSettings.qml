@@ -44,17 +44,8 @@ Column {
         for (let index = 0; index < hyprlandMonitors.length; index++) {
             const monitor = hyprlandMonitors[index];
 
-            if (monitor.description === monitorDescription) {
-                const transform = Number(monitor.lastIpcObject.transform);
-
-                if (transform === 1 || transform === 3)
-                    return true;
-
-                if (transform === 0 || transform === 2)
-                    return false;
-
-                return monitor.height > monitor.width;
-            }
+            if (monitor.description === monitorDescription)
+                return root.wallpapers.isPortraitMonitor(monitor);
         }
 
         return false;
@@ -379,7 +370,7 @@ Column {
 
                 width: wallpaperGrid.cellWidth - 8
                 height: wallpaperGrid.cellHeight - 8
-                radius: root.appearance.radius
+                radius: theme.radius
                 color: tileHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
                 border.color: root.wallpapers.pathFor(root.selectedWallpaperMonitor)
                     === wallpaperPath ? theme.accent : "transparent"

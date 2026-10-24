@@ -3,6 +3,7 @@ import QtQuick
 QtObject {
     // Everforest Dark Hard
     readonly property string fontFamily: "GeistMono Nerd Font Propo"
+    readonly property int radius: 8
     readonly property color background: "#272e33"
     readonly property color backgroundSecondary: "#1e2326"
     readonly property color surface: "#374145"
