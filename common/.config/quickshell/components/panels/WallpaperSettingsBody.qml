@@ -285,14 +285,16 @@ Column {
                         ? root.wallpapers.verticalFolder
                         : root.wallpapers.horizontalFolder)
                     + "/" + fileName
+                readonly property bool assigned:
+                    root.wallpapers.pathFor(root.selectedWallpaperMonitor) === wallpaperPath
 
+                // Only an outline: the accent marks the monitor's wallpaper.
                 width: wallpaperGrid.cellWidth - 8
                 height: wallpaperGrid.cellHeight - 8
-                radius: theme.radius
-                color: tileHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-                border.color: root.wallpapers.pathFor(root.selectedWallpaperMonitor)
-                    === wallpaperPath ? theme.accent : "transparent"
-                border.width: 2
+                radius: root.appearance.radius
+                color: "transparent"
+                border.color: assigned ? theme.accent : tileHover.hovered ? theme.textMuted : theme.border
+                border.width: assigned ? 2 : 1
 
                 HoverHandler {
                     id: tileHover
@@ -314,17 +316,15 @@ Column {
                         asynchronous: true
                     }
 
-                    Text {
+                    Panels.SettingsHint {
                         anchors.centerIn: parent
                         visible: wallpaperPreview.status === Image.Error
+                        appearance: root.appearance
                         text: "Preview unavailable"
-                        color: theme.textMuted
-                        font.pixelSize: root.appearance.textSize - 2
-                        font.bold: true
                     }
                 }
 
-                Text {
+                Panels.Text {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
@@ -332,8 +332,7 @@ Column {
                     text: wallpaperTile.fileName
                     color: theme.text
                     elide: Text.ElideRight
-                    font.pixelSize: root.appearance.textSize - 3
-                    font.bold: true
+                    font.pixelSize: root.appearance.textSize - 2
                 }
 
                 MouseArea {

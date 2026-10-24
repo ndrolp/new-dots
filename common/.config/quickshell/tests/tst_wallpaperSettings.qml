@@ -10,6 +10,7 @@ TestCase {
     name: "WallpaperSettings"
     width: 800
     height: 1200
+    visible: true
     when: windowShown
 
     Config.Theme {
@@ -139,5 +140,33 @@ TestCase {
 
         compare(monitorChoice(built.item).value, "Philips");
         compare(tiles(built.item).map(tile => tile.wallpaperPath), ["/walls/v/tower.png"]);
+    }
+
+    function test_theWallpaperListStaysFullWidth() {
+        const built = make();
+        const list = all(built.item, child => child instanceof GridView)[0];
+
+        compare(list.width, built.item.width);
+    }
+
+    function test_choosingAWallpaperAppliesItToTheChosenMonitor() {
+        const built = make();
+        monitorChoice(built.item).chosen("Philips");
+        const tower = tiles(built.item)[0];
+
+        mouseClick(tower);
+
+        compare(built.wallpapers.applied, [["Philips", "/walls/v/tower.png"]]);
+    }
+
+    function test_theMonitorsWallpaperIsOutlinedAndNoTileIsAFilledCard() {
+        const built = make();
+        const lake = tiles(built.item).filter(tile => tile.wallpaperPath === "/walls/h/lake.jpg")[0];
+        const forest = tiles(built.item).filter(tile => tile.wallpaperPath === "/walls/h/forest.png")[0];
+
+        compare(lake.border.color, theme.accent);
+        compare(forest.border.color, theme.border);
+        compare(lake.color, Qt.rgba(0, 0, 0, 0));
+        compare(forest.color, Qt.rgba(0, 0, 0, 0));
     }
 }
