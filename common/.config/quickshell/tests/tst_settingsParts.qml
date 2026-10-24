@@ -66,6 +66,19 @@ TestCase {
         }
     }
 
+    Component {
+        id: choice
+
+        Panels.SettingsChoice {
+            width: 302
+            options: [
+                { label: "Compact", value: "compact" },
+                { label: "Balanced", value: "balanced" },
+                { label: "Spacious", value: "spacious" }
+            ]
+        }
+    }
+
     // The text item showing `text` inside `item`.
     function textOf(item, text) {
         if (item.text === text)
@@ -148,5 +161,39 @@ TestCase {
         const item = make(switchRow, { checked: true });
 
         tryCompare(item.switchItem, "color", theme.accent, 500);
+    }
+
+    // A segmented choice is one hairline-bordered control split evenly
+    // between its options.
+    function test_aChoiceIsOneOutlinedControlSplitBetweenItsOptions() {
+        const item = make(choice);
+
+        compare(item.height, 32);
+        compare(item.color, Qt.rgba(0, 0, 0, 0));
+        compare(item.border.color, theme.border);
+        compare(item.border.width, 1);
+        compare(textOf(item, "Compact").parent.width, 100);
+        compare(textOf(item, "Spacious").parent.width, 100);
+    }
+
+    function test_theChosenOptionHasAccentTextAndAFaintFill() {
+        const item = make(choice, { value: "balanced" });
+        const chosen = textOf(item, "Balanced");
+        const other = textOf(item, "Compact");
+
+        compare(chosen.color, theme.accent);
+        compare(chosen.parent.color, theme.surfaceHover);
+        compare(other.color, theme.text);
+        compare(other.parent.color, Qt.rgba(0, 0, 0, 0));
+        verify(!chosen.font.bold);
+    }
+
+    // Sizes that match no preset leave every option unmarked.
+    function test_aValueMatchingNoOptionMarksNone() {
+        const item = make(choice, { value: "" });
+
+        compare(textOf(item, "Compact").color, theme.text);
+        compare(textOf(item, "Balanced").color, theme.text);
+        compare(textOf(item, "Spacious").color, theme.text);
     }
 }
