@@ -22,15 +22,6 @@ hl.layer_rule({
 	dim_around = false,
 })
 
-hl.layer_rule({
-	name = "ndro-bar",
-	match = { class = "maim" },
-	ignore_alpha = 0.0,
-	blur = false,
-	dim_around = false,
-	animation = "spring",
-})
-
 hl.curve("easy", { type = "spring", mass = 1, stiffness = 71.2633, dampening = 15.8273644 })
 
 hl.layer_rule({
