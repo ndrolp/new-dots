@@ -9,7 +9,6 @@ import QtQuick
 import QtQuick.Controls
 import "../../config" as Config
 import "." as Panels
-import "AudioOutputs.js" as AudioOutputs
 import "BluetoothDevices.js" as BluetoothDevices
 import "../IconSource.js" as IconSource
 
@@ -534,17 +533,14 @@ Item {
                 model: Pipewire.nodes.values
 
                 delegate: PopupRow {
-                    id: sinkRow
-
                     required property var modelData
 
                     readonly property bool selected: Pipewire.defaultAudioSink === modelData
-                    readonly property string port: AudioOutputs.port(modelData)
 
                     appearance: root.appearance
                     visible: modelData.isSink
                     width: parent.width
-                    height: port !== "" ? 42 : 36
+                    height: outputName.rowHeight
 
                     Panels.Text {
                         id: sinkIconLabel
@@ -559,29 +555,18 @@ Item {
                         font.pixelSize: 16
                     }
 
-                    Column {
+                    Panels.AudioOutputName {
+                        id: outputName
+
                         anchors.left: sinkIconLabel.right
                         anchors.leftMargin: 10
                         anchors.right: parent.right
                         anchors.rightMargin: 8
                         anchors.verticalCenter: parent.verticalCenter
-
-                        Panels.Text {
-                            width: parent.width
-                            text: AudioOutputs.label(modelData)
-                            color: sinkRow.selected ? theme.accent : theme.text
-                            elide: Text.ElideRight
-                            font.pixelSize: root.appearance.textSize - 1
-                        }
-
-                        Panels.Text {
-                            width: parent.width
-                            visible: text !== ""
-                            text: sinkRow.port
-                            color: theme.textMuted
-                            elide: Text.ElideRight
-                            font.pixelSize: root.appearance.textSize - 3
-                        }
+                        appearance: root.appearance
+                        output: modelData
+                        highlighted: parent.selected
+                        labelSize: root.appearance.textSize - 1
                     }
 
                     TapHandler {
