@@ -32,6 +32,10 @@ _Avoid_: Wallpaper picker, carrusel
 El bar element que muestra el uso de CPU y memoria. No confundir con el desktop widget *System*.
 _Avoid_: System (para el elemento de la barra)
 
+**Cava**:
+El bar element que dibuja lo que suena por la audio output actual como barras de frecuencia que se mueven con lo que suena. Siempre está visible: en silencio, las barras quedan planas. No confundir con el bar element *audio*, que muestra y cambia el volumen.
+_Avoid_: Visualizer, waveform, espectro
+
 **Popup**:
 La ventana pequeña que se despliega desde un bar element al pulsarlo (Bluetooth, red, batería, audio, media…). Pertenece a ese bar element y se cierra al perder el foco.
 Con la barra opaca un popup va **anclado** (attached): sale de la barra como si fuera parte de ella. Con la barra transparente va **flotante** (floating), separado de la barra.
