@@ -108,6 +108,14 @@ TestCase {
         }
     }
 
+    Component {
+        id: button
+
+        Panels.SettingsButton {
+            label: "Done"
+        }
+    }
+
     SignalSpy {
         id: editedSpy
 
@@ -312,5 +320,19 @@ TestCase {
         compare(cells[1].y, cells[0].y);
         compare(cells[2].x, 0);
         verify(cells[2].y >= cells[0].y + 40);
+    }
+
+    // A quiet text button: no fill at rest, its label in the normal text
+    // color, as tall as a field.
+    function test_aButtonIsQuietText() {
+        const item = make(button);
+        const buttonLabel = textOf(item, "Done");
+
+        compare(item.height, 32);
+        compare(item.color, Qt.rgba(0, 0, 0, 0));
+        compare(buttonLabel.color, theme.text);
+        compare(buttonLabel.font.pixelSize, 13);
+        verify(!buttonLabel.font.bold);
+        verify(item.width >= buttonLabel.implicitWidth + 24);
     }
 }
