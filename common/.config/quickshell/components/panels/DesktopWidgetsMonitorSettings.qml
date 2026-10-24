@@ -1,5 +1,6 @@
 import QtQuick
 import "." as Panels
+import "../../config/DesktopWidgetsModel.js" as DesktopWidgetsModel
 
 // The desktop widgets of one monitor: each one turned on or off with a switch
 // row, its placement a segmented choice and its other settings two per line.
@@ -24,25 +25,19 @@ Column {
     }
 
     // Where a desktop widget sits on the monitor, as two segmented choices: the
-    // row (top, center, bottom) and the column (left, center, right). The
-    // stored position joins them, "top-left", "center-right"…, and is just
-    // "center" when both are.
+    // row (top, center, bottom) and the column (left, center, right).
     component Placement: Row {
         id: placement
 
         required property string widget
-        readonly property var parts: {
-            const position = root.desktop[widget].position;
-            return position === "center" ? ["center", "center"] : position.split("-");
-        }
+        readonly property var parts: DesktopWidgetsModel.placementOf(root.desktop[widget].position)
         readonly property alias vertical: verticalChoice
         readonly property alias horizontal: horizontalChoice
 
         spacing: 8
 
         function place(vertical, horizontal) {
-            root.setWidget(widget, "position", vertical === "center" && horizontal === "center"
-                ? "center" : vertical + "-" + horizontal);
+            root.setWidget(widget, "position", DesktopWidgetsModel.positionOf(vertical, horizontal));
         }
 
         Panels.SettingsChoice {
@@ -56,8 +51,8 @@ Column {
                 { label: "Center", value: "center" },
                 { label: "Bottom", value: "bottom" }
             ]
-            value: placement.parts[0]
-            onChosen: vertical => placement.place(vertical, placement.parts[1])
+            value: placement.parts.vertical
+            onChosen: vertical => placement.place(vertical, placement.parts.horizontal)
         }
 
         Panels.SettingsChoice {
@@ -71,8 +66,8 @@ Column {
                 { label: "Center", value: "center" },
                 { label: "Right", value: "right" }
             ]
-            value: placement.parts[1]
-            onChosen: horizontal => placement.place(placement.parts[0], horizontal)
+            value: placement.parts.horizontal
+            onChosen: horizontal => placement.place(placement.parts.vertical, horizontal)
         }
     }
 
