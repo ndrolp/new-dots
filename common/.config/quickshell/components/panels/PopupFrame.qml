@@ -1,6 +1,5 @@
 import Quickshell
 import QtQuick
-import "../../config" as Config
 import "PopupPlacement.js" as PopupPlacement
 
 // The frame every popup shares: the window placed next to the bar element
@@ -66,10 +65,6 @@ PopupWindow {
 
     implicitHeight: surface.implicitHeight + room.top + room.bottom
 
-    Config.Theme {
-        id: theme
-    }
-
     PopupSurface {
         id: surface
 
@@ -84,11 +79,6 @@ PopupWindow {
         attached: frame.attached
         joinRadius: frame.joinRadius
         radius: frame.appearance.radius
-        // The bar's own color and opacity, so an attached popup looks like
-        // part of the bar.
-        fillColor: frame.attached
-            ? Qt.rgba(theme.background.r, theme.background.g, theme.background.b,
-                frame.appearance.barOpacity / 100)
-            : theme.surface
+        barOpacity: frame.appearance.barOpacity
     }
 }

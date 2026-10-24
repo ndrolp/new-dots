@@ -365,12 +365,7 @@ Variants {
             enabled: controlCenter.shown
             attached: controlCenter.placement.attached
             radius: controlCenter.barAppearance.radius
-            // The bar's own color and opacity, so an attached Control center
-            // looks like part of the bar.
-            fillColor: attached
-                ? Qt.rgba(theme.background.r, theme.background.g, theme.background.b,
-                    controlCenter.barAppearance.barOpacity / 100)
-                : theme.surface
+            barOpacity: controlCenter.barAppearance.barOpacity
 
             Column {
                 width: parent.width

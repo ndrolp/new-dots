@@ -14,9 +14,15 @@ Rectangle {
     property bool open: false
     // Hangs from the bar instead of floating below it.
     property bool attached: false
-    // The host may paint it in its own colors, e.g. the bar's.
+    // The host may paint a floating surface in its own colors.
     property color fillColor: theme.surface
     property color borderColor: theme.border
+    // The bar's opacity, 0 to 100 as the bar profile keeps it. An attached
+    // surface is painted in the bar's own color and opacity, so it looks like
+    // part of the bar.
+    property real barOpacity: 100
+    readonly property color attachedColor: Qt.rgba(theme.background.r, theme.background.g,
+        theme.background.b, barOpacity / 100)
     // How far the curved corners joining an attached surface to the bar reach
     // out beside it.
     property real joinRadius: 6
@@ -67,7 +73,7 @@ Rectangle {
         Connections {
             target: surface
 
-            function onFillColorChanged() {
+            function onAttachedColorChanged() {
                 outline.requestPaint();
             }
 
@@ -98,7 +104,7 @@ Rectangle {
             if (!surface.attached || bottom <= 0)
                 return;
 
-            context.fillStyle = surface.fillColor;
+            context.fillStyle = surface.attachedColor;
             context.beginPath();
             context.moveTo(left - join, 0);
             context.lineTo(right + join, 0);
