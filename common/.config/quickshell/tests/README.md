@@ -7,7 +7,8 @@ popups: where a popup opens (`components/panels/PopupPlacement.js`), the
 outline of an attached popup (`PopupOutline.js`), the surface every popup
 draws on (`PopupSurface.qml`), the shared popup parts (`PopupTitle`,
 `PopupHeader`, `PopupRow`…), the Bluetooth device list and turning Bluetooth
-on (`BluetoothDevices.js`, `BluetoothPower.js`). They run with QtTest outside
+on (`BluetoothDevices.js`, `BluetoothPower.js`), and how an audio output is
+named (`AudioOutputs.js`). They run with QtTest outside
 of `qs`:
 
 ```sh

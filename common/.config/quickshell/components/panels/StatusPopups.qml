@@ -9,6 +9,7 @@ import QtQuick
 import QtQuick.Controls
 import "../../config" as Config
 import "." as Panels
+import "AudioOutputs.js" as AudioOutputs
 import "BluetoothDevices.js" as BluetoothDevices
 import "../IconSource.js" as IconSource
 
@@ -561,7 +562,7 @@ Item {
                         anchors.right: parent.right
                         anchors.rightMargin: 8
                         anchors.verticalCenter: parent.verticalCenter
-                        text: modelData.description
+                        text: AudioOutputs.label(modelData)
                         color: parent.selected ? theme.accent : theme.text
                         elide: Text.ElideRight
                         font.pixelSize: root.appearance.textSize - 1

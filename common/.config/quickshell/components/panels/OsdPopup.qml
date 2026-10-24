@@ -6,6 +6,7 @@ import Quickshell.Wayland
 import QtQuick
 import QtQuick.Effects
 import "../../config" as Config
+import "AudioOutputs.js" as AudioOutputs
 
 PanelWindow {
     id: root
@@ -60,11 +61,11 @@ PanelWindow {
     }
 
     function showAudioSink(sink) {
-        const description = String(sink.description || "");
+        const label = AudioOutputs.label(sink);
 
         mode = "sink";
-        sinkName = description !== "" ? description : "Audio output";
-        sinkType = description.toLowerCase();
+        sinkName = label !== "" ? label : "Audio output";
+        sinkType = String(sink.description || "").toLowerCase();
         reveal = 1;
         dismissTimer.restart();
     }

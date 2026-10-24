@@ -8,6 +8,7 @@ import Quickshell.Wayland
 import QtQuick
 import QtQuick.Controls
 import "../../config" as Config
+import "AudioOutputs.js" as AudioOutputs
 
 Variants {
     id: root
@@ -104,7 +105,7 @@ Variants {
         function actions() {
             const volume = audio ? Math.round(audio.volume * 100) + "%" : "Unavailable";
             const output = Pipewire.defaultAudioSink
-                ? String(Pipewire.defaultAudioSink.description || "Default output") : "Unavailable";
+                ? (AudioOutputs.label(Pipewire.defaultAudioSink) || "Default output") : "Unavailable";
             const bluetooth = bluetoothAdapter ? (bluetoothAdapter.enabled ? "On" : "Off")
                 : "Unavailable";
             const brightnessText = brightnessAvailable ? Math.round(brightness * 100) + "%"
