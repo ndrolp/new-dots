@@ -13,6 +13,9 @@ Column {
     property string monitorDescription: ""
     readonly property var range: monitors.rangeFor(monitorDescription)
     readonly property var displaySettings: monitors.displaySettingsFor(monitorDescription)
+    // Workspace ranges have no upper limit: the sliders show the usual
+    // workspaces, and a larger one can be typed.
+    readonly property int noWorkspaceLimit: 2147483647
 
     width: parent ? parent.width : 0
     spacing: 14
@@ -31,6 +34,7 @@ Column {
             label: "First workspace"
             from: 1
             to: 20
+            fieldTo: root.noWorkspaceLimit
             value: root.range.from
             onEdited: number => root.monitors.setRangeStart(root.monitorDescription, number)
         }
@@ -41,6 +45,7 @@ Column {
             label: "Last workspace"
             from: 1
             to: 20
+            fieldTo: root.noWorkspaceLimit
             value: root.range.to
             onEdited: number => root.monitors.setRangeEnd(root.monitorDescription, number)
         }
