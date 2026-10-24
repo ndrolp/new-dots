@@ -23,6 +23,9 @@ common/.config/quickshell/tests/run.sh
   the panels, `import "../components/panels" as Panels`. Quickshell's own
   modules (`Quickshell.Io`, `Quickshell.Bluetooth`…) don't load under
   `qmltestrunner`, so only files that don't import them can be tested here.
+  A section that needs one keeps it in a thin wrapper and is tested through
+  what the wrapper hands it, e.g. `WallpaperSettings.qml` passes Hyprland's
+  monitors to `WallpaperSettingsBody.qml` as plain displays.
 - `fixtures/` holds copies of the real `appearance.json` and `monitors.json`
   (schema version 0, from before bar profiles were reworked). Read them with
   the shared `Fixtures` helper (`Fixtures.qml`): declare
