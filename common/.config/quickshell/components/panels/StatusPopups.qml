@@ -1031,6 +1031,7 @@ Item {
                             width: parent.width
                             height: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled ? 36 : 0
                             visible: height > 0
+                            opacity: BluetoothDevices.isDimmed(deviceRow.modelData) ? 0.5 : 1
 
                             Panels.Text {
                                 anchors.left: parent.left
@@ -1041,15 +1042,34 @@ Item {
                                 font.pixelSize: 16
                             }
 
-                            Panels.Text {
-                                anchors.fill: parent
+                            Row {
+                                anchors.left: parent.left
                                 anchors.leftMargin: 36
+                                anchors.right: parent.right
                                 anchors.rightMargin: 80
-                                verticalAlignment: Text.AlignVCenter
-                                text: BluetoothDevices.label(deviceRow.modelData)
-                                color: deviceRow.modelData.connected ? theme.accent : theme.text
-                                elide: Text.ElideRight
-                                font.pixelSize: root.appearance.textSize - 1
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 6
+
+                                Panels.Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: Math.min(implicitWidth, parent.width
+                                        - (deviceIdentifier.visible ? deviceIdentifier.implicitWidth + parent.spacing : 0))
+                                    text: BluetoothDevices.label(deviceRow.modelData)
+                                    color: deviceRow.modelData.connected ? theme.accent : theme.text
+                                    elide: Text.ElideRight
+                                    font.pixelSize: root.appearance.textSize - 1
+                                }
+
+                                // Tells unnamed devices apart.
+                                Panels.Text {
+                                    id: deviceIdentifier
+
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    visible: text !== ""
+                                    text: BluetoothDevices.identifier(deviceRow.modelData)
+                                    color: theme.textMuted
+                                    font.pixelSize: root.appearance.textSize - 2
+                                }
                             }
 
                             Panels.Text {
