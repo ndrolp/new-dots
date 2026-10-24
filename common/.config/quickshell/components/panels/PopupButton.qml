@@ -1,5 +1,6 @@
 import QtQuick
 import "../../config" as Config
+import "." as Panels
 
 // A text button: a row with a centered label.
 PopupRow {
@@ -16,7 +17,7 @@ PopupRow {
         id: theme
     }
 
-    Text {
+    Panels.Text {
         anchors.centerIn: parent
         text: button.label
         color: button.labelColor

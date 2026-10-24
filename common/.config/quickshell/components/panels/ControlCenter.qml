@@ -10,6 +10,7 @@ import Quickshell.Wayland
 import QtQuick
 import QtQuick.Controls
 import "../../config" as Config
+import "." as Panels
 import "PopupPlacement.js" as PopupPlacement
 
 // The Control center: quick toggles and sliders, centered at the top of the
@@ -62,7 +63,7 @@ Variants {
             height: parent.height
             spacing: 6
 
-            Text {
+            Panels.Text {
                 anchors.verticalCenter: parent.verticalCenter
                 text: tile.icon
                 color: tile.active || tile.hovered ? tile.accentColor : tileTheme.textMuted
@@ -73,7 +74,7 @@ Variants {
                 }
             }
 
-            Text {
+            Panels.Text {
                 anchors.verticalCenter: parent.verticalCenter
                 text: tile.label
                 color: tile.active ? tileTheme.text : tileTheme.textMuted
@@ -112,7 +113,7 @@ Variants {
             width: parent.width
             height: Math.max(sliderLabel.implicitHeight, sliderValue.implicitHeight)
 
-            Text {
+            Panels.Text {
                 id: sliderLabel
 
                 anchors.left: parent.left
@@ -227,6 +228,10 @@ Variants {
 
         Config.Theme {
             id: theme
+        }
+
+        BluetoothPower {
+            id: bluetoothPower
         }
 
         Process {
@@ -360,12 +365,7 @@ Variants {
             enabled: controlCenter.shown
             attached: controlCenter.placement.attached
             radius: controlCenter.barAppearance.radius
-            // The bar's own color and opacity, so an attached Control center
-            // looks like part of the bar.
-            fillColor: attached
-                ? Qt.rgba(theme.background.r, theme.background.g, theme.background.b,
-                    controlCenter.barAppearance.barOpacity / 100)
-                : theme.surface
+            barOpacity: controlCenter.barAppearance.barOpacity
 
             Column {
                 width: parent.width
@@ -505,8 +505,7 @@ Variants {
                         active: controlCenter.bluetoothAdapter !== null
                             && controlCenter.bluetoothAdapter.enabled
                         controlEnabled: controlCenter.bluetoothAdapter !== null
-                        onTriggered: controlCenter.bluetoothAdapter.enabled
-                            = !controlCenter.bluetoothAdapter.enabled
+                        onTriggered: bluetoothPower.setEnabled(!controlCenter.bluetoothAdapter.enabled)
                     }
 
                     ControlTile {
@@ -582,7 +581,7 @@ Variants {
                         anchors.rightMargin: 8
                         spacing: 10
 
-                        Text {
+                        Panels.Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: controlCenter.player && controlCenter.player.isPlaying ? "󰏤" : "󰐊"
                             color: theme.green
@@ -646,7 +645,7 @@ Variants {
                                 text: modelData.icon + "  " + modelData.label
                             }
 
-                            Text {
+                            Panels.Text {
                                 width: parent.width
                                 text: modelData.value
                                 color: theme.text

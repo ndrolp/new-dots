@@ -1,39 +1,49 @@
 .pragma library
 
-// Where a popup opens in its bar window. Popups of center bar elements open
-// under them, shifted sideways to stay on screen; the rest at the bar edge.
-// On an opaque bar popups are attached: they hang from the bar's bottom edge.
+// Where a popup opens in its bar window: under the bar element that opened
+// it, whatever zone it sits in, shifted sideways to stay on screen; at the bar
+// edge when its element isn't on the bar. Either way it keeps clear of the
+// bar's rounded ends. On an opaque bar popups are attached: they hang from the
+// bar's bottom edge.
 
 // Takes the bar profile of the popup's monitor, { barTransparent }.
 function attached(bar) {
     return !bar.barTransparent;
 }
 
-// The bar edge a popup opens at: "left" or "right".
-function edgeX(placement, edge) {
-    if (edge === "left")
-        return placement.padding;
-
-    return Math.max(placement.padding, placement.barWidth - placement.popupWidth - placement.padding);
+// How close to the bar's ends a popup may open: the padding, or the bar's
+// radius when its rounded ends reach further in.
+function margin(placement) {
+    return Math.max(placement.padding, placement.radius || 0);
 }
 
-// Takes { popupWidth, barWidth, padding, nearTrigger, edge,
-// trigger: { x, width } | null (the bar element, in bar window coordinates) }.
+// The bar edge a popup opens at: "left" or "right".
+function edgeX(placement, edge) {
+    const side = margin(placement);
+
+    if (edge === "left")
+        return side;
+
+    return Math.max(side, placement.barWidth - placement.popupWidth - side);
+}
+
+// Takes { popupWidth, barWidth, padding, radius, edge,
+// trigger: { x, width } | null (the bar element, in bar window coordinates;
+// null when it isn't on the bar) }.
 function x(placement) {
     const trigger = placement.trigger;
 
-    if (!placement.nearTrigger)
-        return edgeX(placement, placement.edge);
     if (!trigger)
-        return edgeX(placement, "right");
+        return edgeX(placement, placement.edge);
 
-    return Math.max(placement.padding, Math.min(
-        placement.barWidth - placement.popupWidth - placement.padding,
+    const side = margin(placement);
+    return Math.max(side, Math.min(
+        placement.barWidth - placement.popupWidth - side,
         trigger.x + (trigger.width - placement.popupWidth) / 2
     ));
 }
 
-// Takes { barHeight, spacing, nearTrigger, attached,
+// Takes { barHeight, spacing, attached,
 // content: { y, height } | null (the bar content the elements sit in) }.
 function y(placement) {
     const content = placement.content;
@@ -41,7 +51,7 @@ function y(placement) {
     if (placement.attached)
         return placement.barHeight;
 
-    if (placement.nearTrigger && content)
+    if (content)
         return content.y + content.height + placement.spacing;
 
     return placement.barHeight + placement.spacing;

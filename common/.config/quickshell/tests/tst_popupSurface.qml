@@ -1,6 +1,7 @@
 import QtQuick
 import QtTest
 import "../components/panels" as Panels
+import "../config" as Config
 
 // The surface every popup draws on: a flat card with a hairline border, its
 // contents inset by the padding, opening with a short fade and slide down.
@@ -11,6 +12,10 @@ TestCase {
     width: 400
     height: 400
     when: windowShown
+
+    Config.Theme {
+        id: theme
+    }
 
     Component {
         id: surfaceWithBox
@@ -94,6 +99,21 @@ TestCase {
 
         verify(Qt.colorEqual(surface.color, "#102030"));
         verify(Qt.colorEqual(surface.border.color, "#405060"));
+    }
+
+    function test_anAttachedSurfaceIsPaintedInTheBarsColorAndOpacity() {
+        const surface = makeSurface({ attached: true, barOpacity: 70, fillColor: "#102030" });
+
+        verify(Qt.colorEqual(surface.attachedColor, Qt.rgba(theme.background.r, theme.background.g,
+            theme.background.b, 0.7)));
+        surface.barOpacity = 100;
+        verify(Qt.colorEqual(surface.attachedColor, theme.background));
+    }
+
+    function test_anAttachedSurfaceIsOpaqueUnlessTheBarSaysOtherwise() {
+        const surface = makeSurface({ attached: true });
+
+        verify(Qt.colorEqual(surface.attachedColor, theme.background));
     }
 
     function test_anAttachedSurfaceHasNoBorderAndDoesNotFadeOrSlide() {

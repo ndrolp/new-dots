@@ -1,6 +1,5 @@
 import Quickshell
 import Quickshell.Bluetooth
-import Quickshell.Io
 import Quickshell.Networking
 import Quickshell.Services.Mpris
 import Quickshell.Services.Pipewire
@@ -9,6 +8,7 @@ import Quickshell.Services.UPower
 import QtQuick
 import QtQuick.Controls
 import "../../config" as Config
+import "." as Panels
 import "BluetoothDevices.js" as BluetoothDevices
 
 Item {
@@ -163,7 +163,7 @@ Item {
     }
 
     // A popup of this bar, open while it is the active one.
-    component StatusPopup: PopupFrame {
+    component BarPopup: PopupFrame {
         appearance: root.appearance
         barWindow: root.barWindow
         anchorProvider: root.popupAnchorProvider
@@ -171,7 +171,7 @@ Item {
         onDismissed: root.popupClosed(popup)
     }
 
-    StatusPopup {
+    BarPopup {
         id: systemPopup
 
         popup: "system"
@@ -233,7 +233,7 @@ Item {
                     width: parent.width
                     height: 22
 
-                    Text {
+                    Panels.Text {
                         anchors.left: parent.left
                         anchors.verticalCenter: parent.verticalCenter
                         text: modelData.label
@@ -241,7 +241,7 @@ Item {
                         font.pixelSize: root.appearance.textSize - 1
                     }
 
-                    Text {
+                    Panels.Text {
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
                         text: modelData.value
@@ -253,7 +253,7 @@ Item {
         }
     }
 
-    StatusPopup {
+    BarPopup {
         id: pomodoroPopup
 
         popup: "pomodoro"
@@ -268,7 +268,7 @@ Item {
                 title: "Pomodoro"
             }
 
-            Text {
+            Panels.Text {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
                 text: root.pomodoro.remainingLabel
@@ -362,7 +362,7 @@ Item {
         }
     }
 
-    StatusPopup {
+    BarPopup {
         id: mediaPopup
 
         readonly property var player: root.player
@@ -391,7 +391,7 @@ Item {
                     fillMode: Image.PreserveAspectCrop
                 }
 
-                Text {
+                Panels.Text {
                     anchors.centerIn: parent
                     visible: mediaArtImage.status !== Image.Ready
                     text: "󰎈"
@@ -413,7 +413,7 @@ Item {
                         : "Nothing playing"
                 }
 
-                Text {
+                Panels.Text {
                     width: parent.width
                     visible: text !== ""
                     text: mediaPopup.player ? mediaPopup.player.trackArtist : ""
@@ -505,7 +505,7 @@ Item {
         }
     }
 
-    StatusPopup {
+    BarPopup {
         id: sinkPopup
 
         popup: "audio"
@@ -541,7 +541,7 @@ Item {
                     width: parent.width
                     height: 36
 
-                    Text {
+                    Panels.Text {
                         id: sinkIconLabel
 
                         anchors.left: parent.left
@@ -554,7 +554,7 @@ Item {
                         font.pixelSize: 16
                     }
 
-                    Text {
+                    Panels.Text {
                         anchors.left: sinkIconLabel.right
                         anchors.leftMargin: 10
                         anchors.right: parent.right
@@ -578,7 +578,7 @@ Item {
         }
     }
 
-    StatusPopup {
+    BarPopup {
         id: trayPopup
 
         property var selectedTrayItem: null
@@ -676,7 +676,7 @@ Item {
                             visible: status === Image.Ready
                         }
 
-                        Text {
+                        Panels.Text {
                             anchors.left: parent.left
                             anchors.leftMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
@@ -686,7 +686,7 @@ Item {
                             font.pixelSize: root.appearance.textSize
                         }
 
-                        Text {
+                        Panels.Text {
                             anchors.left: parent.left
                             anchors.leftMargin: 36
                             anchors.right: parent.right
@@ -749,7 +749,7 @@ Item {
                             width: parent.width
                             height: 30
 
-                            Text {
+                            Panels.Text {
                                 anchors.left: parent.left
                                 anchors.leftMargin: 36
                                 anchors.verticalCenter: parent.verticalCenter
@@ -785,7 +785,7 @@ Item {
                                     color: theme.border
                                 }
 
-                                Text {
+                                Panels.Text {
                                     anchors.left: parent.left
                                     anchors.leftMargin: 36
                                     anchors.right: parent.right
@@ -818,7 +818,7 @@ Item {
         }
     }
 
-    StatusPopup {
+    BarPopup {
         id: batteryPopup
 
         readonly property var battery: UPower.displayDevice
@@ -888,7 +888,7 @@ Item {
                             text: modelData.label
                         }
 
-                        Text {
+                        Panels.Text {
                             width: parent.width
                             text: modelData.value
                             color: theme.text
@@ -901,33 +901,29 @@ Item {
         }
     }
 
-    StatusPopup {
+    BarPopup {
         id: bluetoothPopup
 
         readonly property var adapter: Bluetooth.defaultAdapter
         readonly property var devices: adapter
             ? BluetoothDevices.visibleDevices(adapter.devices.values) : []
-        // Why the last attempt to turn Bluetooth on failed, shown as the subtitle.
-        property string enableError: ""
         // Addresses of devices paired from this popup, trusted once paired.
         property var pairRequests: ({})
 
+        popup: "bluetooth"
+        implicitWidth: 380
+
+        // Scan for devices while the popup is open and Bluetooth is on.
         onVisibleChanged: {
-            if (!visible && adapter && adapter.discovering)
+            if (visible)
+                startDiscovery();
+            else if (adapter && adapter.discovering)
                 adapter.discovering = false;
         }
 
-        function setEnabled(on) {
-            enableError = "";
-            if (!on) {
-                adapter.enabled = false;
-                return;
-            }
-            enableTimeout.restart();
-            if (adapter.state === BluetoothAdapterState.Blocked)
-                rfkillUnblock.running = true;
-            else
-                adapter.enabled = true;
+        function startDiscovery() {
+            if (adapter && adapter.enabled && !adapter.discovering)
+                adapter.discovering = true;
         }
 
         function pair(device) {
@@ -937,44 +933,16 @@ Item {
             device.pair();
         }
 
-        Process {
-            id: rfkillUnblock
-
-            command: ["rfkill", "unblock", "bluetooth"]
-            onExited: exitCode => {
-                if (exitCode !== 0) {
-                    enableTimeout.stop();
-                    bluetoothPopup.enableError = "Couldn't unblock Bluetooth (rfkill)";
-                } else if (bluetoothPopup.adapter) {
-                    bluetoothPopup.adapter.enabled = true;
-                }
-            }
-        }
-
-        Timer {
-            id: enableTimeout
-
-            interval: 5000
-            onTriggered: {
-                const adapter = bluetoothPopup.adapter;
-                if (!adapter || adapter.enabled)
-                    return;
-                bluetoothPopup.enableError = adapter.state === BluetoothAdapterState.Blocked
-                    ? "Bluetooth is blocked (rfkill)" : "Couldn't turn Bluetooth on";
-            }
+        BluetoothPower {
+            id: bluetoothPower
         }
 
         Connections {
             target: bluetoothPopup.adapter
 
             function onEnabledChanged() {
-                const adapter = bluetoothPopup.adapter;
-                if (!adapter.enabled)
-                    return;
-                enableTimeout.stop();
-                bluetoothPopup.enableError = "";
                 if (bluetoothPopup.visible)
-                    adapter.discovering = true;
+                    bluetoothPopup.startDiscovery();
             }
         }
 
@@ -996,13 +964,6 @@ Item {
                 }
             }
         }
-        popup: "bluetooth"
-        implicitWidth: 380
-
-        onRevealChanged: {
-            if (reveal > 0 && adapter && adapter.enabled)
-                adapter.discovering = true;
-        }
 
         Column {
             width: parent.width
@@ -1015,7 +976,7 @@ Item {
                     ? theme.accent : theme.textMuted
                 title: "Bluetooth"
                 subtitle: !bluetoothPopup.adapter ? "No adapter found"
-                    : bluetoothPopup.enableError !== "" ? bluetoothPopup.enableError
+                    : bluetoothPower.error !== "" ? bluetoothPower.error
                     : !bluetoothPopup.adapter.enabled ? "Bluetooth is off"
                     : bluetoothPopup.adapter.discovering ? "Scanning for devices"
                     : "Choose a device"
@@ -1024,7 +985,7 @@ Item {
                     appearance: root.appearance
                     checked: !!bluetoothPopup.adapter && bluetoothPopup.adapter.enabled
                     enabled: bluetoothPopup.adapter !== null
-                    onToggled: bluetoothPopup.setEnabled(!bluetoothPopup.adapter.enabled)
+                    onToggled: bluetoothPower.setEnabled(!bluetoothPopup.adapter.enabled)
                 }
             }
 
@@ -1071,7 +1032,7 @@ Item {
                             height: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled ? 36 : 0
                             visible: height > 0
 
-                            Text {
+                            Panels.Text {
                                 anchors.left: parent.left
                                 anchors.leftMargin: 8
                                 anchors.verticalCenter: parent.verticalCenter
@@ -1080,7 +1041,7 @@ Item {
                                 font.pixelSize: 16
                             }
 
-                            Text {
+                            Panels.Text {
                                 anchors.fill: parent
                                 anchors.leftMargin: 36
                                 anchors.rightMargin: 80
@@ -1091,7 +1052,7 @@ Item {
                                 font.pixelSize: root.appearance.textSize - 1
                             }
 
-                            Text {
+                            Panels.Text {
                                 anchors.right: parent.right
                                 anchors.rightMargin: 8
                                 anchors.verticalCenter: parent.verticalCenter
@@ -1119,7 +1080,7 @@ Item {
         }
     }
 
-    StatusPopup {
+    BarPopup {
         id: networkPopup
 
         readonly property var wifi: root.wifiDevice()
@@ -1175,7 +1136,7 @@ Item {
                     leftPadding: 30
                     rightPadding: 28
 
-                    Text {
+                    Panels.Text {
                         anchors.left: parent.left
                         anchors.leftMargin: 10
                         anchors.verticalCenter: parent.verticalCenter
@@ -1184,7 +1145,7 @@ Item {
                         font.pixelSize: 14
                     }
 
-                    Text {
+                    Panels.Text {
                         anchors.right: parent.right
                         anchors.rightMargin: 10
                         anchors.verticalCenter: parent.verticalCenter
@@ -1240,7 +1201,7 @@ Item {
                                     }
                                 }
 
-                                Text {
+                                Panels.Text {
                                     anchors.left: parent.left
                                     anchors.leftMargin: 8
                                     anchors.verticalCenter: parent.verticalCenter
@@ -1249,7 +1210,7 @@ Item {
                                     font.pixelSize: 16
                                 }
 
-                                Text {
+                                Panels.Text {
                                     anchors.fill: parent
                                     anchors.leftMargin: 36
                                     anchors.rightMargin: 40
@@ -1260,7 +1221,7 @@ Item {
                                     font.pixelSize: root.appearance.textSize - 1
                                 }
 
-                                Text {
+                                Panels.Text {
                                     anchors.right: parent.right
                                     anchors.rightMargin: 8
                                     anchors.verticalCenter: parent.verticalCenter

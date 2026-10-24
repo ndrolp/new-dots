@@ -19,7 +19,7 @@ TestCase {
     }
 
     QtObject {
-        id: appearance
+        id: barAppearance
 
         property int radius: 12
         property int textSize: 13
@@ -29,7 +29,7 @@ TestCase {
         id: title
 
         Panels.PopupTitle {
-            appearance: appearance
+            appearance: barAppearance
             text: "Bluetooth"
         }
     }
@@ -38,7 +38,7 @@ TestCase {
         id: label
 
         Panels.PopupLabel {
-            appearance: appearance
+            appearance: barAppearance
             text: "Connected"
         }
     }
@@ -47,7 +47,7 @@ TestCase {
         id: row
 
         Panels.PopupRow {
-            appearance: appearance
+            appearance: barAppearance
             width: 200
             height: 40
         }
@@ -57,7 +57,7 @@ TestCase {
         id: button
 
         Panels.PopupButton {
-            appearance: appearance
+            appearance: barAppearance
             width: 120
             label: "Scan"
         }
@@ -67,7 +67,7 @@ TestCase {
         id: popupSwitch
 
         Panels.PopupSwitch {
-            appearance: appearance
+            appearance: barAppearance
         }
     }
 
@@ -82,7 +82,7 @@ TestCase {
             Panels.PopupHeader {
                 id: popupHeader
 
-                appearance: appearance
+                appearance: barAppearance
                 icon: "󰂯"
                 title: "Bluetooth"
                 subtitle: "2 connected"
@@ -94,13 +94,25 @@ TestCase {
         id: progress
 
         Panels.PopupProgress {
-            appearance: appearance
+            appearance: barAppearance
             width: 200
         }
     }
 
+    // The text item showing `text` inside `item`.
+    function textOf(item, text) {
+        if (item.text === text)
+            return item;
+        for (let i = 0; i < item.children.length; i++) {
+            const found = textOf(item.children[i], text);
+            if (found)
+                return found;
+        }
+        return null;
+    }
+
     function make(component, properties) {
-        return createTemporaryObject(component, this, Object.assign({ appearance: appearance }, properties || {}));
+        return createTemporaryObject(component, this, Object.assign({ appearance: barAppearance }, properties || {}));
     }
 
     function test_aTitleIsBoldAndSlightlyLargerThanText() {
@@ -151,9 +163,23 @@ TestCase {
 
     function test_aHeaderFillsItsParentAndFitsTitleAndSubtitle() {
         const holder = createTemporaryObject(header, this);
+        const headerTitle = textOf(holder.header, "Bluetooth");
+        const headerSubtitle = textOf(holder.header, "2 connected");
 
         compare(holder.header.width, 300);
-        verify(holder.header.implicitHeight > 14 + 11);
+        compare(headerTitle.font.pixelSize, 14);
+        compare(headerSubtitle.font.pixelSize, 11);
+        verify(holder.header.implicitHeight >= headerTitle.implicitHeight + headerSubtitle.implicitHeight);
+    }
+
+    function test_popupTextUsesTheThemeFont() {
+        const holder = createTemporaryObject(header, this);
+
+        compare(make(title).font.family, theme.fontFamily);
+        compare(make(label).font.family, theme.fontFamily);
+        compare(textOf(make(button), "Scan").font.family, theme.fontFamily);
+        compare(textOf(holder.header, "󰂯").font.family, theme.fontFamily);
+        compare(textOf(holder.header, "Bluetooth").font.family, theme.fontFamily);
     }
 
     function test_progressIsFilledUpToItsFractionAndNoFurther() {

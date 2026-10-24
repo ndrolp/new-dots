@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Runs the bar profile model tests (QtTest via qmltestrunner), outside of qs.
+# Runs the quickshell tests (QtTest via qmltestrunner), outside of qs.
 # Usage: common/.config/quickshell/tests/run.sh [extra qmltestrunner args]
 set -eu
 dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)

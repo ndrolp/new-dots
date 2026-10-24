@@ -2,15 +2,23 @@
 
 Tests for the pure JS models behind the settings: bar profiles
 (`config/BarProfileModel.js`), desktop widgets (`config/DesktopWidgetsModel.js`)
-and schema migrations (`config/SchemaMigrations.js`). They run with QtTest
-outside of `qs`:
+and schema migrations (`config/SchemaMigrations.js`). They also cover the
+popups: where a popup opens (`components/panels/PopupPlacement.js`), the
+outline of an attached popup (`PopupOutline.js`), the surface every popup
+draws on (`PopupSurface.qml`), the shared popup parts (`PopupTitle`,
+`PopupHeader`, `PopupRow`…), the Bluetooth device list and turning Bluetooth
+on (`BluetoothDevices.js`, `BluetoothPower.js`). They run with QtTest outside
+of `qs`:
 
 ```sh
 common/.config/quickshell/tests/run.sh
 ```
 
 - Test files are `tst_*.qml` (QtTest `TestCase`) and import the models they
-  test, e.g. `import "../config/BarProfileModel.js" as BarProfileModel`.
+  test, e.g. `import "../config/BarProfileModel.js" as BarProfileModel`, or
+  the panels, `import "../components/panels" as Panels`. Quickshell's own
+  modules (`Quickshell.Io`, `Quickshell.Bluetooth`…) don't load under
+  `qmltestrunner`, so only files that don't import them can be tested here.
 - `fixtures/` holds copies of the real `appearance.json` and `monitors.json`
   (schema version 0, from before bar profiles were reworked). Read them with
   the shared `Fixtures` helper (`Fixtures.qml`): declare

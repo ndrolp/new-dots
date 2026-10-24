@@ -1,5 +1,6 @@
 import QtQuick
 import "../../config" as Config
+import "." as Panels
 
 // A popup's title with its icon, a muted subtitle, and room on the right,
 // e.g. for a switch.
@@ -20,7 +21,7 @@ Item {
         id: theme
     }
 
-    Text {
+    Panels.Text {
         id: headerIcon
 
         anchors.left: parent.left
