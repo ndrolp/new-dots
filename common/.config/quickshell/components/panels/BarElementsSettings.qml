@@ -11,8 +11,8 @@ import "../../config/BarProfileModel.js" as BarProfileModel
 Column {
     id: root
 
-    property var appearance
-    property string expandedWidget: ""
+    required property var appearance
+    property string expandedElement: ""
     readonly property var barElements: BarProfileModel.normalizeBarElements(appearance.barElements)
     readonly property var zones: [
         { label: "Left", short: "L", value: "left" },
@@ -115,28 +115,19 @@ Column {
                     readonly property bool elementOn: modelData.enabled !== false
                     readonly property bool joined: modelData.joinPrevious === true
                     readonly property var options: root.optionsFor(element)
-                    readonly property bool expanded: root.expandedWidget === element
+                    readonly property bool expanded: root.expandedElement === element
 
                     width: root.width
                     spacing: 2
 
-                    Rectangle {
+                    Panels.SettingsRow {
                         id: elementRow
 
                         readonly property string elementLabel: root.labelFor(elementDelegate.element)
 
                         width: parent.width
                         height: 40
-                        radius: root.appearance.radius
-                        color: rowHover.hovered ? theme.surfaceHover : "transparent"
-
-                        Behavior on color {
-                            ColorAnimation { duration: 140 }
-                        }
-
-                        HoverHandler {
-                            id: rowHover
-                        }
+                        appearance: root.appearance
 
                         Row {
                             anchors.left: parent.left
@@ -152,7 +143,7 @@ Column {
 
                                 TapHandler {
                                     enabled: elementDelegate.options.length > 0
-                                    onTapped: root.expandedWidget = elementDelegate.expanded
+                                    onTapped: root.expandedElement = elementDelegate.expanded
                                         ? "" : elementDelegate.element
                                 }
                             }
@@ -176,7 +167,7 @@ Column {
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: elementDelegate.index > 0
                                 appearance: root.appearance
-                                label: "Join"
+                                label: "󰌷  Join"
                                 labelColor: elementDelegate.joined ? theme.accent : theme.textMuted
                                 onActivated: root.appearance.setBarElementJoined(elementDelegate.element,
                                     !elementDelegate.joined)
@@ -191,26 +182,13 @@ Column {
                                 onChosen: zone => root.appearance.moveBarElementToZone(elementDelegate.element, zone)
                             }
 
-                            Repeater {
-                                model: [
-                                    { label: "▲", offset: -1 },
-                                    { label: "▼", offset: 1 }
-                                ]
-
-                                delegate: Panels.SettingsButton {
-                                    required property var modelData
-                                    readonly property bool movable: modelData.offset < 0
-                                        ? elementDelegate.index > 0
-                                        : elementDelegate.index < zoneDelegate.elements.length - 1
-
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: 32
-                                    appearance: root.appearance
-                                    label: modelData.label
-                                    labelColor: movable ? theme.text : theme.textDisabled
-                                    onActivated: root.appearance.moveBarElement(elementDelegate.element,
-                                        modelData.offset)
-                                }
+                            Panels.SettingsMoveButtons {
+                                anchors.verticalCenter: parent.verticalCenter
+                                appearance: root.appearance
+                                canMoveUp: elementDelegate.index > 0
+                                canMoveDown: elementDelegate.index < zoneDelegate.elements.length - 1
+                                onMovedUp: root.appearance.moveBarElement(elementDelegate.element, -1)
+                                onMovedDown: root.appearance.moveBarElement(elementDelegate.element, 1)
                             }
 
                             Item {

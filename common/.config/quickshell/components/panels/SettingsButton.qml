@@ -3,6 +3,7 @@ import "../../config" as Config
 import "." as Panels
 
 // A quiet text button: its label alone, with a faint fill only while hovered.
+// A disabled button is dimmed and can't be pressed.
 Rectangle {
     id: button
 
@@ -14,7 +15,8 @@ Rectangle {
     width: buttonLabel.implicitWidth + 28
     height: 32
     radius: appearance.radius
-    color: buttonHover.hovered ? theme.surfaceHover : "transparent"
+    color: buttonHover.hovered && enabled ? theme.surfaceHover : "transparent"
+    opacity: enabled ? 1 : 0.4
 
     Behavior on color {
         ColorAnimation { duration: 140 }
@@ -38,6 +40,7 @@ Rectangle {
     }
 
     TapHandler {
+        enabled: button.enabled
         onTapped: button.activated()
     }
 }

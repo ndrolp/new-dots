@@ -39,7 +39,7 @@ TestCase {
     // A fake of the shell's monitors over the real desktop widgets model, so
     // what is saved shows up again in the section.
     Component {
-        id: page
+        id: sectionArea
 
         Item {
             property alias monitors: monitors
@@ -89,7 +89,7 @@ TestCase {
     }
 
     function make() {
-        const built = createTemporaryObject(page, this);
+        const built = createTemporaryObject(sectionArea, this);
         return { monitors: built.monitors, item: built.section };
     }
 
@@ -138,6 +138,17 @@ TestCase {
         compare(widgetsOf(built).weather.position, "center");
         compare(placement.vertical.value, "center");
         compare(placement.horizontal.value, "center");
+    }
+
+    // Each placement is named after its desktop widget, so the choices don't
+    // stand alone.
+    function test_eachPlacementIsLabelledWithItsDesktopWidget() {
+        const built = make();
+
+        compare(placementOf(switchRow(built.item, "Background clock")).label, "Clock position");
+        compare(placementOf(switchRow(built.item, "Media")).label, "Media position");
+        compare(placementOf(switchRow(built.item, "Weather")).label, "Weather position");
+        verify(textShown(built.item, "Clock position"));
     }
 
     function sameLine(item, first, second) {
@@ -235,8 +246,8 @@ TestCase {
 
     function test_theStackOrderListsTheDesktopWidgetsAndQuietButtonsMoveThem() {
         const built = make();
-        const up = buttons(built.item, "Up");
-        const down = buttons(built.item, "Down");
+        const up = buttons(built.item, "󰁝");
+        const down = buttons(built.item, "󰁅");
 
         compare(up.length, 5);
         compare(down.length, 5);

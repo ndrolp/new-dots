@@ -7,7 +7,7 @@ import "." as Panels
 Column {
     id: root
 
-    property var appearance
+    required property var appearance
     signal requested(var command)
 
     width: parent ? parent.width : 0
@@ -23,17 +23,17 @@ Column {
         Repeater {
             model: [
                 {
-                    label: "Lock now",
+                    label: "󰌾  Lock now",
                     description: "Lock this session with Hyprlock.",
                     command: ["loginctl", "lock-session"]
                 },
                 {
-                    label: "Turn displays off",
+                    label: "󰍹  Turn displays off",
                     description: "Turn displays off until the next input.",
                     command: ["hyprctl", "dispatch", "dpms", "off"]
                 },
                 {
-                    label: "Suspend",
+                    label: "󰤄  Suspend",
                     description: "Lock and suspend the computer.",
                     command: ["systemctl", "suspend"]
                 }

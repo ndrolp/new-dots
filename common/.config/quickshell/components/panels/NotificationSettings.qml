@@ -5,7 +5,7 @@ import "." as Panels
 Column {
     id: root
 
-    property var appearance
+    required property var appearance
 
     width: parent ? parent.width : 0
     spacing: 14
@@ -16,14 +16,10 @@ Column {
         topPadding: 4
     }
 
-    Column {
+    Panels.SettingsField {
         width: parent.width
-        spacing: 6
-
-        Panels.SettingsLabel {
-            appearance: root.appearance
-            text: "Position"
-        }
+        appearance: root.appearance
+        label: "Notification location"
 
         Panels.SettingsChoice {
             width: parent.width

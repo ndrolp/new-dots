@@ -9,11 +9,11 @@ import "../../config/BarProfileModel.js" as BarProfileModel
 Column {
     id: root
 
-    property var appearance
+    required property var appearance
     // Config.Monitors: Delete is refused for profiles a monitor draws.
     property var monitors
     readonly property bool modified: appearance.barProfileModified
-    readonly property var profileNames: Object.keys(appearance.barProfiles || {}).sort()
+    readonly property var profileChoices: BarProfileModel.profileChoices(appearance.barProfiles)
     readonly property var displaySettings: monitors ? monitors.displaySettings : ({})
 
     // "" (none), "duplicate" (naming the copy) or "delete" (confirming or
@@ -22,11 +22,6 @@ Column {
     readonly property string duplicateError: appearance.duplicateNameError(duplicateName.text)
     readonly property string deleteRejection: appearance.deleteBarProfileRejection(
         appearance.editingBarProfile, displaySettings)
-
-    function displayName(profileName) {
-        return profileName.length > 0
-            ? profileName.charAt(0).toUpperCase() + profileName.slice(1) : "";
-    }
 
     function startDuplicate() {
         duplicateName.text = appearance.suggestedDuplicateName();
@@ -51,7 +46,7 @@ Column {
 
     function deleteMessage() {
         if (deleteRejection === "assigned")
-            return "Can't delete \"" + displayName(appearance.editingBarProfile)
+            return "Can't delete \"" + BarProfileModel.profileDisplayName(appearance.editingBarProfile)
                 + "\": used by " + BarProfileModel.monitorsUsingProfile(
                     displaySettings, appearance.editingBarProfile).join(", ")
                 + ". Assign another profile to them first.";
@@ -59,7 +54,7 @@ Column {
             return "Can't delete the last bar profile.";
         if (deleteRejection === "pending")
             return "Save or discard the pending changes first.";
-        return "Delete \"" + displayName(appearance.editingBarProfile) + "\"? This can't be undone.";
+        return "Delete \"" + BarProfileModel.profileDisplayName(appearance.editingBarProfile) + "\"? This can't be undone.";
     }
 
     onModifiedChanged: if (modified) action = ""
@@ -95,12 +90,12 @@ Column {
             id: profileChoice
 
             anchors.verticalCenter: parent.verticalCenter
-            width: Math.min(root.profileNames.length * 96,
+            width: Math.min(root.profileChoices.length * 96,
                 parent.width - profileActions.width - 12)
             appearance: root.appearance
             enabled: !root.modified
             opacity: enabled ? 1 : 0.6
-            options: root.profileNames.map(name => ({ label: root.displayName(name), value: name }))
+            options: root.profileChoices
             value: root.appearance.editingBarProfile
             onChosen: profile => {
                 root.action = "";
@@ -173,7 +168,7 @@ Column {
             appearance: root.appearance
             label: "Create"
             labelColor: theme.accent
-            opacity: root.duplicateError === "" ? 1 : 0.5
+            enabled: root.duplicateError === ""
             onActivated: root.confirmDuplicate()
         }
 

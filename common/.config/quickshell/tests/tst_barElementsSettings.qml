@@ -52,7 +52,7 @@ TestCase {
 
     // A fake appearance stands in for the shell's and records what is asked.
     Component {
-        id: page
+        id: sectionArea
 
         Item {
             property alias appearance: appearance
@@ -113,7 +113,7 @@ TestCase {
     }
 
     function make() {
-        const built = createTemporaryObject(page, this);
+        const built = createTemporaryObject(sectionArea, this);
         return { appearance: built.appearance, item: built.section };
     }
 
@@ -163,10 +163,18 @@ TestCase {
         const built = make();
         const workspaces = elementRow(built.item, "Workspaces");
 
-        button(workspaces, "▲").activated();
-        button(workspaces, "▼").activated();
+        button(workspaces, "󰁝").activated();
+        button(workspaces, "󰁅").activated();
 
         compare(built.appearance.calls, [["move", "workspaces", -1], ["move", "workspaces", 1]]);
+    }
+
+    function test_theFirstElementOfAZoneCannotMoveUp() {
+        const built = make();
+        const audio = elementRow(built.item, "Audio");
+
+        verify(!button(audio, "󰁝").enabled);
+        verify(button(audio, "󰁅").enabled);
     }
 
     function test_joinGroupsAnElementWithTheOneAbove() {
@@ -174,10 +182,10 @@ TestCase {
         const battery = elementRow(built.item, "Battery");
         const audio = elementRow(built.item, "Audio");
 
-        verify(!button(audio, "Join"), "the first element of a zone cannot join");
-        compare(button(battery, "Join").labelColor, theme.accent);
+        verify(!button(audio, "󰌷  Join"), "the first element of a zone cannot join");
+        compare(button(battery, "󰌷  Join").labelColor, theme.accent);
 
-        button(battery, "Join").activated();
+        button(battery, "󰌷  Join").activated();
         compare(built.appearance.calls, [["joined", "battery", false]]);
     }
 

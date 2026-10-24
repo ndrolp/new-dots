@@ -6,7 +6,7 @@ import "." as Panels
 Column {
     id: root
 
-    property var appearance
+    required property var appearance
     readonly property var workspaceIds: [
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
         11, 12, 13, 14, 15, 16, 17, 18, 19, 20
@@ -48,17 +48,12 @@ Column {
         Repeater {
             model: root.workspaceIds
 
-            delegate: Column {
+            delegate: Panels.SettingsField {
                 required property int modelData
 
                 width: (parent.width - parent.columnSpacing * (parent.columns - 1)) / parent.columns
-                spacing: 6
-
-                Panels.SettingsLabel {
-                    width: parent.width
-                    appearance: root.appearance
-                    text: "Workspace " + modelData
-                }
+                appearance: root.appearance
+                label: "Workspace " + modelData
 
                 Panels.SettingsInput {
                     width: parent.width
@@ -67,8 +62,8 @@ Column {
                     placeholderText: String(modelData)
                     maximumLength: 4
 
-                    onTextEdited: {
-                        const glyphs = root.appearance.barElementOption("workspaces", "glyphs");
+                    onEdited: text => {
+                        const glyphs = root.appearance.barElementOption("workspaces", "glyphs").slice();
                         glyphs[modelData - 1] = text;
                         root.appearance.setBarElementOption("workspaces", "glyphs", glyphs);
                     }

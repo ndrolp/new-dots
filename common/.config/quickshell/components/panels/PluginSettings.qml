@@ -1,10 +1,12 @@
 import QtQuick
 import "." as Panels
 
+// The Plugins section: each plugin turned on or off with a switch row and
+// what it does underneath, then the plugins' own settings.
 Column {
     id: root
 
-    property var appearance
+    required property var appearance
     property var plugins
 
     width: parent ? parent.width : 0
@@ -89,12 +91,23 @@ Column {
             onEdited: number => root.plugins.launcherRecentLimit = number
         }
 
-        Panels.SettingsSwitchRow {
+        Column {
             width: parent.cellWidth
-            appearance: root.appearance
-            label: "Clipboard image previews"
-            checked: root.plugins.clipboardImagePreviewsEnabled
-            onToggled: root.plugins.clipboardImagePreviewsEnabled = !root.plugins.clipboardImagePreviewsEnabled
+
+            Panels.SettingsSwitchRow {
+                width: parent.width
+                appearance: root.appearance
+                label: "Clipboard image previews"
+                checked: root.plugins.clipboardImagePreviewsEnabled
+                onToggled: root.plugins.clipboardImagePreviewsEnabled = !root.plugins.clipboardImagePreviewsEnabled
+            }
+
+            Panels.SettingsHint {
+                x: 12
+                width: parent.width - 24
+                appearance: root.appearance
+                text: "Decode copied images for preview in clipboard history."
+            }
         }
     }
 }

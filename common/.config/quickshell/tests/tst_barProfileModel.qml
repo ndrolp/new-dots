@@ -9,6 +9,22 @@ TestCase {
         id: fixtures
     }
 
+    // A bar profile is shown by its name with a capital first letter.
+    function test_aProfileIsShownCapitalised() {
+        compare(BarProfileModel.profileDisplayName("presentation"), "Presentation");
+        compare(BarProfileModel.profileDisplayName(""), "");
+    }
+
+    // Choosing a bar profile offers every profile, in name order.
+    function test_profileChoicesAreSortedByName() {
+        compare(BarProfileModel.profileChoices({ minimal: {}, laptop: {}, presentation: {} }), [
+            { label: "Laptop", value: "laptop" },
+            { label: "Minimal", value: "minimal" },
+            { label: "Presentation", value: "presentation" }
+        ]);
+        compare(BarProfileModel.profileChoices(undefined), []);
+    }
+
     function test_editingAProfileShowsItsSavedValues() {
         const state = fixtures.startedBarState();
 

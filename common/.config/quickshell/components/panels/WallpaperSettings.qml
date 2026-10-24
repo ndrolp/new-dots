@@ -1,4 +1,3 @@
-import Quickshell.Hyprland
 import QtQuick
 import "." as Panels
 
@@ -9,10 +8,9 @@ Panels.WallpaperSettingsBody {
 
     property var monitors
 
-    displays: Hyprland.monitors.values
-        .filter(monitor => monitor.description !== "")
-        .map(monitor => ({
-            description: monitor.description,
-            portrait: root.wallpapers.isPortraitMonitor(monitor)
-        }))
+    displays: connectedDisplays.values
+
+    Panels.ConnectedDisplays {
+        id: connectedDisplays
+    }
 }

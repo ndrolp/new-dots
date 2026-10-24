@@ -1,12 +1,13 @@
 import QtQuick
 import "." as Panels
+import "../../config/DesktopWidgetsModel.js" as DesktopWidgetsModel
 
 // The desktop widgets of one monitor: each one turned on or off with a switch
 // row, its placement a segmented choice and its other settings two per line.
 Column {
     id: root
 
-    property var appearance
+    required property var appearance
     property var monitors
     property string monitorName: ""
 
@@ -23,56 +24,54 @@ Column {
         monitors.setDesktopWidgetSetting(monitorName, widget, key, value);
     }
 
-    // Where a desktop widget sits on the monitor, as two segmented choices: the
-    // row (top, center, bottom) and the column (left, center, right). The
-    // stored position joins them, "top-left", "center-right"…, and is just
-    // "center" when both are.
-    component Placement: Row {
+    // Where a desktop widget sits on the monitor, under its label, as two
+    // segmented choices: the row (top, center, bottom) and the column (left,
+    // center, right).
+    component Placement: Panels.SettingsField {
         id: placement
 
         required property string widget
-        readonly property var parts: {
-            const position = root.desktop[widget].position;
-            return position === "center" ? ["center", "center"] : position.split("-");
-        }
+        readonly property var parts: DesktopWidgetsModel.placementOf(root.desktop[widget].position)
         readonly property alias vertical: verticalChoice
         readonly property alias horizontal: horizontalChoice
 
-        spacing: 8
+        appearance: root.appearance
 
         function place(vertical, horizontal) {
-            root.setWidget(widget, "position", vertical === "center" && horizontal === "center"
-                ? "center" : vertical + "-" + horizontal);
+            root.setWidget(widget, "position", DesktopWidgetsModel.positionOf(vertical, horizontal));
         }
 
-        Panels.SettingsChoice {
-            id: verticalChoice
+        Row {
+            width: parent.width
+            spacing: 8
 
-            width: (placement.width - placement.spacing) / 2
-            anchors.verticalCenter: parent.verticalCenter
-            appearance: root.appearance
-            options: [
-                { label: "Top", value: "top" },
-                { label: "Center", value: "center" },
-                { label: "Bottom", value: "bottom" }
-            ]
-            value: placement.parts[0]
-            onChosen: vertical => placement.place(vertical, placement.parts[1])
-        }
+            Panels.SettingsChoice {
+                id: verticalChoice
 
-        Panels.SettingsChoice {
-            id: horizontalChoice
+                width: (parent.width - parent.spacing) / 2
+                appearance: root.appearance
+                options: [
+                    { label: "Top", value: "top" },
+                    { label: "Center", value: "center" },
+                    { label: "Bottom", value: "bottom" }
+                ]
+                value: placement.parts.vertical
+                onChosen: vertical => placement.place(vertical, placement.parts.horizontal)
+            }
 
-            width: (placement.width - placement.spacing) / 2
-            anchors.verticalCenter: parent.verticalCenter
-            appearance: root.appearance
-            options: [
-                { label: "Left", value: "left" },
-                { label: "Center", value: "center" },
-                { label: "Right", value: "right" }
-            ]
-            value: placement.parts[1]
-            onChosen: horizontal => placement.place(placement.parts[0], horizontal)
+            Panels.SettingsChoice {
+                id: horizontalChoice
+
+                width: (parent.width - parent.spacing) / 2
+                appearance: root.appearance
+                options: [
+                    { label: "Left", value: "left" },
+                    { label: "Center", value: "center" },
+                    { label: "Right", value: "right" }
+                ]
+                value: placement.parts.horizontal
+                onChosen: horizontal => placement.place(placement.parts.vertical, horizontal)
+            }
         }
     }
 
@@ -97,7 +96,7 @@ Column {
 
         Placement {
             width: clockGrid.cellWidth
-            height: 40
+            label: "Clock position"
             widget: "backgroundClock"
         }
 
@@ -129,15 +128,10 @@ Column {
                 !root.desktop.backgroundClock.calendarEnabled)
         }
 
-        Column {
+        Panels.SettingsField {
             width: clockGrid.cellWidth
-            spacing: 6
-
-            Panels.SettingsLabel {
-                width: parent.width
-                appearance: root.appearance
-                text: "Date format"
-            }
+            appearance: root.appearance
+            label: "Date format"
 
             Panels.SettingsChoice {
                 width: parent.width
@@ -182,27 +176,22 @@ Column {
 
             Placement {
                 width: widgetGrid.cellWidth
-                height: 40
+                label: widgetGrid.modelData.label + " position"
                 widget: widgetGrid.modelData.widget
             }
 
             // Only the weather widget has a setting of its own.
-            Column {
+            Panels.SettingsField {
                 width: widgetGrid.cellWidth
-                spacing: 6
                 visible: widgetGrid.modelData.widget === "weather"
-
-                Panels.SettingsLabel {
-                    width: parent.width
-                    appearance: root.appearance
-                    text: "Location"
-                }
+                appearance: root.appearance
+                label: "Location"
 
                 Panels.SettingsInput {
                     width: parent.width
                     appearance: root.appearance
                     text: root.desktop.weather.location
-                    onEditingFinished: root.setWidget("weather", "location", text.trim())
+                    onEdited: text => root.setWidget("weather", "location", text.trim())
                 }
             }
         }
@@ -217,7 +206,7 @@ Column {
     Panels.SettingsHint {
         width: root.width
         appearance: root.appearance
-        text: "Sets the top-to-bottom order when desktop widgets share a placement."
+        text: "Sets top-to-bottom order when widgets share a position."
     }
 
     Repeater {
@@ -243,27 +232,16 @@ Column {
                 text: (orderRow.index + 1) + ". " + root.widgetLabels[orderRow.modelData]
             }
 
-            Row {
+            Panels.SettingsMoveButtons {
                 id: moveButtons
 
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-
-                Panels.SettingsButton {
-                    appearance: root.appearance
-                    label: "Up"
-                    enabled: !orderRow.first
-                    opacity: enabled ? 1 : 0.4
-                    onActivated: root.monitors.moveDesktopWidget(root.monitorName, orderRow.modelData, -1)
-                }
-
-                Panels.SettingsButton {
-                    appearance: root.appearance
-                    label: "Down"
-                    enabled: !orderRow.last
-                    opacity: enabled ? 1 : 0.4
-                    onActivated: root.monitors.moveDesktopWidget(root.monitorName, orderRow.modelData, 1)
-                }
+                appearance: root.appearance
+                canMoveUp: !orderRow.first
+                canMoveDown: !orderRow.last
+                onMovedUp: root.monitors.moveDesktopWidget(root.monitorName, orderRow.modelData, -1)
+                onMovedDown: root.monitors.moveDesktopWidget(root.monitorName, orderRow.modelData, 1)
             }
         }
     }

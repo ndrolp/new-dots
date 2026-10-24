@@ -38,11 +38,11 @@ TestCase {
         return all(item, child => child.label === label && child.switchItem !== undefined)[0];
     }
 
-    // The settings panel's page: the monitor's settings size themselves to
-    // it. Fake appearance and monitors stand in for the shell's and record
-    // what is saved.
+    // Where the settings panel shows a section: the monitor's settings size
+    // themselves to it. Fake appearance and monitors stand in for the shell's and
+    // record what is saved.
     Component {
-        id: page
+        id: sectionArea
 
         Item {
             property alias monitors: monitors
@@ -95,7 +95,7 @@ TestCase {
     }
 
     function make() {
-        const built = createTemporaryObject(page, this);
+        const built = createTemporaryObject(sectionArea, this);
         return { monitors: built.monitors, item: built.section };
     }
 
@@ -127,6 +127,33 @@ TestCase {
         keyClick(Qt.Key_Return);
 
         compare(built.monitors.saved, [["Dell U2720Q", "from", 2]]);
+    }
+
+    // The slider shows the usual workspaces, but the range has no upper limit:
+    // a larger number can still be typed.
+    function test_aWorkspacePastTheSliderCanBeTyped() {
+        const built = make();
+        const last = numberCell(built.item, "Last workspace");
+
+        last.field.forceActiveFocus();
+        last.field.selectAll();
+        keyClick("4");
+        keyClick("2");
+        keyClick(Qt.Key_Return);
+
+        compare(built.monitors.saved, [["Dell U2720Q", "to", 42]]);
+    }
+
+    function test_aWorkspaceBelowOneIsRejected() {
+        const built = make();
+        const first = numberCell(built.item, "First workspace");
+
+        first.field.forceActiveFocus();
+        first.field.selectAll();
+        keyClick("0");
+        keyClick(Qt.Key_Return);
+
+        compare(built.monitors.saved, []);
     }
 
     function test_movingTheLastWorkspaceSliderStillSavesIt() {

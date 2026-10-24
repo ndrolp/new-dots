@@ -33,10 +33,10 @@ TestCase {
         return all(item, child => child.label === label && child.switchItem !== undefined)[0];
     }
 
-    // The settings panel's page: the section sizes itself to it. A fake
-    // plugins object stands in for the shell's; the section writes to it.
+    // Where the settings panel shows a section: the section sizes itself to it. A
+    // fake plugins object stands in for the shell's; the section writes to it.
     Component {
-        id: page
+        id: sectionArea
 
         Item {
             property alias plugins: plugins
@@ -76,7 +76,7 @@ TestCase {
     }
 
     function make() {
-        const built = createTemporaryObject(page, this);
+        const built = createTemporaryObject(sectionArea, this);
         return { plugins: built.plugins, item: built.section };
     }
 
@@ -109,6 +109,17 @@ TestCase {
         const a = first.mapToItem(item, 0, 0);
         const b = second.mapToItem(item, 0, 0);
         return a.y === b.y && a.x < b.x;
+    }
+
+    function textShown(item, text) {
+        return all(item, child => child.text === text && child.font !== undefined
+            && !(child instanceof TextInput)).length > 0;
+    }
+
+    function test_clipboardImagePreviewsSayWhatTheyDo() {
+        const built = make();
+
+        verify(textShown(built.item, "Decode copied images for preview in clipboard history."));
     }
 
     function test_thePluginsOwnSettingsSitTwoPerLineAndStillSave() {

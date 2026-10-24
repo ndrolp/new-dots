@@ -58,6 +58,20 @@ TestCase {
     }
 
     Component {
+        id: row
+
+        Panels.SettingsRow {
+            width: 260
+            height: 44
+
+            Panels.SettingsLabel {
+                appearance: barAppearance
+                text: "Bar"
+            }
+        }
+    }
+
+    Component {
         id: switchRow
 
         Panels.SettingsSwitchRow {
@@ -89,6 +103,57 @@ TestCase {
             to: 56
             value: 32
         }
+    }
+
+    Component {
+        id: labelledField
+
+        Panels.SettingsField {
+            width: 280
+            label: "Date format"
+
+            Panels.SettingsChoice {
+                width: parent.width
+                appearance: barAppearance
+                options: [{ label: "Full", value: "full" }, { label: "Short", value: "short" }]
+            }
+        }
+    }
+
+    Component {
+        id: moveButtons
+
+        Panels.SettingsMoveButtons {}
+    }
+
+    SignalSpy {
+        id: movedUpSpy
+
+        signalName: "movedUp"
+    }
+
+    SignalSpy {
+        id: movedDownSpy
+
+        signalName: "movedDown"
+    }
+
+    Component {
+        id: monitorChoice
+
+        Panels.SettingsMonitorChoice {
+            width: 400
+            displays: [
+                { description: "Dell Inc. DELL U2720Q 1234", name: "DELL U2720Q", portrait: false },
+                { description: "Philips Consumer Electronics 243V 5678", name: "243V", portrait: true }
+            ]
+        }
+    }
+
+    SignalSpy {
+        id: chosenSpy
+
+        signalName: "chosen"
     }
 
     Component {
@@ -185,6 +250,26 @@ TestCase {
         verify(!item.font.bold);
     }
 
+    // A list row is full width and transparent until hovered, with the
+    // settings' corner radius; what it shows is up to its owner.
+    function test_aRowIsTransparentAtRestAndShowsItsContent() {
+        const item = make(row);
+
+        compare(item.color, Qt.rgba(0, 0, 0, 0));
+        compare(item.radius, 12);
+        verify(!item.hovered);
+        verify(textOf(item, "Bar"));
+    }
+
+    // A switch row is a row like any other: its label on the left and a
+    // switch on the right.
+    function test_aSwitchRowIsARow() {
+        const item = make(switchRow);
+
+        compare(item.radius, 12);
+        verify(item.hovered !== undefined);
+    }
+
     // A switch row is transparent until hovered, its label on the left and a
     // hairline pill switch on the right.
     function test_aSwitchRowAtRestIsTransparentWithItsLabelAndAnOutlinedSwitch() {
@@ -272,6 +357,54 @@ TestCase {
         compare(editedSpy.signalArguments[0][0], 40);
     }
 
+    // Return finishes the edit and so does leaving the field after it: the
+    // number is still saved only once.
+    function test_typingANumberThenLeavingTheFieldSavesItOnce() {
+        const item = make(number);
+        editedSpy.target = item;
+        editedSpy.clear();
+
+        item.field.forceActiveFocus();
+        item.field.selectAll();
+        keyClick("4");
+        keyClick("0");
+        keyClick(Qt.Key_Return);
+        item.field.focus = false;
+
+        compare(editedSpy.count, 1);
+    }
+
+    function test_leavingANumberFieldUnchangedSavesNothing() {
+        const item = make(number);
+        editedSpy.target = item;
+        editedSpy.clear();
+
+        item.field.forceActiveFocus();
+        keyClick(Qt.Key_Return);
+        item.field.focus = false;
+
+        compare(editedSpy.count, 0);
+    }
+
+    // A field asks to save its text when the edit is finished, once per
+    // change, however the edit is finished.
+    function test_aFieldAsksToSaveItsTextOncePerChange() {
+        const item = make(input, { text: "GitHub" });
+        editedSpy.target = item;
+        editedSpy.clear();
+
+        item.forceActiveFocus();
+        item.selectAll();
+        keyClick("G");
+        keyClick("o");
+        compare(editedSpy.count, 0);
+        keyClick(Qt.Key_Return);
+        item.focus = false;
+
+        compare(editedSpy.count, 1);
+        compare(editedSpy.signalArguments[0][0], "Go");
+    }
+
     function test_aNumberOutOfRangeIsRejected() {
         const item = make(number);
         editedSpy.target = item;
@@ -308,6 +441,87 @@ TestCase {
         compare(item.slider.value, 48);
     }
 
+    // A setting whose control has no name of its own has its label on top,
+    // the control right under it, full width.
+    function test_aLabelledSettingHasItsLabelOverItsControl() {
+        const item = make(labelledField);
+        const fieldLabel = textOf(item, "Date format");
+        const control = item.children.filter(child => child.options !== undefined)[0];
+
+        compare(fieldLabel.color, theme.text);
+        compare(fieldLabel.font.pixelSize, 13);
+        compare(control.width, 280);
+        compare(control.y, fieldLabel.height + 6);
+    }
+
+    // Moving something up or down a list is a pair of quiet arrow buttons;
+    // an end of the list disables the arrow past it.
+    function test_moveButtonsAreAPairOfQuietArrows() {
+        const item = make(moveButtons);
+        const up = item.children.filter(child => child.label === "󰁝")[0];
+        const down = item.children.filter(child => child.label === "󰁅")[0];
+        movedUpSpy.target = item;
+        movedDownSpy.target = item;
+        movedUpSpy.clear();
+        movedDownSpy.clear();
+
+        compare(up.color, Qt.rgba(0, 0, 0, 0));
+        compare(up.width, 32);
+        verify(up.x < down.x);
+        up.activated();
+        down.activated();
+        compare(movedUpSpy.count, 1);
+        compare(movedDownSpy.count, 1);
+    }
+
+    function test_theEndsOfAListDisableTheArrowPastThem() {
+        const item = make(moveButtons, { canMoveUp: false });
+        const up = item.children.filter(child => child.label === "󰁝")[0];
+        const down = item.children.filter(child => child.label === "󰁅")[0];
+
+        verify(!up.enabled);
+        verify(down.enabled);
+        item.canMoveDown = false;
+        verify(!down.enabled);
+    }
+
+    // A connected monitor is chosen by its short name, with an icon for how
+    // it stands, so the options don't elide; settings are stored under its
+    // description.
+    function test_aMonitorChoiceNamesEachMonitorShortly() {
+        const item = make(monitorChoice, { value: "Philips Consumer Electronics 243V 5678" });
+
+        compare(item.options, [
+            { label: "󰍺 DELL U2720Q", value: "Dell Inc. DELL U2720Q 1234" },
+            { label: "󰍹 243V", value: "Philips Consumer Electronics 243V 5678" }
+        ]);
+        compare(textOf(item, "󰍹 243V").color, theme.accent);
+    }
+
+    // A monitor that isn't connected (or none chosen yet) gives way to the
+    // first connected one.
+    function test_aMonitorChoiceAsksForTheFirstMonitorWhenTheChosenOneIsGone() {
+        const item = make(monitorChoice, { value: "Philips Consumer Electronics 243V 5678" });
+        chosenSpy.target = item;
+        chosenSpy.clear();
+
+        item.displays = item.displays.slice(0, 1);
+
+        compare(chosenSpy.count, 1);
+        compare(chosenSpy.signalArguments[0][0], "Dell Inc. DELL U2720Q 1234");
+    }
+
+    // A small label suits fields packed into a list row: muted and a little
+    // smaller, like a hint.
+    function test_aSmallLabelIsMutedAndSlightlySmaller() {
+        const item = make(labelledField, { small: true });
+        const fieldLabel = textOf(item, "Date format");
+
+        compare(fieldLabel.color, theme.textMuted);
+        compare(fieldLabel.font.pixelSize, 12);
+        verify(!fieldLabel.font.bold);
+    }
+
     // Short controls sit two per line, in columns of equal width with a gap
     // between them; an odd one out starts the next line.
     function test_aGridPlacesShortControlsTwoPerLine() {
@@ -334,5 +548,20 @@ TestCase {
         compare(buttonLabel.font.pixelSize, 13);
         verify(!buttonLabel.font.bold);
         verify(item.width >= buttonLabel.implicitWidth + 24);
+    }
+
+    // A button that can't be pressed now is dimmed, the same for every
+    // button, and can't be pressed.
+    function test_aDisabledButtonIsDimmedAndCannotBeTapped() {
+        const item = make(button);
+        const tap = item.data.filter(child => child instanceof TapHandler)[0];
+
+        compare(item.opacity, 1);
+        verify(tap.enabled);
+
+        item.enabled = false;
+
+        compare(item.opacity, 0.4);
+        verify(!tap.enabled);
     }
 }

@@ -134,7 +134,6 @@ Rectangle {
                 text: "Settings"
                 color: theme.text
                 font.pixelSize: 20
-                font.bold: true
             }
 
             Item {
@@ -183,7 +182,8 @@ Rectangle {
                 Repeater {
                     model: root.filteredSections
 
-                    delegate: Rectangle {
+                    // The selected section shows in the accent text; only hover fills a row.
+                    delegate: SettingsRow {
                         id: sectionRow
 
                         required property var modelData
@@ -191,17 +191,7 @@ Rectangle {
 
                         width: parent.width
                         height: 44
-                        radius: root.appearance.radius
-                        // The selected section shows in the accent text; only hover fills a row.
-                        color: sectionHover.hovered ? theme.surfaceHover : "transparent"
-
-                        Behavior on color {
-                            ColorAnimation { duration: 140 }
-                        }
-
-                        HoverHandler {
-                            id: sectionHover
-                        }
+                        appearance: root.appearance
 
                         Row {
                             anchors.fill: parent
@@ -229,13 +219,11 @@ Rectangle {
                     }
                 }
 
-                Text {
+                SettingsHint {
                     width: parent.width
                     visible: root.filteredSections.length === 0
+                    appearance: root.appearance
                     text: "No settings match this search."
-                    color: theme.textMuted
-                    wrapMode: Text.WordWrap
-                    font.pixelSize: root.appearance.textSize - 1
                 }
             }
 
@@ -291,7 +279,7 @@ Rectangle {
                     }
 
                     ScrollView {
-                        id: pageScroll
+                        id: sectionScroll
 
                         width: parent.width
                         height: parent.height - 56
@@ -311,7 +299,7 @@ Rectangle {
                         Loader {
                             id: sectionLoader
 
-                            width: pageScroll.availableWidth - 12
+                            width: sectionScroll.availableWidth - 12
                             height: item ? item.implicitHeight : 0
                         }
                     }

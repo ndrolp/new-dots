@@ -27,8 +27,15 @@ TestCase {
         return found;
     }
 
+    // A bookmark's link is its URL; a search engine's is its search URL.
     function rows(item, kind) {
-        return all(item, child => child.rowKind === kind);
+        const linkKey = kind === "bookmark" ? "url" : "searchUrl";
+        return all(item, child => child.linkKey === linkKey && child.hovered !== undefined);
+    }
+
+    function textShown(item, text) {
+        return all(item, child => child.text === text && child.font !== undefined
+            && !(child instanceof TextInput)).length > 0;
     }
 
     function field(row, name) {
@@ -39,10 +46,10 @@ TestCase {
         return all(item, child => child.label === label && child.activated !== undefined)[0];
     }
 
-    // The settings panel's page: the section sizes itself to it. A fake
-    // bookmarks store stands in for the shell's and records what is asked.
+    // Where the settings panel shows a section: the section sizes itself to it. A
+    // fake bookmarks store stands in for the shell's and records what is asked.
     Component {
-        id: page
+        id: sectionArea
 
         Item {
             property alias bookmarks: bookmarks
@@ -95,7 +102,7 @@ TestCase {
     }
 
     function make() {
-        const built = createTemporaryObject(page, this);
+        const built = createTemporaryObject(sectionArea, this);
         return { bookmarks: built.bookmarks, item: built.section };
     }
 
@@ -108,12 +115,6 @@ TestCase {
     function press(item) {
         verify(item.enabled, item.label);
         item.activated();
-    }
-
-    // Leaving a field also finishes its edit, so the same save can be asked
-    // twice in a row; that is harmless and not what these tests are about.
-    function distinct(calls) {
-        return calls.filter((call, i) => i === 0 || JSON.stringify(call) !== JSON.stringify(calls[i - 1]));
     }
 
     function typeInto(input, text) {
@@ -148,6 +149,24 @@ TestCase {
         compare(glyph.background.border.color, theme.border);
     }
 
+    // Each field is named by a small label over it; the glyph field shows an
+    // example glyph while empty.
+    function test_aBookmarksFieldsAreLabelled() {
+        const built = make();
+        const row = rows(built.item, "bookmark")[0];
+
+        verify(textShown(row, "Glyph"));
+        verify(textShown(row, "Label"));
+        verify(textShown(row, "URL"));
+        verify(field(row, "glyph").placeholderText !== "");
+    }
+
+    function test_aSearchEnginesLinkIsLabelledAsItsSearchUrl() {
+        const built = make();
+
+        verify(textShown(rows(built.item, "searchEngine")[0], "Search URL"));
+    }
+
     function test_editingABookmarkStillSavesIt() {
         const built = make();
         const row = rows(built.item, "bookmark")[1];
@@ -155,7 +174,7 @@ TestCase {
         typeInto(field(row, "label"), "Inbox");
         typeInto(field(row, "url"), "https://x.io");
 
-        compare(distinct(built.bookmarks.calls), [
+        compare(built.bookmarks.calls, [
             ["update", 1, "label", "Inbox"],
             ["update", 1, "url", "https://x.io"]
         ]);
@@ -168,7 +187,7 @@ TestCase {
         press(button(built.item, "󰐕  Add bookmark"));
         press(button(first, "󰁅"));
         press(button(second, "󰁝"));
-        press(button(second, "Remove"));
+        press(button(second, "Delete"));
 
         compare(built.bookmarks.calls, [["add"], ["move", 0, 1], ["move", 1, 0], ["remove", 1]]);
     }
@@ -190,19 +209,19 @@ TestCase {
         typeInto(field(row, "searchUrl"), "q=%s");
         press(button(built.item, "󰐕  Add search engine"));
 
-        compare(distinct(built.bookmarks.calls), [["updateSearchEngine", 0, "searchUrl", "q=%s"], ["addSearchEngine"]]);
+        compare(built.bookmarks.calls, [["updateSearchEngine", 0, "searchUrl", "q=%s"], ["addSearchEngine"]]);
     }
 
     function test_theLastSearchEngineCannotBeRemoved() {
         const built = make();
         const row = rows(built.item, "searchEngine")[0];
 
-        verify(!button(row, "Remove").enabled);
+        verify(!button(row, "Delete").enabled);
 
         built.bookmarks.searchEngines = built.bookmarks.searchEngines.concat([
             { label: "Wiki", glyph: "W", searchUrl: "https://wiki.example.com/?q=%s" }
         ]);
-        press(button(rows(built.item, "searchEngine")[1], "Remove"));
+        press(button(rows(built.item, "searchEngine")[1], "Delete"));
         compare(built.bookmarks.calls, [["removeSearchEngine", 1]]);
     }
 

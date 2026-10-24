@@ -3,12 +3,12 @@ import "../../config" as Config
 import "." as Panels
 
 // The Wallpapers section without Hyprland: `displays` are the connected
-// monitors, each { description, portrait }, so it can be built and tested
-// outside of the shell. The wallpaper lists are the `wallpapers` folders.
+// monitors, each { description, name, portrait }, so it can be built and
+// tested outside of the shell. The wallpaper lists are the `wallpapers` folders.
 Column {
     id: root
 
-    property var appearance
+    required property var appearance
     property var wallpapers
     property var displays: []
     property string wallpaperView: "Selection"
@@ -26,14 +26,6 @@ Column {
         const display = displays.find(display => display.description === monitorDescription);
         return display !== undefined && display.portrait;
     }
-
-    function ensureWallpaperMonitor() {
-        if (!displays.some(display => display.description === selectedWallpaperMonitor))
-            selectedWallpaperMonitor = displays.length > 0 ? displays[0].description : "";
-    }
-
-    Component.onCompleted: ensureWallpaperMonitor()
-    onDisplaysChanged: ensureWallpaperMonitor()
 
     Panels.SettingsChoice {
         width: Math.min(parent.width, 360)
@@ -60,7 +52,7 @@ Column {
             appearance: root.appearance
             text: root.wallpapers.horizontalFolder
             placeholderText: "Horizontal wallpaper folder"
-            onTextEdited: root.wallpapers.horizontalFolder = text
+            onEdited: text => root.wallpapers.horizontalFolder = text
         }
 
         SettingsInput {
@@ -68,7 +60,7 @@ Column {
             appearance: root.appearance
             text: root.wallpapers.verticalFolder
             placeholderText: "Vertical wallpaper folder"
-            onTextEdited: root.wallpapers.verticalFolder = text
+            onEdited: text => root.wallpapers.verticalFolder = text
         }
     }
 
@@ -94,7 +86,7 @@ Column {
         Panels.SettingsSwitchRow {
             width: parent.width
             appearance: root.appearance
-            label: "Scheduled rotation"
+            label: "Enable scheduled rotation"
             checked: root.wallpapers.dynamicEnabled
             onToggled: root.wallpapers.dynamicEnabled = !root.wallpapers.dynamicEnabled
         }
@@ -121,13 +113,10 @@ Column {
         spacing: 10
         visible: root.wallpaperView === "Selection"
 
-        Panels.SettingsChoice {
+        Panels.SettingsMonitorChoice {
             width: parent.width
             appearance: root.appearance
-            options: root.displays.map(display => ({
-                label: (display.portrait ? "󰍹 " : "󰍺 ") + display.description,
-                value: display.description
-            }))
+            displays: root.displays
             value: root.selectedWallpaperMonitor
             onChosen: description => root.selectedWallpaperMonitor = description
         }
@@ -143,7 +132,7 @@ Column {
         Panels.SettingsHint {
             width: parent.width
             appearance: root.appearance
-            text: "No monitors connected"
+            text: "No monitors configured"
             visible: root.selectedWallpaperMonitor === ""
         }
 

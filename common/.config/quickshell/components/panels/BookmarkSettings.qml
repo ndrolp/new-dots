@@ -2,10 +2,12 @@ import QtQuick
 import "../../config" as Config
 import "." as Panels
 
+// The Quick Search section: the bookmarks and the search engines of the
+// quick-search panel, each a list of settings rows with Add below it.
 Column {
     id: root
 
-    property var appearance
+    required property var appearance
     property var bookmarks
 
     width: parent ? parent.width : 0
@@ -15,17 +17,17 @@ Column {
         id: theme
     }
 
-    // A bookmark or search engine: a full-width row, transparent until
-    // hovered. Its glyph and name share the first line with the row's
-    // actions; the link, which runs long, has the second line to itself.
-    component LinkRow: Rectangle {
+    // A bookmark or search engine: a settings row. Its glyph and name share
+    // the first line with the row's actions; the link, which runs long, has
+    // the second line to itself. Each field has a small label over it.
+    component LinkRow: Panels.SettingsRow {
         id: row
 
-        required property string rowKind
         required property string glyph
         required property string name
         required property string link
         required property string linkKey
+        required property string linkLabel
         property string linkPlaceholder: ""
         property bool canMoveUp: true
         property bool canMoveDown: true
@@ -37,16 +39,7 @@ Column {
 
         width: parent ? parent.width : 0
         height: rowContent.implicitHeight + 16
-        radius: root.appearance.radius
-        color: rowHover.hovered ? theme.surfaceHover : "transparent"
-
-        Behavior on color {
-            ColorAnimation { duration: 140 }
-        }
-
-        HoverHandler {
-            id: rowHover
-        }
+        appearance: root.appearance
 
         Column {
             id: rowContent
@@ -60,65 +53,81 @@ Column {
                 width: parent.width
                 spacing: 8
 
-                Panels.SettingsInput {
-                    readonly property string fieldName: "glyph"
-
+                Panels.SettingsField {
                     width: 56
                     appearance: root.appearance
-                    text: row.glyph
-                    maximumLength: 4
-                    horizontalAlignment: TextInput.AlignHCenter
-                    onEditingFinished: row.edited(fieldName, text)
+                    label: "Glyph"
+                    small: true
+
+                    Panels.SettingsInput {
+                        readonly property string fieldName: "glyph"
+
+                        width: parent.width
+                        appearance: root.appearance
+                        text: row.glyph
+                        placeholderText: "󰖟"
+                        maximumLength: 4
+                        horizontalAlignment: TextInput.AlignHCenter
+                        onEdited: text => row.edited(fieldName, text)
+                    }
                 }
 
-                Panels.SettingsInput {
-                    readonly property string fieldName: "label"
-
+                Panels.SettingsField {
                     width: parent.width - 56 - actions.width - parent.spacing * 2
                     appearance: root.appearance
-                    text: row.name
-                    placeholderText: "Name"
-                    onEditingFinished: row.edited(fieldName, text)
+                    label: "Label"
+                    small: true
+
+                    Panels.SettingsInput {
+                        readonly property string fieldName: "label"
+
+                        width: parent.width
+                        appearance: root.appearance
+                        text: row.name
+                        placeholderText: "Name"
+                        onEdited: text => row.edited(fieldName, text)
+                    }
                 }
 
                 Row {
                     id: actions
 
-                    Panels.SettingsButton {
+                    anchors.bottom: parent.bottom
+
+                    Panels.SettingsMoveButtons {
+                        anchors.verticalCenter: parent.verticalCenter
                         appearance: root.appearance
-                        label: "󰁝"
-                        enabled: row.canMoveUp
-                        opacity: enabled ? 1 : 0.35
-                        onActivated: row.movedUp()
+                        canMoveUp: row.canMoveUp
+                        canMoveDown: row.canMoveDown
+                        onMovedUp: row.movedUp()
+                        onMovedDown: row.movedDown()
                     }
 
                     Panels.SettingsButton {
                         appearance: root.appearance
-                        label: "󰁅"
-                        enabled: row.canMoveDown
-                        opacity: enabled ? 1 : 0.35
-                        onActivated: row.movedDown()
-                    }
-
-                    Panels.SettingsButton {
-                        appearance: root.appearance
-                        label: "Remove"
+                        label: "Delete"
                         labelColor: theme.red
                         enabled: row.canRemove
-                        opacity: enabled ? 1 : 0.35
                         onActivated: row.removed()
                     }
                 }
             }
 
-            Panels.SettingsInput {
-                readonly property string fieldName: row.linkKey
-
+            Panels.SettingsField {
                 width: parent.width
                 appearance: root.appearance
-                text: row.link
-                placeholderText: row.linkPlaceholder
-                onEditingFinished: row.edited(fieldName, text)
+                label: row.linkLabel
+                small: true
+
+                Panels.SettingsInput {
+                    readonly property string fieldName: row.linkKey
+
+                    width: parent.width
+                    appearance: root.appearance
+                    text: row.link
+                    placeholderText: row.linkPlaceholder
+                    onEdited: text => row.edited(fieldName, text)
+                }
             }
         }
     }
@@ -133,7 +142,7 @@ Column {
     Panels.SettingsHint {
         width: parent.width
         appearance: root.appearance
-        text: "The links shown in the Alt+G quick-search panel."
+        text: "Configure the links shown in the Alt+G quick-search panel."
     }
 
     Column {
@@ -147,11 +156,11 @@ Column {
                 required property var modelData
                 required property int index
 
-                rowKind: "bookmark"
                 glyph: modelData.glyph
                 name: modelData.label
                 link: modelData.url
                 linkKey: "url"
+                linkLabel: "URL"
                 linkPlaceholder: "https://example.com"
                 canMoveUp: index > 0
                 canMoveDown: index < root.bookmarks.items.length - 1
@@ -180,7 +189,7 @@ Column {
     Panels.SettingsHint {
         width: parent.width
         appearance: root.appearance
-        text: "The fallback engines in quick search. Use %s where the query belongs."
+        text: "Choose the fallback engine in quick search. Use %s where the query belongs."
     }
 
     Column {
@@ -194,11 +203,11 @@ Column {
                 required property var modelData
                 required property int index
 
-                rowKind: "searchEngine"
                 glyph: modelData.glyph
                 name: modelData.label
                 link: modelData.searchUrl
                 linkKey: "searchUrl"
+                linkLabel: "Search URL"
                 linkPlaceholder: "https://example.com/search?q=%s"
                 canMoveUp: index > 0
                 canMoveDown: index < root.bookmarks.searchEngines.length - 1

@@ -47,11 +47,11 @@ TestCase {
         return all(item, child => child.wallpaperPath !== undefined);
     }
 
-    // The settings panel's page: the section sizes itself to it. Fake
-    // wallpapers stand in for the shell's and record what is applied; the
+    // Where the settings panel shows a section: the section sizes itself to it.
+    // Fake wallpapers stand in for the shell's and record what is applied; the
     // folders are plain lists of file names.
     Component {
-        id: page
+        id: sectionArea
 
         Item {
             property alias wallpapers: wallpapers
@@ -107,15 +107,15 @@ TestCase {
                 }
                 wallpapers: wallpapers
                 displays: [
-                    { description: "AOC", portrait: false },
-                    { description: "Philips", portrait: true }
+                    { description: "AOC", name: "Q27G2", portrait: false },
+                    { description: "Philips", name: "243V", portrait: true }
                 ]
             }
         }
     }
 
     function make() {
-        const built = createTemporaryObject(page, this);
+        const built = createTemporaryObject(sectionArea, this);
         return { wallpapers: built.wallpapers, item: built.section };
     }
 
@@ -126,8 +126,8 @@ TestCase {
         verify(choice);
         compare(choice.options.map(option => option.value), ["AOC", "Philips"]);
         compare(choice.value, "AOC");
-        compare(textOf(choice, "󰍺 AOC").color, theme.accent);
-        verify(textOf(choice, "󰍹 Philips"));
+        compare(textOf(choice, "󰍺 Q27G2").color, theme.accent);
+        verify(textOf(choice, "󰍹 243V"));
     }
 
     function test_choosingAMonitorShowsTheWallpapersOfItsOrientation() {
@@ -158,10 +158,33 @@ TestCase {
         verify(textOf(built.item, "Wallpaper folders").visible);
     }
 
+    // A folder is saved when its edit is finished, not on every key.
+    function test_typingAFolderSavesItWhenFinished() {
+        const built = make();
+        viewChoice(built.item).chosen("Locations");
+        const folder = all(built.item, child => child instanceof TextInput
+            && child.placeholderText === "Horizontal wallpaper folder")[0];
+
+        folder.forceActiveFocus();
+        folder.selectAll();
+        keyClick("x");
+        compare(built.wallpapers.horizontalFolder, "/walls/h");
+        keyClick(Qt.Key_Return);
+
+        compare(built.wallpapers.horizontalFolder, "x");
+    }
+
+    function test_withoutMonitorsTheSelectionSaysNoneAreConfigured() {
+        const built = make();
+        built.item.displays = [];
+
+        verify(textOf(built.item, "No monitors configured").visible);
+    }
+
     function test_theScheduleIsASwitchRowANumberAndAQuietButton() {
         const built = make();
         viewChoice(built.item).chosen("Schedule");
-        const rotation = all(built.item, child => child.label === "Scheduled rotation"
+        const rotation = all(built.item, child => child.label === "Enable scheduled rotation"
             && child.switchItem !== undefined)[0];
         const interval = all(built.item, child => child.label === "Interval (minutes)"
             && child.field !== undefined)[0];
