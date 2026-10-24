@@ -8,8 +8,9 @@ outline of an attached popup (`PopupOutline.js`), the surface every popup
 draws on (`PopupSurface.qml`), the shared popup parts (`PopupTitle`,
 `PopupHeader`, `PopupRow`…), the settings panel's own parts (`SettingsNumber`,
 `SettingsSwitchRow`, `SettingsChoice`, `SettingsGrid`…) and the Bar section's
-size and style settings built from them, as well as the Notifications
-section and the Session section's actions (`SessionActions.qml`), the Bluetooth device list and turning Bluetooth
+size and style settings, the Quick Search section, the Notifications section
+and the Session section's actions (`SessionActions.qml`) built from them, the
+Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
 (`AudioOutputs.js`), how the volume is shown as text
 (`components/VolumeText.js`) and what the audio bar element shows and how
