@@ -10,8 +10,9 @@ draws on (`PopupSurface.qml`), the shared popup parts (`PopupTitle`,
 `SettingsSwitchRow`, `SettingsChoice`, `SettingsGrid`…) and the Bar section's
 size and style settings built from them, the Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
-(`AudioOutputs.js`) and how the volume is shown as text
-(`components/VolumeText.js`). They run with QtTest outside of `qs`:
+(`AudioOutputs.js`), how the volume is shown as text
+(`components/VolumeText.js`) and what the audio bar element shows and how
+wide it is (`components/bar/AudioLevel.qml`). They run with QtTest outside of `qs`:
 
 ```sh
 common/.config/quickshell/tests/run.sh
