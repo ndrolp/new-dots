@@ -383,4 +383,19 @@ TestCase {
         verify(!buttonLabel.font.bold);
         verify(item.width >= buttonLabel.implicitWidth + 24);
     }
+
+    // A button that can't be pressed now is dimmed, the same for every
+    // button, and can't be pressed.
+    function test_aDisabledButtonIsDimmedAndCannotBeTapped() {
+        const item = make(button);
+        const tap = item.data.filter(child => child instanceof TapHandler)[0];
+
+        compare(item.opacity, 1);
+        verify(tap.enabled);
+
+        item.enabled = false;
+
+        compare(item.opacity, 0.4);
+        verify(!tap.enabled);
+    }
 }

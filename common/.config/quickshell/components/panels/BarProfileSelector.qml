@@ -173,7 +173,7 @@ Column {
             appearance: root.appearance
             label: "Create"
             labelColor: theme.accent
-            opacity: root.duplicateError === "" ? 1 : 0.5
+            enabled: root.duplicateError === ""
             onActivated: root.confirmDuplicate()
         }
 

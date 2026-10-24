@@ -88,7 +88,6 @@ Column {
                         appearance: root.appearance
                         label: "󰁝"
                         enabled: row.canMoveUp
-                        opacity: enabled ? 1 : 0.35
                         onActivated: row.movedUp()
                     }
 
@@ -96,7 +95,6 @@ Column {
                         appearance: root.appearance
                         label: "󰁅"
                         enabled: row.canMoveDown
-                        opacity: enabled ? 1 : 0.35
                         onActivated: row.movedDown()
                     }
 
@@ -105,7 +103,6 @@ Column {
                         label: "Remove"
                         labelColor: theme.red
                         enabled: row.canRemove
-                        opacity: enabled ? 1 : 0.35
                         onActivated: row.removed()
                     }
                 }

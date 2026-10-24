@@ -253,7 +253,6 @@ Column {
                     appearance: root.appearance
                     label: "Up"
                     enabled: !orderRow.first
-                    opacity: enabled ? 1 : 0.4
                     onActivated: root.monitors.moveDesktopWidget(root.monitorName, orderRow.modelData, -1)
                 }
 
@@ -261,7 +260,6 @@ Column {
                     appearance: root.appearance
                     label: "Down"
                     enabled: !orderRow.last
-                    opacity: enabled ? 1 : 0.4
                     onActivated: root.monitors.moveDesktopWidget(root.monitorName, orderRow.modelData, 1)
                 }
             }
