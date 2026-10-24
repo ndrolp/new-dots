@@ -171,198 +171,6 @@ Item {
         onDismissed: root.popupClosed(popup)
     }
 
-    // The only bold text in a popup.
-    component PopupTitle: Text {
-        color: theme.text
-        elide: Text.ElideRight
-        font.pixelSize: root.appearance.textSize + 1
-        font.bold: true
-    }
-
-    // Secondary text: regular weight, muted.
-    component PopupLabel: Text {
-        color: theme.textMuted
-        elide: Text.ElideRight
-        font.pixelSize: root.appearance.textSize - 2
-    }
-
-    // A popup's title with its icon, a muted subtitle, and room on the right,
-    // e.g. for a switch.
-    component PopupHeader: Item {
-        id: header
-
-        property string icon: ""
-        property color iconColor: theme.textMuted
-        property string title: ""
-        property string subtitle: ""
-        default property alias trailing: trailingSlot.data
-
-        width: parent ? parent.width : 0
-        implicitHeight: Math.max(headerText.implicitHeight, trailingSlot.height)
-
-        Text {
-            id: headerIcon
-
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            visible: header.icon !== ""
-            text: header.icon
-            color: header.iconColor
-            font.pixelSize: root.appearance.textSize + 5
-
-            Behavior on color {
-                ColorAnimation { duration: 140 }
-            }
-        }
-
-        Column {
-            id: headerText
-
-            anchors.left: headerIcon.visible ? headerIcon.right : parent.left
-            anchors.leftMargin: headerIcon.visible ? 10 : 0
-            anchors.right: trailingSlot.left
-            anchors.rightMargin: trailingSlot.width > 0 ? 8 : 0
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 1
-
-            PopupTitle {
-                width: parent.width
-                text: header.title
-            }
-
-            PopupLabel {
-                width: parent.width
-                visible: header.subtitle !== ""
-                text: header.subtitle
-            }
-        }
-
-        Item {
-            id: trailingSlot
-
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            width: childrenRect.width
-            height: childrenRect.height
-        }
-    }
-
-    // A row that stays transparent until hovered. A selected row shows it with
-    // the accent color in its contents, not with a fill.
-    component PopupRow: Rectangle {
-        readonly property alias hovered: rowHover.hovered
-        property bool interactive: true
-
-        radius: root.appearance.radius
-        color: interactive && hovered ? theme.surfaceHover : "transparent"
-
-        Behavior on color {
-            ColorAnimation { duration: 140 }
-        }
-
-        HoverHandler {
-            id: rowHover
-
-            enabled: parent.interactive
-        }
-    }
-
-    // A text button: a row with a centered label.
-    component PopupButton: PopupRow {
-        id: button
-
-        property string label: ""
-        property color labelColor: theme.text
-        property real labelSize: root.appearance.textSize - 1
-        signal activated()
-
-        height: 30
-
-        Text {
-            anchors.centerIn: parent
-            text: button.label
-            color: button.labelColor
-            font.pixelSize: button.labelSize
-        }
-
-        TapHandler {
-            enabled: button.interactive
-            onTapped: button.activated()
-        }
-    }
-
-    component PopupSwitch: Rectangle {
-        id: popupSwitch
-
-        property bool checked: false
-        signal toggled()
-
-        width: 36
-        height: 20
-        radius: height / 2
-        color: checked ? theme.accent : "transparent"
-        border.color: checked ? theme.accent : theme.border
-        border.width: 1
-
-        Behavior on color {
-            ColorAnimation { duration: 140 }
-        }
-
-        Rectangle {
-            x: popupSwitch.checked ? parent.width - width - 3 : 3
-            anchors.verticalCenter: parent.verticalCenter
-            width: 14
-            height: 14
-            radius: 7
-            color: popupSwitch.checked ? theme.background : theme.textMuted
-
-            Behavior on x {
-                NumberAnimation {
-                    duration: 140
-                    easing.type: Easing.OutCubic
-                }
-            }
-        }
-
-        TapHandler {
-            onTapped: popupSwitch.toggled()
-        }
-    }
-
-    component PopupTextField: TextField {
-        id: field
-
-        color: theme.text
-        placeholderTextColor: theme.textDisabled
-        font.family: theme.fontFamily
-        font.pixelSize: root.appearance.textSize - 1
-        selectByMouse: true
-
-        background: Rectangle {
-            radius: root.appearance.radius
-            color: "transparent"
-            border.color: field.activeFocus ? theme.accent : theme.border
-            border.width: 1
-        }
-    }
-
-    // A thin bar filled up to a fraction between 0 and 1.
-    component PopupProgress: Rectangle {
-        property real fraction: 0
-        property color fillColor: theme.accent
-
-        height: 4
-        radius: 2
-        color: theme.backgroundSecondary
-
-        Rectangle {
-            width: parent.width * Math.max(0, Math.min(1, parent.fraction))
-            height: parent.height
-            radius: parent.radius
-            color: parent.fillColor
-        }
-    }
-
     StatusPopup {
         id: systemPopup
 
@@ -375,9 +183,11 @@ Item {
             spacing: 6
 
             PopupHeader {
+                appearance: root.appearance
                 title: "System resources"
 
                 PopupLabel {
+                    appearance: root.appearance
                     text: "Load " + root.systemMonitor.loadAverage
                 }
             }
@@ -454,6 +264,7 @@ Item {
             spacing: 8
 
             PopupHeader {
+                appearance: root.appearance
                 title: "Pomodoro"
             }
 
@@ -466,6 +277,7 @@ Item {
             }
 
             PopupLabel {
+                appearance: root.appearance
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
                 text: root.pomodoro.running ? "Focus session in progress"
@@ -482,6 +294,7 @@ Item {
                     delegate: PopupButton {
                         required property int modelData
 
+                        appearance: root.appearance
                         width: (parent.width - parent.spacing * 3) / 4
                         label: modelData === 60 ? "1h" : modelData + "m"
                         labelColor: root.pomodoro.durationSeconds === modelData * 60
@@ -496,18 +309,21 @@ Item {
                 spacing: 4
 
                 PopupButton {
+                    appearance: root.appearance
                     width: 48
                     label: "−10m"
                     onActivated: root.pomodoro.adjustMinutes(-10)
                 }
 
                 PopupButton {
+                    appearance: root.appearance
                     width: 36
                     label: "−1"
                     onActivated: root.pomodoro.adjustMinutes(-1)
                 }
 
                 PopupButton {
+                    appearance: root.appearance
                     width: parent.width - 168 - parent.spacing * 4
                     label: root.pomodoro.running ? "Stop" : root.pomodoro.started ? "Resume" : "Start"
                     labelColor: theme.accent
@@ -521,12 +337,14 @@ Item {
                 }
 
                 PopupButton {
+                    appearance: root.appearance
                     width: 36
                     label: "+1"
                     onActivated: root.pomodoro.adjustMinutes(1)
                 }
 
                 PopupButton {
+                    appearance: root.appearance
                     width: 48
                     label: "+10m"
                     onActivated: root.pomodoro.adjustMinutes(10)
@@ -534,6 +352,7 @@ Item {
             }
 
             PopupButton {
+                appearance: root.appearance
                 visible: root.pomodoro.started
                 width: parent.width
                 label: "Cancel timer"
@@ -587,6 +406,7 @@ Item {
                 spacing: 4
 
                 PopupTitle {
+                    appearance: root.appearance
                     width: parent.width
                     text: mediaPopup.player
                         ? (mediaPopup.player.trackTitle || mediaPopup.player.identity)
@@ -603,6 +423,7 @@ Item {
                 }
 
                 PopupLabel {
+                    appearance: root.appearance
                     width: parent.width
                     visible: !!mediaPopup.player && mediaPopup.player.identity !== ""
                     text: mediaPopup.player ? mediaPopup.player.identity : ""
@@ -619,6 +440,7 @@ Item {
                     spacing: 4
 
                     PopupProgress {
+                        appearance: root.appearance
                         width: parent.width
                         fraction: mediaPopup.player && mediaPopup.player.length > 0
                             ? root.mediaPosition / mediaPopup.player.length : 0
@@ -631,11 +453,13 @@ Item {
                         PopupLabel {
                             id: currentTime
 
+                            appearance: root.appearance
                             anchors.left: parent.left
                             text: root.formatDuration(root.mediaPosition)
                         }
 
                         PopupLabel {
+                            appearance: root.appearance
                             anchors.right: parent.right
                             text: root.formatDuration(mediaPopup.player ? mediaPopup.player.length : 0)
                         }
@@ -647,6 +471,7 @@ Item {
                     spacing: 4
 
                     PopupButton {
+                        appearance: root.appearance
                         width: 32
                         height: 32
                         label: "󰒮"
@@ -656,6 +481,7 @@ Item {
                     }
 
                     PopupButton {
+                        appearance: root.appearance
                         width: 36
                         height: 32
                         label: mediaPopup.player && mediaPopup.player.isPlaying ? "󰏤" : "󰐊"
@@ -666,6 +492,7 @@ Item {
                     }
 
                     PopupButton {
+                        appearance: root.appearance
                         width: 32
                         height: 32
                         label: "󰒭"
@@ -689,6 +516,7 @@ Item {
             spacing: 4
 
             PopupHeader {
+                appearance: root.appearance
                 icon: "󰓃"
                 iconColor: theme.accent
                 title: "Audio output"
@@ -708,6 +536,7 @@ Item {
 
                     readonly property bool selected: Pipewire.defaultAudioSink === modelData
 
+                    appearance: root.appearance
                     visible: modelData.isSink
                     width: parent.width
                     height: 36
@@ -801,6 +630,7 @@ Item {
             }
 
             PopupLabel {
+                appearance: root.appearance
                 visible: SystemTray.items.values.length === 0
                 text: "No tray items"
                 font.pixelSize: root.appearance.textSize - 1
@@ -829,6 +659,7 @@ Item {
                     PopupRow {
                         id: trayItemRow
 
+                        appearance: root.appearance
                         width: parent.width
                         height: 34
 
@@ -913,6 +744,7 @@ Item {
                         }
 
                         PopupRow {
+                            appearance: root.appearance
                             visible: trayPopup.menuStack.length > 0
                             width: parent.width
                             height: 30
@@ -937,6 +769,7 @@ Item {
                             delegate: PopupRow {
                                 required property var modelData
 
+                                appearance: root.appearance
                                 width: inlineMenu.width
                                 height: modelData.isSeparator ? 9 : 30
                                 interactive: !modelData.isSeparator && modelData.enabled
@@ -999,6 +832,7 @@ Item {
             spacing: 10
 
             PopupHeader {
+                appearance: root.appearance
                 icon: root.batteryIcon(batteryPopup.battery)
                 iconColor: batteryPopup.charging ? theme.yellow : theme.textMuted
                 title: root.batteryStateLabel(batteryPopup.battery)
@@ -1008,6 +842,7 @@ Item {
             }
 
             PopupProgress {
+                appearance: root.appearance
                 width: parent.width
                 fraction: batteryPopup.battery ? batteryPopup.battery.percentage : 0
                 fillColor: batteryPopup.charging ? theme.yellow : theme.green
@@ -1048,6 +883,7 @@ Item {
                         spacing: 2
 
                         PopupLabel {
+                            appearance: root.appearance
                             width: parent.width
                             text: modelData.label
                         }
@@ -1173,6 +1009,7 @@ Item {
             spacing: 4
 
             PopupHeader {
+                appearance: root.appearance
                 icon: "󰂯"
                 iconColor: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled
                     ? theme.accent : theme.textMuted
@@ -1184,6 +1021,7 @@ Item {
                     : "Choose a device"
 
                 PopupSwitch {
+                    appearance: root.appearance
                     checked: !!bluetoothPopup.adapter && bluetoothPopup.adapter.enabled
                     enabled: bluetoothPopup.adapter !== null
                     onToggled: bluetoothPopup.setEnabled(!bluetoothPopup.adapter.enabled)
@@ -1196,6 +1034,7 @@ Item {
             }
 
             PopupLabel {
+                appearance: root.appearance
                 visible: bluetoothPopup.adapter !== null
                     && bluetoothPopup.adapter.enabled
                     && bluetoothPopup.devices.length === 0
@@ -1227,6 +1066,7 @@ Item {
 
                             required property var modelData
 
+                            appearance: root.appearance
                             width: parent.width
                             height: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled ? 36 : 0
                             visible: height > 0
@@ -1303,6 +1143,7 @@ Item {
                 spacing: 4
 
                 PopupHeader {
+                    appearance: root.appearance
                     icon: "󰤨"
                     iconColor: Networking.wifiEnabled ? theme.accent : theme.textMuted
                     title: "Wi-Fi"
@@ -1311,6 +1152,7 @@ Item {
                         : Networking.wifiEnabled ? "Choose a network" : "Wi-Fi is off"
 
                     PopupSwitch {
+                        appearance: root.appearance
                         checked: Networking.wifiEnabled
                         onToggled: Networking.wifiEnabled = !Networking.wifiEnabled
                     }
@@ -1324,6 +1166,7 @@ Item {
                 PopupTextField {
                     id: networkSearch
 
+                    appearance: root.appearance
                     width: parent.width
                     height: 32
                     visible: Networking.wifiEnabled
@@ -1385,6 +1228,7 @@ Item {
                                 readonly property bool matchesSearch: modelData.name.toLowerCase()
                                     .includes(networkPopup.searchQuery.trim().toLowerCase())
 
+                                appearance: root.appearance
                                 width: parent.width
                                 height: Networking.wifiEnabled && matchesSearch ? 36 : 0
                                 visible: height > 0
@@ -1441,6 +1285,7 @@ Item {
                 spacing: 8
 
                 PopupHeader {
+                    appearance: root.appearance
                     icon: "󰌾"
                     iconColor: theme.accent
                     title: root.passwordNetwork ? root.passwordNetwork.name : ""
@@ -1450,6 +1295,7 @@ Item {
                 PopupTextField {
                     id: passwordInput
 
+                    appearance: root.appearance
                     width: parent.width
                     height: 32
                     echoMode: TextInput.Password
@@ -1468,6 +1314,7 @@ Item {
                     spacing: 4
 
                     PopupButton {
+                        appearance: root.appearance
                         width: 72
                         label: "Cancel"
                         onActivated: {
@@ -1477,6 +1324,7 @@ Item {
                     }
 
                     PopupButton {
+                        appearance: root.appearance
                         width: 80
                         label: "Connect"
                         labelColor: theme.accent
