@@ -257,9 +257,30 @@ TestCase {
 
         for (const name in state.barProfiles) {
             const barElements = BarProfileModel.savedProfile(state, name).barElements;
-            compare(BarProfileModel.elementZone(barElements, "cava"), "right", name);
+            const mediaZone = BarProfileModel.elementZone(barElements, "media");
+            compare(BarProfileModel.elementZone(barElements, "cava"), mediaZone, name);
             compare(BarProfileModel.elementEnabled(barElements, "cava"), false, name);
+            const ids = zone(barElements, mediaZone).map(id => id.replace("-", ""));
+            compare(ids.indexOf("cava"), ids.indexOf("media") + 1, name);
+            if (BarProfileModel.elementZone(barElements, "audio") === mediaZone)
+                compare(ids.indexOf("audio"), ids.indexOf("cava") + 1, name);
         }
+    }
+
+    // A missing element goes right after the element it follows by default,
+    // in that element's zone; the first element, which follows none, goes
+    // right before the one it precedes.
+    function test_aMissingElementIsAddedNextToItsDefaultNeighbours() {
+        const afterMedia = BarProfileModel.normalizeBarElements({
+            left: [{ id: "media", enabled: true }, { id: "clock", enabled: true }],
+            right: [{ id: "audio", enabled: true }]
+        });
+        compare(zone(afterMedia, "left").slice(0, 3), ["media", "-cava", "clock"]);
+
+        const beforeSystemMonitor = BarProfileModel.normalizeBarElements({
+            center: [{ id: "clock", enabled: true }, { id: "systemMonitor", enabled: true }]
+        });
+        compare(zone(beforeSystemMonitor, "center").slice(0, 3), ["clock", "arch", "systemMonitor"]);
     }
 
     function test_aProfileThatListsCavaKeepsItEnabled() {

@@ -558,9 +558,27 @@ function setElementOption(barElements, id, option, value) {
     return updated;
 }
 
+// Adds missing element `id` next to its default neighbours: right after the
+// element before it in elementIds, else right before the one after it, in
+// that element's zone; else at the end of the right zone.
+function insertMissingElement(normalized, id) {
+    const entry = { id: id, enabled: disabledElementIds.indexOf(id) === -1 };
+    const index = elementIds.indexOf(id);
+    const before = findElement(normalized, elementIds[index - 1]);
+    const after = findElement(normalized, elementIds[index + 1]);
+
+    if (before)
+        normalized[before.zone].splice(before.index + 1, 0, entry);
+    else if (after)
+        normalized[after.zone].splice(after.index, 0, entry);
+    else
+        normalized.right.push(entry);
+}
+
 // Every known element listed exactly once: unknown and repeated entries are
-// dropped (the first one wins) and missing elements are added at the end of
-// the right zone, enabled unless listed in disabledElementIds. Elements with options get all of them.
+// dropped (the first one wins) and missing elements are added next to their
+// default neighbours (see insertMissingElement), enabled unless listed in
+// disabledElementIds. Elements with options get all of them.
 function normalizeBarElements(barElements) {
     const normalized = { left: [], center: [], right: [] };
     const seen = [];
@@ -580,7 +598,7 @@ function normalizeBarElements(barElements) {
 
     for (const id of elementIds) {
         if (seen.indexOf(id) === -1)
-            normalized.right.push({ id: id, enabled: disabledElementIds.indexOf(id) === -1 });
+            insertMissingElement(normalized, id);
     }
 
     for (const zoneName of zoneNames) {
