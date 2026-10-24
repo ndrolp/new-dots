@@ -63,6 +63,26 @@ TestCase {
         })), "");
     }
 
+    // Without a nickname the label is the description, so the port is hidden
+    // when it repeats the description instead.
+    function test_withoutANicknameAPortThatRepeatsTheDescriptionIsHidden() {
+        compare(AudioOutputs.port(output({
+            description: "Analog Stereo",
+            properties: {
+                "device.profile.description": "Analog Stereo"
+            }
+        })), "");
+    }
+
+    function test_withoutANicknameADifferentPortIsShown() {
+        compare(AudioOutputs.port(output({
+            description: "G522 LIGHTSPEED - Wireless Mode",
+            properties: {
+                "device.profile.description": "Analog Stereo"
+            }
+        })), "Analog Stereo");
+    }
+
     function test_anOutputWithoutAPortHasAnEmptyPort() {
         compare(AudioOutputs.port(output({
             nickname: "Q27G42XE"

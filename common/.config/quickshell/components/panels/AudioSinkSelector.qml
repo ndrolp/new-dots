@@ -5,7 +5,6 @@ import Quickshell.Wayland
 import QtQuick
 import "../../config" as Config
 import "." as Panels
-import "AudioOutputs.js" as AudioOutputs
 
 Variants {
     id: root
@@ -171,11 +170,10 @@ Variants {
                         readonly property var sink: modelData
                         readonly property bool selected: ListView.isCurrentItem
                         readonly property bool active: Pipewire.defaultAudioSink === sink
-                        readonly property string port: AudioOutputs.port(sink)
 
                         appearance: root.appearance
                         width: sinkList.width
-                        height: port !== "" ? 42 : 36
+                        height: outputName.rowHeight
                         color: selected || hovered ? theme.surfaceHover : "transparent"
 
                         Panels.Text {
@@ -189,29 +187,17 @@ Variants {
                             font.pixelSize: root.appearance.textSize + 3
                         }
 
-                        Column {
+                        Panels.AudioOutputName {
+                            id: outputName
+
                             anchors.left: sinkIcon.right
                             anchors.leftMargin: 10
                             anchors.right: activeMark.left
                             anchors.rightMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
-
-                            Panels.Text {
-                                width: parent.width
-                                text: AudioOutputs.label(sinkTile.sink)
-                                color: sinkTile.active ? theme.accent : theme.text
-                                elide: Text.ElideRight
-                                font.pixelSize: root.appearance.textSize
-                            }
-
-                            Panels.Text {
-                                width: parent.width
-                                visible: text !== ""
-                                text: sinkTile.port
-                                color: theme.textMuted
-                                elide: Text.ElideRight
-                                font.pixelSize: root.appearance.textSize - 3
-                            }
+                            appearance: root.appearance
+                            output: sinkTile.sink
+                            highlighted: sinkTile.active
                         }
 
                         Panels.Text {

@@ -1,9 +1,9 @@
 import QtQuick
 import QtTest
-import "../components/bar/VolumeText.js" as VolumeText
+import "../components/VolumeText.js" as VolumeText
 
-// With the volume meter off, the audio bar element shows the volume as a
-// whole-number percentage. Volumes over 100% are shown as they are.
+// The volume is shown as a whole-number percentage (the audio bar element
+// without its meter, the control center, quick settings). Volumes over 100% are shown as they are.
 TestCase {
     name: "VolumeText"
 

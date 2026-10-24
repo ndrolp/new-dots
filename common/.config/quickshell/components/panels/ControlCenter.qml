@@ -12,6 +12,7 @@ import QtQuick.Controls
 import "../../config" as Config
 import "." as Panels
 import "PopupPlacement.js" as PopupPlacement
+import "../VolumeText.js" as VolumeText
 
 // The Control center: quick toggles and sliders, centered at the top of the
 // focused monitor. Decided per monitor from that bar's profile, it hangs from
@@ -404,7 +405,7 @@ Variants {
                         icon: "󰕾"
                         accentColor: theme.blue
                         valueText: controlCenter.audio && !controlCenter.audio.muted
-                            ? Math.round(controlCenter.audio.volume * 100) + "%" : "Muted"
+                            ? VolumeText.percentage(controlCenter.audio.volume) : "Muted"
                         from: 0
                         to: 1
                         value: controlCenter.volume

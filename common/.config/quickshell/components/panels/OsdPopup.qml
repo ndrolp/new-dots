@@ -65,6 +65,7 @@ PanelWindow {
 
         mode = "sink";
         sinkName = label !== "" ? label : "Audio output";
+        // The icon goes by the description: it names the kind, the nickname doesn't.
         sinkType = String(sink.description || "").toLowerCase();
         reveal = 1;
         dismissTimer.restart();
