@@ -8,6 +8,7 @@ import Quickshell.Services.UPower
 import QtQuick
 import QtQuick.Controls
 import "../../config" as Config
+import "." as Panels
 import "BluetoothDevices.js" as BluetoothDevices
 
 Item {
@@ -232,7 +233,7 @@ Item {
                     width: parent.width
                     height: 22
 
-                    Text {
+                    Panels.Text {
                         anchors.left: parent.left
                         anchors.verticalCenter: parent.verticalCenter
                         text: modelData.label
@@ -240,7 +241,7 @@ Item {
                         font.pixelSize: root.appearance.textSize - 1
                     }
 
-                    Text {
+                    Panels.Text {
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
                         text: modelData.value
@@ -267,7 +268,7 @@ Item {
                 title: "Pomodoro"
             }
 
-            Text {
+            Panels.Text {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
                 text: root.pomodoro.remainingLabel
@@ -390,7 +391,7 @@ Item {
                     fillMode: Image.PreserveAspectCrop
                 }
 
-                Text {
+                Panels.Text {
                     anchors.centerIn: parent
                     visible: mediaArtImage.status !== Image.Ready
                     text: "󰎈"
@@ -412,7 +413,7 @@ Item {
                         : "Nothing playing"
                 }
 
-                Text {
+                Panels.Text {
                     width: parent.width
                     visible: text !== ""
                     text: mediaPopup.player ? mediaPopup.player.trackArtist : ""
@@ -540,7 +541,7 @@ Item {
                     width: parent.width
                     height: 36
 
-                    Text {
+                    Panels.Text {
                         id: sinkIconLabel
 
                         anchors.left: parent.left
@@ -553,7 +554,7 @@ Item {
                         font.pixelSize: 16
                     }
 
-                    Text {
+                    Panels.Text {
                         anchors.left: sinkIconLabel.right
                         anchors.leftMargin: 10
                         anchors.right: parent.right
@@ -675,7 +676,7 @@ Item {
                             visible: status === Image.Ready
                         }
 
-                        Text {
+                        Panels.Text {
                             anchors.left: parent.left
                             anchors.leftMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
@@ -685,7 +686,7 @@ Item {
                             font.pixelSize: root.appearance.textSize
                         }
 
-                        Text {
+                        Panels.Text {
                             anchors.left: parent.left
                             anchors.leftMargin: 36
                             anchors.right: parent.right
@@ -748,7 +749,7 @@ Item {
                             width: parent.width
                             height: 30
 
-                            Text {
+                            Panels.Text {
                                 anchors.left: parent.left
                                 anchors.leftMargin: 36
                                 anchors.verticalCenter: parent.verticalCenter
@@ -784,7 +785,7 @@ Item {
                                     color: theme.border
                                 }
 
-                                Text {
+                                Panels.Text {
                                     anchors.left: parent.left
                                     anchors.leftMargin: 36
                                     anchors.right: parent.right
@@ -887,7 +888,7 @@ Item {
                             text: modelData.label
                         }
 
-                        Text {
+                        Panels.Text {
                             width: parent.width
                             text: modelData.value
                             color: theme.text
@@ -1031,7 +1032,7 @@ Item {
                             height: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled ? 36 : 0
                             visible: height > 0
 
-                            Text {
+                            Panels.Text {
                                 anchors.left: parent.left
                                 anchors.leftMargin: 8
                                 anchors.verticalCenter: parent.verticalCenter
@@ -1040,7 +1041,7 @@ Item {
                                 font.pixelSize: 16
                             }
 
-                            Text {
+                            Panels.Text {
                                 anchors.fill: parent
                                 anchors.leftMargin: 36
                                 anchors.rightMargin: 80
@@ -1051,7 +1052,7 @@ Item {
                                 font.pixelSize: root.appearance.textSize - 1
                             }
 
-                            Text {
+                            Panels.Text {
                                 anchors.right: parent.right
                                 anchors.rightMargin: 8
                                 anchors.verticalCenter: parent.verticalCenter
@@ -1135,7 +1136,7 @@ Item {
                     leftPadding: 30
                     rightPadding: 28
 
-                    Text {
+                    Panels.Text {
                         anchors.left: parent.left
                         anchors.leftMargin: 10
                         anchors.verticalCenter: parent.verticalCenter
@@ -1144,7 +1145,7 @@ Item {
                         font.pixelSize: 14
                     }
 
-                    Text {
+                    Panels.Text {
                         anchors.right: parent.right
                         anchors.rightMargin: 10
                         anchors.verticalCenter: parent.verticalCenter
@@ -1200,7 +1201,7 @@ Item {
                                     }
                                 }
 
-                                Text {
+                                Panels.Text {
                                     anchors.left: parent.left
                                     anchors.leftMargin: 8
                                     anchors.verticalCenter: parent.verticalCenter
@@ -1209,7 +1210,7 @@ Item {
                                     font.pixelSize: 16
                                 }
 
-                                Text {
+                                Panels.Text {
                                     anchors.fill: parent
                                     anchors.leftMargin: 36
                                     anchors.rightMargin: 40
@@ -1220,7 +1221,7 @@ Item {
                                     font.pixelSize: root.appearance.textSize - 1
                                 }
 
-                                Text {
+                                Panels.Text {
                                     anchors.right: parent.right
                                     anchors.rightMargin: 8
                                     anchors.verticalCenter: parent.verticalCenter

@@ -1,8 +1,9 @@
 import QtQuick
 import "../../config" as Config
+import "." as Panels
 
 // Secondary text: regular weight, muted.
-Text {
+Panels.Text {
     required property var appearance
 
     color: theme.textMuted

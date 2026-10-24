@@ -1,8 +1,9 @@
 import QtQuick
 import "../../config" as Config
+import "." as Panels
 
 // The only bold text in a popup.
-Text {
+Panels.Text {
     required property var appearance
 
     color: theme.text

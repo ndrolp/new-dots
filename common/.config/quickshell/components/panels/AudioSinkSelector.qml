@@ -4,6 +4,7 @@ import Quickshell.Services.Pipewire
 import Quickshell.Wayland
 import QtQuick
 import "../../config" as Config
+import "." as Panels
 
 Variants {
     id: root
@@ -175,7 +176,7 @@ Variants {
                         height: 36
                         color: selected || hovered ? theme.surfaceHover : "transparent"
 
-                        Text {
+                        Panels.Text {
                             id: sinkIcon
 
                             anchors.left: parent.left
@@ -186,7 +187,7 @@ Variants {
                             font.pixelSize: root.appearance.textSize + 3
                         }
 
-                        Text {
+                        Panels.Text {
                             anchors.left: sinkIcon.right
                             anchors.leftMargin: 10
                             anchors.right: activeMark.left
@@ -198,7 +199,7 @@ Variants {
                             font.pixelSize: root.appearance.textSize
                         }
 
-                        Text {
+                        Panels.Text {
                             id: activeMark
 
                             anchors.right: parent.right

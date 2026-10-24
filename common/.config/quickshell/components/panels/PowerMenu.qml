@@ -4,6 +4,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
 import "../../config" as Config
+import "." as Panels
 
 Variants {
     id: root
@@ -159,7 +160,7 @@ Variants {
                                 anchors.centerIn: parent
                                 spacing: 8
 
-                                Text {
+                                Panels.Text {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: actionTile.modelData.icon
                                     color: actionTile.confirming ? theme.red
