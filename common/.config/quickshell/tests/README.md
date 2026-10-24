@@ -13,8 +13,8 @@ on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
 (`AudioOutputs.js`), how the volume is shown as text
 (`components/VolumeText.js`) and what the audio bar element shows and how
 wide it is (`components/bar/AudioLevel.qml`), how the Cava bar element
-reads cava (`services/CavaOutput.js`) and what it draws
-(`components/bar/CavaBars.qml`). They run with QtTest outside of `qs`:
+reads cava and tries it again when it fails (`services/CavaOutput.js`) and
+what it draws (`components/bar/CavaBars.qml`). They run with QtTest outside of `qs`:
 
 ```sh
 common/.config/quickshell/tests/run.sh

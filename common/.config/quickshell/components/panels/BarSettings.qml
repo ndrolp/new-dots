@@ -7,6 +7,7 @@ Column {
 
     required property var appearance
     property var monitors
+    property var cava
 
     width: parent ? parent.width : 0
     spacing: 12
@@ -22,5 +23,6 @@ Column {
 
     BarElementsSettings {
         appearance: root.appearance
+        elementHints: ({ "cava": root.cava ? root.cava.problem : "" })
     }
 }

@@ -62,6 +62,10 @@ Column {
         "battery": [{ label: "Show percentage", option: "percentageVisible" }]
     })
 
+    // A hint shown under an element while there is something to say about
+    // it, e.g. { "cava": "cava isn't installed…" }; empty shows nothing.
+    property var elementHints: ({})
+
     function optionsFor(element) {
         return (elementOptions[element] || []).map(entry => Object.assign({ "element": element }, entry));
     }
@@ -230,6 +234,17 @@ Column {
                                 }
                             }
                         }
+                    }
+
+                    Panels.SettingsHint {
+                        readonly property string hint: root.elementHints[elementDelegate.element] || ""
+
+                        visible: hint !== ""
+                        x: 24
+                        width: parent.width - x
+                        appearance: root.appearance
+                        text: hint
+                        leftPadding: 12
                     }
 
                     // The element's options, two per line, indented under it.

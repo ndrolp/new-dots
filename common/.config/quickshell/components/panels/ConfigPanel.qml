@@ -10,6 +10,8 @@ Rectangle {
     required property var wallpapers
     required property var bookmarks
     required property var plugins
+    // The shell's cava, so the Bar section can say when it can't run.
+    property var cava
 
     property string currentSection: "Bar"
     property string pendingSection: ""
@@ -70,6 +72,7 @@ Rectangle {
         if (currentSection === "Bar") {
             source = "BarSettings.qml";
             properties.monitors = root.monitors;
+            properties.cava = root.cava;
         } else if (currentSection === "Notifications") {
             source = "NotificationSettings.qml";
         } else if (currentSection === "Monitors") {

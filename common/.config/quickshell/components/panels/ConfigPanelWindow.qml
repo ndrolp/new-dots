@@ -10,6 +10,7 @@ PanelWindow {
     required property var wallpapers
     required property var bookmarks
     required property var plugins
+    property var cava
     property bool open: false
     property var targetWindow
     property real reveal: open ? 1 : 0
@@ -55,6 +56,7 @@ PanelWindow {
         wallpapers: root.wallpapers
         bookmarks: root.bookmarks
         plugins: root.plugins
+        cava: root.cava
 
         onCloseRequested: root.closeRequested()
     }

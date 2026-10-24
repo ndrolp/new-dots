@@ -484,6 +484,7 @@ ShellRoot {
         wallpapers: wallpapers
         bookmarks: bookmarks
         plugins: plugins
+        cava: cava
         open: shell.configOpen
         targetWindow: shell.configWindow
 
