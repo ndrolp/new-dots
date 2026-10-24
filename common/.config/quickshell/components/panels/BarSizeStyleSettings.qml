@@ -1,5 +1,4 @@
 import QtQuick
-import "../../config" as Config
 import "." as Panels
 
 Column {
@@ -9,10 +8,6 @@ Column {
 
     width: parent ? parent.width : 0
     spacing: 14
-
-    Config.Theme {
-        id: theme
-    }
 
     Panels.SettingsHeading {
         appearance: root.appearance
