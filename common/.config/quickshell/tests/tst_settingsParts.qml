@@ -91,6 +91,23 @@ TestCase {
         }
     }
 
+    Component {
+        id: grid
+
+        Panels.SettingsGrid {
+            width: 500
+
+            Repeater {
+                model: 3
+
+                delegate: Rectangle {
+                    width: parent.cellWidth
+                    height: 40
+                }
+            }
+        }
+    }
+
     SignalSpy {
         id: editedSpy
 
@@ -281,5 +298,19 @@ TestCase {
 
         compare(item.field.text, "48");
         compare(item.slider.value, 48);
+    }
+
+    // Short controls sit two per line, in columns of equal width with a gap
+    // between them; an odd one out starts the next line.
+    function test_aGridPlacesShortControlsTwoPerLine() {
+        const item = createTemporaryObject(grid, this);
+        const cells = item.children.filter(child => child instanceof Rectangle);
+
+        compare(item.cellWidth, 238);
+        compare(cells[0].x, 0);
+        compare(cells[1].x, 262);
+        compare(cells[1].y, cells[0].y);
+        compare(cells[2].x, 0);
+        verify(cells[2].y >= cells[0].y + 40);
     }
 }
