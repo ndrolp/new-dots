@@ -1,5 +1,4 @@
 import QtQuick
-import "../../config" as Config
 import "." as Panels
 
 // A whole-number setting between `from` and `to`: its label on top, then a
@@ -7,11 +6,9 @@ import "." as Panels
 // or typing a number in range asks to save it; a number out of range is
 // rejected. A setting with room past what the slider shows types up to
 // `fieldTo` instead. Whoever owns the setting saves it and sets `value`.
-Column {
+Panels.SettingsField {
     id: cell
 
-    required property var appearance
-    property string label: ""
     property int from: 0
     property int to: 100
     property int fieldTo: to
@@ -19,18 +16,6 @@ Column {
     readonly property alias slider: numberSlider
     readonly property alias field: numberField
     signal edited(int value)
-
-    spacing: 6
-
-    Config.Theme {
-        id: theme
-    }
-
-    Panels.SettingsLabel {
-        width: parent.width
-        appearance: cell.appearance
-        text: cell.label
-    }
 
     Row {
         width: parent.width

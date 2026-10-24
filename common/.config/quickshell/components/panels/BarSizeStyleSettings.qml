@@ -17,14 +17,10 @@ Column {
 
     // Density presets fill in the sizes below in one go; they are a pending
     // change like any other and the preset itself is not stored.
-    Column {
+    Panels.SettingsField {
         width: parent.width
-        spacing: 6
-
-        Panels.SettingsLabel {
-            appearance: root.appearance
-            text: "Density preset"
-        }
+        appearance: root.appearance
+        label: "Density preset"
 
         Panels.SettingsChoice {
             width: Math.min(parent.width, 360)

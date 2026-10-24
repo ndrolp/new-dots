@@ -60,14 +60,10 @@ Column {
         }
     }
 
-    Column {
+    Panels.SettingsField {
         width: parent.width
-        spacing: 6
-
-        Panels.SettingsLabel {
-            appearance: root.appearance
-            text: "Bar profile"
-        }
+        appearance: root.appearance
+        label: "Bar profile"
 
         Panels.SettingsChoice {
             width: Math.min(parent.width, 120 * Math.max(1, options.length))

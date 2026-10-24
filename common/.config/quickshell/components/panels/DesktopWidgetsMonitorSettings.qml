@@ -129,15 +129,10 @@ Column {
                 !root.desktop.backgroundClock.calendarEnabled)
         }
 
-        Column {
+        Panels.SettingsField {
             width: clockGrid.cellWidth
-            spacing: 6
-
-            Panels.SettingsLabel {
-                width: parent.width
-                appearance: root.appearance
-                text: "Date format"
-            }
+            appearance: root.appearance
+            label: "Date format"
 
             Panels.SettingsChoice {
                 width: parent.width
@@ -187,16 +182,11 @@ Column {
             }
 
             // Only the weather widget has a setting of its own.
-            Column {
+            Panels.SettingsField {
                 width: widgetGrid.cellWidth
-                spacing: 6
                 visible: widgetGrid.modelData.widget === "weather"
-
-                Panels.SettingsLabel {
-                    width: parent.width
-                    appearance: root.appearance
-                    text: "Location"
-                }
+                appearance: root.appearance
+                label: "Location"
 
                 Panels.SettingsInput {
                     width: parent.width

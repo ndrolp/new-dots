@@ -48,17 +48,12 @@ Column {
         Repeater {
             model: root.workspaceIds
 
-            delegate: Column {
+            delegate: Panels.SettingsField {
                 required property int modelData
 
                 width: (parent.width - parent.columnSpacing * (parent.columns - 1)) / parent.columns
-                spacing: 6
-
-                Panels.SettingsLabel {
-                    width: parent.width
-                    appearance: root.appearance
-                    text: "Workspace " + modelData
-                }
+                appearance: root.appearance
+                label: "Workspace " + modelData
 
                 Panels.SettingsInput {
                     width: parent.width

@@ -92,6 +92,21 @@ TestCase {
     }
 
     Component {
+        id: labelledField
+
+        Panels.SettingsField {
+            width: 280
+            label: "Date format"
+
+            Panels.SettingsChoice {
+                width: parent.width
+                appearance: barAppearance
+                options: [{ label: "Full", value: "full" }, { label: "Short", value: "short" }]
+            }
+        }
+    }
+
+    Component {
         id: grid
 
         Panels.SettingsGrid {
@@ -354,6 +369,19 @@ TestCase {
 
         compare(item.field.text, "48");
         compare(item.slider.value, 48);
+    }
+
+    // A setting whose control has no name of its own has its label on top,
+    // the control right under it, full width.
+    function test_aLabelledSettingHasItsLabelOverItsControl() {
+        const item = make(labelledField);
+        const fieldLabel = textOf(item, "Date format");
+        const control = item.children.filter(child => child.options !== undefined)[0];
+
+        compare(fieldLabel.color, theme.text);
+        compare(fieldLabel.font.pixelSize, 13);
+        compare(control.width, 280);
+        compare(control.y, fieldLabel.height + 6);
     }
 
     // Short controls sit two per line, in columns of equal width with a gap

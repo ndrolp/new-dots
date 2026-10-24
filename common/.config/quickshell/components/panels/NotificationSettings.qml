@@ -16,14 +16,10 @@ Column {
         topPadding: 4
     }
 
-    Column {
+    Panels.SettingsField {
         width: parent.width
-        spacing: 6
-
-        Panels.SettingsLabel {
-            appearance: root.appearance
-            text: "Position"
-        }
+        appearance: root.appearance
+        label: "Position"
 
         Panels.SettingsChoice {
             width: parent.width
