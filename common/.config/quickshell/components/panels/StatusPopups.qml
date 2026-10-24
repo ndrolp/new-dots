@@ -171,11 +171,196 @@ Item {
         onDismissed: root.popupClosed(popup)
     }
 
-    component PopupCard: Rectangle {
-        color: theme.backgroundSecondary
-        radius: Math.max(10, root.appearance.radius)
-        border.color: theme.border
+    // The only bold text in a popup.
+    component PopupTitle: Text {
+        color: theme.text
+        elide: Text.ElideRight
+        font.pixelSize: root.appearance.textSize + 1
+        font.bold: true
+    }
+
+    // Secondary text: regular weight, muted.
+    component PopupLabel: Text {
+        color: theme.textMuted
+        elide: Text.ElideRight
+        font.pixelSize: root.appearance.textSize - 2
+    }
+
+    // A popup's title with its icon, a muted subtitle, and room on the right,
+    // e.g. for a switch.
+    component PopupHeader: Item {
+        id: header
+
+        property string icon: ""
+        property color iconColor: theme.textMuted
+        property string title: ""
+        property string subtitle: ""
+        default property alias trailing: trailingSlot.data
+
+        width: parent ? parent.width : 0
+        implicitHeight: Math.max(headerText.implicitHeight, trailingSlot.height)
+
+        Text {
+            id: headerIcon
+
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            visible: header.icon !== ""
+            text: header.icon
+            color: header.iconColor
+            font.pixelSize: root.appearance.textSize + 5
+
+            Behavior on color {
+                ColorAnimation { duration: 140 }
+            }
+        }
+
+        Column {
+            id: headerText
+
+            anchors.left: headerIcon.visible ? headerIcon.right : parent.left
+            anchors.leftMargin: headerIcon.visible ? 10 : 0
+            anchors.right: trailingSlot.left
+            anchors.rightMargin: trailingSlot.width > 0 ? 8 : 0
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 1
+
+            PopupTitle {
+                width: parent.width
+                text: header.title
+            }
+
+            PopupLabel {
+                width: parent.width
+                visible: header.subtitle !== ""
+                text: header.subtitle
+            }
+        }
+
+        Item {
+            id: trailingSlot
+
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            width: childrenRect.width
+            height: childrenRect.height
+        }
+    }
+
+    // A row that stays transparent until hovered. A selected row shows it with
+    // the accent color in its contents, not with a fill.
+    component PopupRow: Rectangle {
+        readonly property alias hovered: rowHover.hovered
+        property bool interactive: true
+
+        radius: root.appearance.radius
+        color: interactive && hovered ? theme.surfaceHover : "transparent"
+
+        Behavior on color {
+            ColorAnimation { duration: 140 }
+        }
+
+        HoverHandler {
+            id: rowHover
+
+            enabled: parent.interactive
+        }
+    }
+
+    // A text button: a row with a centered label.
+    component PopupButton: PopupRow {
+        id: button
+
+        property string label: ""
+        property color labelColor: theme.text
+        property real labelSize: root.appearance.textSize - 1
+        signal activated()
+
+        height: 30
+
+        Text {
+            anchors.centerIn: parent
+            text: button.label
+            color: button.labelColor
+            font.pixelSize: button.labelSize
+        }
+
+        TapHandler {
+            enabled: button.interactive
+            onTapped: button.activated()
+        }
+    }
+
+    component PopupSwitch: Rectangle {
+        id: popupSwitch
+
+        property bool checked: false
+        signal toggled()
+
+        width: 36
+        height: 20
+        radius: height / 2
+        color: checked ? theme.accent : "transparent"
+        border.color: checked ? theme.accent : theme.border
         border.width: 1
+
+        Behavior on color {
+            ColorAnimation { duration: 140 }
+        }
+
+        Rectangle {
+            x: popupSwitch.checked ? parent.width - width - 3 : 3
+            anchors.verticalCenter: parent.verticalCenter
+            width: 14
+            height: 14
+            radius: 7
+            color: popupSwitch.checked ? theme.background : theme.textMuted
+
+            Behavior on x {
+                NumberAnimation {
+                    duration: 140
+                    easing.type: Easing.OutCubic
+                }
+            }
+        }
+
+        TapHandler {
+            onTapped: popupSwitch.toggled()
+        }
+    }
+
+    component PopupTextField: TextField {
+        id: field
+
+        color: theme.text
+        placeholderTextColor: theme.textDisabled
+        font.family: theme.fontFamily
+        font.pixelSize: root.appearance.textSize - 1
+        selectByMouse: true
+
+        background: Rectangle {
+            radius: root.appearance.radius
+            color: "transparent"
+            border.color: field.activeFocus ? theme.accent : theme.border
+            border.width: 1
+        }
+    }
+
+    // A thin bar filled up to a fraction between 0 and 1.
+    component PopupProgress: Rectangle {
+        property real fraction: 0
+        property color fillColor: theme.accent
+
+        height: 4
+        radius: 2
+        color: theme.backgroundSecondary
+
+        Rectangle {
+            width: parent.width * Math.max(0, Math.min(1, parent.fraction))
+            height: parent.height
+            radius: parent.radius
+            color: parent.fillColor
+        }
     }
 
     StatusPopup {
@@ -183,223 +368,75 @@ Item {
 
         popup: "system"
         edge: "left"
-        implicitWidth: 430
-        implicitHeight: 330
+        implicitWidth: 360
 
         Column {
-            anchors.fill: parent
-            anchors.margins: 18
-            spacing: 12
+            width: parent.width
+            spacing: 6
 
-            Row {
-                width: parent.width
+            PopupHeader {
+                title: "System resources"
 
-                Text {
-                    text: "System resources"
-                    color: theme.text
-                    font.pixelSize: root.appearance.textSize + 3
-                    font.bold: true
-                }
-
-                Item {
-                    width: parent.width - parent.children[0].implicitWidth - loadLabel.implicitWidth
-                    height: 1
-                }
-
-                Text {
-                    id: loadLabel
-
-                    anchors.verticalCenter: parent.verticalCenter
+                PopupLabel {
                     text: "Load " + root.systemMonitor.loadAverage
-                    color: theme.textMuted
-                    font.pixelSize: root.appearance.textSize - 3
-                    font.bold: true
                 }
             }
 
-            Row {
-                width: parent.width
-                spacing: 10
-
-                Rectangle {
-                    width: (parent.width - parent.spacing) / 2
-                    height: 72
-                    radius: root.appearance.radius
-                    color: theme.backgroundSecondary
-
-                    Text {
-                        anchors.left: parent.left
-                        anchors.leftMargin: 12
-                        anchors.top: parent.top
-                        anchors.topMargin: 10
-                        text: "󰍛  CPU"
-                        color: theme.blue
-                        font.pixelSize: root.appearance.textSize - 1
-                        font.bold: true
-                    }
-
-                    Text {
-                        anchors.left: parent.left
-                        anchors.leftMargin: 12
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 10
-                        text: Math.round(root.systemMonitor.cpuUsage) + "%"
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize + 5
-                        font.bold: true
-                    }
-                }
-
-                Rectangle {
-                    width: (parent.width - parent.spacing) / 2
-                    height: 72
-                    radius: root.appearance.radius
-                    color: theme.backgroundSecondary
-
-                    Text {
-                        anchors.left: parent.left
-                        anchors.leftMargin: 12
-                        anchors.top: parent.top
-                        anchors.topMargin: 10
-                        text: "󰘚  Memory"
-                        color: theme.yellow
-                        font.pixelSize: root.appearance.textSize - 1
-                        font.bold: true
-                    }
-
-                    Text {
-                        anchors.left: parent.left
-                        anchors.leftMargin: 12
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 10
-                        text: root.systemMonitor.memoryUsedGiB.toFixed(1)
+            Repeater {
+                model: [
+                    { label: "󰍛  CPU", value: Math.round(root.systemMonitor.cpuUsage) + "%" },
+                    {
+                        label: "󰘚  Memory",
+                        value: root.systemMonitor.memoryUsedGiB.toFixed(1)
                             + " / " + root.systemMonitor.memoryTotalGiB.toFixed(1) + " GiB"
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize
-                        font.bold: true
-                    }
-                }
-            }
-
-            Row {
-                width: parent.width
-                spacing: 10
-
-                Rectangle {
-                    width: (parent.width - parent.spacing) / 2
-                    height: 56
-                    radius: root.appearance.radius
-                    color: theme.backgroundSecondary
-
-                    Text {
-                        anchors.left: parent.left
-                        anchors.leftMargin: 12
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: "  Temperature"
-                        color: theme.orange
-                        font.pixelSize: root.appearance.textSize - 1
-                        font.bold: true
-                    }
-
-                    Text {
-                        anchors.right: parent.right
-                        anchors.rightMargin: 12
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: root.systemMonitor.temperature > 0
+                            + " · " + Math.round(root.systemMonitor.memoryUsage) + "%"
+                    },
+                    {
+                        label: "  Temperature",
+                        value: root.systemMonitor.temperature > 0
                             ? Math.round(root.systemMonitor.temperature) + "°C" : "--"
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize + 1
-                        font.bold: true
+                    },
+                    {
+                        label: "󰋊  Disk",
+                        value: root.systemMonitor.diskTotalGiB > 0
+                            ? root.systemMonitor.diskUsedGiB.toFixed(0) + " / "
+                                + root.systemMonitor.diskTotalGiB.toFixed(0) + " GiB"
+                            : "--"
+                    },
+                    {
+                        label: "󰕒  Network",
+                        value: "↓ " + root.systemMonitor.formatRate(root.systemMonitor.networkDownloadRate)
+                            + "  ↑ " + root.systemMonitor.formatRate(root.systemMonitor.networkUploadRate)
+                    },
+                    {
+                        label: "󰢮  GPU",
+                        value: root.systemMonitor.gpuUsage >= 0
+                            ? Math.round(root.systemMonitor.gpuUsage) + "% · "
+                                + Math.round(root.systemMonitor.gpuTemperature) + "°C"
+                            : "Unavailable"
                     }
-                }
+                ]
 
-                Rectangle {
-                    width: (parent.width - parent.spacing) / 2
-                    height: 56
-                    radius: root.appearance.radius
-                    color: theme.backgroundSecondary
+                delegate: Item {
+                    required property var modelData
+
+                    width: parent.width
+                    height: 22
 
                     Text {
                         anchors.left: parent.left
-                        anchors.leftMargin: 12
                         anchors.verticalCenter: parent.verticalCenter
-                        text: "󰌢  Memory use"
-                        color: theme.green
+                        text: modelData.label
+                        color: theme.textMuted
                         font.pixelSize: root.appearance.textSize - 1
-                        font.bold: true
                     }
 
                     Text {
                         anchors.right: parent.right
-                        anchors.rightMargin: 12
                         anchors.verticalCenter: parent.verticalCenter
-                        text: Math.round(root.systemMonitor.memoryUsage) + "%"
+                        text: modelData.value
                         color: theme.text
-                        font.pixelSize: root.appearance.textSize + 1
-                        font.bold: true
-                    }
-                }
-            }
-
-            Row {
-                width: parent.width
-                spacing: 8
-
-                Repeater {
-                    model: [
-                        {
-                            label: "󰋊 Disk",
-                            value: root.systemMonitor.diskTotalGiB > 0
-                                ? root.systemMonitor.diskUsedGiB.toFixed(0) + " / "
-                                    + root.systemMonitor.diskTotalGiB.toFixed(0) + " GiB"
-                                : "--",
-                            color: theme.purple
-                        },
-                        {
-                            label: "󰕒 Network",
-                            value: "↓ " + root.systemMonitor.formatRate(root.systemMonitor.networkDownloadRate)
-                                + "\n↑ " + root.systemMonitor.formatRate(root.systemMonitor.networkUploadRate),
-                            color: theme.blue
-                        },
-                        {
-                            label: "󰢮 GPU",
-                            value: root.systemMonitor.gpuUsage >= 0
-                                ? Math.round(root.systemMonitor.gpuUsage) + "% · "
-                                    + Math.round(root.systemMonitor.gpuTemperature) + "°C"
-                                : "Unavailable",
-                            color: theme.green
-                        }
-                    ]
-
-                    delegate: Rectangle {
-                        required property var modelData
-
-                        width: (parent.width - parent.spacing * 2) / 3
-                        height: 64
-                        radius: root.appearance.radius
-                        color: theme.backgroundSecondary
-
-                        Column {
-                            anchors.fill: parent
-                            anchors.margins: 10
-                            spacing: 5
-
-                            Text {
-                                text: modelData.label
-                                color: modelData.color
-                                font.pixelSize: root.appearance.textSize - 2
-                                font.bold: true
-                            }
-
-                            Text {
-                                width: parent.width
-                                text: modelData.value
-                                color: theme.text
-                                elide: Text.ElideRight
-                                font.pixelSize: root.appearance.textSize - 3
-                                font.bold: true
-                            }
-                        }
+                        font.pixelSize: root.appearance.textSize - 1
                     }
                 }
             }
@@ -410,242 +447,98 @@ Item {
         id: pomodoroPopup
 
         popup: "pomodoro"
-        implicitWidth: 356
-        implicitHeight: root.pomodoro.started ? 326 : 282
-
-        Behavior on implicitHeight {
-            NumberAnimation {
-                duration: 160
-                easing.type: Easing.OutCubic
-            }
-        }
+        implicitWidth: 320
 
         Column {
-            anchors.fill: parent
-            anchors.margins: 18
-            spacing: 12
+            width: parent.width
+            spacing: 8
 
-            Text {
-                text: "Pomodoro"
-                color: theme.text
-                font.pixelSize: root.appearance.textSize + 3
-                font.bold: true
+            PopupHeader {
+                title: "Pomodoro"
             }
 
             Text {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
                 text: root.pomodoro.remainingLabel
-                color: root.pomodoro.running ? theme.green : theme.text
-                font.pixelSize: 38
-                font.bold: true
+                color: root.pomodoro.running ? theme.accent : theme.text
+                font.pixelSize: 34
             }
 
-            Text {
+            PopupLabel {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
                 text: root.pomodoro.running ? "Focus session in progress"
                     : root.pomodoro.started ? "Timer paused" : "Choose a focus duration"
-                color: theme.textMuted
-                font.pixelSize: root.appearance.textSize - 1
-                font.bold: true
             }
 
             Row {
                 width: parent.width
-                spacing: 6
+                spacing: 4
 
                 Repeater {
                     model: [25, 30, 45, 60]
 
-                    delegate: Rectangle {
+                    delegate: PopupButton {
                         required property int modelData
 
                         width: (parent.width - parent.spacing * 3) / 4
-                        height: 34
-                        radius: root.appearance.radius
-                        color: root.pomodoro.durationSeconds === modelData * 60
-                            ? theme.accent : presetHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-
-                        Behavior on color {
-                            ColorAnimation { duration: 140 }
-                        }
-
-                        HoverHandler {
-                            id: presetHover
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: modelData === 60 ? "1h" : modelData + "m"
-                            color: root.pomodoro.durationSeconds === modelData * 60
-                                ? theme.background : theme.text
-                            font.pixelSize: root.appearance.textSize - 1
-                            font.bold: true
-                        }
-
-                        TapHandler {
-                            onTapped: root.pomodoro.selectMinutes(modelData)
-                        }
+                        label: modelData === 60 ? "1h" : modelData + "m"
+                        labelColor: root.pomodoro.durationSeconds === modelData * 60
+                            ? theme.accent : theme.textMuted
+                        onActivated: root.pomodoro.selectMinutes(modelData)
                     }
                 }
             }
 
             Row {
                 width: parent.width
-                spacing: 8
+                spacing: 4
 
-                Rectangle {
-                    width: 52
-                    height: 38
-                    radius: root.appearance.radius
-                    color: subtractHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-
-                    HoverHandler {
-                        id: subtractHover
-                    }
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "−10m"
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize - 1
-                        font.bold: true
-                    }
-
-                    TapHandler {
-                        onTapped: root.pomodoro.adjustMinutes(-10)
-                    }
+                PopupButton {
+                    width: 48
+                    label: "−10m"
+                    onActivated: root.pomodoro.adjustMinutes(-10)
                 }
 
-                Rectangle {
+                PopupButton {
                     width: 36
-                    height: 38
-                    radius: root.appearance.radius
-                    color: subtractOneHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+                    label: "−1"
+                    onActivated: root.pomodoro.adjustMinutes(-1)
+                }
 
-                    HoverHandler {
-                        id: subtractOneHover
-                    }
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "−1"
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize - 1
-                        font.bold: true
-                    }
-
-                    TapHandler {
-                        onTapped: root.pomodoro.adjustMinutes(-1)
+                PopupButton {
+                    width: parent.width - 168 - parent.spacing * 4
+                    label: root.pomodoro.running ? "Stop" : root.pomodoro.started ? "Resume" : "Start"
+                    labelColor: theme.accent
+                    labelSize: root.appearance.textSize
+                    onActivated: {
+                        if (root.pomodoro.running)
+                            root.pomodoro.stop();
+                        else
+                            root.pomodoro.start();
                     }
                 }
 
-                Rectangle {
-                    width: parent.width - 208
-                    height: 38
-                    radius: root.appearance.radius
-                    color: root.pomodoro.running
-                        ? stopHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-                        : startHover.hovered ? theme.accentHover : theme.accent
-
-                    HoverHandler {
-                        id: startHover
-                        enabled: !root.pomodoro.running
-                    }
-
-                    HoverHandler {
-                        id: stopHover
-                        enabled: root.pomodoro.running
-                    }
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: root.pomodoro.running ? "Stop" : root.pomodoro.started ? "Resume" : "Start"
-                        color: root.pomodoro.running ? theme.text : theme.background
-                        font.pixelSize: root.appearance.textSize
-                        font.bold: true
-                    }
-
-                    TapHandler {
-                        onTapped: {
-                            if (root.pomodoro.running)
-                                root.pomodoro.stop();
-                            else
-                                root.pomodoro.start();
-                        }
-                    }
-                }
-
-                Rectangle {
+                PopupButton {
                     width: 36
-                    height: 38
-                    radius: root.appearance.radius
-                    color: addOneHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-
-                    HoverHandler {
-                        id: addOneHover
-                    }
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "+1"
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize - 1
-                        font.bold: true
-                    }
-
-                    TapHandler {
-                        onTapped: root.pomodoro.adjustMinutes(1)
-                    }
+                    label: "+1"
+                    onActivated: root.pomodoro.adjustMinutes(1)
                 }
 
-                Rectangle {
-                    width: 52
-                    height: 38
-                    radius: root.appearance.radius
-                    color: addHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-
-                    HoverHandler {
-                        id: addHover
-                    }
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "+10m"
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize - 1
-                        font.bold: true
-                    }
-
-                    TapHandler {
-                        onTapped: root.pomodoro.adjustMinutes(10)
-                    }
+                PopupButton {
+                    width: 48
+                    label: "+10m"
+                    onActivated: root.pomodoro.adjustMinutes(10)
                 }
             }
 
-            Rectangle {
+            PopupButton {
                 visible: root.pomodoro.started
                 width: parent.width
-                height: 32
-                radius: root.appearance.radius
-                color: cancelPomodoroHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-
-                HoverHandler {
-                    id: cancelPomodoroHover
-                }
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "Cancel timer"
-                    color: theme.red
-                    font.pixelSize: root.appearance.textSize - 1
-                    font.bold: true
-                }
-
-                TapHandler {
-                    onTapped: root.pomodoro.cancel()
-                }
+                label: "Cancel timer"
+                labelColor: theme.red
+                onActivated: root.pomodoro.cancel()
             }
         }
     }
@@ -656,130 +549,68 @@ Item {
         readonly property var player: root.player
 
         popup: "media"
-        implicitWidth: 480
-        implicitHeight: 258
-        revealDuration: 200
-        revealOffset: 16
-        clipContents: true
-
-        Image {
-            anchors.fill: parent
-            source: mediaPopup.player ? mediaPopup.player.trackArtUrl : ""
-            fillMode: Image.PreserveAspectCrop
-            opacity: 0.32
-            visible: source !== ""
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            gradient: Gradient {
-                orientation: Gradient.Horizontal
-
-                GradientStop {
-                    position: 0
-                    color: "transparent"
-                }
-
-                GradientStop {
-                    position: 0.72
-                    color: theme.surface
-                }
-            }
-        }
+        implicitWidth: 440
 
         Row {
-            anchors.fill: parent
-            anchors.margins: 18
-            spacing: 16
+            width: parent.width
+            spacing: 12
 
-            Item {
-                width: 150
-                height: parent.height
+            Rectangle {
+                id: mediaArt
 
-                Rectangle {
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 150
-                    height: 150
-                    radius: root.appearance.radius
-                    color: theme.green
-                    clip: true
+                width: 112
+                height: 112
+                radius: root.appearance.radius
+                color: theme.backgroundSecondary
+                clip: true
 
-                    Image {
-                        anchors.fill: parent
-                        source: mediaPopup.player ? mediaPopup.player.trackArtUrl : ""
-                        fillMode: Image.PreserveAspectCrop
-                    }
+                Image {
+                    id: mediaArtImage
 
-                    Rectangle {
-                        id: sinkCard
+                    anchors.fill: parent
+                    source: mediaPopup.player ? mediaPopup.player.trackArtUrl : ""
+                    fillMode: Image.PreserveAspectCrop
+                }
 
-                        anchors.fill: parent
-                        visible: parent.children[0].status !== Image.Ready
-                        radius: parent.radius
-                        color: theme.green
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "󰎈"
-                            color: theme.background
-                            font.pixelSize: 36
-                        }
-                    }
-
-                    Rectangle {
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
-                        height: 26
-                        color: "#99000000"
-
-                        Text {
-                            anchors.left: parent.left
-                            anchors.leftMargin: 9
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: "NOW PLAYING"
-                            color: theme.text
-                            font.pixelSize: 10
-                            font.bold: true
-                        }
-                    }
-
+                Text {
+                    anchors.centerIn: parent
+                    visible: mediaArtImage.status !== Image.Ready
+                    text: "󰎈"
+                    color: theme.textMuted
+                    font.pixelSize: 32
                 }
             }
 
             Column {
-                width: parent.width - 166
+                width: parent.width - mediaArt.width - parent.spacing
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 9
+                spacing: 4
 
-                Text {
+                PopupTitle {
                     width: parent.width
                     text: mediaPopup.player
                         ? (mediaPopup.player.trackTitle || mediaPopup.player.identity)
                         : "Nothing playing"
-                    color: theme.text
-                    elide: Text.ElideRight
-                    font.pixelSize: root.appearance.textSize + 3
-                    font.bold: true
                 }
 
                 Text {
                     width: parent.width
+                    visible: text !== ""
                     text: mediaPopup.player ? mediaPopup.player.trackArtist : ""
                     color: theme.textMuted
                     elide: Text.ElideRight
-                    font.pixelSize: root.appearance.textSize
-                    font.bold: true
+                    font.pixelSize: root.appearance.textSize - 1
                 }
 
-                Text {
+                PopupLabel {
                     width: parent.width
-                    visible: mediaPopup.player && mediaPopup.player.identity !== ""
+                    visible: !!mediaPopup.player && mediaPopup.player.identity !== ""
                     text: mediaPopup.player ? mediaPopup.player.identity : ""
-                    color: theme.green
-                    elide: Text.ElideRight
-                    font.pixelSize: root.appearance.textSize - 2
-                    font.bold: true
+                }
+
+                Item {
+                    width: 1
+                    height: 4
                 }
 
                 Column {
@@ -787,133 +618,60 @@ Item {
                     visible: !!mediaPopup.player && mediaPopup.player.lengthSupported
                     spacing: 4
 
-                    Rectangle {
+                    PopupProgress {
                         width: parent.width
-                        height: 6
-                        radius: 3
-                        color: theme.backgroundSecondary
-
-                        Rectangle {
-                            width: parent.width * Math.min(1, Math.max(0,
-                                mediaPopup.player && mediaPopup.player.length > 0
-                                ? root.mediaPosition / mediaPopup.player.length : 0))
-                            height: parent.height
-                            radius: parent.radius
-                            color: theme.green
-                        }
+                        fraction: mediaPopup.player && mediaPopup.player.length > 0
+                            ? root.mediaPosition / mediaPopup.player.length : 0
                     }
 
-                    Row {
+                    Item {
                         width: parent.width
+                        height: currentTime.implicitHeight
 
-                        Text {
+                        PopupLabel {
                             id: currentTime
 
+                            anchors.left: parent.left
                             text: root.formatDuration(root.mediaPosition)
-                            color: theme.textMuted
-                            font.pixelSize: root.appearance.textSize - 2
-                            font.bold: true
                         }
 
-                        Item {
-                            width: parent.width - currentTime.implicitWidth - trackLength.implicitWidth
-                            height: 1
-                        }
-
-                        Text {
-                            id: trackLength
-
+                        PopupLabel {
+                            anchors.right: parent.right
                             text: root.formatDuration(mediaPopup.player ? mediaPopup.player.length : 0)
-                            color: theme.textMuted
-                            font.pixelSize: root.appearance.textSize - 2
-                            font.bold: true
                         }
                     }
                 }
 
                 Row {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    spacing: 8
+                    spacing: 4
 
-                    Rectangle {
-                        width: 28
-                        height: 28
-                        radius: 14
-                        color: previousHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-
-                        Behavior on color {
-                            ColorAnimation { duration: 140 }
-                        }
-
-                        HoverHandler {
-                            id: previousHover
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "󰒮"
-                            color: theme.text
-                            font.pixelSize: 16
-                        }
-
-                        TapHandler {
-                            enabled: !!mediaPopup.player && mediaPopup.player.canGoPrevious
-                            onTapped: mediaPopup.player.previous()
-                        }
+                    PopupButton {
+                        width: 32
+                        height: 32
+                        label: "󰒮"
+                        labelSize: 16
+                        interactive: !!mediaPopup.player && mediaPopup.player.canGoPrevious
+                        onActivated: mediaPopup.player.previous()
                     }
 
-                    Rectangle {
+                    PopupButton {
                         width: 36
-                        height: 36
-                        radius: 18
-                        color: playHover.hovered ? theme.accentHover : theme.green
-
-                        Behavior on color {
-                            ColorAnimation { duration: 140 }
-                        }
-
-                        HoverHandler {
-                            id: playHover
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: mediaPopup.player && mediaPopup.player.isPlaying ? "󰏤" : "󰐊"
-                            color: theme.background
-                            font.pixelSize: 19
-                        }
-
-                        TapHandler {
-                            enabled: !!mediaPopup.player && mediaPopup.player.canTogglePlaying
-                            onTapped: mediaPopup.player.togglePlaying()
-                        }
+                        height: 32
+                        label: mediaPopup.player && mediaPopup.player.isPlaying ? "󰏤" : "󰐊"
+                        labelColor: theme.accent
+                        labelSize: 20
+                        interactive: !!mediaPopup.player && mediaPopup.player.canTogglePlaying
+                        onActivated: mediaPopup.player.togglePlaying()
                     }
 
-                    Rectangle {
-                        width: 28
-                        height: 28
-                        radius: 14
-                        color: nextHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-
-                        Behavior on color {
-                            ColorAnimation { duration: 140 }
-                        }
-
-                        HoverHandler {
-                            id: nextHover
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "󰒭"
-                            color: theme.text
-                            font.pixelSize: 16
-                        }
-
-                        TapHandler {
-                            enabled: !!mediaPopup.player && mediaPopup.player.canGoNext
-                            onTapped: mediaPopup.player.next()
-                        }
+                    PopupButton {
+                        width: 32
+                        height: 32
+                        label: "󰒭"
+                        labelSize: 16
+                        interactive: !!mediaPopup.player && mediaPopup.player.canGoNext
+                        onActivated: mediaPopup.player.next()
                     }
                 }
             }
@@ -924,109 +682,59 @@ Item {
         id: sinkPopup
 
         popup: "audio"
-        implicitWidth: 500
-        implicitHeight: sinkList.implicitHeight + 64
+        implicitWidth: 440
 
         Column {
-            id: sinkList
+            width: parent.width
+            spacing: 4
 
-            anchors.fill: parent
-            anchors.margins: 16
-            spacing: 10
+            PopupHeader {
+                icon: "󰓃"
+                iconColor: theme.accent
+                title: "Audio output"
+                subtitle: "Choose where sound plays"
+            }
 
-            Row {
-                spacing: 10
-
-                Rectangle {
-                    width: 38
-                    height: 38
-                    radius: 19
-                    color: theme.accent
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "󰓃"
-                        color: theme.background
-                        font.pixelSize: 20
-                        font.bold: true
-                    }
-                }
-
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: 1
-
-                    Text {
-                        text: "Audio output"
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize + 2
-                        font.bold: true
-                    }
-
-                    Text {
-                        text: "Choose where sound plays"
-                        color: theme.textMuted
-                        font.pixelSize: root.appearance.textSize - 2
-                        font.bold: true
-                    }
-                }
+            Item {
+                width: 1
+                height: 4
             }
 
             Repeater {
                 model: Pipewire.nodes.values
 
-                delegate: Rectangle {
+                delegate: PopupRow {
                     required property var modelData
+
+                    readonly property bool selected: Pipewire.defaultAudioSink === modelData
 
                     visible: modelData.isSink
                     width: parent.width
-                    height: visible ? 52 : 0
-                    radius: root.appearance.radius
-                    color: Pipewire.defaultAudioSink === modelData || sinkHover.hovered
-                        ? theme.surfaceHover : theme.backgroundSecondary
+                    height: 36
 
-                    Behavior on color {
-                        ColorAnimation { duration: 140 }
-                    }
-
-                    HoverHandler {
-                        id: sinkHover
-                    }
-
-                    Rectangle {
-                        id: sinkIconBackground
+                    Text {
+                        id: sinkIconLabel
 
                         anchors.left: parent.left
-                        anchors.leftMargin: 10
+                        anchors.leftMargin: 8
                         anchors.verticalCenter: parent.verticalCenter
-                        width: 32
-                        height: 32
-                        radius: 16
-                        color: Pipewire.defaultAudioSink === modelData ? theme.accent : theme.surface
-
-                        Behavior on color {
-                            ColorAnimation { duration: 140 }
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: root.sinkIcon(modelData)
-                            color: Pipewire.defaultAudioSink === modelData ? theme.background : theme.textMuted
-                            font.pixelSize: 17
-                            font.bold: true
-                        }
+                        width: 20
+                        horizontalAlignment: Text.AlignHCenter
+                        text: root.sinkIcon(modelData)
+                        color: parent.selected ? theme.accent : theme.textMuted
+                        font.pixelSize: 16
                     }
 
                     Text {
-                        anchors.fill: parent
-                        anchors.leftMargin: 52
-                        anchors.rightMargin: 12
-                        verticalAlignment: Text.AlignVCenter
+                        anchors.left: sinkIconLabel.right
+                        anchors.leftMargin: 10
+                        anchors.right: parent.right
+                        anchors.rightMargin: 8
+                        anchors.verticalCenter: parent.verticalCenter
                         text: modelData.description
-                        color: Pipewire.defaultAudioSink === modelData ? theme.accent : theme.textMuted
+                        color: parent.selected ? theme.accent : theme.text
                         elide: Text.ElideRight
-                        font.pixelSize: root.appearance.textSize
-                        font.bold: true
+                        font.pixelSize: root.appearance.textSize - 1
                     }
 
                     TapHandler {
@@ -1046,9 +754,6 @@ Item {
 
         property var selectedTrayItem: null
         property var menuStack: []
-        readonly property int visibleItemCount: SystemTray.items.values.length
-            + (selectedTrayItem !== null
-                ? trayMenu.children.values.length + (menuStack.length > 0 ? 1 : 0) : 0)
 
         function returnToParentMenu() {
             const parentStack = menuStack.slice(0, -1);
@@ -1069,8 +774,6 @@ Item {
         }
         popup: "tray"
         implicitWidth: 220
-        implicitHeight: Math.max(88, Math.min(328,
-            visibleItemCount * 44 + 48))
 
         QsMenuOpener {
             id: trayMenu
@@ -1086,8 +789,7 @@ Item {
         Column {
             id: trayList
 
-            anchors.fill: parent
-            anchors.margins: 12
+            width: parent.width
             spacing: 2
 
             move: Transition {
@@ -1098,12 +800,10 @@ Item {
                 }
             }
 
-            Text {
+            PopupLabel {
                 visible: SystemTray.items.values.length === 0
                 text: "No tray items"
-                color: theme.textMuted
                 font.pixelSize: root.appearance.textSize - 1
-                font.bold: true
             }
 
             Repeater {
@@ -1126,31 +826,20 @@ Item {
                         }
                     }
 
-                    Rectangle {
+                    PopupRow {
                         id: trayItemRow
 
                         width: parent.width
-                        height: 42
-                        radius: root.appearance.radius
-                        color: trayItemHover.hovered ? theme.surfaceHover
-                            : trayPopup.selectedTrayItem === modelData ? theme.backgroundSecondary : "transparent"
-
-                        Behavior on color {
-                            ColorAnimation { duration: 140 }
-                        }
-
-                        HoverHandler {
-                            id: trayItemHover
-                        }
+                        height: 34
 
                         Image {
                             id: trayIcon
 
                             anchors.left: parent.left
-                            anchors.leftMargin: 10
+                            anchors.leftMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
-                            width: 20
-                            height: 20
+                            width: 18
+                            height: 18
                             source: modelData.icon
                             fillMode: Image.PreserveAspectFit
                             visible: status === Image.Ready
@@ -1158,26 +847,24 @@ Item {
 
                         Text {
                             anchors.left: parent.left
-                            anchors.leftMargin: 10
+                            anchors.leftMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
                             visible: !trayIcon.visible
                             text: "󰍜"
                             color: theme.textMuted
                             font.pixelSize: root.appearance.textSize
-                            font.bold: true
                         }
 
                         Text {
                             anchors.left: parent.left
-                            anchors.leftMargin: 42
+                            anchors.leftMargin: 36
                             anchors.right: parent.right
-                            anchors.rightMargin: 10
+                            anchors.rightMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
                             text: modelData.tooltipTitle || modelData.title || modelData.id
-                            color: theme.text
+                            color: trayItemRow.parent.expanded ? theme.accent : theme.text
                             elide: Text.ElideRight
                             font.pixelSize: root.appearance.textSize - 1
-                            font.bold: true
                         }
 
                         TapHandler {
@@ -1225,25 +912,18 @@ Item {
                             }
                         }
 
-                        Rectangle {
+                        PopupRow {
                             visible: trayPopup.menuStack.length > 0
                             width: parent.width
-                            height: 32
-                            radius: root.appearance.radius
-                            color: trayMenuBackHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-
-                            HoverHandler {
-                                id: trayMenuBackHover
-                            }
+                            height: 30
 
                             Text {
                                 anchors.left: parent.left
-                                anchors.leftMargin: 12
+                                anchors.leftMargin: 36
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: "󰅁  Back"
                                 color: theme.textMuted
                                 font.pixelSize: root.appearance.textSize - 1
-                                font.bold: true
                             }
 
                             TapHandler {
@@ -1254,41 +934,35 @@ Item {
                         Repeater {
                             model: trayMenu.children
 
-                            delegate: Rectangle {
+                            delegate: PopupRow {
                                 required property var modelData
 
                                 width: inlineMenu.width
-                                height: modelData.isSeparator ? 9 : 40
-                                radius: root.appearance.radius
-                                color: !modelData.isSeparator && trayMenuItemHover.hovered
-                                    ? theme.surfaceHover : theme.backgroundSecondary
-
-                                HoverHandler {
-                                    id: trayMenuItemHover
-                                    enabled: !modelData.isSeparator && modelData.enabled
-                                }
+                                height: modelData.isSeparator ? 9 : 30
+                                interactive: !modelData.isSeparator && modelData.enabled
 
                                 Rectangle {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    width: parent.width - 20
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 36
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: 8
                                     height: 1
-                                    anchors.horizontalCenter: parent.horizontalCenter
                                     visible: modelData.isSeparator
                                     color: theme.border
                                 }
 
                                 Text {
                                     anchors.left: parent.left
-                                    anchors.leftMargin: 12
+                                    anchors.leftMargin: 36
                                     anchors.right: parent.right
-                                    anchors.rightMargin: 12
+                                    anchors.rightMargin: 8
                                     anchors.verticalCenter: parent.verticalCenter
                                     visible: !modelData.isSeparator
                                     text: modelData.text + (modelData.hasChildren ? "  ›" : "")
                                     color: modelData.enabled ? theme.text : theme.textDisabled
                                     elide: Text.ElideRight
                                     font.pixelSize: root.appearance.textSize - 1
-                                    font.bold: true
                                 }
 
                                 TapHandler {
@@ -1315,153 +989,76 @@ Item {
         id: batteryPopup
 
         readonly property var battery: UPower.displayDevice
+        readonly property bool charging: !!battery && battery.state === UPowerDeviceState.Charging
 
         popup: "battery"
-        implicitWidth: 380
-        implicitHeight: 216
+        implicitWidth: 340
 
         Column {
-            anchors.fill: parent
-            anchors.margins: 18
-            spacing: 14
+            width: parent.width
+            spacing: 10
 
-            Row {
-                width: parent.width
-                spacing: 12
-
-                Rectangle {
-                    width: 48
-                    height: 48
-                    radius: 24
-                    color: batteryPopup.battery
-                        && batteryPopup.battery.state === UPowerDeviceState.Charging
-                        ? theme.yellow : theme.backgroundSecondary
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: root.batteryIcon(batteryPopup.battery)
-                        color: batteryPopup.battery
-                            && batteryPopup.battery.state === UPowerDeviceState.Charging
-                            ? theme.background : theme.yellow
-                        font.pixelSize: 25
-                        font.bold: true
-                    }
-                }
-
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: 2
-
-                    Text {
-                        text: root.batteryStateLabel(batteryPopup.battery)
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize + 3
-                        font.bold: true
-                    }
-
-                    Text {
-                        text: batteryPopup.battery
-                            ? Math.round(batteryPopup.battery.percentage * 100) + "%"
-                            : "No battery detected"
-                        color: theme.textMuted
-                        font.pixelSize: root.appearance.textSize - 1
-                        font.bold: true
-                    }
-                }
+            PopupHeader {
+                icon: root.batteryIcon(batteryPopup.battery)
+                iconColor: batteryPopup.charging ? theme.yellow : theme.textMuted
+                title: root.batteryStateLabel(batteryPopup.battery)
+                subtitle: batteryPopup.battery
+                    ? Math.round(batteryPopup.battery.percentage * 100) + "%"
+                    : "No battery detected"
             }
 
-            Rectangle {
+            PopupProgress {
                 width: parent.width
-                height: 8
-                radius: 4
-                color: theme.backgroundSecondary
-
-                Rectangle {
-                    width: parent.width * (batteryPopup.battery
-                        ? Math.max(0, Math.min(1, batteryPopup.battery.percentage)) : 0)
-                    height: parent.height
-                    radius: parent.radius
-                    color: batteryPopup.battery
-                        && batteryPopup.battery.state === UPowerDeviceState.Charging
-                        ? theme.yellow : theme.green
-                }
-            }
-
-            Rectangle {
-                width: parent.width
-                height: 1
-                color: theme.border
+                fraction: batteryPopup.battery ? batteryPopup.battery.percentage : 0
+                fillColor: batteryPopup.charging ? theme.yellow : theme.green
             }
 
             Row {
                 width: parent.width
-                spacing: 12
+                spacing: 8
 
-                Column {
-                    width: (parent.width - parent.spacing * 2) / 3
-                    spacing: 3
-
-                    Text {
-                        text: "BATTERY HEALTH"
-                        color: theme.textMuted
-                        font.pixelSize: 10
-                        font.bold: true
-                    }
-
-                    Text {
-                        text: root.systemMonitor.batteryHealth !== ""
-                            ? root.systemMonitor.batteryHealth
-                            : batteryPopup.battery && batteryPopup.battery.healthSupported
-                                ? Math.round(batteryPopup.battery.healthPercentage * 100) + "%"
+                Repeater {
+                    model: [
+                        {
+                            label: "Health",
+                            value: root.systemMonitor.batteryHealth !== ""
+                                ? root.systemMonitor.batteryHealth
+                                : batteryPopup.battery && batteryPopup.battery.healthSupported
+                                    ? Math.round(batteryPopup.battery.healthPercentage * 100) + "%"
+                                    : "Unavailable"
+                        },
+                        {
+                            label: "Power draw",
+                            value: batteryPopup.battery
+                                ? Math.abs(batteryPopup.battery.changeRate).toFixed(1) + " W"
                                 : "Unavailable"
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize + 1
-                        font.bold: true
-                    }
-                }
+                        },
+                        {
+                            label: batteryPopup.charging ? "Time to full" : "Time left",
+                            value: batteryPopup.charging
+                                ? (root.systemMonitor.batteryTimeToFull || "Calculating")
+                                : (root.systemMonitor.batteryTimeToEmpty || "Calculating")
+                        }
+                    ]
 
-                Column {
-                    width: (parent.width - parent.spacing * 2) / 3
-                    spacing: 3
+                    delegate: Column {
+                        required property var modelData
 
-                    Text {
-                        text: "POWER DRAW"
-                        color: theme.textMuted
-                        font.pixelSize: 10
-                        font.bold: true
-                    }
+                        width: (parent.width - parent.spacing * 2) / 3
+                        spacing: 2
 
-                    Text {
-                        text: batteryPopup.battery
-                            ? Math.abs(batteryPopup.battery.changeRate).toFixed(1) + " W"
-                            : "Unavailable"
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize + 1
-                        font.bold: true
-                    }
-                }
+                        PopupLabel {
+                            width: parent.width
+                            text: modelData.label
+                        }
 
-                Column {
-                    width: (parent.width - parent.spacing * 2) / 3
-                    spacing: 3
-
-                    Text {
-                        text: batteryPopup.battery
-                            && batteryPopup.battery.state === UPowerDeviceState.Charging
-                            ? "TIME TO FULL" : "TIME LEFT"
-                        color: theme.textMuted
-                        font.pixelSize: 10
-                        font.bold: true
-                    }
-
-                    Text {
-                        text: batteryPopup.battery
-                            && batteryPopup.battery.state === UPowerDeviceState.Charging
-                            ? (root.systemMonitor.batteryTimeToFull || "Calculating")
-                            : (root.systemMonitor.batteryTimeToEmpty || "Calculating")
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize + 1
-                        font.bold: true
+                        Text {
+                            width: parent.width
+                            text: modelData.value
+                            color: theme.text
+                            elide: Text.ElideRight
+                            font.pixelSize: root.appearance.textSize - 1
+                        }
                     }
                 }
             }
@@ -1564,8 +1161,7 @@ Item {
             }
         }
         popup: "bluetooth"
-        implicitWidth: 400
-        implicitHeight: Math.max(132, bluetoothList.implicitHeight + 64)
+        implicitWidth: 380
 
         onRevealChanged: {
             if (reveal > 0 && adapter && adapter.enabled)
@@ -1573,104 +1169,38 @@ Item {
         }
 
         Column {
-            id: bluetoothList
+            width: parent.width
+            spacing: 4
 
-            anchors.fill: parent
-            anchors.margins: 16
-            spacing: 10
+            PopupHeader {
+                icon: "󰂯"
+                iconColor: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled
+                    ? theme.accent : theme.textMuted
+                title: "Bluetooth"
+                subtitle: !bluetoothPopup.adapter ? "No adapter found"
+                    : bluetoothPopup.enableError !== "" ? bluetoothPopup.enableError
+                    : !bluetoothPopup.adapter.enabled ? "Bluetooth is off"
+                    : bluetoothPopup.adapter.discovering ? "Scanning for devices"
+                    : "Choose a device"
 
-            Row {
-                width: parent.width
-                spacing: 10
-
-                Rectangle {
-                    width: 38
-                    height: 38
-                    radius: 19
-                    color: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled
-                        ? theme.blue : theme.backgroundSecondary
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "󰂯"
-                        color: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled
-                            ? theme.background : theme.textMuted
-                        font.pixelSize: 20
-                        font.bold: true
-                    }
-                }
-
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: 1
-
-                    Text {
-                        text: "Bluetooth"
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize + 2
-                        font.bold: true
-                    }
-
-                    Text {
-                        text: !bluetoothPopup.adapter ? "No adapter found"
-                            : bluetoothPopup.enableError !== "" ? bluetoothPopup.enableError
-                            : !bluetoothPopup.adapter.enabled ? "Bluetooth is off"
-                            : bluetoothPopup.adapter.discovering ? "Scanning for devices"
-                            : "Choose a device"
-                        color: theme.textMuted
-                        font.pixelSize: root.appearance.textSize - 2
-                        font.bold: true
-                    }
-                }
-
-                Item {
-                    width: Math.max(0, parent.width - 38 - parent.children[1].implicitWidth
-                        - bluetoothToggle.width - (parent.spacing * 3))
-                    height: 1
-                }
-
-                Rectangle {
-                    id: bluetoothToggle
-
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 48
-                    height: 28
-                    radius: root.appearance.radius
-                    color: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled
-                        ? theme.blue : theme.backgroundSecondary
-
-                    Rectangle {
-                        x: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled
-                            ? parent.width - width - 3 : 3
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: 22
-                        height: 22
-                        radius: 11
-                        color: theme.text
-
-                        Behavior on x {
-                            NumberAnimation {
-                                duration: 160
-                                easing.type: Easing.OutCubic
-                            }
-                        }
-                    }
-
-                    TapHandler {
-                        enabled: bluetoothPopup.adapter !== null
-                        onTapped: bluetoothPopup.setEnabled(!bluetoothPopup.adapter.enabled)
-                    }
+                PopupSwitch {
+                    checked: !!bluetoothPopup.adapter && bluetoothPopup.adapter.enabled
+                    enabled: bluetoothPopup.adapter !== null
+                    onToggled: bluetoothPopup.setEnabled(!bluetoothPopup.adapter.enabled)
                 }
             }
 
-            Text {
+            Item {
+                width: 1
+                height: 4
+            }
+
+            PopupLabel {
                 visible: bluetoothPopup.adapter !== null
                     && bluetoothPopup.adapter.enabled
                     && bluetoothPopup.devices.length === 0
                 text: "No devices found yet"
-                color: theme.textMuted
                 font.pixelSize: root.appearance.textSize - 1
-                font.bold: true
             }
 
             Flickable {
@@ -1687,71 +1217,59 @@ Item {
                     id: bluetoothRows
 
                     width: parent.width
-                    spacing: 10
+                    spacing: 2
 
                     Repeater {
                         model: bluetoothPopup.devices
 
-                        delegate: Rectangle {
+                        delegate: PopupRow {
+                            id: deviceRow
+
                             required property var modelData
 
                             width: parent.width
-                            height: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled ? 52 : 0
+                            height: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled ? 36 : 0
                             visible: height > 0
-                            radius: root.appearance.radius
-                            color: modelData.connected || bluetoothDeviceHover.hovered
-                                ? theme.surfaceHover : theme.backgroundSecondary
-
-                            Behavior on color {
-                                ColorAnimation { duration: 140 }
-                            }
-
-                            HoverHandler {
-                                id: bluetoothDeviceHover
-                            }
 
                             Text {
                                 anchors.left: parent.left
-                                anchors.leftMargin: 12
+                                anchors.leftMargin: 8
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: "󰂯"
-                                color: modelData.connected ? theme.blue : theme.textMuted
-                                font.pixelSize: 19
-                                font.bold: true
+                                color: deviceRow.modelData.connected ? theme.accent : theme.textMuted
+                                font.pixelSize: 16
                             }
 
                             Text {
                                 anchors.fill: parent
-                                anchors.leftMargin: 44
-                                anchors.rightMargin: 86
+                                anchors.leftMargin: 36
+                                anchors.rightMargin: 80
                                 verticalAlignment: Text.AlignVCenter
-                                text: BluetoothDevices.label(modelData)
-                                color: modelData.connected ? theme.blue : theme.text
+                                text: BluetoothDevices.label(deviceRow.modelData)
+                                color: deviceRow.modelData.connected ? theme.accent : theme.text
                                 elide: Text.ElideRight
-                                font.pixelSize: root.appearance.textSize
-                                font.bold: true
+                                font.pixelSize: root.appearance.textSize - 1
                             }
 
                             Text {
                                 anchors.right: parent.right
-                                anchors.rightMargin: 12
+                                anchors.rightMargin: 8
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: modelData.connected ? "Connected"
-                                    : modelData.pairing ? "Pairing"
-                                    : modelData.paired ? "Connect" : "Pair"
-                                color: modelData.connected ? theme.blue : theme.textMuted
+                                text: deviceRow.modelData.connected ? "Connected"
+                                    : deviceRow.modelData.pairing ? "Pairing"
+                                    : deviceRow.modelData.paired ? "Connect" : "Pair"
+                                color: deviceRow.modelData.connected ? theme.accent : theme.textMuted
                                 font.pixelSize: root.appearance.textSize - 2
-                                font.bold: true
                             }
 
                             TapHandler {
                                 onTapped: {
-                                    if (modelData.connected)
-                                        modelData.disconnect();
-                                    else if (modelData.paired)
-                                        modelData.connect();
+                                    if (deviceRow.modelData.connected)
+                                        deviceRow.modelData.disconnect();
+                                    else if (deviceRow.modelData.paired)
+                                        deviceRow.modelData.connect();
                                     else
-                                        bluetoothPopup.pair(modelData);
+                                        bluetoothPopup.pair(deviceRow.modelData);
                                 }
                             }
                         }
@@ -1770,8 +1288,6 @@ Item {
         popup: "network"
         implicitWidth: Math.min(420, Math.max(300,
             root.barWindow.width - root.appearance.horizontalPadding * 2))
-        implicitHeight: root.passwordNetwork ? 304 : networkList.implicitHeight + 56
-        revealScale: 0.96
 
         onRevealChanged: {
             if (reveal > 0 && wifi)
@@ -1779,292 +1295,165 @@ Item {
         }
 
         Column {
-            id: networkList
+            width: parent.width
 
-            anchors.fill: parent
-            anchors.margins: 16
-            spacing: 10
-
-            Row {
+            Column {
                 width: parent.width
-                spacing: 10
+                visible: root.passwordNetwork === null
+                spacing: 4
 
-                Rectangle {
-                    width: 38
-                    height: 38
-                    radius: 19
-                    color: Networking.wifiEnabled ? theme.purple : theme.backgroundSecondary
+                PopupHeader {
+                    icon: "󰤨"
+                    iconColor: Networking.wifiEnabled ? theme.accent : theme.textMuted
+                    title: "Wi-Fi"
+                    subtitle: networkPopup.wifi && networkPopup.wifi.connected
+                        ? "Connected to " + root.connectedNetworkName(networkPopup.wifi)
+                        : Networking.wifiEnabled ? "Choose a network" : "Wi-Fi is off"
 
-                    Behavior on color {
-                        ColorAnimation { duration: 140 }
-                    }
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "󰤨"
-                        color: Networking.wifiEnabled ? theme.background : theme.textMuted
-                        font.pixelSize: 20
-                        font.bold: true
-                    }
-                }
-
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: 1
-
-                    Text {
-                        text: "Wi-Fi"
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize + 2
-                        font.bold: true
-                    }
-
-                    Text {
-                        text: networkPopup.wifi && networkPopup.wifi.connected
-                            ? "Connected to " + root.connectedNetworkName(networkPopup.wifi)
-                            : Networking.wifiEnabled ? "Choose a network" : "Wi-Fi is off"
-                        color: theme.textMuted
-                        font.pixelSize: root.appearance.textSize - 2
-                        font.bold: true
+                    PopupSwitch {
+                        checked: Networking.wifiEnabled
+                        onToggled: Networking.wifiEnabled = !Networking.wifiEnabled
                     }
                 }
 
                 Item {
-                    width: Math.max(0, parent.width - 38 - parent.children[1].implicitWidth
-                        - wifiToggle.width - (parent.spacing * 3))
-                    height: 1
+                    width: 1
+                    height: 4
                 }
 
-                Rectangle {
-                    id: wifiToggle
-
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 48
-                    height: 28
-                    radius: root.appearance.radius
-                    color: Networking.wifiEnabled ? theme.purple : theme.backgroundSecondary
-
-                    Behavior on color {
-                        ColorAnimation { duration: 140 }
-                    }
-
-                    Rectangle {
-                        x: Networking.wifiEnabled ? parent.width - width - 3 : 3
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: 22
-                        height: 22
-                        radius: 11
-                        color: theme.text
-
-                        Behavior on x {
-                            NumberAnimation {
-                                duration: 160
-                                easing.type: Easing.OutCubic
-                            }
-                        }
-                    }
-
-                    TapHandler {
-                        onTapped: Networking.wifiEnabled = !Networking.wifiEnabled
-                    }
-                }
-            }
-
-            TextField {
-                id: networkSearch
-
-                width: parent.width
-                height: 38
-                visible: Networking.wifiEnabled
-                placeholderText: "Search networks"
-                text: networkPopup.searchQuery
-                color: theme.text
-                placeholderTextColor: Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.6)
-                font.pixelSize: root.appearance.textSize - 1
-                font.bold: true
-                leftPadding: 34
-                rightPadding: 30
-
-                background: Rectangle {
-                    radius: root.appearance.radius
-                    color: theme.backgroundSecondary
-                    border.color: networkSearch.activeFocus ? theme.purple : theme.border
-                    border.width: 1
-                }
-
-                Text {
-                    anchors.left: parent.left
-                    anchors.leftMargin: 11
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "󰍉"
-                    color: theme.textMuted
-                    font.pixelSize: 16
-                }
-
-                Text {
-                    anchors.right: parent.right
-                    anchors.rightMargin: 11
-                    anchors.verticalCenter: parent.verticalCenter
-                    visible: networkSearch.text !== ""
-                    text: "󰅖"
-                    color: theme.textMuted
-                    font.pixelSize: 15
-
-                    TapHandler {
-                        onTapped: networkSearch.clear()
-                    }
-                }
-
-                onTextEdited: networkPopup.searchQuery = text
-            }
-
-            Flickable {
-                width: parent.width
-                height: Networking.wifiEnabled
-                    ? Math.min(260, networkRows.implicitHeight) : 0
-                contentWidth: width
-                contentHeight: networkRows.implicitHeight
-                clip: true
-                boundsBehavior: Flickable.StopAtBounds
-                visible: height > 0
-
-                Column {
-                    id: networkRows
+                PopupTextField {
+                    id: networkSearch
 
                     width: parent.width
-                    spacing: 8
+                    height: 32
+                    visible: Networking.wifiEnabled
+                    placeholderText: "Search networks"
+                    text: networkPopup.searchQuery
+                    leftPadding: 30
+                    rightPadding: 28
 
-                    Repeater {
-                        model: networkPopup.wifi ? networkPopup.wifi.networks : []
+                    Text {
+                        anchors.left: parent.left
+                        anchors.leftMargin: 10
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "󰍉"
+                        color: theme.textMuted
+                        font.pixelSize: 14
+                    }
 
-                        delegate: Rectangle {
-                            required property var modelData
+                    Text {
+                        anchors.right: parent.right
+                        anchors.rightMargin: 10
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: networkSearch.text !== ""
+                        text: "󰅖"
+                        color: theme.textMuted
+                        font.pixelSize: 14
 
-                            readonly property bool matchesSearch: modelData.name.toLowerCase()
-                                .includes(networkPopup.searchQuery.trim().toLowerCase())
+                        TapHandler {
+                            onTapped: networkSearch.clear()
+                        }
+                    }
 
-                            width: parent.width
-                            height: Networking.wifiEnabled && matchesSearch ? 52 : 0
-                            visible: height > 0
-                            radius: root.appearance.radius
-                            color: modelData.connected || networkHover.hovered
-                                ? theme.surfaceHover : theme.backgroundSecondary
+                    onTextEdited: networkPopup.searchQuery = text
+                }
 
-                            Behavior on height {
-                                NumberAnimation {
-                                    duration: 140
-                                    easing.type: Easing.OutCubic
+                Flickable {
+                    width: parent.width
+                    height: Networking.wifiEnabled
+                        ? Math.min(260, networkRows.implicitHeight) : 0
+                    contentWidth: width
+                    contentHeight: networkRows.implicitHeight
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+                    visible: height > 0
+
+                    Column {
+                        id: networkRows
+
+                        width: parent.width
+                        spacing: 2
+
+                        Repeater {
+                            model: networkPopup.wifi ? networkPopup.wifi.networks : []
+
+                            delegate: PopupRow {
+                                id: networkRow
+
+                                required property var modelData
+
+                                readonly property bool matchesSearch: modelData.name.toLowerCase()
+                                    .includes(networkPopup.searchQuery.trim().toLowerCase())
+
+                                width: parent.width
+                                height: Networking.wifiEnabled && matchesSearch ? 36 : 0
+                                visible: height > 0
+
+                                Behavior on height {
+                                    NumberAnimation {
+                                        duration: 140
+                                        easing.type: Easing.OutCubic
+                                    }
                                 }
-                            }
 
-                            Behavior on color {
-                                ColorAnimation { duration: 140 }
-                            }
+                                Text {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 8
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: root.wifiIcon(networkRow.modelData)
+                                    color: networkRow.modelData.connected ? theme.accent : theme.textMuted
+                                    font.pixelSize: 16
+                                }
 
-                            HoverHandler {
-                                id: networkHover
-                            }
+                                Text {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 36
+                                    anchors.rightMargin: 40
+                                    verticalAlignment: Text.AlignVCenter
+                                    text: networkRow.modelData.name
+                                    color: networkRow.modelData.connected ? theme.accent : theme.text
+                                    elide: Text.ElideRight
+                                    font.pixelSize: root.appearance.textSize - 1
+                                }
 
-                            Text {
-                                anchors.left: parent.left
-                                anchors.leftMargin: 12
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: root.wifiIcon(modelData)
-                                color: modelData.connected ? theme.purple : theme.textMuted
-                                font.pixelSize: 19
-                                font.bold: true
-                            }
+                                Text {
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: 8
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: networkRow.modelData.connected ? "󰄬"
+                                        : networkRow.modelData.security === WifiSecurityType.Open ? "" : "󰌾"
+                                    color: networkRow.modelData.connected ? theme.accent : theme.textMuted
+                                    font.pixelSize: 14
+                                }
 
-                            Text {
-                                anchors.fill: parent
-                                anchors.leftMargin: 44
-                                anchors.rightMargin: 56
-                                verticalAlignment: Text.AlignVCenter
-                                text: modelData.name
-                                color: modelData.connected ? theme.purple : theme.textMuted
-                                elide: Text.ElideRight
-                                font.pixelSize: root.appearance.textSize
-                                font.bold: true
-                            }
-
-                            Text {
-                                anchors.right: parent.right
-                                anchors.rightMargin: 12
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: modelData.connected ? "󰄬"
-                                    : modelData.security === WifiSecurityType.Open ? "" : "󰌾"
-                                color: modelData.connected ? theme.purple : theme.textMuted
-                                font.pixelSize: 16
-                                font.bold: true
-                            }
-
-                            TapHandler {
-                                onTapped: root.manageNetwork(modelData)
+                                TapHandler {
+                                    onTapped: root.manageNetwork(networkRow.modelData)
+                                }
                             }
                         }
                     }
                 }
             }
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            radius: parent.radius
-            color: theme.surface
-            visible: root.passwordNetwork !== null
 
             Column {
-                anchors.fill: parent
-                anchors.margins: 20
-                spacing: 12
+                width: parent.width
+                visible: root.passwordNetwork !== null
+                spacing: 8
 
-                Rectangle {
-                    width: 42
-                    height: 42
-                    radius: 21
-                    color: theme.purple
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "󰌾"
-                        color: theme.background
-                        font.pixelSize: 20
-                        font.bold: true
-                    }
+                PopupHeader {
+                    icon: "󰌾"
+                    iconColor: theme.accent
+                    title: root.passwordNetwork ? root.passwordNetwork.name : ""
+                    subtitle: "Enter the Wi-Fi password to connect."
                 }
 
-                Text {
-                    text: root.passwordNetwork ? root.passwordNetwork.name : ""
-                    color: theme.text
-                    font.pixelSize: root.appearance.textSize + 3
-                    font.bold: true
-                }
-
-                Text {
-                    text: "Enter the Wi-Fi password to connect."
-                    color: theme.textMuted
-                    font.pixelSize: root.appearance.textSize - 1
-                    font.bold: true
-                }
-
-                TextField {
+                PopupTextField {
                     id: passwordInput
 
                     width: parent.width
-                    height: 40
+                    height: 32
                     echoMode: TextInput.Password
                     placeholderText: "Password"
-                    color: theme.text
-                    placeholderTextColor: Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.6)
-                    font.pixelSize: root.appearance.textSize
-                    font.bold: true
-                    selectByMouse: true
-                    background: Rectangle {
-                        radius: root.appearance.radius
-                        color: theme.backgroundSecondary
-                        border.color: passwordInput.activeFocus ? theme.purple : "transparent"
-                        border.width: 1
-                    }
                     onAccepted: {
                         if (text !== "" && root.passwordNetwork) {
                             root.passwordNetwork.connectWithPsk(text);
@@ -2075,67 +1464,27 @@ Item {
                 }
 
                 Row {
-                    spacing: 8
+                    anchors.right: parent.right
+                    spacing: 4
 
-                    Rectangle {
-                        width: 78
-                        height: 34
-                        radius: root.appearance.radius
-                        color: cancelHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-
-                        Behavior on color {
-                            ColorAnimation { duration: 140 }
-                        }
-
-                        HoverHandler {
-                            id: cancelHover
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Cancel"
-                            color: theme.text
-                            font.pixelSize: root.appearance.textSize - 1
-                            font.bold: true
-                        }
-
-                        TapHandler {
-                            onTapped: {
-                                root.passwordNetwork = null;
-                                passwordInput.text = "";
-                            }
+                    PopupButton {
+                        width: 72
+                        label: "Cancel"
+                        onActivated: {
+                            root.passwordNetwork = null;
+                            passwordInput.text = "";
                         }
                     }
 
-                    Rectangle {
-                        width: 86
-                        height: 34
-                        radius: root.appearance.radius
-                        color: connectHover.hovered ? theme.accentHover : theme.purple
-
-                        Behavior on color {
-                            ColorAnimation { duration: 140 }
-                        }
-
-                        HoverHandler {
-                            id: connectHover
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Connect"
-                            color: theme.background
-                            font.pixelSize: root.appearance.textSize - 1
-                            font.bold: true
-                        }
-
-                        TapHandler {
-                            onTapped: {
-                                if (passwordInput.text !== "" && root.passwordNetwork) {
-                                    root.passwordNetwork.connectWithPsk(passwordInput.text);
-                                    root.passwordNetwork = null;
-                                    passwordInput.text = "";
-                                }
+                    PopupButton {
+                        width: 80
+                        label: "Connect"
+                        labelColor: theme.accent
+                        onActivated: {
+                            if (passwordInput.text !== "" && root.passwordNetwork) {
+                                root.passwordNetwork.connectWithPsk(passwordInput.text);
+                                root.passwordNetwork = null;
+                                passwordInput.text = "";
                             }
                         }
                     }
