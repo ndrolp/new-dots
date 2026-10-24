@@ -6,8 +6,8 @@ import "../config" as Config
 // The parts every section of the settings panel is built from. They share the
 // popups' minimal look (transparent, hairline borders, accent for focus and
 // choice, only the section title bold), a little larger for a big window.
-// Pointer events don't reach items under qmltestrunner offscreen, so taps are
-// checked through the signals the parts expose, and typing with key events.
+// Pointer events don't reach items under qmltestrunner offscreen, so taps and
+// hover are checked in the renders instead; typing is checked with key events.
 TestCase {
     name: "SettingsParts"
     width: 600
@@ -55,6 +55,27 @@ TestCase {
         Panels.SettingsHint {
             text: "Fills in the sizes below"
         }
+    }
+
+    Component {
+        id: switchRow
+
+        Panels.SettingsSwitchRow {
+            width: 260
+            label: "Transparent bar"
+        }
+    }
+
+    // The text item showing `text` inside `item`.
+    function textOf(item, text) {
+        if (item.text === text)
+            return item;
+        for (let i = 0; i < item.children.length; i++) {
+            const found = textOf(item.children[i], text);
+            if (found)
+                return found;
+        }
+        return null;
     }
 
     function make(component, properties) {
@@ -106,5 +127,26 @@ TestCase {
         compare(item.font.pixelSize, 12);
         compare(item.color, theme.textMuted);
         verify(!item.font.bold);
+    }
+
+    // A switch row is transparent until hovered, its label on the left and a
+    // hairline pill switch on the right.
+    function test_aSwitchRowAtRestIsTransparentWithItsLabelAndAnOutlinedSwitch() {
+        const item = make(switchRow);
+        const rowLabel = textOf(item, "Transparent bar");
+
+        compare(item.color, Qt.rgba(0, 0, 0, 0));
+        compare(item.height, 40);
+        compare(rowLabel.color, theme.text);
+        verify(!rowLabel.font.bold);
+        compare(item.switchItem.color, Qt.rgba(0, 0, 0, 0));
+        compare(item.switchItem.border.color, theme.border);
+        verify(item.switchItem.x > rowLabel.x + rowLabel.width);
+    }
+
+    function test_aCheckedSwitchRowFillsItsSwitchWithTheAccent() {
+        const item = make(switchRow, { checked: true });
+
+        tryCompare(item.switchItem, "color", theme.accent, 500);
     }
 }
