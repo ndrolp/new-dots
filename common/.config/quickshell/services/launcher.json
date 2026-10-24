@@ -3,25 +3,10 @@
         "code"
     ],
     "recent": [
+        "blueman-manager",
         "com.obsproject.Studio",
         "org.gnome.Nautilus",
         "org.kde.plasma.emojier",
-        "com.github.th-ch.youtube-music",
-        "obsidian",
-        "com.microsoft.VSCode",
-        "blueman-manager",
-        "org.gnome.Calculator",
-        "com.rtosta.zapzap",
-        "ai.storyteller.photocraft",
-        "chromium",
-        "com.valvesoftware.SteamLink",
-        "gimp",
-        "steam",
-        "org.gnome.Snapshot",
-        "proton.vpn.app.gtk",
-        "ranger",
-        "org.gnome.Software",
-        "openlogi",
-        "org.gnome.Weather"
+        "com.github.th-ch.youtube-music"
     ]
 }
