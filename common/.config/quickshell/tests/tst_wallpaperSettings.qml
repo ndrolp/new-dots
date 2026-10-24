@@ -142,6 +142,22 @@ TestCase {
         compare(tiles(built.item).map(tile => tile.wallpaperPath), ["/walls/v/tower.png"]);
     }
 
+    function test_theViewsAreASegmentedChoiceThatSwitchesWhatIsShown() {
+        const built = make();
+        const views = viewChoice(built.item);
+        const list = all(built.item, child => child instanceof GridView)[0];
+
+        compare(views.options.map(option => option.label), ["Selection", "Locations", "Schedule"]);
+        compare(views.value, "Selection");
+        verify(list.visible);
+
+        views.chosen("Locations");
+
+        compare(views.value, "Locations");
+        verify(!list.visible);
+        verify(textOf(built.item, "Wallpaper folders").visible);
+    }
+
     function test_theWallpaperListStaysFullWidth() {
         const built = make();
         const list = all(built.item, child => child instanceof GridView)[0];

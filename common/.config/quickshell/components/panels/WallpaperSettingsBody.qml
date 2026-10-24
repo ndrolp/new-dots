@@ -35,45 +35,12 @@ Column {
     Component.onCompleted: ensureWallpaperMonitor()
     onDisplaysChanged: ensureWallpaperMonitor()
 
-    Row {
-        spacing: 6
-
-        Repeater {
-            model: ["Selection", "Locations", "Schedule"]
-
-            delegate: Rectangle {
-                required property string modelData
-
-                width: viewLabel.implicitWidth + 20
-                height: 30
-                radius: root.appearance.radius
-                color: root.wallpaperView === modelData
-                    ? theme.accent : viewHover.hovered
-                        ? theme.surfaceHover : theme.backgroundSecondary
-
-                Behavior on color {
-                    ColorAnimation { duration: 140 }
-                }
-
-                HoverHandler {
-                    id: viewHover
-                }
-
-                Text {
-                    id: viewLabel
-
-                    anchors.centerIn: parent
-                    text: modelData
-                    color: root.wallpaperView === modelData ? theme.background : theme.text
-                    font.pixelSize: root.appearance.textSize - 2
-                    font.bold: true
-                }
-
-                TapHandler {
-                    onTapped: root.wallpaperView = modelData
-                }
-            }
-        }
+    Panels.SettingsChoice {
+        width: Math.min(parent.width, 360)
+        appearance: root.appearance
+        options: ["Selection", "Locations", "Schedule"].map(view => ({ label: view, value: view }))
+        value: root.wallpaperView
+        onChosen: view => root.wallpaperView = view
     }
 
     Column {
@@ -81,11 +48,11 @@ Column {
         spacing: 8
         visible: root.wallpaperView === "Locations"
 
-        Text {
-            text: "WALLPAPER FOLDERS"
-            color: theme.textMuted
-            font.pixelSize: 11
-            font.bold: true
+        Panels.SettingsHeading {
+            width: parent.width
+            appearance: root.appearance
+            text: "Wallpaper folders"
+            topPadding: 4
         }
 
         SettingsInput {
