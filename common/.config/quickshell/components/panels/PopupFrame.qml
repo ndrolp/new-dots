@@ -1,12 +1,10 @@
 import Quickshell
 import QtQuick
-import QtQuick.Effects
-import "../../config" as Config
 import "PopupPlacement.js" as PopupPlacement
 
 // The frame every popup shares: the window placed next to the bar element
-// that opened it, the surface with its border and shadow, and the opening and
-// closing animation. A popup only puts its contents inside.
+// that opened it, hosting the popup surface. A popup only puts its contents
+// inside; the window is as tall as they are unless the popup says otherwise.
 PopupWindow {
     id: frame
 
@@ -19,14 +17,10 @@ PopupWindow {
     property bool open: false
     // Where the popup opens when it isn't under its element: "left" or "right".
     property string edge: "right"
-    property int revealDuration: 180
-    // How far the surface slides down while opening.
-    property real revealOffset: 12
-    // The scale the surface grows from while opening.
-    property real revealScale: 1
-    property bool clipContents: false
-    property real reveal: open ? 1 : 0
-    default property alias contents: surface.data
+    // Room around the surface inside the window.
+    readonly property real inset: 12
+    property alias reveal: surface.reveal
+    default property alias contents: surface.contents
     // Hidden while still open, e.g. after losing focus.
     signal dismissed()
 
@@ -60,47 +54,17 @@ PopupWindow {
     })
     color: "transparent"
 
-    Behavior on reveal {
-        NumberAnimation {
-            duration: frame.revealDuration
-            easing.type: Easing.OutCubic
-        }
-    }
+    implicitHeight: surface.implicitHeight + inset * 2
 
-    Config.Theme {
-        id: theme
-    }
-
-    Rectangle {
+    PopupSurface {
         id: surface
 
-        anchors.fill: parent
-        anchors.margins: 12
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.margins: frame.inset
+        height: implicitHeight
+        open: frame.open
         radius: frame.appearance.radius
-        color: theme.surface
-        opacity: frame.reveal
-        border.color: theme.border
-        border.width: 1
-        clip: frame.clipContents
-        transform: Translate { y: -frame.revealOffset * (1 - frame.reveal) }
-        scale: frame.revealScale + (1 - frame.revealScale) * frame.reveal
-        transformOrigin: Item.TopRight
-
-        layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: "#73000000"
-            shadowBlur: 0.65
-            shadowVerticalOffset: 6
-        }
-
-        Behavior on scale {
-            enabled: frame.revealScale !== 1
-
-            NumberAnimation {
-                duration: frame.revealDuration
-                easing.type: Easing.OutCubic
-            }
-        }
     }
 }
