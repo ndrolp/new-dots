@@ -271,6 +271,39 @@ TestCase {
         compare(BarProfileModel.elementEnabled(barElements, "cava"), true);
     }
 
+    function test_cavaDrawsTwelveBlueBarsThreePixelsWideByDefault() {
+        const barElements = BarProfileModel.normalizeBarElements({});
+
+        compare(BarProfileModel.elementOptions(barElements, "cava"),
+            { barCount: 12, barWidth: 3, color: "blue" });
+    }
+
+    function test_cavaKeepsItsBarCountAndWidthWithinTheirRanges() {
+        const tooMuch = BarProfileModel.normalizeBarElements({
+            right: [{ id: "cava", enabled: true, options: { barCount: 40, barWidth: 12 } }]
+        });
+        const tooLittle = BarProfileModel.normalizeBarElements({
+            right: [{ id: "cava", enabled: true, options: { barCount: 2, barWidth: 0 } }]
+        });
+
+        compare(BarProfileModel.elementOption(tooMuch, "cava", "barCount"), 32);
+        compare(BarProfileModel.elementOption(tooMuch, "cava", "barWidth"), 8);
+        compare(BarProfileModel.elementOption(tooLittle, "cava", "barCount"), 6);
+        compare(BarProfileModel.elementOption(tooLittle, "cava", "barWidth"), 1);
+    }
+
+    function test_cavaDrawsOnlyTheThemesNamedColors() {
+        compare(BarProfileModel.elementOptionLimits.cava.color.choices,
+            ["accent", "blue", "green", "yellow", "orange", "red", "purple", "text"]);
+
+        const barElements = BarProfileModel.normalizeBarElements({
+            right: [{ id: "cava", enabled: true, options: { color: "#ff0000" } }]
+        });
+        compare(BarProfileModel.elementOption(barElements, "cava", "color"), "blue");
+        compare(BarProfileModel.elementOption(BarProfileModel.setElementOption(barElements,
+            "cava", "color", "purple"), "cava", "color"), "purple");
+    }
+
     function test_changingAnElementOptionIsAPendingChange() {
         const state = fixtures.startedBarState();
         const barElements = BarProfileModel.editedProfile(state).barElements;
@@ -279,5 +312,28 @@ TestCase {
             barElements, "audio", "meterVisible", true) });
 
         verify(BarProfileModel.isModified(after));
+    }
+
+    function test_cavasOptionsArePendingChangesUntilSavedOrDiscarded() {
+        const state = fixtures.startedBarState();
+        const name = state.editingBarProfile;
+        const barElements = BarProfileModel.editedProfile(state).barElements;
+
+        const after = fixtures.edited(state, { barElements: BarProfileModel.setElementOption(
+            BarProfileModel.setElementOption(barElements, "cava", "barCount", 20),
+            "cava", "color", "red") });
+        const drawn = BarProfileModel.profileValue(after, name, "barElements");
+
+        verify(BarProfileModel.isModified(after));
+        compare(BarProfileModel.elementOption(drawn, "cava", "barCount"), 20);
+        compare(BarProfileModel.elementOption(drawn, "cava", "color"), "red");
+
+        const discarded = fixtures.withChanges(after, BarProfileModel.discardChanges(after));
+        compare(BarProfileModel.elementOption(BarProfileModel.profileValue(discarded, name,
+            "barElements"), "cava", "barCount"), 12);
+
+        const saved = fixtures.withChanges(after, BarProfileModel.saveProfile(after));
+        compare(BarProfileModel.elementOption(BarProfileModel.savedProfile(saved, name).barElements,
+            "cava", "barCount"), 20);
     }
 }
