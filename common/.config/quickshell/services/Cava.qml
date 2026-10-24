@@ -5,53 +5,55 @@ import "CavaOutput.js" as CavaOutput
 
 // The one cava process the whole shell shares. It runs only while some bar
 // draws the Cava bar element (see setDrawing) and listens to the default
-// audio output, restarting when the default changes so it follows it.
+// audio output, restarting when the default changes so it follows it. When
+// it starts, stops, restarts and retries is decided in CavaOutput.js; this
+// only carries it out.
 QtObject {
     id: root
 
     // How many bars cava computes: the most any drawn Cava bar element asks
     // for (its `barCount`); each resamples the frame down to its own.
-    readonly property int barCount: CavaOutput.sharedBarCount(drawers.map(drawer => drawer.barCount))
+    readonly property int barCount: CavaOutput.sharedBarCount(drawnElements.map(element => element.barCount))
     // The latest frame, one height from 0 to 1 per bar; flat while cava
     // isn't running.
     property var heights: CavaOutput.flatHeights(barCount)
     // The Cava bar elements drawing right now.
-    property var drawers: []
-    readonly property bool wanted: drawers.length > 0
-    property bool restarting: false
-    // How many times in a row cava exited on its own before printing a
-    // frame, and what the Bar section says about it under Cava ("" while
-    // cava runs).
-    property int failures: 0
-    property string problem: ""
+    property var drawnElements: []
+    readonly property bool needed: drawnElements.length > 0
+    // What the Bar section says under Cava while cava can't run ("" while it
+    // runs or no bar draws it).
+    readonly property string failureHint: runState.failureHint
+    // When cava runs (CavaOutput.stopped and the functions after it).
+    property var runState: CavaOutput.stopped
 
     // Called by each Cava bar element when it starts or stops being drawn.
-    function setDrawing(drawer, drawing) {
-        const others = drawers.filter(entry => entry !== drawer);
-        drawers = drawing ? others.concat([drawer]) : others;
+    function setDrawing(element, drawing) {
+        const others = drawnElements.filter(entry => entry !== element);
+        drawnElements = drawing ? others.concat([element]) : others;
     }
 
     // A planned restart, so cava follows a new default output or bar count.
     function restart() {
-        if (!cava.running)
-            return;
-        restarting = true;
-        cava.running = false;
+        follow(CavaOutput.restartAsked(runState));
     }
 
-    onWantedChanged: {
-        retry.stop();
-        cava.running = wanted;
+    // Moves to the `next` run state and starts, stops or waits to match it.
+    function follow(next) {
+        runState = next;
+        retry.interval = next.retryDelay;
+        retry.running = next.retrying;
+        if (cava.running !== next.running)
+            cava.running = next.running;
     }
 
+    onNeededChanged: follow(CavaOutput.drawnChanged(runState, needed))
     onBarCountChanged: restart()
 
-    // Starts cava again a while after it failed, longer the more it fails.
+    // Starts cava again a while after it failed.
     property var retry: Timer {
         id: retry
 
-        interval: CavaOutput.retryDelay(root.failures)
-        onTriggered: cava.running = root.wanted
+        onTriggered: root.follow(CavaOutput.retryDue(root.runState))
     }
 
     property var defaultOutputWatcher: Connections {
@@ -71,24 +73,16 @@ QtObject {
 
         stdout: SplitParser {
             onRead: data => {
-                root.failures = 0;
-                root.problem = "";
+                if (!root.runState.printedFrame)
+                    root.runState = CavaOutput.framePrinted(root.runState);
                 root.heights = CavaOutput.frameHeights(data, root.barCount);
             }
         }
 
-        // An exit nobody asked for is a failure: flat bars, a hint and a
-        // retry a while later.
+        // Flat bars until cava prints again.
         onExited: exitCode => {
             root.heights = CavaOutput.flatHeights(root.barCount);
-            if (root.restarting) {
-                root.restarting = false;
-                running = root.wanted;
-            } else if (root.wanted) {
-                root.failures += 1;
-                root.problem = CavaOutput.failureHint(exitCode);
-                retry.restart();
-            }
+            root.follow(CavaOutput.exited(root.runState, exitCode));
         }
     }
 }

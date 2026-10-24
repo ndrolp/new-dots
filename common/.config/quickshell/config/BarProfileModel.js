@@ -47,23 +47,39 @@ const elementOptionDefaults = {
     "battery": { percentageVisible: true }
 };
 
-// What the options that can't take any value accept: a number's range
-// ({ from, to }) or a choice's values ({ choices }). A stored value outside
-// them is clamped, or falls back to the default.
+// What the options that can't take any value accept: a number in a range
+// ({ kind: "number", from, to }) or one of some values ({ kind: "choice",
+// choices }). A value outside them is clamped, or falls back. Every other
+// option is a switch.
 const elementOptionLimits = {
     "cava": {
-        barCount: { from: 6, to: 32 },
-        barWidth: { from: 1, to: 8 },
-        color: { choices: ["accent", "blue", "green", "yellow", "orange", "red", "purple", "text"] }
+        barCount: { kind: "number", from: 6, to: 32 },
+        barWidth: { kind: "number", from: 1, to: 8 },
+        color: { kind: "choice", choices: ["accent", "blue", "green", "yellow", "orange", "red", "purple", "text"] }
     }
 };
+
+// How the Bar section edits option `option` of element `id`: { kind:
+// "switch" }, { kind: "number", from, to } or { kind: "choice", choices:
+// [{ label, value }] }, each value labelled with a capital first letter.
+function elementOptionField(id, option) {
+    const limit = (elementOptionLimits[id] || {})[option];
+
+    if (!limit)
+        return { kind: "switch" };
+    if (limit.kind === "choice") {
+        return { kind: "choice", choices: limit.choices.map(value => ({
+            label: value.charAt(0).toUpperCase() + value.slice(1), value: value })) };
+    }
+    return { kind: "number", from: limit.from, to: limit.to };
+}
 
 function limitedOption(id, option, value, fallback) {
     const limit = (elementOptionLimits[id] || {})[option];
 
     if (!limit)
         return value;
-    if (limit.choices)
+    if (limit.kind === "choice")
         return limit.choices.indexOf(value) !== -1 ? value : fallback;
     if (typeof value !== "number" || isNaN(value))
         return fallback;
@@ -544,23 +560,42 @@ function elementOption(barElements, id, option) {
     return elementOptions(barElements, id)[option];
 }
 
-// Sets an option of element `id`; options the element does not have are
-// ignored.
+// Sets an option of element `id`, kept within its limits: a number is
+// clamped and a choice it does not list keeps the current one. Options the
+// element does not have are ignored.
 function setElementOption(barElements, id, option, value) {
     const updated = cloneValue(barElements);
     const found = findElement(updated, id);
 
     if (found && elementOptionDefaults[id] && option in elementOptionDefaults[id]) {
         const options = elementOptions(updated, id);
-        options[option] = cloneValue(value);
+        options[option] = limitedOption(id, option, cloneValue(value), options[option]);
         updated[found.zone][found.index].options = options;
     }
     return updated;
 }
 
+// Adds missing element `id` next to its default neighbours: right after the
+// element before it in elementIds, else right before the one after it, in
+// that element's zone; else at the end of the right zone.
+function insertMissingElement(normalized, id) {
+    const entry = { id: id, enabled: disabledElementIds.indexOf(id) === -1 };
+    const index = elementIds.indexOf(id);
+    const before = findElement(normalized, elementIds[index - 1]);
+    const after = findElement(normalized, elementIds[index + 1]);
+
+    if (before)
+        normalized[before.zone].splice(before.index + 1, 0, entry);
+    else if (after)
+        normalized[after.zone].splice(after.index, 0, entry);
+    else
+        normalized.right.push(entry);
+}
+
 // Every known element listed exactly once: unknown and repeated entries are
-// dropped (the first one wins) and missing elements are added at the end of
-// the right zone, enabled unless listed in disabledElementIds. Elements with options get all of them.
+// dropped (the first one wins) and missing elements are added next to their
+// default neighbours (see insertMissingElement), enabled unless listed in
+// disabledElementIds. Elements with options get all of them.
 function normalizeBarElements(barElements) {
     const normalized = { left: [], center: [], right: [] };
     const seen = [];
@@ -580,7 +615,7 @@ function normalizeBarElements(barElements) {
 
     for (const id of elementIds) {
         if (seen.indexOf(id) === -1)
-            normalized.right.push({ id: id, enabled: disabledElementIds.indexOf(id) === -1 });
+            insertMissingElement(normalized, id);
     }
 
     for (const zoneName of zoneNames) {

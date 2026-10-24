@@ -23,6 +23,6 @@ Column {
 
     BarElementsSettings {
         appearance: root.appearance
-        elementHints: ({ "cava": root.cava ? root.cava.problem : "" })
+        elementHints: ({ "cava": root.cava ? root.cava.failureHint : "" })
     }
 }

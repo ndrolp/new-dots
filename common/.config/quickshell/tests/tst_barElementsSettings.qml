@@ -128,8 +128,9 @@ TestCase {
         return field ? zoneChoice(field) : null;
     }
 
-    // A test-only bar element whose options mix a switch, a number and a
-    // choice, as no real element does yet.
+    // Options that mix a switch, a number and a choice, as no real element's
+    // do: given to a real element (media) along with how each is edited, so
+    // the section still lists the element after normalizing the profile.
     Component {
         id: probeArea
 
@@ -146,14 +147,14 @@ TestCase {
                 property int textSize: 13
                 property var barElements: ({
                     left: [],
-                    center: [{ id: "probe", enabled: true }],
+                    center: [{ id: "media", enabled: true }],
                     right: []
                 })
                 property var optionValues: ({ peaksVisible: true, bars: 12, color: "blue" })
                 property var calls: []
 
                 function barElementOption(element, option) {
-                    return element === "probe" ? optionValues[option] : undefined;
+                    return element === "media" ? optionValues[option] : undefined;
                 }
 
                 function setBarElementOption(element, option, value) {
@@ -166,15 +167,20 @@ TestCase {
 
                 appearance: appearance
                 elementOptions: ({
-                    "probe": [
+                    "media": [
                         { label: "Show peaks", option: "peaksVisible" },
-                        { label: "Bars", option: "bars", kind: "number", from: 6, to: 32 },
-                        { label: "Color", option: "color", kind: "choice", choices: [
-                            { label: "Blue", value: "blue" },
-                            { label: "Red", value: "red" }
-                        ] }
+                        { label: "Bars", option: "bars" },
+                        { label: "Color", option: "color" }
                     ]
                 })
+                optionField: (element, option) => ({
+                    "peaksVisible": { kind: "switch" },
+                    "bars": { kind: "number", from: 6, to: 32 },
+                    "color": { kind: "choice", choices: [
+                        { label: "Blue", value: "blue" },
+                        { label: "Red", value: "red" }
+                    ] }
+                })[option]
             }
         }
     }
@@ -186,7 +192,7 @@ TestCase {
 
     function makeProbe() {
         const built = createTemporaryObject(probeArea, this);
-        mouseClick(textOf(elementRow(built.section, "probe"), "probe"));
+        mouseClick(textOf(elementRow(built.section, "Media"), "Media"));
         return { appearance: built.appearance, item: built.section };
     }
 
@@ -198,29 +204,26 @@ TestCase {
         compare(choiceOption(built.item, "Color").value, "blue");
     }
 
-    function test_aNumberOptionClampsToItsMinimumAndMaximum() {
+    // Keeping a value within its limits is the model's (see tst_barElements).
+    function test_aNumberOptionShowsItsRangeAndSavesWhatIsTyped() {
         const built = makeProbe();
         const bars = numberOption(built.item, "Bars");
 
         compare(bars.from, 6);
         compare(bars.to, 32);
-        bars.edited(40);
-        bars.edited(2);
         bars.edited(20);
 
-        compare(built.appearance.calls, [["option", "probe", "bars", 32], ["option", "probe", "bars", 6],
-            ["option", "probe", "bars", 20]]);
+        compare(built.appearance.calls, [["option", "media", "bars", 20]]);
     }
 
-    function test_aChoiceOptionOnlyOffersItsListedValues() {
+    function test_aChoiceOptionOffersItsListedValuesAndSavesTheChosenOne() {
         const built = makeProbe();
         const color = choiceOption(built.item, "Color");
 
-        compare(color.options.map(choice => choice.value), ["blue", "red"]);
-        color.chosen("green");
+        compare(color.options, [{ label: "Blue", value: "blue" }, { label: "Red", value: "red" }]);
         color.chosen("red");
 
-        compare(built.appearance.calls, [["option", "probe", "color", "red"]]);
+        compare(built.appearance.calls, [["option", "media", "color", "red"]]);
     }
 
     function test_switchOptionsStillToggleNextToNumbersAndChoices() {
@@ -228,7 +231,7 @@ TestCase {
 
         switchRow(built.item, "Show peaks").toggled();
 
-        compare(built.appearance.calls, [["option", "probe", "peaksVisible", false]]);
+        compare(built.appearance.calls, [["option", "media", "peaksVisible", false]]);
     }
 
     function test_eachBarElementIsAFullWidthRowTransparentUntilHovered() {
@@ -248,9 +251,17 @@ TestCase {
         verify(!all(cava, child => child.checked !== undefined && child.toggled === undefined)[0].checked);
     }
 
+    function enableCava(appearance) {
+        appearance.barElements = Object.assign({}, appearance.barElements, {
+            right: appearance.barElements.right.map(element => element.id === "cava"
+                ? Object.assign({}, element, { enabled: true }) : element)
+        });
+    }
+
     function test_aHintShowsUnderCavaWhileCavaCantRunAndGoesAwayOnceItRuns() {
         const built = make();
         const hint = "cava isn't installed, so the bars stay flat.";
+        enableCava(built.appearance);
 
         verify(!textOf(built.item, hint));
         built.item.elementHints = { "cava": hint };
@@ -261,6 +272,27 @@ TestCase {
 
         built.item.elementHints = { "cava": "" };
         verify(!textOf(built.item, hint));
+    }
+
+    // The hint is about the edited bar profile's Cava: turned off, there is
+    // nothing to explain.
+    function test_noHintShowsUnderCavaWhileItIsTurnedOff() {
+        const built = make();
+        const hint = "cava isn't installed, so the bars stay flat.";
+
+        built.item.elementHints = { "cava": hint };
+        verify(!textOf(built.item, hint));
+
+        enableCava(built.appearance);
+        verify(textOf(built.item, hint));
+    }
+
+    // The section lists every bar element even when the profile it is given
+    // lacks some, as the model normalizes it.
+    function test_anElementTheProfileDoesNotListIsStillListed() {
+        const built = make();
+
+        verify(elementRow(built.item, "System tray"));
     }
 
     function test_cavasBarCountWidthAndColorAreEditedUnderIt() {
@@ -275,6 +307,7 @@ TestCase {
         compare(color.value, "blue");
         compare(color.options.map(choice => choice.value),
             ["accent", "blue", "green", "yellow", "orange", "red", "purple", "text"]);
+        compare(color.options[0].label, "Accent");
 
         count.edited(20);
         width.edited(5);
