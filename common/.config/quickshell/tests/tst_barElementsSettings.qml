@@ -80,7 +80,11 @@ TestCase {
                     calls = calls.concat([call]);
                 }
 
+                property var cavaOptions: ({ barCount: 12, barWidth: 3, color: "blue" })
+
                 function barElementOption(element, option) {
+                    if (element === "cava")
+                        return cavaOptions[option];
                     return element === "audio" && option === "meterVisible";
                 }
 
@@ -257,6 +261,26 @@ TestCase {
 
         built.item.elementHints = { "cava": "" };
         verify(!textOf(built.item, hint));
+    }
+
+    function test_cavasBarCountWidthAndColorAreEditedUnderIt() {
+        const built = make();
+        mouseClick(textOf(elementRow(built.item, "Cava"), "Cava"));
+        const count = numberOption(built.item, "Bars");
+        const width = numberOption(built.item, "Bar width");
+        const color = choiceOption(built.item, "Color");
+
+        compare([count.value, count.from, count.to], [12, 6, 32]);
+        compare([width.value, width.from, width.to], [3, 1, 8]);
+        compare(color.value, "blue");
+        compare(color.options.map(choice => choice.value),
+            ["accent", "blue", "green", "yellow", "orange", "red", "purple", "text"]);
+
+        count.edited(20);
+        width.edited(5);
+        color.chosen("red");
+        compare(built.appearance.calls, [["option", "cava", "barCount", 20],
+            ["option", "cava", "barWidth", 5], ["option", "cava", "color", "red"]]);
     }
 
     function test_theZonesAreHeadingsWithTheirElementsInOrder() {

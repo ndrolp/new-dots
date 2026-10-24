@@ -30,6 +30,33 @@ TestCase {
         compare(CavaOutput.frameHeights("1000;1000;1000;", 2), [1, 1]);
     }
 
+    function test_cavaComputesTheMostBarsAnyDrawnCavaAsksFor() {
+        compare(CavaOutput.sharedBarCount([8, 20, 12]), 20);
+        compare(CavaOutput.sharedBarCount([6]), 6);
+    }
+
+    function test_withNoCavaDrawnTheBarCountIsTheDefault() {
+        compare(CavaOutput.sharedBarCount([]), 12);
+    }
+
+    function test_resamplingToFewerBarsKeepsEachGroupsTallestBar() {
+        compare(CavaOutput.resample([0, 0.5, 1, 0.25], 2), [0.5, 1]);
+        compare(CavaOutput.resample([0.2, 0.4, 0.6, 0.8, 1, 0], 3), [0.4, 0.8, 1]);
+    }
+
+    function test_resamplingToTheSameCountChangesNothing() {
+        compare(CavaOutput.resample([0.1, 0.2, 0.3], 3), [0.1, 0.2, 0.3]);
+    }
+
+    function test_resamplingAnUnevenSplitCoversEveryBar() {
+        // 5 bars into 2: bars 0-1 and 2-4.
+        compare(CavaOutput.resample([1, 0, 0, 0, 0.5], 2), [1, 0.5]);
+    }
+
+    function test_resamplingNothingGivesFlatBars() {
+        compare(CavaOutput.resample([], 3), [0, 0, 0]);
+    }
+
     // The config is cava's ini format; read back the settings that matter.
     function setting(config, section, key) {
         let current = "";

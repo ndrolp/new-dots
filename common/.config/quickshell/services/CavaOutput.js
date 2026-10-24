@@ -71,3 +71,31 @@ function failureHint(exitCode) {
         return "cava isn't installed, so the bars stay flat.";
     return "cava failed to start, so the bars stay flat. Trying again in a few seconds.";
 }
+
+// How many bars cava computes while no Cava bar element is drawn.
+const defaultBarCount = 12;
+
+// How many bars the one shared cava computes for Cava bar elements asking for
+// `barCounts`: the most any of them asks for, so each resamples down to its
+// own.
+function sharedBarCount(barCounts) {
+    return barCounts.length > 0 ? Math.max.apply(null, barCounts) : defaultBarCount;
+}
+
+// `heights` resampled to `barCount` bars: each bar is the tallest of the
+// group of bars it stands for, so peaks survive. Flat without heights.
+function resample(heights, barCount) {
+    const source = heights || [];
+    const resampled = flatHeights(barCount);
+
+    if (source.length === 0)
+        return resampled;
+
+    for (let index = 0; index < barCount; index++) {
+        const start = Math.floor(index * source.length / barCount);
+        const end = Math.max(start + 1, Math.floor((index + 1) * source.length / barCount));
+        resampled[index] = Math.max.apply(null, source.slice(start, end));
+    }
+
+    return resampled;
+}
