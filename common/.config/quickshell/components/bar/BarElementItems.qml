@@ -8,7 +8,7 @@ import Quickshell.Services.UPower
 import QtQuick
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
-import "VolumeText.js" as VolumeText
+import "../VolumeText.js" as VolumeText
 
 // The bar elements that need no component of their own (notifications,
 // recording, media, audio, bluetooth, tray, network, battery and clock),

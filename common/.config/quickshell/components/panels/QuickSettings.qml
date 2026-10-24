@@ -9,6 +9,7 @@ import QtQuick
 import QtQuick.Controls
 import "../../config" as Config
 import "AudioOutputs.js" as AudioOutputs
+import "../VolumeText.js" as VolumeText
 
 Variants {
     id: root
@@ -103,7 +104,7 @@ Variants {
         }
 
         function actions() {
-            const volume = audio ? Math.round(audio.volume * 100) + "%" : "Unavailable";
+            const volume = audio ? VolumeText.percentage(audio.volume) : "Unavailable";
             const output = Pipewire.defaultAudioSink
                 ? (AudioOutputs.label(Pipewire.defaultAudioSink) || "Default output") : "Unavailable";
             const bluetooth = bluetoothAdapter ? (bluetoothAdapter.enabled ? "On" : "Off")
