@@ -31,3 +31,12 @@ _Avoid_: Wallpaper picker, carrusel
 **System monitor**:
 El bar element que muestra el uso de CPU y memoria. No confundir con el desktop widget *System*.
 _Avoid_: System (para el elemento de la barra)
+
+**Popup**:
+La ventana pequeña que se despliega desde un bar element al pulsarlo (Bluetooth, red, batería, audio, media…). Pertenece a ese bar element y se cierra al perder el foco.
+Con la barra opaca un popup va **anclado** (attached): sale de la barra como si fuera parte de ella. Con la barra transparente va **flotante** (floating), separado de la barra.
+_Avoid_: Menu, dropdown, status popup
+
+**Control center** (centro de control):
+El panel con los conmutadores rápidos y los deslizadores (Wi-Fi, Bluetooth, no molestar, volumen, brillo). No es un popup: no pertenece a ningún bar element, aunque igual que un popup va anclado o flotante según la barra.
+_Avoid_: Control panel, quick settings, panel de control
