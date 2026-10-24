@@ -20,12 +20,15 @@ const zoneNames = ["left", "center", "right"];
 // zone in defaultElementZones, the rest to the right.
 const elementIds = [
     "arch", "systemMonitor", "currentApp", "workspaces",
-    "notifications", "recording", "media", "audio", "bluetooth", "tray",
+    "notifications", "recording", "media", "cava", "audio", "bluetooth", "tray",
     "network", "battery", "clock"
 ];
 const defaultElementZones = {
     "arch": "left", "systemMonitor": "left", "currentApp": "left", "workspaces": "center"
 };
+// Elements that start disabled: in every default profile and wherever a
+// profile does not list them yet.
+const disabledElementIds = ["cava"];
 
 // The options of the elements that have any, with their defaults.
 const elementOptionDefaults = {
@@ -43,7 +46,7 @@ const elementOptionDefaults = {
 };
 
 // Bar elements with every element listed in its default zone and order,
-// enabled unless listed in `disabledIds`, with `options` ({ id: options })
+// enabled unless listed in `disabledIds` or disabledElementIds, with `options` ({ id: options })
 // over the default options.
 function defaultBarElements(disabledIds, options) {
     const barElements = { left: [], center: [], right: [] };
@@ -51,7 +54,8 @@ function defaultBarElements(disabledIds, options) {
     for (const id of elementIds) {
         barElements[defaultElementZones[id] || "right"].push({
             id: id,
-            enabled: (disabledIds || []).indexOf(id) === -1,
+            enabled: (disabledIds || []).indexOf(id) === -1
+                && disabledElementIds.indexOf(id) === -1,
             options: (options || {})[id]
         });
     }
@@ -530,8 +534,8 @@ function setElementOption(barElements, id, option, value) {
 }
 
 // Every known element listed exactly once: unknown and repeated entries are
-// dropped (the first one wins) and missing elements are added, enabled, at
-// the end of the right zone. Elements with options get all of them.
+// dropped (the first one wins) and missing elements are added at the end of
+// the right zone, enabled unless listed in disabledElementIds. Elements with options get all of them.
 function normalizeBarElements(barElements) {
     const normalized = { left: [], center: [], right: [] };
     const seen = [];
@@ -551,7 +555,7 @@ function normalizeBarElements(barElements) {
 
     for (const id of elementIds) {
         if (seen.indexOf(id) === -1)
-            normalized.right.push({ id: id, enabled: true });
+            normalized.right.push({ id: id, enabled: disabledElementIds.indexOf(id) === -1 });
     }
 
     for (const zoneName of zoneNames) {

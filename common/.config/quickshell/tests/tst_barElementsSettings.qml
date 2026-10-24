@@ -70,7 +70,8 @@ TestCase {
                     center: [{ id: "clock", enabled: true }],
                     right: [
                         { id: "audio", enabled: true, options: { meterVisible: true } },
-                        { id: "battery", enabled: false, joinPrevious: true }
+                        { id: "battery", enabled: false, joinPrevious: true },
+                        { id: "cava", enabled: false }
                     ]
                 })
                 property var calls: []
@@ -124,6 +125,14 @@ TestCase {
         verify(row);
         compare(row.width, built.item.width);
         compare(row.color, Qt.rgba(0, 0, 0, 0));
+    }
+
+    function test_cavaIsListedByItsName() {
+        const built = make();
+        const cava = elementRow(built.item, "Cava");
+
+        verify(cava);
+        verify(!all(cava, child => child.checked !== undefined && child.toggled === undefined)[0].checked);
     }
 
     function test_theZonesAreHeadingsWithTheirElementsInOrder() {
