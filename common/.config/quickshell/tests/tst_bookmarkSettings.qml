@@ -110,12 +110,6 @@ TestCase {
         item.activated();
     }
 
-    // Leaving a field also finishes its edit, so the same save can be asked
-    // twice in a row; that is harmless and not what these tests are about.
-    function distinct(calls) {
-        return calls.filter((call, i) => i === 0 || JSON.stringify(call) !== JSON.stringify(calls[i - 1]));
-    }
-
     function typeInto(input, text) {
         input.forceActiveFocus();
         input.selectAll();
@@ -155,7 +149,7 @@ TestCase {
         typeInto(field(row, "label"), "Inbox");
         typeInto(field(row, "url"), "https://x.io");
 
-        compare(distinct(built.bookmarks.calls), [
+        compare(built.bookmarks.calls, [
             ["update", 1, "label", "Inbox"],
             ["update", 1, "url", "https://x.io"]
         ]);
@@ -190,7 +184,7 @@ TestCase {
         typeInto(field(row, "searchUrl"), "q=%s");
         press(button(built.item, "󰐕  Add search engine"));
 
-        compare(distinct(built.bookmarks.calls), [["updateSearchEngine", 0, "searchUrl", "q=%s"], ["addSearchEngine"]]);
+        compare(built.bookmarks.calls, [["updateSearchEngine", 0, "searchUrl", "q=%s"], ["addSearchEngine"]]);
     }
 
     function test_theLastSearchEngineCannotBeRemoved() {

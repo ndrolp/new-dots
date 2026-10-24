@@ -57,7 +57,7 @@ Column {
                 bottom: cell.from
                 top: cell.to
             }
-            onEditingFinished: cell.edited(Number(text))
+            onEdited: text => cell.edited(Number(text))
         }
     }
 }

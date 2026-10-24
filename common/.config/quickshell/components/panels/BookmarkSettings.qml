@@ -68,7 +68,7 @@ Column {
                     text: row.glyph
                     maximumLength: 4
                     horizontalAlignment: TextInput.AlignHCenter
-                    onEditingFinished: row.edited(fieldName, text)
+                    onEdited: text => row.edited(fieldName, text)
                 }
 
                 Panels.SettingsInput {
@@ -78,7 +78,7 @@ Column {
                     appearance: root.appearance
                     text: row.name
                     placeholderText: "Name"
-                    onEditingFinished: row.edited(fieldName, text)
+                    onEdited: text => row.edited(fieldName, text)
                 }
 
                 Row {
@@ -118,7 +118,7 @@ Column {
                 appearance: root.appearance
                 text: row.link
                 placeholderText: row.linkPlaceholder
-                onEditingFinished: row.edited(fieldName, text)
+                onEdited: text => row.edited(fieldName, text)
             }
         }
     }

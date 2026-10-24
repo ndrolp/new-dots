@@ -202,7 +202,7 @@ Column {
                     width: parent.width
                     appearance: root.appearance
                     text: root.desktop.weather.location
-                    onEditingFinished: root.setWidget("weather", "location", text.trim())
+                    onEdited: text => root.setWidget("weather", "location", text.trim())
                 }
             }
         }

@@ -272,6 +272,54 @@ TestCase {
         compare(editedSpy.signalArguments[0][0], 40);
     }
 
+    // Return finishes the edit and so does leaving the field after it: the
+    // number is still saved only once.
+    function test_typingANumberThenLeavingTheFieldSavesItOnce() {
+        const item = make(number);
+        editedSpy.target = item;
+        editedSpy.clear();
+
+        item.field.forceActiveFocus();
+        item.field.selectAll();
+        keyClick("4");
+        keyClick("0");
+        keyClick(Qt.Key_Return);
+        item.field.focus = false;
+
+        compare(editedSpy.count, 1);
+    }
+
+    function test_leavingANumberFieldUnchangedSavesNothing() {
+        const item = make(number);
+        editedSpy.target = item;
+        editedSpy.clear();
+
+        item.field.forceActiveFocus();
+        keyClick(Qt.Key_Return);
+        item.field.focus = false;
+
+        compare(editedSpy.count, 0);
+    }
+
+    // A field asks to save its text when the edit is finished, once per
+    // change, however the edit is finished.
+    function test_aFieldAsksToSaveItsTextOncePerChange() {
+        const item = make(input, { text: "GitHub" });
+        editedSpy.target = item;
+        editedSpy.clear();
+
+        item.forceActiveFocus();
+        item.selectAll();
+        keyClick("G");
+        keyClick("o");
+        compare(editedSpy.count, 0);
+        keyClick(Qt.Key_Return);
+        item.focus = false;
+
+        compare(editedSpy.count, 1);
+        compare(editedSpy.signalArguments[0][0], "Go");
+    }
+
     function test_aNumberOutOfRangeIsRejected() {
         const item = make(number);
         editedSpy.target = item;
