@@ -35,7 +35,7 @@ hl.curve("easy", { type = "spring", mass = 1, stiffness = 71.2633, dampening = 1
 
 hl.layer_rule({
 	name = "ndro-bar-no-blur",
-	match = { namespace = "ndro-shell-settings|ndro-shell-wallpaper|ndro-shell-notifications" },
+	match = { namespace = "ndro-shell-settings|ndro-shell-notifications" },
 	ignore_alpha = 0.0,
 	blur = false,
 	dim_around = false,
@@ -52,10 +52,19 @@ hl.layer_rule({
 
 hl.layer_rule({
 	name = "ndro-bar-no-blur",
-	match = { namespace = "ndro-shell-settings|ndro-shell-wallpaper" },
+	match = { namespace = "ndro-shell-settings" },
 	ignore_alpha = 0.0,
 	blur = false,
 	dim_around = true,
+	animation = "popin",
+})
+
+hl.layer_rule({
+	name = "ndro-shell-wallpaper-selector",
+	match = { namespace = "ndro-shell-wallpaper-selector" },
+	ignore_alpha = 0.0,
+	blur = true,
+	dim_around = false,
 	animation = "popin",
 })
 
