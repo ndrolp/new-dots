@@ -484,7 +484,7 @@
             "barHeight": 30,
             "barOpacity": 90,
             "barTransparent": true,
-            "barTransparentBorder": false,
+            "barTransparentBorder": true,
             "elementVerticalPadding": 5,
             "groupRadius": 3,
             "horizontalPadding": 10,
