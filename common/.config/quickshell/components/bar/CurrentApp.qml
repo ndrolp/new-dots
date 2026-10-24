@@ -2,6 +2,7 @@ import Quickshell
 import Quickshell.Hyprland
 import QtQuick
 import "../../config" as Config
+import "../IconSource.js" as IconSource
 
 Row {
     id: root
@@ -29,7 +30,7 @@ Row {
         : windowTitle !== "" ? windowTitle : "Desktop"
     readonly property string iconName: terminal ? terminalIconName(windowTitle) : appId
     readonly property string iconSource: iconName !== ""
-        ? Quickshell.iconPath(iconName, true) : ""
+        ? IconSource.forName(iconName) : ""
     readonly property string terminalGlyph: terminal ? terminalIconGlyph(windowTitle) : ""
     readonly property real activeTitleMaximumWidth: monitorScreen
         ? Math.max(120, Math.min(320, monitorScreen.width * 0.14)) : 320

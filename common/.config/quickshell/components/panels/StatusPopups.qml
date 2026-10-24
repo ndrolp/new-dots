@@ -10,6 +10,7 @@ import QtQuick.Controls
 import "../../config" as Config
 import "." as Panels
 import "BluetoothDevices.js" as BluetoothDevices
+import "../IconSource.js" as IconSource
 
 Item {
     id: root
@@ -671,7 +672,7 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                             width: 18
                             height: 18
-                            source: modelData.icon
+                            source: IconSource.forTray(modelData.icon)
                             fillMode: Image.PreserveAspectFit
                             visible: status === Image.Ready
                         }

@@ -112,7 +112,7 @@ ln -sf "$THEME_FOLDER/quickshell/Theme.qml" "$HOME/.config/quickshell/config/The
 
 # The apply process belongs to the running shell, so schedule its replacement
 # independently before asking Quickshell to terminate the current instances.
-setsid sh -c 'sleep 0.5; exec quickshell --path "$HOME/.config/quickshell" --daemonize' \
+setsid sh -c 'sleep 0.5; exec "$HOME/.config/quickshell/start.sh"' \
   </dev/null >/dev/null 2>&1 &
 
 quickshell list --json \
