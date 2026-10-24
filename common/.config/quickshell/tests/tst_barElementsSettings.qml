@@ -113,9 +113,118 @@ TestCase {
         }
     }
 
+    function numberOption(item, label) {
+        return all(item, child => child.label === label && child.fieldTo !== undefined
+            && child.visible)[0] || null;
+    }
+
+    function choiceOption(item, label) {
+        const field = all(item, child => child.label === label && child.appearance !== undefined
+            && child.fieldTo === undefined && child.switchItem === undefined && child.visible)[0];
+        return field ? zoneChoice(field) : null;
+    }
+
+    // A test-only bar element whose options mix a switch, a number and a
+    // choice, as no real element does yet.
+    Component {
+        id: probeArea
+
+        Item {
+            property alias appearance: appearance
+            property alias section: section
+
+            width: 800
+
+            QtObject {
+                id: appearance
+
+                property int radius: 12
+                property int textSize: 13
+                property var barElements: ({
+                    left: [],
+                    center: [{ id: "probe", enabled: true }],
+                    right: []
+                })
+                property var optionValues: ({ peaksVisible: true, bars: 12, color: "blue" })
+                property var calls: []
+
+                function barElementOption(element, option) {
+                    return element === "probe" ? optionValues[option] : undefined;
+                }
+
+                function setBarElementOption(element, option, value) {
+                    calls = calls.concat([["option", element, option, value]]);
+                }
+            }
+
+            Panels.BarElementsSettings {
+                id: section
+
+                appearance: appearance
+                elementOptions: ({
+                    "probe": [
+                        { label: "Show peaks", option: "peaksVisible" },
+                        { label: "Bars", option: "bars", kind: "number", from: 6, to: 32 },
+                        { label: "Color", option: "color", kind: "choice", choices: [
+                            { label: "Blue", value: "blue" },
+                            { label: "Red", value: "red" }
+                        ] }
+                    ]
+                })
+            }
+        }
+    }
+
     function make() {
         const built = createTemporaryObject(sectionArea, this);
         return { appearance: built.appearance, item: built.section };
+    }
+
+    function makeProbe() {
+        const built = createTemporaryObject(probeArea, this);
+        mouseClick(textOf(elementRow(built.section, "probe"), "probe"));
+        return { appearance: built.appearance, item: built.section };
+    }
+
+    function test_anElementsOptionsCanMixSwitchesNumbersAndChoices() {
+        const built = makeProbe();
+
+        verify(switchRow(built.item, "Show peaks").checked);
+        compare(numberOption(built.item, "Bars").value, 12);
+        compare(choiceOption(built.item, "Color").value, "blue");
+    }
+
+    function test_aNumberOptionClampsToItsMinimumAndMaximum() {
+        const built = makeProbe();
+        const bars = numberOption(built.item, "Bars");
+
+        compare(bars.from, 6);
+        compare(bars.to, 32);
+        bars.edited(40);
+        bars.edited(2);
+        bars.edited(20);
+
+        compare(built.appearance.calls, [["option", "probe", "bars", 32], ["option", "probe", "bars", 6],
+            ["option", "probe", "bars", 20]]);
+    }
+
+    function test_aChoiceOptionOnlyOffersItsListedValues() {
+        const built = makeProbe();
+        const color = choiceOption(built.item, "Color");
+
+        compare(color.options.map(choice => choice.value), ["blue", "red"]);
+        color.chosen("green");
+        color.chosen("red");
+
+        compare(built.appearance.calls, [["option", "probe", "color", "red"]]);
+    }
+
+    function test_switchOptionsStillToggleNextToNumbersAndChoices() {
+        const built = makeProbe();
+
+        switchRow(built.item, "Show peaks").toggled();
+
+        compare(built.appearance.calls, [["option", "probe", "peaksVisible", false]]);
     }
 
     function test_eachBarElementIsAFullWidthRowTransparentUntilHovered() {

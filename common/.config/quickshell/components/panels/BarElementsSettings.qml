@@ -1,19 +1,18 @@
 import QtQuick
 import "." as Panels
 import "../../config" as Config
-import "../../config/BarProfileModel.js" as BarProfileModel
 
 // The Bar section's bar elements list: every bar element of the edited bar
 // profile, zone by zone, in full width rows that stay transparent until
 // hovered. A row turns its element on or off, picks its zone, orders it and
-// joins it with the one above; elements with options open them below as
-// switch rows.
+// joins it with the one above; elements with options open them below:
+// switches, numbers and choices.
 Column {
     id: root
 
     required property var appearance
     property string expandedElement: ""
-    readonly property var barElements: BarProfileModel.normalizeBarElements(appearance.barElements)
+    readonly property var barElements: appearance.barElements || {}
     readonly property var zones: [
         { label: "Left", short: "L", value: "left" },
         { label: "Center", short: "C", value: "center" },
@@ -40,23 +39,38 @@ Column {
         return labels[element] || element;
     }
 
-    // Element options, shown under the element they belong to.
+    // Element options, shown under the element they belong to. An option is
+    // a switch, a number ({ kind: "number", from, to }) or a choice
+    // ({ kind: "choice", choices: [{ label, value }] }).
+    property var elementOptions: ({
+        "workspaces": [
+            { label: "Hide empty workspaces", option: "hideEmpty" },
+            { label: "Show workspace app counts", option: "appCountVisible" }
+        ],
+        "notifications": [{ label: "Show unread badge", option: "badgeVisible" }],
+        "media": [{ label: "Show track title", option: "titleVisible" }],
+        "audio": [{ label: "Show volume meter", option: "meterVisible" }],
+        "battery": [{ label: "Show percentage", option: "percentageVisible" }]
+    })
+
     function optionsFor(element) {
-        const options = {
-            "workspaces": [
-                { label: "Hide empty workspaces", option: "hideEmpty" },
-                { label: "Show workspace app counts", option: "appCountVisible" }
-            ],
-            "notifications": [{ label: "Show unread badge", option: "badgeVisible" }],
-            "media": [{ label: "Show track title", option: "titleVisible" }],
-            "audio": [{ label: "Show volume meter", option: "meterVisible" }],
-            "battery": [{ label: "Show percentage", option: "percentageVisible" }]
-        };
-        return (options[element] || []).map(entry => Object.assign({ "element": element }, entry));
+        return (elementOptions[element] || []).map(entry => Object.assign({ "element": element }, entry));
     }
 
     function toggleElementOption(element, option) {
         appearance.setBarElementOption(element, option, !appearance.barElementOption(element, option));
+    }
+
+    // Sets a number option, clamped to its range.
+    function setNumberOption(entry, value) {
+        appearance.setBarElementOption(entry.element, entry.option,
+            Math.max(entry.from, Math.min(entry.to, Math.round(value))));
+    }
+
+    // Sets a choice option; values it does not list are ignored.
+    function setChoiceOption(entry, value) {
+        if (entry.choices.some(choice => choice.value === value))
+            appearance.setBarElementOption(entry.element, entry.option, value);
     }
 
     width: parent ? parent.width : 0
@@ -220,14 +234,78 @@ Column {
                         Repeater {
                             model: elementDelegate.options
 
-                            delegate: Panels.SettingsSwitchRow {
+                            delegate: Loader {
+                                id: optionCell
+
                                 required property var modelData
 
                                 width: parent.cellWidth
-                                appearance: root.appearance
-                                label: modelData.label
-                                checked: root.appearance.barElementOption(modelData.element, modelData.option)
-                                onToggled: root.toggleElementOption(modelData.element, modelData.option)
+                                sourceComponent: modelData.kind === "number" ? numberOption
+                                    : modelData.kind === "choice" ? choiceOption : switchOption
+
+                                Component {
+                                    id: switchOption
+
+                                    Panels.SettingsSwitchRow {
+                                        appearance: root.appearance
+                                        label: optionCell.modelData.label
+                                        checked: root.appearance.barElementOption(optionCell.modelData.element,
+                                            optionCell.modelData.option)
+                                        onToggled: root.toggleElementOption(optionCell.modelData.element,
+                                            optionCell.modelData.option)
+                                    }
+                                }
+
+                                // Numbers and choices line their labels up with the switches'.
+                                Component {
+                                    id: numberOption
+
+                                    Item {
+                                        height: numberField.height + 8
+
+                                        Panels.SettingsNumber {
+                                            id: numberField
+
+                                            x: 12
+                                            y: 4
+                                            width: parent.width - 24
+                                            appearance: root.appearance
+                                            label: optionCell.modelData.label
+                                            from: optionCell.modelData.from
+                                            to: optionCell.modelData.to
+                                            value: root.appearance.barElementOption(optionCell.modelData.element,
+                                                optionCell.modelData.option)
+                                            onEdited: value => root.setNumberOption(optionCell.modelData, value)
+                                        }
+                                    }
+                                }
+
+                                Component {
+                                    id: choiceOption
+
+                                    Item {
+                                        height: choiceField.height + 8
+
+                                        Panels.SettingsField {
+                                            id: choiceField
+
+                                            x: 12
+                                            y: 4
+                                            width: parent.width - 24
+                                            appearance: root.appearance
+                                            label: optionCell.modelData.label
+
+                                            Panels.SettingsChoice {
+                                                width: parent.width
+                                                appearance: root.appearance
+                                                options: optionCell.modelData.choices
+                                                value: root.appearance.barElementOption(optionCell.modelData.element,
+                                                    optionCell.modelData.option)
+                                                onChosen: value => root.setChoiceOption(optionCell.modelData, value)
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
