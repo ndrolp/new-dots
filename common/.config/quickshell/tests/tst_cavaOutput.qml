@@ -3,7 +3,7 @@ import QtTest
 import "../services/CavaOutput.js" as CavaOutput
 
 // How the Cava bar element reads cava: the config the shell runs it with and
-// each line it prints turned into bar heights.
+// each line it prints turned into bar heights, and what happens when it fails.
 TestCase {
     name: "CavaOutput"
 
@@ -60,5 +60,19 @@ TestCase {
 
     function test_theConfigDrawsOneSpectrumNotTwoMirroredChannels() {
         compare(setting(CavaOutput.config(12), "output", "channels"), "mono");
+    }
+
+    function test_cavaIsStartedAgainAfterAFewSecondsThenLessOftenTheMoreItFails() {
+        compare(CavaOutput.retryDelay(1), 3000);
+        compare(CavaOutput.retryDelay(2), 6000);
+        compare(CavaOutput.retryDelay(3), 12000);
+        compare(CavaOutput.retryDelay(20), 60000);
+    }
+
+    // The shell runs cava through sh, which exits 127 when cava isn't found.
+    function test_aFailedCavaExplainsWhetherItIsMissingOrFailedToStart() {
+        compare(CavaOutput.failureHint(127), "cava isn't installed, so the bars stay flat.");
+        compare(CavaOutput.failureHint(1), "cava failed to start, so the bars stay flat. Trying again in a few seconds.");
+        compare(CavaOutput.failureHint(-1), "cava failed to start, so the bars stay flat. Trying again in a few seconds.");
     }
 }

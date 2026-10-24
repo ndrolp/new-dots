@@ -18,6 +18,11 @@ QtObject {
     property var drawers: []
     readonly property bool wanted: drawers.length > 0
     property bool restarting: false
+    // How many times in a row cava exited on its own before printing a
+    // frame, and what the Bar section says about it under Cava ("" while
+    // cava runs).
+    property int failures: 0
+    property string problem: ""
 
     // Called by each Cava bar element when it starts or stops being drawn.
     function setDrawing(drawer, drawing) {
@@ -32,7 +37,18 @@ QtObject {
         cava.running = false;
     }
 
-    onWantedChanged: cava.running = wanted
+    onWantedChanged: {
+        retry.stop();
+        cava.running = wanted;
+    }
+
+    // Starts cava again a while after it failed, longer the more it fails.
+    property var retry: Timer {
+        id: retry
+
+        interval: CavaOutput.retryDelay(root.failures)
+        onTriggered: cava.running = root.wanted
+    }
 
     property var defaultOutputWatcher: Connections {
         target: Pipewire
@@ -50,14 +66,24 @@ QtObject {
             CavaOutput.config(root.barCount)]
 
         stdout: SplitParser {
-            onRead: data => root.heights = CavaOutput.frameHeights(data, root.barCount)
+            onRead: data => {
+                root.failures = 0;
+                root.problem = "";
+                root.heights = CavaOutput.frameHeights(data, root.barCount);
+            }
         }
 
-        onExited: {
+        // An exit nobody asked for is a failure: flat bars, a hint and a
+        // retry a while later.
+        onExited: exitCode => {
             root.heights = CavaOutput.flatHeights(root.barCount);
             if (root.restarting) {
                 root.restarting = false;
                 running = root.wanted;
+            } else if (root.wanted) {
+                root.failures += 1;
+                root.problem = CavaOutput.failureHint(exitCode);
+                retry.restart();
             }
         }
     }

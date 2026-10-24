@@ -244,6 +244,21 @@ TestCase {
         verify(!all(cava, child => child.checked !== undefined && child.toggled === undefined)[0].checked);
     }
 
+    function test_aHintShowsUnderCavaWhileCavaCantRunAndGoesAwayOnceItRuns() {
+        const built = make();
+        const hint = "cava isn't installed, so the bars stay flat.";
+
+        verify(!textOf(built.item, hint));
+        built.item.elementHints = { "cava": hint };
+        const shown = textOf(built.item, hint);
+        verify(shown);
+        tryVerify(() => shown.mapToItem(built.item, 0, 0).y
+            > elementRow(built.item, "Cava").mapToItem(built.item, 0, 0).y);
+
+        built.item.elementHints = { "cava": "" };
+        verify(!textOf(built.item, hint));
+    }
+
     function test_theZonesAreHeadingsWithTheirElementsInOrder() {
         const built = make();
         const left = textOf(built.item, "Left");
