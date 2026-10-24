@@ -1,6 +1,8 @@
 import QtQuick
-import "../../config" as Config
+import "." as Panels
 
+// The Workspace Labels section: whether the workspaces bar element shows
+// glyphs, and the glyph for each of workspaces 1-20.
 Column {
     id: root
 
@@ -9,120 +11,66 @@ Column {
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
         11, 12, 13, 14, 15, 16, 17, 18, 19, 20
     ]
+    readonly property bool glyphsEnabled: appearance.barElementOption("workspaces", "glyphsEnabled")
 
     width: parent ? parent.width : 0
-    spacing: 12
+    spacing: 14
 
-    Config.Theme {
-        id: theme
+    Panels.SettingsHeading {
+        appearance: root.appearance
+        text: "Workspace labels"
+        topPadding: 4
     }
 
-    Text {
-        text: "WORKSPACE LABELS"
-        color: theme.textMuted
-        font.pixelSize: 11
-        font.bold: true
+    Panels.SettingsGrid {
+        Panels.SettingsSwitchRow {
+            width: parent.cellWidth
+            appearance: root.appearance
+            label: "Use workspace glyphs"
+            checked: root.glyphsEnabled
+            onToggled: root.appearance.setBarElementOption("workspaces", "glyphsEnabled", !root.glyphsEnabled)
+        }
     }
 
-    Column {
+    Panels.SettingsHint {
         width: parent.width
-        spacing: 8
+        appearance: root.appearance
+        text: "Leave a glyph empty to show its workspace number."
+    }
 
-        Rectangle {
-            width: parent.width
-            height: 44
-            radius: root.appearance.radius
-            color: glyphToggleHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+    // Glyphs are a few characters, so their fields are short, five per line.
+    Grid {
+        width: parent.width
+        columns: 5
+        columnSpacing: 16
+        rowSpacing: 14
 
-            HoverHandler {
-                id: glyphToggleHover
-            }
+        Repeater {
+            model: root.workspaceIds
 
-            Text {
-                anchors.left: parent.left
-                anchors.leftMargin: 12
-                anchors.verticalCenter: parent.verticalCenter
-                text: "USE WORKSPACE GLYPHS"
-                color: theme.text
-                font.pixelSize: root.appearance.textSize - 1
-                font.bold: true
-            }
+            delegate: Column {
+                required property int modelData
 
-            Rectangle {
-                anchors.right: parent.right
-                anchors.rightMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                width: 48
-                height: 28
-                radius: root.appearance.radius
-                color: root.appearance.barElementOption("workspaces", "glyphsEnabled") ? theme.accent : theme.surface
+                width: (parent.width - parent.columnSpacing * (parent.columns - 1)) / parent.columns
+                spacing: 6
 
-                Rectangle {
-                    x: root.appearance.barElementOption("workspaces", "glyphsEnabled") ? parent.width - width - 3 : 3
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 22
-                    height: 22
-                    radius: 11
-                    color: theme.text
-
-                    Behavior on x {
-                        NumberAnimation {
-                            duration: 160
-                            easing.type: Easing.OutCubic
-                        }
-                    }
+                Panels.SettingsLabel {
+                    width: parent.width
+                    appearance: root.appearance
+                    text: "Workspace " + modelData
                 }
-            }
 
-            TapHandler {
-                onTapped: root.appearance.setBarElementOption("workspaces", "glyphsEnabled",
-                    !root.appearance.barElementOption("workspaces", "glyphsEnabled"))
-            }
-        }
+                Panels.SettingsInput {
+                    width: parent.width
+                    appearance: root.appearance
+                    text: root.appearance.barElementOption("workspaces", "glyphs")[modelData - 1] || ""
+                    placeholderText: String(modelData)
+                    maximumLength: 4
 
-        Text {
-            width: parent.width
-            text: "Leave a glyph empty to show its workspace number."
-            color: theme.textMuted
-            font.pixelSize: root.appearance.textSize - 2
-            font.bold: true
-        }
-
-        Grid {
-            width: parent.width
-            height: 292
-            columns: 4
-            columnSpacing: 8
-            rowSpacing: 8
-
-            Repeater {
-                model: root.workspaceIds
-
-                delegate: Column {
-                    required property int modelData
-
-                    width: (parent.width - parent.columnSpacing * 3) / 4
-                    spacing: 4
-
-                    Text {
-                        text: "WORKSPACE " + modelData
-                        color: theme.textMuted
-                        font.pixelSize: 10
-                        font.bold: true
-                    }
-
-                    SettingsInput {
-                        width: parent.width
-                        appearance: root.appearance
-                        text: root.appearance.barElementOption("workspaces", "glyphs")[modelData - 1] || ""
-                        placeholderText: String(modelData)
-                        maximumLength: 4
-
-                        onTextEdited: {
-                            const glyphs = root.appearance.barElementOption("workspaces", "glyphs");
-                            glyphs[modelData - 1] = text;
-                            root.appearance.setBarElementOption("workspaces", "glyphs", glyphs);
-                        }
+                    onTextEdited: {
+                        const glyphs = root.appearance.barElementOption("workspaces", "glyphs");
+                        glyphs[modelData - 1] = text;
+                        root.appearance.setBarElementOption("workspaces", "glyphs", glyphs);
                     }
                 }
             }
