@@ -67,8 +67,8 @@ Column {
                     placeholderText: String(modelData)
                     maximumLength: 4
 
-                    onTextEdited: {
-                        const glyphs = root.appearance.barElementOption("workspaces", "glyphs");
+                    onEdited: text => {
+                        const glyphs = root.appearance.barElementOption("workspaces", "glyphs").slice();
                         glyphs[modelData - 1] = text;
                         root.appearance.setBarElementOption("workspaces", "glyphs", glyphs);
                     }

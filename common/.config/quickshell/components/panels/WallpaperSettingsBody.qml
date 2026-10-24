@@ -60,7 +60,7 @@ Column {
             appearance: root.appearance
             text: root.wallpapers.horizontalFolder
             placeholderText: "Horizontal wallpaper folder"
-            onTextEdited: root.wallpapers.horizontalFolder = text
+            onEdited: text => root.wallpapers.horizontalFolder = text
         }
 
         SettingsInput {
@@ -68,7 +68,7 @@ Column {
             appearance: root.appearance
             text: root.wallpapers.verticalFolder
             placeholderText: "Vertical wallpaper folder"
-            onTextEdited: root.wallpapers.verticalFolder = text
+            onEdited: text => root.wallpapers.verticalFolder = text
         }
     }
 

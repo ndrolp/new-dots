@@ -51,8 +51,9 @@ TestCase {
                 property var glyphs: ["", "", "", ""]
                 property var saved: []
 
+                // The stored glyphs themselves, as the shell hands them out.
                 function barElementOption(element, option) {
-                    return option === "glyphs" ? glyphs.slice() : true;
+                    return option === "glyphs" ? glyphs : true;
                 }
 
                 function setBarElementOption(element, option, value) {
@@ -97,14 +98,30 @@ TestCase {
         compare(label.background.border.color, theme.border);
     }
 
-    function test_typingALabelStillSavesIt() {
+    // Like every other field, a label is saved when its edit is finished,
+    // not on every key.
+    function test_typingALabelSavesItWhenFinished() {
         const built = make();
         const label = fields(built.item)[2];
 
         label.forceActiveFocus();
         keyClick("x");
+        compare(built.appearance.saved, []);
+        keyClick(Qt.Key_Return);
+        label.focus = false;
 
         compare(built.appearance.saved, [["workspaces", "glyphs", ["", "", "x", ""]]]);
+    }
+
+    function test_savingALabelLeavesTheStoredGlyphsUntouched() {
+        const built = make();
+        const label = fields(built.item)[2];
+
+        label.forceActiveFocus();
+        keyClick("x");
+        keyClick(Qt.Key_Return);
+
+        compare(built.appearance.glyphs, ["", "", "", ""]);
     }
 
     function test_theGlyphsSwitchIsATransparentSwitchRowThatSavesWhenToggled() {

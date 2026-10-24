@@ -158,6 +158,22 @@ TestCase {
         verify(textOf(built.item, "Wallpaper folders").visible);
     }
 
+    // A folder is saved when its edit is finished, not on every key.
+    function test_typingAFolderSavesItWhenFinished() {
+        const built = make();
+        viewChoice(built.item).chosen("Locations");
+        const folder = all(built.item, child => child instanceof TextInput
+            && child.placeholderText === "Horizontal wallpaper folder")[0];
+
+        folder.forceActiveFocus();
+        folder.selectAll();
+        keyClick("x");
+        compare(built.wallpapers.horizontalFolder, "/walls/h");
+        keyClick(Qt.Key_Return);
+
+        compare(built.wallpapers.horizontalFolder, "x");
+    }
+
     function test_theScheduleIsASwitchRowANumberAndAQuietButton() {
         const built = make();
         viewChoice(built.item).chosen("Schedule");
