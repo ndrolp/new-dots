@@ -184,6 +184,23 @@ TestCase {
         compare(built.wallpapers.advanced, 1);
     }
 
+    function test_theListIsHeadedByTheMonitorsOrientation() {
+        const built = make();
+
+        verify(textOf(built.item, "Horizontal wallpapers").visible);
+
+        monitorChoice(built.item).chosen("Philips");
+
+        verify(textOf(built.item, "Vertical wallpapers").visible);
+    }
+
+    function test_nothingInTheSectionIsBold() {
+        const built = make();
+        const bold = all(built.item, child => child.font !== undefined && child.font.bold);
+
+        compare(bold.length, 0);
+    }
+
     function test_theWallpaperListStaysFullWidth() {
         const built = make();
         const list = all(built.item, child => child instanceof GridView)[0];

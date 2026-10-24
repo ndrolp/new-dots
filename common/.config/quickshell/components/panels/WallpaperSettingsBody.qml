@@ -132,14 +132,19 @@ Column {
             onChosen: description => root.selectedWallpaperMonitor = description
         }
 
-        Text {
-            text: root.selectedWallpaperMonitor === ""
-                ? "No monitors configured"
-                : root.selectedPortrait
-                    ? "VERTICAL WALLPAPERS" : "HORIZONTAL WALLPAPERS"
-            color: theme.textMuted
-            font.pixelSize: 11
-            font.bold: true
+        Panels.SettingsHeading {
+            width: parent.width
+            appearance: root.appearance
+            text: root.selectedPortrait ? "Vertical wallpapers" : "Horizontal wallpapers"
+            topPadding: 4
+            visible: root.selectedWallpaperMonitor !== ""
+        }
+
+        Panels.SettingsHint {
+            width: parent.width
+            appearance: root.appearance
+            text: "No monitors connected"
+            visible: root.selectedWallpaperMonitor === ""
         }
 
         GridView {
