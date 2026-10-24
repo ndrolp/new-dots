@@ -125,6 +125,8 @@ Row {
             id: appContent
 
             anchors.centerIn: parent
+            // As tall as the background, so its center is the background's.
+            height: parent.height
             spacing: icon.displayedIconSource === ""
                 ? root.appearance.spacing + 2 : root.appearance.spacing
 
@@ -134,9 +136,10 @@ Row {
                 property string displayedIconSource: root.iconSource
                 property string displayedTerminalGlyph: root.terminalGlyph
 
+                anchors.verticalCenter: parent.verticalCenter
                 visible: root.activeToplevel !== null
                 width: visible ? root.appearance.workspaceButtonSize - 8 : 0
-                height: Math.max(appName.implicitHeight, width)
+                height: width
 
                 transform: Translate {
                     id: iconTranslation
@@ -152,16 +155,31 @@ Row {
                 }
 
                 Text {
-                    anchors.fill: parent
+                    id: glyph
+
+                    // Centers the glyph's drawn shape, not its line box.
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.alignWhenCentered: false
+                    anchors.verticalCenterOffset: height / 2 - (baselineOffset
+                        + glyphMetrics.tightBoundingRect.y
+                        + glyphMetrics.tightBoundingRect.height / 2)
                     visible: icon.displayedTerminalGlyph !== ""
                         || icon.displayedIconSource === ""
                     horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
                     text: icon.displayedTerminalGlyph !== ""
                         ? icon.displayedTerminalGlyph : "󰣆"
                     color: icon.displayedTerminalGlyph !== "" ? theme.blue : theme.text
                     font.pixelSize: appearance.textSize
                     font.bold: true
+
+                    TextMetrics {
+                        id: glyphMetrics
+
+                        font: glyph.font
+                        text: glyph.text
+                    }
                 }
             }
 
@@ -170,7 +188,12 @@ Row {
 
                 property string displayedLabel: root.label
 
+                // Centers the capital letters, not the line box (which also
+                // holds descender space).
                 anchors.verticalCenter: parent.verticalCenter
+                anchors.alignWhenCentered: false
+                anchors.verticalCenterOffset: height / 2
+                    - (baselineOffset - labelMetrics.capitalHeight / 2)
                 width: Math.min(root.activeTitleMaximumWidth, implicitWidth)
                 text: displayedLabel
                 color: theme.text
@@ -180,6 +203,12 @@ Row {
 
                 transform: Translate {
                     id: labelTranslation
+                }
+
+                FontMetrics {
+                    id: labelMetrics
+
+                    font: appName.font
                 }
             }
         }
