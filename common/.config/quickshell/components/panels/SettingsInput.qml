@@ -2,18 +2,20 @@ import QtQuick
 import QtQuick.Controls
 import "../../config" as Config
 
+// A text or number field: transparent, with a hairline border that turns
+// accent while focused.
 TextField {
     id: control
 
     required property var appearance
 
-    height: 36
-    leftPadding: 12
-    rightPadding: 12
+    height: 32
+    leftPadding: 10
+    rightPadding: 10
     color: theme.text
-    placeholderTextColor: Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.6)
+    placeholderTextColor: theme.textDisabled
+    font.family: theme.fontFamily
     font.pixelSize: appearance.textSize
-    font.bold: true
     selectByMouse: true
 
     TapHandler {
@@ -26,8 +28,8 @@ TextField {
 
     background: Rectangle {
         radius: control.appearance.radius
-        color: theme.backgroundSecondary
-        border.color: control.activeFocus ? theme.accent : "transparent"
+        color: "transparent"
+        border.color: control.activeFocus ? theme.accent : theme.border
         border.width: 1
     }
 }

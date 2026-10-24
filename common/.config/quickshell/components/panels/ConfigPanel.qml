@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Effects
 import "../../config" as Config
 
 Rectangle {
@@ -117,14 +116,6 @@ Rectangle {
     border.color: theme.border
     border.width: 1
 
-    layer.enabled: true
-    layer.effect: MultiEffect {
-        shadowEnabled: true
-        shadowColor: "#73000000"
-        shadowBlur: 0.65
-        shadowVerticalOffset: 6
-    }
-
     Config.Theme {
         id: theme
     }
@@ -151,25 +142,13 @@ Rectangle {
                 height: 1
             }
 
-            TextField {
+            SettingsInput {
                 id: sectionSearch
 
                 width: 244
-                height: 34
+                appearance: root.appearance
                 placeholderText: "Search settings"
                 text: root.sectionQuery
-                color: theme.text
-                placeholderTextColor: theme.textMuted
-                font.pixelSize: root.appearance.textSize - 1
-                font.bold: true
-                selectByMouse: true
-
-                background: Rectangle {
-                    radius: root.appearance.radius
-                    color: theme.backgroundSecondary
-                    border.color: sectionSearch.activeFocus ? theme.accent : theme.border
-                    border.width: 1
-                }
 
                 onTextEdited: root.sectionQuery = text
                 onAccepted: {
@@ -183,33 +162,12 @@ Rectangle {
                 height: 1
             }
 
-            Rectangle {
+            SettingsButton {
                 id: doneButton
 
-                width: 76
-                height: 34
-                radius: root.appearance.radius
-                color: doneHover.hovered ? theme.accentHover : theme.accent
-
-                Behavior on color {
-                    ColorAnimation { duration: 140 }
-                }
-
-                HoverHandler {
-                    id: doneHover
-                }
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "Done"
-                    color: theme.background
-                    font.pixelSize: root.appearance.textSize
-                    font.bold: true
-                }
-
-                TapHandler {
-                    onTapped: root.closeRequested()
-                }
+                appearance: root.appearance
+                label: "Done"
+                onActivated: root.closeRequested()
             }
         }
 
@@ -226,13 +184,16 @@ Rectangle {
                     model: root.filteredSections
 
                     delegate: Rectangle {
+                        id: sectionRow
+
                         required property var modelData
+                        readonly property bool selected: root.currentSection === sectionRow.modelData.section
 
                         width: parent.width
                         height: 44
                         radius: root.appearance.radius
-                        color: root.currentSection === modelData.section || sectionHover.hovered
-                            ? theme.surfaceHover : "transparent"
+                        // The selected section shows in the accent text; only hover fills a row.
+                        color: sectionHover.hovered ? theme.surfaceHover : "transparent"
 
                         Behavior on color {
                             ColorAnimation { duration: 140 }
@@ -249,23 +210,21 @@ Rectangle {
 
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: modelData.icon
-                                color: root.currentSection === modelData.section ? theme.accent : theme.textMuted
+                                text: sectionRow.modelData.icon
+                                color: sectionRow.selected ? theme.accent : theme.textMuted
                                 font.pixelSize: 16
-                                font.bold: true
                             }
 
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: modelData.label
-                                color: root.currentSection === modelData.section ? theme.text : theme.textMuted
+                                text: sectionRow.modelData.label
+                                color: sectionRow.selected ? theme.accent : theme.text
                                 font.pixelSize: root.appearance.textSize
-                                font.bold: true
                             }
                         }
 
                         TapHandler {
-                            onTapped: root.selectSection(modelData.section)
+                            onTapped: root.selectSection(sectionRow.modelData.section)
                         }
                     }
                 }
@@ -277,7 +236,6 @@ Rectangle {
                     color: theme.textMuted
                     wrapMode: Text.WordWrap
                     font.pixelSize: root.appearance.textSize - 1
-                    font.bold: true
                 }
             }
 
@@ -330,7 +288,6 @@ Rectangle {
                                         : "Choose a wallpaper for each display."
                         color: theme.textMuted
                         font.pixelSize: root.appearance.textSize
-                        font.bold: true
                     }
 
                     ScrollView {

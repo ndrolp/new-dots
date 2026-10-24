@@ -1,0 +1,63 @@
+import QtQuick
+import "../../config" as Config
+import "." as Panels
+
+// A whole-number setting between `from` and `to`: its label on top, then a
+// slider and a small number field side by side on one line. Moving the slider
+// or typing a number in range asks to save it; a number out of range is
+// rejected. Whoever owns the setting saves it and sets `value`.
+Column {
+    id: cell
+
+    required property var appearance
+    property string label: ""
+    property int from: 0
+    property int to: 100
+    property int value: 0
+    readonly property alias slider: numberSlider
+    readonly property alias field: numberField
+    signal edited(int value)
+
+    spacing: 6
+
+    Config.Theme {
+        id: theme
+    }
+
+    Panels.SettingsLabel {
+        width: parent.width
+        appearance: cell.appearance
+        text: cell.label
+    }
+
+    Row {
+        width: parent.width
+        spacing: 12
+
+        SettingsSlider {
+            id: numberSlider
+
+            width: parent.width - numberField.width - parent.spacing
+            height: numberField.height
+            from: cell.from
+            to: cell.to
+            stepSize: 1
+            value: cell.value
+            onMoved: cell.edited(Math.round(value))
+        }
+
+        SettingsInput {
+            id: numberField
+
+            width: 56
+            appearance: cell.appearance
+            horizontalAlignment: TextInput.AlignHCenter
+            text: String(cell.value)
+            validator: IntValidator {
+                bottom: cell.from
+                top: cell.to
+            }
+            onEditingFinished: cell.edited(Number(text))
+        }
+    }
+}
