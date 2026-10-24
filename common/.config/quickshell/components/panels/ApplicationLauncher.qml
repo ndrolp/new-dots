@@ -5,6 +5,7 @@ import Quickshell.Widgets
 import QtQuick
 import QtQuick.Controls
 import "../../config" as Config
+import "../IconSource.js" as IconSource
 
 Variants {
     id: root
@@ -171,14 +172,6 @@ Variants {
                     return root.launcherHistory.recentIndex(application.id) >= 0;
                 return true;
             }).length;
-        }
-
-        function iconSource(application) {
-            if (application.icon.startsWith("/"))
-                return "file://" + application.icon;
-
-            return "image://icon/" + (application.icon || "utilities-terminal")
-                + "?fallback=utilities-terminal";
         }
 
         onVisibleChanged: {
@@ -389,7 +382,7 @@ Variants {
                             anchors.topMargin: 14
                             width: 36
                             height: 36
-                            source: launcher.iconSource(applicationTile.application)
+                            source: IconSource.forName(applicationTile.application.icon)
                             visible: status === Image.Ready
                         }
 
@@ -407,7 +400,7 @@ Variants {
                                 anchors.centerIn: parent
                                 width: 20
                                 height: 20
-                                source: "image://icon/utilities-terminal"
+                                source: IconSource.forName("")
                             }
                         }
 

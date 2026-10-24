@@ -4,6 +4,7 @@ import Quickshell.Wayland
 import Quickshell.Widgets
 import QtQuick
 import "../../config" as Config
+import "../IconSource.js" as IconSource
 
 Variants {
     id: root
@@ -313,8 +314,7 @@ Variants {
                                             anchors.centerIn: parent
                                             width: 13
                                             height: 13
-                                            source: "image://icon/" + parent.appClass
-                                                + "?fallback=application-x-executable"
+                                            source: IconSource.forName(parent.appClass)
                                         }
                                     }
                                 }
@@ -358,8 +358,7 @@ Variants {
                                         anchors.verticalCenter: parent.verticalCenter
                                         width: 16
                                         height: 16
-                                        source: "image://icon/" + windowEntry.appClass
-                                            + "?fallback=application-x-executable"
+                                        source: IconSource.forName(windowEntry.appClass)
                                     }
 
                                     Text {

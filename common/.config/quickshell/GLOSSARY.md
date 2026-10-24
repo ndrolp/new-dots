@@ -37,6 +37,10 @@ La ventana pequeña que se despliega desde un bar element al pulsarlo (Bluetooth
 Con la barra opaca un popup va **anclado** (attached): sale de la barra como si fuera parte de ella. Con la barra transparente va **flotante** (floating), separado de la barra.
 _Avoid_: Menu, dropdown, status popup
 
+**Icon theme** (tema de iconos):
+El conjunto de iconos de aplicaciones y de la bandeja que usa el escritorio (hoy Papirus-Dark). Lo decide GTK y Quickshell lo sigue; es el mismo para todos los temas de color y no cambia al cambiar de tema.
+_Avoid_: Tema (a secas), que en este proyecto es el esquema de colores
+
 **Control center** (centro de control):
 El panel con los conmutadores rápidos y los deslizadores (Wi-Fi, Bluetooth, no molestar, volumen, brillo). No es un popup: no pertenece a ningún bar element, aunque igual que un popup va anclado o flotante según la barra.
 _Avoid_: Control panel, quick settings, panel de control

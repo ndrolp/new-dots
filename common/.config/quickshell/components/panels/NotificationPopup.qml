@@ -3,6 +3,7 @@ import Quickshell.Wayland
 import QtQuick
 import QtQuick.Effects
 import "../../config" as Config
+import "../IconSource.js" as IconSource
 
 PanelWindow {
     id: root
@@ -124,7 +125,7 @@ PanelWindow {
                             source: notificationCard.modelData.image !== ""
                                 ? notificationCard.modelData.image
                                 : notificationCard.modelData.appIcon !== ""
-                                    ? Quickshell.iconPath(notificationCard.modelData.appIcon, true) : ""
+                                    ? IconSource.forName(notificationCard.modelData.appIcon) : ""
                             fillMode: Image.PreserveAspectCrop
                         }
 

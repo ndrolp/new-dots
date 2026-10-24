@@ -4,6 +4,7 @@ import Quickshell.Wayland
 import Quickshell.Widgets
 import QtQuick
 import "../../config" as Config
+import "../IconSource.js" as IconSource
 
 Variants {
     id: root
@@ -263,8 +264,7 @@ Variants {
                                 Image {
                                     anchors.fill: parent
                                     cache: false
-                                    source: "image://icon/" + windowRow.appClass
-                                        + "?fallback=application-x-executable"
+                                    source: IconSource.forName(windowRow.appClass)
                                 }
                             }
                         }

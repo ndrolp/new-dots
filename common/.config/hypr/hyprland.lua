@@ -44,7 +44,7 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("udiskie --tray --notify")
 	hl.exec_cmd("awww-daemon")
 	hl.exec_cmd("hyprdynamicmonitors --disable-power-events")
-	hl.exec_cmd("qs & disown")
+	hl.exec_cmd("~/.config/quickshell/start.sh")
 end)
 
 -------------------------------
