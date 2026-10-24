@@ -229,6 +229,10 @@ Variants {
             id: theme
         }
 
+        BluetoothPower {
+            id: bluetoothPower
+        }
+
         Process {
             id: volumeCommand
         }
@@ -505,8 +509,7 @@ Variants {
                         active: controlCenter.bluetoothAdapter !== null
                             && controlCenter.bluetoothAdapter.enabled
                         controlEnabled: controlCenter.bluetoothAdapter !== null
-                        onTriggered: controlCenter.bluetoothAdapter.enabled
-                            = !controlCenter.bluetoothAdapter.enabled
+                        onTriggered: bluetoothPower.setEnabled(!controlCenter.bluetoothAdapter.enabled)
                     }
 
                     ControlTile {

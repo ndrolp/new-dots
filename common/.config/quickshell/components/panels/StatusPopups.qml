@@ -1,6 +1,5 @@
 import Quickshell
 import Quickshell.Bluetooth
-import Quickshell.Io
 import Quickshell.Networking
 import Quickshell.Services.Mpris
 import Quickshell.Services.Pipewire
@@ -907,27 +906,23 @@ Item {
         readonly property var adapter: Bluetooth.defaultAdapter
         readonly property var devices: adapter
             ? BluetoothDevices.visibleDevices(adapter.devices.values) : []
-        // Why the last attempt to turn Bluetooth on failed, shown as the subtitle.
-        property string enableError: ""
         // Addresses of devices paired from this popup, trusted once paired.
         property var pairRequests: ({})
 
+        popup: "bluetooth"
+        implicitWidth: 380
+
+        // Scan for devices while the popup is open and Bluetooth is on.
         onVisibleChanged: {
-            if (!visible && adapter && adapter.discovering)
+            if (visible)
+                startDiscovery();
+            else if (adapter && adapter.discovering)
                 adapter.discovering = false;
         }
 
-        function setEnabled(on) {
-            enableError = "";
-            if (!on) {
-                adapter.enabled = false;
-                return;
-            }
-            enableTimeout.restart();
-            if (adapter.state === BluetoothAdapterState.Blocked)
-                rfkillUnblock.running = true;
-            else
-                adapter.enabled = true;
+        function startDiscovery() {
+            if (adapter && adapter.enabled && !adapter.discovering)
+                adapter.discovering = true;
         }
 
         function pair(device) {
@@ -937,44 +932,16 @@ Item {
             device.pair();
         }
 
-        Process {
-            id: rfkillUnblock
-
-            command: ["rfkill", "unblock", "bluetooth"]
-            onExited: exitCode => {
-                if (exitCode !== 0) {
-                    enableTimeout.stop();
-                    bluetoothPopup.enableError = "Couldn't unblock Bluetooth (rfkill)";
-                } else if (bluetoothPopup.adapter) {
-                    bluetoothPopup.adapter.enabled = true;
-                }
-            }
-        }
-
-        Timer {
-            id: enableTimeout
-
-            interval: 5000
-            onTriggered: {
-                const adapter = bluetoothPopup.adapter;
-                if (!adapter || adapter.enabled)
-                    return;
-                bluetoothPopup.enableError = adapter.state === BluetoothAdapterState.Blocked
-                    ? "Bluetooth is blocked (rfkill)" : "Couldn't turn Bluetooth on";
-            }
+        BluetoothPower {
+            id: bluetoothPower
         }
 
         Connections {
             target: bluetoothPopup.adapter
 
             function onEnabledChanged() {
-                const adapter = bluetoothPopup.adapter;
-                if (!adapter.enabled)
-                    return;
-                enableTimeout.stop();
-                bluetoothPopup.enableError = "";
                 if (bluetoothPopup.visible)
-                    adapter.discovering = true;
+                    bluetoothPopup.startDiscovery();
             }
         }
 
@@ -996,13 +963,6 @@ Item {
                 }
             }
         }
-        popup: "bluetooth"
-        implicitWidth: 380
-
-        onRevealChanged: {
-            if (reveal > 0 && adapter && adapter.enabled)
-                adapter.discovering = true;
-        }
 
         Column {
             width: parent.width
@@ -1015,7 +975,7 @@ Item {
                     ? theme.accent : theme.textMuted
                 title: "Bluetooth"
                 subtitle: !bluetoothPopup.adapter ? "No adapter found"
-                    : bluetoothPopup.enableError !== "" ? bluetoothPopup.enableError
+                    : bluetoothPower.error !== "" ? bluetoothPower.error
                     : !bluetoothPopup.adapter.enabled ? "Bluetooth is off"
                     : bluetoothPopup.adapter.discovering ? "Scanning for devices"
                     : "Choose a device"
@@ -1024,7 +984,7 @@ Item {
                     appearance: root.appearance
                     checked: !!bluetoothPopup.adapter && bluetoothPopup.adapter.enabled
                     enabled: bluetoothPopup.adapter !== null
-                    onToggled: bluetoothPopup.setEnabled(!bluetoothPopup.adapter.enabled)
+                    onToggled: bluetoothPower.setEnabled(!bluetoothPopup.adapter.enabled)
                 }
             }
 
