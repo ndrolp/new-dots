@@ -2,9 +2,9 @@ import QtQuick
 import QtTest
 import "../components/panels/PopupPlacement.js" as PopupPlacement
 
-// A popup opens under the bar element that opened it when that element sits
-// in the center zone, shifted sideways to stay on screen; otherwise it opens
-// at the bar's edge.
+// A popup opens under the bar element that opened it, whatever zone it sits
+// in, shifted sideways to stay on screen and clear of the bar's rounded ends.
+// A popup whose element isn't on the bar opens at the bar's edge.
 TestCase {
     name: "PopupPlacement"
 
@@ -14,7 +14,6 @@ TestCase {
     function placement(fields) {
         return Object.assign({
             popupWidth: 400,
-            nearTrigger: true,
             trigger: { x: 900, width: 120 },
             edge: "right"
         }, bar, fields);
@@ -32,24 +31,42 @@ TestCase {
         compare(PopupPlacement.x(placement({ trigger: { x: 1860, width: 60 } })), 1508);
     }
 
-    function test_aPopupOfAnElementOutsideTheCenterOpensAtTheRightEdge() {
-        compare(PopupPlacement.x(placement({ nearTrigger: false })), 1508);
+    function test_aPopupOfALeftZoneElementOpensUnderIt() {
+        compare(PopupPlacement.x(placement({ trigger: { x: 300, width: 60 } })), 130);
+    }
+
+    function test_aPopupOfARightZoneElementOpensUnderIt() {
+        compare(PopupPlacement.x(placement({ trigger: { x: 1600, width: 60 } })), 1430);
+    }
+
+    function test_aPopupKeepsClearOfTheBarsRoundedEnds() {
+        compare(PopupPlacement.x(placement({ radius: 20, trigger: { x: 20, width: 60 } })), 20);
+        compare(PopupPlacement.x(placement({ radius: 20, trigger: { x: 1860, width: 60 } })), 1500);
+    }
+
+    function test_aSmallRadiusLeavesThePaddingAsTheMargin() {
+        compare(PopupPlacement.x(placement({ radius: 6, trigger: { x: 20, width: 60 } })), 12);
+    }
+
+    function test_aPopupWhoseElementIsNotOnTheBarOpensAtTheRightEdge() {
+        compare(PopupPlacement.x(placement({ trigger: null })), 1508);
     }
 
     function test_aPopupCanOpenAtTheLeftEdgeInstead() {
-        compare(PopupPlacement.x(placement({ nearTrigger: false, edge: "left" })), 12);
+        compare(PopupPlacement.x(placement({ trigger: null, edge: "left" })), 12);
     }
 
-    function test_aCenterPopupWhoseElementIsMissingOpensAtTheRightEdge() {
-        compare(PopupPlacement.x(placement({ trigger: null, edge: "left" })), 1508);
+    function test_anEdgePopupKeepsClearOfTheBarsRoundedEnds() {
+        compare(PopupPlacement.x(placement({ radius: 20, trigger: null })), 1500);
+        compare(PopupPlacement.x(placement({ radius: 20, trigger: null, edge: "left" })), 20);
     }
 
-    function test_aCenterPopupOpensJustBelowTheBarContent() {
+    function test_aFloatingPopupOpensJustBelowTheBarContent() {
         compare(PopupPlacement.y(placement({ content: { y: 6, height: 32 } })), 46);
     }
 
-    function test_anEdgePopupOpensBelowTheBarHeight() {
-        compare(PopupPlacement.y(placement({ nearTrigger: false, content: { y: 6, height: 32 } })), 48);
+    function test_aFloatingPopupWithoutBarContentOpensBelowTheBarHeight() {
+        compare(PopupPlacement.y(placement({ content: null })), 48);
     }
 
     function test_popupsAreAttachedOnAnOpaqueBar() {
@@ -62,7 +79,7 @@ TestCase {
 
     function test_anAttachedPopupOpensRightAtTheBarsBottomEdge() {
         compare(PopupPlacement.y(placement({ attached: true, content: { y: 6, height: 32 } })), 40);
-        compare(PopupPlacement.y(placement({ attached: true, nearTrigger: false })), 40);
+        compare(PopupPlacement.y(placement({ attached: true, content: null })), 40);
     }
 
     function test_aFloatingPopupHasRoomAllAroundItsSurface() {

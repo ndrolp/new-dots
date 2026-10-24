@@ -15,10 +15,10 @@ PopupWindow {
     required property string popup
     required property var appearance
     required property var barWindow
-    // The bar content; places popups of center elements under them.
+    // The bar content; places popups under the bar element that opened them.
     property var anchorProvider: null
     property bool open: false
-    // Where the popup opens when it isn't under its element: "left" or "right".
+    // Where the popup opens when its element isn't on the bar: "left" or "right".
     property string edge: "right"
     // Decided by the bar profile of this bar's monitor.
     readonly property bool attached: PopupPlacement.attached(appearance)
@@ -36,10 +36,8 @@ PopupWindow {
     // Hidden while still open, e.g. after losing focus.
     signal dismissed()
 
-    readonly property bool nearTrigger: anchorProvider ? anchorProvider.popupNearTrigger(popup) : false
-
     function trigger() {
-        const element = nearTrigger ? anchorProvider.popupTrigger(popup) : null;
+        const element = anchorProvider ? anchorProvider.popupTrigger(popup) : null;
         return element ? { x: anchorProvider.x + element.x, width: element.width } : null;
     }
 
@@ -54,14 +52,13 @@ PopupWindow {
         popupWidth: implicitWidth,
         barWidth: barWindow.width,
         padding: appearance.horizontalPadding,
-        nearTrigger: nearTrigger,
+        radius: appearance.radius,
         trigger: trigger(),
         edge: edge
     })
     anchor.rect.y: PopupPlacement.y({
         barHeight: appearance.barHeight,
         spacing: appearance.spacing,
-        nearTrigger: nearTrigger,
         attached: attached,
         content: anchorProvider ? { y: anchorProvider.y, height: anchorProvider.height } : null
     })
