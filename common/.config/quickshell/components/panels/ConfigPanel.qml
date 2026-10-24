@@ -134,7 +134,6 @@ Rectangle {
                 text: "Settings"
                 color: theme.text
                 font.pixelSize: 20
-                font.bold: true
             }
 
             Item {
@@ -220,13 +219,11 @@ Rectangle {
                     }
                 }
 
-                Text {
+                SettingsHint {
                     width: parent.width
                     visible: root.filteredSections.length === 0
+                    appearance: root.appearance
                     text: "No settings match this search."
-                    color: theme.textMuted
-                    wrapMode: Text.WordWrap
-                    font.pixelSize: root.appearance.textSize - 1
                 }
             }
 
