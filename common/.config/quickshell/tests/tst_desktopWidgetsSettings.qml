@@ -223,4 +223,43 @@ TestCase {
         keyClick(Qt.Key_Return);
         compare(widgetsOf(built).weather.location, "Vigo");
     }
+
+    function buttons(item, label) {
+        return all(item, child => child.label === label && child.activated !== undefined);
+    }
+
+    function textShown(item, text) {
+        return all(item, child => child.text === text && child.font !== undefined
+            && !(child instanceof TextInput)).length > 0;
+    }
+
+    function test_theStackOrderListsTheDesktopWidgetsAndQuietButtonsMoveThem() {
+        const built = make();
+        const up = buttons(built.item, "Up");
+        const down = buttons(built.item, "Down");
+
+        compare(up.length, 5);
+        compare(down.length, 5);
+        verify(textShown(built.item, "1. Media"));
+        verify(!up[0].enabled, "the first can't move up");
+        verify(!down[4].enabled, "the last can't move down");
+
+        down[0].activated();
+
+        compare(built.monitors.desktopWidgetOrder("DELL U2720Q"),
+            ["system", "media", "calendar", "network", "weather"]);
+        verify(textShown(built.item, "1. System"));
+        verify(textShown(built.item, "2. Media"));
+    }
+
+    function test_noFilledCardsOrBoldTextRemain() {
+        const built = make();
+        const bold = all(built.item, child => child.font !== undefined && child.font.bold);
+        // A slider's thin track keeps its fill; a card is a row-sized block.
+        const filled = all(built.item, child => child.radius !== undefined && child.border !== undefined
+            && child.height > 20 && child.color === theme.backgroundSecondary);
+
+        compare(bold.length, 0);
+        compare(filled.length, 0);
+    }
 }

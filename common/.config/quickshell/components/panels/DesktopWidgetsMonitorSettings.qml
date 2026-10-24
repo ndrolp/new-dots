@@ -11,6 +11,10 @@ Column {
     property string monitorName: ""
 
     readonly property var desktop: monitors.desktopWidgetsFor(monitorName)
+    readonly property var widgetOrder: monitors.desktopWidgetOrder(monitorName)
+    readonly property var widgetLabels: ({
+        media: "Media", system: "System", calendar: "Calendar", network: "Network", weather: "Weather"
+    })
 
     width: parent ? parent.width : 0
     spacing: 14
@@ -157,13 +161,7 @@ Column {
     }
 
     Repeater {
-        model: [
-            { label: "Media", widget: "media" },
-            { label: "System", widget: "system" },
-            { label: "Calendar", widget: "calendar" },
-            { label: "Network", widget: "network" },
-            { label: "Weather", widget: "weather" }
-        ]
+        model: Object.keys(root.widgetLabels).map(widget => ({ label: root.widgetLabels[widget], widget: widget }))
 
         delegate: Panels.SettingsGrid {
             id: widgetGrid
@@ -205,6 +203,66 @@ Column {
                     appearance: root.appearance
                     text: root.desktop.weather.location
                     onEditingFinished: root.setWidget("weather", "location", text.trim())
+                }
+            }
+        }
+    }
+
+    Panels.SettingsHeading {
+        appearance: root.appearance
+        text: "Stack order"
+        topPadding: 8
+    }
+
+    Panels.SettingsHint {
+        width: root.width
+        appearance: root.appearance
+        text: "Sets the top-to-bottom order when desktop widgets share a placement."
+    }
+
+    Repeater {
+        model: root.widgetOrder
+
+        delegate: Item {
+            id: orderRow
+
+            required property string modelData
+            required property int index
+            readonly property bool first: index === 0
+            readonly property bool last: index === root.widgetOrder.length - 1
+
+            width: root.width
+            height: 36
+
+            Panels.SettingsLabel {
+                anchors.left: parent.left
+                anchors.leftMargin: 12
+                anchors.right: moveButtons.left
+                anchors.verticalCenter: parent.verticalCenter
+                appearance: root.appearance
+                text: (orderRow.index + 1) + ". " + root.widgetLabels[orderRow.modelData]
+            }
+
+            Row {
+                id: moveButtons
+
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+
+                Panels.SettingsButton {
+                    appearance: root.appearance
+                    label: "Up"
+                    enabled: !orderRow.first
+                    opacity: enabled ? 1 : 0.4
+                    onActivated: root.monitors.moveDesktopWidget(root.monitorName, orderRow.modelData, -1)
+                }
+
+                Panels.SettingsButton {
+                    appearance: root.appearance
+                    label: "Down"
+                    enabled: !orderRow.last
+                    opacity: enabled ? 1 : 0.4
+                    onActivated: root.monitors.moveDesktopWidget(root.monitorName, orderRow.modelData, 1)
                 }
             }
         }
