@@ -185,6 +185,15 @@
                 "right": [
                     {
                         "enabled": true,
+                        "id": "cava",
+                        "options": {
+                            "barCount": 15,
+                            "barWidth": 4,
+                            "color": "green"
+                        }
+                    },
+                    {
+                        "enabled": true,
                         "id": "media",
                         "options": {
                             "titleVisible": true

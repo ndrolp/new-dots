@@ -17,6 +17,9 @@ QtObject {
     // The latest frame, one height from 0 to 1 per bar; flat while cava
     // isn't running.
     property var heights: CavaOutput.flatHeights(barCount)
+    // Whether nothing has sounded for a while (CavaOutput.silenceDelay), or
+    // cava isn't running; the Cava bar element hides meanwhile.
+    property bool silent: true
     // The Cava bar elements drawing right now.
     property var drawnElements: []
     readonly property bool needed: drawnElements.length > 0
@@ -49,6 +52,24 @@ QtObject {
     onNeededChanged: follow(CavaOutput.drawnChanged(runState, needed))
     onBarCountChanged: restart()
 
+    // Turns a run of silent frames into `silent`, once it lasts.
+    property var silence: Timer {
+        id: silence
+
+        interval: CavaOutput.silenceDelay
+        onTriggered: root.silent = true
+    }
+
+    function hear(frame) {
+        heights = frame;
+        if (!CavaOutput.frameSilent(frame)) {
+            silent = false;
+            silence.stop();
+        } else if (!silent && !silence.running) {
+            silence.start();
+        }
+    }
+
     // Starts cava again a while after it failed.
     property var retry: Timer {
         id: retry
@@ -75,13 +96,15 @@ QtObject {
             onRead: data => {
                 if (!root.runState.printedFrame)
                     root.runState = CavaOutput.framePrinted(root.runState);
-                root.heights = CavaOutput.frameHeights(data, root.barCount);
+                root.hear(CavaOutput.frameHeights(data, root.barCount));
             }
         }
 
-        // Flat bars until cava prints again.
+        // Flat bars, and so silence, until cava prints again.
         onExited: exitCode => {
             root.heights = CavaOutput.flatHeights(root.barCount);
+            root.silent = true;
+            silence.stop();
             root.follow(CavaOutput.exited(root.runState, exitCode));
         }
     }

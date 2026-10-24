@@ -33,7 +33,7 @@ El bar element que muestra el uso de CPU y memoria. No confundir con el desktop 
 _Avoid_: System (para el elemento de la barra)
 
 **Cava**:
-El bar element que dibuja lo que suena por la audio output actual como barras de frecuencia que se mueven con lo que suena. Siempre está visible: en silencio, las barras quedan planas. No confundir con el bar element *audio*, que muestra y cambia el volumen.
+El bar element que dibuja lo que suena por la audio output actual como barras de frecuencia que se mueven con lo que suena. Se oculta mientras no suena nada y vuelve a aparecer en cuanto hay sonido. No confundir con el bar element *audio*, que muestra y cambia el volumen.
 _Avoid_: Visualizer, waveform, espectro
 
 **Popup**:

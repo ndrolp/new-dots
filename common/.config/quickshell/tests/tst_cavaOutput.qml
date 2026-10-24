@@ -16,6 +16,12 @@ TestCase {
         compare(CavaOutput.flatHeights(3), [0, 0, 0]);
     }
 
+    function test_aFrameIsSilentOnlyWhenEveryBarIsFlat() {
+        verify(CavaOutput.frameSilent([0, 0, 0]));
+        verify(CavaOutput.frameSilent([]));
+        verify(!CavaOutput.frameSilent([0, 0.01, 0]));
+    }
+
     function test_heightsOutsideTheRangeAreClamped() {
         compare(CavaOutput.frameHeights("1200;-5;", 2), [1, 0]);
     }

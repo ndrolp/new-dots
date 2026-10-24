@@ -89,8 +89,8 @@ Item {
         "clock": pomodoroButton
     })
 
-    // Enabled elements with nothing to show (no player, battery or
-    // recording) are hidden.
+    // Enabled elements with nothing to show (no player, battery, recording
+    // or sound) are hidden.
     function itemVisible(element) {
         if (!BarProfileModel.elementEnabled(appearance.barElements, element))
             return false;
@@ -100,6 +100,8 @@ Item {
             return hasBattery;
         if (element === "recording")
             return screenCapture.recording;
+        if (element === "cava")
+            return !cava.silent;
         return true;
     }
 
@@ -345,13 +347,15 @@ Item {
         }
     }
 
-    // Cava never hides and opens nothing.
+    // Cava hides in silence and opens nothing.
     Rectangle {
         id: cavaElement
 
         // While drawn, it keeps the shared cava process running, computing
-        // at least its bar count.
-        readonly property bool drawing: visible && root.barVisible
+        // at least its bar count. Hidden in silence still counts as drawn, so
+        // cava hears the sound that shows it again.
+        readonly property bool drawing: BarProfileModel.elementEnabled(root.appearance.barElements, "cava")
+            && root.barVisible
         readonly property var options: BarProfileModel.elementOptions(root.appearance.barElements, "cava")
         readonly property int barCount: options.barCount
 
@@ -369,11 +373,25 @@ Item {
         Component.onCompleted: root.cava.setDrawing(cavaElement, drawing)
         Component.onDestruction: root.cava.setDrawing(cavaElement, false)
 
+        // The bars stand on the baseline of the other elements' text, which
+        // is centered in the element like this text would be.
+        FontMetrics {
+            id: cavaTextMetrics
+
+            font.family: theme.fontFamily
+            font.pixelSize: root.appearance.textSize
+            font.bold: true
+        }
+
         CavaBars {
             id: cavaBars
 
-            anchors.centerIn: parent
-            height: Math.max(1, parent.height - 10)
+            readonly property real textBaseline: (parent.height - cavaTextMetrics.height) / 2
+                + cavaTextMetrics.ascent
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: 2
+            height: Math.max(1, textBaseline - y)
             frame: root.cava.heights
             barCount: cavaElement.barCount
             barWidth: cavaElement.options.barWidth

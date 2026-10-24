@@ -56,6 +56,15 @@ function frameHeights(frame, barCount) {
     return heights;
 }
 
+// Whether a frame is silence: every bar flat.
+function frameSilent(heights) {
+    return (heights || []).every(height => height === 0);
+}
+
+// How long, in ms, a run of silent frames lasts before the Cava bar element
+// hides, so it doesn't flicker out in the quiet between two songs.
+const silenceDelay = 2000;
+
 // How long to wait, in ms, before starting cava again after it failed
 // `failures` times in a row: a few seconds, doubling up to a minute, so a
 // cava that keeps failing isn't restarted in a tight loop.
