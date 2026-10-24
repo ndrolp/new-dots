@@ -1,5 +1,6 @@
 import Quickshell
 import Quickshell.Bluetooth
+import Quickshell.Io
 import Quickshell.Networking
 import Quickshell.Services.Mpris
 import Quickshell.Services.Pipewire
@@ -9,6 +10,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
 import "../../config" as Config
+import "BluetoothDevices.js" as BluetoothDevices
 
 Item {
     id: root
@@ -155,10 +157,6 @@ Item {
         return popupAnchorProvider
             ? popupAnchorProvider.y + popupAnchorProvider.height + appearance.spacing
             : appearance.barHeight + appearance.spacing;
-    }
-
-    function bluetoothDeviceName(device) {
-        return device.deviceName || device.name || device.address;
     }
 
     function batteryIcon(battery) {
@@ -1732,12 +1730,100 @@ Item {
         id: bluetoothPopup
 
         readonly property var adapter: Bluetooth.defaultAdapter
+        readonly property var devices: adapter
+            ? BluetoothDevices.visibleDevices(adapter.devices.values) : []
         property real reveal: root.activePopup === "bluetooth" ? 1 : 0
+        // Why the last attempt to turn Bluetooth on failed, shown as the subtitle.
+        property string enableError: ""
+        // Addresses of devices paired from this popup, trusted once paired.
+        property var pairRequests: ({})
         grabFocus: true
 
         onVisibleChanged: {
+            if (!visible && adapter && adapter.discovering)
+                adapter.discovering = false;
             if (!visible && root.activePopup === "bluetooth")
                 root.popupClosed("bluetooth");
+        }
+
+        function setEnabled(on) {
+            enableError = "";
+            if (!on) {
+                adapter.enabled = false;
+                return;
+            }
+            enableTimeout.restart();
+            if (adapter.state === BluetoothAdapterState.Blocked)
+                rfkillUnblock.running = true;
+            else
+                adapter.enabled = true;
+        }
+
+        function pair(device) {
+            const requests = Object.assign({}, pairRequests);
+            requests[device.address] = true;
+            pairRequests = requests;
+            device.pair();
+        }
+
+        Process {
+            id: rfkillUnblock
+
+            command: ["rfkill", "unblock", "bluetooth"]
+            onExited: exitCode => {
+                if (exitCode !== 0) {
+                    enableTimeout.stop();
+                    bluetoothPopup.enableError = "Couldn't unblock Bluetooth (rfkill)";
+                } else if (bluetoothPopup.adapter) {
+                    bluetoothPopup.adapter.enabled = true;
+                }
+            }
+        }
+
+        Timer {
+            id: enableTimeout
+
+            interval: 5000
+            onTriggered: {
+                const adapter = bluetoothPopup.adapter;
+                if (!adapter || adapter.enabled)
+                    return;
+                bluetoothPopup.enableError = adapter.state === BluetoothAdapterState.Blocked
+                    ? "Bluetooth is blocked (rfkill)" : "Couldn't turn Bluetooth on";
+            }
+        }
+
+        Connections {
+            target: bluetoothPopup.adapter
+
+            function onEnabledChanged() {
+                const adapter = bluetoothPopup.adapter;
+                if (!adapter.enabled)
+                    return;
+                enableTimeout.stop();
+                bluetoothPopup.enableError = "";
+                if (bluetoothPopup.visible)
+                    adapter.discovering = true;
+            }
+        }
+
+        Instantiator {
+            model: bluetoothPopup.adapter ? bluetoothPopup.adapter.devices : []
+
+            delegate: Connections {
+                required property var modelData
+
+                target: modelData
+
+                function onPairedChanged() {
+                    if (!modelData.paired || !bluetoothPopup.pairRequests[modelData.address])
+                        return;
+                    modelData.trusted = true;
+                    const requests = Object.assign({}, bluetoothPopup.pairRequests);
+                    delete requests[modelData.address];
+                    bluetoothPopup.pairRequests = requests;
+                }
+            }
         }
         visible: reveal > 0
         anchor.window: root.barWindow
@@ -1821,6 +1907,7 @@ Item {
 
                         Text {
                             text: !bluetoothPopup.adapter ? "No adapter found"
+                                : bluetoothPopup.enableError !== "" ? bluetoothPopup.enableError
                                 : !bluetoothPopup.adapter.enabled ? "Bluetooth is off"
                                 : bluetoothPopup.adapter.discovering ? "Scanning for devices"
                                 : "Choose a device"
@@ -1865,7 +1952,7 @@ Item {
 
                         TapHandler {
                             enabled: bluetoothPopup.adapter !== null
-                            onTapped: bluetoothPopup.adapter.enabled = !bluetoothPopup.adapter.enabled
+                            onTapped: bluetoothPopup.setEnabled(!bluetoothPopup.adapter.enabled)
                         }
                     }
                 }
@@ -1873,76 +1960,94 @@ Item {
                 Text {
                     visible: bluetoothPopup.adapter !== null
                         && bluetoothPopup.adapter.enabled
-                        && bluetoothPopup.adapter.devices.values.length === 0
+                        && bluetoothPopup.devices.length === 0
                     text: "No devices found yet"
                     color: theme.textMuted
                     font.pixelSize: root.appearance.textSize - 1
                     font.bold: true
                 }
 
-                Repeater {
-                    model: bluetoothPopup.adapter ? bluetoothPopup.adapter.devices : []
+                Flickable {
+                    width: parent.width
+                    height: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled
+                        ? Math.min(292, bluetoothRows.implicitHeight) : 0
+                    contentWidth: width
+                    contentHeight: bluetoothRows.implicitHeight
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+                    visible: height > 0
 
-                    delegate: Rectangle {
-                        required property var modelData
+                    Column {
+                        id: bluetoothRows
 
                         width: parent.width
-                        height: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled ? 52 : 0
-                        visible: height > 0
-                        radius: root.appearance.radius
-                        color: modelData.connected || bluetoothDeviceHover.hovered
-                            ? theme.surfaceHover : theme.backgroundSecondary
+                        spacing: 10
 
-                        Behavior on color {
-                            ColorAnimation { duration: 140 }
-                        }
+                        Repeater {
+                            model: bluetoothPopup.devices
 
-                        HoverHandler {
-                            id: bluetoothDeviceHover
-                        }
+                            delegate: Rectangle {
+                                required property var modelData
 
-                        Text {
-                            anchors.left: parent.left
-                            anchors.leftMargin: 12
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: "󰂯"
-                            color: modelData.connected ? theme.blue : theme.textMuted
-                            font.pixelSize: 19
-                            font.bold: true
-                        }
+                                width: parent.width
+                                height: bluetoothPopup.adapter && bluetoothPopup.adapter.enabled ? 52 : 0
+                                visible: height > 0
+                                radius: root.appearance.radius
+                                color: modelData.connected || bluetoothDeviceHover.hovered
+                                    ? theme.surfaceHover : theme.backgroundSecondary
 
-                        Text {
-                            anchors.fill: parent
-                            anchors.leftMargin: 44
-                            anchors.rightMargin: 86
-                            verticalAlignment: Text.AlignVCenter
-                            text: root.bluetoothDeviceName(modelData)
-                            color: modelData.connected ? theme.blue : theme.text
-                            elide: Text.ElideRight
-                            font.pixelSize: root.appearance.textSize
-                            font.bold: true
-                        }
+                                Behavior on color {
+                                    ColorAnimation { duration: 140 }
+                                }
 
-                        Text {
-                            anchors.right: parent.right
-                            anchors.rightMargin: 12
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: modelData.connected ? "Connected"
-                                : modelData.pairing ? "Pairing"
-                                : modelData.paired ? "Connect" : "Pair"
-                            color: modelData.connected ? theme.blue : theme.textMuted
-                            font.pixelSize: root.appearance.textSize - 2
-                            font.bold: true
-                        }
+                                HoverHandler {
+                                    id: bluetoothDeviceHover
+                                }
 
-                        TapHandler {
-                            onTapped: {
-                                if (modelData.connected)
-                                    modelData.disconnect();
-                                else if (modelData.paired)
-                                    modelData.connect();
-                                else
-                                    modelData.pair();
+                                Text {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 12
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "󰂯"
+                                    color: modelData.connected ? theme.blue : theme.textMuted
+                                    font.pixelSize: 19
+                                    font.bold: true
+                                }
+
+                                Text {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 44
+                                    anchors.rightMargin: 86
+                                    verticalAlignment: Text.AlignVCenter
+                                    text: BluetoothDevices.label(modelData)
+                                    color: modelData.connected ? theme.blue : theme.text
+                                    elide: Text.ElideRight
+                                    font.pixelSize: root.appearance.textSize
+                                    font.bold: true
+                                }
+
+                                Text {
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: 12
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: modelData.connected ? "Connected"
+                                        : modelData.pairing ? "Pairing"
+                                        : modelData.paired ? "Connect" : "Pair"
+                                    color: modelData.connected ? theme.blue : theme.textMuted
+                                    font.pixelSize: root.appearance.textSize - 2
+                                    font.bold: true
+                                }
+
+                                TapHandler {
+                                    onTapped: {
+                                        if (modelData.connected)
+                                            modelData.disconnect();
+                                        else if (modelData.paired)
+                                            modelData.connect();
+                                        else
+                                            bluetoothPopup.pair(modelData);
+                                    }
+                                }
                             }
                         }
                     }
