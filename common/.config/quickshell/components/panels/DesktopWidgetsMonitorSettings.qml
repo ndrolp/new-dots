@@ -206,7 +206,7 @@ Column {
     Panels.SettingsHint {
         width: root.width
         appearance: root.appearance
-        text: "Sets the top-to-bottom order when desktop widgets share a placement."
+        text: "Sets top-to-bottom order when widgets share a position."
     }
 
     Repeater {

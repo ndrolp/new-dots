@@ -86,7 +86,7 @@ Column {
         Panels.SettingsSwitchRow {
             width: parent.width
             appearance: root.appearance
-            label: "Scheduled rotation"
+            label: "Enable scheduled rotation"
             checked: root.wallpapers.dynamicEnabled
             onToggled: root.wallpapers.dynamicEnabled = !root.wallpapers.dynamicEnabled
         }
@@ -132,7 +132,7 @@ Column {
         Panels.SettingsHint {
             width: parent.width
             appearance: root.appearance
-            text: "No monitors connected"
+            text: "No monitors configured"
             visible: root.selectedWallpaperMonitor === ""
         }
 

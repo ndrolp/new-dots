@@ -140,7 +140,7 @@ Column {
     Panels.SettingsHint {
         width: parent.width
         appearance: root.appearance
-        text: "The links shown in the Alt+G quick-search panel."
+        text: "Configure the links shown in the Alt+G quick-search panel."
     }
 
     Column {
@@ -187,7 +187,7 @@ Column {
     Panels.SettingsHint {
         width: parent.width
         appearance: root.appearance
-        text: "The fallback engines in quick search. Use %s where the query belongs."
+        text: "Choose the fallback engine in quick search. Use %s where the query belongs."
     }
 
     Column {

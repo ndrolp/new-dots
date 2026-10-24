@@ -76,6 +76,12 @@ TestCase {
         compare(textOf(position, "Top left").color, theme.text);
     }
 
+    function test_thePositionIsLabelledAsTheNotificationLocation() {
+        const built = make();
+
+        verify(textOf(built.item, "Notification location"));
+    }
+
     function test_choosingAPositionMovesWhereNotificationPopupsAppear() {
         const built = make();
 

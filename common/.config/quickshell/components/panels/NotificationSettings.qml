@@ -19,7 +19,7 @@ Column {
     Panels.SettingsField {
         width: parent.width
         appearance: root.appearance
-        label: "Position"
+        label: "Notification location"
 
         Panels.SettingsChoice {
             width: parent.width

@@ -174,10 +174,17 @@ TestCase {
         compare(built.wallpapers.horizontalFolder, "x");
     }
 
+    function test_withoutMonitorsTheSelectionSaysNoneAreConfigured() {
+        const built = make();
+        built.item.displays = [];
+
+        verify(textOf(built.item, "No monitors configured").visible);
+    }
+
     function test_theScheduleIsASwitchRowANumberAndAQuietButton() {
         const built = make();
         viewChoice(built.item).chosen("Schedule");
-        const rotation = all(built.item, child => child.label === "Scheduled rotation"
+        const rotation = all(built.item, child => child.label === "Enable scheduled rotation"
             && child.switchItem !== undefined)[0];
         const interval = all(built.item, child => child.label === "Interval (minutes)"
             && child.field !== undefined)[0];

@@ -29,7 +29,7 @@ Column {
     Panels.SettingsHint {
         width: parent.width
         appearance: root.appearance
-        text: "Turn a desktop widget on, then choose where it appears on this monitor's desktop."
+        text: "Enable a widget, then choose where it appears on this monitor's desktop."
     }
 
     Panels.DesktopWidgetsMonitorSettings {
