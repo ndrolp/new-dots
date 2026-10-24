@@ -171,10 +171,11 @@ Variants {
                         readonly property var sink: modelData
                         readonly property bool selected: ListView.isCurrentItem
                         readonly property bool active: Pipewire.defaultAudioSink === sink
+                        readonly property string port: AudioOutputs.port(sink)
 
                         appearance: root.appearance
                         width: sinkList.width
-                        height: 36
+                        height: port !== "" ? 42 : 36
                         color: selected || hovered ? theme.surfaceHover : "transparent"
 
                         Panels.Text {
@@ -188,16 +189,29 @@ Variants {
                             font.pixelSize: root.appearance.textSize + 3
                         }
 
-                        Panels.Text {
+                        Column {
                             anchors.left: sinkIcon.right
                             anchors.leftMargin: 10
                             anchors.right: activeMark.left
                             anchors.rightMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
-                            text: AudioOutputs.label(sinkTile.sink)
-                            color: sinkTile.active ? theme.accent : theme.text
-                            elide: Text.ElideRight
-                            font.pixelSize: root.appearance.textSize
+
+                            Panels.Text {
+                                width: parent.width
+                                text: AudioOutputs.label(sinkTile.sink)
+                                color: sinkTile.active ? theme.accent : theme.text
+                                elide: Text.ElideRight
+                                font.pixelSize: root.appearance.textSize
+                            }
+
+                            Panels.Text {
+                                width: parent.width
+                                visible: text !== ""
+                                text: sinkTile.port
+                                color: theme.textMuted
+                                elide: Text.ElideRight
+                                font.pixelSize: root.appearance.textSize - 3
+                            }
                         }
 
                         Panels.Text {
