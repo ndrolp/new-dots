@@ -1,73 +1,55 @@
+import QtQuick
+import "." as Panels
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
-import QtQuick
-import QtQuick.Controls
 
+// The Bar section's bar elements list: every bar element of the edited bar
+// profile, zone by zone, in full width rows that stay transparent until
+// hovered. A row turns its element on or off, picks its zone, orders it and
+// joins it with the one above; elements with options open them below as
+// switch rows.
 Column {
     id: root
 
-    property var appearance
-    property string expandedWidget: ""
+    required property var appearance
+    property string expandedElement: ""
     readonly property var barElements: BarProfileModel.normalizeBarElements(appearance.barElements)
-    readonly property var zones: [{
-        "label": "LEFT",
-        "short": "L",
-        "value": "left"
-    }, {
-        "label": "CENTER",
-        "short": "C",
-        "value": "center"
-    }, {
-        "label": "RIGHT",
-        "short": "R",
-        "value": "right"
-    }]
+    readonly property var zones: [
+        { label: "Left", short: "L", value: "left" },
+        { label: "Center", short: "C", value: "center" },
+        { label: "Right", short: "R", value: "right" }
+    ]
 
     function labelFor(element) {
         const labels = {
-            "arch": "ARCH ICON",
-            "systemMonitor": "SYSTEM MONITOR",
-            "currentApp": "CURRENT APP",
-            "workspaces": "WORKSPACES",
-            "notifications": "NOTIFICATIONS",
-            "recording": "SCREEN RECORDING",
-            "media": "MEDIA",
-            "audio": "AUDIO",
-            "bluetooth": "BLUETOOTH",
-            "tray": "SYSTEM TRAY",
-            "network": "NETWORK",
-            "battery": "BATTERY",
-            "clock": "CLOCK & POMODORO"
+            "arch": "Arch icon",
+            "systemMonitor": "System monitor",
+            "currentApp": "Current app",
+            "workspaces": "Workspaces",
+            "notifications": "Notifications",
+            "recording": "Screen recording",
+            "media": "Media",
+            "audio": "Audio",
+            "bluetooth": "Bluetooth",
+            "tray": "System tray",
+            "network": "Network",
+            "battery": "Battery",
+            "clock": "Clock & pomodoro"
         };
-        return labels[element] || element.toUpperCase();
+        return labels[element] || element;
     }
 
-    // Element options, shown next to the element they belong to.
+    // Element options, shown under the element they belong to.
     function optionsFor(element) {
         const options = {
-            "workspaces": [{
-                "label": "HIDE EMPTY WORKSPACES",
-                "option": "hideEmpty"
-            }, {
-                "label": "SHOW WORKSPACE APP COUNTS",
-                "option": "appCountVisible"
-            }],
-            "notifications": [{
-                "label": "SHOW UNREAD BADGE",
-                "option": "badgeVisible"
-            }],
-            "media": [{
-                "label": "SHOW TRACK TITLE",
-                "option": "titleVisible"
-            }],
-            "audio": [{
-                "label": "SHOW VOLUME METER",
-                "option": "meterVisible"
-            }],
-            "battery": [{
-                "label": "SHOW PERCENTAGE",
-                "option": "percentageVisible"
-            }]
+            "workspaces": [
+                { label: "Hide empty workspaces", option: "hideEmpty" },
+                { label: "Show workspace app counts", option: "appCountVisible" }
+            ],
+            "notifications": [{ label: "Show unread badge", option: "badgeVisible" }],
+            "media": [{ label: "Show track title", option: "titleVisible" }],
+            "audio": [{ label: "Show volume meter", option: "meterVisible" }],
+            "battery": [{ label: "Show percentage", option: "percentageVisible" }]
         };
         return (options[element] || []).map(entry => Object.assign({ "element": element }, entry));
     }
@@ -77,26 +59,22 @@ Column {
     }
 
     width: parent ? parent.width : 0
-    spacing: 8
+    spacing: 6
 
     Config.Theme {
         id: theme
     }
 
-    Text {
-        text: "ELEMENTS"
-        color: theme.textMuted
-        font.pixelSize: root.appearance.textSize - 2
-        font.bold: true
-        topPadding: 6
+    Panels.SettingsHeading {
+        appearance: root.appearance
+        text: "Elements"
+        topPadding: 8
     }
 
-    Text {
+    Panels.SettingsHint {
         width: root.width
+        appearance: root.appearance
         text: "Every piece of the bar. Turn it on or off, pick its zone (L/C/R) and order it within the zone. Join joins an element with the one above it: joined elements form a group with one shared background."
-        color: theme.textMuted
-        font.pixelSize: root.appearance.textSize - 1
-        wrapMode: Text.Wrap
     }
 
     Repeater {
@@ -109,21 +87,20 @@ Column {
             readonly property var elements: root.barElements[modelData.value] || []
 
             width: root.width
-            spacing: 4
+            spacing: 2
 
-            Text {
+            Panels.SettingsHeading {
+                appearance: root.appearance
                 text: zoneDelegate.modelData.label
-                color: theme.textMuted
-                font.pixelSize: root.appearance.textSize - 3
-                font.bold: true
-                topPadding: 4
+                topPadding: 10
+                bottomPadding: 2
             }
 
-            Text {
+            Panels.SettingsHint {
                 visible: zoneDelegate.elements.length === 0
+                appearance: root.appearance
                 text: "No elements"
-                color: theme.textMuted
-                font.pixelSize: root.appearance.textSize - 2
+                leftPadding: 12
             }
 
             Repeater {
@@ -136,244 +113,125 @@ Column {
                     required property int index
                     readonly property string element: modelData.id
                     readonly property bool elementOn: modelData.enabled !== false
+                    readonly property bool joined: modelData.joinPrevious === true
                     readonly property var options: root.optionsFor(element)
+                    readonly property bool expanded: root.expandedElement === element
 
                     width: root.width
-                    spacing: 4
+                    spacing: 2
 
-                    Rectangle {
+                    Panels.SettingsRow {
+                        id: elementRow
+
+                        readonly property string elementLabel: root.labelFor(elementDelegate.element)
+
                         width: parent.width
-                        height: 46
-                        radius: root.appearance.radius
-                        color: rowHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+                        height: 40
+                        appearance: root.appearance
 
-                        HoverHandler {
-                            id: rowHover
-                        }
-
-                        Text {
+                        Row {
                             anchors.left: parent.left
                             anchors.leftMargin: 12
                             anchors.verticalCenter: parent.verticalCenter
-                            text: root.labelFor(elementDelegate.element)
-                                + (elementDelegate.options.length === 0 ? ""
-                                    : root.expandedWidget === elementDelegate.element ? " 󰅀" : " 󰅂")
-                            color: elementDelegate.elementOn ? theme.text : theme.textMuted
-                            font.pixelSize: root.appearance.textSize - 1
-                            font.bold: true
+                            spacing: 6
 
-                            TapHandler {
-                                enabled: elementDelegate.options.length > 0
-                                onTapped: root.expandedWidget = root.expandedWidget === elementDelegate.element
-                                    ? "" : elementDelegate.element
+                            Panels.SettingsLabel {
+                                anchors.verticalCenter: parent.verticalCenter
+                                appearance: root.appearance
+                                text: elementRow.elementLabel
+                                color: elementDelegate.elementOn ? theme.text : theme.textMuted
+
+                                TapHandler {
+                                    enabled: elementDelegate.options.length > 0
+                                    onTapped: root.expandedElement = elementDelegate.expanded
+                                        ? "" : elementDelegate.element
+                                }
+                            }
+
+                            Panels.SettingsHint {
+                                anchors.verticalCenter: parent.verticalCenter
+                                visible: elementDelegate.options.length > 0
+                                appearance: root.appearance
+                                text: elementDelegate.expanded ? "󰅀" : "󰅂"
                             }
                         }
 
                         Row {
                             anchors.right: parent.right
-                            anchors.rightMargin: 6
+                            anchors.rightMargin: 12
                             anchors.verticalCenter: parent.verticalCenter
-                            spacing: 5
+                            spacing: 4
 
-                            // "Join previous": shares one background with the element above.
-                            Rectangle {
-                                readonly property bool joined: elementDelegate.modelData.joinPrevious === true
-
+                            // Join: shares one background with the element above.
+                            Panels.SettingsButton {
+                                anchors.verticalCenter: parent.verticalCenter
                                 visible: elementDelegate.index > 0
-                                width: 56
-                                height: 30
-                                radius: root.appearance.radius
-                                color: joined ? theme.accent : joinHover.hovered ? theme.surfaceHover : theme.surface
-
-                                HoverHandler {
-                                    id: joinHover
-                                }
-
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "󰌷 Join"
-                                    color: parent.joined ? theme.background : theme.textMuted
-                                    font.pixelSize: root.appearance.textSize - 3
-                                    font.bold: true
-                                }
-
-                                TapHandler {
-                                    onTapped: root.appearance.setBarElementJoined(elementDelegate.element,
-                                        !parent.joined)
-                                }
-
+                                appearance: root.appearance
+                                label: "󰌷  Join"
+                                labelColor: elementDelegate.joined ? theme.accent : theme.textMuted
+                                onActivated: root.appearance.setBarElementJoined(elementDelegate.element,
+                                    !elementDelegate.joined)
                             }
 
-                            Row {
-                                spacing: 2
-
-                                Repeater {
-                                    model: root.zones
-
-                                    delegate: Rectangle {
-                                        required property var modelData
-                                        readonly property bool selected: zoneDelegate.modelData.value === modelData.value
-
-                                        width: 26
-                                        height: 30
-                                        radius: root.appearance.radius
-                                        color: selected ? theme.accent : theme.surface
-
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: parent.modelData.short
-                                            color: parent.selected ? theme.background : theme.textMuted
-                                            font.pixelSize: root.appearance.textSize - 3
-                                            font.bold: true
-                                        }
-
-                                        TapHandler {
-                                            onTapped: root.appearance.moveBarElementToZone(elementDelegate.element,
-                                                parent.modelData.value)
-                                        }
-
-                                    }
-
-                                }
-
+                            Panels.SettingsChoice {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 96
+                                appearance: root.appearance
+                                options: root.zones.map(zone => ({ label: zone.short, value: zone.value }))
+                                value: zoneDelegate.modelData.value
+                                onChosen: zone => root.appearance.moveBarElementToZone(elementDelegate.element, zone)
                             }
 
-                            Repeater {
-                                model: [{
-                                    "label": "▲",
-                                    "offset": -1
-                                }, {
-                                    "label": "▼",
-                                    "offset": 1
-                                }]
-
-                                delegate: Rectangle {
-                                    required property var modelData
-                                    readonly property bool movable: modelData.offset < 0
-                                        ? elementDelegate.index > 0
-                                        : elementDelegate.index < zoneDelegate.elements.length - 1
-
-                                    width: 30
-                                    height: 30
-                                    radius: root.appearance.radius
-                                    color: moveHover.hovered && movable ? theme.surfaceHover : theme.surface
-
-                                    HoverHandler {
-                                        id: moveHover
-                                    }
-
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: parent.modelData.label
-                                        color: parent.movable ? theme.accent : theme.textMuted
-                                        font.pixelSize: root.appearance.textSize - 3
-                                        font.bold: true
-                                    }
-
-                                    TapHandler {
-                                        onTapped: root.appearance.moveBarElement(elementDelegate.element,
-                                            parent.modelData.offset)
-                                    }
-
-                                }
-
+                            Panels.SettingsMoveButtons {
+                                anchors.verticalCenter: parent.verticalCenter
+                                appearance: root.appearance
+                                canMoveUp: elementDelegate.index > 0
+                                canMoveDown: elementDelegate.index < zoneDelegate.elements.length - 1
+                                onMovedUp: root.appearance.moveBarElement(elementDelegate.element, -1)
+                                onMovedDown: root.appearance.moveBarElement(elementDelegate.element, 1)
                             }
 
-                            Rectangle {
-                                width: 36
-                                height: 30
-                                radius: root.appearance.radius
-                                color: elementDelegate.elementOn ? theme.accent : theme.surface
+                            Item {
+                                width: 8
+                                height: 1
+                            }
 
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: elementDelegate.elementOn ? "On" : "Off"
-                                    color: elementDelegate.elementOn ? theme.background : theme.textMuted
-                                    font.pixelSize: root.appearance.textSize - 3
-                                    font.bold: true
-                                }
+                            Panels.SettingsSwitch {
+                                anchors.verticalCenter: parent.verticalCenter
+                                checked: elementDelegate.elementOn
 
                                 TapHandler {
                                     onTapped: root.appearance.setBarElementEnabled(elementDelegate.element,
                                         !elementDelegate.elementOn)
                                 }
-
                             }
-
                         }
-
                     }
 
-                    Rectangle {
-                        width: parent.width
-                        height: root.expandedWidget === elementDelegate.element
-                            ? elementDelegate.options.length * 38 + 16 : 0
-                        visible: height > 0
-                        radius: root.appearance.radius
-                        color: theme.surface
-                        clip: true
+                    // The element's options, two per line, indented under it.
+                    Panels.SettingsGrid {
+                        visible: elementDelegate.expanded
+                        x: 24
+                        width: parent.width - x
+                        columnSpacing: 12
+                        rowSpacing: 2
 
-                        Column {
-                            anchors.fill: parent
-                            anchors.margins: 8
-                            spacing: 4
+                        Repeater {
+                            model: elementDelegate.options
 
-                            Repeater {
-                                model: elementDelegate.options
+                            delegate: Panels.SettingsSwitchRow {
+                                required property var modelData
 
-                                delegate: Rectangle {
-                                    required property var modelData
-
-                                    width: parent.width
-                                    height: 34
-                                    radius: root.appearance.radius
-                                    color: optionHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-
-                                    HoverHandler {
-                                        id: optionHover
-                                    }
-
-                                    Text {
-                                        anchors.left: parent.left
-                                        anchors.leftMargin: 10
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        text: parent.modelData.label
-                                        color: theme.text
-                                        font.pixelSize: root.appearance.textSize - 2
-                                        font.bold: true
-                                    }
-
-                                    Text {
-                                        anchors.right: parent.right
-                                        anchors.rightMargin: 10
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        text: root.appearance.barElementOption(parent.modelData.element,
-                                            parent.modelData.option) ? "On" : "Off"
-                                        color: root.appearance.barElementOption(parent.modelData.element,
-                                            parent.modelData.option)
-                                            ? theme.accent : theme.textMuted
-                                        font.pixelSize: root.appearance.textSize - 2
-                                        font.bold: true
-                                    }
-
-                                    TapHandler {
-                                        onTapped: root.toggleElementOption(parent.modelData.element, parent.modelData.option)
-                                    }
-
-                                }
-
+                                width: parent.cellWidth
+                                appearance: root.appearance
+                                label: modelData.label
+                                checked: root.appearance.barElementOption(modelData.element, modelData.option)
+                                onToggled: root.toggleElementOption(modelData.element, modelData.option)
                             }
-
                         }
-
                     }
-
                 }
-
             }
-
         }
-
     }
-
 }

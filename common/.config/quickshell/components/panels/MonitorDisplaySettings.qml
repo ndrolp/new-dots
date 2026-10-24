@@ -1,0 +1,77 @@
+import QtQuick
+import "." as Panels
+import "../../config/BarProfileModel.js" as BarProfileModel
+
+// One monitor's settings in the Displays section: the workspaces it shows and
+// what the shell draws on it. Kept apart from WorkspaceSettings, which lists
+// the monitors through Quickshell.
+Column {
+    id: root
+
+    required property var appearance
+    // Config.Monitors: reads and saves this monitor's settings.
+    property var monitors
+    property string monitorDescription: ""
+    readonly property var range: monitors.rangeFor(monitorDescription)
+    readonly property var displaySettings: monitors.displaySettingsFor(monitorDescription)
+    // Workspace ranges have no upper limit: the sliders show the usual
+    // workspaces, and a larger one can be typed.
+    readonly property int noWorkspaceLimit: 2147483647
+
+    width: parent ? parent.width : 0
+    spacing: 14
+
+    Panels.SettingsHeading {
+        width: parent.width
+        appearance: root.appearance
+        text: root.monitorDescription
+        topPadding: 4
+    }
+
+    Panels.SettingsGrid {
+        Panels.SettingsNumber {
+            width: parent.cellWidth
+            appearance: root.appearance
+            label: "First workspace"
+            from: 1
+            to: 20
+            fieldTo: root.noWorkspaceLimit
+            value: root.range.from
+            onEdited: number => root.monitors.setRangeStart(root.monitorDescription, number)
+        }
+
+        Panels.SettingsNumber {
+            width: parent.cellWidth
+            appearance: root.appearance
+            label: "Last workspace"
+            from: 1
+            to: 20
+            fieldTo: root.noWorkspaceLimit
+            value: root.range.to
+            onEdited: number => root.monitors.setRangeEnd(root.monitorDescription, number)
+        }
+
+        Panels.SettingsSwitchRow {
+            width: parent.cellWidth
+            appearance: root.appearance
+            label: "Show bar"
+            checked: root.displaySettings.barVisible
+            onToggled: root.monitors.setDisplaySetting(root.monitorDescription, "barVisible",
+                !root.displaySettings.barVisible)
+        }
+    }
+
+    Panels.SettingsField {
+        width: parent.width
+        appearance: root.appearance
+        label: "Bar profile"
+
+        Panels.SettingsChoice {
+            width: Math.min(parent.width, 120 * Math.max(1, options.length))
+            appearance: root.appearance
+            options: BarProfileModel.profileChoices(root.appearance.barProfiles)
+            value: root.displaySettings.barProfile
+            onChosen: profile => root.monitors.setDisplaySetting(root.monitorDescription, "barProfile", profile)
+        }
+    }
+}

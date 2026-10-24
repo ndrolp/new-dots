@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import "../../config" as Config
 
+// A slider: a thin track, like a popup's progress bar, filled with the accent
+// up to a round accent handle.
 Slider {
     id: control
 

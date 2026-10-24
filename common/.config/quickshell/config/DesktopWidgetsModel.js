@@ -83,6 +83,19 @@ function desktopWidgetOrder(widgets) {
     return order;
 }
 
+// Where a desktop widget sits, as its row (top, center, bottom) and column
+// (left, center, right). The stored position joins them, "top-left",
+// "center-right"…, and is just "center" when both are.
+function placementOf(position) {
+    const parts = position === "center" ? ["center", "center"] : String(position).split("-");
+    return { vertical: parts[0], horizontal: parts[1] };
+}
+
+// The stored position of a row and column (see placementOf).
+function positionOf(vertical, horizontal) {
+    return vertical === "center" && horizontal === "center" ? "center" : vertical + "-" + horizontal;
+}
+
 // New displaySettings with `widget` moved by `offset` in the stack order of
 // `monitorName`; unchanged when the move would leave the list.
 function moveDesktopWidget(displaySettings, monitorName, widget, offset) {

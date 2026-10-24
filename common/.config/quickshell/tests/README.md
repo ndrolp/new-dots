@@ -6,10 +6,13 @@ and schema migrations (`config/SchemaMigrations.js`). They also cover the
 popups: where a popup opens (`components/panels/PopupPlacement.js`), the
 outline of an attached popup (`PopupOutline.js`), the surface every popup
 draws on (`PopupSurface.qml`), the shared popup parts (`PopupTitle`,
-`PopupHeader`, `PopupRow`…), the Bluetooth device list and turning Bluetooth
+`PopupHeader`, `PopupRow`…), the settings panel's own parts (`SettingsNumber`,
+`SettingsSwitchRow`, `SettingsChoice`, `SettingsGrid`…), its frame
+(`ConfigPanel.qml`) and the settings panel sections built from them, the Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
-(`AudioOutputs.js`) and how the volume is shown as text
-(`components/VolumeText.js`). They run with QtTest outside of `qs`:
+(`AudioOutputs.js`), how the volume is shown as text
+(`components/VolumeText.js`) and what the audio bar element shows and how
+wide it is (`components/bar/AudioLevel.qml`). They run with QtTest outside of `qs`:
 
 ```sh
 common/.config/quickshell/tests/run.sh
@@ -20,6 +23,9 @@ common/.config/quickshell/tests/run.sh
   the panels, `import "../components/panels" as Panels`. Quickshell's own
   modules (`Quickshell.Io`, `Quickshell.Bluetooth`…) don't load under
   `qmltestrunner`, so only files that don't import them can be tested here.
+  A section that needs one keeps it in a thin wrapper and is tested through
+  what the wrapper hands it, e.g. `WallpaperSettings.qml` passes Hyprland's
+  monitors to `WallpaperSettingsBody.qml` as plain displays.
 - `fixtures/` holds copies of the real `appearance.json` and `monitors.json`
   (schema version 0, from before bar profiles were reworked). Read them with
   the shared `Fixtures` helper (`Fixtures.qml`): declare

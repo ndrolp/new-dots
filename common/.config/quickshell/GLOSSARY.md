@@ -48,3 +48,11 @@ _Avoid_: Control panel, quick settings, panel de control
 **Audio output** (salida de audio):
 Un destino al que se puede enviar el sonido del sistema: auriculares, altavoces, un monitor por HDMI/DisplayPort, unos cascos inalámbricos… Se nombra por su apodo corto (el monitor conectado, el modelo de los cascos), no por la descripción larga de la tarjeta de sonido; el puerto (HDMI / DisplayPort 1, Analog Stereo) es información secundaria.
 _Avoid_: Sink, dispositivo, device
+
+**Settings panel** (panel de ajustes):
+La ventana que se abre desde la shell para editar toda su configuración, dividida en secciones. No es un popup: no pertenece a ningún bar element ni se despliega desde la barra.
+_Avoid_: Config panel, settings window, preferencias
+
+**Section** (sección):
+Cada una de las áreas del settings panel (Bar, Notifications, Displays, Wallpapers…), elegida en su barra lateral. Muestra los ajustes de una sola área.
+_Avoid_: Página, pestaña, tab

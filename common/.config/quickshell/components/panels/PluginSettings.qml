@@ -1,179 +1,113 @@
 import QtQuick
-import QtQuick.Controls
-import "../../config" as Config
+import "." as Panels
 
+// The Plugins section: each plugin turned on or off with a switch row and
+// what it does underneath, then the plugins' own settings.
 Column {
     id: root
 
-    property var appearance
+    required property var appearance
     property var plugins
 
     width: parent ? parent.width : 0
-    spacing: 12
+    spacing: 14
 
-    Config.Theme {
-        id: theme
+    Panels.SettingsHint {
+        width: parent.width
+        appearance: root.appearance
+        text: "Disabled plugins no longer open from their keyboard shortcut or shell actions."
     }
 
-    component PluginToggle: Rectangle {
-        required property string label
-        required property string description
-        required property string propertyName
+    Panels.SettingsHeading {
+        appearance: root.appearance
+        text: "Plugins"
+        topPadding: 4
+    }
 
-        width: root.width
-        height: 54
-        radius: root.appearance.radius
-        color: toggleHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+    // A list, so it stays full width: each plugin's switch row with what the
+    // plugin does underneath.
+    Column {
+        width: parent.width
+        spacing: 2
 
-        HoverHandler {
-            id: toggleHover
-        }
+        Repeater {
+            model: [
+                { label: "Application launcher", propertyName: "applicationLauncherEnabled",
+                  description: "Browse, search, favorite, and launch desktop applications." },
+                { label: "Clipboard history", propertyName: "clipboardEnabled",
+                  description: "Search copied content and manage pinned clipboard entries." },
+                { label: "Quick search", propertyName: "quickSearchEnabled",
+                  description: "Open bookmarks and search the web from a compact prompt." },
+                { label: "Unified search", propertyName: "unifiedSearchEnabled",
+                  description: "Search applications, windows, bookmarks, actions, and clipboard history." },
+                { label: "Quick settings", propertyName: "quickSettingsEnabled",
+                  description: "Access audio, connectivity, appearance, and session actions." },
+                { label: "Command launcher", propertyName: "commandLauncherEnabled",
+                  description: "Run a shell command in the configured terminal." },
+                { label: "Screen capture", propertyName: "screenCaptureEnabled",
+                  description: "Choose screenshot and screen recording actions." },
+                { label: "Control center", propertyName: "controlCenterEnabled",
+                  description: "Open the expanded system and media control panel." }
+            ]
 
-        Column {
-            anchors.left: parent.left
-            anchors.leftMargin: 12
-            anchors.right: toggleControl.left
-            anchors.rightMargin: 12
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 2
+            delegate: Column {
+                required property var modelData
 
-            Text {
-                text: parent.parent.label
-                color: theme.text
-                font.pixelSize: root.appearance.textSize - 1
-                font.bold: true
-            }
-
-            Text {
                 width: parent.width
-                text: parent.parent.description
-                color: theme.textMuted
-                elide: Text.ElideRight
-                font.pixelSize: root.appearance.textSize - 2
-            }
-        }
 
-        Rectangle {
-            id: toggleControl
+                Panels.SettingsSwitchRow {
+                    width: parent.width
+                    appearance: root.appearance
+                    label: modelData.label
+                    checked: root.plugins[modelData.propertyName]
+                    onToggled: root.plugins[modelData.propertyName] = !root.plugins[modelData.propertyName]
+                }
 
-            anchors.right: parent.right
-            anchors.rightMargin: 10
-            anchors.verticalCenter: parent.verticalCenter
-            width: 48
-            height: 28
-            radius: root.appearance.radius
-            color: root.plugins[parent.propertyName] ? theme.accent : theme.surface
-
-            Rectangle {
-                x: root.plugins[parent.parent.propertyName] ? parent.width - width - 3 : 3
-                anchors.verticalCenter: parent.verticalCenter
-                width: 22
-                height: 22
-                radius: 11
-                color: theme.text
-
-                Behavior on x {
-                    NumberAnimation {
-                        duration: 160
-                        easing.type: Easing.OutCubic
-                    }
+                Panels.SettingsHint {
+                    x: 12
+                    width: parent.width - 24
+                    bottomPadding: 6
+                    appearance: root.appearance
+                    text: modelData.description
                 }
             }
         }
-
-        TapHandler {
-            onTapped: root.plugins[parent.propertyName] = !root.plugins[parent.propertyName]
-        }
     }
 
-    Text {
-        width: parent.width
-        text: "Disabled plugins no longer open from their keyboard shortcut or shell actions."
-        wrapMode: Text.WordWrap
-        color: theme.textMuted
-        font.pixelSize: root.appearance.textSize - 1
+    Panels.SettingsHeading {
+        appearance: root.appearance
+        text: "Plugin settings"
+        topPadding: 8
     }
 
-    PluginToggle {
-        label: "APPLICATION LAUNCHER"
-        description: "Browse, search, favorite, and launch desktop applications."
-        propertyName: "applicationLauncherEnabled"
-    }
-
-    PluginToggle {
-        label: "CLIPBOARD HISTORY"
-        description: "Search copied content and manage pinned clipboard entries."
-        propertyName: "clipboardEnabled"
-    }
-
-    PluginToggle {
-        label: "QUICK SEARCH"
-        description: "Open bookmarks and search the web from a compact prompt."
-        propertyName: "quickSearchEnabled"
-    }
-
-    PluginToggle {
-        label: "UNIFIED SEARCH"
-        description: "Search applications, windows, bookmarks, actions, and clipboard history."
-        propertyName: "unifiedSearchEnabled"
-    }
-
-    PluginToggle {
-        label: "QUICK SETTINGS"
-        description: "Access audio, connectivity, appearance, and session actions."
-        propertyName: "quickSettingsEnabled"
-    }
-
-    PluginToggle {
-        label: "COMMAND LAUNCHER"
-        description: "Run a shell command in the configured terminal."
-        propertyName: "commandLauncherEnabled"
-    }
-
-    PluginToggle {
-        label: "SCREEN CAPTURE"
-        description: "Choose screenshot and screen recording actions."
-        propertyName: "screenCaptureEnabled"
-    }
-
-    PluginToggle {
-        label: "CONTROL CENTER"
-        description: "Open the expanded system and media control panel."
-        propertyName: "controlCenterEnabled"
-    }
-
-    Rectangle {
-        width: root.width
-        height: 56
-        radius: root.appearance.radius
-        color: theme.backgroundSecondary
-
-        Text {
-            anchors.left: parent.left
-            anchors.leftMargin: 12
-            anchors.verticalCenter: parent.verticalCenter
-            text: "Launcher recent apps"
-            color: theme.text
-            font.pixelSize: root.appearance.textSize - 1
-            font.bold: true
-        }
-
-        SpinBox {
-            anchors.right: parent.right
-            anchors.rightMargin: 10
-            anchors.verticalCenter: parent.verticalCenter
+    Panels.SettingsGrid {
+        Panels.SettingsNumber {
+            width: parent.cellWidth
+            appearance: root.appearance
+            label: "Launcher recent apps"
             from: 0
             to: 50
             value: root.plugins.launcherRecentLimit
-            editable: true
-
-            onValueModified: root.plugins.launcherRecentLimit = value
+            onEdited: number => root.plugins.launcherRecentLimit = number
         }
-    }
 
-    PluginToggle {
-        label: "CLIPBOARD IMAGE PREVIEWS"
-        description: "Decode copied images for preview in clipboard history."
-        propertyName: "clipboardImagePreviewsEnabled"
+        Column {
+            width: parent.cellWidth
+
+            Panels.SettingsSwitchRow {
+                width: parent.width
+                appearance: root.appearance
+                label: "Clipboard image previews"
+                checked: root.plugins.clipboardImagePreviewsEnabled
+                onToggled: root.plugins.clipboardImagePreviewsEnabled = !root.plugins.clipboardImagePreviewsEnabled
+            }
+
+            Panels.SettingsHint {
+                x: 12
+                width: parent.width - 24
+                appearance: root.appearance
+                text: "Decode copied images for preview in clipboard history."
+            }
+        }
     }
 }
