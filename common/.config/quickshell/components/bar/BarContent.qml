@@ -124,16 +124,14 @@ Item {
         return position !== null && position.grouped;
     }
 
-    // Popups of center elements open under them; the others at the bar edge.
-    function popupNearTrigger(popup) {
-        return BarProfileModel.elementZone(appearance.barElements, popupElement(popup)) === "center";
-    }
-
-    // Where the element a popup opens from sits in the bar.
+    // Where the element a popup opens from sits in the bar; null when it isn't
+    // shown, so the popup opens at the bar edge.
     function popupTrigger(popup) {
-        const item = elementItem(popupElement(popup));
-        if (!item)
+        const element = popupElement(popup);
+        if (!elementShown(element))
             return null;
+
+        const item = elementItem(element);
 
         const offset = item.parent === barElementItems ? barElementItems.x : 0;
         return { x: offset + item.x, width: item.width };

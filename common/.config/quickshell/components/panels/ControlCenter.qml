@@ -10,11 +10,19 @@ import Quickshell.Wayland
 import QtQuick
 import QtQuick.Controls
 import "../../config" as Config
+import "." as Panels
+import "PopupPlacement.js" as PopupPlacement
 
+// The Control center: quick toggles and sliders, centered at the top of the
+// focused monitor. Decided per monitor from that bar's profile, it hangs from
+// an opaque bar in the bar's color and opacity, like an attached popup, and
+// floats below a transparent one.
 Variants {
     id: root
 
     required property var appearance
+    required property var monitors
+    required property var workspaceService
     required property var clipboardHistory
     required property var screenCapture
     required property var systemMonitor
@@ -29,53 +37,133 @@ Variants {
 
     model: Quickshell.screens
 
-    component UtilityButton: Rectangle {
+    // A quick toggle or action: a row with a colored icon and a label. An
+    // active toggle shows it with its color; the rest stay muted until hovered.
+    component ControlTile: PopupRow {
+        id: tile
+
         required property string label
         required property string icon
         required property color accentColor
+        property bool active: false
         property bool controlEnabled: true
 
         signal triggered()
 
-        radius: root.appearance.radius
-        color: utilityHover.hovered && controlEnabled ? utilityTheme.surfaceHover : "transparent"
-        border.color: utilityTheme.border
-        border.width: 1
+        height: 38
+        interactive: controlEnabled
         opacity: controlEnabled ? 1 : 0.45
 
         Config.Theme {
-            id: utilityTheme
-        }
-
-        HoverHandler {
-            id: utilityHover
-            enabled: parent.controlEnabled
+            id: tileTheme
         }
 
         Row {
             anchors.centerIn: parent
             height: parent.height
-            spacing: 4
+            spacing: 6
 
-            Text {
+            Panels.Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: parent.parent.icon
-                color: parent.parent.accentColor
-                font.pixelSize: 15
+                text: tile.icon
+                color: tile.active || tile.hovered ? tile.accentColor : tileTheme.textMuted
+                font.pixelSize: tile.appearance.textSize + 3
+
+                Behavior on color {
+                    ColorAnimation { duration: 140 }
+                }
             }
 
-            Text {
+            Panels.Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: parent.parent.label
-                color: utilityTheme.text
-                font.pixelSize: root.appearance.textSize - 5
-                font.bold: true
+                text: tile.label
+                color: tile.active ? tileTheme.text : tileTheme.textMuted
+                font.pixelSize: tile.appearance.textSize - 2
             }
         }
 
         TapHandler {
-            enabled: parent.controlEnabled
-            onTapped: parent.triggered()
+            enabled: tile.controlEnabled
+            onTapped: tile.triggered()
+        }
+    }
+
+    // A labelled slider with its value on the right.
+    component ControlSlider: Column {
+        id: control
+
+        required property var appearance
+        required property string label
+        required property string icon
+        required property color accentColor
+        property string valueText: ""
+        property alias from: slider.from
+        property alias to: slider.to
+        property alias value: slider.value
+
+        signal adjusted(real position)
+
+        spacing: 4
+
+        Config.Theme {
+            id: sliderTheme
+        }
+
+        Item {
+            width: parent.width
+            height: Math.max(sliderLabel.implicitHeight, sliderValue.implicitHeight)
+
+            Panels.Text {
+                id: sliderLabel
+
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                text: control.icon + "  " + control.label
+                color: sliderTheme.text
+                font.pixelSize: control.appearance.textSize - 1
+            }
+
+            PopupLabel {
+                id: sliderValue
+
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                appearance: control.appearance
+                text: control.valueText
+            }
+        }
+
+        Slider {
+            id: slider
+
+            width: parent.width
+            implicitHeight: 18
+            onMoved: control.adjusted(value)
+
+            background: Rectangle {
+                x: slider.leftPadding
+                y: slider.topPadding + (slider.availableHeight - height) / 2
+                width: slider.availableWidth
+                height: 4
+                radius: 2
+                color: sliderTheme.backgroundSecondary
+
+                Rectangle {
+                    width: parent.width * slider.visualPosition
+                    height: parent.height
+                    radius: parent.radius
+                    color: control.accentColor
+                }
+            }
+
+            handle: Rectangle {
+                x: slider.leftPadding + slider.visualPosition * (slider.availableWidth - width)
+                y: slider.topPadding + (slider.availableHeight - height) / 2
+                width: 12
+                height: 12
+                radius: width / 2
+                color: control.accentColor
+            }
         }
     }
 
@@ -87,6 +175,31 @@ Variants {
         readonly property bool focusedMonitor: Hyprland.focusedWorkspace
             && Hyprland.focusedWorkspace.monitor && monitor
             && Hyprland.focusedWorkspace.monitor.name === monitor.name
+        // Open on the focused monitor; the window stays up while it closes.
+        readonly property bool shown: root.open && focusedMonitor
+        readonly property string monitorDescription: root.workspaceService.monitorDescriptionForScreen(modelData)
+        readonly property string profileName: root.monitors.barProfileFor(monitorDescription)
+        // This monitor's bar, as its popups see it.
+        property var barAppearance: QtObject {
+            property int barHeight: root.appearance.barProfileValue(controlCenter.profileName, "barHeight")
+            property int spacing: root.appearance.barProfileValue(controlCenter.profileName, "spacing")
+            property int radius: root.appearance.barProfileValue(controlCenter.profileName, "radius")
+            property int textSize: root.appearance.barProfileValue(controlCenter.profileName, "textSize")
+            property int transparentBarTopMargin: root.appearance.barProfileValue(controlCenter.profileName, "transparentBarTopMargin")
+            property bool transparentBarSlanted: root.appearance.barProfileValue(controlCenter.profileName, "transparentBarSlanted")
+            property bool barTransparent: root.appearance.barProfileValue(controlCenter.profileName, "barTransparent")
+            property int barOpacity: root.appearance.barProfileValue(controlCenter.profileName, "barOpacity")
+        }
+        // The bar window's height, as the bar computes it.
+        readonly property int totalBarHeight: barAppearance.barHeight
+            + (barAppearance.barTransparent && !barAppearance.transparentBarSlanted
+                ? barAppearance.transparentBarTopMargin : 0)
+        readonly property var placement: PopupPlacement.controlCenter({
+            barVisible: root.monitors.barVisible(monitorDescription),
+            barTransparent: barAppearance.barTransparent,
+            barHeight: totalBarHeight,
+            spacing: barAppearance.spacing
+        })
         readonly property var audio: Pipewire.defaultAudioSink?.audio || null
         readonly property var microphone: Pipewire.defaultAudioSource?.audio || null
         readonly property var bluetoothAdapter: Bluetooth.defaultAdapter
@@ -99,7 +212,7 @@ Variants {
         property string powerProfile: "balanced"
 
         screen: modelData
-        visible: root.open && focusedMonitor
+        visible: surface.reveal > 0
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         focusable: true
@@ -115,6 +228,10 @@ Variants {
 
         Config.Theme {
             id: theme
+        }
+
+        BluetoothPower {
+            id: bluetoothPower
         }
 
         Process {
@@ -163,7 +280,7 @@ Variants {
 
         Timer {
             interval: 1000
-            running: controlCenter.visible
+            running: controlCenter.shown
             repeat: true
             triggeredOnStart: true
             onTriggered: {
@@ -201,8 +318,8 @@ Variants {
             powerProfileCommand.running = true;
         }
 
-        onVisibleChanged: {
-            if (visible) {
+        onShownChanged: {
+            if (shown) {
                 keyboardFocus.forceActiveFocus();
                 brightnessQuery.running = true;
                 powerProfileQuery.running = true;
@@ -215,434 +332,260 @@ Variants {
             enabled: root.idleInhibited
         }
 
-        Rectangle {
-            anchors.fill: parent
-            color: "transparent"
-
-            MouseArea {
-                onClicked: controlCenter.close()
-            }
-        }
-
         Item {
             id: keyboardFocus
 
             anchors.fill: parent
-            focus: controlCenter.visible
+            focus: controlCenter.shown
             Keys.onEscapePressed: controlCenter.close()
+
+            // A click outside the Control center closes it.
+            TapHandler {
+                enabled: controlCenter.shown
+                onTapped: controlCenter.close()
+            }
         }
 
-        Rectangle {
-            anchors.centerIn: parent
+        // Keeps clicks on the Control center's own background from closing it.
+        MouseArea {
+            x: surface.x
+            y: surface.y
+            width: surface.width
+            height: surface.unfoldedHeight
+        }
+
+        PopupSurface {
+            id: surface
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: controlCenter.placement.y
             width: Math.min(parent.width - 48, 540)
-            height: content.implicitHeight + 24
-            radius: root.appearance.radius
-            color: Qt.rgba(theme.surface.r, theme.surface.g, theme.surface.b, 0.9)
-            border.color: theme.border
-            border.width: 1
+            height: implicitHeight
+            open: controlCenter.shown
+            enabled: controlCenter.shown
+            attached: controlCenter.placement.attached
+            radius: controlCenter.barAppearance.radius
+            barOpacity: controlCenter.barAppearance.barOpacity
 
             Column {
-                id: content
+                width: parent.width
+                spacing: 12
 
-                anchors.fill: parent
-                anchors.margins: 12
-                spacing: 8
+                PopupHeader {
+                    appearance: controlCenter.barAppearance
+                    title: "Controls"
 
-                Row {
-                    width: parent.width
+                    Row {
+                        spacing: 8
 
-                    Text {
-                        text: "Controls"
-                        color: theme.textMuted
-                        font.family: theme.fontFamily
-                        font.pixelSize: root.appearance.textSize - 1
-                        font.bold: true
-                    }
-
-                    Item {
-                        width: parent.width - parent.children[0].implicitWidth - dndToggle.width
-                        height: 1
-                    }
-
-                    Rectangle {
-                        id: dndToggle
-
-                        width: 72
-                        height: 24
-                        radius: root.appearance.radius
-                        color: root.appearance.doNotDisturb ? theme.accent : theme.backgroundSecondary
-                        border.color: theme.border
-                        border.width: 1
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: root.appearance.doNotDisturb ? "󰂛  DND" : "󰂚  DND"
-                            color: root.appearance.doNotDisturb ? theme.background : theme.textMuted
-                            font.pixelSize: root.appearance.textSize - 3
-                            font.bold: true
+                        PopupLabel {
+                            anchors.verticalCenter: parent.verticalCenter
+                            appearance: controlCenter.barAppearance
+                            text: "Do not disturb"
                         }
 
-                        TapHandler {
-                            onTapped: root.appearance.doNotDisturb = !root.appearance.doNotDisturb
+                        PopupSwitch {
+                            anchors.verticalCenter: parent.verticalCenter
+                            appearance: controlCenter.barAppearance
+                            checked: root.appearance.doNotDisturb
+                            onToggled: root.appearance.doNotDisturb = !root.appearance.doNotDisturb
                         }
                     }
                 }
 
                 Row {
                     width: parent.width
-                    spacing: 10
+                    spacing: 16
 
-                    Rectangle {
+                    ControlSlider {
                         width: (parent.width - parent.spacing) / 2
-                        height: 68
-                        radius: root.appearance.radius
-                        color: "transparent"
-                        border.color: theme.border
-                        border.width: 1
-
-                        Column {
-                            anchors.fill: parent
-                            anchors.margins: 8
-                            spacing: 2
-
-                            Row {
-                                width: parent.width
-                                height: 18
-
-                                Text {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: "󰕾  Volume"
-                                    color: theme.blue
-                                    font.pixelSize: root.appearance.textSize - 1
-                                    font.bold: true
-                                }
-
-                                Item {
-                                    width: parent.width - parent.children[0].implicitWidth - volumeLabel.implicitWidth
-                                    height: 1
-                                }
-
-                                Text {
-                                    id: volumeLabel
-
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: controlCenter.audio && !controlCenter.audio.muted
-                                        ? Math.round(controlCenter.audio.volume * 100) + "%" : "Muted"
-                                    color: theme.text
-                                    font.pixelSize: root.appearance.textSize - 2
-                                    font.bold: true
-                                }
-                            }
-
-                            Slider {
-                                id: volumeSlider
-
-                                width: parent.width
-                                implicitHeight: 18
-                                from: 0
-                                to: 1
-                                value: controlCenter.volume
-                                onMoved: controlCenter.setVolume(value)
-
-                                background: Rectangle {
-                                    x: volumeSlider.leftPadding
-                                    y: volumeSlider.topPadding
-                                        + (volumeSlider.availableHeight - height) / 2
-                                    width: volumeSlider.availableWidth
-                                    height: 4
-                                    radius: 3
-                                    color: theme.surface
-
-                                    Rectangle {
-                                        width: parent.width * volumeSlider.visualPosition
-                                        height: parent.height
-                                        radius: parent.radius
-                                        color: theme.blue
-                                    }
-                                }
-
-                                handle: Rectangle {
-                                    x: volumeSlider.leftPadding + volumeSlider.visualPosition
-                                        * (volumeSlider.availableWidth - width)
-                                    y: volumeSlider.topPadding
-                                        + (volumeSlider.availableHeight - height) / 2
-                                    width: 12
-                                    height: 12
-                                    radius: width / 2
-                                    color: theme.blue
-                                    border.color: theme.surface
-                                    border.width: 2
-                                }
-                            }
-                        }
+                        appearance: controlCenter.barAppearance
+                        label: "Volume"
+                        icon: "󰕾"
+                        accentColor: theme.blue
+                        valueText: controlCenter.audio && !controlCenter.audio.muted
+                            ? Math.round(controlCenter.audio.volume * 100) + "%" : "Muted"
+                        from: 0
+                        to: 1
+                        value: controlCenter.volume
+                        onAdjusted: position => controlCenter.setVolume(position)
                     }
 
-                    Rectangle {
+                    ControlSlider {
                         width: (parent.width - parent.spacing) / 2
-                        height: 68
-                        radius: root.appearance.radius
-                        color: "transparent"
-                        border.color: theme.border
-                        border.width: 1
-
-                        Column {
-                            anchors.fill: parent
-                            anchors.margins: 8
-                            spacing: 2
-
-                            Row {
-                                width: parent.width
-                                height: 18
-
-                                Text {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: "󰃠  Brightness"
-                                    color: theme.yellow
-                                    font.pixelSize: root.appearance.textSize - 1
-                                    font.bold: true
-                                }
-
-                                Item {
-                                    width: parent.width - parent.children[0].implicitWidth
-                                        - brightnessLabel.implicitWidth
-                                    height: 1
-                                }
-
-                                Text {
-                                    id: brightnessLabel
-
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: Math.round(controlCenter.brightness * 100) + "%"
-                                    color: theme.text
-                                    font.pixelSize: root.appearance.textSize - 2
-                                    font.bold: true
-                                }
-                            }
-
-                            Slider {
-                                id: brightnessSlider
-
-                                width: parent.width
-                                implicitHeight: 18
-                                from: 0.01
-                                to: 1
-                                value: controlCenter.brightness
-                                onMoved: {
-                                    controlCenter.brightness = value;
-                                    controlCenter.setBrightness(value);
-                                }
-
-                                background: Rectangle {
-                                    x: brightnessSlider.leftPadding
-                                    y: brightnessSlider.topPadding
-                                        + (brightnessSlider.availableHeight - height) / 2
-                                    width: brightnessSlider.availableWidth
-                                    height: 4
-                                    radius: 3
-                                    color: theme.surface
-
-                                    Rectangle {
-                                        width: parent.width * brightnessSlider.visualPosition
-                                        height: parent.height
-                                        radius: parent.radius
-                                        color: theme.yellow
-                                    }
-                                }
-
-                                handle: Rectangle {
-                                    x: brightnessSlider.leftPadding + brightnessSlider.visualPosition
-                                        * (brightnessSlider.availableWidth - width)
-                                    y: brightnessSlider.topPadding
-                                        + (brightnessSlider.availableHeight - height) / 2
-                                    width: 12
-                                    height: 12
-                                    radius: width / 2
-                                    color: theme.yellow
-                                    border.color: theme.surface
-                                    border.width: 2
-                                }
-                            }
+                        appearance: controlCenter.barAppearance
+                        label: "Brightness"
+                        icon: "󰃠"
+                        accentColor: theme.yellow
+                        valueText: Math.round(controlCenter.brightness * 100) + "%"
+                        from: 0.01
+                        to: 1
+                        value: controlCenter.brightness
+                        onAdjusted: position => {
+                            controlCenter.brightness = position;
+                            controlCenter.setBrightness(position);
                         }
                     }
                 }
 
-                Row {
+                Grid {
+                    id: tiles
+
+                    readonly property real tileWidth: (width - columnSpacing * (columns - 1)) / columns
+
                     width: parent.width
-                    spacing: 10
+                    columns: 4
+                    columnSpacing: 4
+                    rowSpacing: 4
 
-                    Repeater {
-                        model: [
-                            { label: "Audio output", icon: "󰓃", color: theme.accent, action: "audio" },
-                            { label: "Lock", icon: "󰌾", color: theme.blue, action: "lock" },
-                            { label: "Displays off", icon: "󰍹", color: theme.orange, action: "display" },
-                            { label: controlCenter.powerProfile, icon: "󱐋",
-                                color: theme.green, action: "profile" }
-                        ]
-
-                        delegate: Rectangle {
-                            required property var modelData
-
-                            width: (parent.width - parent.spacing * 3) / 4
-                            height: 38
-                            radius: root.appearance.radius
-                            color: quickHover.hovered ? theme.surfaceHover : "transparent"
-                            border.color: theme.border
-                            border.width: 1
-
-                            HoverHandler {
-                                id: quickHover
-                            }
-
-                            Row {
-                                anchors.centerIn: parent
-                                height: parent.height
-                                spacing: 5
-
-                                Text {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: modelData.icon
-                                    color: modelData.color
-                                    font.pixelSize: 16
-                                }
-
-                                Text {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: modelData.label
-                                    color: theme.text
-                                    font.pixelSize: root.appearance.textSize - 4
-                                    font.bold: true
-                                }
-                            }
-
-                            TapHandler {
-                                onTapped: {
-                                    if (modelData.action === "audio") {
-                                        root.audioSinksRequested();
-                                        controlCenter.close();
-                                    } else if (modelData.action === "lock") {
-                                        volumeCommand.command = ["loginctl", "lock-session"];
-                                        volumeCommand.running = true;
-                                        controlCenter.close();
-                                    } else {
-                                        if (modelData.action === "display") {
-                                            volumeCommand.command = ["hyprctl", "dispatch", "dpms", "off"];
-                                            volumeCommand.running = true;
-                                            controlCenter.close();
-                                        } else {
-                                            controlCenter.cyclePowerProfile();
-                                        }
-                                    }
-                                }
-                            }
+                    ControlTile {
+                        width: tiles.tileWidth
+                        appearance: controlCenter.barAppearance
+                        label: "Audio output"
+                        icon: "󰓃"
+                        accentColor: theme.accent
+                        onTriggered: {
+                            root.audioSinksRequested();
+                            controlCenter.close();
                         }
                     }
-                }
 
-                Row {
-                    width: parent.width
-                    spacing: 8
+                    ControlTile {
+                        width: tiles.tileWidth
+                        appearance: controlCenter.barAppearance
+                        label: "Lock"
+                        icon: "󰌾"
+                        accentColor: theme.blue
+                        onTriggered: {
+                            volumeCommand.command = ["loginctl", "lock-session"];
+                            volumeCommand.running = true;
+                            controlCenter.close();
+                        }
+                    }
 
-                    UtilityButton {
-                        width: (parent.width - parent.spacing * 3) / 4
-                        height: 38
+                    ControlTile {
+                        width: tiles.tileWidth
+                        appearance: controlCenter.barAppearance
+                        label: "Displays off"
+                        icon: "󰍹"
+                        accentColor: theme.orange
+                        onTriggered: {
+                            volumeCommand.command = ["hyprctl", "dispatch", "dpms", "off"];
+                            volumeCommand.running = true;
+                            controlCenter.close();
+                        }
+                    }
+
+                    ControlTile {
+                        width: tiles.tileWidth
+                        appearance: controlCenter.barAppearance
+                        label: controlCenter.powerProfile
+                        icon: "󱐋"
+                        accentColor: theme.green
+                        active: true
+                        onTriggered: controlCenter.cyclePowerProfile()
+                    }
+
+                    ControlTile {
+                        width: tiles.tileWidth
+                        appearance: controlCenter.barAppearance
                         label: Networking.wifiEnabled ? "Wi-Fi" : "Wi-Fi off"
                         icon: "󰤨"
                         accentColor: theme.purple
+                        active: Networking.wifiEnabled
                         onTriggered: Networking.wifiEnabled = !Networking.wifiEnabled
                     }
 
-                    UtilityButton {
-                        width: (parent.width - parent.spacing * 3) / 4
-                        height: 38
-                        label: controlCenter.bluetoothAdapter
-                            && controlCenter.bluetoothAdapter.enabled ? "Bluetooth" : "BT off"
+                    ControlTile {
+                        width: tiles.tileWidth
+                        appearance: controlCenter.barAppearance
+                        label: active ? "Bluetooth" : "BT off"
                         icon: "󰂯"
                         accentColor: theme.blue
+                        active: controlCenter.bluetoothAdapter !== null
+                            && controlCenter.bluetoothAdapter.enabled
                         controlEnabled: controlCenter.bluetoothAdapter !== null
-                        onTriggered: controlCenter.bluetoothAdapter.enabled
-                            = !controlCenter.bluetoothAdapter.enabled
+                        onTriggered: bluetoothPower.setEnabled(!controlCenter.bluetoothAdapter.enabled)
                     }
 
-                    UtilityButton {
-                        width: (parent.width - parent.spacing * 3) / 4
-                        height: 38
-                        label: controlCenter.microphone && !controlCenter.microphone.muted
-                            ? "Mic on" : "Mic off"
+                    ControlTile {
+                        width: tiles.tileWidth
+                        appearance: controlCenter.barAppearance
+                        label: active ? "Mic on" : "Mic off"
                         icon: "󰍬"
                         accentColor: theme.red
+                        active: controlCenter.microphone !== null && !controlCenter.microphone.muted
                         controlEnabled: controlCenter.microphone !== null
                         onTriggered: controlCenter.toggleMicrophone()
                     }
 
-                    UtilityButton {
-                        width: (parent.width - parent.spacing * 3) / 4
-                        height: 38
+                    ControlTile {
+                        width: tiles.tileWidth
+                        appearance: controlCenter.barAppearance
                         label: root.idleInhibited ? "Awake" : "Sleep allowed"
                         icon: "󰒲"
                         accentColor: theme.green
+                        active: root.idleInhibited
                         onTriggered: root.idleInhibited = !root.idleInhibited
                     }
-                }
 
-                Row {
-                    width: parent.width
-                    spacing: 8
-
-                    UtilityButton {
-                        width: (parent.width - parent.spacing * 3) / 4
-                        height: 38
+                    ControlTile {
+                        width: tiles.tileWidth
+                        appearance: controlCenter.barAppearance
                         label: root.screenCapture.recording ? "Recording" : "Capture"
                         icon: root.screenCapture.recording ? "󰑋" : "󰄀"
                         accentColor: root.screenCapture.recording ? theme.red : theme.orange
+                        active: root.screenCapture.recording
                         onTriggered: root.screenCaptureRequested()
                     }
 
-                    UtilityButton {
-                        width: (parent.width - parent.spacing * 3) / 4
-                        height: 38
+                    ControlTile {
+                        width: tiles.tileWidth
+                        appearance: controlCenter.barAppearance
                         label: root.clipboardHistory.entries.length + " copied"
                         icon: "󰅌"
                         accentColor: theme.accent
                         onTriggered: root.clipboardRequested()
                     }
 
-                    UtilityButton {
-                        width: (parent.width - parent.spacing * 3) / 4
-                        height: 38
+                    ControlTile {
+                        width: tiles.tileWidth
+                        appearance: controlCenter.barAppearance
                         label: "Power"
                         icon: "󰐥"
                         accentColor: theme.red
                         onTriggered: root.powerMenuRequested()
                     }
 
-                    UtilityButton {
-                        width: (parent.width - parent.spacing * 3) / 4
-                        height: 38
+                    ControlTile {
+                        width: tiles.tileWidth
+                        appearance: controlCenter.barAppearance
                         label: "Caps " + (controlCenter.capsLocked ? "on" : "off")
                         icon: "󰘲"
-                        accentColor: controlCenter.capsLocked ? theme.yellow : theme.textMuted
+                        accentColor: theme.yellow
+                        active: controlCenter.capsLocked
+                        interactive: false
                     }
                 }
 
-                Rectangle {
+                PopupRow {
                     width: parent.width
-                    height: controlCenter.player ? 52 : 0
+                    height: controlCenter.player ? 44 : 0
                     visible: height > 0
-                    radius: root.appearance.radius
-                    color: "transparent"
-                    border.color: theme.border
-                    border.width: 1
+                    appearance: controlCenter.barAppearance
+                    interactive: false
 
                     Row {
                         anchors.fill: parent
-                        anchors.margins: 8
-                        spacing: 8
+                        anchors.leftMargin: 8
+                        anchors.rightMargin: 8
+                        spacing: 10
 
-                        Text {
+                        Panels.Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: controlCenter.player && controlCenter.player.isPlaying ? "󰏤" : "󰐊"
                             color: theme.green
-                            font.pixelSize: 18
+                            font.pixelSize: controlCenter.barAppearance.textSize + 5
 
                             TapHandler {
                                 onTapped: {
@@ -657,21 +600,17 @@ Variants {
                             width: parent.width - 48
                             spacing: 1
 
-                            Text {
+                            PopupTitle {
                                 width: parent.width
+                                appearance: controlCenter.barAppearance
                                 text: controlCenter.player ? controlCenter.player.trackTitle : ""
-                                color: theme.text
-                                elide: Text.ElideRight
-                                font.pixelSize: root.appearance.textSize
-                                font.bold: true
+                                font.pixelSize: controlCenter.barAppearance.textSize
                             }
 
-                            Text {
+                            PopupLabel {
                                 width: parent.width
+                                appearance: controlCenter.barAppearance
                                 text: controlCenter.player ? controlCenter.player.trackArtist : ""
-                                color: theme.textMuted
-                                elide: Text.ElideRight
-                                font.pixelSize: root.appearance.textSize - 3
                             }
                         }
                     }
@@ -694,34 +633,24 @@ Variants {
                                 icon: "󰋊", color: theme.purple }
                         ]
 
-                        delegate: Rectangle {
+                        delegate: Column {
                             required property var modelData
 
                             width: (parent.width - parent.spacing * 2) / 3
-                            height: 38
-                            radius: root.appearance.radius
-                            color: "transparent"
-                            border.color: theme.border
-                            border.width: 1
+                            spacing: 2
 
-                            Column {
-                                anchors.centerIn: parent
-                                width: parent.width - 16
-                                spacing: 1
+                            PopupLabel {
+                                width: parent.width
+                                appearance: controlCenter.barAppearance
+                                text: modelData.icon + "  " + modelData.label
+                            }
 
-                                Text {
-                                    text: modelData.icon + "  " + modelData.label
-                                    color: modelData.color
-                                    font.pixelSize: root.appearance.textSize - 4
-                                    font.bold: true
-                                }
-
-                                Text {
-                                    text: modelData.value
-                                    color: theme.text
-                                    font.pixelSize: root.appearance.textSize - 2
-                                    font.bold: true
-                                }
+                            Panels.Text {
+                                width: parent.width
+                                text: modelData.value
+                                color: theme.text
+                                elide: Text.ElideRight
+                                font.pixelSize: controlCenter.barAppearance.textSize - 1
                             }
                         }
                     }

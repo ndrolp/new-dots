@@ -4,6 +4,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
 import "../../config" as Config
+import "." as Panels
 
 Variants {
     id: root
@@ -23,11 +24,13 @@ Variants {
         readonly property bool focusedMonitor: Hyprland.focusedWorkspace
             && Hyprland.focusedWorkspace.monitor && monitor
             && Hyprland.focusedWorkspace.monitor.name === monitor.name
+        // Open on the focused monitor; the window stays up while it fades out.
+        readonly property bool shown: root.open && focusedMonitor
         property int selectedIndex: 0
         property int confirmationIndex: -1
 
         screen: modelData
-        visible: root.open && focusedMonitor
+        visible: surface.reveal > 0
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         focusable: true
@@ -81,7 +84,8 @@ Variants {
 
         Rectangle {
             anchors.fill: parent
-            color: "#b01e1e2e"
+            color: Qt.rgba(theme.background.r, theme.background.g, theme.background.b, 0.7)
+            opacity: surface.reveal
 
             TapHandler {
                 onTapped: menu.close()
@@ -90,7 +94,7 @@ Variants {
 
         Item {
             anchors.fill: parent
-            focus: menu.visible
+            focus: menu.shown
 
             Keys.onEscapePressed: menu.close()
             Keys.onLeftPressed: menu.selectRelative(-1)
@@ -108,62 +112,83 @@ Variants {
             Keys.onEnterPressed: menu.executeCurrent()
         }
 
-        Rectangle {
+        PopupSurface {
+            id: surface
+
             anchors.centerIn: parent
-            width: Math.min(parent.width - 64, 680)
-            height: 190
+            width: Math.min(parent.width - 64, 520)
+            height: implicitHeight
+            open: menu.shown
+            enabled: menu.shown
             radius: root.appearance.radius
-            color: Qt.rgba(theme.surface.r, theme.surface.g, theme.surface.b, 0.9)
-            border.color: theme.border
-            border.width: 1
 
-            Row {
-                anchors.fill: parent
-                anchors.margins: 18
-                spacing: 12
+            Column {
+                width: parent.width
+                spacing: 10
 
-                Repeater {
-                    model: menu.powerActions
+                PopupHeader {
+                    appearance: root.appearance
+                    icon: "󰐥"
+                    title: "Power"
+                    subtitle: "H / L or arrows · Enter to choose"
+                }
 
-                    delegate: Rectangle {
-                        required property var modelData
-                        required property int index
+                Row {
+                    id: actionRow
 
-                        readonly property bool selected: index === menu.selectedIndex
-                        readonly property bool confirming: selected && menu.confirmationIndex === index
-                        width: (parent.width - parent.spacing * 4) / 5
-                        height: parent.height
-                        radius: root.appearance.radius
-                        color: selected ? theme.surfaceHover : theme.backgroundSecondary
-                        border.color: confirming ? theme.red : selected ? modelData.color : "transparent"
-                        border.width: selected ? 2 : 1
+                    width: parent.width
+                    spacing: 4
 
-                        Behavior on color { ColorAnimation { duration: 120 } }
+                    Repeater {
+                        model: menu.powerActions
 
-                        Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.top: parent.top
-                            anchors.topMargin: 36
-                            text: modelData.icon
-                            color: modelData.color
-                            font.pixelSize: 34
-                        }
+                        delegate: PopupRow {
+                            id: actionTile
 
-                        Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.bottom: parent.bottom
-                            anchors.bottomMargin: 34
-                            text: confirming ? "Confirm" : modelData.label
-                            color: theme.text
-                            font.family: theme.fontFamily
-                            font.pixelSize: root.appearance.textSize
-                            font.bold: true
-                        }
+                            required property var modelData
+                            required property int index
 
-                        TapHandler {
-                            onTapped: {
-                                menu.selectedIndex = index;
-                                menu.executeCurrent();
+                            readonly property bool selected: index === menu.selectedIndex
+                            readonly property bool confirming: selected && menu.confirmationIndex === index
+
+                            appearance: root.appearance
+                            width: (actionRow.width - actionRow.spacing * 4) / 5
+                            height: 84
+                            color: selected || hovered ? theme.surfaceHover : "transparent"
+
+                            Column {
+                                anchors.centerIn: parent
+                                spacing: 8
+
+                                Panels.Text {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    text: actionTile.modelData.icon
+                                    color: actionTile.confirming ? theme.red
+                                        : actionTile.selected || actionTile.hovered ? actionTile.modelData.color
+                                        : theme.textMuted
+                                    font.pixelSize: root.appearance.textSize + 13
+
+                                    Behavior on color {
+                                        ColorAnimation { duration: 140 }
+                                    }
+                                }
+
+                                PopupLabel {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    appearance: root.appearance
+                                    text: actionTile.confirming ? "Confirm" : actionTile.modelData.label
+                                    color: actionTile.confirming ? theme.red
+                                        : actionTile.selected ? theme.text
+                                        : theme.textMuted
+                                    font.pixelSize: root.appearance.textSize - 1
+                                }
+                            }
+
+                            TapHandler {
+                                onTapped: {
+                                    menu.selectedIndex = actionTile.index;
+                                    menu.executeCurrent();
+                                }
                             }
                         }
                     }

@@ -4,6 +4,7 @@ import Quickshell.Services.Pipewire
 import Quickshell.Wayland
 import QtQuick
 import "../../config" as Config
+import "." as Panels
 
 Variants {
     id: root
@@ -25,9 +26,11 @@ Variants {
             && Hyprland.focusedWorkspace.monitor && monitor
             && Hyprland.focusedWorkspace.monitor.name === monitor.name
         readonly property var sinks: Pipewire.nodes.values.filter(node => node.isSink)
+        // Open on the focused monitor; the window stays up while it fades out.
+        readonly property bool shown: root.open && focusedMonitor
 
         screen: modelData
-        visible: root.open && focusedMonitor
+        visible: surface.reveal > 0
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         focusable: true
@@ -103,7 +106,7 @@ Variants {
             id: selectorFocus
 
             anchors.fill: parent
-            focus: selector.visible
+            focus: selector.shown
 
             Keys.onEscapePressed: selector.close()
             Keys.onLeftPressed: selector.selectRelative(-1)
@@ -123,28 +126,27 @@ Variants {
             }
         }
 
-        Rectangle {
+        PopupSurface {
+            id: surface
+
             anchors.centerIn: parent
-            width: Math.min(parent.width - 64, 680)
-            height: content.implicitHeight + 32
-            radius: 12
-            color: Qt.rgba(theme.surface.r, theme.surface.g, theme.surface.b, 0.88)
-            border.color: theme.border
-            border.width: 1
+            width: Math.min(parent.width - 64, 440)
+            height: implicitHeight
+            open: selector.shown
+            enabled: selector.shown
+            radius: root.appearance.radius
 
             Column {
-                id: content
-
-                anchors.fill: parent
-                anchors.margins: 16
+                width: parent.width
                 spacing: 10
 
-                Text {
-                    text: "AUDIO OUTPUT"
-                    color: theme.text
-                    font.family: theme.fontFamily
-                    font.pixelSize: 15
-                    font.bold: true
+                PopupHeader {
+                    appearance: root.appearance
+                    icon: "󰓃"
+                    title: "Audio output"
+                    subtitle: selector.sinks.length > 0
+                        ? "󰄬 active · H / L or arrows · Enter to apply"
+                        : "No audio outputs found"
                 }
 
                 ListView {
@@ -152,93 +154,70 @@ Variants {
 
                     width: parent.width
                     height: Math.min(contentHeight, 276)
-                    spacing: 4
+                    visible: count > 0
+                    spacing: 2
                     clip: true
                     model: selector.sinks
                     highlightRangeMode: ListView.ApplyRange
                     preferredHighlightBegin: 0
-                    preferredHighlightEnd: height - 52
+                    preferredHighlightEnd: height - 36
 
-                    delegate: Rectangle {
+                    delegate: PopupRow {
                         id: sinkTile
 
                         required property var modelData
+                        required property int index
                         readonly property var sink: modelData
                         readonly property bool selected: ListView.isCurrentItem
                         readonly property bool active: Pipewire.defaultAudioSink === sink
 
+                        appearance: root.appearance
                         width: sinkList.width
-                        height: 52
-                        radius: 8
-                        color: selected || sinkHover.hovered ? theme.surfaceHover : "transparent"
-                        border.color: active ? theme.accent : "transparent"
-                        border.width: active ? 1 : 0
+                        height: 36
+                        color: selected || hovered ? theme.surfaceHover : "transparent"
 
-                        Behavior on color {
-                            ColorAnimation { duration: 120 }
+                        Panels.Text {
+                            id: sinkIcon
+
+                            anchors.left: parent.left
+                            anchors.leftMargin: 8
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: selector.sinkIcon(sinkTile.sink)
+                            color: sinkTile.active ? theme.accent : theme.textMuted
+                            font.pixelSize: root.appearance.textSize + 3
                         }
 
-                        Row {
-                            anchors.fill: parent
-                            anchors.leftMargin: 12
-                            anchors.rightMargin: 12
-                            spacing: 10
-
-                            Text {
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: selector.sinkIcon(sinkTile.sink)
-                                color: sinkTile.active ? theme.accent : theme.textMuted
-                                font.family: theme.fontFamily
-                                font.pixelSize: 18
-                            }
-
-                            Text {
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: parent.width - 58
-                                text: sinkTile.sink.description || sinkTile.sink.name
-                                color: theme.text
-                                elide: Text.ElideRight
-                                font.family: theme.fontFamily
-                                font.pixelSize: 14
-                                font.bold: true
-                            }
-
-                            Text {
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: "󰄬"
-                                visible: sinkTile.active
-                                color: theme.accent
-                                font.pixelSize: 16
-                            }
+                        Panels.Text {
+                            anchors.left: sinkIcon.right
+                            anchors.leftMargin: 10
+                            anchors.right: activeMark.left
+                            anchors.rightMargin: 8
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: sinkTile.sink.description || sinkTile.sink.name
+                            color: sinkTile.active ? theme.accent : theme.text
+                            elide: Text.ElideRight
+                            font.pixelSize: root.appearance.textSize
                         }
 
-                        HoverHandler {
-                            id: sinkHover
+                        Panels.Text {
+                            id: activeMark
+
+                            anchors.right: parent.right
+                            anchors.rightMargin: 8
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "󰄬"
+                            visible: sinkTile.active
+                            color: theme.accent
+                            font.pixelSize: root.appearance.textSize + 1
                         }
 
                         TapHandler {
                             onTapped: {
-                                sinkList.currentIndex = index;
+                                sinkList.currentIndex = sinkTile.index;
                                 selector.applyCurrent();
                             }
                         }
                     }
-                }
-
-                Text {
-                    visible: selector.sinks.length === 0
-                    text: "No audio outputs found"
-                    color: theme.textMuted
-                    font.family: theme.fontFamily
-                    font.pixelSize: 12
-                }
-
-                Text {
-                    visible: selector.sinks.length > 0
-                    text: "󰄬 active · H / L or arrows · Enter to apply"
-                    color: theme.textMuted
-                    font.family: theme.fontFamily
-                    font.pixelSize: 11
                 }
             }
         }

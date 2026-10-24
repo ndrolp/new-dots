@@ -404,6 +404,8 @@ ShellRoot {
 
     Panels.ControlCenter {
         appearance: appearance
+        monitors: monitors
+        workspaceService: workspaceService
         clipboardHistory: clipboardHistory
         screenCapture: screenCapture
         systemMonitor: systemMonitor
