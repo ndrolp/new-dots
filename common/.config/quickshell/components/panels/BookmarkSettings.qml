@@ -17,15 +17,15 @@ Column {
 
     // A bookmark or search engine: a settings row. Its glyph and name share
     // the first line with the row's actions; the link, which runs long, has
-    // the second line to itself.
+    // the second line to itself. Each field has a small label over it.
     component LinkRow: Panels.SettingsRow {
         id: row
 
-        required property string rowKind
         required property string glyph
         required property string name
         required property string link
         required property string linkKey
+        required property string linkLabel
         property string linkPlaceholder: ""
         property bool canMoveUp: true
         property bool canMoveDown: true
@@ -51,29 +51,46 @@ Column {
                 width: parent.width
                 spacing: 8
 
-                Panels.SettingsInput {
-                    readonly property string fieldName: "glyph"
-
+                Panels.SettingsField {
                     width: 56
                     appearance: root.appearance
-                    text: row.glyph
-                    maximumLength: 4
-                    horizontalAlignment: TextInput.AlignHCenter
-                    onEdited: text => row.edited(fieldName, text)
+                    label: "Glyph"
+                    small: true
+
+                    Panels.SettingsInput {
+                        readonly property string fieldName: "glyph"
+
+                        width: parent.width
+                        appearance: root.appearance
+                        text: row.glyph
+                        placeholderText: "󰖟"
+                        maximumLength: 4
+                        horizontalAlignment: TextInput.AlignHCenter
+                        onEdited: text => row.edited(fieldName, text)
+                    }
                 }
 
-                Panels.SettingsInput {
-                    readonly property string fieldName: "label"
-
+                Panels.SettingsField {
                     width: parent.width - 56 - actions.width - parent.spacing * 2
                     appearance: root.appearance
-                    text: row.name
-                    placeholderText: "Name"
-                    onEdited: text => row.edited(fieldName, text)
+                    label: "Label"
+                    small: true
+
+                    Panels.SettingsInput {
+                        readonly property string fieldName: "label"
+
+                        width: parent.width
+                        appearance: root.appearance
+                        text: row.name
+                        placeholderText: "Name"
+                        onEdited: text => row.edited(fieldName, text)
+                    }
                 }
 
                 Row {
                     id: actions
+
+                    anchors.bottom: parent.bottom
 
                     Panels.SettingsMoveButtons {
                         anchors.verticalCenter: parent.verticalCenter
@@ -86,7 +103,7 @@ Column {
 
                     Panels.SettingsButton {
                         appearance: root.appearance
-                        label: "Remove"
+                        label: "Delete"
                         labelColor: theme.red
                         enabled: row.canRemove
                         onActivated: row.removed()
@@ -94,14 +111,21 @@ Column {
                 }
             }
 
-            Panels.SettingsInput {
-                readonly property string fieldName: row.linkKey
-
+            Panels.SettingsField {
                 width: parent.width
                 appearance: root.appearance
-                text: row.link
-                placeholderText: row.linkPlaceholder
-                onEdited: text => row.edited(fieldName, text)
+                label: row.linkLabel
+                small: true
+
+                Panels.SettingsInput {
+                    readonly property string fieldName: row.linkKey
+
+                    width: parent.width
+                    appearance: root.appearance
+                    text: row.link
+                    placeholderText: row.linkPlaceholder
+                    onEdited: text => row.edited(fieldName, text)
+                }
             }
         }
     }
@@ -130,11 +154,11 @@ Column {
                 required property var modelData
                 required property int index
 
-                rowKind: "bookmark"
                 glyph: modelData.glyph
                 name: modelData.label
                 link: modelData.url
                 linkKey: "url"
+                linkLabel: "URL"
                 linkPlaceholder: "https://example.com"
                 canMoveUp: index > 0
                 canMoveDown: index < root.bookmarks.items.length - 1
@@ -177,11 +201,11 @@ Column {
                 required property var modelData
                 required property int index
 
-                rowKind: "searchEngine"
                 glyph: modelData.glyph
                 name: modelData.label
                 link: modelData.searchUrl
                 linkKey: "searchUrl"
+                linkLabel: "Search URL"
                 linkPlaceholder: "https://example.com/search?q=%s"
                 canMoveUp: index > 0
                 canMoveDown: index < root.bookmarks.searchEngines.length - 1

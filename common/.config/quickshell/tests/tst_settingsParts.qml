@@ -511,6 +511,17 @@ TestCase {
         compare(chosenSpy.signalArguments[0][0], "Dell Inc. DELL U2720Q 1234");
     }
 
+    // A small label suits fields packed into a list row: muted and a little
+    // smaller, like a hint.
+    function test_aSmallLabelIsMutedAndSlightlySmaller() {
+        const item = make(labelledField, { small: true });
+        const fieldLabel = textOf(item, "Date format");
+
+        compare(fieldLabel.color, theme.textMuted);
+        compare(fieldLabel.font.pixelSize, 12);
+        verify(!fieldLabel.font.bold);
+    }
+
     // Short controls sit two per line, in columns of equal width with a gap
     // between them; an odd one out starts the next line.
     function test_aGridPlacesShortControlsTwoPerLine() {

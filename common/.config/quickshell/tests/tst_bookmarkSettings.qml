@@ -27,8 +27,15 @@ TestCase {
         return found;
     }
 
+    // A bookmark's link is its URL; a search engine's is its search URL.
     function rows(item, kind) {
-        return all(item, child => child.rowKind === kind);
+        const linkKey = kind === "bookmark" ? "url" : "searchUrl";
+        return all(item, child => child.linkKey === linkKey && child.hovered !== undefined);
+    }
+
+    function textShown(item, text) {
+        return all(item, child => child.text === text && child.font !== undefined
+            && !(child instanceof TextInput)).length > 0;
     }
 
     function field(row, name) {
@@ -142,6 +149,24 @@ TestCase {
         compare(glyph.background.border.color, theme.border);
     }
 
+    // Each field is named by a small label over it; the glyph field shows an
+    // example glyph while empty.
+    function test_aBookmarksFieldsAreLabelled() {
+        const built = make();
+        const row = rows(built.item, "bookmark")[0];
+
+        verify(textShown(row, "Glyph"));
+        verify(textShown(row, "Label"));
+        verify(textShown(row, "URL"));
+        verify(field(row, "glyph").placeholderText !== "");
+    }
+
+    function test_aSearchEnginesLinkIsLabelledAsItsSearchUrl() {
+        const built = make();
+
+        verify(textShown(rows(built.item, "searchEngine")[0], "Search URL"));
+    }
+
     function test_editingABookmarkStillSavesIt() {
         const built = make();
         const row = rows(built.item, "bookmark")[1];
@@ -162,7 +187,7 @@ TestCase {
         press(button(built.item, "󰐕  Add bookmark"));
         press(button(first, "󰁅"));
         press(button(second, "󰁝"));
-        press(button(second, "Remove"));
+        press(button(second, "Delete"));
 
         compare(built.bookmarks.calls, [["add"], ["move", 0, 1], ["move", 1, 0], ["remove", 1]]);
     }
@@ -191,12 +216,12 @@ TestCase {
         const built = make();
         const row = rows(built.item, "searchEngine")[0];
 
-        verify(!button(row, "Remove").enabled);
+        verify(!button(row, "Delete").enabled);
 
         built.bookmarks.searchEngines = built.bookmarks.searchEngines.concat([
             { label: "Wiki", glyph: "W", searchUrl: "https://wiki.example.com/?q=%s" }
         ]);
-        press(button(rows(built.item, "searchEngine")[1], "Remove"));
+        press(button(rows(built.item, "searchEngine")[1], "Delete"));
         compare(built.bookmarks.calls, [["removeSearchEngine", 1]]);
     }
 
