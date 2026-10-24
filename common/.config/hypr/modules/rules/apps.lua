@@ -5,11 +5,17 @@ hl.layer_rule({
 	dim_around = true,
 })
 
+-- The bar and its popups. Quickshell PopupWindows are xdg popups of this
+-- layer, so they have no namespace of their own and take this rule's
+-- blur_popups and ignore_alpha. ignore_alpha keeps the blur to the drawn
+-- shape: it skips the transparent room beside a popup and the faint
+-- anti-aliased fringe, and stays below the lowest bar opacity (20%).
 hl.layer_rule({
 	name = "ndro-bar",
 	match = { namespace = "ndro-shell-bar" },
-	ignore_alpha = 0.0,
+	ignore_alpha = 0.1,
 	blur = true,
+	blur_popups = true,
 	dim_around = false,
 	animation = "spring",
 })
@@ -20,15 +26,6 @@ hl.layer_rule({
 	ignore_alpha = 0.0,
 	blur = true,
 	dim_around = false,
-})
-
-hl.layer_rule({
-	name = "ndro-bar",
-	match = { class = "maim" },
-	ignore_alpha = 0.0,
-	blur = false,
-	dim_around = false,
-	animation = "spring",
 })
 
 hl.curve("easy", { type = "spring", mass = 1, stiffness = 71.2633, dampening = 15.8273644 })
@@ -87,8 +84,19 @@ hl.layer_rule({
 
 hl.layer_rule({
 	name = "ndro-shell-panel-overlays",
-	match = { namespace = "ndro-shell-screen-capture|ndro-shell-control-center" },
+	match = { namespace = "ndro-shell-screen-capture" },
 	ignore_alpha = 0.0,
+	blur = true,
+	dim_around = false,
+	animation = "popin",
+})
+
+-- The Control center is its own layer. It is blurred like the bar's popups
+-- so it matches them when it hangs from the bar.
+hl.layer_rule({
+	name = "ndro-shell-control-center",
+	match = { namespace = "ndro-shell-control-center" },
+	ignore_alpha = 0.1,
 	blur = true,
 	dim_around = false,
 	animation = "popin",
