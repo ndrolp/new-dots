@@ -74,6 +74,84 @@ Column {
 
     Panels.SettingsHeading {
         appearance: root.appearance
+        text: "Background clock"
+        topPadding: 4
+    }
+
+    Panels.SettingsGrid {
+        id: clockGrid
+
+        width: root.width
+
+        Panels.SettingsSwitchRow {
+            width: clockGrid.cellWidth
+            appearance: root.appearance
+            label: "Background clock"
+            checked: root.desktop.backgroundClock.enabled
+            onToggled: root.setWidget("backgroundClock", "enabled", !root.desktop.backgroundClock.enabled)
+        }
+
+        Placement {
+            width: clockGrid.cellWidth
+            height: 40
+            widget: "backgroundClock"
+        }
+
+        Repeater {
+            model: [
+                { label: "Clock size", from: 48, to: 160, key: "size" },
+                { label: "Clock opacity", from: 20, to: 100, key: "opacity" }
+            ]
+
+            delegate: Panels.SettingsNumber {
+                required property var modelData
+
+                width: clockGrid.cellWidth
+                appearance: root.appearance
+                label: modelData.label
+                from: modelData.from
+                to: modelData.to
+                value: root.desktop.backgroundClock[modelData.key]
+                onEdited: number => root.setWidget("backgroundClock", modelData.key, number)
+            }
+        }
+
+        Panels.SettingsSwitchRow {
+            width: clockGrid.cellWidth
+            appearance: root.appearance
+            label: "Clock calendar"
+            checked: root.desktop.backgroundClock.calendarEnabled
+            onToggled: root.setWidget("backgroundClock", "calendarEnabled",
+                !root.desktop.backgroundClock.calendarEnabled)
+        }
+
+        Column {
+            width: clockGrid.cellWidth
+            spacing: 6
+
+            Panels.SettingsLabel {
+                width: parent.width
+                appearance: root.appearance
+                text: "Date format"
+            }
+
+            Panels.SettingsChoice {
+                width: parent.width
+                appearance: root.appearance
+                options: [
+                    { label: "Full", value: "full" },
+                    { label: "Short", value: "short" },
+                    { label: "Numeric", value: "numeric" },
+                    { label: "Hidden", value: "none" }
+                ]
+                value: root.desktop.backgroundClock.dateFormat
+                onChosen: format => root.setWidget("backgroundClock", "dateFormat", format)
+            }
+        }
+    }
+
+    Panels.SettingsHeading {
+        appearance: root.appearance
         text: "Widgets"
         topPadding: 8
     }
@@ -108,6 +186,26 @@ Column {
                 width: widgetGrid.cellWidth
                 height: 40
                 widget: widgetGrid.modelData.widget
+            }
+
+            // Only the weather widget has a setting of its own.
+            Column {
+                width: widgetGrid.cellWidth
+                spacing: 6
+                visible: widgetGrid.modelData.widget === "weather"
+
+                Panels.SettingsLabel {
+                    width: parent.width
+                    appearance: root.appearance
+                    text: "Location"
+                }
+
+                Panels.SettingsInput {
+                    width: parent.width
+                    appearance: root.appearance
+                    text: root.desktop.weather.location
+                    onEditingFinished: root.setWidget("weather", "location", text.trim())
+                }
             }
         }
     }

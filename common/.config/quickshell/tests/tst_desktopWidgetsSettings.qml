@@ -139,4 +139,88 @@ TestCase {
         compare(placement.vertical.value, "center");
         compare(placement.horizontal.value, "center");
     }
+
+    function sameLine(item, first, second) {
+        const a = first.mapToItem(item, 0, 0);
+        const b = second.mapToItem(item, 0, 0);
+        return a.y === b.y && a.x < b.x;
+    }
+
+    function test_theBackgroundClockIsTurnedOffWithASwitchRowAndPlacedBesideIt() {
+        const built = make();
+        const clock = switchRow(built.item, "Background clock");
+        const placement = placementOf(clock);
+
+        verify(clock);
+        compare(clock.checked, true);
+        verify(sameLine(built.item, clock, placement));
+
+        clock.toggled();
+        compare(widgetsOf(built).backgroundClock.enabled, false);
+
+        placement.vertical.chosen("top");
+        compare(widgetsOf(built).backgroundClock.position, "top-center");
+    }
+
+    function test_theClockSizeAndOpacitySitTwoPerLineAndStillSave() {
+        const built = make();
+        const size = numberCell(built.item, "Clock size");
+        const opacity = numberCell(built.item, "Clock opacity");
+
+        verify(size);
+        verify(opacity);
+        verify(sameLine(built.item, size, opacity));
+        compare(size.value, 96);
+
+        size.field.forceActiveFocus();
+        size.field.selectAll();
+        keyClick("1");
+        keyClick("2");
+        keyClick("0");
+        keyClick(Qt.Key_Return);
+        compare(widgetsOf(built).backgroundClock.size, 120);
+
+        opacity.slider.forceActiveFocus();
+        keyClick(Qt.Key_Left);
+        compare(widgetsOf(built).backgroundClock.opacity, 99);
+    }
+
+    function test_theClockCalendarAndDateFormatSitTwoPerLineAndStillSave() {
+        const built = make();
+        const calendar = switchRow(built.item, "Clock calendar");
+        const dateFormat = all(built.item, child => child.chosen !== undefined && child.options !== undefined
+            && child.options.some(option => option.value === "numeric"))[0];
+
+        verify(calendar);
+        verify(dateFormat);
+        // The choice sits under its label, in the cell beside the switch.
+        verify(sameLine(built.item, calendar, dateFormat.parent));
+        compare(dateFormat.value, "full");
+
+        calendar.toggled();
+        compare(widgetsOf(built).backgroundClock.calendarEnabled, true);
+
+        dateFormat.chosen("none");
+        compare(widgetsOf(built).backgroundClock.dateFormat, "none");
+        compare(dateFormat.value, "none");
+    }
+
+    function test_theWeatherLocationSitsWithTheWeatherWidgetAndStillSaves() {
+        const built = make();
+        const weather = switchRow(built.item, "Weather");
+        const location = all(weather.parent, child => child instanceof TextInput)[0];
+
+        verify(location);
+        compare(location.text, "Ourense, ES");
+
+        location.forceActiveFocus();
+        location.selectAll();
+        keyClick("V");
+        keyClick("i");
+        keyClick("g");
+        keyClick("o");
+        keyClick(" ");
+        keyClick(Qt.Key_Return);
+        compare(widgetsOf(built).weather.location, "Vigo");
+    }
 }
