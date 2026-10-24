@@ -161,8 +161,8 @@ TestCase {
         compare(zone(normalized, "left"), ["clock"]);
         compare(zone(normalized, "center"), []);
         compare(zone(normalized, "right"), ["arch", "systemMonitor", "currentApp", "workspaces",
-            "notifications", "recording", "media", "audio", "bluetooth", "tray", "network",
-            "battery"]);
+            "notifications", "recording", "media", "-cava", "audio", "bluetooth", "tray",
+            "network", "battery"]);
         const once = BarProfileModel.normalizeBarElements(minimalElements());
         compare(BarProfileModel.normalizeBarElements(once), once);
     }
@@ -241,6 +241,124 @@ TestCase {
         compare(element(updated, "audio"), element(barElements, "audio"));
     }
 
+    function test_cavaIsInEveryDefaultProfileDisabledNextToMediaAndAudio() {
+        const profiles = BarProfileModel.defaultBarProfiles();
+
+        for (const name in profiles) {
+            const right = zone(profiles[name].barElements, "right").map(id => id.replace("-", ""));
+            compare(right.indexOf("cava"), right.indexOf("media") + 1, name);
+            compare(right.indexOf("audio"), right.indexOf("cava") + 1, name);
+            compare(BarProfileModel.elementEnabled(profiles[name].barElements, "cava"), false, name);
+        }
+    }
+
+    function test_aProfileSavedBeforeCavaExistedShowsItDisabled() {
+        const state = fixtures.startedBarState();
+
+        for (const name in state.barProfiles) {
+            const barElements = BarProfileModel.savedProfile(state, name).barElements;
+            const mediaZone = BarProfileModel.elementZone(barElements, "media");
+            compare(BarProfileModel.elementZone(barElements, "cava"), mediaZone, name);
+            compare(BarProfileModel.elementEnabled(barElements, "cava"), false, name);
+            const ids = zone(barElements, mediaZone).map(id => id.replace("-", ""));
+            compare(ids.indexOf("cava"), ids.indexOf("media") + 1, name);
+            if (BarProfileModel.elementZone(barElements, "audio") === mediaZone)
+                compare(ids.indexOf("audio"), ids.indexOf("cava") + 1, name);
+        }
+    }
+
+    // A missing element goes right after the element it follows by default,
+    // in that element's zone; the first element, which follows none, goes
+    // right before the one it precedes.
+    function test_aMissingElementIsAddedNextToItsDefaultNeighbours() {
+        const afterMedia = BarProfileModel.normalizeBarElements({
+            left: [{ id: "media", enabled: true }, { id: "clock", enabled: true }],
+            right: [{ id: "audio", enabled: true }]
+        });
+        compare(zone(afterMedia, "left").slice(0, 3), ["media", "-cava", "clock"]);
+
+        const beforeSystemMonitor = BarProfileModel.normalizeBarElements({
+            center: [{ id: "clock", enabled: true }, { id: "systemMonitor", enabled: true }]
+        });
+        compare(zone(beforeSystemMonitor, "center").slice(0, 3), ["clock", "arch", "systemMonitor"]);
+    }
+
+    function test_aProfileThatListsCavaKeepsItEnabled() {
+        const barElements = BarProfileModel.normalizeBarElements({
+            left: [{ id: "cava", enabled: true }]
+        });
+
+        compare(BarProfileModel.elementZone(barElements, "cava"), "left");
+        compare(BarProfileModel.elementEnabled(barElements, "cava"), true);
+    }
+
+    function test_cavaDrawsTwelveBlueBarsThreePixelsWideByDefault() {
+        const barElements = BarProfileModel.normalizeBarElements({});
+
+        compare(BarProfileModel.elementOptions(barElements, "cava"),
+            { barCount: 12, barWidth: 3, color: "blue" });
+    }
+
+    function test_cavaKeepsItsBarCountAndWidthWithinTheirRanges() {
+        const tooMuch = BarProfileModel.normalizeBarElements({
+            right: [{ id: "cava", enabled: true, options: { barCount: 40, barWidth: 12 } }]
+        });
+        const tooLittle = BarProfileModel.normalizeBarElements({
+            right: [{ id: "cava", enabled: true, options: { barCount: 2, barWidth: 0 } }]
+        });
+
+        compare(BarProfileModel.elementOption(tooMuch, "cava", "barCount"), 32);
+        compare(BarProfileModel.elementOption(tooMuch, "cava", "barWidth"), 8);
+        compare(BarProfileModel.elementOption(tooLittle, "cava", "barCount"), 6);
+        compare(BarProfileModel.elementOption(tooLittle, "cava", "barWidth"), 1);
+    }
+
+    function test_cavaDrawsOnlyTheThemesNamedColors() {
+        compare(BarProfileModel.elementOptionLimits.cava.color.choices,
+            ["accent", "blue", "green", "yellow", "orange", "red", "purple", "text"]);
+
+        const barElements = BarProfileModel.normalizeBarElements({
+            right: [{ id: "cava", enabled: true, options: { color: "#ff0000" } }]
+        });
+        compare(BarProfileModel.elementOption(barElements, "cava", "color"), "blue");
+        compare(BarProfileModel.elementOption(BarProfileModel.setElementOption(barElements,
+            "cava", "color", "purple"), "cava", "color"), "purple");
+    }
+
+    function test_settingANumberOptionKeepsItWithinItsRange() {
+        const barElements = BarProfileModel.normalizeBarElements({});
+        function set(value) {
+            return BarProfileModel.elementOption(BarProfileModel.setElementOption(barElements,
+                "cava", "barCount", value), "cava", "barCount");
+        }
+
+        compare(set(40), 32);
+        compare(set(2), 6);
+        compare(set(20.4), 20);
+    }
+
+    function test_settingAChoiceOptionToAValueItDoesntListKeepsTheCurrentOne() {
+        const red = BarProfileModel.setElementOption(BarProfileModel.normalizeBarElements({}),
+            "cava", "color", "red");
+
+        compare(BarProfileModel.elementOption(BarProfileModel.setElementOption(red, "cava", "color",
+            "#00ff00"), "cava", "color"), "red");
+    }
+
+    // How the Bar section edits each option: a switch, a number in a range or
+    // a choice among labelled values.
+    function test_eachOptionSaysHowItIsEdited() {
+        compare(BarProfileModel.elementOptionField("audio", "meterVisible"), { kind: "switch" });
+        compare(BarProfileModel.elementOptionField("cava", "barCount"), { kind: "number", from: 6, to: 32 });
+        compare(BarProfileModel.elementOptionField("cava", "barWidth"), { kind: "number", from: 1, to: 8 });
+
+        const color = BarProfileModel.elementOptionField("cava", "color");
+        compare(color.kind, "choice");
+        compare(color.choices.slice(0, 2), [{ label: "Accent", value: "accent" }, { label: "Blue", value: "blue" }]);
+        compare(color.choices.map(choice => choice.value),
+            ["accent", "blue", "green", "yellow", "orange", "red", "purple", "text"]);
+    }
+
     function test_changingAnElementOptionIsAPendingChange() {
         const state = fixtures.startedBarState();
         const barElements = BarProfileModel.editedProfile(state).barElements;
@@ -249,5 +367,28 @@ TestCase {
             barElements, "audio", "meterVisible", true) });
 
         verify(BarProfileModel.isModified(after));
+    }
+
+    function test_cavasOptionsArePendingChangesUntilSavedOrDiscarded() {
+        const state = fixtures.startedBarState();
+        const name = state.editingBarProfile;
+        const barElements = BarProfileModel.editedProfile(state).barElements;
+
+        const after = fixtures.edited(state, { barElements: BarProfileModel.setElementOption(
+            BarProfileModel.setElementOption(barElements, "cava", "barCount", 20),
+            "cava", "color", "red") });
+        const drawn = BarProfileModel.profileValue(after, name, "barElements");
+
+        verify(BarProfileModel.isModified(after));
+        compare(BarProfileModel.elementOption(drawn, "cava", "barCount"), 20);
+        compare(BarProfileModel.elementOption(drawn, "cava", "color"), "red");
+
+        const discarded = fixtures.withChanges(after, BarProfileModel.discardChanges(after));
+        compare(BarProfileModel.elementOption(BarProfileModel.profileValue(discarded, name,
+            "barElements"), "cava", "barCount"), 12);
+
+        const saved = fixtures.withChanges(after, BarProfileModel.saveProfile(after));
+        compare(BarProfileModel.elementOption(BarProfileModel.savedProfile(saved, name).barElements,
+            "cava", "barCount"), 20);
     }
 }

@@ -182,6 +182,10 @@ ShellRoot {
         id: notificationHistory
     }
 
+    Services.Cava {
+        id: cava
+    }
+
     Services.SystemMonitor {
         id: systemMonitor
     }
@@ -480,6 +484,7 @@ ShellRoot {
         wallpapers: wallpapers
         bookmarks: bookmarks
         plugins: plugins
+        cava: cava
         open: shell.configOpen
         targetWindow: shell.configWindow
 
@@ -692,6 +697,7 @@ ShellRoot {
         pomodoro: pomodoro
         notificationHistory: notificationHistory
         screenCapture: screenCapture
+        cava: cava
         systemMonitor: systemMonitor
         workspaceService: workspaceService
 

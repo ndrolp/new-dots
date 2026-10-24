@@ -6,8 +6,8 @@ import "../../config/BarProfileModel.js" as BarProfileModel
 // The Bar section's bar elements list: every bar element of the edited bar
 // profile, zone by zone, in full width rows that stay transparent until
 // hovered. A row turns its element on or off, picks its zone, orders it and
-// joins it with the one above; elements with options open them below as
-// switch rows.
+// joins it with the one above; elements with options open them below:
+// switches, numbers and choices.
 Column {
     id: root
 
@@ -29,6 +29,7 @@ Column {
             "notifications": "Notifications",
             "recording": "Screen recording",
             "media": "Media",
+            "cava": "Cava",
             "audio": "Audio",
             "bluetooth": "Bluetooth",
             "tray": "System tray",
@@ -39,19 +40,36 @@ Column {
         return labels[element] || element;
     }
 
-    // Element options, shown under the element they belong to.
+    // Element options, shown under the element they belong to, each edited
+    // as `optionField` says: a switch, a number or a choice.
+    property var elementOptions: ({
+        "workspaces": [
+            { label: "Hide empty workspaces", option: "hideEmpty" },
+            { label: "Show workspace app counts", option: "appCountVisible" }
+        ],
+        "notifications": [{ label: "Show unread badge", option: "badgeVisible" }],
+        "media": [{ label: "Show track title", option: "titleVisible" }],
+        "cava": [
+            { label: "Bars", option: "barCount" },
+            { label: "Bar width", option: "barWidth" },
+            { label: "Color", option: "color" }
+        ],
+        "audio": [{ label: "Show volume meter", option: "meterVisible" }],
+        "battery": [{ label: "Show percentage", option: "percentageVisible" }]
+    })
+
+    // How an option is edited ({ kind: "switch" }, { kind: "number", from, to }
+    // or { kind: "choice", choices: [{ label, value }] }); the model's, which
+    // also keeps saved values within those limits.
+    property var optionField: BarProfileModel.elementOptionField
+
+    // A hint shown under an enabled element while there is something to say
+    // about it, e.g. { "cava": "cava isn't installed…" }; empty shows nothing.
+    property var elementHints: ({})
+
     function optionsFor(element) {
-        const options = {
-            "workspaces": [
-                { label: "Hide empty workspaces", option: "hideEmpty" },
-                { label: "Show workspace app counts", option: "appCountVisible" }
-            ],
-            "notifications": [{ label: "Show unread badge", option: "badgeVisible" }],
-            "media": [{ label: "Show track title", option: "titleVisible" }],
-            "audio": [{ label: "Show volume meter", option: "meterVisible" }],
-            "battery": [{ label: "Show percentage", option: "percentageVisible" }]
-        };
-        return (options[element] || []).map(entry => Object.assign({ "element": element }, entry));
+        return (elementOptions[element] || []).map(entry => Object.assign({ "element": element },
+            optionField(element, entry.option), entry));
     }
 
     function toggleElementOption(element, option) {
@@ -208,6 +226,17 @@ Column {
                         }
                     }
 
+                    Panels.SettingsHint {
+                        readonly property string hint: root.elementHints[elementDelegate.element] || ""
+
+                        visible: hint !== "" && elementDelegate.elementOn
+                        x: 24
+                        width: parent.width - x
+                        appearance: root.appearance
+                        text: hint
+                        leftPadding: 12
+                    }
+
                     // The element's options, two per line, indented under it.
                     Panels.SettingsGrid {
                         visible: elementDelegate.expanded
@@ -219,14 +248,81 @@ Column {
                         Repeater {
                             model: elementDelegate.options
 
-                            delegate: Panels.SettingsSwitchRow {
+                            delegate: Loader {
+                                id: optionCell
+
                                 required property var modelData
+                                readonly property var value: root.appearance.barElementOption(
+                                    modelData.element, modelData.option)
+
+                                // The model keeps what is saved within the option's limits.
+                                function save(value) {
+                                    root.appearance.setBarElementOption(modelData.element, modelData.option, value);
+                                }
 
                                 width: parent.cellWidth
-                                appearance: root.appearance
-                                label: modelData.label
-                                checked: root.appearance.barElementOption(modelData.element, modelData.option)
-                                onToggled: root.toggleElementOption(modelData.element, modelData.option)
+                                sourceComponent: modelData.kind === "switch" ? switchOption : fieldOption
+
+                                Component {
+                                    id: switchOption
+
+                                    Panels.SettingsSwitchRow {
+                                        appearance: root.appearance
+                                        label: optionCell.modelData.label
+                                        checked: optionCell.value
+                                        onToggled: root.toggleElementOption(optionCell.modelData.element,
+                                            optionCell.modelData.option)
+                                    }
+                                }
+
+                                // A number or a choice, its label lined up with the switches'.
+                                Component {
+                                    id: fieldOption
+
+                                    Item {
+                                        height: field.height + 8
+
+                                        Loader {
+                                            id: field
+
+                                            x: 12
+                                            y: 4
+                                            width: parent.width - 24
+                                            sourceComponent: optionCell.modelData.kind === "number"
+                                                ? numberOption : choiceOption
+                                        }
+                                    }
+                                }
+
+                                Component {
+                                    id: numberOption
+
+                                    Panels.SettingsNumber {
+                                        appearance: root.appearance
+                                        label: optionCell.modelData.label
+                                        from: optionCell.modelData.from
+                                        to: optionCell.modelData.to
+                                        value: optionCell.value
+                                        onEdited: value => optionCell.save(value)
+                                    }
+                                }
+
+                                Component {
+                                    id: choiceOption
+
+                                    Panels.SettingsField {
+                                        appearance: root.appearance
+                                        label: optionCell.modelData.label
+
+                                        Panels.SettingsChoice {
+                                            width: parent.width
+                                            appearance: root.appearance
+                                            options: optionCell.modelData.choices
+                                            value: optionCell.value
+                                            onChosen: value => optionCell.save(value)
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

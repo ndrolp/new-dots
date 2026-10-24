@@ -15,6 +15,7 @@ Variants {
     required property var pomodoro
     required property var notificationHistory
     required property var screenCapture
+    required property var cava
     required property var systemMonitor
     required property var workspaceService
 
@@ -64,6 +65,7 @@ Variants {
             property var pomodoro: bar.pomodoro
             property var notificationHistory: bar.notificationHistory
             property var screenCapture: bar.screenCapture
+            property var cava: bar.cava
             property var systemMonitor: bar.systemMonitor
             property var workspaceService: bar.workspaceService
 
@@ -137,6 +139,8 @@ Variants {
                     pomodoro: panel.pomodoro
                     notificationHistory: panel.notificationHistory
                     screenCapture: panel.screenCapture
+                    cava: panel.cava
+                    barVisible: panel.visible
                     systemMonitor: panel.systemMonitor
                     workspaceService: panel.workspaceService
 

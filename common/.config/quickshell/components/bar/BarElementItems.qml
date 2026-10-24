@@ -10,7 +10,7 @@ import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 
 // The bar elements that need no component of their own (notifications,
-// recording, media, audio, bluetooth, tray, network, battery and clock),
+// recording, media, cava, audio, bluetooth, tray, network, battery and clock),
 // placed by the bar's single walk per zone (see BarContent).
 Item {
     id: root
@@ -20,6 +20,10 @@ Item {
     required property var pomodoro
     required property var notificationHistory
     required property var screenCapture
+    // The shared cava process (services/Cava.qml).
+    required property var cava
+    // Whether the bar holding these elements is shown on its monitor.
+    property bool barVisible: true
     property string activePopup: ""
     // Where each element goes, provided by the bar's single walk per zone.
     property var elementX: element => 0
@@ -76,6 +80,7 @@ Item {
         "notifications": notificationButton,
         "recording": recordingButton,
         "media": mediaButton,
+        "cava": cavaElement,
         "audio": audioButton,
         "bluetooth": bluetoothButton,
         "tray": trayButton,
@@ -337,6 +342,42 @@ Item {
         MouseArea {
             anchors.fill: parent
             onClicked: root.popupRequested("media")
+        }
+    }
+
+    // Cava never hides and opens nothing.
+    Rectangle {
+        id: cavaElement
+
+        // While drawn, it keeps the shared cava process running, computing
+        // at least its bar count.
+        readonly property bool drawing: visible && root.barVisible
+        readonly property var options: BarProfileModel.elementOptions(root.appearance.barElements, "cava")
+        readonly property int barCount: options.barCount
+
+        visible: root.itemVisible("cava")
+        x: root.elementX("cava")
+        width: cavaBars.implicitWidth + 16
+        height: root.itemHeight
+        radius: root.appearance.radius
+        color: root.elementGrouped("cava") || root.appearance.pillsTransparent
+            || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
+        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("cava") ? 1 : 0
+        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+
+        onDrawingChanged: root.cava.setDrawing(cavaElement, drawing)
+        Component.onCompleted: root.cava.setDrawing(cavaElement, drawing)
+        Component.onDestruction: root.cava.setDrawing(cavaElement, false)
+
+        CavaBars {
+            id: cavaBars
+
+            anchors.centerIn: parent
+            height: Math.max(1, parent.height - 10)
+            frame: root.cava.heights
+            barCount: cavaElement.barCount
+            barWidth: cavaElement.options.barWidth
+            colorName: cavaElement.options.color
         }
     }
 
