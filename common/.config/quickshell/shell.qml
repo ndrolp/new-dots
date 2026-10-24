@@ -182,6 +182,10 @@ ShellRoot {
         id: notificationHistory
     }
 
+    Services.Cava {
+        id: cava
+    }
+
     Services.SystemMonitor {
         id: systemMonitor
     }
@@ -692,6 +696,7 @@ ShellRoot {
         pomodoro: pomodoro
         notificationHistory: notificationHistory
         screenCapture: screenCapture
+        cava: cava
         systemMonitor: systemMonitor
         workspaceService: workspaceService
 
