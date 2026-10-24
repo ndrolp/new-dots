@@ -2,6 +2,12 @@
 
 // Where a popup opens in its bar window. Popups of center bar elements open
 // under them, shifted sideways to stay on screen; the rest at the bar edge.
+// On an opaque bar popups are attached: they hang from the bar's bottom edge.
+
+// Takes the bar profile of the popup's monitor, { barTransparent }.
+function attached(bar) {
+    return !bar.barTransparent;
+}
 
 // The bar edge a popup opens at: "left" or "right".
 function edgeX(placement, edge) {
@@ -27,13 +33,27 @@ function x(placement) {
     ));
 }
 
-// Takes { barHeight, spacing, nearTrigger,
+// Takes { barHeight, spacing, nearTrigger, attached,
 // content: { y, height } | null (the bar content the elements sit in) }.
 function y(placement) {
     const content = placement.content;
+
+    if (placement.attached)
+        return placement.barHeight;
 
     if (placement.nearTrigger && content)
         return content.y + content.height + placement.spacing;
 
     return placement.barHeight + placement.spacing;
+}
+
+// The room around the surface inside the popup window. A floating popup keeps
+// the inset all around; an attached one touches the bar and leaves room only
+// beside it, for the curved corners that join it to the bar.
+// Takes { attached, inset, joinRadius }.
+function room(placement) {
+    if (placement.attached)
+        return { top: 0, side: placement.joinRadius, bottom: 0 };
+
+    return { top: placement.inset, side: placement.inset, bottom: placement.inset };
 }

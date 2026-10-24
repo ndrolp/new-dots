@@ -51,4 +51,27 @@ TestCase {
     function test_anEdgePopupOpensBelowTheBarHeight() {
         compare(PopupPlacement.y(placement({ nearTrigger: false, content: { y: 6, height: 32 } })), 48);
     }
+
+    function test_popupsAreAttachedOnAnOpaqueBar() {
+        verify(PopupPlacement.attached({ barTransparent: false }));
+    }
+
+    function test_popupsFloatOnATransparentBar() {
+        verify(!PopupPlacement.attached({ barTransparent: true }));
+    }
+
+    function test_anAttachedPopupOpensRightAtTheBarsBottomEdge() {
+        compare(PopupPlacement.y(placement({ attached: true, content: { y: 6, height: 32 } })), 40);
+        compare(PopupPlacement.y(placement({ attached: true, nearTrigger: false })), 40);
+    }
+
+    function test_aFloatingPopupHasRoomAllAroundItsSurface() {
+        compare(PopupPlacement.room({ attached: false, inset: 12, joinRadius: 6 }),
+            { top: 12, side: 12, bottom: 12 });
+    }
+
+    function test_anAttachedPopupTouchesTheBarWithRoomOnlyForItsCurvedJoins() {
+        compare(PopupPlacement.room({ attached: true, inset: 12, joinRadius: 6 }),
+            { top: 0, side: 6, bottom: 0 });
+    }
 }
