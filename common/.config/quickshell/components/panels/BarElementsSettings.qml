@@ -191,26 +191,13 @@ Column {
                                 onChosen: zone => root.appearance.moveBarElementToZone(elementDelegate.element, zone)
                             }
 
-                            Repeater {
-                                model: [
-                                    { label: "▲", offset: -1 },
-                                    { label: "▼", offset: 1 }
-                                ]
-
-                                delegate: Panels.SettingsButton {
-                                    required property var modelData
-                                    readonly property bool movable: modelData.offset < 0
-                                        ? elementDelegate.index > 0
-                                        : elementDelegate.index < zoneDelegate.elements.length - 1
-
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: 32
-                                    appearance: root.appearance
-                                    label: modelData.label
-                                    labelColor: movable ? theme.text : theme.textDisabled
-                                    onActivated: root.appearance.moveBarElement(elementDelegate.element,
-                                        modelData.offset)
-                                }
+                            Panels.SettingsMoveButtons {
+                                anchors.verticalCenter: parent.verticalCenter
+                                appearance: root.appearance
+                                canMoveUp: elementDelegate.index > 0
+                                canMoveDown: elementDelegate.index < zoneDelegate.elements.length - 1
+                                onMovedUp: root.appearance.moveBarElement(elementDelegate.element, -1)
+                                onMovedDown: root.appearance.moveBarElement(elementDelegate.element, 1)
                             }
 
                             Item {

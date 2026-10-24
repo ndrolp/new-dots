@@ -233,25 +233,16 @@ Column {
                 text: (orderRow.index + 1) + ". " + root.widgetLabels[orderRow.modelData]
             }
 
-            Row {
+            Panels.SettingsMoveButtons {
                 id: moveButtons
 
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-
-                Panels.SettingsButton {
-                    appearance: root.appearance
-                    label: "Up"
-                    enabled: !orderRow.first
-                    onActivated: root.monitors.moveDesktopWidget(root.monitorName, orderRow.modelData, -1)
-                }
-
-                Panels.SettingsButton {
-                    appearance: root.appearance
-                    label: "Down"
-                    enabled: !orderRow.last
-                    onActivated: root.monitors.moveDesktopWidget(root.monitorName, orderRow.modelData, 1)
-                }
+                appearance: root.appearance
+                canMoveUp: !orderRow.first
+                canMoveDown: !orderRow.last
+                onMovedUp: root.monitors.moveDesktopWidget(root.monitorName, orderRow.modelData, -1)
+                onMovedDown: root.monitors.moveDesktopWidget(root.monitorName, orderRow.modelData, 1)
             }
         }
     }

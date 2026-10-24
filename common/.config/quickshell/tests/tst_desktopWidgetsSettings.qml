@@ -235,8 +235,8 @@ TestCase {
 
     function test_theStackOrderListsTheDesktopWidgetsAndQuietButtonsMoveThem() {
         const built = make();
-        const up = buttons(built.item, "Up");
-        const down = buttons(built.item, "Down");
+        const up = buttons(built.item, "󰁝");
+        const down = buttons(built.item, "󰁅");
 
         compare(up.length, 5);
         compare(down.length, 5);

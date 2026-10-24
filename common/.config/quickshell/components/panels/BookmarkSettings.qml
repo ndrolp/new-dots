@@ -84,18 +84,13 @@ Column {
                 Row {
                     id: actions
 
-                    Panels.SettingsButton {
+                    Panels.SettingsMoveButtons {
+                        anchors.verticalCenter: parent.verticalCenter
                         appearance: root.appearance
-                        label: "󰁝"
-                        enabled: row.canMoveUp
-                        onActivated: row.movedUp()
-                    }
-
-                    Panels.SettingsButton {
-                        appearance: root.appearance
-                        label: "󰁅"
-                        enabled: row.canMoveDown
-                        onActivated: row.movedDown()
+                        canMoveUp: row.canMoveUp
+                        canMoveDown: row.canMoveDown
+                        onMovedUp: row.movedUp()
+                        onMovedDown: row.movedDown()
                     }
 
                     Panels.SettingsButton {

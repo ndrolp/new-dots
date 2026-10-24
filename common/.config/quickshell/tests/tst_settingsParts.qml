@@ -107,6 +107,24 @@ TestCase {
     }
 
     Component {
+        id: moveButtons
+
+        Panels.SettingsMoveButtons {}
+    }
+
+    SignalSpy {
+        id: movedUpSpy
+
+        signalName: "movedUp"
+    }
+
+    SignalSpy {
+        id: movedDownSpy
+
+        signalName: "movedDown"
+    }
+
+    Component {
         id: grid
 
         Panels.SettingsGrid {
@@ -382,6 +400,37 @@ TestCase {
         compare(fieldLabel.font.pixelSize, 13);
         compare(control.width, 280);
         compare(control.y, fieldLabel.height + 6);
+    }
+
+    // Moving something up or down a list is a pair of quiet arrow buttons;
+    // an end of the list disables the arrow past it.
+    function test_moveButtonsAreAPairOfQuietArrows() {
+        const item = make(moveButtons);
+        const up = item.children.filter(child => child.label === "󰁝")[0];
+        const down = item.children.filter(child => child.label === "󰁅")[0];
+        movedUpSpy.target = item;
+        movedDownSpy.target = item;
+        movedUpSpy.clear();
+        movedDownSpy.clear();
+
+        compare(up.color, Qt.rgba(0, 0, 0, 0));
+        compare(up.width, 32);
+        verify(up.x < down.x);
+        up.activated();
+        down.activated();
+        compare(movedUpSpy.count, 1);
+        compare(movedDownSpy.count, 1);
+    }
+
+    function test_theEndsOfAListDisableTheArrowPastThem() {
+        const item = make(moveButtons, { canMoveUp: false });
+        const up = item.children.filter(child => child.label === "󰁝")[0];
+        const down = item.children.filter(child => child.label === "󰁅")[0];
+
+        verify(!up.enabled);
+        verify(down.enabled);
+        item.canMoveDown = false;
+        verify(!down.enabled);
     }
 
     // Short controls sit two per line, in columns of equal width with a gap

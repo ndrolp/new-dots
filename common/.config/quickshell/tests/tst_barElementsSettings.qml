@@ -163,10 +163,18 @@ TestCase {
         const built = make();
         const workspaces = elementRow(built.item, "Workspaces");
 
-        button(workspaces, "▲").activated();
-        button(workspaces, "▼").activated();
+        button(workspaces, "󰁝").activated();
+        button(workspaces, "󰁅").activated();
 
         compare(built.appearance.calls, [["move", "workspaces", -1], ["move", "workspaces", 1]]);
+    }
+
+    function test_theFirstElementOfAZoneCannotMoveUp() {
+        const built = make();
+        const audio = elementRow(built.item, "Audio");
+
+        verify(!button(audio, "󰁝").enabled);
+        verify(button(audio, "󰁅").enabled);
     }
 
     function test_joinGroupsAnElementWithTheOneAbove() {
