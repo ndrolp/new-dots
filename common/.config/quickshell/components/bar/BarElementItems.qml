@@ -349,8 +349,11 @@ Item {
     Rectangle {
         id: cavaElement
 
-        // While drawn, it keeps the shared cava process running.
+        // While drawn, it keeps the shared cava process running, computing
+        // at least its bar count.
         readonly property bool drawing: visible && root.barVisible
+        readonly property var options: BarProfileModel.elementOptions(root.appearance.barElements, "cava")
+        readonly property int barCount: options.barCount
 
         visible: root.itemVisible("cava")
         x: root.elementX("cava")
@@ -371,7 +374,10 @@ Item {
 
             anchors.centerIn: parent
             height: Math.max(1, parent.height - 10)
-            heights: root.cava.heights
+            frame: root.cava.heights
+            barCount: cavaElement.barCount
+            barWidth: cavaElement.options.barWidth
+            colorName: cavaElement.options.color
         }
     }
 

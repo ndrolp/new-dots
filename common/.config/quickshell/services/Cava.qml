@@ -9,8 +9,9 @@ import "CavaOutput.js" as CavaOutput
 QtObject {
     id: root
 
-    // How many bars cava computes.
-    readonly property int barCount: 12
+    // How many bars cava computes: the most any drawn Cava bar element asks
+    // for (its `barCount`); each resamples the frame down to its own.
+    readonly property int barCount: CavaOutput.sharedBarCount(drawers.map(drawer => drawer.barCount))
     // The latest frame, one height from 0 to 1 per bar; flat while cava
     // isn't running.
     property var heights: CavaOutput.flatHeights(barCount)
@@ -25,7 +26,8 @@ QtObject {
         drawers = drawing ? others.concat([drawer]) : others;
     }
 
-    function followDefaultOutput() {
+    // A planned restart, so cava follows a new default output or bar count.
+    function restart() {
         if (!cava.running)
             return;
         restarting = true;
@@ -33,12 +35,13 @@ QtObject {
     }
 
     onWantedChanged: cava.running = wanted
+    onBarCountChanged: restart()
 
     property var defaultOutputWatcher: Connections {
         target: Pipewire
 
         function onDefaultAudioSinkChanged() {
-            root.followDefaultOutput();
+            root.restart();
         }
     }
 

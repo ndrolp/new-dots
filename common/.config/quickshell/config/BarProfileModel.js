@@ -41,9 +41,34 @@ const elementOptionDefaults = {
     },
     "notifications": { badgeVisible: true },
     "media": { titleVisible: true },
+    // `color` names one of the theme's colors, so it follows the theme.
+    "cava": { barCount: 12, barWidth: 3, color: "blue" },
     "audio": { meterVisible: true },
     "battery": { percentageVisible: true }
 };
+
+// What the options that can't take any value accept: a number's range
+// ({ from, to }) or a choice's values ({ choices }). A stored value outside
+// them is clamped, or falls back to the default.
+const elementOptionLimits = {
+    "cava": {
+        barCount: { from: 6, to: 32 },
+        barWidth: { from: 1, to: 8 },
+        color: { choices: ["accent", "blue", "green", "yellow", "orange", "red", "purple", "text"] }
+    }
+};
+
+function limitedOption(id, option, value, fallback) {
+    const limit = (elementOptionLimits[id] || {})[option];
+
+    if (!limit)
+        return value;
+    if (limit.choices)
+        return limit.choices.indexOf(value) !== -1 ? value : fallback;
+    if (typeof value !== "number" || isNaN(value))
+        return fallback;
+    return Math.max(limit.from, Math.min(limit.to, Math.round(value)));
+}
 
 // Bar elements with every element listed in its default zone and order,
 // enabled unless listed in `disabledIds` or disabledElementIds, with `options` ({ id: options })
@@ -501,7 +526,7 @@ function setElementJoined(barElements, id, joined) {
 }
 
 // The options of element `id`, completed with their defaults ({} for an
-// element without options), as a fresh object.
+// element without options) and kept within their limits, as a fresh object.
 function elementOptions(barElements, id) {
     const found = findElement(barElements || {}, id);
     const stored = found ? barElements[found.zone][found.index].options || {} : {};
@@ -509,7 +534,7 @@ function elementOptions(barElements, id) {
 
     for (const option in options) {
         if (stored[option] !== undefined)
-            options[option] = cloneValue(stored[option]);
+            options[option] = limitedOption(id, option, cloneValue(stored[option]), options[option]);
     }
 
     return options;

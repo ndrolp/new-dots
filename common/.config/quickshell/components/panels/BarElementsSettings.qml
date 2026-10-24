@@ -1,6 +1,7 @@
 import QtQuick
 import "." as Panels
 import "../../config" as Config
+import "../../config/BarProfileModel.js" as BarProfileModel
 
 // The Bar section's bar elements list: every bar element of the edited bar
 // profile, zone by zone, in full width rows that stay transparent until
@@ -39,6 +40,8 @@ Column {
         return labels[element] || element;
     }
 
+    readonly property var cavaLimits: BarProfileModel.elementOptionLimits.cava
+
     // Element options, shown under the element they belong to. An option is
     // a switch, a number ({ kind: "number", from, to }) or a choice
     // ({ kind: "choice", choices: [{ label, value }] }).
@@ -49,6 +52,12 @@ Column {
         ],
         "notifications": [{ label: "Show unread badge", option: "badgeVisible" }],
         "media": [{ label: "Show track title", option: "titleVisible" }],
+        "cava": [
+            Object.assign({ label: "Bars", option: "barCount", kind: "number" }, cavaLimits.barCount),
+            Object.assign({ label: "Bar width", option: "barWidth", kind: "number" }, cavaLimits.barWidth),
+            { label: "Color", option: "color", kind: "choice", choices: cavaLimits.color.choices.map(
+                name => ({ label: name.charAt(0).toUpperCase() + name.slice(1), value: name })) }
+        ],
         "audio": [{ label: "Show volume meter", option: "meterVisible" }],
         "battery": [{ label: "Show percentage", option: "percentageVisible" }]
     })
