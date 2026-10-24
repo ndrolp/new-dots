@@ -120,23 +120,14 @@ Column {
                     width: root.width
                     spacing: 2
 
-                    Rectangle {
+                    Panels.SettingsRow {
                         id: elementRow
 
                         readonly property string elementLabel: root.labelFor(elementDelegate.element)
 
                         width: parent.width
                         height: 40
-                        radius: root.appearance.radius
-                        color: rowHover.hovered ? theme.surfaceHover : "transparent"
-
-                        Behavior on color {
-                            ColorAnimation { duration: 140 }
-                        }
-
-                        HoverHandler {
-                            id: rowHover
-                        }
+                        appearance: root.appearance
 
                         Row {
                             anchors.left: parent.left

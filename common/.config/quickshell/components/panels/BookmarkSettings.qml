@@ -15,10 +15,10 @@ Column {
         id: theme
     }
 
-    // A bookmark or search engine: a full-width row, transparent until
-    // hovered. Its glyph and name share the first line with the row's
-    // actions; the link, which runs long, has the second line to itself.
-    component LinkRow: Rectangle {
+    // A bookmark or search engine: a settings row. Its glyph and name share
+    // the first line with the row's actions; the link, which runs long, has
+    // the second line to itself.
+    component LinkRow: Panels.SettingsRow {
         id: row
 
         required property string rowKind
@@ -37,16 +37,7 @@ Column {
 
         width: parent ? parent.width : 0
         height: rowContent.implicitHeight + 16
-        radius: root.appearance.radius
-        color: rowHover.hovered ? theme.surfaceHover : "transparent"
-
-        Behavior on color {
-            ColorAnimation { duration: 140 }
-        }
-
-        HoverHandler {
-            id: rowHover
-        }
+        appearance: root.appearance
 
         Column {
             id: rowContent

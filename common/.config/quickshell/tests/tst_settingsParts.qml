@@ -58,6 +58,20 @@ TestCase {
     }
 
     Component {
+        id: row
+
+        Panels.SettingsRow {
+            width: 260
+            height: 44
+
+            Panels.SettingsLabel {
+                appearance: barAppearance
+                text: "Bar"
+            }
+        }
+    }
+
+    Component {
         id: switchRow
 
         Panels.SettingsSwitchRow {
@@ -216,6 +230,26 @@ TestCase {
         compare(item.font.pixelSize, 12);
         compare(item.color, theme.textMuted);
         verify(!item.font.bold);
+    }
+
+    // A list row is full width and transparent until hovered, with the
+    // settings' corner radius; what it shows is up to its owner.
+    function test_aRowIsTransparentAtRestAndShowsItsContent() {
+        const item = make(row);
+
+        compare(item.color, Qt.rgba(0, 0, 0, 0));
+        compare(item.radius, 12);
+        verify(!item.hovered);
+        verify(textOf(item, "Bar"));
+    }
+
+    // A switch row is a row like any other: its label on the left and a
+    // switch on the right.
+    function test_aSwitchRowIsARow() {
+        const item = make(switchRow);
+
+        compare(item.radius, 12);
+        verify(item.hovered !== undefined);
     }
 
     // A switch row is transparent until hovered, its label on the left and a

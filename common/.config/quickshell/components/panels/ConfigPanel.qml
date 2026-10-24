@@ -183,7 +183,8 @@ Rectangle {
                 Repeater {
                     model: root.filteredSections
 
-                    delegate: Rectangle {
+                    // The selected section shows in the accent text; only hover fills a row.
+                    delegate: SettingsRow {
                         id: sectionRow
 
                         required property var modelData
@@ -191,17 +192,7 @@ Rectangle {
 
                         width: parent.width
                         height: 44
-                        radius: root.appearance.radius
-                        // The selected section shows in the accent text; only hover fills a row.
-                        color: sectionHover.hovered ? theme.surfaceHover : "transparent"
-
-                        Behavior on color {
-                            ColorAnimation { duration: 140 }
-                        }
-
-                        HoverHandler {
-                            id: sectionHover
-                        }
+                        appearance: root.appearance
 
                         Row {
                             anchors.fill: parent
