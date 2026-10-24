@@ -7,7 +7,15 @@
                 "center": [
                     {
                         "enabled": true,
-                        "id": "arch"
+                        "id": "media",
+                        "options": {
+                            "titleVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "arch",
+                        "joinPrevious": true
                     },
                     {
                         "enabled": false,
@@ -52,20 +60,17 @@
                         }
                     },
                     {
-                        "enabled": false,
-                        "id": "media",
-                        "joinPrevious": true,
-                        "options": {
-                            "titleVisible": true
-                        }
-                    },
-                    {
                         "enabled": true,
                         "id": "audio",
                         "joinPrevious": true,
                         "options": {
-                            "meterVisible": true
+                            "meterVisible": false
                         }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "bluetooth",
+                        "joinPrevious": true
                     },
                     {
                         "enabled": true,
@@ -99,12 +104,7 @@
                         "joinPrevious": true
                     },
                     {
-                        "enabled": false,
-                        "id": "bluetooth",
-                        "joinPrevious": true
-                    },
-                    {
-                        "enabled": false,
+                        "enabled": true,
                         "id": "tray",
                         "joinPrevious": true
                     }
@@ -117,12 +117,12 @@
             "barHeight": 30,
             "barOpacity": 90,
             "barTransparent": true,
-            "barTransparentBorder": true,
+            "barTransparentBorder": false,
             "elementVerticalPadding": 8,
             "groupRadius": 12,
             "horizontalPadding": 8,
             "pillVerticalPadding": 2,
-            "pillsTransparent": true,
+            "pillsTransparent": false,
             "radius": 20,
             "spacing": 4,
             "textSize": 13,
@@ -175,14 +175,14 @@
                     },
                     {
                         "enabled": true,
+                        "id": "systemMonitor"
+                    },
+                    {
+                        "enabled": true,
                         "id": "currentApp"
                     }
                 ],
                 "right": [
-                    {
-                        "enabled": false,
-                        "id": "systemMonitor"
-                    },
                     {
                         "enabled": true,
                         "id": "media",
@@ -196,6 +196,10 @@
                         "options": {
                             "meterVisible": true
                         }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "bluetooth"
                     },
                     {
                         "enabled": true,
@@ -225,16 +229,12 @@
                     },
                     {
                         "enabled": true,
-                        "id": "bluetooth"
-                    },
-                    {
-                        "enabled": true,
                         "id": "tray"
                     }
                 ]
             },
             "barHeight": 30,
-            "barOpacity": 90,
+            "barOpacity": 85,
             "barTransparent": false,
             "barTransparentBorder": false,
             "elementVerticalPadding": 8,
