@@ -3,10 +3,10 @@
         "code"
     ],
     "recent": [
+        "com.microsoft.VSCode",
+        "org.gnome.Nautilus",
         "blueman-manager",
         "com.obsproject.Studio",
-        "org.gnome.Nautilus",
-        "org.kde.plasma.emojier",
-        "com.github.th-ch.youtube-music"
+        "org.kde.plasma.emojier"
     ]
 }

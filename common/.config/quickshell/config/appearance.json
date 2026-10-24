@@ -127,7 +127,7 @@
             "spacing": 4,
             "textSize": 13,
             "transparentBarSlanted": false,
-            "transparentBarTopMargin": 7,
+            "transparentBarTopMargin": 10,
             "workspaceButtonSize": 18,
             "workspacePadding": 3
         },
@@ -494,7 +494,7 @@
             "spacing": 4,
             "textSize": 13,
             "transparentBarSlanted": false,
-            "transparentBarTopMargin": 7,
+            "transparentBarTopMargin": 10,
             "workspaceButtonSize": 18,
             "workspacePadding": 3
         }
