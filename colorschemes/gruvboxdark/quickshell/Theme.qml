@@ -2,6 +2,7 @@ import QtQuick
 
 QtObject {
     readonly property string fontFamily: "GeistMono Nerd Font Propo"
+    readonly property int radius: 8
     // Gruvbox Dark
     readonly property color background: "#282828"
     readonly property color backgroundSecondary: "#1d2021"

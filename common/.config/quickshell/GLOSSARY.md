@@ -24,6 +24,10 @@ _Avoid_: Densidad (como ajuste guardado)
 Una pieza informativa dibujada sobre el fondo de un monitor (media, calendario, tiempo, red, sistema, reloj de fondo). Se configura por monitor, fuera de los bar profiles.
 _Avoid_: Widget (a secas, para cosas de la barra)
 
+**Wallpaper selector** (selector de fondos):
+La vista a pantalla completa que se abre sobre el monitor enfocado para elegir el fondo de ese monitor. La lista de fondos dentro de los ajustes no es un wallpaper selector, sino parte de la sección Wallpapers del panel de ajustes.
+_Avoid_: Wallpaper picker, carrusel
+
 **System monitor**:
 El bar element que muestra el uso de CPU y memoria. No confundir con el desktop widget *System*.
 _Avoid_: System (para el elemento de la barra)
