@@ -79,6 +79,24 @@ TestCase {
         }
     }
 
+    Component {
+        id: number
+
+        Panels.SettingsNumber {
+            width: 280
+            label: "Bar height"
+            from: 24
+            to: 56
+            value: 32
+        }
+    }
+
+    SignalSpy {
+        id: editedSpy
+
+        signalName: "edited"
+    }
+
     // The text item showing `text` inside `item`.
     function textOf(item, text) {
         if (item.text === text)
@@ -195,5 +213,73 @@ TestCase {
         compare(textOf(item, "Compact").color, theme.text);
         compare(textOf(item, "Balanced").color, theme.text);
         compare(textOf(item, "Spacious").color, theme.text);
+    }
+
+    // A number setting is its label on top, then the slider and a small
+    // number field side by side on one line.
+    function test_aNumberSettingHasItsLabelOverASliderAndASmallField() {
+        const item = make(number);
+        const numberLabel = textOf(item, "Bar height");
+
+        compare(numberLabel.color, theme.text);
+        compare(item.field.width, 56);
+        compare(item.field.text, "32");
+        compare(item.field.x + item.field.width, 280);
+        verify(item.slider.width > 150);
+        verify(item.slider.x + item.slider.width < item.field.x);
+        verify(item.slider.mapToItem(item, 0, 0).y >= numberLabel.y + numberLabel.height);
+        compare(item.slider.y + item.slider.height / 2, item.field.y + item.field.height / 2);
+        compare(item.slider.value, 32);
+    }
+
+    function test_typingANumberInRangeSavesIt() {
+        const item = make(number);
+        editedSpy.target = item;
+        editedSpy.clear();
+
+        item.field.forceActiveFocus();
+        item.field.selectAll();
+        keyClick("4");
+        keyClick("0");
+        keyClick(Qt.Key_Return);
+
+        compare(editedSpy.count, 1);
+        compare(editedSpy.signalArguments[0][0], 40);
+    }
+
+    function test_aNumberOutOfRangeIsRejected() {
+        const item = make(number);
+        editedSpy.target = item;
+        editedSpy.clear();
+
+        item.field.forceActiveFocus();
+        item.field.selectAll();
+        keyClick("9");
+        keyClick("9");
+        keyClick(Qt.Key_Return);
+
+        compare(editedSpy.count, 0);
+    }
+
+    function test_movingTheSliderSavesTheNumber() {
+        const item = make(number);
+        editedSpy.target = item;
+        editedSpy.clear();
+
+        item.slider.forceActiveFocus();
+        keyClick(Qt.Key_Right);
+
+        compare(editedSpy.count, 1);
+        compare(editedSpy.signalArguments[0][0], 33);
+    }
+
+    // Whoever owns the setting saves it and sets `value`; both controls follow.
+    function test_aNewValueShowsInBothControls() {
+        const item = make(number);
+
+        item.value = 48;
+
+        compare(item.field.text, "48");
+        compare(item.slider.value, 48);
     }
 }
