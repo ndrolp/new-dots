@@ -5,6 +5,7 @@ import Quickshell.Wayland
 import QtQuick
 import "../../config" as Config
 import "." as Panels
+import "AudioOutputs.js" as AudioOutputs
 
 Variants {
     id: root
@@ -193,7 +194,7 @@ Variants {
                             anchors.right: activeMark.left
                             anchors.rightMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
-                            text: sinkTile.sink.description || sinkTile.sink.name
+                            text: AudioOutputs.label(sinkTile.sink)
                             color: sinkTile.active ? theme.accent : theme.text
                             elide: Text.ElideRight
                             font.pixelSize: root.appearance.textSize
