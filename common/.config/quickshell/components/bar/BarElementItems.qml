@@ -289,7 +289,7 @@ Item {
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
