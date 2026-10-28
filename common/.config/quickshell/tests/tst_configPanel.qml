@@ -58,6 +58,12 @@ TestCase {
         verify(textOf(item, "Settings"));
     }
 
+    function test_searchingForAnimationsFindsTheMotionSection() {
+        const item = createTemporaryObject(panel, this, { sectionQuery: "animation" });
+
+        compare(item.filteredSections.map(section => section.label), ["Motion"]);
+    }
+
     // A search that matches no section says so as a hint, like the hints in
     // the sections.
     function test_aSearchMatchingNothingSaysSoAsAHint() {

@@ -251,6 +251,12 @@ TestCase {
         verify(!all(cava, child => child.checked !== undefined && child.toggled === undefined)[0].checked);
     }
 
+    function test_theRecordingIndicatorIsListedByItsName() {
+        const built = make();
+
+        verify(elementRow(built.item, "Recording indicator"));
+    }
+
     function enableCava(appearance) {
         appearance.barElements = Object.assign({}, appearance.barElements, {
             right: appearance.barElements.right.map(element => element.id === "cava"

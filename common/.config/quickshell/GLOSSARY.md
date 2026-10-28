@@ -36,6 +36,10 @@ _Avoid_: System (para el elemento de la barra)
 El bar element que dibuja lo que suena por la audio output actual como barras de frecuencia que se mueven con lo que suena. Se oculta mientras no suena nada y vuelve a aparecer en cuanto hay sonido. No confundir con el bar element *audio*, que muestra y cambia el volumen.
 _Avoid_: Visualizer, waveform, espectro
 
+**Recording indicator** (indicador de grabación):
+El bar element que aparece solo mientras se graba la pantalla y muestra cuánto tiempo lleva la grabación. Al pulsarlo se para la grabación de la propia shell (la que se inicia desde la captura de pantalla con `wf-recorder`), igual que la tecla para pararla.
+_Avoid_: REC, botón de grabación, screen recording (para el elemento de la barra)
+
 **Popup**:
 La ventana pequeña que se despliega desde un bar element al pulsarlo (Bluetooth, red, batería, audio, media…). Pertenece a ese bar element y se cierra al perder el foco.
 Con la barra opaca un popup va **anclado** (attached): sale de la barra como si fuera parte de ella. Con la barra transparente va **flotante** (floating), separado de la barra.
@@ -64,3 +68,7 @@ _Avoid_: Página, pestaña, tab
 **Lock screen** (pantalla de bloqueo):
 Lo que cubre todos los monitores mientras la sesión está bloqueada: el tema, el reloj y la fecha en cada monitor, y el campo de contraseña solo en el monitor enfocado. La dibuja la shell; `hyprlock` queda solo como bloqueo de emergencia (`SUPER+CTRL+ALT+L`) por si la shell falla.
 _Avoid_: Lockscreen, hyprlock (para la de la shell), pantalla de login
+
+**Reduce motion** (reducir movimiento):
+El ajuste global de la sección Motion del settings panel que hace instantáneas las animaciones de la shell: los cambios ocurren igual, pero sin transición. No forma parte de ningún bar profile y se aplica en cuanto se activa.
+_Avoid_: Disable animations, sin animaciones, modo rápido
