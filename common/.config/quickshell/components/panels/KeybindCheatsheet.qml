@@ -30,12 +30,13 @@ Variants {
             && Hyprland.focusedWorkspace.monitor.name === monitor.name
         property string searchQuery: ""
         property var groups: []
+        // Qt's JS engine has no Array.prototype.flatMap.
         readonly property var rows: KeybindCheatsheet.filter(groups, searchQuery)
-            .flatMap(group => group.entries.map(entry => ({
+            .reduce((rows, group) => rows.concat(group.entries.map(entry => ({
                 modifiers: group.modifiers,
                 keys: entry.keys,
                 description: entry.description
-            })))
+            }))), [])
 
         screen: modelData
         visible: root.open && focusedMonitor
