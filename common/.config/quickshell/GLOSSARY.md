@@ -36,6 +36,10 @@ _Avoid_: System (para el elemento de la barra)
 El bar element que dibuja lo que suena por la audio output actual como barras de frecuencia que se mueven con lo que suena. Se oculta mientras no suena nada y vuelve a aparecer en cuanto hay sonido. No confundir con el bar element *audio*, que muestra y cambia el volumen.
 _Avoid_: Visualizer, waveform, espectro
 
+**Recording indicator** (indicador de grabación):
+El bar element que aparece solo mientras se graba la pantalla y muestra cuánto tiempo lleva la grabación. Al pulsarlo se para la grabación de la propia shell (la que se inicia desde la captura de pantalla con `wf-recorder`), igual que la tecla para pararla.
+_Avoid_: REC, botón de grabación, screen recording (para el elemento de la barra)
+
 **Popup**:
 La ventana pequeña que se despliega desde un bar element al pulsarlo (Bluetooth, red, batería, audio, media…). Pertenece a ese bar element y se cierra al perder el foco.
 Con la barra opaca un popup va **anclado** (attached): sale de la barra como si fuera parte de ella. Con la barra transparente va **flotante** (floating), separado de la barra.
@@ -72,3 +76,7 @@ _Avoid_: Prefijo (para el modo en sí), filtro
 **Calculator** (calculadora):
 El resultado de la unified search que da la respuesta de `qalc`. Sale el primero cuando la búsqueda parece una cuenta o una conversión de unidades (`2*(3+4)`, `5 km to mi`, `20% of 80`), y siempre tras `=`. Enter copia la respuesta.
 _Avoid_: Calc, qalc (para el resultado)
+
+**Reduce motion** (reducir movimiento):
+El ajuste global de la sección Motion del settings panel que hace instantáneas las animaciones de la shell: los cambios ocurren igual, pero sin transición. No forma parte de ningún bar profile y se aplica en cuanto se activa.
+_Avoid_: Disable animations, sin animaciones, modo rápido

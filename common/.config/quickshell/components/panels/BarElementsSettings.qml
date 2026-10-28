@@ -27,7 +27,7 @@ Column {
             "currentApp": "Current app",
             "workspaces": "Workspaces",
             "notifications": "Notifications",
-            "recording": "Screen recording",
+            "recording": "Recording indicator",
             "media": "Media",
             "cava": "Cava",
             "audio": "Audio",

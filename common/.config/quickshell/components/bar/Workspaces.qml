@@ -30,14 +30,14 @@ Rectangle {
 
     Behavior on color {
         ColorAnimation {
-            duration: 140
+            duration: root.appearance.motion.short
         }
     }
 
     Behavior on width {
         NumberAnimation {
-            duration: 180
-            easing.type: Easing.OutCubic
+            duration: root.appearance.motion.medium
+            easing.type: root.appearance.motionEasing
         }
     }
 
@@ -50,8 +50,8 @@ Rectangle {
         move: Transition {
             NumberAnimation {
                 properties: "x"
-                duration: 180
-                easing.type: Easing.OutCubic
+                duration: root.appearance.motion.medium
+                easing.type: root.appearance.motionEasing
             }
         }
 
@@ -96,21 +96,21 @@ Rectangle {
 
                 Behavior on width {
                     NumberAnimation {
-                        duration: 180
-                        easing.type: Easing.OutCubic
+                        duration: root.appearance.motion.medium
+                        easing.type: root.appearance.motionEasing
                     }
                 }
 
                 Behavior on x {
                     NumberAnimation {
-                        duration: 180
-                        easing.type: Easing.OutCubic
+                        duration: root.appearance.motion.medium
+                        easing.type: root.appearance.motionEasing
                     }
                 }
 
                 Behavior on color {
                     ColorAnimation {
-                        duration: 140
+                        duration: root.appearance.motion.short
                     }
                 }
 
@@ -126,7 +126,7 @@ Rectangle {
 
                     Behavior on color {
                         ColorAnimation {
-                            duration: 80
+                            duration: root.appearance.motion.brief
                         }
                     }
 
@@ -168,7 +168,7 @@ Rectangle {
 
                     Behavior on opacity {
                         NumberAnimation {
-                            duration: 140
+                            duration: root.appearance.motion.short
                         }
                     }
 
