@@ -185,8 +185,8 @@ ShellRoot {
         appearance: appearance
     }
 
-    Modules.AudioSinkSelector {
-        id: audioSinkSelector
+    Modules.AudioOutputSelector {
+        id: audioOutputSelector
 
         appearance: appearance
         osd: osd
@@ -228,7 +228,7 @@ ShellRoot {
         keepAwake: keepAwake
         nightLight: nightLight
         plugins: plugins
-        audioSinkSelector: audioSinkSelector
+        audioOutputSelector: audioOutputSelector
         clipboardSelector: clipboardSelector
         powerMenu: powerMenu
         screenCaptureChooser: screenCaptureChooser
@@ -238,7 +238,7 @@ ShellRoot {
         appearance: appearance
         plugins: plugins
         barProfiles: barProfiles
-        audioSinkSelector: audioSinkSelector
+        audioOutputSelector: audioOutputSelector
         controlCenter: controlCenter
         settings: settings
         themeSelector: themeSelector

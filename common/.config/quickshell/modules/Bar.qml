@@ -56,8 +56,8 @@ Scope {
             root.openPopup = OpenPopup.closed(root.openPopup, popup, panelWindow);
         }
 
-        onAudioSinkSelected: function(sink) {
-            root.osd.showAudioSink(sink);
+        onAudioOutputSelected: function(output) {
+            root.osd.showAudioOutput(output);
         }
 
         onNotificationRequested: function(panelWindow) {

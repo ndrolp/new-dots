@@ -52,7 +52,7 @@ BarPopup {
                 height: outputName.rowHeight
 
                 Panels.Text {
-                    id: sinkIconLabel
+                    id: outputIconLabel
 
                     anchors.left: parent.left
                     anchors.leftMargin: 8
@@ -67,7 +67,7 @@ BarPopup {
                 Panels.AudioOutputName {
                     id: outputName
 
-                    anchors.left: sinkIconLabel.right
+                    anchors.left: outputIconLabel.right
                     anchors.leftMargin: 10
                     anchors.right: parent.right
                     anchors.rightMargin: 8
@@ -81,7 +81,7 @@ BarPopup {
                 TapHandler {
                     onTapped: {
                         Pipewire.preferredDefaultAudioSink = modelData;
-                        root.popups.audioSinkSelected(modelData);
+                        root.popups.audioOutputSelected(modelData);
                         root.popups.popupClosed("audio");
                     }
                 }

@@ -11,7 +11,7 @@ adding or editing one file here.
   `switchTo(other)` closes one part and opens another, the way a control
   center button opens the power menu. A module that opens other parts gets
   them as properties (`ControlCenter`, `QuickSettings`, `UnifiedSearch`).
-- One module per panel: `ApplicationLauncher`, `AudioSinkSelector`,
+- One module per panel: `ApplicationLauncher`, `AudioOutputSelector`,
   `ClipboardSelector`, `CommandLauncher`, `ControlCenter`, `KeybindCheatsheet`,
   `PowerMenu`, `QuickSearch`, `QuickSettings`, `ScreenCapture` (the chooser),
   `Settings`, `ThemeSelector`, `UnifiedSearch`, `WallpaperSelector`,

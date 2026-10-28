@@ -13,7 +13,7 @@ Item {
     // The bar content; places popups under the bar element that opened them.
     property var popupAnchorProvider: null
     signal popupClosed(string popup)
-    signal audioSinkSelected(var sink)
+    signal audioOutputSelected(var output)
 
     SystemPopup {
         popups: root

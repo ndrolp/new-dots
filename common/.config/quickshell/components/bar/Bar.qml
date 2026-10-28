@@ -25,7 +25,7 @@ Variants {
     signal panelReady(var screen, var panelWindow)
     signal popupRequested(string popup, var panelWindow)
     signal popupClosed(string popup, var panelWindow)
-    signal audioSinkSelected(var sink)
+    signal audioOutputSelected(var output)
     signal notificationRequested(var panelWindow)
 
     model: Quickshell.screens
@@ -176,8 +176,8 @@ Variants {
                     bar.popupClosed(popup, panel);
                 }
 
-                onAudioSinkSelected: function(sink) {
-                    bar.audioSinkSelected(sink);
+                onAudioOutputSelected: function(output) {
+                    bar.audioOutputSelected(output);
                 }
             }
 

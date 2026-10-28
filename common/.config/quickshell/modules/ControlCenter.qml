@@ -15,7 +15,7 @@ Feature {
     required property var nightLight
     required property var plugins
     // The features its buttons open.
-    required property var audioSinkSelector
+    required property var audioOutputSelector
     required property var clipboardSelector
     required property var powerMenu
     required property var screenCaptureChooser
@@ -35,7 +35,7 @@ Feature {
 
         onCloseRequested: root.open = false
         // Audio outputs open over the control center, which stays open.
-        onAudioSinksRequested: root.audioSinkSelector.open = true
+        onAudioSinksRequested: root.audioOutputSelector.open = true
         onClipboardRequested: root.switchTo(root.clipboardSelector)
         onPowerMenuRequested: root.switchTo(root.powerMenu)
         onScreenCaptureRequested: root.switchTo(root.screenCaptureChooser)

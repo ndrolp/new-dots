@@ -9,7 +9,7 @@ Feature {
     required property var plugins
     required property var barProfiles
     // The features its buttons open.
-    required property var audioSinkSelector
+    required property var audioOutputSelector
     required property var controlCenter
     required property var settings
     required property var themeSelector
@@ -23,7 +23,7 @@ Feature {
         open: root.open && root.available
 
         onCloseRequested: root.open = false
-        onAudioSinksRequested: root.switchTo(root.audioSinkSelector)
+        onAudioSinksRequested: root.switchTo(root.audioOutputSelector)
         onControlCenterRequested: root.switchTo(root.controlCenter)
         onSettingsRequested: root.switchTo(root.settings)
         onThemeSelectorRequested: root.switchTo(root.themeSelector)

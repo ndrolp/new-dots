@@ -13,7 +13,7 @@ Feature {
         open: root.open
 
         onCloseRequested: root.open = false
-        onSinkSelected: sink => root.osd.showAudioSink(sink)
+        onSinkSelected: output => root.osd.showAudioOutput(output)
     }
 
     IpcHandler {

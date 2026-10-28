@@ -10,8 +10,8 @@ Scope {
 
     required property var appearance
 
-    function showAudioSink(sink) {
-        osdPopup.showAudioSink(sink);
+    function showAudioOutput(output) {
+        osdPopup.showAudioSink(output);
     }
 
     function showBarProfile(name) {
