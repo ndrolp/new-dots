@@ -5,12 +5,19 @@
 // Quickshell. Quickshell objects are read only through their plain
 // properties, so tests pass plain objects in their place.
 
-// A media position or length in seconds, as "m:ss".
+// A time in seconds (a media position or length, the time since a recording
+// started), as "m:ss", or "h:mm:ss" from an hour on. Part seconds are
+// dropped.
 function duration(seconds) {
-    const totalSeconds = Math.max(0, Math.floor(seconds));
-    const minutes = Math.floor(totalSeconds / 60);
-    const remainingSeconds = totalSeconds % 60;
-    return minutes + ":" + (remainingSeconds < 10 ? "0" : "") + remainingSeconds;
+    const total = Math.max(0, Math.floor(seconds));
+    const hours = Math.floor(total / 3600);
+    const minutes = Math.floor(total / 60) % 60;
+    const twoDigits = value => String(value).padStart(2, "0");
+    const rest = twoDigits(total % 60);
+
+    return hours > 0
+        ? hours + ":" + twoDigits(minutes) + ":" + rest
+        : minutes + ":" + rest;
 }
 
 // The icon of an audio output (a Pipewire sink), guessed from its description.

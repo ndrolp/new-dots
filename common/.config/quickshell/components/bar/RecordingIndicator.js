@@ -1,4 +1,5 @@
 .pragma library
+.import "../StatusText.js" as StatusText
 
 // The recording indicator bar element: pure logic, no Quickshell.
 // What is recording is a list of recordings, each started at `startedAt` (ms
@@ -90,19 +91,5 @@ function elapsedSince(recordings, now) {
         return "";
 
     const startedAt = Math.min(...recordings.map(recording => recording.startedAt));
-    return elapsedText((now - startedAt) / 1000);
-}
-
-// The time since a recording started, as m:ss or h:mm:ss. Part seconds are
-// dropped.
-function elapsedText(seconds) {
-    const total = Math.max(0, Math.floor(seconds));
-    const hours = Math.floor(total / 3600);
-    const minutes = Math.floor(total / 60) % 60;
-    const twoDigits = value => String(value).padStart(2, "0");
-    const rest = twoDigits(total % 60);
-
-    return hours > 0
-        ? hours + ":" + twoDigits(minutes) + ":" + rest
-        : minutes + ":" + rest;
+    return StatusText.duration((now - startedAt) / 1000);
 }

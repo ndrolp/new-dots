@@ -18,6 +18,11 @@ TestCase {
         compare(StatusText.duration(-3), "0:00");
     }
 
+    function test_anHourOrMoreAddsHours() {
+        compare(StatusText.duration(3600), "1:00:00");
+        compare(StatusText.duration(3723), "1:02:03");
+    }
+
     function test_audioOutputIconFollowsItsDescription() {
         compare(StatusText.audioOutputIcon({ description: "USB Headset Analog Stereo" }), "󰋋");
         compare(StatusText.audioOutputIcon({ description: "Headphones" }), "󰋋");
