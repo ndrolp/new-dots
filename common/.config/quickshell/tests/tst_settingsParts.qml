@@ -2,6 +2,7 @@ import QtQuick
 import QtTest
 import "../components/panels" as Panels
 import "../config" as Config
+import "../config/Motion.js" as Motion
 
 // The parts every section of the settings panel is built from. They share the
 // popups' minimal look (transparent, hairline borders, accent for focus and
@@ -23,6 +24,18 @@ TestCase {
 
         property int radius: 12
         property int textSize: 13
+        readonly property var motion: Motion.durations(false)
+        readonly property int motionEasing: Easing.OutCubic
+    }
+
+    // The same settings with reduce motion on.
+    QtObject {
+        id: reducedAppearance
+
+        property int radius: 12
+        property int textSize: 13
+        readonly property var motion: Motion.durations(true)
+        readonly property int motionEasing: Easing.OutCubic
     }
 
     Component {
@@ -289,6 +302,33 @@ TestCase {
         const item = make(switchRow, { checked: true });
 
         tryCompare(item.switchItem, "color", theme.accent, 500);
+    }
+
+    // Turning a switch on eases its fill and knob over, unless reduce motion
+    // is on: then the switch is on at once.
+    function test_turningASwitchOnEasesItOver() {
+        const item = make(switchRow);
+
+        item.checked = true;
+        verify(!Qt.colorEqual(item.switchItem.color, theme.accent));
+        tryCompare(item.switchItem, "color", theme.accent, 500);
+    }
+
+    function test_withReduceMotionASwitchIsOnAtOnce() {
+        const item = make(switchRow, { appearance: reducedAppearance });
+        const knob = item.switchItem.children[0];
+
+        item.checked = true;
+        compare(item.switchItem.color, theme.accent);
+        compare(knob.x, item.switchItem.width - knob.width - 3);
+    }
+
+    function test_withReduceMotionTheChosenOptionIsMarkedAtOnce() {
+        const item = make(choice, { appearance: reducedAppearance, value: "compact" });
+
+        item.value = "balanced";
+        compare(textOf(item, "Balanced").parent.color, theme.surfaceHover);
+        compare(textOf(item, "Compact").parent.color, Qt.rgba(0, 0, 0, 0));
     }
 
     // A segmented choice is one hairline-bordered control split evenly

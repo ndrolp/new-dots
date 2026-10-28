@@ -5,6 +5,7 @@ import Quickshell.Wayland
 import QtQuick
 import QtQuick.Controls
 import "../../config" as Config
+import "SearchQuery.js" as SearchQuery
 
 Variants {
     id: root
@@ -18,6 +19,7 @@ Variants {
 
     signal closeRequested()
     signal settingsRequested()
+    signal keybindCheatsheetRequested()
 
     model: Quickshell.screens
 
@@ -30,6 +32,12 @@ Variants {
             && Hyprland.focusedWorkspace.monitor && monitor
             && Hyprland.focusedWorkspace.monitor.name === monitor.name
         property string searchQuery: ""
+        readonly property var queryMode: SearchQuery.mode(searchQuery)
+        // The calculator: what the query asks qalc, and qalc's latest answer
+        // with the expression it answered, so a stale answer is never shown.
+        readonly property string calculation: SearchQuery.calculation(searchQuery)
+        property string calculationAnswer: ""
+        property string calculationAnswered: ""
         readonly property var categories: [
             "ALL", "APPLICATIONS", "BOOKMARKS", "CLIPBOARD", "WINDOWS", "ACTIONS"
         ]
@@ -65,6 +73,36 @@ Variants {
 
         Process {
             id: actionProcess
+        }
+
+        // One qalc at a time: a query typed while it runs is asked when it exits.
+        Process {
+            id: calculator
+
+            property string expression: ""
+            property var lines: []
+
+            stdout: SplitParser {
+                onRead: data => calculator.lines = calculator.lines.concat([data])
+            }
+
+            onExited: exitCode => {
+                searchPanel.calculationAnswer = SearchQuery.answer(calculator.lines, exitCode);
+                searchPanel.calculationAnswered = calculator.expression;
+                searchPanel.calculate();
+            }
+        }
+
+        onCalculationChanged: calculate()
+
+        function calculate() {
+            if (calculator.running || calculation === "" || calculation === calculationAnswered)
+                return;
+
+            calculator.expression = calculation;
+            calculator.lines = [];
+            calculator.command = SearchQuery.qalcCommand(calculation);
+            calculator.running = true;
         }
 
         function textValue(value) {
@@ -109,25 +147,15 @@ Variants {
             return template + (template.includes("?") ? "&q=" : "?q=") + encodedQuery;
         }
 
-        function queryPrefix() {
-            const first = searchQuery.trim().charAt(0);
-            return first === ">" || first === "?" || first === "@" ? first : "";
-        }
-
-        function queryText() {
-            const query = searchQuery.trim();
-            return queryPrefix() !== "" ? query.slice(1).trim() : query;
-        }
-
         function categoryAllowed(category) {
-            const prefix = queryPrefix();
+            const mode = queryMode.mode;
 
-            if (prefix === ">")
+            if (mode === "commands" || mode === "web")
                 return category === "ACTIONS";
-            if (prefix === "?")
-                return category === "ACTIONS";
-            if (prefix === "@")
+            if (mode === "windows")
                 return category === "WINDOWS";
+            if (mode === "calculator")
+                return false;
 
             return selectedCategory === "ALL" || selectedCategory === category;
         }
@@ -139,10 +167,23 @@ Variants {
         }
 
         function buildResults() {
-            const query = queryText();
+            const query = queryMode.text;
             const normalizedQuery = query.toLowerCase();
             const results = [];
             const limit = 7;
+
+            if (calculation !== "" && calculation === calculationAnswered
+                    && calculationAnswer !== ""
+                    && (selectedCategory === "ALL" || queryMode.mode === "calculator")) {
+                results.push({
+                    type: "calculation",
+                    category: "CALCULATOR",
+                    title: calculationAnswer,
+                    subtitle: calculation + "  •  Enter to copy",
+                    glyph: "󰃬",
+                    answer: calculationAnswer
+                });
+            }
             const applications = categoryAllowed("APPLICATIONS")
                 ? DesktopEntries.applications.values.map(application => {
                 if (application.noDisplay)
@@ -193,7 +234,7 @@ Variants {
                 .slice(0, limit) : [];
             results.push(...bookmarks);
 
-            if (query !== "" && categoryAllowed("ACTIONS") && queryPrefix() !== ">") {
+            if (query !== "" && categoryAllowed("ACTIONS") && queryMode.mode !== "commands") {
                 results.push({
                     type: "search",
                     category: "ACTIONS",
@@ -247,7 +288,7 @@ Variants {
                 .slice(0, limit) : [];
             results.push(...toplevels);
 
-            if (query !== "" && categoryAllowed("ACTIONS") && queryPrefix() !== "?") {
+            if (query !== "" && categoryAllowed("ACTIONS") && queryMode.mode !== "web") {
                 results.push({
                     type: "command",
                     category: "ACTIONS",
@@ -258,7 +299,7 @@ Variants {
                 });
             }
 
-            if (categoryAllowed("ACTIONS") && queryPrefix() === "") {
+            if (categoryAllowed("ACTIONS") && queryMode.mode === "") {
                 const actionItems = [
                     {
                         type: "settings",
@@ -266,6 +307,13 @@ Variants {
                         title: "Open shell settings",
                         subtitle: "Configure appearance, displays, widgets, and status bar",
                         glyph: "󰒓"
+                    },
+                    {
+                        type: "keybinds",
+                        category: "ACTIONS",
+                        title: "Show keybind cheatsheet",
+                        subtitle: "Every key binding with what it does",
+                        glyph: "󰌌"
                     }
                 ];
                 const workspaceIds = root.workspaceService.workspacesForScreen(
@@ -346,6 +394,9 @@ Variants {
                     String(result.entry.id)
                 ];
                 actionProcess.running = true;
+            } else if (result.type === "calculation") {
+                actionProcess.command = ["wl-copy", result.answer];
+                actionProcess.running = true;
             } else if (result.type === "window") {
                 root.workspaceService.focusToplevel(result.toplevel);
             } else if (result.type === "command") {
@@ -353,6 +404,8 @@ Variants {
                 actionProcess.running = true;
             } else if (result.type === "settings") {
                 root.settingsRequested();
+            } else if (result.type === "keybinds") {
+                root.keybindCheatsheetRequested();
             } else if (result.type === "workspace") {
                 root.workspaceService.switchTo(result.workspaceId);
             } else {
@@ -412,7 +465,7 @@ Variants {
 
                     width: parent.width
                     height: 46
-                    placeholderText: "Search apps, bookmarks, clipboard, windows, or run a command"
+                    placeholderText: "Search apps, bookmarks, clipboard, windows, run a command, or calculate"
                     placeholderTextColor: Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.6)
                     color: theme.text
                     font.family: theme.fontFamily
@@ -535,7 +588,7 @@ Variants {
 
                     Text {
                         anchors.right: parent.right
-                        text: "Tab category  •  > command  •  ? web  •  @ windows"
+                        text: "Tab category  •  > command  •  ? web  •  @ windows  •  = calculate"
                         color: theme.textMuted
                         font.family: theme.fontFamily
                         font.pixelSize: root.appearance.textSize - 4
@@ -593,7 +646,7 @@ Variants {
                             border.width: resultDelegate.selected ? 1 : 0
 
                             Behavior on color {
-                                ColorAnimation { duration: 100 }
+                                ColorAnimation { duration: root.appearance.motion.brief }
                             }
 
                             HoverHandler {

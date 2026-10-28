@@ -161,15 +161,15 @@ PanelWindow {
 
         Behavior on opacity {
             NumberAnimation {
-                duration: 160
-                easing.type: Easing.OutCubic
+                duration: root.appearance.motion.medium
+                easing.type: root.appearance.motionEasing
             }
         }
 
         Behavior on transform {
             NumberAnimation {
-                duration: 160
-                easing.type: Easing.OutCubic
+                duration: root.appearance.motion.medium
+                easing.type: root.appearance.motionEasing
             }
         }
 

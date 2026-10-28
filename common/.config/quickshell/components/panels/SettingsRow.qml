@@ -13,7 +13,7 @@ Rectangle {
     color: rowHover.hovered ? theme.surfaceHover : "transparent"
 
     Behavior on color {
-        ColorAnimation { duration: 140 }
+        ColorAnimation { duration: row.appearance.motion.short }
     }
 
     Config.Theme {

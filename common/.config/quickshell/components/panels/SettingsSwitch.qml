@@ -6,6 +6,7 @@ import "../../config" as Config
 Rectangle {
     id: settingsSwitch
 
+    required property var appearance
     property bool checked: false
 
     width: 40
@@ -16,7 +17,7 @@ Rectangle {
     border.width: 1
 
     Behavior on color {
-        ColorAnimation { duration: 140 }
+        ColorAnimation { duration: settingsSwitch.appearance.motion.short }
     }
 
     Config.Theme {
@@ -33,8 +34,8 @@ Rectangle {
 
         Behavior on x {
             NumberAnimation {
-                duration: 140
-                easing.type: Easing.OutCubic
+                duration: settingsSwitch.appearance.motion.short
+                easing.type: settingsSwitch.appearance.motionEasing
             }
         }
     }

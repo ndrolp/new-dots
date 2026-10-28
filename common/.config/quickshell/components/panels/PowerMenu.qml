@@ -169,7 +169,7 @@ Variants {
                                     font.pixelSize: root.appearance.textSize + 13
 
                                     Behavior on color {
-                                        ColorAnimation { duration: 140 }
+                                        ColorAnimation { duration: root.appearance.motion.short }
                                     }
                                 }
 

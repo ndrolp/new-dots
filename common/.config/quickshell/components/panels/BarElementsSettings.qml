@@ -28,6 +28,7 @@ Column {
             "workspaces": "Workspaces",
             "notifications": "Notifications",
             "recording": "Recording indicator",
+            "keepAwake": "Keep-awake",
             "media": "Media",
             "cava": "Cava",
             "audio": "Audio",
@@ -216,6 +217,7 @@ Column {
 
                             Panels.SettingsSwitch {
                                 anchors.verticalCenter: parent.verticalCenter
+                                appearance: root.appearance
                                 checked: elementDelegate.elementOn
 
                                 TapHandler {

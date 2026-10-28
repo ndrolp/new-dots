@@ -29,6 +29,7 @@ ShellRoot {
     property bool clipboardSelectorOpen: false
     property bool quickSearchOpen: false
     property bool unifiedSearchOpen: false
+    property bool keybindCheatsheetOpen: false
     property bool audioSinkSelectorOpen: false
     property bool commandLauncherOpen: false
     property bool windowSwitcherOpen: false
@@ -205,6 +206,10 @@ ShellRoot {
         id: screenCapture
     }
 
+    Services.KeepAwake {
+        id: keepAwake
+    }
+
     NotificationServer {
         id: notificationServer
 
@@ -309,6 +314,7 @@ ShellRoot {
     }
 
     Panels.ThemeSelector {
+        appearance: appearance
         open: shell.themeSelectorOpen
 
         onCloseRequested: shell.themeSelectorOpen = false
@@ -362,6 +368,17 @@ ShellRoot {
             if (shell.configScreen === null)
                 shell.configScreen = Quickshell.screens.values[0];
         }
+        onKeybindCheatsheetRequested: {
+            shell.unifiedSearchOpen = false;
+            shell.keybindCheatsheetOpen = true;
+        }
+    }
+
+    Panels.KeybindCheatsheet {
+        appearance: appearance
+        open: shell.keybindCheatsheetOpen
+
+        onCloseRequested: shell.keybindCheatsheetOpen = false
     }
 
     Panels.AudioSinkSelector {
@@ -414,6 +431,7 @@ ShellRoot {
         clipboardHistory: clipboardHistory
         screenCapture: screenCapture
         systemMonitor: systemMonitor
+        keepAwake: keepAwake
         open: shell.controlCenterOpen && plugins.controlCenterEnabled
 
         onCloseRequested: shell.controlCenterOpen = false
@@ -686,6 +704,14 @@ ShellRoot {
     }
 
     IpcHandler {
+        target: "keybinds"
+
+        function toggle() {
+            shell.keybindCheatsheetOpen = !shell.keybindCheatsheetOpen;
+        }
+    }
+
+    IpcHandler {
         target: "bar-profiles"
 
         function minimal() {
@@ -714,6 +740,7 @@ ShellRoot {
         pomodoro: pomodoro
         notificationHistory: notificationHistory
         screenCapture: screenCapture
+        keepAwake: keepAwake
         cava: cava
         systemMonitor: systemMonitor
         workspaceService: workspaceService
