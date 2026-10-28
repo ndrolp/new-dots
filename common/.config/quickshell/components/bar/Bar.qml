@@ -9,8 +9,8 @@ Variants {
 
     required property var appearance
     property bool configOpen: false
-    property string activeStatusPopup: ""
-    property var activeStatusPopupWindow: null
+    property string activePopup: ""
+    property var activePopupWindow: null
     required property var monitors
     required property var pomodoro
     required property var notificationHistory
@@ -23,8 +23,8 @@ Variants {
 
     signal configRequested(var screen, var panelWindow)
     signal panelReady(var screen, var panelWindow)
-    signal statusPopupRequested(string popup, var panelWindow)
-    signal statusPopupClosed(string popup, var panelWindow)
+    signal popupRequested(string popup, var panelWindow)
+    signal popupClosed(string popup, var panelWindow)
     signal audioSinkSelected(var sink)
     signal notificationRequested(var panelWindow)
 
@@ -63,8 +63,8 @@ Variants {
                 property int motionEasing: bar.appearance.motionEasing
             }
             property bool configOpen: bar.configOpen
-            property string activeStatusPopup: bar.activeStatusPopupWindow === panel
-                ? bar.activeStatusPopup : ""
+            property string activePopup: bar.activePopupWindow === panel
+                ? bar.activePopup : ""
             property var monitors: bar.monitors
             property var pomodoro: bar.pomodoro
             property var notificationHistory: bar.notificationHistory
@@ -139,7 +139,7 @@ Variants {
                         ? panel.barAppearance.transparentBarTopMargin : 0
                     appearance: panel.barAppearance
                     configOpen: panel.configOpen
-                    activeStatusPopup: panel.activeStatusPopup
+                    activePopup: panel.activePopup
                     monitorScreen: panel.screen
                     monitors: panel.monitors
                     pomodoro: panel.pomodoro
@@ -156,8 +156,8 @@ Variants {
                         bar.configRequested(screen, panel);
                     }
 
-                    onStatusPopupRequested: function(popup) {
-                        bar.statusPopupRequested(popup, panel);
+                    onPopupRequested: function(popup) {
+                        bar.popupRequested(popup, panel);
                     }
 
                     onNotificationRequested: bar.notificationRequested(panel)
@@ -168,12 +168,12 @@ Variants {
                 appearance: panel.barAppearance
                 barWindow: panel
                 popupAnchorProvider: barContent
-                activePopup: panel.activeStatusPopup
+                activePopup: panel.activePopup
                 pomodoro: panel.pomodoro
                 systemMonitor: panel.systemMonitor
 
                 onPopupClosed: function(popup) {
-                    bar.statusPopupClosed(popup, panel);
+                    bar.popupClosed(popup, panel);
                 }
 
                 onAudioSinkSelected: function(sink) {

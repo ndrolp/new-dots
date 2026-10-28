@@ -9,7 +9,7 @@ Item {
 
     required property var appearance
     property bool configOpen: false
-    property string activeStatusPopup: ""
+    property string activePopup: ""
     required property var monitorScreen
     required property var monitors
     required property var pomodoro
@@ -24,7 +24,7 @@ Item {
     required property var workspaceService
 
     signal configRequested(var screen)
-    signal statusPopupRequested(string popup)
+    signal popupRequested(string popup)
     signal notificationRequested()
     readonly property var zoneNames: ["left", "center", "right"]
     readonly property real slantedPadding: appearance.barTransparent && appearance.transparentBarSlanted
@@ -274,7 +274,7 @@ Item {
         grouped: root.elementGrouped("systemMonitor")
         appearance: root.appearance
         systemMonitor: root.systemMonitor
-        onClicked: root.statusPopupRequested("system")
+        onClicked: root.popupRequested("system")
     }
 
     Workspaces {
@@ -302,7 +302,7 @@ Item {
         width: root.width
         anchors.verticalCenter: parent.verticalCenter
         appearance: root.appearance
-        activePopup: root.activeStatusPopup
+        activePopup: root.activePopup
         monitorScreen: root.monitorScreen
         pomodoro: root.pomodoro
         notificationHistory: root.notificationHistory
@@ -315,7 +315,7 @@ Item {
         elementGrouped: element => root.elementGrouped(element)
 
         onPopupRequested: function(popup) {
-            root.statusPopupRequested(popup);
+            root.popupRequested(popup);
         }
 
         onNotificationRequested: root.notificationRequested()

@@ -27,8 +27,8 @@ Scope {
     BarComponents.Bar {
         appearance: root.appearance
         configOpen: root.settings.open
-        activeStatusPopup: root.openPopup.popup
-        activeStatusPopupWindow: root.openPopup.window
+        activePopup: root.openPopup.popup
+        activePopupWindow: root.openPopup.window
         monitors: root.monitors
         pomodoro: root.pomodoro
         notificationHistory: root.notificationHistory
@@ -48,11 +48,11 @@ Scope {
             root.notifications.offerWindow(panelWindow);
         }
 
-        onStatusPopupRequested: function(popup, panelWindow) {
+        onPopupRequested: function(popup, panelWindow) {
             root.openPopup = OpenPopup.requested(root.openPopup, popup, panelWindow);
         }
 
-        onStatusPopupClosed: function(popup, panelWindow) {
+        onPopupClosed: function(popup, panelWindow) {
             root.openPopup = OpenPopup.closed(root.openPopup, popup, panelWindow);
         }
 
