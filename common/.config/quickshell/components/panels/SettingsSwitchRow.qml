@@ -30,6 +30,7 @@ Panels.SettingsRow {
         anchors.right: parent.right
         anchors.rightMargin: 12
         anchors.verticalCenter: parent.verticalCenter
+        appearance: row.appearance
         checked: row.checked
     }
 

@@ -1,6 +1,7 @@
 import QtQuick
 import QtTest
 import "../components/panels" as Panels
+import "../config/Motion.js" as Motion
 
 // The Motion section: reduce motion is a switch that makes every animation
 // instant as soon as it is turned on.
@@ -39,6 +40,8 @@ TestCase {
 
                 property int radius: 12
                 property int textSize: 13
+                readonly property var motion: Motion.durations(reduceMotion)
+                readonly property int motionEasing: Easing.OutCubic
                 property bool reduceMotion: false
             }
 

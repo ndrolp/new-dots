@@ -1,6 +1,7 @@
 import QtQuick
 import QtTest
 import "../components/panels" as Panels
+import "../config/Motion.js" as Motion
 import "../config" as Config
 
 // The Notifications section, built from the settings parts: where
@@ -49,6 +50,8 @@ TestCase {
 
                 property int radius: 12
                 property int textSize: 13
+                readonly property var motion: Motion.durations(false)
+                readonly property int motionEasing: Easing.OutCubic
                 property string notificationPopupLocation: "top-right"
             }
 

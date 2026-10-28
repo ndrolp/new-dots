@@ -308,6 +308,7 @@ ShellRoot {
     }
 
     Panels.ThemeSelector {
+        appearance: appearance
         open: shell.themeSelectorOpen
 
         onCloseRequested: shell.themeSelectorOpen = false
