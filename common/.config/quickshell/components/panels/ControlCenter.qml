@@ -27,8 +27,8 @@ Variants {
     required property var clipboardHistory
     required property var screenCapture
     required property var systemMonitor
+    required property var keepAwake
     property bool open: false
-    property bool idleInhibited: false
 
     signal closeRequested()
     signal audioSinksRequested()
@@ -328,11 +328,6 @@ Variants {
             }
         }
 
-        IdleInhibitor {
-            window: controlCenter
-            enabled: root.idleInhibited
-        }
-
         Item {
             id: keyboardFocus
 
@@ -523,11 +518,11 @@ Variants {
                     ControlTile {
                         width: tiles.tileWidth
                         appearance: controlCenter.barAppearance
-                        label: root.idleInhibited ? "Awake" : "Sleep allowed"
+                        label: root.keepAwake.on ? "Awake" : "Sleep allowed"
                         icon: "󰒲"
                         accentColor: theme.green
-                        active: root.idleInhibited
-                        onTriggered: root.idleInhibited = !root.idleInhibited
+                        active: root.keepAwake.on
+                        onTriggered: root.keepAwake.toggle()
                     }
 
                     ControlTile {

@@ -24,6 +24,15 @@ retry is decided by plain functions in `CavaOutput.js` (`drawnChanged`,
 `restartAsked`, `framePrinted`, `exited`, `retryDue`); `Cava.qml` only
 carries the decisions out, so they are tested without Quickshell.
 
+## Keep-awake
+
+`KeepAwake.qml` is the shell's one keep-awake. Its `on` is never saved, so it
+starts off on every shell start. The control center tile toggles it and the
+keep-awake bar element, shown only while it is on, turns it off. While on it
+holds an `IdleInhibitor` on a transparent, click-through 1×1 window of its own,
+because an inhibitor only counts while its window is shown and the control
+center hides its window when closed.
+
 ## Screen capture integration
 
 `ScreenCapture.qml` detects `grim`, `slurp`, `wf-recorder`, and `wayshot` at runtime.

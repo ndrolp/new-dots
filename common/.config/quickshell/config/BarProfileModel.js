@@ -20,7 +20,7 @@ const zoneNames = ["left", "center", "right"];
 // zone in defaultElementZones, the rest to the right.
 const elementIds = [
     "arch", "systemMonitor", "currentApp", "workspaces",
-    "notifications", "recording", "media", "cava", "audio", "bluetooth", "tray",
+    "notifications", "recording", "keepAwake", "media", "cava", "audio", "bluetooth", "tray",
     "network", "battery", "clock"
 ];
 const defaultElementZones = {

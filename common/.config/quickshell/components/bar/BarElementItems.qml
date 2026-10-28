@@ -8,10 +8,11 @@ import Quickshell.Services.UPower
 import QtQuick
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
+import "../StatusText.js" as StatusText
 import "RecordingIndicator.js" as RecordingIndicator
 
 // The bar elements that need no component of their own (notifications,
-// recording, media, cava, audio, bluetooth, tray, network, battery and clock),
+// recording, keep-awake, media, cava, audio, bluetooth, tray, network, battery and clock),
 // placed by the bar's single walk per zone (see BarContent).
 Item {
     id: root
@@ -21,6 +22,8 @@ Item {
     required property var pomodoro
     required property var notificationHistory
     required property var screenCapture
+    // The shell's keep-awake (services/KeepAwake.qml).
+    required property var keepAwake
     // The shared cava process (services/Cava.qml).
     required property var cava
     // Whether the bar holding these elements is shown on its monitor.
@@ -46,9 +49,21 @@ Item {
     readonly property string playerLabel: player
         ? (player.trackTitle !== "" ? player.trackTitle : player.identity) : ""
     property string displayedPlayerLabel: playerLabel
+    // The screens other apps share through PipeWire, read from the graph.
+    readonly property var screenShares: RecordingIndicator.screenShares(
+        Pipewire.nodes.values.map(node => ({ id: node.id, isStream: node.isStream, properties: node.properties })),
+        Pipewire.linkGroups.values.filter(link => link.source && link.target)
+            .map(link => ({ source: link.source.id, target: link.target.id })))
+    // The same shares with when each was first seen.
+    property var startedShares: []
     // What is recording, for the recording indicator.
-    readonly property var recordings: RecordingIndicator.recordings(screenCapture.recordingStartedAt)
+    readonly property var recordings: RecordingIndicator.recordings(screenCapture.recordingStartedAt, startedShares)
     property real recordingNow: Date.now()
+    // Which apps share the screen, shown for a moment after a click that
+    // can't stop anything.
+    property string sharingShown: ""
+
+    onScreenSharesChanged: startedShares = RecordingIndicator.startTimes(startedShares, screenShares, Date.now())
     readonly property real itemHeight: appearance.barTransparent
         ? appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
         : Math.max(1, appearance.barHeight - (appearance.elementVerticalPadding * 2))
@@ -62,6 +77,11 @@ Item {
 
     PwObjectTracker {
         objects: Pipewire.defaultAudioSink ? [Pipewire.defaultAudioSink] : []
+    }
+
+    // Node properties are only read while tracked; screen shares need them.
+    PwObjectTracker {
+        objects: Pipewire.nodes.values
     }
 
     function activePlayer() {
@@ -83,6 +103,7 @@ Item {
     readonly property var items: ({
         "notifications": notificationButton,
         "recording": recordingButton,
+        "keepAwake": keepAwakeButton,
         "media": mediaButton,
         "cava": cavaElement,
         "audio": audioButton,
@@ -93,8 +114,8 @@ Item {
         "clock": pomodoroButton
     })
 
-    // Enabled elements with nothing to show (no player, battery, recording
-    // or sound) are hidden.
+    // Enabled elements with nothing to show (no player, battery, recording,
+    // keep-awake or sound) are hidden.
     function itemVisible(element) {
         if (!BarProfileModel.elementEnabled(appearance.barElements, element))
             return false;
@@ -104,6 +125,8 @@ Item {
             return hasBattery;
         if (element === "recording")
             return RecordingIndicator.shown(recordings);
+        if (element === "keepAwake")
+            return keepAwake.on;
         if (element === "cava")
             return !cava.silent;
         return true;
@@ -121,31 +144,10 @@ Item {
     onPlayerLabelChanged: mediaLabelTransition.restart()
 
     function networkIcon() {
-        const devices = Networking.devices.values;
-
-        for (let index = 0; index < devices.length; index++) {
-            const device = devices[index];
-
-            if (device.connected)
-                return DeviceType.toString(device.type) === "Wifi" ? "󰤨" : "󰈀";
-        }
-
-        return "󰤭";
-    }
-
-    function batteryIcon() {
-        if (!battery)
-            return "󰂑";
-        if (battery.state === UPowerDeviceState.Charging
-                || battery.state === UPowerDeviceState.PendingCharge)
-            return "󰂄";
-        if (battery.percentage <= 0.15)
-            return "󰂃";
-        if (battery.percentage <= 0.4)
-            return "󰁻";
-        if (battery.percentage <= 0.7)
-            return "󰁾";
-        return "󰁹";
+        return StatusText.networkIcon(Networking.devices.values.map(device => ({
+            connected: device.connected,
+            wifi: DeviceType.toString(device.type) === "Wifi"
+        })));
     }
 
     Rectangle {
@@ -243,7 +245,8 @@ Item {
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: RecordingIndicator.elapsedSince(root.recordings, root.recordingNow)
+                text: root.sharingShown !== "" ? root.sharingShown
+                    : RecordingIndicator.elapsedSince(root.recordings, root.recordingNow)
                 color: theme.red
                 font.pixelSize: root.appearance.textSize - 2
                 font.bold: true
@@ -259,11 +262,61 @@ Item {
             onTriggered: root.recordingNow = Date.now()
         }
 
+        Timer {
+            id: sharingShownTimer
+
+            interval: 4000
+            onTriggered: root.sharingShown = ""
+        }
+
         TapHandler {
             onTapped: {
-                if (RecordingIndicator.stoppable(root.recordings))
+                if (RecordingIndicator.stoppable(root.recordings)) {
                     root.screenCapture.stopRecording();
+                } else {
+                    root.sharingShown = RecordingIndicator.sharingText(root.recordings);
+                    sharingShownTimer.restart();
+                }
             }
+        }
+    }
+
+    // Shown only while keep-awake is on; a click turns it off.
+    Rectangle {
+        id: keepAwakeButton
+
+        visible: root.itemVisible("keepAwake")
+        x: root.elementX("keepAwake")
+        width: keepAwakeIcon.implicitWidth + 16
+        height: root.itemHeight
+        radius: root.appearance.radius
+        color: keepAwakeHover.hovered ? theme.surfaceHover
+            : root.elementGrouped("keepAwake") || root.appearance.pillsTransparent
+                || root.appearance.transparentBarSlanted
+                ? "transparent" : theme.surface
+        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("keepAwake") ? 1 : 0
+        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+
+        Behavior on color {
+            ColorAnimation { duration: root.appearance.motion.short }
+        }
+
+        HoverHandler {
+            id: keepAwakeHover
+        }
+
+        Text {
+            id: keepAwakeIcon
+
+            anchors.centerIn: parent
+            text: "󰒲"
+            color: theme.green
+            font.pixelSize: root.appearance.textSize
+            font.bold: true
+        }
+
+        TapHandler {
+            onTapped: root.keepAwake.on = false
         }
     }
 
@@ -597,7 +650,7 @@ Item {
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: root.batteryIcon()
+                text: StatusText.batteryIcon(root.battery, UPowerDeviceState)
                 color: theme.yellow
                 font.pixelSize: root.appearance.textSize
                 font.bold: true
