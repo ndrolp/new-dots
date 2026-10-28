@@ -12,6 +12,8 @@ TestCase {
         compare(SearchQuery.mode("?weather"), { mode: "web", text: "weather" });
         compare(SearchQuery.mode("@ kitty "), { mode: "windows", text: "kitty" });
         compare(SearchQuery.mode("= pi"), { mode: "calculator", text: "pi" });
+        compare(SearchQuery.mode(":fire"), { mode: "emoji", text: "fire" });
+        compare(SearchQuery.mode(":"), { mode: "emoji", text: "" });
     }
 
     function test_aQueryWithoutAPrefixSearchesEverything() {
@@ -52,6 +54,7 @@ TestCase {
     function test_anotherPrefixIsNeverMaths() {
         compare(SearchQuery.calculation("> 2+2"), "");
         compare(SearchQuery.calculation("?5 km to mi"), "");
+        compare(SearchQuery.calculation(":1+1"), "");
     }
 
     function test_qalcGetsTheExpressionAsOneArgumentNeverThroughAShell() {

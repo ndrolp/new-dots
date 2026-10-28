@@ -29,6 +29,7 @@ ShellRoot {
     property bool clipboardSelectorOpen: false
     property bool quickSearchOpen: false
     property bool unifiedSearchOpen: false
+    property string unifiedSearchQuery: ""
     property bool keybindCheatsheetOpen: false
     property bool audioSinkSelectorOpen: false
     property bool commandLauncherOpen: false
@@ -359,6 +360,7 @@ ShellRoot {
         monitors: monitors
         workspaceService: workspaceService
         open: shell.unifiedSearchOpen && plugins.unifiedSearchEnabled
+        initialQuery: shell.unifiedSearchQuery
 
         onCloseRequested: shell.unifiedSearchOpen = false
         onSettingsRequested: {
@@ -696,7 +698,18 @@ ShellRoot {
             if (!plugins.unifiedSearchEnabled)
                 return;
 
+            shell.unifiedSearchQuery = "";
             shell.unifiedSearchOpen = !shell.unifiedSearchOpen;
+        }
+
+        // Opens search on the emoji picker, ":" already typed.
+        function emoji() {
+            if (!plugins.unifiedSearchEnabled)
+                return;
+
+            const close = shell.unifiedSearchOpen && shell.unifiedSearchQuery === ":";
+            shell.unifiedSearchQuery = ":";
+            shell.unifiedSearchOpen = !close;
         }
     }
 

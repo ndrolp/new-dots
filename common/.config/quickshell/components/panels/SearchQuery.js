@@ -8,7 +8,8 @@ const prefixes = {
     ">": "commands",
     "?": "web",
     "@": "windows",
-    "=": "calculator"
+    "=": "calculator",
+    ":": "emoji"
 };
 
 // The mode `query`'s prefix picks ("" for none) and the text after it.

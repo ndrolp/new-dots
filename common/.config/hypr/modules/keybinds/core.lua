@@ -71,6 +71,7 @@ hl.bind(
 )
 hl.bind(mainMod .. " + g", hl.dsp.exec_cmd(qs .. "quick-search toggle"), { description = "Toggle quick search" })
 hl.bind(mainMod .. " + f", hl.dsp.exec_cmd(qs .. "unified-search toggle"), { description = "Toggle unified search" })
+hl.bind(win .. " + period", hl.dsp.exec_cmd(qs .. "unified-search emoji"), { description = "Pick an emoji" })
 hl.bind(
 	mainMod .. " + CTRL + 1",
 	hl.dsp.exec_cmd(qs .. "bar-profiles minimal"),

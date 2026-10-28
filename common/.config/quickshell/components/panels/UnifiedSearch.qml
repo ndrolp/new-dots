@@ -5,6 +5,7 @@ import Quickshell.Wayland
 import QtQuick
 import QtQuick.Controls
 import "../../config" as Config
+import "EmojiSearch.js" as EmojiSearch
 import "SearchQuery.js" as SearchQuery
 
 Variants {
@@ -16,6 +17,8 @@ Variants {
     required property var monitors
     required property var workspaceService
     property bool open: false
+    // What the field holds when search opens, e.g. ":" to open on emoji.
+    property string initialQuery: ""
 
     signal closeRequested()
     signal settingsRequested()
@@ -154,7 +157,7 @@ Variants {
                 return category === "ACTIONS";
             if (mode === "windows")
                 return category === "WINDOWS";
-            if (mode === "calculator")
+            if (mode === "calculator" || mode === "emoji")
                 return false;
 
             return selectedCategory === "ALL" || selectedCategory === category;
@@ -172,6 +175,16 @@ Variants {
             const results = [];
             const limit = 7;
 
+            if (queryMode.mode === "emoji") {
+                results.push(...EmojiSearch.matches(query, 40).map(match => ({
+                    type: "emoji",
+                    category: "EMOJI",
+                    title: match.name,
+                    subtitle: "Enter to copy",
+                    glyph: match.emoji,
+                    emoji: match.emoji
+                })));
+            }
             if (calculation !== "" && calculation === calculationAnswered
                     && calculationAnswer !== ""
                     && (selectedCategory === "ALL" || queryMode.mode === "calculator")) {
@@ -397,6 +410,9 @@ Variants {
             } else if (result.type === "calculation") {
                 actionProcess.command = ["wl-copy", result.answer];
                 actionProcess.running = true;
+            } else if (result.type === "emoji") {
+                actionProcess.command = ["wl-copy", result.emoji];
+                actionProcess.running = true;
             } else if (result.type === "window") {
                 root.workspaceService.focusToplevel(result.toplevel);
             } else if (result.type === "command") {
@@ -416,10 +432,21 @@ Variants {
         }
 
         onVisibleChanged: {
-            if (!visible)
-                return;
+            if (visible)
+                start();
+        }
 
-            searchQuery = "";
+        Connections {
+            target: root
+
+            function onInitialQueryChanged() {
+                if (searchPanel.visible)
+                    searchPanel.start();
+            }
+        }
+
+        function start() {
+            searchQuery = root.initialQuery;
             selectedCategoryIndex = 0;
             selectedSearchEngineIndex = Math.max(0, Math.min(
                 root.bookmarks.activeSearchEngineIndex, searchEngines.length - 1));
@@ -432,7 +459,10 @@ Variants {
             id: inputFocusTimer
 
             interval: 1
-            onTriggered: searchInput.forceActiveFocus()
+            onTriggered: {
+                searchInput.forceActiveFocus();
+                searchInput.cursorPosition = searchInput.length;
+            }
         }
 
         Rectangle {
@@ -465,7 +495,7 @@ Variants {
 
                     width: parent.width
                     height: 46
-                    placeholderText: "Search apps, bookmarks, clipboard, windows, run a command, or calculate"
+                    placeholderText: "Search apps, bookmarks, clipboard, windows, run a command, calculate, or pick emoji"
                     placeholderTextColor: Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.6)
                     color: theme.text
                     font.family: theme.fontFamily
@@ -588,7 +618,7 @@ Variants {
 
                     Text {
                         anchors.right: parent.right
-                        text: "Tab category  •  > command  •  ? web  •  @ windows  •  = calculate"
+                        text: "Tab category  •  > command  •  ? web  •  @ windows  •  = calculate  •  : emoji"
                         color: theme.textMuted
                         font.family: theme.fontFamily
                         font.pixelSize: root.appearance.textSize - 4
