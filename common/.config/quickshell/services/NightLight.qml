@@ -15,6 +15,9 @@ QtObject {
     readonly property bool on: state.on
     // Why night light went off on its own ("" otherwise).
     readonly property string failureHint: state.failureHint
+    // The temperatures the slider offers, in kelvin.
+    readonly property int minTemperature: NightLightState.minTemperature
+    readonly property int maxTemperature: NightLightState.maxTemperature
     // The saved temperature, in kelvin (NightLightState.temperature).
     readonly property int temperature: NightLightState.temperature(appearance.nightLightTemperature)
     property var state: NightLightState.off

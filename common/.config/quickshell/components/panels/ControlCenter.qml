@@ -13,7 +13,6 @@ import "../../config" as Config
 import "." as Panels
 import "PopupPlacement.js" as PopupPlacement
 import "../VolumeText.js" as VolumeText
-import "../../services/NightLightState.js" as NightLightState
 
 // The Control center: quick toggles and sliders, centered at the top of the
 // focused monitor. Decided per monitor from that bar's profile, it hangs from
@@ -453,8 +452,8 @@ Variants {
                         icon: "󰔏"
                         accentColor: theme.orange
                         valueText: root.nightLight.temperature + " K"
-                        from: NightLightState.minTemperature
-                        to: NightLightState.maxTemperature
+                        from: root.nightLight.minTemperature
+                        to: root.nightLight.maxTemperature
                         value: root.nightLight.temperature
                         onAdjusted: position => root.nightLight.setTemperature(position)
                     }
