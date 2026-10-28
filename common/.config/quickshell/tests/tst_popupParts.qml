@@ -2,10 +2,11 @@ import QtQuick
 import QtTest
 import "../components/panels" as Panels
 import "../config" as Config
+import "../config/Motion.js" as Motion
 
 // The parts every popup and floating dialog is built from: weight hierarchy
 // (only titles are bold), rows that show only on hover, and controls that
-// follow the bar's text size and radius.
+// follow the bar's text size and radius and animate with its motion settings.
 // Pointer events don't reach items under qmltestrunner offscreen, so taps and
 // hover are checked in the renders instead.
 TestCase {
@@ -23,6 +24,18 @@ TestCase {
 
         property int radius: 12
         property int textSize: 13
+        readonly property var motion: Motion.durations(false)
+        readonly property int motionEasing: Easing.OutCubic
+    }
+
+    // The same bar with reduce motion on.
+    QtObject {
+        id: reducedAppearance
+
+        property int radius: 12
+        property int textSize: 13
+        readonly property var motion: Motion.durations(true)
+        readonly property int motionEasing: Easing.OutCubic
     }
 
     Component {
@@ -177,6 +190,34 @@ TestCase {
         const item = make(popupSwitch, { checked: true });
 
         tryCompare(item, "color", theme.accent, 500);
+    }
+
+    // Turning a switch on eases its fill and knob over, unless reduce motion
+    // is on: then the switch is on at once.
+    function test_turningASwitchOnEasesItOver() {
+        const item = make(popupSwitch);
+
+        item.checked = true;
+        verify(!Qt.colorEqual(item.color, theme.accent));
+        tryCompare(item, "color", theme.accent, 500);
+    }
+
+    function test_withReduceMotionASwitchIsOnAtOnce() {
+        const item = make(popupSwitch, { appearance: reducedAppearance });
+        const knob = item.children[0];
+
+        item.checked = true;
+        compare(item.color, theme.accent);
+        compare(knob.x, item.width - knob.width - 3);
+    }
+
+    function test_withReduceMotionAHeaderIconTakesItsNewColorAtOnce() {
+        const holder = createTemporaryObject(header, this);
+        const icon = textOf(holder.header, "󰂯");
+
+        holder.header.appearance = reducedAppearance;
+        holder.header.iconColor = theme.accent;
+        compare(icon.color, theme.accent);
     }
 
     function test_aHeaderFillsItsParentAndFitsTitleAndSubtitle() {

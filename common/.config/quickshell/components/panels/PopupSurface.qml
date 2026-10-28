@@ -7,11 +7,15 @@ import "PopupOutline.js" as PopupOutline
 // fade and a short slide down. Attached, it hangs from the bar's bottom edge
 // with no border: square top corners, small curved corners joining it to the
 // bar, round bottom corners, unfolding downward with its contents fading in
-// after. Any window can host it; hide the window while reveal is 0.
+// after. Any window can host it; hide the window while reveal is 0. It takes
+// no appearance, so the host passes in its motion settings.
 Rectangle {
     id: surface
 
     property bool open: false
+    // Appearance.motion and Appearance.motionEasing, as the host has them.
+    required property var motion
+    required property int motionEasing
     // Hangs from the bar instead of floating below it.
     property bool attached: false
     // The host may paint a floating surface in its own colors.
@@ -30,7 +34,7 @@ Rectangle {
     property real padding: 12
     // 0 while closed, 1 once open; animates in between.
     property real reveal: open ? 1 : 0
-    readonly property int revealDuration: attached ? 180 : 120
+    readonly property int revealDuration: attached ? motion.medium : motion.short
     // How far above its resting place a floating surface starts sliding down from.
     readonly property real revealOffset: 8
     // How much of an attached surface has unfolded, from its top edge down.
@@ -50,7 +54,7 @@ Rectangle {
     Behavior on reveal {
         NumberAnimation {
             duration: surface.revealDuration
-            easing.type: Easing.OutCubic
+            easing.type: surface.motionEasing
         }
     }
 

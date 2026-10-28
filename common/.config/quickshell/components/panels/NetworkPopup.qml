@@ -150,8 +150,8 @@ BarPopup {
 
                             Behavior on height {
                                 NumberAnimation {
-                                    duration: 140
-                                    easing.type: Easing.OutCubic
+                                    duration: root.appearance.motion.short
+                                    easing.type: root.appearance.motionEasing
                                 }
                             }
 
