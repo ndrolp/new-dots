@@ -37,8 +37,12 @@ El bar element que dibuja lo que suena por la audio output actual como barras de
 _Avoid_: Visualizer, waveform, espectro
 
 **Recording indicator** (indicador de grabación):
-El bar element que aparece solo mientras se graba la pantalla y muestra cuánto tiempo lleva la grabación. Al pulsarlo se para la grabación de la propia shell (la que se inicia desde la captura de pantalla con `wf-recorder`), igual que la tecla para pararla.
+El bar element que aparece solo mientras se graba la pantalla y muestra cuánto tiempo lleva la grabación. Cuenta tanto la grabación de la propia shell (la que se inicia desde la captura de pantalla con `wf-recorder`) como cada *screen share*. Al pulsarlo se para la grabación de la propia shell, igual que la tecla para pararla; si solo comparten otras apps, dice cuáles son.
 _Avoid_: REC, botón de grabación, screen recording (para el elemento de la barra)
+
+**Screen share** (pantalla compartida):
+Una pantalla que otra app (un navegador en una llamada, OBS…) lee por PipeWire a través del portal. Las cámaras no cuentan. No se puede parar desde la shell.
+_Avoid_: screencast, stream (para esto)
 
 **Popup**:
 La ventana pequeña que se despliega desde un bar element al pulsarlo (Bluetooth, red, batería, audio, media…). Pertenece a ese bar element y se cierra al perder el foco.

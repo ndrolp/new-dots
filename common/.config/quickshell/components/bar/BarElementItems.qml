@@ -46,9 +46,21 @@ Item {
     readonly property string playerLabel: player
         ? (player.trackTitle !== "" ? player.trackTitle : player.identity) : ""
     property string displayedPlayerLabel: playerLabel
+    // The screens other apps share through PipeWire, read from the graph.
+    readonly property var screenShares: RecordingIndicator.screenShares(
+        Pipewire.nodes.values.map(node => ({ id: node.id, isStream: node.isStream, properties: node.properties })),
+        Pipewire.linkGroups.values.filter(link => link.source && link.target)
+            .map(link => ({ source: link.source.id, target: link.target.id })))
+    // The same shares with when each was first seen.
+    property var startedShares: []
     // What is recording, for the recording indicator.
-    readonly property var recordings: RecordingIndicator.recordings(screenCapture.recordingStartedAt)
+    readonly property var recordings: RecordingIndicator.recordings(screenCapture.recordingStartedAt, startedShares)
     property real recordingNow: Date.now()
+    // Which apps share the screen, shown for a moment after a click that
+    // can't stop anything.
+    property string sharingShown: ""
+
+    onScreenSharesChanged: startedShares = RecordingIndicator.startTimes(startedShares, screenShares, Date.now())
     readonly property real itemHeight: appearance.barTransparent
         ? appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
         : Math.max(1, appearance.barHeight - (appearance.elementVerticalPadding * 2))
@@ -62,6 +74,11 @@ Item {
 
     PwObjectTracker {
         objects: Pipewire.defaultAudioSink ? [Pipewire.defaultAudioSink] : []
+    }
+
+    // Node properties are only read while tracked; screen shares need them.
+    PwObjectTracker {
+        objects: Pipewire.nodes.values
     }
 
     function activePlayer() {
@@ -243,7 +260,8 @@ Item {
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: RecordingIndicator.elapsedSince(root.recordings, root.recordingNow)
+                text: root.sharingShown !== "" ? root.sharingShown
+                    : RecordingIndicator.elapsedSince(root.recordings, root.recordingNow)
                 color: theme.red
                 font.pixelSize: root.appearance.textSize - 2
                 font.bold: true
@@ -259,10 +277,21 @@ Item {
             onTriggered: root.recordingNow = Date.now()
         }
 
+        Timer {
+            id: sharingShownTimer
+
+            interval: 4000
+            onTriggered: root.sharingShown = ""
+        }
+
         TapHandler {
             onTapped: {
-                if (RecordingIndicator.stoppable(root.recordings))
+                if (RecordingIndicator.stoppable(root.recordings)) {
                     root.screenCapture.stopRecording();
+                } else {
+                    root.sharingShown = RecordingIndicator.sharingText(root.recordings);
+                    sharingShownTimer.restart();
+                }
             }
         }
     }
