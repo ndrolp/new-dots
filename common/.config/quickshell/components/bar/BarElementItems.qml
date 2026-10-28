@@ -11,7 +11,7 @@ import "../../config/BarProfileModel.js" as BarProfileModel
 import "RecordingIndicator.js" as RecordingIndicator
 
 // The bar elements that need no component of their own (notifications,
-// recording, media, cava, audio, bluetooth, tray, network, battery and clock),
+// recording, keep-awake, media, cava, audio, bluetooth, tray, network, battery and clock),
 // placed by the bar's single walk per zone (see BarContent).
 Item {
     id: root
@@ -21,6 +21,8 @@ Item {
     required property var pomodoro
     required property var notificationHistory
     required property var screenCapture
+    // The shell's keep-awake (services/KeepAwake.qml).
+    required property var keepAwake
     // The shared cava process (services/Cava.qml).
     required property var cava
     // Whether the bar holding these elements is shown on its monitor.
@@ -83,6 +85,7 @@ Item {
     readonly property var items: ({
         "notifications": notificationButton,
         "recording": recordingButton,
+        "keepAwake": keepAwakeButton,
         "media": mediaButton,
         "cava": cavaElement,
         "audio": audioButton,
@@ -93,8 +96,8 @@ Item {
         "clock": pomodoroButton
     })
 
-    // Enabled elements with nothing to show (no player, battery, recording
-    // or sound) are hidden.
+    // Enabled elements with nothing to show (no player, battery, recording,
+    // keep-awake or sound) are hidden.
     function itemVisible(element) {
         if (!BarProfileModel.elementEnabled(appearance.barElements, element))
             return false;
@@ -104,6 +107,8 @@ Item {
             return hasBattery;
         if (element === "recording")
             return RecordingIndicator.shown(recordings);
+        if (element === "keepAwake")
+            return keepAwake.on;
         if (element === "cava")
             return !cava.silent;
         return true;
@@ -264,6 +269,45 @@ Item {
                 if (RecordingIndicator.stoppable(root.recordings))
                     root.screenCapture.stopRecording();
             }
+        }
+    }
+
+    // Shown only while keep-awake is on; a click turns it off.
+    Rectangle {
+        id: keepAwakeButton
+
+        visible: root.itemVisible("keepAwake")
+        x: root.elementX("keepAwake")
+        width: keepAwakeIcon.implicitWidth + 16
+        height: root.itemHeight
+        radius: root.appearance.radius
+        color: keepAwakeHover.hovered ? theme.surfaceHover
+            : root.elementGrouped("keepAwake") || root.appearance.pillsTransparent
+                || root.appearance.transparentBarSlanted
+                ? "transparent" : theme.surface
+        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("keepAwake") ? 1 : 0
+        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+
+        Behavior on color {
+            ColorAnimation { duration: 140 }
+        }
+
+        HoverHandler {
+            id: keepAwakeHover
+        }
+
+        Text {
+            id: keepAwakeIcon
+
+            anchors.centerIn: parent
+            text: "󰒲"
+            color: theme.green
+            font.pixelSize: root.appearance.textSize
+            font.bold: true
+        }
+
+        TapHandler {
+            onTapped: root.keepAwake.on = false
         }
     }
 

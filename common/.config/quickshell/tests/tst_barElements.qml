@@ -161,8 +161,8 @@ TestCase {
         compare(zone(normalized, "left"), ["clock"]);
         compare(zone(normalized, "center"), []);
         compare(zone(normalized, "right"), ["arch", "systemMonitor", "currentApp", "workspaces",
-            "notifications", "recording", "media", "-cava", "audio", "bluetooth", "tray",
-            "network", "battery"]);
+            "notifications", "recording", "keepAwake", "media", "-cava", "audio", "bluetooth",
+            "tray", "network", "battery"]);
         const once = BarProfileModel.normalizeBarElements(minimalElements());
         compare(BarProfileModel.normalizeBarElements(once), once);
     }
@@ -293,6 +293,36 @@ TestCase {
 
         compare(zone(moved, "left"), ["arch", "workspaces", "recording"]);
         compare(BarProfileModel.elementEnabled(moved, "recording"), true);
+    }
+
+    function test_keepAwakeIsInEveryDefaultProfileEnabledAfterTheRecordingIndicator() {
+        const profiles = BarProfileModel.defaultBarProfiles();
+
+        for (const name in profiles) {
+            const barElements = profiles[name].barElements;
+            const zoneName = BarProfileModel.elementZone(barElements, "recording");
+            const ids = zone(barElements, zoneName).map(id => id.replace("-", ""));
+            compare(ids.indexOf("keepAwake"), ids.indexOf("recording") + 1, name);
+            compare(BarProfileModel.elementEnabled(barElements, "keepAwake"), true, name);
+        }
+    }
+
+    function test_aProfileWithoutKeepAwakeGetsItEnabledAfterTheRecordingIndicator() {
+        const barElements = BarProfileModel.normalizeBarElements({
+            center: [{ id: "recording", enabled: true }, { id: "clock", enabled: true }]
+        });
+
+        compare(zone(barElements, "center").slice(0, 2), ["recording", "keepAwake"]);
+        compare(BarProfileModel.elementEnabled(barElements, "keepAwake"), true);
+    }
+
+    function test_keepAwakeCanBeMovedToAnotherZone() {
+        const barElements = BarProfileModel.normalizeBarElements(minimalElements());
+
+        const moved = BarProfileModel.moveElementToZone(barElements, "keepAwake", "left");
+
+        compare(zone(moved, "left"), ["arch", "workspaces", "keepAwake"]);
+        compare(BarProfileModel.elementEnabled(moved, "keepAwake"), true);
     }
 
     // A missing element goes right after the element it follows by default,

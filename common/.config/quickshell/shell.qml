@@ -204,6 +204,10 @@ ShellRoot {
         id: screenCapture
     }
 
+    Services.KeepAwake {
+        id: keepAwake
+    }
+
     NotificationServer {
         id: notificationServer
 
@@ -413,6 +417,7 @@ ShellRoot {
         clipboardHistory: clipboardHistory
         screenCapture: screenCapture
         systemMonitor: systemMonitor
+        keepAwake: keepAwake
         open: shell.controlCenterOpen && plugins.controlCenterEnabled
 
         onCloseRequested: shell.controlCenterOpen = false
@@ -697,6 +702,7 @@ ShellRoot {
         pomodoro: pomodoro
         notificationHistory: notificationHistory
         screenCapture: screenCapture
+        keepAwake: keepAwake
         cava: cava
         systemMonitor: systemMonitor
         workspaceService: workspaceService

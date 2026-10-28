@@ -40,6 +40,10 @@ _Avoid_: Visualizer, waveform, espectro
 El bar element que aparece solo mientras se graba la pantalla y muestra cuánto tiempo lleva la grabación. Al pulsarlo se para la grabación de la propia shell (la que se inicia desde la captura de pantalla con `wf-recorder`), igual que la tecla para pararla.
 _Avoid_: REC, botón de grabación, screen recording (para el elemento de la barra)
 
+**Keep-awake** (mantener despierto):
+Mientras está activo, la sesión no pasa a inactiva: no se atenúa ni se apaga la pantalla ni se suspende. Se activa y desactiva desde el control center. El bar element keep-awake aparece solo mientras está activo, y al pulsarlo se desactiva. Siempre empieza desactivado al arrancar la shell.
+_Avoid_: Caffeine, idle inhibitor (para la función), no dormir
+
 **Popup**:
 La ventana pequeña que se despliega desde un bar element al pulsarlo (Bluetooth, red, batería, audio, media…). Pertenece a ese bar element y se cierra al perder el foco.
 Con la barra opaca un popup va **anclado** (attached): sale de la barra como si fuera parte de ella. Con la barra transparente va **flotante** (floating), separado de la barra.
