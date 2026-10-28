@@ -24,7 +24,8 @@ locks, checks a password and unlocks (`services/LockState.js`) and what it
 shows on each monitor (`components/lock/LockScreenBody.qml`), what a unified
 search query asks for: its query mode, whether it is maths for the
 calculator and how qalc is run and answers
-(`components/panels/SearchQuery.js`), and how the keybind cheatsheet groups
+(`components/panels/SearchQuery.js`), which emoji the emoji picker finds
+(`components/panels/EmojiSearch.js`), and how the keybind cheatsheet groups
 and filters `hyprctl binds -j` (`components/panels/KeybindCheatsheet.js`).
 They run with QtTest outside of `qs`:
 
