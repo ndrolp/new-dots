@@ -56,7 +56,10 @@ hl.bind(
 	mainMod .. " + SHIFT + TAB",
 	hl.dsp.exec_cmd("quickshell ipc --path ~/.config/quickshell call window-switcher previous")
 )
-hl.bind(win .. " + l", hl.dsp.exec_cmd("hyprlock"))
+hl.bind(win .. " + l", hl.dsp.exec_cmd("loginctl lock-session"))
+-- Emergency lock: hyprlock, should the shell's lock screen fail. Locked, so it
+-- still works while the session is locked and the shell has crashed.
+hl.bind(win .. " + CTRL + ALT + l", hl.dsp.exec_cmd("hyprlock"), { locked = true })
 hl.bind(mainMod .. " + left", hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + up", hl.dsp.focus({ direction = "up" }))
