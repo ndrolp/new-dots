@@ -3,16 +3,19 @@
 
 // The recording indicator bar element: pure logic, no Quickshell.
 // What is recording is a list of recordings, each started at `startedAt` (ms
-// since the epoch): the shell's own wf-recorder ("own") and the screens other
-// apps share through PipeWire ("share", with the sharing `app`).
+// since the epoch), of one of the `kinds` below.
+
+// What a recording is: the shell's own wf-recorder, or a screen another app
+// shares through PipeWire (with the sharing `app`).
+const kinds = Object.freeze({ own: "own", share: "share" });
 
 // The recordings under way. `ownStartedAt` is when the shell's own recording
 // started, or 0 while it isn't recording; `shares` are the screen shares with
 // their start times (see startTimes).
 function recordings(ownStartedAt, shares) {
-    const own = ownStartedAt > 0 ? [{ kind: "own", startedAt: ownStartedAt }] : [];
+    const own = ownStartedAt > 0 ? [{ kind: kinds.own, startedAt: ownStartedAt }] : [];
     return own.concat((shares || []).map(share =>
-        ({ kind: "share", app: share.app, startedAt: share.startedAt })));
+        ({ kind: kinds.share, app: share.app, startedAt: share.startedAt })));
 }
 
 // The indicator shows only while something records.
@@ -73,7 +76,7 @@ function startTimes(previous, shares, now) {
 function sharingText(recordings) {
     const apps = [];
     recordings.forEach(recording => {
-        if (recording.kind === "share" && recording.app !== "" && !apps.includes(recording.app))
+        if (recording.kind === kinds.share && recording.app !== "" && !apps.includes(recording.app))
             apps.push(recording.app);
     });
     return apps.length > 0 ? apps.join(", ") : "An app";
@@ -81,7 +84,7 @@ function sharingText(recordings) {
 
 // Clicking stops a recording only when it is the shell's own.
 function stoppable(recordings) {
-    return recordings.some(recording => recording.kind === "own");
+    return recordings.some(recording => recording.kind === kinds.own);
 }
 
 // The time since the earliest recording started, at `now` (ms since the

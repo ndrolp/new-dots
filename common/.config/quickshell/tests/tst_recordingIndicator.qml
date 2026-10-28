@@ -26,7 +26,7 @@ TestCase {
     function test_theShellsOwnRecordingShowsItAndCanBeStopped() {
         const recordings = RecordingIndicator.recordings(5000);
 
-        compare(recordings, [{ kind: "own", startedAt: 5000 }]);
+        compare(recordings, [{ kind: RecordingIndicator.kinds.own, startedAt: 5000 }]);
         verify(RecordingIndicator.shown(recordings));
         verify(RecordingIndicator.stoppable(recordings));
     }
@@ -101,7 +101,7 @@ TestCase {
         const recordings = RecordingIndicator.recordings(0,
             [{ id: 101, app: "Firefox", startedAt: 5000 }]);
 
-        compare(recordings, [{ kind: "share", app: "Firefox", startedAt: 5000 }]);
+        compare(recordings, [{ kind: RecordingIndicator.kinds.share, app: "Firefox", startedAt: 5000 }]);
         verify(RecordingIndicator.shown(recordings));
         verify(!RecordingIndicator.stoppable(recordings));
     }
@@ -165,5 +165,13 @@ TestCase {
             [{ source: 140, target: 120 }, { source: 101, target: 120 }]);
 
         compare(shares, [{ id: 101, app: "Firefox" }]);
+    }
+
+    function test_theRecordingKindsAreFixed() {
+        const kinds = RecordingIndicator.kinds;
+
+        verify(Object.isFrozen(kinds));
+        verify(kinds.own !== kinds.share);
+        compare(Object.keys(kinds).sort(), ["own", "share"]);
     }
 }
