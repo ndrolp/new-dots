@@ -81,4 +81,19 @@ TestCase {
         verify(state.locked);
         compare(state.error, "");
     }
+
+    function test_afterAReloadWhileLockedItStaysLockedAndAsksForThePassword() {
+        const state = LockState.restored(true);
+        verify(state.locked);
+        compare(state.phase, "waiting");
+        compare(state.error, "");
+    }
+
+    function test_afterAReloadWhileUnlockedItStaysUnlocked() {
+        compare(LockState.restored(false), LockState.unlocked);
+    }
+
+    function test_afterAReloadWithNothingSavedItStaysUnlocked() {
+        compare(LockState.restored(undefined), LockState.unlocked);
+    }
 }

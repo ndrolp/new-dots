@@ -14,7 +14,9 @@ Scope {
     id: root
 
     // When the session is locked (LockState.unlocked and the functions after
-    // it).
+    // it). Once `kept` loads it follows what was kept across a reload
+    // (LockState.restored), so a reload while locked keeps the session
+    // locked and shows the password field again.
     property var lockState: LockState.unlocked
     // The shell's wallpapers (Config.Wallpapers): each monitor shows its own.
     property var wallpapers: null
@@ -52,6 +54,25 @@ Scope {
         default:
             return "error";
         }
+    }
+
+    // Whether the session was locked, kept across reloads. It comes first in
+    // the scope so it is restored before WlSessionLock below takes over the
+    // old lock: WlSessionLock unlocks on reload when it finds `locked` false.
+    PersistentProperties {
+        id: kept
+
+        reloadableId: "lockScreen"
+
+        property bool locked: false
+
+        onLoaded: root.lockState = LockState.restored(locked)
+    }
+
+    Binding {
+        target: kept
+        property: "locked"
+        value: root.lockState.locked
     }
 
     PamContext {

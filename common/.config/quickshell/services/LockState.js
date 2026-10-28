@@ -26,6 +26,17 @@ function passwordSubmitted(state, password) {
     return Object.assign({}, state, { phase: "checking", error: "" });
 }
 
+// The shell was reloaded or the lock screen created again, and `wasLocked`
+// is whether the session was locked before (undefined when nothing was
+// kept). A locked session stays locked and asks for the password again: a
+// password being checked is lost with the old PAM conversation, so it waits
+// for one. Anything else starts unlocked.
+function restored(wasLocked) {
+    if (wasLocked !== true)
+        return unlocked;
+    return { locked: true, phase: "waiting", error: "" };
+}
+
 // What the lock screen says when PAM didn't let the password through.
 const errors = {
     failed: "Wrong password",
