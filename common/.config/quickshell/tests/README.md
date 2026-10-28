@@ -19,10 +19,12 @@ reads cava and tries it again when it fails (`services/CavaOutput.js`) and
 what it draws (`components/bar/CavaBars.qml`), how long animations take
 with and without reduce motion (`config/Motion.js`), when the lock screen
 locks, checks a password and unlocks (`services/LockState.js`) and what it
-shows on each monitor (`components/lock/LockScreenBody.qml`), and what a unified
+shows on each monitor (`components/lock/LockScreenBody.qml`), what a unified
 search query asks for: its query mode, whether it is maths for the
 calculator and how qalc is run and answers
-(`components/panels/SearchQuery.js`). They run with QtTest outside of `qs`:
+(`components/panels/SearchQuery.js`), and how the keybind cheatsheet groups
+and filters `hyprctl binds -j` (`components/panels/KeybindCheatsheet.js`).
+They run with QtTest outside of `qs`:
 
 ```sh
 common/.config/quickshell/tests/run.sh
@@ -37,7 +39,8 @@ common/.config/quickshell/tests/run.sh
   what the wrapper hands it, e.g. `WallpaperSettings.qml` passes Hyprland's
   monitors to `WallpaperSettingsBody.qml` as plain displays.
 - `fixtures/` holds copies of the real `appearance.json` and `monitors.json`
-  (schema version 0, from before bar profiles were reworked). Read them with
+  (schema version 0, from before bar profiles were reworked), and a slice of
+  real `hyprctl binds -j` output (`hyprctl-binds.json`). Read them with
   the shared `Fixtures` helper (`Fixtures.qml`): declare
   `Fixtures { id: fixtures }` in the test and call
   `fixtures.read("appearance.json")`. It also gives the fixtures migrated to

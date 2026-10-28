@@ -19,6 +19,7 @@ Variants {
 
     signal closeRequested()
     signal settingsRequested()
+    signal keybindCheatsheetRequested()
 
     model: Quickshell.screens
 
@@ -306,6 +307,13 @@ Variants {
                         title: "Open shell settings",
                         subtitle: "Configure appearance, displays, widgets, and status bar",
                         glyph: "󰒓"
+                    },
+                    {
+                        type: "keybinds",
+                        category: "ACTIONS",
+                        title: "Show keybind cheatsheet",
+                        subtitle: "Every key binding with what it does",
+                        glyph: "󰌌"
                     }
                 ];
                 const workspaceIds = root.workspaceService.workspacesForScreen(
@@ -396,6 +404,8 @@ Variants {
                 actionProcess.running = true;
             } else if (result.type === "settings") {
                 root.settingsRequested();
+            } else if (result.type === "keybinds") {
+                root.keybindCheatsheetRequested();
             } else if (result.type === "workspace") {
                 root.workspaceService.switchTo(result.workspaceId);
             } else {
