@@ -88,8 +88,8 @@ PanelWindow {
 
                 Behavior on reveal {
                     NumberAnimation {
-                        duration: 180
-                        easing.type: Easing.OutCubic
+                        duration: root.appearance.motion.medium
+                        easing.type: root.appearance.motionEasing
                     }
                 }
 
@@ -187,7 +187,7 @@ PanelWindow {
                     color: closeHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
 
                     Behavior on color {
-                        ColorAnimation { duration: 140 }
+                        ColorAnimation { duration: root.appearance.motion.short }
                     }
 
                     HoverHandler {

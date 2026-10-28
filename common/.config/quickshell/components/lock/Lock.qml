@@ -16,6 +16,8 @@ Scope {
     // When the session is locked (LockState.unlocked and the functions after
     // it).
     property var lockState: LockState.unlocked
+    // The shell's wallpapers (Config.Wallpapers): each monitor shows its own.
+    property var wallpapers: null
     // The password waiting for PAM to ask for it.
     property string pendingPassword: ""
 
@@ -91,6 +93,8 @@ Scope {
             Lock.LockScreenBody {
                 anchors.fill: parent
                 now: clock.date
+                wallpaper: root.wallpapers && surface.monitor
+                    ? root.wallpapers.pathFor(surface.monitor.description) : ""
                 showsPasswordField: surface.focused
                 checking: root.lockState.phase === "checking"
                 error: root.lockState.error

@@ -217,6 +217,7 @@ Column {
 
                             Panels.SettingsSwitch {
                                 anchors.verticalCenter: parent.verticalCenter
+                                appearance: root.appearance
                                 checked: elementDelegate.elementOn
 
                                 TapHandler {

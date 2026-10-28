@@ -80,5 +80,7 @@ PopupWindow {
         joinRadius: frame.joinRadius
         radius: frame.appearance.radius
         barOpacity: frame.appearance.barOpacity
+        motion: frame.appearance.motion
+        motionEasing: frame.appearance.motionEasing
     }
 }

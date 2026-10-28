@@ -12,7 +12,7 @@ Rectangle {
     color: interactive && hovered ? theme.surfaceHover : "transparent"
 
     Behavior on color {
-        ColorAnimation { duration: 140 }
+        ColorAnimation { duration: appearance.motion.short }
     }
 
     Config.Theme {

@@ -256,7 +256,7 @@ Variants {
                         border.width: selected || active ? 1 : 0
 
                         Behavior on color {
-                            ColorAnimation { duration: 120 }
+                            ColorAnimation { duration: root.appearance.motion.short }
                         }
 
                         Column {

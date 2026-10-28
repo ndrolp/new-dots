@@ -19,7 +19,7 @@ Rectangle {
     opacity: enabled ? 1 : 0.4
 
     Behavior on color {
-        ColorAnimation { duration: 140 }
+        ColorAnimation { duration: button.appearance.motion.short }
     }
 
     Config.Theme {

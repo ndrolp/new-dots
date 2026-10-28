@@ -244,7 +244,7 @@ Variants {
                         border.width: selected ? 1 : 0
 
                         Behavior on color {
-                            ColorAnimation { duration: 100 }
+                            ColorAnimation { duration: root.appearance.motion.brief }
                         }
 
                         HoverHandler {

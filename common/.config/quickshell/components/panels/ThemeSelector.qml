@@ -9,6 +9,7 @@ import "../../config" as Config
 Variants {
     id: root
 
+    required property var appearance
     property bool open: false
 
     signal closeRequested()
@@ -230,8 +231,8 @@ Variants {
 
                     Behavior on contentY {
                         NumberAnimation {
-                            duration: 160
-                            easing.type: Easing.OutCubic
+                            duration: root.appearance.motion.medium
+                            easing.type: root.appearance.motionEasing
                         }
                     }
 
@@ -258,7 +259,7 @@ Variants {
                         }
 
                         Behavior on color {
-                            ColorAnimation { duration: 120 }
+                            ColorAnimation { duration: root.appearance.motion.short }
                         }
 
                         Row {

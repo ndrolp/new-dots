@@ -82,7 +82,7 @@ Cada una de las áreas del settings panel (Bar, Notifications, Displays, Wallpap
 _Avoid_: Página, pestaña, tab
 
 **Lock screen** (pantalla de bloqueo):
-Lo que cubre todos los monitores mientras la sesión está bloqueada: el tema, el reloj y la fecha en cada monitor, y el campo de contraseña solo en el monitor enfocado. La dibuja la shell; `hyprlock` queda solo como bloqueo de emergencia (`SUPER+CTRL+ALT+L`) por si la shell falla.
+Lo que cubre todos los monitores mientras la sesión está bloqueada: el tema, el reloj y la fecha sobre el fondo de pantalla del monitor, desenfocado, en cada monitor, y el campo de contraseña solo en el monitor enfocado. La dibuja la shell; `hyprlock` queda solo como bloqueo de emergencia (`SUPER+CTRL+ALT+L`) por si la shell falla.
 _Avoid_: Lockscreen, hyprlock (para la de la shell), pantalla de login
 
 **Unified search** (búsqueda unificada):

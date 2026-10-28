@@ -74,7 +74,7 @@ Variants {
                 font.pixelSize: tile.appearance.textSize + 3
 
                 Behavior on color {
-                    ColorAnimation { duration: 140 }
+                    ColorAnimation { duration: tile.appearance.motion.short }
                 }
             }
 
@@ -193,6 +193,8 @@ Variants {
             property bool transparentBarSlanted: root.appearance.barProfileValue(controlCenter.profileName, "transparentBarSlanted")
             property bool barTransparent: root.appearance.barProfileValue(controlCenter.profileName, "barTransparent")
             property int barOpacity: root.appearance.barProfileValue(controlCenter.profileName, "barOpacity")
+            property var motion: root.appearance.motion
+            property int motionEasing: root.appearance.motionEasing
         }
         // The bar window's height, as the bar computes it.
         readonly property int totalBarHeight: barAppearance.barHeight
@@ -365,6 +367,8 @@ Variants {
             attached: controlCenter.placement.attached
             radius: controlCenter.barAppearance.radius
             barOpacity: controlCenter.barAppearance.barOpacity
+            motion: controlCenter.barAppearance.motion
+            motionEasing: controlCenter.barAppearance.motionEasing
 
             Column {
                 width: parent.width

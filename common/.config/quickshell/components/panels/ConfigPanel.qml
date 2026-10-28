@@ -324,8 +324,8 @@ Rectangle {
             target: sectionLoader
             property: "opacity"
             to: 0
-            duration: 100
-            easing.type: Easing.OutCubic
+            duration: root.appearance.motion.brief
+            easing.type: root.appearance.motionEasing
         }
 
         ScriptAction {
@@ -339,8 +339,8 @@ Rectangle {
             target: sectionLoader
             property: "opacity"
             to: 1
-            duration: 180
-            easing.type: Easing.OutCubic
+            duration: root.appearance.motion.medium
+            easing.type: root.appearance.motionEasing
         }
     }
 

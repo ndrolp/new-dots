@@ -2,11 +2,13 @@ import QtQuick
 import QtTest
 import "../components/panels" as Panels
 import "../config" as Config
+import "../config/Motion.js" as Motion
 
 // The surface every popup draws on: a flat card with a hairline border, its
 // contents inset by the padding, opening with a short fade and slide down.
 // Attached to the bar it has no border and unfolds downward instead, its
-// contents fading in after. The host may paint it in its own colors.
+// contents fading in after. The host may paint it in its own colors. It
+// opens with the motion settings it is given, so reduce motion opens it at once.
 TestCase {
     name: "PopupSurface"
     width: 400
@@ -24,6 +26,8 @@ TestCase {
             property alias box: box
 
             width: 200
+            motion: Motion.durations(false)
+            motionEasing: Easing.OutCubic
 
             Rectangle {
                 id: box
@@ -84,6 +88,23 @@ TestCase {
         verify(surface.reveal < 1);
         tryCompare(surface, "opacity", 1, 300);
         compare(surface.mapToItem(surface.parent, 0, 0).y, 0);
+    }
+
+    function test_withReduceMotionASurfaceOpensAndClosesAtOnce() {
+        const surface = makeSurface({ open: false, motion: Motion.durations(true) });
+
+        surface.open = true;
+        compare(surface.reveal, 1);
+        compare(surface.opacity, 1);
+        surface.open = false;
+        compare(surface.reveal, 0);
+    }
+
+    function test_withReduceMotionAnAttachedSurfaceUnfoldsAtOnce() {
+        const surface = makeSurface({ attached: true, open: false, motion: Motion.durations(true) });
+
+        surface.open = true;
+        compare(surface.unfoldedHeight, surface.implicitHeight);
     }
 
     function test_theSurfaceIsAsTallAsItsContentsPlusThePadding() {

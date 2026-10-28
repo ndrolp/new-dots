@@ -34,8 +34,8 @@ Variants {
 
         Behavior on reveal {
             NumberAnimation {
-                duration: 240
-                easing.type: Easing.OutCubic
+                duration: root.appearance.motion.long
+                easing.type: root.appearance.motionEasing
             }
         }
 
@@ -332,8 +332,8 @@ Variants {
                             properties: "opacity,scale"
                             from: 0
                             to: 1
-                            duration: 160
-                            easing.type: Easing.OutCubic
+                            duration: root.appearance.motion.medium
+                            easing.type: root.appearance.motionEasing
                         }
                     }
 
@@ -341,7 +341,7 @@ Variants {
                         NumberAnimation {
                             properties: "opacity,scale"
                             to: 0
-                            duration: 120
+                            duration: root.appearance.motion.short
                             easing.type: Easing.InCubic
                         }
                     }
@@ -349,8 +349,8 @@ Variants {
                     displaced: Transition {
                         NumberAnimation {
                             properties: "x,y"
-                            duration: 160
-                            easing.type: Easing.OutCubic
+                            duration: root.appearance.motion.medium
+                            easing.type: root.appearance.motionEasing
                         }
                     }
 
@@ -367,7 +367,7 @@ Variants {
                         color: selected || rowHover.hovered ? theme.surfaceHover : "transparent"
 
                         Behavior on color {
-                            ColorAnimation { duration: 120 }
+                            ColorAnimation { duration: root.appearance.motion.short }
                         }
 
                         HoverHandler {
