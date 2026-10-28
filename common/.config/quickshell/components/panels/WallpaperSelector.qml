@@ -273,7 +273,7 @@ Variants {
                             from: hero.direction * incoming.width
                             to: 0
                             duration: root.appearance.motion.long
-                            easing.type: root.appearance.motionEasing
+                            easing.type: root.appearance.motion.easing
                         }
 
                         NumberAnimation {
@@ -282,7 +282,7 @@ Variants {
                             from: 0
                             to: -hero.direction * leaving.width
                             duration: root.appearance.motion.long
-                            easing.type: root.appearance.motionEasing
+                            easing.type: root.appearance.motion.easing
                         }
 
                         onFinished: {

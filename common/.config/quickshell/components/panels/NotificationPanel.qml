@@ -61,7 +61,7 @@ PopupWindow {
     Behavior on reveal {
         NumberAnimation {
             duration: root.appearance.motion.long
-            easing.type: root.appearance.motionEasing
+            easing.type: root.appearance.motion.easing
         }
     }
 

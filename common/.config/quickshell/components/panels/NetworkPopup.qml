@@ -151,7 +151,7 @@ BarPopup {
                             Behavior on height {
                                 NumberAnimation {
                                     duration: root.appearance.motion.short
-                                    easing.type: root.appearance.motionEasing
+                                    easing.type: root.appearance.motion.easing
                                 }
                             }
 

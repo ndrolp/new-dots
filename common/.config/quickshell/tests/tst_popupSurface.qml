@@ -26,8 +26,7 @@ TestCase {
             property alias box: box
 
             width: 200
-            motion: Motion.durations(false)
-            motionEasing: Easing.OutCubic
+            motion: Motion.motion(false)
 
             Rectangle {
                 id: box
@@ -91,7 +90,7 @@ TestCase {
     }
 
     function test_withReduceMotionASurfaceOpensAndClosesAtOnce() {
-        const surface = makeSurface({ open: false, motion: Motion.durations(true) });
+        const surface = makeSurface({ open: false, motion: Motion.motion(true) });
 
         surface.open = true;
         compare(surface.reveal, 1);
@@ -101,7 +100,7 @@ TestCase {
     }
 
     function test_withReduceMotionAnAttachedSurfaceUnfoldsAtOnce() {
-        const surface = makeSurface({ attached: true, open: false, motion: Motion.durations(true) });
+        const surface = makeSurface({ attached: true, open: false, motion: Motion.motion(true) });
 
         surface.open = true;
         compare(surface.unfoldedHeight, surface.implicitHeight);

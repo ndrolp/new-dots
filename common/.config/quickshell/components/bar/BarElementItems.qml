@@ -335,7 +335,7 @@ Item {
         Behavior on width {
             NumberAnimation {
                 duration: root.appearance.motion.medium
-                easing.type: root.appearance.motionEasing
+                easing.type: root.appearance.motion.easing
             }
         }
 
@@ -394,7 +394,7 @@ Item {
                     property: "x"
                     to: 0
                     duration: root.appearance.motion.medium
-                    easing.type: root.appearance.motionEasing
+                    easing.type: root.appearance.motion.easing
                 }
             }
         }
@@ -700,7 +700,7 @@ Item {
                 Behavior on width {
                     NumberAnimation {
                         duration: root.appearance.motion.medium
-                        easing.type: root.appearance.motionEasing
+                        easing.type: root.appearance.motion.easing
                     }
                 }
 
@@ -717,7 +717,7 @@ Item {
                     Behavior on opacity {
                         NumberAnimation {
                             duration: root.appearance.motion.short
-                            easing.type: root.appearance.motionEasing
+                            easing.type: root.appearance.motion.easing
                         }
                     }
                 }

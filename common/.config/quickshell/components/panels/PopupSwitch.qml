@@ -36,7 +36,7 @@ Rectangle {
         Behavior on x {
             NumberAnimation {
                 duration: popupSwitch.appearance.motion.short
-                easing.type: popupSwitch.appearance.motionEasing
+                easing.type: popupSwitch.appearance.motion.easing
             }
         }
     }

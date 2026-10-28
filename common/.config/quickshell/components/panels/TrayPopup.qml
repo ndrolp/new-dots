@@ -57,7 +57,7 @@ BarPopup {
             NumberAnimation {
                 properties: "y"
                 duration: root.appearance.motion.medium
-                easing.type: root.appearance.motionEasing
+                easing.type: root.appearance.motion.easing
             }
         }
 
@@ -84,7 +84,7 @@ BarPopup {
                 Behavior on height {
                     NumberAnimation {
                         duration: root.appearance.motion.medium
-                        easing.type: root.appearance.motionEasing
+                        easing.type: root.appearance.motion.easing
                     }
                 }
 
@@ -164,14 +164,14 @@ BarPopup {
                     Behavior on height {
                         NumberAnimation {
                             duration: root.appearance.motion.medium
-                            easing.type: root.appearance.motionEasing
+                            easing.type: root.appearance.motion.easing
                         }
                     }
 
                     Behavior on opacity {
                         NumberAnimation {
                             duration: root.appearance.motion.short
-                            easing.type: root.appearance.motionEasing
+                            easing.type: root.appearance.motion.easing
                         }
                     }
 

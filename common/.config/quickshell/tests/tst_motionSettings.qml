@@ -40,8 +40,7 @@ TestCase {
 
                 property int radius: 12
                 property int textSize: 13
-                readonly property var motion: Motion.durations(reduceMotion)
-                readonly property int motionEasing: Easing.OutCubic
+                readonly property var motion: Motion.motion(reduceMotion)
                 property bool reduceMotion: false
             }
 

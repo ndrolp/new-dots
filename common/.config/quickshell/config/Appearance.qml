@@ -19,9 +19,8 @@ QtObject {
     // The night light temperature, in kelvin (see services/NightLightState.js).
     property alias nightLightTemperature: settings.nightLightTemperature
 
-    // How long animations take (see Motion), and how they ease.
-    readonly property var motion: Motion.durations(settings.reduceMotion)
-    readonly property int motionEasing: Easing.OutCubic
+    // How long animations take and how they ease (see Motion).
+    readonly property var motion: Motion.motion(settings.reduceMotion)
 
     // Not stored: a restart edits the default profile with nothing pending.
     property string editingBarProfile: ""

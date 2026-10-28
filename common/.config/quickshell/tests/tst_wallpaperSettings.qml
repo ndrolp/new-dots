@@ -105,8 +105,7 @@ TestCase {
                 appearance: QtObject {
                     property int radius: 12
                     property int textSize: 13
-                    readonly property var motion: Motion.durations(false)
-                    readonly property int motionEasing: Easing.OutCubic
+                    readonly property var motion: Motion.motion(false)
                 }
                 wallpapers: wallpapers
                 displays: [

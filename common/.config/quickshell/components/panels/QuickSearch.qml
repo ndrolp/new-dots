@@ -147,7 +147,7 @@ Variants {
             Behavior on height {
                 NumberAnimation {
                     duration: root.appearance.motion.medium
-                    easing.type: root.appearance.motionEasing
+                    easing.type: root.appearance.motion.easing
                 }
             }
 
@@ -286,7 +286,7 @@ Variants {
                             from: 0
                             to: 1
                             duration: root.appearance.motion.medium
-                            easing.type: root.appearance.motionEasing
+                            easing.type: root.appearance.motion.easing
                         }
                     }
 
@@ -303,7 +303,7 @@ Variants {
                         NumberAnimation {
                             properties: "x,y"
                             duration: root.appearance.motion.medium
-                            easing.type: root.appearance.motionEasing
+                            easing.type: root.appearance.motion.easing
                         }
                     }
 

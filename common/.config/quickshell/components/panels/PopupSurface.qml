@@ -13,9 +13,8 @@ Rectangle {
     id: surface
 
     property bool open: false
-    // Appearance.motion and Appearance.motionEasing, as the host has them.
+    // Appearance.motion (durations and easing), as the host has it.
     required property var motion
-    required property int motionEasing
     // Hangs from the bar instead of floating below it.
     property bool attached: false
     // The host may paint a floating surface in its own colors.
@@ -54,7 +53,7 @@ Rectangle {
     Behavior on reveal {
         NumberAnimation {
             duration: surface.revealDuration
-            easing.type: surface.motionEasing
+            easing.type: surface.motion.easing
         }
     }
 

@@ -89,7 +89,7 @@ PanelWindow {
                 Behavior on reveal {
                     NumberAnimation {
                         duration: root.appearance.motion.medium
-                        easing.type: root.appearance.motionEasing
+                        easing.type: root.appearance.motion.easing
                     }
                 }
 

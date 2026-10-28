@@ -35,7 +35,7 @@ Rectangle {
         Behavior on x {
             NumberAnimation {
                 duration: settingsSwitch.appearance.motion.short
-                easing.type: settingsSwitch.appearance.motionEasing
+                easing.type: settingsSwitch.appearance.motion.easing
             }
         }
     }

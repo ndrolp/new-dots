@@ -162,14 +162,14 @@ PanelWindow {
         Behavior on opacity {
             NumberAnimation {
                 duration: root.appearance.motion.medium
-                easing.type: root.appearance.motionEasing
+                easing.type: root.appearance.motion.easing
             }
         }
 
         Behavior on transform {
             NumberAnimation {
                 duration: root.appearance.motion.medium
-                easing.type: root.appearance.motionEasing
+                easing.type: root.appearance.motion.easing
             }
         }
 

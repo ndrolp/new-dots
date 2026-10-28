@@ -37,7 +37,7 @@ Rectangle {
     Behavior on width {
         NumberAnimation {
             duration: root.appearance.motion.medium
-            easing.type: root.appearance.motionEasing
+            easing.type: root.appearance.motion.easing
         }
     }
 
@@ -51,7 +51,7 @@ Rectangle {
             NumberAnimation {
                 properties: "x"
                 duration: root.appearance.motion.medium
-                easing.type: root.appearance.motionEasing
+                easing.type: root.appearance.motion.easing
             }
         }
 
@@ -97,14 +97,14 @@ Rectangle {
                 Behavior on width {
                     NumberAnimation {
                         duration: root.appearance.motion.medium
-                        easing.type: root.appearance.motionEasing
+                        easing.type: root.appearance.motion.easing
                     }
                 }
 
                 Behavior on x {
                     NumberAnimation {
                         duration: root.appearance.motion.medium
-                        easing.type: root.appearance.motionEasing
+                        easing.type: root.appearance.motion.easing
                     }
                 }
 

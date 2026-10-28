@@ -1,8 +1,8 @@
 .pragma library
 
-// How long the shell's animations take, in ms. Every animation reads one of
-// these instead of its own number, so reduce motion reaches all of them.
-// Pure, no Quickshell.
+// How the shell's animations move: how long they take, in ms, and how they
+// ease. Every animation reads these instead of its own numbers, so reduce
+// motion reaches all of them. Pure, no Quickshell.
 
 const normal = {
     // Something leaving before its replacement slides in.
@@ -17,10 +17,15 @@ const normal = {
     frame: 50
 };
 
-// The durations to animate with: reduce motion makes every animation instant,
-// and changes still land because a 0 ms animation jumps to its end.
-function durations(reduceMotion) {
-    const result = {};
+// How every animation eases: QtQuick's Easing.OutCubic (QEasingCurve's
+// enum value, since a .pragma library can't read QtQuick's Easing).
+const easing = 6;
+
+// The motion to animate with: the durations above (reduce motion makes every
+// animation instant, and changes still land because a 0 ms animation jumps to
+// its end) and `easing`, the easing.type every animation uses.
+function motion(reduceMotion) {
+    const result = { easing: easing };
     for (const name in normal)
         result[name] = reduceMotion ? 0 : normal[name];
     return result;

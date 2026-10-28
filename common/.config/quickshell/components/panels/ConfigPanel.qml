@@ -325,7 +325,7 @@ Rectangle {
             property: "opacity"
             to: 0
             duration: root.appearance.motion.brief
-            easing.type: root.appearance.motionEasing
+            easing.type: root.appearance.motion.easing
         }
 
         ScriptAction {
@@ -340,7 +340,7 @@ Rectangle {
             property: "opacity"
             to: 1
             duration: root.appearance.motion.medium
-            easing.type: root.appearance.motionEasing
+            easing.type: root.appearance.motion.easing
         }
     }
 

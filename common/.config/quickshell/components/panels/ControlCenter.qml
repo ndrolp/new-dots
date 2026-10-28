@@ -194,7 +194,6 @@ Variants {
             property bool barTransparent: root.appearance.barProfileValue(controlCenter.profileName, "barTransparent")
             property int barOpacity: root.appearance.barProfileValue(controlCenter.profileName, "barOpacity")
             property var motion: root.appearance.motion
-            property int motionEasing: root.appearance.motionEasing
         }
         // The bar window's height, as the bar computes it.
         readonly property int totalBarHeight: barAppearance.barHeight
@@ -368,7 +367,6 @@ Variants {
             radius: controlCenter.barAppearance.radius
             barOpacity: controlCenter.barAppearance.barOpacity
             motion: controlCenter.barAppearance.motion
-            motionEasing: controlCenter.barAppearance.motionEasing
 
             Column {
                 width: parent.width

@@ -122,7 +122,6 @@ Variants {
             enabled: menu.shown
             radius: root.appearance.radius
             motion: root.appearance.motion
-            motionEasing: root.appearance.motionEasing
 
             Column {
                 width: parent.width

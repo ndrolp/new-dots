@@ -24,8 +24,7 @@ TestCase {
 
         property int radius: 12
         property int textSize: 13
-        readonly property var motion: Motion.durations(false)
-        readonly property int motionEasing: Easing.OutCubic
+        readonly property var motion: Motion.motion(false)
     }
 
     // The same settings with reduce motion on.
@@ -34,8 +33,7 @@ TestCase {
 
         property int radius: 12
         property int textSize: 13
-        readonly property var motion: Motion.durations(true)
-        readonly property int motionEasing: Easing.OutCubic
+        readonly property var motion: Motion.motion(true)
     }
 
     Component {

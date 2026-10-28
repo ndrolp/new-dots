@@ -221,14 +221,14 @@ Item {
                     Behavior on x {
                         NumberAnimation {
                             duration: root.appearance.motion.medium
-                            easing.type: root.appearance.motionEasing
+                            easing.type: root.appearance.motion.easing
                         }
                     }
 
                     Behavior on width {
                         NumberAnimation {
                             duration: root.appearance.motion.medium
-                            easing.type: root.appearance.motionEasing
+                            easing.type: root.appearance.motion.easing
                         }
                     }
                 }
@@ -246,7 +246,7 @@ Item {
         Behavior on x {
             NumberAnimation {
                 duration: root.appearance.motion.long
-                easing.type: root.appearance.motionEasing
+                easing.type: root.appearance.motion.easing
             }
         }
         appearance: root.appearance
@@ -286,7 +286,7 @@ Item {
         Behavior on x {
             NumberAnimation {
                 duration: root.appearance.motion.long
-                easing.type: root.appearance.motionEasing
+                easing.type: root.appearance.motion.easing
             }
         }
         appearance: root.appearance
