@@ -94,8 +94,8 @@ Row {
 
     Behavior on width {
         NumberAnimation {
-            duration: 180
-            easing.type: Easing.OutCubic
+            duration: root.appearance.motion.medium
+            easing.type: root.appearance.motionEasing
         }
     }
 
@@ -114,7 +114,7 @@ Row {
 
         Behavior on color {
             ColorAnimation {
-                duration: 140
+                duration: root.appearance.motion.short
             }
         }
 
@@ -223,14 +223,14 @@ Row {
                 target: labelTranslation
                 property: "x"
                 to: -12
-                duration: 90
+                duration: root.appearance.motion.brief
             }
 
             NumberAnimation {
                 target: iconTranslation
                 property: "x"
                 to: -12
-                duration: 90
+                duration: root.appearance.motion.brief
             }
         }
 
@@ -249,16 +249,16 @@ Row {
                 target: labelTranslation
                 property: "x"
                 to: 0
-                duration: 160
-                easing.type: Easing.OutCubic
+                duration: root.appearance.motion.medium
+                easing.type: root.appearance.motionEasing
             }
 
             NumberAnimation {
                 target: iconTranslation
                 property: "x"
                 to: 0
-                duration: 160
-                easing.type: Easing.OutCubic
+                duration: root.appearance.motion.medium
+                easing.type: root.appearance.motionEasing
             }
         }
     }
