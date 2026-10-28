@@ -116,7 +116,14 @@ hl.bind(
 	hl.dsp.exec_cmd(qs .. "window-switcher previous"),
 	{ description = "Switch to previous window" }
 )
-hl.bind(win .. " + l", hl.dsp.exec_cmd("hyprlock"), { description = "Lock screen" })
+hl.bind(win .. " + l", hl.dsp.exec_cmd("loginctl lock-session"), { description = "Lock screen" })
+-- Emergency lock: hyprlock, should the shell's lock screen fail. Locked, so it
+-- still works while the session is locked and the shell has crashed.
+hl.bind(
+	win .. " + CTRL + ALT + l",
+	hl.dsp.exec_cmd("hyprlock"),
+	{ locked = true, description = "Emergency lock (hyprlock)" }
+)
 hl.bind(mainMod .. " + left", hl.dsp.focus({ direction = "left" }), { description = "Focus window left" })
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }), { description = "Focus window right" })
 hl.bind(mainMod .. " + up", hl.dsp.focus({ direction = "up" }), { description = "Focus window up" })
