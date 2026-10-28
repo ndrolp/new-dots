@@ -38,11 +38,6 @@ hl.bind(mainMod .. " + SHIFT + q", hl.dsp.window.close(), { description = "Close
 hl.bind(mainMod .. " + SHIFT + t", hl.dsp.window.float(), { description = "Toggle floating" })
 hl.bind(mainMod .. " + SHIFT + f", hl.dsp.window.fullscreen(), { description = "Toggle fullscreen" })
 hl.bind(
-	mainMod .. " + SHIFT + S",
-	hl.dsp.window.move({ workspace = "special:magic" }),
-	{ description = "Move window to scratchpad" }
-)
-hl.bind(
 	win .. " + SHIFT + S",
 	hl.dsp.exec_cmd("~/.dotfiles/scripts/screenshots/basic.sh"),
 	{ description = "Take a screenshot" }
