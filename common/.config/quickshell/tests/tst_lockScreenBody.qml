@@ -1,6 +1,7 @@
 import QtQuick
 import QtTest
 import "../components/lock" as Lock
+import "../config" as Config
 
 // What the lock screen shows on one monitor. Lock.qml puts it on every
 // monitor with WlSessionLock and checks the password with PamContext, which
@@ -21,6 +22,10 @@ TestCase {
             height: 600
             now: new Date(2026, 9, 28, 9, 5)
         }
+    }
+
+    Config.Theme {
+        id: theme
     }
 
     SignalSpy {
@@ -98,5 +103,33 @@ TestCase {
     function test_theErrorOnlyShowsWithThePasswordField() {
         const body = make({ showsPasswordField: false, error: "Wrong password" });
         verify(!shown(body, "Wrong password"));
+    }
+
+    // The wallpaper as the lock screen shows it: blurred.
+    function blurredWallpaper(item) {
+        return all(item, child => child.blurEnabled === true && child.source instanceof Image
+            && child.visible)[0] || null;
+    }
+
+    function test_theMonitorsWallpaperShowsBlurredBehindTheClock() {
+        const blurred = blurredWallpaper(make({ wallpaper: "/walls/forest.jpg" }));
+        verify(blurred);
+        verify(blurred.blur > 0);
+        compare(blurred.source.source.toString(), "file:///walls/forest.jpg");
+    }
+
+    function test_withoutAWallpaperOnlyTheThemeShows() {
+        verify(!blurredWallpaper(make({ wallpaper: "" })));
+    }
+
+    // Light and dark wallpapers alike sit under the theme's background, so
+    // the theme's text stays readable on them.
+    function test_theThemesBackgroundTintsTheWallpaper() {
+        const body = make({ wallpaper: "/walls/forest.jpg" });
+        const tint = all(body, child => child !== body && child.color !== undefined
+            && Qt.colorEqual(child.color, theme.background) && child.visible
+            && child.width === body.width && child.height === body.height)[0];
+        verify(tint);
+        verify(tint.opacity > 0 && tint.opacity < 1);
     }
 }

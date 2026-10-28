@@ -1,14 +1,17 @@
 import QtQuick
+import QtQuick.Effects
 import "../../config" as Config
 
-// What the lock screen shows on one monitor: the clock and the date and, on
-// the focused monitor only, the password field with what went wrong under
+// What the lock screen shows on one monitor: its wallpaper blurred behind
+// the clock and the date and, on the focused monitor only, the password field with what went wrong under
 // it. Enter only asks for the password to be checked (passwordSubmitted) and
 // clears the field: Lock.qml checks it.
 Rectangle {
     id: root
 
     property date now: new Date()
+    // The monitor's wallpaper, as a local path; "" shows only the theme.
+    property string wallpaper: ""
     property bool showsPasswordField: false
     // A password is being checked: the field takes no more until it's done.
     property bool checking: false
@@ -19,6 +22,33 @@ Rectangle {
 
     Config.Theme {
         id: theme
+    }
+
+    Image {
+        id: wallpaperImage
+
+        anchors.fill: parent
+        source: root.wallpaper === "" ? "" : "file://" + root.wallpaper
+        fillMode: Image.PreserveAspectCrop
+        asynchronous: true
+        visible: false
+    }
+
+    MultiEffect {
+        anchors.fill: parent
+        source: wallpaperImage
+        visible: root.wallpaper !== ""
+        blurEnabled: true
+        blur: 1
+        blurMax: 64
+    }
+
+    // Keeps the theme's text readable on light and dark wallpapers alike.
+    Rectangle {
+        anchors.fill: parent
+        color: theme.background
+        opacity: 0.55
+        visible: root.wallpaper !== ""
     }
 
     Column {

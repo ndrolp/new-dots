@@ -494,6 +494,8 @@ ShellRoot {
 
     Lock.Lock {
         id: lockScreen
+
+        wallpapers: wallpapers
     }
 
     // hypridle's lock_cmd: every way of locking (idle, sleep, the control
