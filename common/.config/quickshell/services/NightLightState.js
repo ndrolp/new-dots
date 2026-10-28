@@ -33,24 +33,38 @@ function temperatureCommand(kelvin) {
 }
 
 // Whether night light is on: plain state, changed only through the functions
-// below, which return the next state. hyprsunset runs exactly while `on`.
+// below, which return the next state.
 // - failureHint: why night light went off on its own ("" otherwise), shown
 //   under the control center toggle.
+// - hyprsunset: what NightLight.qml makes the process do: "running" (start it
+//   if it isn't), "stopping" (stop it and wait for it to exit) or "stopped".
+//   Turning night light back on while the old hyprsunset is still exiting
+//   keeps it "stopping" until it exits, then starts it again.
 // It isn't saved, so every shell start begins with it off.
-const off = { on: false, failureHint: "" };
+const off = { on: false, failureHint: "", hyprsunset: "stopped" };
 
 // The control center toggle: turning it on tries hyprsunset afresh, so an
 // old hint goes.
 function toggled(state) {
-    return { on: !state.on, failureHint: "" };
+    const on = !state.on;
+    let hyprsunset = state.hyprsunset;
+    if (on && hyprsunset === "stopped")
+        hyprsunset = "running";
+    else if (!on && hyprsunset === "running")
+        hyprsunset = "stopping";
+    return { on: on, failureHint: "", hyprsunset: hyprsunset };
 }
 
-// hyprsunset exited with `exitCode`. Once night light is off that is just it
-// stopping; while it is on, night light goes off and the hint says why.
+// hyprsunset exited with `exitCode`. When it was asked to stop that is just
+// it stopping, whatever the code, and it starts again if night light was
+// turned back on meanwhile. Exiting on its own turns night light off and the
+// hint says why.
 function exited(state, exitCode) {
+    if (state.hyprsunset === "stopping")
+        return Object.assign({}, state, { hyprsunset: state.on ? "running" : "stopped" });
     if (!state.on)
         return state;
-    return { on: false, failureHint: failureHint(exitCode) };
+    return { on: false, failureHint: failureHint(exitCode), hyprsunset: "stopped" };
 }
 
 function failureHint(exitCode) {

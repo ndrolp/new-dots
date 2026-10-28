@@ -29,12 +29,16 @@ QtObject {
     }
 
     // Moves to the `next` state and starts or stops hyprsunset to match it.
+    // While it is "stopping" the old process may still be exiting; once it
+    // exits, `exited` says whether to start it again.
     function follow(next) {
         state = next;
-        if (next.on && !hyprsunset.running)
+        if (next.hyprsunset === "running" && !hyprsunset.running) {
             hyprsunset.command = NightLightState.startCommand(temperature);
-        if (hyprsunset.running !== next.on)
-            hyprsunset.running = next.on;
+            hyprsunset.running = true;
+        } else if (next.hyprsunset === "stopping" && hyprsunset.running) {
+            hyprsunset.running = false;
+        }
     }
 
     onTemperatureChanged: {

@@ -73,4 +73,41 @@ TestCase {
         const failed = NightLightState.exited(NightLightState.toggled(NightLightState.off), 127);
         compare(NightLightState.toggled(failed).failureHint, "");
     }
+
+    function test_turningItOnRunsHyprsunset() {
+        compare(NightLightState.off.hyprsunset, "stopped");
+        compare(NightLightState.toggled(NightLightState.off).hyprsunset, "running");
+    }
+
+    function test_turningItOffStopsHyprsunset() {
+        const off = NightLightState.toggled(NightLightState.toggled(NightLightState.off));
+        compare(off.hyprsunset, "stopping");
+        compare(NightLightState.exited(off, 143).hyprsunset, "stopped");
+    }
+
+    function test_turningItBackOnWhileHyprsunsetIsStillStoppingStartsItOnceItExits() {
+        const off = NightLightState.toggled(NightLightState.toggled(NightLightState.off));
+        const onAgain = NightLightState.toggled(off);
+        verify(onAgain.on);
+        compare(onAgain.hyprsunset, "stopping");
+        const restarted = NightLightState.exited(onAgain, 143);
+        verify(restarted.on);
+        compare(restarted.hyprsunset, "running");
+        compare(restarted.failureHint, "");
+    }
+
+    function test_anExitWeAskedForIsNoFailureWhateverItsCode() {
+        const off = NightLightState.toggled(NightLightState.toggled(NightLightState.off));
+        for (const code of [0, 1, 127, 143])
+            compare(NightLightState.exited(off, code).failureHint, "");
+    }
+
+    function test_hyprsunsetFailingAfterARestartStillTurnsItOff() {
+        const restarted = NightLightState.exited(NightLightState.toggled(
+            NightLightState.toggled(NightLightState.toggled(NightLightState.off))), 143);
+        const failed = NightLightState.exited(restarted, 1);
+        verify(!failed.on);
+        compare(failed.hyprsunset, "stopped");
+        compare(failed.failureHint, "hyprsunset stopped, so night light turned off.");
+    }
 }

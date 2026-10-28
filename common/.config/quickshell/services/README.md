@@ -41,7 +41,9 @@ missing hyprsunset exits 127), and stopping it gives the screen its colours
 back. The slider saves `nightLightTemperature` in `appearance.json` and a
 running hyprsunset follows it live through `hyprctl hyprsunset temperature`.
 `on` is never saved. When hyprsunset exits while night light is on, night
-light turns off and `failureHint` says why. The bounds, the commands and the
+light turns off and `failureHint` says why; an exit it asked for is no
+failure, and turning it back on while the old hyprsunset is still exiting
+starts a new one once it exits. The bounds, the commands and the
 on/off decisions are plain functions in `NightLightState.js`, tested without
 Quickshell.
 
