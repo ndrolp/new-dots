@@ -91,6 +91,7 @@ ShellRoot {
 
     Modules.Lock {
         wallpapers: wallpapers
+        appearance: appearance
     }
 
     Modules.LowBattery {}

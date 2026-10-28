@@ -5,15 +5,18 @@
 // Lock.qml locks the session while `locked` and hands the password to PAM
 // while `phase` is "checking". Pure, no Quickshell.
 // - locked: the session is locked.
-// - phase: "waiting" for a password, "checking" one, or "unlocked".
+// - phase: "waiting" for a password, "checking" one, "unlocking" (the
+//   password went through and the lock screen is fading away, still locked
+//   under it) or "unlocked".
 // - error: what the lock screen says under the password field ("" for
 //   nothing).
 const unlocked = { locked: false, phase: "unlocked", error: "" };
 
 // Something asked to lock (the `lock` IPC call). Asking again while locked
-// changes nothing, so hypridle can ask as often as it likes.
+// changes nothing, so hypridle can ask as often as it likes; asking while
+// the lock screen fades away keeps it and asks for the password again.
 function lockAsked(state) {
-    if (state.locked)
+    if (state.locked && state.phase !== "unlocking")
         return state;
     return { locked: true, phase: "waiting", error: "" };
 }
@@ -45,15 +48,24 @@ const errors = {
 
 // PAM finished checking the password with `result`: one of PamResult's
 // "success", "failed", "error" and "maxTries", or "startFailed" when PAM
-// couldn't even start (a PamError). Only "success" unlocks; anything else
-// waits for the password again and says why.
+// couldn't even start (a PamError). Only "success" unlocks, once the lock
+// screen has faded away (unlockFinished); anything else waits for the
+// password again and says why.
 function authFinished(state, result) {
     if (state.phase !== "checking")
         return state;
     if (result === "success")
-        return unlocked;
+        return { locked: true, phase: "unlocking", error: "" };
     return Object.assign({}, state, {
         phase: "waiting",
         error: errors[result] || "Couldn't check the password"
     });
+}
+
+// The lock screen has faded away after the right password: the session
+// unlocks. Anything but unlocking stays as it is.
+function unlockFinished(state) {
+    if (state.phase !== "unlocking")
+        return state;
+    return unlocked;
 }

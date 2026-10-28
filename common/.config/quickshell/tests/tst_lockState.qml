@@ -22,10 +22,33 @@ TestCase {
         return LockState.passwordSubmitted(LockState.lockAsked(LockState.unlocked), "secret");
     }
 
-    function test_theRightPasswordUnlocks() {
+    // The lock screen fades away before the session unlocks under it.
+    function test_theRightPasswordStartsUnlocking() {
         const state = LockState.authFinished(checking(), "success");
+        verify(state.locked);
+        compare(state.phase, "unlocking");
+        compare(state.error, "");
+    }
+
+    function test_onceTheLockScreenHasFadedTheSessionUnlocks() {
+        const state = LockState.unlockFinished(LockState.authFinished(checking(), "success"));
         verify(!state.locked);
         compare(state.phase, "unlocked");
+    }
+
+    function test_fadingAwayFinishesOnlyWhileUnlocking() {
+        const waiting = LockState.lockAsked(LockState.unlocked);
+        compare(LockState.unlockFinished(waiting), waiting);
+        compare(LockState.unlockFinished(checking()), checking());
+        compare(LockState.unlockFinished(LockState.unlocked), LockState.unlocked);
+    }
+
+    // hypridle asking to lock while the lock screen fades away keeps it.
+    function test_askingToLockWhileUnlockingStaysLocked() {
+        const state = LockState.lockAsked(LockState.authFinished(checking(), "success"));
+        verify(state.locked);
+        compare(state.phase, "waiting");
+        compare(LockState.unlockFinished(state), state);
     }
 
     function test_aWrongPasswordStaysLockedAndSaysSo() {
@@ -77,7 +100,8 @@ TestCase {
     }
 
     function test_unlockingThenLockingAgainLocks() {
-        const state = LockState.lockAsked(LockState.authFinished(checking(), "success"));
+        const unlocking = LockState.authFinished(checking(), "success");
+        const state = LockState.lockAsked(LockState.unlockFinished(unlocking));
         verify(state.locked);
         compare(state.error, "");
     }

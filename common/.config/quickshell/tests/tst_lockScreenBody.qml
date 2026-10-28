@@ -2,6 +2,7 @@ import QtQuick
 import QtTest
 import "../components/lock" as Lock
 import "../config" as Config
+import "../config/Motion.js" as Motion
 
 // What the lock screen shows on one monitor. Lock.qml puts it on every
 // monitor with WlSessionLock and checks the password with PamContext, which
@@ -114,8 +115,60 @@ TestCase {
     function test_theMonitorsWallpaperShowsBlurredBehindTheClock() {
         const blurred = blurredWallpaper(make({ wallpaper: "/walls/forest.jpg" }));
         verify(blurred);
-        verify(blurred.blur > 0);
+        tryVerify(() => blurred.blur > 0);
         compare(blurred.source.source.toString(), "file:///walls/forest.jpg");
+    }
+
+    function still() {
+        return Motion.motion(true);
+    }
+
+    // What the lock screen shows over the wallpaper: the clock, the date and
+    // the password field.
+    function content(body) {
+        return all(body, child => child.objectName === "lockContent")[0];
+    }
+
+    function test_whenItLocksTheClockFadesIn() {
+        const body = make({ showsPasswordField: true });
+        verify(content(body).opacity < 1);
+        tryCompare(content(body), "opacity", 1);
+    }
+
+    function test_whenItLocksTheWallpaperBlursIn() {
+        const blurred = blurredWallpaper(make({ wallpaper: "/walls/forest.jpg" }));
+        verify(blurred.blur < 1);
+        tryCompare(blurred, "blur", 1);
+    }
+
+    function test_withReduceMotionItShowsAtOnce() {
+        const body = make({ motion: still(), wallpaper: "/walls/forest.jpg" });
+        compare(content(body).opacity, 1);
+        compare(blurredWallpaper(body).blur, 1);
+    }
+
+    // Unlocking clears the clock away and sharpens the wallpaper, so the
+    // lock screen gives way to the desktop under it.
+    function test_whileUnlockingTheClockFadesAndTheWallpaperSharpens() {
+        const body = make({ motion: still(), wallpaper: "/walls/forest.jpg" });
+        body.unlocking = true;
+        compare(content(body).opacity, 0);
+        compare(all(body, child => child.blurEnabled === true)[0].blur, 0);
+    }
+
+    function test_aWrongPasswordShakesTheField() {
+        const body = make({ showsPasswordField: true });
+        verify(!body.shaking);
+        body.error = "Wrong password";
+        verify(body.shaking);
+        tryVerify(() => !body.shaking);
+    }
+
+    function test_withReduceMotionAWrongPasswordDoesntShake() {
+        const body = make({ showsPasswordField: true, motion: still() });
+        body.error = "Wrong password";
+        verify(!body.shaking);
+        verify(shown(body, "Wrong password"));
     }
 
     function test_withoutAWallpaperOnlyTheThemeShows() {
@@ -130,6 +183,6 @@ TestCase {
             && Qt.colorEqual(child.color, theme.background) && child.visible
             && child.width === body.width && child.height === body.height)[0];
         verify(tint);
-        verify(tint.opacity > 0 && tint.opacity < 1);
+        tryVerify(() => tint.opacity > 0.5 && tint.opacity < 1);
     }
 }

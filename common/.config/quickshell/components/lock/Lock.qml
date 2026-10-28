@@ -4,6 +4,7 @@ import Quickshell.Services.Pam
 import Quickshell.Wayland
 import QtQuick
 import "LockState.js" as LockState
+import "../../config/Motion.js" as Motion
 import "." as Lock
 
 // The lock screen: locks every monitor through the session-lock protocol and
@@ -20,6 +21,9 @@ Scope {
     property var lockState: LockState.unlocked
     // The shell's wallpapers (Config.Wallpapers): each monitor shows its own.
     property var wallpapers: null
+    // The shell's Appearance, for how the lock screen animates.
+    property var appearance: null
+    readonly property var motion: appearance ? appearance.motion : Motion.motion(false)
     // The password waiting for PAM to ask for it.
     property string pendingPassword: ""
 
@@ -41,6 +45,8 @@ Scope {
     function finish(result) {
         pendingPassword = "";
         lockState = LockState.authFinished(lockState, result);
+        if (lockState.phase === "unlocking")
+            unlockDelay.restart();
     }
 
     function resultName(result) {
@@ -88,6 +94,16 @@ Scope {
         onError: root.finish("startFailed")
     }
 
+    // How long the lock screen takes to fade away before the session unlocks
+    // under it. A timer rather than the animation's end, so the session
+    // unlocks even if an animation never finishes.
+    Timer {
+        id: unlockDelay
+
+        interval: root.motion.long
+        onTriggered: root.lockState = LockState.unlockFinished(root.lockState)
+    }
+
     SystemClock {
         id: clock
 
@@ -119,6 +135,8 @@ Scope {
                 showsPasswordField: surface.focused
                 checking: root.lockState.phase === "checking"
                 error: root.lockState.error
+                unlocking: root.lockState.phase === "unlocking"
+                motion: root.motion
                 onPasswordSubmitted: password => root.submit(password)
             }
         }
