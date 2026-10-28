@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import "../services/LockState.js" as LockState
+import "../components/lock/LockState.js" as LockState
 
 // When the lock screen locks, checks a password and unlocks. Lock.qml carries
 // the decisions out with WlSessionLock and PamContext, which don't load here.

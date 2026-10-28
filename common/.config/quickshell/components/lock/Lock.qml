@@ -3,7 +3,7 @@ import Quickshell.Hyprland
 import Quickshell.Services.Pam
 import Quickshell.Wayland
 import QtQuick
-import "../../services/LockState.js" as LockState
+import "LockState.js" as LockState
 import "." as Lock
 
 // The lock screen: locks every monitor through the session-lock protocol and
