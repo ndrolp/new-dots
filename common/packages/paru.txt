@@ -12,6 +12,7 @@ xdg-desktop-portal-gtk
 xdg-desktop-portal-hyprland
 hyprlock
 hypridle
+hyprsunset
 hyprpolkitagent
 cava
 playerctl

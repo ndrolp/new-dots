@@ -13,6 +13,7 @@ import "../../config" as Config
 import "." as Panels
 import "PopupPlacement.js" as PopupPlacement
 import "../VolumeText.js" as VolumeText
+import "../../services/NightLightState.js" as NightLightState
 
 // The Control center: quick toggles and sliders, centered at the top of the
 // focused monitor. Decided per monitor from that bar's profile, it hangs from
@@ -28,6 +29,8 @@ Variants {
     required property var screenCapture
     required property var systemMonitor
     required property var keepAwake
+    // The shell's night light (services/NightLight.qml).
+    required property var nightLight
     property bool open: false
 
     signal closeRequested()
@@ -422,6 +425,45 @@ Variants {
                             controlCenter.setBrightness(position);
                         }
                     }
+                }
+
+                // Night light: its toggle, a tile wide, beside its temperature.
+                Row {
+                    width: parent.width
+                    spacing: tiles.columnSpacing
+
+                    ControlTile {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: tiles.tileWidth
+                        appearance: controlCenter.barAppearance
+                        label: root.nightLight.on ? "Night light" : "Night light off"
+                        icon: "󰖔"
+                        accentColor: theme.orange
+                        active: root.nightLight.on
+                        onTriggered: root.nightLight.toggle()
+                    }
+
+                    ControlSlider {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width - tiles.tileWidth - parent.spacing
+                        appearance: controlCenter.barAppearance
+                        label: "Temperature"
+                        icon: "󰔏"
+                        accentColor: theme.orange
+                        valueText: root.nightLight.temperature + " K"
+                        from: NightLightState.minTemperature
+                        to: NightLightState.maxTemperature
+                        value: root.nightLight.temperature
+                        onAdjusted: position => root.nightLight.setTemperature(position)
+                    }
+                }
+
+                PopupLabel {
+                    width: parent.width
+                    visible: text !== ""
+                    appearance: controlCenter.barAppearance
+                    text: root.nightLight.failureHint
+                    wrapMode: Text.Wrap
                 }
 
                 Grid {

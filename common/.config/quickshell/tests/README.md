@@ -17,7 +17,9 @@ media position, audio outputs, Wi-Fi, the battery and the network
 wide it is (`components/bar/AudioLevel.qml`), how the Cava bar element
 reads cava and tries it again when it fails (`services/CavaOutput.js`) and
 what it draws (`components/bar/CavaBars.qml`), how long animations take
-with and without reduce motion (`config/Motion.js`), when the lock screen
+with and without reduce motion (`config/Motion.js`), night light's
+temperature bounds, the saved temperature, how hyprsunset is run and when
+night light turns on and off (`services/NightLightState.js`), when the lock screen
 locks, checks a password and unlocks (`services/LockState.js`) and what it
 shows on each monitor (`components/lock/LockScreenBody.qml`), what a unified
 search query asks for: its query mode, whether it is maths for the

@@ -210,6 +210,12 @@ ShellRoot {
         id: keepAwake
     }
 
+    Services.NightLight {
+        id: nightLight
+
+        appearance: appearance
+    }
+
     NotificationServer {
         id: notificationServer
 
@@ -431,6 +437,7 @@ ShellRoot {
         screenCapture: screenCapture
         systemMonitor: systemMonitor
         keepAwake: keepAwake
+        nightLight: nightLight
         open: shell.controlCenterOpen && plugins.controlCenterEnabled
 
         onCloseRequested: shell.controlCenterOpen = false
