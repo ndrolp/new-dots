@@ -156,7 +156,7 @@ Variants {
                 }
             }
 
-            Panels.StatusPopups {
+            Panels.BarPopups {
                 appearance: panel.barAppearance
                 barWindow: panel
                 popupAnchorProvider: barContent

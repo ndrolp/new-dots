@@ -11,7 +11,9 @@ draws on (`PopupSurface.qml`), the shared popup parts (`PopupTitle`,
 (`ConfigPanel.qml`) and the settings panel sections built from them, the Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
 (`AudioOutputs.js`), how the volume is shown as text
-(`components/VolumeText.js`) and what the audio bar element shows and how
+(`components/VolumeText.js`), what the popups and bar elements show for the
+media position, audio outputs, Wi-Fi, the battery and the network
+(`components/StatusText.js`) and what the audio bar element shows and how
 wide it is (`components/bar/AudioLevel.qml`), how the Cava bar element
 reads cava and tries it again when it fails (`services/CavaOutput.js`) and
 what it draws (`components/bar/CavaBars.qml`). They run with QtTest outside of `qs`:

@@ -8,6 +8,7 @@ import Quickshell.Services.UPower
 import QtQuick
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
+import "../StatusText.js" as StatusText
 
 // The bar elements that need no component of their own (notifications,
 // recording, media, cava, audio, bluetooth, tray, network, battery and clock),
@@ -117,31 +118,10 @@ Item {
     onPlayerLabelChanged: mediaLabelTransition.restart()
 
     function networkIcon() {
-        const devices = Networking.devices.values;
-
-        for (let index = 0; index < devices.length; index++) {
-            const device = devices[index];
-
-            if (device.connected)
-                return DeviceType.toString(device.type) === "Wifi" ? "󰤨" : "󰈀";
-        }
-
-        return "󰤭";
-    }
-
-    function batteryIcon() {
-        if (!battery)
-            return "󰂑";
-        if (battery.state === UPowerDeviceState.Charging
-                || battery.state === UPowerDeviceState.PendingCharge)
-            return "󰂄";
-        if (battery.percentage <= 0.15)
-            return "󰂃";
-        if (battery.percentage <= 0.4)
-            return "󰁻";
-        if (battery.percentage <= 0.7)
-            return "󰁾";
-        return "󰁹";
+        return StatusText.networkIcon(Networking.devices.values.map(device => ({
+            connected: device.connected,
+            wifi: DeviceType.toString(device.type) === "Wifi"
+        })));
     }
 
     Rectangle {
@@ -580,7 +560,7 @@ Item {
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: root.batteryIcon()
+                text: StatusText.batteryIcon(root.battery, UPowerDeviceState)
                 color: theme.yellow
                 font.pixelSize: root.appearance.textSize
                 font.bold: true
