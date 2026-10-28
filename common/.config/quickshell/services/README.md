@@ -51,31 +51,9 @@ Quickshell.
 It saves captures to `$(xdg-user-dir PICTURES)/Screenshots`; the service only runs
 fixed executable argument lists and passes the selected region directly from `slurp`.
 
-The shell owner must add the following (the component must be instantiated once for
-tool detection and IPC actions):
-
-```qml
-property bool screenCaptureOpen: false
-
-Services.ScreenCapture {
-    id: screenCapture
-}
-
-Panels.ScreenCapture {
-    appearance: appearance
-    screenCapture: screenCapture
-    open: shell.screenCaptureOpen
-    onCloseRequested: shell.screenCaptureOpen = false
-}
-
-IpcHandler {
-    target: "screen-capture"
-
-    function toggle() {
-        shell.screenCaptureOpen = !shell.screenCaptureOpen;
-    }
-}
-```
+`shell.qml` creates it once, for tool detection and IPC actions, and hands
+it to the bar, the control center and the chooser (`modules/ScreenCapture.qml`,
+which owns the `screen-capture toggle` IPC call).
 
 Replace the existing `SUPER + SHIFT + S` binding with:
 
