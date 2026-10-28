@@ -20,7 +20,7 @@ Feature {
 
     Panels.QuickSettings {
         appearance: root.appearance
-        open: root.open && root.available
+        open: root.open
 
         onCloseRequested: root.open = false
         onAudioSinksRequested: root.switchTo(root.audioOutputSelector)

@@ -31,7 +31,7 @@ Feature {
         systemMonitor: root.systemMonitor
         keepAwake: root.keepAwake
         nightLight: root.nightLight
-        open: root.open && root.available
+        open: root.open
 
         onCloseRequested: root.open = false
         // Audio outputs open over the control center, which stays open.

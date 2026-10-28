@@ -15,7 +15,7 @@ Feature {
         appearance: root.appearance
         launcherHistory: root.launcherHistory
         enabled: root.available
-        open: root.open && root.available
+        open: root.open
 
         onCloseRequested: root.open = false
     }

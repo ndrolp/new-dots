@@ -14,7 +14,7 @@ Feature {
     Panels.QuickSearch {
         appearance: root.appearance
         bookmarks: root.bookmarks
-        open: root.open && root.available
+        open: root.open
 
         onCloseRequested: root.open = false
     }

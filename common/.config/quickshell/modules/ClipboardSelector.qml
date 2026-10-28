@@ -15,7 +15,7 @@ Feature {
         appearance: root.appearance
         clipboardHistory: root.clipboardHistory
         imagePreviewsEnabled: root.plugins.clipboardImagePreviewsEnabled
-        open: root.open && root.available
+        open: root.open
 
         onCloseRequested: root.open = false
     }

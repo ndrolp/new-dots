@@ -12,7 +12,7 @@ Feature {
 
     Panels.CommandLauncher {
         appearance: root.appearance
-        open: root.open && root.available
+        open: root.open
 
         onCloseRequested: root.open = false
     }

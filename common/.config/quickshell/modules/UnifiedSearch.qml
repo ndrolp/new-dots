@@ -26,7 +26,7 @@ Feature {
         clipboardHistory: root.clipboardHistory
         monitors: root.monitors
         workspaceService: root.workspaceService
-        open: root.open && root.available
+        open: root.open
         initialQuery: root.query
 
         onCloseRequested: root.open = false

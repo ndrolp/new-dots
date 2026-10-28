@@ -16,7 +16,7 @@ Feature {
     Panels.ScreenCapture {
         appearance: root.appearance
         screenCapture: root.screenCapture
-        open: root.open && root.available
+        open: root.open
 
         onCloseRequested: root.open = false
     }

@@ -11,8 +11,14 @@ Scope {
     property bool open: false
     property bool available: true
 
+    // Whatever opens it, it stays closed while unavailable, so the panel
+    // inside can follow `open` alone.
     onAvailableChanged: {
         if (!available)
+            open = false;
+    }
+    onOpenChanged: {
+        if (open && !available)
             open = false;
     }
 
