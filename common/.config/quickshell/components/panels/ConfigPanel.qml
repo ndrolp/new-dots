@@ -29,6 +29,10 @@ Rectangle {
             keywords: "notification popup location position"
         },
         {
+            label: "Motion", icon: "󰑮", section: "Motion",
+            keywords: "animations reduce motion speed instant"
+        },
+        {
             label: "Displays", icon: "󰍹", section: "Monitors",
             keywords: "monitor screen workspace range bar profile"
         },
@@ -75,6 +79,8 @@ Rectangle {
             properties.cava = root.cava;
         } else if (currentSection === "Notifications") {
             source = "NotificationSettings.qml";
+        } else if (currentSection === "Motion") {
+            source = "MotionSettings.qml";
         } else if (currentSection === "Monitors") {
             source = "WorkspaceSettings.qml";
             properties.monitors = root.monitors;

@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell.Io
 import "BarProfileModel.js" as BarProfileModel
+import "Motion.js" as Motion
 import "SchemaMigrations.js" as SchemaMigrations
 
 // Saved bar profiles and global settings (appearance.json), plus the bar
@@ -13,6 +14,11 @@ QtObject {
     property alias barProfiles: settings.barProfiles
     property alias notificationPopupLocation: settings.notificationPopupLocation
     property alias doNotDisturb: settings.doNotDisturb
+    property alias reduceMotion: settings.reduceMotion
+
+    // How long animations take (see Motion), and how they ease.
+    readonly property var motion: Motion.durations(settings.reduceMotion)
+    readonly property int motionEasing: Easing.OutCubic
 
     // Not stored: a restart edits the default profile with nothing pending.
     property string editingBarProfile: ""
@@ -213,6 +219,7 @@ QtObject {
             property var barProfiles: BarProfileModel.defaultBarProfiles()
             property string notificationPopupLocation: "top-center"
             property bool doNotDisturb: false
+            property bool reduceMotion: false
         }
     }
 }
