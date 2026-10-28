@@ -37,12 +37,10 @@ Feature {
     IpcHandler {
         target: "unified-search"
 
+        // Opens search with an empty field, or closes it.
         function toggle() {
-            if (!root.available)
-                return;
-
             root.query = "";
-            root.open = !root.open;
+            root.toggle();
         }
 
         // Opens search on the emoji picker, ":" already typed.
