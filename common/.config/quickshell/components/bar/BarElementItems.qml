@@ -8,6 +8,7 @@ import Quickshell.Services.UPower
 import QtQuick
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
+import "RecordingIndicator.js" as RecordingIndicator
 
 // The bar elements that need no component of their own (notifications,
 // recording, media, cava, audio, bluetooth, tray, network, battery and clock),
@@ -45,6 +46,9 @@ Item {
     readonly property string playerLabel: player
         ? (player.trackTitle !== "" ? player.trackTitle : player.identity) : ""
     property string displayedPlayerLabel: playerLabel
+    // What is recording, for the recording indicator.
+    readonly property var recordings: RecordingIndicator.recordings(screenCapture.recordingStartedAt)
+    property real recordingNow: Date.now()
     readonly property real itemHeight: appearance.barTransparent
         ? appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
         : Math.max(1, appearance.barHeight - (appearance.elementVerticalPadding * 2))
@@ -99,7 +103,7 @@ Item {
         if (element === "battery")
             return hasBattery;
         if (element === "recording")
-            return screenCapture.recording;
+            return RecordingIndicator.shown(recordings);
         if (element === "cava")
             return !cava.silent;
         return true;
@@ -239,15 +243,27 @@ Item {
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: "REC"
+                text: RecordingIndicator.elapsedSince(root.recordings, root.recordingNow)
                 color: theme.red
                 font.pixelSize: root.appearance.textSize - 2
                 font.bold: true
             }
         }
 
+        // Ticks the elapsed time only while the indicator is shown.
+        Timer {
+            interval: 1000
+            repeat: true
+            triggeredOnStart: true
+            running: recordingButton.visible
+            onTriggered: root.recordingNow = Date.now()
+        }
+
         TapHandler {
-            onTapped: root.screenCapture.stopRecording()
+            onTapped: {
+                if (RecordingIndicator.stoppable(root.recordings))
+                    root.screenCapture.stopRecording();
+            }
         }
     }
 

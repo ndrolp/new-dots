@@ -267,6 +267,34 @@ TestCase {
         }
     }
 
+    function test_theRecordingIndicatorIsInEveryDefaultProfileEnabledAfterNotifications() {
+        const profiles = BarProfileModel.defaultBarProfiles();
+
+        for (const name in profiles) {
+            const barElements = profiles[name].barElements;
+            const zoneName = BarProfileModel.elementZone(barElements, "notifications");
+            const ids = zone(barElements, zoneName).map(id => id.replace("-", ""));
+            compare(ids.indexOf("recording"), ids.indexOf("notifications") + 1, name);
+            compare(BarProfileModel.elementEnabled(barElements, "recording"), true, name);
+        }
+    }
+
+    function test_aProfileWithoutTheRecordingIndicatorGetsItEnabledAfterNotifications() {
+        const barElements = BarProfileModel.normalizeBarElements({
+            center: [{ id: "notifications", enabled: true }, { id: "clock", enabled: true }]
+        });
+
+        compare(zone(barElements, "center").slice(0, 2), ["notifications", "recording"]);
+        compare(BarProfileModel.elementEnabled(barElements, "recording"), true);
+    }
+
+    function test_theRecordingIndicatorCanBeMovedToAnotherZone() {
+        const moved = BarProfileModel.moveElementToZone(minimalElements(), "recording", "left");
+
+        compare(zone(moved, "left"), ["arch", "workspaces", "recording"]);
+        compare(BarProfileModel.elementEnabled(moved, "recording"), true);
+    }
+
     // A missing element goes right after the element it follows by default,
     // in that element's zone; the first element, which follows none, goes
     // right before the one it precedes.
