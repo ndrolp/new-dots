@@ -47,6 +47,15 @@ starts a new one once it exits. The bounds, the commands and the
 on/off decisions are plain functions in `NightLightState.js`, tested without
 Quickshell.
 
+## Screen shares
+
+`ScreenShares.qml` is the shell's one reader of the screens other apps share
+through PipeWire. It reads the graph once and keeps when each share was first
+seen (`shares`), and every bar's recording indicator shows them. Which nodes
+are a shared screen (not a camera or a virtual camera) and the start times
+are decided in `components/bar/RecordingIndicator.js`, tested without
+Quickshell.
+
 ## Screen capture integration
 
 `ScreenCapture.qml` detects `grim`, `slurp`, `wf-recorder`, and `wayshot` at runtime.

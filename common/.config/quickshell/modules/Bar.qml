@@ -14,6 +14,7 @@ Scope {
     required property var notificationHistory
     required property var screenCapture
     required property var keepAwake
+    required property var screenShares
     required property var cava
     required property var systemMonitor
     required property var workspaceService
@@ -33,6 +34,7 @@ Scope {
         notificationHistory: root.notificationHistory
         screenCapture: root.screenCapture
         keepAwake: root.keepAwake
+        screenShares: root.screenShares
         cava: root.cava
         systemMonitor: root.systemMonitor
         workspaceService: root.workspaceService

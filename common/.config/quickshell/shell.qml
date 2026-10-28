@@ -79,6 +79,10 @@ ShellRoot {
         id: keepAwake
     }
 
+    Services.ScreenShares {
+        id: screenShares
+    }
+
     Services.NightLight {
         id: nightLight
 
@@ -260,6 +264,7 @@ ShellRoot {
         notificationHistory: notificationHistory
         screenCapture: screenCapture
         keepAwake: keepAwake
+        screenShares: screenShares
         cava: cava
         systemMonitor: systemMonitor
         workspaceService: workspaceService

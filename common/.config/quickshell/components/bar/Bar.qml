@@ -16,6 +16,7 @@ Variants {
     required property var notificationHistory
     required property var screenCapture
     required property var keepAwake
+    required property var screenShares
     required property var cava
     required property var systemMonitor
     required property var workspaceService
@@ -69,6 +70,7 @@ Variants {
             property var notificationHistory: bar.notificationHistory
             property var screenCapture: bar.screenCapture
             property var keepAwake: bar.keepAwake
+            property var screenShares: bar.screenShares
             property var cava: bar.cava
             property var systemMonitor: bar.systemMonitor
             property var workspaceService: bar.workspaceService
@@ -144,6 +146,7 @@ Variants {
                     notificationHistory: panel.notificationHistory
                     screenCapture: panel.screenCapture
                     keepAwake: panel.keepAwake
+                    screenShares: panel.screenShares
                     cava: panel.cava
                     barVisible: panel.visible
                     systemMonitor: panel.systemMonitor

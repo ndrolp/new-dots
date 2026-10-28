@@ -16,6 +16,8 @@ Item {
     required property var notificationHistory
     required property var screenCapture
     required property var keepAwake
+    // The screens other apps share (services/ScreenShares.qml).
+    required property var screenShares
     required property var cava
     property bool barVisible: true
     required property var systemMonitor
@@ -306,6 +308,7 @@ Item {
         notificationHistory: root.notificationHistory
         screenCapture: root.screenCapture
         keepAwake: root.keepAwake
+        screenShares: root.screenShares
         cava: root.cava
         barVisible: root.barVisible
         elementX: element => root.elementX(element)
