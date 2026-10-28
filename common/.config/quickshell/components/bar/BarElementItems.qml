@@ -9,6 +9,7 @@ import QtQuick
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 import "../StatusText.js" as StatusText
+import "RecordingIndicator.js" as RecordingIndicator
 
 // The bar elements that need no component of their own (notifications,
 // recording, media, cava, audio, bluetooth, tray, network, battery and clock),
@@ -46,6 +47,9 @@ Item {
     readonly property string playerLabel: player
         ? (player.trackTitle !== "" ? player.trackTitle : player.identity) : ""
     property string displayedPlayerLabel: playerLabel
+    // What is recording, for the recording indicator.
+    readonly property var recordings: RecordingIndicator.recordings(screenCapture.recordingStartedAt)
+    property real recordingNow: Date.now()
     readonly property real itemHeight: appearance.barTransparent
         ? appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
         : Math.max(1, appearance.barHeight - (appearance.elementVerticalPadding * 2))
@@ -100,7 +104,7 @@ Item {
         if (element === "battery")
             return hasBattery;
         if (element === "recording")
-            return screenCapture.recording;
+            return RecordingIndicator.shown(recordings);
         if (element === "cava")
             return !cava.silent;
         return true;
@@ -140,7 +144,7 @@ Item {
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
@@ -196,7 +200,7 @@ Item {
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
@@ -219,15 +223,27 @@ Item {
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: "REC"
+                text: RecordingIndicator.elapsedSince(root.recordings, root.recordingNow)
                 color: theme.red
                 font.pixelSize: root.appearance.textSize - 2
                 font.bold: true
             }
         }
 
+        // Ticks the elapsed time only while the indicator is shown.
+        Timer {
+            interval: 1000
+            repeat: true
+            triggeredOnStart: true
+            running: recordingButton.visible
+            onTriggered: root.recordingNow = Date.now()
+        }
+
         TapHandler {
-            onTapped: root.screenCapture.stopRecording()
+            onTapped: {
+                if (RecordingIndicator.stoppable(root.recordings))
+                    root.screenCapture.stopRecording();
+            }
         }
     }
 
@@ -247,7 +263,7 @@ Item {
 
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
@@ -256,8 +272,8 @@ Item {
 
         Behavior on width {
             NumberAnimation {
-                duration: 180
-                easing.type: Easing.OutCubic
+                duration: root.appearance.motion.medium
+                easing.type: root.appearance.motionEasing
             }
         }
 
@@ -301,7 +317,7 @@ Item {
                     target: mediaLabelTranslation
                     property: "x"
                     to: -12
-                    duration: 90
+                    duration: root.appearance.motion.brief
                 }
 
                 ScriptAction {
@@ -315,8 +331,8 @@ Item {
                     target: mediaLabelTranslation
                     property: "x"
                     to: 0
-                    duration: 160
-                    easing.type: Easing.OutCubic
+                    duration: root.appearance.motion.medium
+                    easing.type: root.appearance.motionEasing
                 }
             }
         }
@@ -376,6 +392,7 @@ Item {
             barCount: cavaElement.barCount
             barWidth: cavaElement.options.barWidth
             colorName: cavaElement.options.color
+            smoothing: root.appearance.motion.frame
         }
     }
 
@@ -395,7 +412,7 @@ Item {
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
@@ -434,7 +451,7 @@ Item {
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
@@ -471,7 +488,7 @@ Item {
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
@@ -508,7 +525,7 @@ Item {
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
@@ -545,7 +562,7 @@ Item {
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
@@ -598,7 +615,7 @@ Item {
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
@@ -620,8 +637,8 @@ Item {
 
                 Behavior on width {
                     NumberAnimation {
-                        duration: 180
-                        easing.type: Easing.OutCubic
+                        duration: root.appearance.motion.medium
+                        easing.type: root.appearance.motionEasing
                     }
                 }
 
@@ -637,8 +654,8 @@ Item {
 
                     Behavior on opacity {
                         NumberAnimation {
-                            duration: 140
-                            easing.type: Easing.OutCubic
+                            duration: root.appearance.motion.short
+                            easing.type: root.appearance.motionEasing
                         }
                     }
                 }

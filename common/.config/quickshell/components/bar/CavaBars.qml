@@ -15,6 +15,8 @@ Item {
     property int barWidth: 3
     // One of the theme's named colors, so it follows the theme.
     property string colorName: "blue"
+    // How long a bar takes to reach its next height (appearance.motion.frame).
+    property int smoothing: 0
     readonly property var heights: CavaOutput.resample(frame, barCount)
     readonly property color color: theme[colorName] || theme.blue
     readonly property int gap: 1
@@ -41,7 +43,7 @@ Item {
 
             Behavior on height {
                 NumberAnimation {
-                    duration: 50
+                    duration: root.smoothing
                 }
             }
         }

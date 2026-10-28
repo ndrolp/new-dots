@@ -14,6 +14,9 @@ QtObject {
     property bool busy: false
     property bool recording: recordingProcess.running
     property string recordingPath: ""
+    // When the current recording started (ms since the epoch), 0 while not
+    // recording.
+    property real recordingStartedAt: 0
     property string pendingAction: ""
     property string pendingOutput: ""
     property string pendingMonitor: ""
@@ -244,6 +247,8 @@ QtObject {
 
     property var recordingProcess: Process {
         id: recordingProcess
+
+        onRunningChanged: root.recordingStartedAt = running ? Date.now() : 0
 
         onExited: (exitCode, exitStatus) => {
             const output = root.recordingPath;
