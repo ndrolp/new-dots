@@ -13,8 +13,9 @@ on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
 (`AudioOutputs.js`), how the volume is shown as text
 (`components/VolumeText.js`) and what the audio bar element shows and how
 wide it is (`components/bar/AudioLevel.qml`), how the Cava bar element
-reads cava and tries it again when it fails (`services/CavaOutput.js`) and
-what it draws (`components/bar/CavaBars.qml`). They run with QtTest outside of `qs`:
+reads cava and tries it again when it fails (`services/CavaOutput.js`),
+what it draws (`components/bar/CavaBars.qml`) and how the keybind cheatsheet
+groups and filters `hyprctl binds -j` (`components/panels/KeybindCheatsheet.js`). They run with QtTest outside of `qs`:
 
 ```sh
 common/.config/quickshell/tests/run.sh
@@ -29,7 +30,8 @@ common/.config/quickshell/tests/run.sh
   what the wrapper hands it, e.g. `WallpaperSettings.qml` passes Hyprland's
   monitors to `WallpaperSettingsBody.qml` as plain displays.
 - `fixtures/` holds copies of the real `appearance.json` and `monitors.json`
-  (schema version 0, from before bar profiles were reworked). Read them with
+  (schema version 0, from before bar profiles were reworked), and a slice of
+  real `hyprctl binds -j` output (`hyprctl-binds.json`). Read them with
   the shared `Fixtures` helper (`Fixtures.qml`): declare
   `Fixtures { id: fixtures }` in the test and call
   `fixtures.read("appearance.json")`. It also gives the fixtures migrated to

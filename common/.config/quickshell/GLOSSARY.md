@@ -49,6 +49,10 @@ _Avoid_: Tema (a secas), que en este proyecto es el esquema de colores
 El panel con los conmutadores rápidos y los deslizadores (Wi-Fi, Bluetooth, no molestar, volumen, brillo). No es un popup: no pertenece a ningún bar element, aunque igual que un popup va anclado o flotante según la barra.
 _Avoid_: Control panel, quick settings, panel de control
 
+**Keybind cheatsheet** (chuleta de atajos):
+El panel que lista todos los atajos de teclado de Hyprland con su descripción, agrupados por modificadores (`SUPER + SHIFT`, `ALT`…) y filtrables por tecla o descripción. Los lee de `hyprctl binds -j` cada vez que se abre, así que nunca se queda desfasado. Se abre por IPC (`keybinds toggle`) o desde la búsqueda unificada.
+_Avoid_: Keymap, lista de atajos, ayuda de teclado
+
 **Audio output** (salida de audio):
 Un destino al que se puede enviar el sonido del sistema: auriculares, altavoces, un monitor por HDMI/DisplayPort, unos cascos inalámbricos… Se nombra por su apodo corto (el monitor conectado, el modelo de los cascos), no por la descripción larga de la tarjeta de sonido; el puerto (HDMI / DisplayPort 1, Analog Stereo) es información secundaria.
 _Avoid_: Sink, dispositivo, device

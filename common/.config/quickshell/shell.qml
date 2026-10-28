@@ -28,6 +28,7 @@ ShellRoot {
     property bool clipboardSelectorOpen: false
     property bool quickSearchOpen: false
     property bool unifiedSearchOpen: false
+    property bool keybindCheatsheetOpen: false
     property bool audioSinkSelectorOpen: false
     property bool commandLauncherOpen: false
     property bool windowSwitcherOpen: false
@@ -361,6 +362,17 @@ ShellRoot {
             if (shell.configScreen === null)
                 shell.configScreen = Quickshell.screens.values[0];
         }
+        onKeybindCheatsheetRequested: {
+            shell.unifiedSearchOpen = false;
+            shell.keybindCheatsheetOpen = true;
+        }
+    }
+
+    Panels.KeybindCheatsheet {
+        appearance: appearance
+        open: shell.keybindCheatsheetOpen
+
+        onCloseRequested: shell.keybindCheatsheetOpen = false
     }
 
     Panels.AudioSinkSelector {
@@ -665,6 +677,14 @@ ShellRoot {
                 return;
 
             shell.unifiedSearchOpen = !shell.unifiedSearchOpen;
+        }
+    }
+
+    IpcHandler {
+        target: "keybinds"
+
+        function toggle() {
+            shell.keybindCheatsheetOpen = !shell.keybindCheatsheetOpen;
         }
     }
 
