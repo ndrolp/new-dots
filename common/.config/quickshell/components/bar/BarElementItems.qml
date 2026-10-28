@@ -169,7 +169,7 @@ Item {
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
@@ -225,7 +225,7 @@ Item {
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
@@ -327,7 +327,7 @@ Item {
 
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
@@ -336,8 +336,8 @@ Item {
 
         Behavior on width {
             NumberAnimation {
-                duration: 180
-                easing.type: Easing.OutCubic
+                duration: root.appearance.motion.medium
+                easing.type: root.appearance.motionEasing
             }
         }
 
@@ -381,7 +381,7 @@ Item {
                     target: mediaLabelTranslation
                     property: "x"
                     to: -12
-                    duration: 90
+                    duration: root.appearance.motion.brief
                 }
 
                 ScriptAction {
@@ -395,8 +395,8 @@ Item {
                     target: mediaLabelTranslation
                     property: "x"
                     to: 0
-                    duration: 160
-                    easing.type: Easing.OutCubic
+                    duration: root.appearance.motion.medium
+                    easing.type: root.appearance.motionEasing
                 }
             }
         }
@@ -456,6 +456,7 @@ Item {
             barCount: cavaElement.barCount
             barWidth: cavaElement.options.barWidth
             colorName: cavaElement.options.color
+            smoothing: root.appearance.motion.frame
         }
     }
 
@@ -475,7 +476,7 @@ Item {
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
@@ -514,7 +515,7 @@ Item {
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
@@ -551,7 +552,7 @@ Item {
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
@@ -588,7 +589,7 @@ Item {
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
@@ -625,7 +626,7 @@ Item {
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
@@ -678,7 +679,7 @@ Item {
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: root.appearance.motion.short }
         }
 
         HoverHandler {
@@ -700,8 +701,8 @@ Item {
 
                 Behavior on width {
                     NumberAnimation {
-                        duration: 180
-                        easing.type: Easing.OutCubic
+                        duration: root.appearance.motion.medium
+                        easing.type: root.appearance.motionEasing
                     }
                 }
 
@@ -717,8 +718,8 @@ Item {
 
                     Behavior on opacity {
                         NumberAnimation {
-                            duration: 140
-                            easing.type: Easing.OutCubic
+                            duration: root.appearance.motion.short
+                            easing.type: root.appearance.motionEasing
                         }
                     }
                 }

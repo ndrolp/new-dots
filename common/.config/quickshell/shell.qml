@@ -5,6 +5,7 @@ import Quickshell.Services.Notifications
 import Quickshell.Services.UPower
 import QtQuick
 import "components/bar" as Bar
+import "components/lock" as Lock
 import "components/panels" as Panels
 import "components/widgets" as Widgets
 import "config" as Config
@@ -494,6 +495,20 @@ ShellRoot {
         targetWindow: shell.configWindow
 
         onCloseRequested: shell.configOpen = false
+    }
+
+    Lock.Lock {
+        id: lockScreen
+    }
+
+    // hypridle's lock_cmd: every way of locking (idle, sleep, the control
+    // center's Lock) goes through `loginctl lock-session` and ends here.
+    IpcHandler {
+        target: "lock"
+
+        function lock(): void {
+            lockScreen.lock();
+        }
     }
 
     IpcHandler {

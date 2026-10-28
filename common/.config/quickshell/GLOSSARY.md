@@ -68,3 +68,11 @@ _Avoid_: Config panel, settings window, preferencias
 **Section** (sección):
 Cada una de las áreas del settings panel (Bar, Notifications, Displays, Wallpapers…), elegida en su barra lateral. Muestra los ajustes de una sola área.
 _Avoid_: Página, pestaña, tab
+
+**Lock screen** (pantalla de bloqueo):
+Lo que cubre todos los monitores mientras la sesión está bloqueada: el tema, el reloj y la fecha en cada monitor, y el campo de contraseña solo en el monitor enfocado. La dibuja la shell; `hyprlock` queda solo como bloqueo de emergencia (`SUPER+CTRL+ALT+L`) por si la shell falla.
+_Avoid_: Lockscreen, hyprlock (para la de la shell), pantalla de login
+
+**Reduce motion** (reducir movimiento):
+El ajuste global de la sección Motion del settings panel que hace instantáneas las animaciones de la shell: los cambios ocurren igual, pero sin transición. No forma parte de ningún bar profile y se aplica en cuanto se activa.
+_Avoid_: Disable animations, sin animaciones, modo rápido

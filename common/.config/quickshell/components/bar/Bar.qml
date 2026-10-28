@@ -58,6 +58,8 @@ Variants {
                 property var barElements: bar.appearance.barProfileValue(panel.profileName, "barElements")
                 // Global, not part of the bar profile.
                 property bool doNotDisturb: bar.appearance.doNotDisturb
+                property var motion: bar.appearance.motion
+                property int motionEasing: bar.appearance.motionEasing
             }
             property bool configOpen: bar.configOpen
             property string activeStatusPopup: bar.activeStatusPopupWindow === panel
@@ -117,8 +119,8 @@ Variants {
 
                 Behavior on color {
                     ColorAnimation {
-                        duration: 220
-                        easing.type: Easing.OutCubic
+                        duration: panel.barAppearance.motion.long
+                        easing.type: panel.barAppearance.motionEasing
                     }
                 }
 

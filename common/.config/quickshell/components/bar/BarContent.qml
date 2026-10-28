@@ -218,15 +218,15 @@ Item {
 
                     Behavior on x {
                         NumberAnimation {
-                            duration: 180
-                            easing.type: Easing.OutCubic
+                            duration: root.appearance.motion.medium
+                            easing.type: root.appearance.motionEasing
                         }
                     }
 
                     Behavior on width {
                         NumberAnimation {
-                            duration: 180
-                            easing.type: Easing.OutCubic
+                            duration: root.appearance.motion.medium
+                            easing.type: root.appearance.motionEasing
                         }
                     }
                 }
@@ -243,8 +243,8 @@ Item {
         grouped: root.elementGrouped("arch")
         Behavior on x {
             NumberAnimation {
-                duration: 220
-                easing.type: Easing.OutCubic
+                duration: root.appearance.motion.long
+                easing.type: root.appearance.motionEasing
             }
         }
         appearance: root.appearance
@@ -283,8 +283,8 @@ Item {
         grouped: root.elementGrouped("workspaces")
         Behavior on x {
             NumberAnimation {
-                duration: 220
-                easing.type: Easing.OutCubic
+                duration: root.appearance.motion.long
+                easing.type: root.appearance.motionEasing
             }
         }
         appearance: root.appearance
