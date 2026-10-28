@@ -73,6 +73,18 @@ _Avoid_: Página, pestaña, tab
 Lo que cubre todos los monitores mientras la sesión está bloqueada: el tema, el reloj y la fecha en cada monitor, y el campo de contraseña solo en el monitor enfocado. La dibuja la shell; `hyprlock` queda solo como bloqueo de emergencia (`SUPER+CTRL+ALT+L`) por si la shell falla.
 _Avoid_: Lockscreen, hyprlock (para la de la shell), pantalla de login
 
+**Unified search** (búsqueda unificada):
+El panel a pantalla completa con un solo campo de texto que busca a la vez en aplicaciones, marcadores, portapapeles y ventanas, y ofrece acciones (buscar en la web, ejecutar en Kitty, ir a un workspace). No es un popup: no pertenece a ningún bar element.
+_Avoid_: Launcher, quick search (que es otro panel)
+
+**Query mode** (modo de búsqueda):
+Lo que pide el carácter con el que empieza la búsqueda en la unified search: `>` comandos, `?` web, `@` ventanas, `=` calculadora. Sin prefijo se busca en todo.
+_Avoid_: Prefijo (para el modo en sí), filtro
+
+**Calculator** (calculadora):
+El resultado de la unified search que da la respuesta de `qalc`. Sale el primero cuando la búsqueda parece una cuenta o una conversión de unidades (`2*(3+4)`, `5 km to mi`, `20% of 80`), y siempre tras `=`. Enter copia la respuesta.
+_Avoid_: Calc, qalc (para el resultado)
+
 **Reduce motion** (reducir movimiento):
 El ajuste global de la sección Motion del settings panel que hace instantáneas las animaciones de la shell: los cambios ocurren igual, pero sin transición. No forma parte de ningún bar profile y se aplica en cuanto se activa.
 _Avoid_: Disable animations, sin animaciones, modo rápido

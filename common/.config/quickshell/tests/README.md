@@ -15,9 +15,12 @@ on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
 wide it is (`components/bar/AudioLevel.qml`), how the Cava bar element
 reads cava and tries it again when it fails (`services/CavaOutput.js`) and
 what it draws (`components/bar/CavaBars.qml`), how long animations take
-with and without reduce motion (`config/Motion.js`), and when the lock screen
+with and without reduce motion (`config/Motion.js`), when the lock screen
 locks, checks a password and unlocks (`services/LockState.js`) and what it
-shows on each monitor (`components/lock/LockScreenBody.qml`). They run with QtTest outside of `qs`:
+shows on each monitor (`components/lock/LockScreenBody.qml`), and what a unified
+search query asks for: its query mode, whether it is maths for the
+calculator and how qalc is run and answers
+(`components/panels/SearchQuery.js`). They run with QtTest outside of `qs`:
 
 ```sh
 common/.config/quickshell/tests/run.sh
