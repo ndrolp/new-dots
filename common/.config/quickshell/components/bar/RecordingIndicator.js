@@ -34,13 +34,23 @@ function screenShares(nodes, links) {
 }
 
 // A screen the portal offers is a video source with no device behind it;
-// cameras are devices.
+// cameras are devices, and virtual cameras (OBS's, a v4l2loopback node, any
+// node whose name or description says camera) aren't screens either.
 function isSharedScreen(node) {
     const properties = node.properties || {};
     return !node.isStream
         && properties["media.class"] === "Video/Source"
         && properties["media.role"] !== "Camera"
-        && !properties["device.api"];
+        && !properties["device.api"]
+        && !isVirtualCamera(properties);
+}
+
+const cameraWords = /camera|webcam|\bcam\b|v4l2loopback|v4l2 loopback/i;
+
+function isVirtualCamera(properties) {
+    return ["node.name", "node.nick", "node.description", "media.name",
+        "device.description", "api.v4l2.cap.driver", "api.v4l2.cap.card"]
+        .some(key => cameraWords.test(String(properties[key] || "")));
 }
 
 function appName(node) {

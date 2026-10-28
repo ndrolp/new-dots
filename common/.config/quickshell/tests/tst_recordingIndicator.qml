@@ -139,4 +139,44 @@ TestCase {
         compare(RecordingIndicator.sharingText(RecordingIndicator.recordings(0,
             [{ id: 103, app: "", startedAt: 7000 }])), "An app");
     }
+
+    // Virtual cameras are Video/Sources with no device behind them too, but
+    // they aren't a screen being shared.
+    readonly property var obsVirtualCamera: ({
+        id: 140,
+        isStream: false,
+        properties: { "media.class": "Video/Source",
+            "node.name": "v4l2_input.platform-v4l2loopback-000",
+            "node.description": "OBS Virtual Camera" }
+    })
+    readonly property var loopbackNode: ({
+        id: 141,
+        isStream: false,
+        properties: { "media.class": "Video/Source", "node.name": "dummy-video-0",
+            "node.description": "Dummy video device (0x0000)",
+            "api.v4l2.cap.driver": "v4l2 loopback" }
+    })
+    readonly property var namedWebcam: ({
+        id: 142,
+        isStream: false,
+        properties: { "media.class": "Video/Source", "node.name": "virtual-cam-7",
+            "node.nick": "Webcam", "node.description": "Virtual Camera" }
+    })
+
+    function test_virtualCamerasAreNotScreenSharing() {
+        for (const node of [obsVirtualCamera, loopbackNode, namedWebcam]) {
+            const shares = RecordingIndicator.screenShares([node, firefoxStream],
+                [{ source: node.id, target: 120 }]);
+
+            compare(shares, [], node.properties["node.name"]);
+        }
+    }
+
+    function test_aVirtualCameraNextToASharedScreenLeavesOnlyTheScreen() {
+        const shares = RecordingIndicator.screenShares(
+            [obsVirtualCamera, portalScreen, firefoxStream],
+            [{ source: 140, target: 120 }, { source: 101, target: 120 }]);
+
+        compare(shares, [{ id: 101, app: "Firefox" }]);
+    }
 }
