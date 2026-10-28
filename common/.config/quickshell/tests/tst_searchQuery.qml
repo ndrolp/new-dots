@@ -58,8 +58,8 @@ TestCase {
     }
 
     function test_qalcGetsTheExpressionAsOneArgumentNeverThroughAShell() {
-        compare(SearchQuery.qalcCommand("1+1; rm -rf ~ $(id)"),
-            ["qalc", "-t", "1+1; rm -rf ~ $(id)"]);
+        const command = SearchQuery.qalcCommand("1+1; rm -rf ~ $(id)");
+        compare(command.slice(command.indexOf("qalc")), ["qalc", "-t", "1+1; rm -rf ~ $(id)"]);
     }
 
     function test_qalcsAnswerIsWhatItPrintsLast() {
@@ -79,5 +79,16 @@ TestCase {
         compare(SearchQuery.calculation("2048"), "");
         compare(SearchQuery.calculation("mp3 to wav"), "");
         compare(SearchQuery.calculation(""), "");
+    }
+
+    // A hung qalc is killed, so it exits and the next query is asked.
+    function test_aHungQalcIsKilledAfterTheTimeout() {
+        compare(SearchQuery.qalcCommand("2^2^2^2^2"),
+            ["timeout", "-k", "1", "3", "qalc", "-t", "2^2^2^2^2"]);
+    }
+
+    function test_aQalcKilledForTakingTooLongGivesNoAnswer() {
+        compare(SearchQuery.answer(["partial"], 124), "");
+        compare(SearchQuery.answer([], 137), "");
     }
 }

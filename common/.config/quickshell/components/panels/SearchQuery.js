@@ -57,10 +57,16 @@ function calculation(query) {
     return "";
 }
 
+// How long qalc may take before it is killed, in seconds: one query runs at a
+// time, so a hung qalc would otherwise hold back every later one. It is sent
+// SIGTERM, then SIGKILL a second later if it ignores that.
+const qalcTimeoutSeconds = 3;
+
 // How qalc is run for `expression`: terse output, and the expression as its
-// own argument, never through a shell.
+// own argument, never through a shell; under `timeout`, which exits 124 (or
+// 137 once it has to kill it), so a killed qalc gives no answer.
 function qalcCommand(expression) {
-    return ["qalc", "-t", String(expression)];
+    return ["timeout", "-k", "1", String(qalcTimeoutSeconds), "qalc", "-t", String(expression)];
 }
 
 // qalc's answer from the lines it printed and its exit code: the last line it

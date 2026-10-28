@@ -78,7 +78,8 @@ Variants {
             id: actionProcess
         }
 
-        // One qalc at a time: a query typed while it runs is asked when it exits.
+        // One qalc at a time: a query typed while it runs is asked when it
+        // exits, and a hung one is killed (SearchQuery.qalcTimeoutSeconds).
         Process {
             id: calculator
 
