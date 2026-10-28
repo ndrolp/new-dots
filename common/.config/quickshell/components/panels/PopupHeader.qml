@@ -32,7 +32,7 @@ Item {
         font.pixelSize: header.appearance.textSize + 5
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: header.appearance.motion.short }
         }
     }
 

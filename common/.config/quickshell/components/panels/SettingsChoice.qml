@@ -45,7 +45,7 @@ Rectangle {
                     theme.surfaceHover.g, theme.surfaceHover.b, 0.5) : "transparent"
 
                 Behavior on color {
-                    ColorAnimation { duration: 140 }
+                    ColorAnimation { duration: control.appearance.motion.short }
                 }
 
                 HoverHandler {

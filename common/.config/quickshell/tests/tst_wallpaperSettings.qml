@@ -1,6 +1,7 @@
 import QtQuick
 import QtTest
 import "../components/panels" as Panels
+import "../config/Motion.js" as Motion
 import "../config" as Config
 
 // The Wallpapers section built from the settings parts: the monitor to edit
@@ -104,6 +105,8 @@ TestCase {
                 appearance: QtObject {
                     property int radius: 12
                     property int textSize: 13
+                    readonly property var motion: Motion.durations(false)
+                    readonly property int motionEasing: Easing.OutCubic
                 }
                 wallpapers: wallpapers
                 displays: [

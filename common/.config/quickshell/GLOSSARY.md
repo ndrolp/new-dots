@@ -48,6 +48,10 @@ _Avoid_: screencast, stream (para esto)
 Mientras está activo, la sesión no pasa a inactiva: no se atenúa ni se apaga la pantalla ni se suspende. Se activa y desactiva desde el control center. El bar element keep-awake aparece solo mientras está activo, y al pulsarlo se desactiva. Siempre empieza desactivado al arrancar la shell.
 _Avoid_: Caffeine, idle inhibitor (para la función), no dormir
 
+**Night light** (luz nocturna):
+Mientras está activa, los colores de la pantalla se vuelven más cálidos (los aplica `hyprsunset`). Se activa y desactiva desde el control center, donde un deslizador elige la temperatura (de 2500 K, la más cálida, a 6000 K, neutra), que cambia al momento si está activa. La temperatura se guarda en `appearance.json`; si está activa o no, no: solo cambia al pulsarla, nunca por horario, y empieza desactivada al arrancar la shell. Si falta `hyprsunset`, el control center dice por qué no se puede activar.
+_Avoid_: Blue light filter, filtro de luz azul, modo noche, hyprsunset (para la función)
+
 **Popup**:
 La ventana pequeña que se despliega desde un bar element al pulsarlo (Bluetooth, red, batería, audio, media…). Pertenece a ese bar element y se cierra al perder el foco.
 Con la barra opaca un popup va **anclado** (attached): sale de la barra como si fuera parte de ella. Con la barra transparente va **flotante** (floating), separado de la barra.
@@ -78,7 +82,7 @@ Cada una de las áreas del settings panel (Bar, Notifications, Displays, Wallpap
 _Avoid_: Página, pestaña, tab
 
 **Lock screen** (pantalla de bloqueo):
-Lo que cubre todos los monitores mientras la sesión está bloqueada: el tema, el reloj y la fecha en cada monitor, y el campo de contraseña solo en el monitor enfocado. La dibuja la shell; `hyprlock` queda solo como bloqueo de emergencia (`SUPER+CTRL+ALT+L`) por si la shell falla.
+Lo que cubre todos los monitores mientras la sesión está bloqueada: el tema, el reloj y la fecha sobre el fondo de pantalla del monitor, desenfocado, en cada monitor, y el campo de contraseña solo en el monitor enfocado. La dibuja la shell; `hyprlock` queda solo como bloqueo de emergencia (`SUPER+CTRL+ALT+L`) por si la shell falla.
 _Avoid_: Lockscreen, hyprlock (para la de la shell), pantalla de login
 
 **Unified search** (búsqueda unificada):

@@ -60,8 +60,8 @@ PopupWindow {
 
     Behavior on reveal {
         NumberAnimation {
-            duration: 200
-            easing.type: Easing.OutCubic
+            duration: root.appearance.motion.long
+            easing.type: root.appearance.motionEasing
         }
     }
 
@@ -294,7 +294,7 @@ PopupWindow {
                                         ? theme.surfaceHover : theme.backgroundSecondary
 
                                     Behavior on color {
-                                        ColorAnimation { duration: 140 }
+                                        ColorAnimation { duration: root.appearance.motion.short }
                                     }
 
                                     HoverHandler {

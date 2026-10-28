@@ -121,6 +121,8 @@ Variants {
             open: menu.shown
             enabled: menu.shown
             radius: root.appearance.radius
+            motion: root.appearance.motion
+            motionEasing: root.appearance.motionEasing
 
             Column {
                 width: parent.width
@@ -169,7 +171,7 @@ Variants {
                                     font.pixelSize: root.appearance.textSize + 13
 
                                     Behavior on color {
-                                        ColorAnimation { duration: 140 }
+                                        ColorAnimation { duration: root.appearance.motion.short }
                                     }
                                 }
 

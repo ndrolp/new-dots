@@ -18,7 +18,7 @@ Rectangle {
     border.width: 1
 
     Behavior on color {
-        ColorAnimation { duration: 140 }
+        ColorAnimation { duration: popupSwitch.appearance.motion.short }
     }
 
     Config.Theme {
@@ -35,8 +35,8 @@ Rectangle {
 
         Behavior on x {
             NumberAnimation {
-                duration: 140
-                easing.type: Easing.OutCubic
+                duration: popupSwitch.appearance.motion.short
+                easing.type: popupSwitch.appearance.motionEasing
             }
         }
     }

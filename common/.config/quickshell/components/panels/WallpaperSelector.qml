@@ -272,8 +272,8 @@ Variants {
                             property: "x"
                             from: hero.direction * incoming.width
                             to: 0
-                            duration: 260
-                            easing.type: Easing.OutCubic
+                            duration: root.appearance.motion.long
+                            easing.type: root.appearance.motionEasing
                         }
 
                         NumberAnimation {
@@ -281,8 +281,8 @@ Variants {
                             property: "x"
                             from: 0
                             to: -hero.direction * leaving.width
-                            duration: 260
-                            easing.type: Easing.OutCubic
+                            duration: root.appearance.motion.long
+                            easing.type: root.appearance.motionEasing
                         }
 
                         onFinished: {
@@ -309,7 +309,7 @@ Variants {
                     interactive: false
                     model: selectorWallpapers
                     highlightRangeMode: ListView.StrictlyEnforceRange
-                    highlightMoveDuration: 240
+                    highlightMoveDuration: root.appearance.motion.long
                     preferredHighlightBegin: (width - thumbnailWidth) / 2
                     preferredHighlightEnd: preferredHighlightBegin + thumbnailWidth
 
@@ -329,8 +329,8 @@ Variants {
                         border.width: selected ? 3 : 1
                         opacity: selected ? 1 : 0.55
 
-                        Behavior on opacity { NumberAnimation { duration: 180 } }
-                        Behavior on border.color { ColorAnimation { duration: 180 } }
+                        Behavior on opacity { NumberAnimation { duration: root.appearance.motion.medium } }
+                        Behavior on border.color { ColorAnimation { duration: root.appearance.motion.medium } }
 
                         Rectangle {
                             anchors.fill: parent

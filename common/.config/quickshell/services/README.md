@@ -33,6 +33,18 @@ holds an `IdleInhibitor` on a transparent, click-through 1×1 window of its own,
 because an inhibitor only counts while its window is shown and the control
 center hides its window when closed.
 
+## Night light
+
+`NightLight.qml` is the shell's one night light, driven from the control
+center. While `on` it runs `hyprsunset -t <temperature>` (through `sh`, so a
+missing hyprsunset exits 127), and stopping it gives the screen its colours
+back. The slider saves `nightLightTemperature` in `appearance.json` and a
+running hyprsunset follows it live through `hyprctl hyprsunset temperature`.
+`on` is never saved. When hyprsunset exits while night light is on, night
+light turns off and `failureHint` says why. The bounds, the commands and the
+on/off decisions are plain functions in `NightLightState.js`, tested without
+Quickshell.
+
 ## Screen capture integration
 
 `ScreenCapture.qml` detects `grim`, `slurp`, `wf-recorder`, and `wayshot` at runtime.

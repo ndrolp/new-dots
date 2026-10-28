@@ -211,6 +211,12 @@ ShellRoot {
         id: keepAwake
     }
 
+    Services.NightLight {
+        id: nightLight
+
+        appearance: appearance
+    }
+
     NotificationServer {
         id: notificationServer
 
@@ -315,6 +321,7 @@ ShellRoot {
     }
 
     Panels.ThemeSelector {
+        appearance: appearance
         open: shell.themeSelectorOpen
 
         onCloseRequested: shell.themeSelectorOpen = false
@@ -433,6 +440,7 @@ ShellRoot {
         screenCapture: screenCapture
         systemMonitor: systemMonitor
         keepAwake: keepAwake
+        nightLight: nightLight
         open: shell.controlCenterOpen && plugins.controlCenterEnabled
 
         onCloseRequested: shell.controlCenterOpen = false
@@ -513,6 +521,8 @@ ShellRoot {
 
     Lock.Lock {
         id: lockScreen
+
+        wallpapers: wallpapers
     }
 
     // hypridle's lock_cmd: every way of locking (idle, sleep, the control
