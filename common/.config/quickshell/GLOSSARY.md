@@ -44,6 +44,10 @@ _Avoid_: REC, botón de grabación, screen recording (para el elemento de la bar
 Una pantalla que otra app (un navegador en una llamada, OBS…) lee por PipeWire a través del portal. Las cámaras no cuentan. No se puede parar desde la shell.
 _Avoid_: screencast, stream (para esto)
 
+**Keep-awake** (mantener despierto):
+Mientras está activo, la sesión no pasa a inactiva: no se atenúa ni se apaga la pantalla ni se suspende. Se activa y desactiva desde el control center. El bar element keep-awake aparece solo mientras está activo, y al pulsarlo se desactiva. Siempre empieza desactivado al arrancar la shell.
+_Avoid_: Caffeine, idle inhibitor (para la función), no dormir
+
 **Popup**:
 La ventana pequeña que se despliega desde un bar element al pulsarlo (Bluetooth, red, batería, audio, media…). Pertenece a ese bar element y se cierra al perder el foco.
 Con la barra opaca un popup va **anclado** (attached): sale de la barra como si fuera parte de ella. Con la barra transparente va **flotante** (floating), separado de la barra.

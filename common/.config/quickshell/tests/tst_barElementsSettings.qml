@@ -257,6 +257,12 @@ TestCase {
         verify(elementRow(built.item, "Recording indicator"));
     }
 
+    function test_keepAwakeIsListedByItsName() {
+        const built = make();
+
+        verify(elementRow(built.item, "Keep-awake"));
+    }
+
     function enableCava(appearance) {
         appearance.barElements = Object.assign({}, appearance.barElements, {
             right: appearance.barElements.right.map(element => element.id === "cava"
