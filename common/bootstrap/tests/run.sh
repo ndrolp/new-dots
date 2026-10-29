@@ -298,6 +298,34 @@ test_a_second_shell_run_installs_nothing_and_says_so() {
     done
 }
 
+test_node_installs_nvm_in_home_and_an_lts_node_without_editing_shell_files() {
+    fresh_home
+    run_step_alone node
+    [[ $STATUS -eq 0 ]] || fail "node step exited $STATUS"
+    [[ -f "$TEST_HOME/.nvm/nvm.sh" ]] || fail "nvm is not in ~/.nvm"
+    grep -q "nvm-installer NVM_DIR=$TEST_HOME/.nvm PROFILE=/dev/null" "$CALLS" \
+        || fail "installer may edit a shell profile: $(cat "$CALLS")"
+    grep -q "^nvm install --lts" "$CALLS" || fail "no LTS node installed: $(cat "$CALLS")"
+}
+
+test_a_second_node_run_installs_nothing_and_says_so() {
+    fresh_home
+    run_step_alone node
+    : >"$CALLS"
+    run_step_alone node
+    [[ $STATUS -eq 0 ]] || fail "second run exited $STATUS"
+    ! grep -qE "^curl|^nvm install" "$CALLS" || fail "second run installed again: $(cat "$CALLS")"
+    grep -q "^skipped	nvm" <<<"$SUMMARY" || fail "nvm not reported as skipped: $SUMMARY"
+    grep -q "^skipped	node LTS" <<<"$SUMMARY" || fail "node LTS not reported as skipped: $SUMMARY"
+}
+
+test_node_uses_nvm_dir_when_it_is_set() {
+    fresh_home
+    run_step_alone node NVM_DIR="$TEST_HOME/.config/nvm"
+    [[ $STATUS -eq 0 ]] || fail "node step exited $STATUS"
+    [[ -f "$TEST_HOME/.config/nvm/nvm.sh" ]] || fail "nvm not installed into NVM_DIR"
+}
+
 for t in $(declare -F | awk '{print $3}' | grep '^test_'); do
     echo "$t"
     ( set -e; "$t" )
