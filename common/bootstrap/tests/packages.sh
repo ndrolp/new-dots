@@ -247,11 +247,11 @@ test_paru_is_not_rebuilt_when_installed() {
 
 # The upgrade outlasts sudo's timeout, so without a keep-alive the install batch would prompt again.
 test_one_sudo_prompt_up_front_for_the_whole_run() {
-    FAKE_SUDO_TTL=2
+    FAKE_SUDO_TTL=3
     setup_fakes
     without_paru
     make_lists "core=zsh" "apps=steam" "core-aur=wlctl-git" "apps-aur=app"
-    FAKE_UPGRADE_SECONDS=4 DOTFILES_SUDO_KEEPALIVE_SECONDS=1 run_steps false preflight packages paru aur
+    FAKE_UPGRADE_SECONDS=6 DOTFILES_SUDO_KEEPALIVE_SECONDS=1 run_steps false preflight packages paru aur
     [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
     [[ "$(wc -l <"$PROMPTS")" -eq 1 ]] || fail "$(wc -l <"$PROMPTS") sudo prompts"
     [[ "$(head -1 "$CALLS")" == "sudo -v" ]] || fail "first call is not the sudo prompt: $(head -1 "$CALLS")"
