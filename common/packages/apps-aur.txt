@@ -1,0 +1,23 @@
+# Apps: installed by default, skipped by --minimal.
+# AUR packages, installed one by one with paru.
+android-studio
+cmatrix-git
+flutter-bin
+genymotion
+google-chrome
+gtk-engine-murrine
+herdr-bin
+intellij-idea-community-edition
+llama.cpp
+lm-studio-bin
+lutgen-bin
+lutgen-studio-bin
+ocs-url
+openlogi-bin
+pear-desktop
+photocraft
+rapidraw-bin
+spotify
+steamlink
+webcord-bin
+zapzap
