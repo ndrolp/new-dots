@@ -1,0 +1,4 @@
+# For the container test: real repo lists, a short AUR list with one package that cannot exist.
+paru
+neofetch
+dotfiles-bogus-package-that-does-not-exist

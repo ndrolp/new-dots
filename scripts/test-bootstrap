@@ -23,8 +23,11 @@ tar -C /src --exclude=./.git --exclude=./.claude/worktrees -cf - . | tar -C /hom
 chown -R tester:tester /home/tester/.dotfiles
 cd /home/tester
 exec runuser -u tester -- env HOME=/home/tester USER=tester LOGNAME=tester \
+    ${DOTFILES_PACKAGES_DIR:+DOTFILES_PACKAGES_DIR="$DOTFILES_PACKAGES_DIR"} \
     bash /home/tester/.dotfiles/bootstrap.sh --no-system "$@"
 EOF
 
-docker run --rm --label dotfiles.test-bootstrap=1 \
+# DOTFILES_PACKAGES_DIR, when set, is passed on (a path inside the container, e.g.
+# /home/tester/.dotfiles/common/bootstrap/tests/fixtures/packages for short test lists).
+docker run --rm --label dotfiles.test-bootstrap=1 -e DOTFILES_PACKAGES_DIR \
     -v "$REPO:/src:ro" "$IMAGE" bash -c "$SETUP" bash "$@"

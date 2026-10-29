@@ -36,6 +36,19 @@ test_a_failing_bootstrap_fails_the_harness() {
     grep -q -- "Unknown option: --no-such-flag" <<<"$OUT" || fail "the bootstrap did not reject the flag"
 }
 
+# The real core list from the repo; a short AUR list (fixtures/packages) so it does not build
+# every AUR package, with one that cannot exist. Slow: builds paru (several minutes).
+test_package_steps_install_core_and_report_a_bogus_aur_package_as_failed() {
+    DOTFILES_PACKAGES_DIR=/home/tester/.dotfiles/common/bootstrap/tests/fixtures/packages \
+        run_harness --minimal
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    grep -q "pacman packages: core$" <<<"$OUT" || fail "core repo packages were not installed"
+    grep -q "AUR: neofetch" <<<"$OUT" || fail "neofetch was not installed from the AUR"
+    grep -A20 "^Failed:" <<<"$OUT" | grep -q "AUR: dotfiles-bogus-package-that-does-not-exist" \
+        || fail "the bogus AUR package is not listed as failed"
+    grep -q "stow: common" <<<"$OUT" || fail "the run stopped before stow"
+}
+
 harness_containers() { docker ps -aq --filter label=dotfiles.test-bootstrap=1 | sort; }
 
 test_no_container_is_left_behind_after_a_pass_or_a_failure() {
