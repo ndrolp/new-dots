@@ -50,6 +50,33 @@ test_package_steps_install_core_and_report_a_bogus_aur_package_as_failed() {
     grep -q "stow: common" <<<"$OUT" || fail "the run stopped before stow"
 }
 
+# The whole bootstrap with the real core, core-aur and hardware lists (--minimal leaves out the
+# apps groups), then a second run in the same container. AUR packages that fail to build are
+# reported, not fatal, so they are allowed here. Very slow: builds every core-aur package (~40 min).
+test_full_minimal_run_passes_and_a_second_run_changes_nothing() {
+    STATUS=0
+    OUT="$(TEST_BOOTSTRAP_BEFORE='echo mine >~/.zshrc' \
+        TEST_BOOTSTRAP_AFTER='echo "=== second run"
+                              bash ~/.dotfiles/bootstrap.sh --no-system --minimal --host omelas || exit
+                              [ "$(readlink -f ~/.zshrc)" = ~/.dotfiles/common/.zshrc ] && echo ZSHRC-LINKED
+                              [ "$(cat ~/.dotfiles-backup/*/.zshrc)" = mine ] && echo ZSHRC-BACKED-UP' \
+        "$HARNESS" --minimal --host omelas 2>&1)" || STATUS=$?
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    local first second
+    first="$(sed '/^=== second run/,$d' <<<"$OUT")"
+    second="$(sed -n '/^=== second run/,$p' <<<"$OUT")"
+    for what in "pacman packages: core" "hardware packages: hardware-any" "paru" oh-my-zsh nvm "stow: common" "stow: host-omelas"; do
+        sed -n '/^Installed:/,/^[A-Z]/p' <<<"$first" | grep -q -- "- $what" || fail "first run did not install $what"
+    done
+    grep -q ZSHRC-LINKED <<<"$OUT" || fail "~/.zshrc is not a link into the repo"
+    grep -q ZSHRC-BACKED-UP <<<"$OUT" || fail "the old ~/.zshrc is not in ~/.dotfiles-backup/<ts>/"
+    ! grep -q "^Installed:" <<<"$second" || fail "second run installed something"
+    ! grep -q "^Backed up:" <<<"$second" || fail "second run backed something up"
+    local other_failures
+    other_failures="$(sed -n '/^Failed:/,/^Log:/{/^  - /p}' <<<"$second" | grep -v "^  - AUR: " || true)"
+    [[ -z "$other_failures" ]] || fail "second run failed something besides AUR builds: $other_failures"
+}
+
 test_a_pre_existing_zshrc_is_backed_up_and_linked_in_the_container() {
     STATUS=0
     OUT="$(TEST_BOOTSTRAP_BEFORE='echo mine >~/.zshrc' \
