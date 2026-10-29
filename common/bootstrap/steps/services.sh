@@ -8,15 +8,17 @@ source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 
 system_changes_allowed "services and the docker group" || exit 0
 
-services_file="${DOTFILES_SERVICES_FILE:-}"
-services_file="${services_file:-$DOTFILES_DIR/common/bootstrap/services.txt}"
+services_file="${DOTFILES_SERVICES_FILE:-$DOTFILES_DIR/common/bootstrap/services.txt}"
 
 # Runs systemctl for <scope>: as root for system units, as the user for user units.
+# is-enabled only reads, so it needs no sudo.
 scoped_systemctl() {
     local scope="$1"
     shift
     if [[ "$scope" == user ]]; then
         systemctl --user "$@"
+    elif [[ "$1" == is-enabled ]]; then
+        systemctl "$@"
     else
         sudo systemctl "$@"
     fi
@@ -38,7 +40,7 @@ while read -r scope unit package optional _; do
         summary_add failed "service: $unit ($scope)"
         failed=$((failed + 1))
     fi
-done < <(sed -e 's/#.*//' "$services_file" | grep -v '^[[:space:]]*$')
+done < <(list_lines "$services_file")
 ((already == 0)) || summary_add skipped "$already services (already enabled)"
 ((failed == 0)) || warn "$failed services failed to enable; they are listed in the summary."
 

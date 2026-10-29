@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# Sets the stable Rust toolchain (paru and many AUR packages build with cargo), then builds
-# and installs paru from the AUR unless it is already there.
+# Builds and installs paru from the AUR unless it is already there, setting the stable Rust
+# toolchain first (paru builds with cargo).
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
-
-rustup default stable
 
 if command -v paru >/dev/null 2>&1; then
     info "paru is already installed."
     summary_add skipped "paru (already installed)"
     exit 0
 fi
+
+rustup default stable
 
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT

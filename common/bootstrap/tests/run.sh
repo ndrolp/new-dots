@@ -101,6 +101,19 @@ test_a_pre_existing_file_is_backed_up_and_replaced_by_the_link() {
     grep -A20 "Backed up:" <<<"$OUT" | grep -q ".zshrc" || fail "summary does not list the backed-up .zshrc"
 }
 
+test_a_pre_existing_symlink_stow_does_not_own_is_backed_up_and_replaced() {
+    TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
+    mkdir -p "$TEST_HOME/mine"
+    echo "mine" >"$TEST_HOME/mine/zshrc"
+    ln -s "$TEST_HOME/mine/zshrc" "$TEST_HOME/.zshrc"
+    rerun_bootstrap --stow-only --host no-such-host
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    [[ "$(readlink -f "$TEST_HOME/.zshrc")" == "$REPO/common/.zshrc" ]] || fail ".zshrc is not linked into the repo"
+    local backups=("$TEST_HOME"/.dotfiles-backup/*/.zshrc)
+    [[ "$(readlink "${backups[0]}")" == "$TEST_HOME/mine/zshrc" ]] || fail "the old .zshrc link is not under ~/.dotfiles-backup/<ts>/"
+    grep -A20 "Backed up:" <<<"$OUT" | grep -q ".zshrc" || fail "summary does not list the backed-up .zshrc"
+}
+
 test_a_second_run_backs_up_nothing() {
     TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
     echo "mine" >"$TEST_HOME/.zshrc"
@@ -194,7 +207,71 @@ make_remote() {
 pipe_bootstrap() {
     make_remote
     STATUS=0
-    OUT="$(cd "$TEST_HOME" && env HOME="$TEST_HOME" DOTFILES_REPO_URL="file://$REMOTE" bash -s -- "$@" <"$BOOTSTRAP" 2>&1)" || STATUS=$?
+    OUT="$(cd "$TEST_HOME" && cat "${PIPED_SCRIPT:-$BOOTSTRAP}" | env HOME="$TEST_HOME" PATH="${EXTRA_PATH:+$EXTRA_PATH:}$PATH" \
+        DOTFILES_REPO_URL="file://$REMOTE" bash -s -- "$@" 2>&1)" || STATUS=$?
+}
+
+test_the_clone_stage_output_lands_in_the_run_log() {
+    TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
+    pipe_bootstrap --stow-only --host no-such-host
+    [[ $STATUS -eq 0 ]] || fail "piped bootstrap exited $STATUS"
+    local logs=("$TEST_HOME"/.local/state/dotfiles/bootstrap-*.log)
+    [[ ${#logs[@]} -eq 1 ]] || fail "${#logs[@]} logs for one run: ${logs[*]}"
+    grep -q "Cloning" "${logs[0]}" || fail "the log does not hold the clone"
+    grep -qi "ssh key" "${logs[0]}" || fail "the log does not hold the SSH key reminder"
+    grep -q "Summary" "${logs[0]}" || fail "the log does not hold the run from the clone"
+    [[ "$(grep -c "^Cloning file://" "${logs[0]}")" -eq 1 ]] || fail "the clone output is in the log more than once"
+}
+
+# A download cut short by the network must run nothing, not the first half of the script.
+test_a_truncated_download_runs_nothing() {
+    local lines cut
+    lines="$(wc -l <"$BOOTSTRAP")"
+    for ((cut = 10; cut < lines; cut += 10)); do
+        TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
+        head -n "$cut" "$BOOTSTRAP" >"$SCRATCH/truncated.sh"
+        PIPED_SCRIPT="$SCRATCH/truncated.sh" pipe_bootstrap --stow-only --host no-such-host
+        [[ -z "$(ls -A "$TEST_HOME")" ]] || fail "the first $cut lines changed HOME: $(ls -A "$TEST_HOME")"
+    done
+}
+
+# Under curl | bash, stdin is the rest of the download; the run from the clone must not read it.
+test_the_run_from_the_clone_does_not_read_the_piped_script() {
+    TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
+    EXTRA_PATH="$SCRATCH/stdin-stow"
+    mkdir -p "$EXTRA_PATH"
+    printf '#!/bin/sh\n[ -p /dev/stdin ] && echo "STDIN IS A PIPE"\nexec /usr/bin/stow "$@"\n' >"$EXTRA_PATH/stow"
+    chmod +x "$EXTRA_PATH/stow"
+    pipe_bootstrap --stow-only --host no-such-host
+    [[ $STATUS -eq 0 ]] || fail "piped bootstrap exited $STATUS"
+    ! grep -q "STDIN IS A PIPE" <<<"$OUT" || fail "the steps get the curl pipe as stdin"
+}
+
+# tee writes the log and the screen; a bootstrap that exits before tee is done cuts the summary short.
+test_the_summary_is_all_written_out_when_bootstrap_exits() {
+    TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
+    EXTRA_PATH="$SCRATCH/slow-tee"
+    mkdir -p "$EXTRA_PATH"
+    printf '#!/bin/sh\nsleep 1\nexec /usr/bin/tee "$@"\n' >"$EXTRA_PATH/tee"
+    chmod +x "$EXTRA_PATH/tee"
+    STATUS=0
+    (cd "$TEST_HOME" && env HOME="$TEST_HOME" PATH="$EXTRA_PATH:$PATH" bash "$BOOTSTRAP" --stow-only --host no-such-host \
+        >"$TEST_HOME.out" 2>&1) || STATUS=$?
+    OUT="$(cat "$TEST_HOME.out")"
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    grep -q "^Log: " <<<"$OUT" || fail "the summary was still being written when bootstrap exited"
+}
+
+test_a_run_that_stops_early_leaves_no_temp_files() {
+    TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
+    local tmp="$SCRATCH/tmpdir"
+    mkdir -p "$tmp"
+    touch "$TEST_HOME/.local"
+    STATUS=0
+    OUT="$(cd "$TEST_HOME" && env HOME="$TEST_HOME" TMPDIR="$tmp" bash "$BOOTSTRAP" --stow-only --host no-such-host 2>&1)" \
+        || STATUS=$?
+    [[ $STATUS -ne 0 ]] || fail "ran with an unwritable ~/.local/state"
+    [[ -z "$(ls -A "$tmp")" ]] || fail "left temp files: $(ls -A "$tmp")"
 }
 
 test_piped_into_bash_clones_the_repo_and_runs_from_the_clone() {
@@ -260,8 +337,8 @@ cat >"$NVM_DIR/nvm.sh" <<'NVM'
 nvm() {
     echo "nvm $*" >>"$CALLS"
     case "$1" in
-        version) [ -e "$NVM_DIR/lts-installed" ] && echo v22.0.0 || echo N/A ;;
-        install) [ "$2" = --lts ] && touch "$NVM_DIR/lts-installed" ;;
+        version) [ -e "$NVM_DIR/lts-installed" ] && echo v22.0.0 || { echo N/A; return 3; } ;;
+        install) [ -z "$FAKE_NVM_INSTALL_FAIL" ] || return 1; [ "$2" = --lts ] && touch "$NVM_DIR/lts-installed" ;;
     esac
 }
 NVM
@@ -389,14 +466,66 @@ test_a_second_node_run_installs_nothing_and_says_so() {
     grep -q "^skipped	node LTS" <<<"$SUMMARY" || fail "node LTS not reported as skipped: $SUMMARY"
 }
 
-test_node_uses_nvm_dir_when_it_is_set() {
+# The pacman nvm puts its own copy in /usr/share/nvm; the node step installs nvm in ~/.nvm.
+test_no_package_list_installs_nvm() {
+    OUT="$(grep -lx 'nvm' "$REPO"/common/packages/*.txt || true)"
+    [[ -z "$OUT" ]] || fail "a package list installs nvm with pacman"
+}
+
+# fake_nvm_in <dir>: an nvm already installed in <dir>, with an LTS node.
+fake_nvm_in() {
+    mkdir -p "$1"
+    printf 'nvm() { echo "nvm $*" >>"$CALLS"; echo v22.0.0; }\n' >"$1/nvm.sh"
+}
+
+test_node_uses_nvm_dir_when_it_holds_an_nvm() {
+    fresh_home
+    fake_nvm_in "$TEST_HOME/elsewhere"
+    run_step_alone node NVM_DIR="$TEST_HOME/elsewhere"
+    [[ $STATUS -eq 0 ]] || fail "node step exited $STATUS"
+    grep -q "^nvm version" "$CALLS" || fail "did not use the nvm in NVM_DIR: $(cat "$CALLS")"
+    [[ ! -e "$TEST_HOME/.nvm" ]] || fail "installed a second nvm in ~/.nvm"
+}
+
+# A shell that once ran with spaceship's XDG_CONFIG_HOME exports NVM_DIR=~/.config/nvm, where no nvm is.
+test_node_ignores_a_stale_nvm_dir_and_installs_into_home() {
     fresh_home
     run_step_alone node NVM_DIR="$TEST_HOME/.config/nvm"
     [[ $STATUS -eq 0 ]] || fail "node step exited $STATUS"
-    [[ -f "$TEST_HOME/.config/nvm/nvm.sh" ]] || fail "nvm not installed into NVM_DIR"
+    [[ -f "$TEST_HOME/.nvm/nvm.sh" ]] || fail "nvm is not in ~/.nvm"
+    [[ ! -e "$TEST_HOME/.config/nvm" ]] || fail "created a second nvm at the stale NVM_DIR"
 }
 
-for t in $(declare -F | awk '{print $3}' | grep '^test_'); do
+test_a_failing_node_install_fails_the_node_step() {
+    fresh_home
+    run_step_alone node FAKE_NVM_INSTALL_FAIL=1
+    [[ $STATUS -ne 0 ]] || fail "a failed nvm install --lts exited 0"
+    ! grep -q "^installed	node" <<<"$SUMMARY" || fail "reports node installed: $SUMMARY"
+}
+
+# zshrc_nvm_dir <NVM_DIR or empty>: the NVM_DIR the .zshrc ends up with, run with only its nvm lines.
+zshrc_nvm_dir() {
+    env -i HOME="$TEST_HOME" ${1:+NVM_DIR="$1"} zsh -fc "$(grep NVM_DIR "$REPO/common/.zshrc")
+echo \$NVM_DIR"
+}
+
+test_zshrc_ignores_a_stale_nvm_dir() {
+    fresh_home
+    OUT="$(zshrc_nvm_dir "$TEST_HOME/.config/nvm")"
+    [[ "$OUT" == "$TEST_HOME/.nvm" ]] || fail "a stale NVM_DIR gives $OUT"
+    OUT="$(zshrc_nvm_dir "")"
+    [[ "$OUT" == "$TEST_HOME/.nvm" ]] || fail "no NVM_DIR gives $OUT"
+}
+
+test_zshrc_keeps_an_nvm_dir_that_holds_an_nvm() {
+    fresh_home
+    fake_nvm_in "$TEST_HOME/elsewhere"
+    OUT="$(CALLS=/dev/null zshrc_nvm_dir "$TEST_HOME/elsewhere")"
+    [[ "$OUT" == "$TEST_HOME/elsewhere" ]] || fail "NVM_DIR is $OUT"
+}
+
+# run.sh [name filter]: runs only the tests whose name contains the filter.
+for t in $(declare -F | awk '{print $3}' | grep "^test_.*${1:-}"); do
     echo "$t"
     ( set -e; "$t" )
     if [[ $? -eq 0 ]]; then PASSED=$((PASSED + 1)); else FAILED=$((FAILED + 1)); fi

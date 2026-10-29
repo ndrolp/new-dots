@@ -4,8 +4,7 @@
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 
-groups=(core)
-[[ "${DOTFILES_MINIMAL:-false}" == true ]] || groups+=(apps)
+mapfile -t groups < <(package_groups)
 mapfile -t packages < <(package_list "${groups[@]}")
 
 info "Updating the system..."

@@ -4,8 +4,7 @@
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 
-groups=(core-aur)
-[[ "${DOTFILES_MINIMAL:-false}" == true ]] || groups+=(apps-aur)
+mapfile -t groups < <(package_groups -aur)
 mapfile -t packages < <(package_list "${groups[@]}")
 
 info "Installing AUR packages (${groups[*]})..."

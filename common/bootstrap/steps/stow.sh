@@ -6,12 +6,13 @@ source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 
 backup_dir="$HOME/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
 
-# conflicts <package>: the targets (relative to $HOME) stow would refuse to replace,
-# one per line. Matches the messages of stow 2.4 and 2.3.
+# conflicts <package>: the targets (relative to $HOME) stow would refuse to replace, one per
+# line: a file, or a symlink stow does not own. Matches the messages of stow 2.4 and 2.3
+# ("cannot stow X over existing target Y since ...", "existing target is <why>: Y[ => link]").
 conflicts() {
     stow -n -v -d "$DOTFILES_DIR" -t "$HOME" "$1" 2>&1 | sed -n \
-        -e 's/^  \* cannot stow .* over existing target \(.*\) since neither a link nor a directory.*/\1/p' \
-        -e 's/^  \* existing target is neither a link nor a directory: \(.*\)/\1/p' || true
+        -e 's/^  \* cannot stow .* over existing target \(.*\) since .*/\1/p' \
+        -e 's/^  \* existing target is [^:]*: \(.*\)/\1/p' | sed 's/ => .*//' || true
 }
 
 # stow_package <package>: backs up what is in the way, then stows <package>.
