@@ -11,5 +11,4 @@ mapfile -t packages < <(package_list "${groups[@]}")
 info "Updating the system..."
 sudo pacman -Syu --noconfirm
 info "Installing pacman packages (${groups[*]})..."
-sudo pacman -S --needed --noconfirm "${packages[@]}"
-summary_add installed "pacman packages: ${groups[*]}"
+pacman_install "pacman packages: ${groups[*]}" "${packages[@]}"

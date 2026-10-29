@@ -57,14 +57,21 @@ fi
 touch "$stamp"
 [[ "$1" == -v ]] && exit 0
 "$@"'
-    # pacman: -Q <pkg> succeeds for anything in $FAKE/installed; FAKE_PACMAN_FAIL makes -S fail;
+    # pacman: -Q <pkg> succeeds for anything in $FAKE/installed; -T prints the args that are
+    # not there (exit 127 if any); -S installs its args; FAKE_PACMAN_FAIL makes -S fail;
     # FAKE_UPGRADE_SECONDS makes -Syu take that long.
     shim pacman '
 echo "pacman $*" >>"$FAKE/calls"
 case "$1" in
     -Q) [[ -e "$FAKE/installed/$2" ]] ;;
+    -T)
+        missing=0
+        for p in "${@:2}"; do [[ -e "$FAKE/installed/$p" ]] || { echo "$p"; missing=1; }; done
+        ((missing == 0)) || exit 127 ;;
     -Syu) sleep "${FAKE_UPGRADE_SECONDS:-0}" ;;
-    -S) [[ -z "${FAKE_PACMAN_FAIL:-}" ]] || exit 1 ;;
+    -S)
+        [[ -z "${FAKE_PACMAN_FAIL:-}" ]] || exit 1
+        for p in "${@:2}"; do [[ "$p" == -* ]] || touch "$FAKE/installed/$p"; done ;;
 esac'
     # paru: installing a package named bogus-* fails.
     shim paru '
@@ -161,6 +168,19 @@ test_minimal_skips_apps() {
     ! grep -q steam "$CALLS" || fail "installed an apps package under --minimal"
     ! grep -q bogus-app "$CALLS" || fail "installed an apps-aur package under --minimal"
     grep -q "^paru .*wlctl-git" "$CALLS" || fail "did not install core-aur"
+}
+
+test_a_second_packages_run_installs_nothing_and_says_so() {
+    setup_fakes
+    make_lists "core=zsh git" "apps=steam"
+    run_steps false packages
+    : >"$CALLS"
+    run_steps false packages
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    ! grep -q "^pacman -S " "$CALLS" || fail "second run ran an install batch"
+    ! grep -q "^installed" <<<"$SUMMARY" || fail "second run reports an install: $SUMMARY"
+    grep -q "^skipped	pacman packages: core apps (already installed)$" <<<"$SUMMARY" \
+        || fail "not reported as skipped: $SUMMARY"
 }
 
 test_a_failing_pacman_batch_fails_the_step() {
@@ -334,6 +354,20 @@ test_hardware_installs_the_intel_set_on_an_intel_machine() {
     [[ "$(grep -c '^pacman -S ' "$CALLS")" -eq 1 ]] || fail "not one batch"
     grep -q "^pacman -S --needed --noconfirm sof-firmware intel-ucode vulkan-intel$" "$CALLS" \
         || fail "batch is not hardware-any + hardware-intel"
+}
+
+test_a_second_hardware_run_installs_nothing_and_says_so() {
+    setup_fakes
+    make_lists "${HW_LISTS[@]}"
+    fake_hardware GenuineIntel "$INTEL_GPU"
+    run_steps false hardware
+    : >"$CALLS"
+    run_steps false hardware
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    ! grep -q "^pacman -S " "$CALLS" || fail "second run ran an install batch"
+    ! grep -q "^installed" <<<"$SUMMARY" || fail "second run reports an install: $SUMMARY"
+    grep -q "^skipped	hardware packages: hardware-any hardware-intel (already installed)$" <<<"$SUMMARY" \
+        || fail "not reported as skipped: $SUMMARY"
 }
 
 test_hardware_installs_the_amd_set_on_an_amd_machine() {

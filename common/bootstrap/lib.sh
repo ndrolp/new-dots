@@ -59,6 +59,21 @@ package_list() {
     done
 }
 
+# pacman_install <what> <package>...: installs the packages in one sudo pacman batch and records
+# <what> as installed, or, when pacman -T finds every one already there, runs nothing and records
+# <what> as skipped (so a second run says it changed nothing). A failed batch returns non-zero.
+pacman_install() {
+    local what="$1"
+    shift
+    if [[ -z "$(pacman -T "$@" || true)" ]]; then
+        info "All $what are already installed."
+        summary_add skipped "$what (already installed)"
+        return 0
+    fi
+    sudo pacman -S --needed --noconfirm "$@" || return 1
+    summary_add installed "$what"
+}
+
 # run_step <name>: runs steps/<name>.sh in its own process and records how it went.
 run_step() {
     local name="$1"
