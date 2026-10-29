@@ -162,6 +162,142 @@ test_a_second_run_updates_the_existing_clone_instead_of_recloning() {
         || fail "origin changed on the second run"
 }
 
+# Fakes for the network installers and the system tools the shell and node steps call.
+# Every call is appended to $CALLS so tests can check what ran and how.
+make_shims() {
+    SHIMS="$SCRATCH/shims"
+    [[ -d "$SHIMS" ]] && return 0
+    mkdir -p "$SHIMS"
+    # curl serves a fake installer for each URL the steps pipe into a shell.
+    cat >"$SHIMS/curl" <<'EOF'
+#!/usr/bin/env bash
+url="${*: -1}"
+echo "curl $url" >>"$CALLS"
+case "$url" in
+    *ohmyzsh*)
+        cat <<'INSTALLER'
+echo "oh-my-zsh-installer RUNZSH=$RUNZSH CHSH=$CHSH KEEP_ZSHRC=$KEEP_ZSHRC args=$*" >>"$CALLS"
+mkdir -p "$HOME/.oh-my-zsh"
+touch "$HOME/.oh-my-zsh/oh-my-zsh.sh"
+[ -e "$HOME/.zshrc" ] && [ "$KEEP_ZSHRC" = yes ] || echo "# oh-my-zsh template" >"$HOME/.zshrc"
+INSTALLER
+        ;;
+    *nvm-sh/nvm*)
+        cat <<'INSTALLER'
+echo "nvm-installer NVM_DIR=$NVM_DIR PROFILE=$PROFILE" >>"$CALLS"
+[ -d "$NVM_DIR" ] || { echo "NVM_DIR does not exist" >&2; exit 1; }
+cat >"$NVM_DIR/nvm.sh" <<'NVM'
+nvm() {
+    echo "nvm $*" >>"$CALLS"
+    case "$1" in
+        version) [ -e "$NVM_DIR/lts-installed" ] && echo v22.0.0 || echo N/A ;;
+        install) [ "$2" = --lts ] && touch "$NVM_DIR/lts-installed" ;;
+    esac
+}
+NVM
+INSTALLER
+        ;;
+    *) echo "unexpected url $url" >&2; exit 1 ;;
+esac
+EOF
+    # git fakes clones from GitHub and passes anything else to the real git.
+    cat >"$SHIMS/git" <<'EOF'
+#!/usr/bin/env bash
+if [[ "$1" == clone && "$*" == *github.com* ]]; then
+    echo "git $*" >>"$CALLS"
+    mkdir -p "${*: -1}"
+    exit 0
+fi
+exec /usr/bin/git "$@"
+EOF
+    printf '#!/bin/sh\necho "sudo $*" >>"$CALLS"\nexec "$@"\n' >"$SHIMS/sudo"
+    printf '#!/bin/sh\necho "chsh $*" >>"$CALLS"\n' >"$SHIMS/chsh"
+    # getent reports the login shell in $FAKE_LOGIN_SHELL.
+    printf '#!/bin/sh\necho "$3:x:1000:1000::/home/$3:$FAKE_LOGIN_SHELL"\n' >"$SHIMS/getent"
+    chmod +x "$SHIMS"/*
+}
+
+# run_step_alone <step> [VAR=value...]: runs steps/<step>.sh on its own in TEST_HOME
+# with the shims first in PATH. Sets OUT, STATUS and SUMMARY.
+run_step_alone() {
+    local step="$1"
+    shift
+    make_shims
+    local summary
+    summary="$(mktemp "$SCRATCH/summary.XXXX")"
+    STATUS=0
+    OUT="$(cd "$TEST_HOME" && env -u ZSH -u ZSH_CUSTOM -u NVM_DIR HOME="$TEST_HOME" PATH="$SHIMS:$PATH" \
+        CALLS="$CALLS" DOTFILES_SUMMARY_FILE="$summary" DOTFILES_NO_SYSTEM=false FAKE_LOGIN_SHELL=/bin/bash \
+        "$@" bash "$REPO/common/bootstrap/steps/$step.sh" 2>&1)" || STATUS=$?
+    SUMMARY="$(cat "$summary")"
+}
+
+fresh_home() {
+    TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
+    CALLS="$TEST_HOME.calls"
+    : >"$CALLS"
+}
+
+test_shell_installs_oh_my_zsh_unattended_and_leaves_no_zshrc_for_stow() {
+    fresh_home
+    run_step_alone shell
+    [[ $STATUS -eq 0 ]] || fail "shell step exited $STATUS"
+    [[ -f "$TEST_HOME/.oh-my-zsh/oh-my-zsh.sh" ]] || fail "oh-my-zsh is not installed"
+    grep -q "oh-my-zsh-installer RUNZSH=no CHSH=no KEEP_ZSHRC=yes args=.*--unattended" "$CALLS" \
+        || fail "installer not run unattended: $(cat "$CALLS")"
+    [[ ! -e "$TEST_HOME/.zshrc" ]] || fail "left the installer's .zshrc where stow links its own"
+}
+
+test_shell_clones_the_plugins_and_theme_into_the_custom_dir_the_zshrc_uses() {
+    fresh_home
+    run_step_alone shell
+    [[ $STATUS -eq 0 ]] || fail "shell step exited $STATUS"
+    local custom="$TEST_HOME/.config/zsh_custom"
+    grep -q '^export ZSH_CUSTOM="$HOME/.config/zsh_custom"$' "$REPO/common/.zshrc" || fail ".zshrc uses another ZSH_CUSTOM"
+    [[ -d "$custom/plugins/zsh-autosuggestions" ]] || fail "zsh-autosuggestions not in $custom/plugins"
+    [[ -d "$custom/plugins/zsh-syntax-highlighting" ]] || fail "zsh-syntax-highlighting not in $custom/plugins"
+    [[ -d "$custom/themes/spaceship-prompt" ]] || fail "spaceship-prompt not in $custom/themes"
+    [[ "$(readlink "$custom/themes/spaceship.zsh-theme")" == "$custom/themes/spaceship-prompt/spaceship.zsh-theme" ]] \
+        || fail "spaceship.zsh-theme does not link into spaceship-prompt"
+}
+
+test_shell_changes_the_login_shell_to_zsh() {
+    fresh_home
+    run_step_alone shell
+    [[ $STATUS -eq 0 ]] || fail "shell step exited $STATUS"
+    grep -q "^chsh -s .*/zsh $(id -un)$" "$CALLS" || fail "chsh to zsh not run: $(cat "$CALLS")"
+    grep -q "^sudo chsh" "$CALLS" || fail "chsh not run through sudo, so it would ask for a password"
+}
+
+test_shell_leaves_the_login_shell_alone_when_it_is_already_zsh() {
+    fresh_home
+    run_step_alone shell FAKE_LOGIN_SHELL=/usr/bin/zsh
+    [[ $STATUS -eq 0 ]] || fail "shell step exited $STATUS"
+    ! grep -q chsh "$CALLS" || fail "ran chsh again: $(cat "$CALLS")"
+    grep -q "^skipped.*zsh" <<<"$SUMMARY" || fail "summary does not record the skip: $SUMMARY"
+}
+
+test_shell_under_no_system_does_not_change_the_login_shell() {
+    fresh_home
+    run_step_alone shell DOTFILES_NO_SYSTEM=true
+    [[ $STATUS -eq 0 ]] || fail "shell step exited $STATUS"
+    ! grep -q chsh "$CALLS" || fail "ran chsh under --no-system"
+    grep -q "^skipped.*--no-system" <<<"$SUMMARY" || fail "summary does not record the skip: $SUMMARY"
+}
+
+test_a_second_shell_run_installs_nothing_and_says_so() {
+    fresh_home
+    run_step_alone shell DOTFILES_NO_SYSTEM=true
+    : >"$CALLS"
+    run_step_alone shell DOTFILES_NO_SYSTEM=true
+    [[ $STATUS -eq 0 ]] || fail "second run exited $STATUS"
+    [[ ! -s "$CALLS" ]] || fail "second run downloaded or cloned again: $(cat "$CALLS")"
+    ! grep -q "^installed" <<<"$SUMMARY" || fail "second run reports installs: $SUMMARY"
+    for what in oh-my-zsh zsh-autosuggestions zsh-syntax-highlighting "spaceship theme"; do
+        grep -q "^skipped	$what" <<<"$SUMMARY" || fail "second run does not report $what as skipped: $SUMMARY"
+    done
+}
+
 for t in $(declare -F | awk '{print $3}' | grep '^test_'); do
     echo "$t"
     ( set -e; "$t" )
