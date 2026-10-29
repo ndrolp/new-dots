@@ -25,7 +25,7 @@ error() { printf "${RED}error: %s${NC}\n" "$*" >&2; }
 # bootstrap.sh sets it; a step run on its own has no summary to add to.
 DOTFILES_SUMMARY_FILE="${DOTFILES_SUMMARY_FILE:-/dev/null}"
 
-# summary_add <installed|skipped|failed|backed-up> <what>
+# summary_add <installed|skipped|failed|backed-up|warning> <what>
 summary_add() { printf '%s\t%s\n' "$1" "$2" >>"$DOTFILES_SUMMARY_FILE"; }
 
 # system_changes_allowed <what>: false under --no-system, after recording <what> as skipped.
@@ -75,12 +75,13 @@ run_step() {
 print_summary() {
     local kind label lines
     header "Summary"
-    for kind in step-ok installed skipped backed-up failed; do
+    for kind in step-ok installed skipped backed-up warning failed; do
         case "$kind" in
             step-ok) label="Steps done" ;;
             installed) label="Installed" ;;
             skipped) label="Skipped" ;;
             backed-up) label="Backed up" ;;
+            warning) label="Warnings" ;;
             failed) label="Failed" ;;
         esac
         lines="$(awk -F'\t' -v k="$kind" '$1 == k { print "  - " $2 }' "$DOTFILES_SUMMARY_FILE")"
