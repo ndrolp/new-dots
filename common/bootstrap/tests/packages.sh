@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Tests for the preflight, packages, paru, aur and services steps. pacman, paru, sudo, rustup,
-# git, makepkg, systemctl, usermod and id are PATH shims that log their calls, so nothing is
-# installed or enabled and no root is needed.
+# Tests for the preflight, packages, paru, aur, hardware and services steps. pacman, paru, sudo,
+# rustup, git, makepkg, lspci, systemctl, usermod and id are PATH shims that log their calls, so
+# nothing is installed or enabled and no root is needed.
 set -uo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
@@ -15,7 +15,7 @@ FAILED=0
 SYS_BIN="$SCRATCH/sysbin"
 mkdir -p "$SYS_BIN"
 for cmd in /usr/bin/*; do
-    case "${cmd##*/}" in pacman | paru | sudo | rustup | git | makepkg | systemctl | usermod) continue ;; esac
+    case "${cmd##*/}" in pacman | paru | sudo | rustup | git | makepkg | lspci | systemctl | usermod) continue ;; esac
     ln -s "$cmd" "$SYS_BIN/"
 done
 
@@ -76,6 +76,10 @@ touch "$FAKE/installed/$pkg"'
     shim git 'echo "git $*" >>"$FAKE/calls"; [[ "$1" == clone ]] && mkdir -p "${!#}"; exit 0'
     # makepkg -si installs paru into the fake bin.
     shim makepkg 'echo "makepkg $*" >>"$FAKE/calls"; cp "$FAKE/paru.real" "$FAKE/bin/paru"'
+    # lspci prints $FAKE/lspci; $FAKE/cpuinfo is what the hardware step reads for /proc/cpuinfo.
+    : >"$FAKE/lspci"
+    : >"$FAKE/cpuinfo"
+    shim lspci 'echo "lspci $*" >>"$FAKE/calls"; cat "$FAKE/lspci"'
     # systemctl: is-enabled succeeds for units in $FAKE/enabled (as <system|user>-<unit>);
     # enable adds them there; enabling a unit named bogus-* fails.
     shim systemctl '
@@ -97,6 +101,20 @@ make_services() {
     { echo "# a comment"; printf '%s\n' "$@"; } >"$SERVICES"
 }
 
+# fake_hardware <cpu vendor_id> <lspci -nn line>...: the machine the hardware step sees.
+fake_hardware() {
+    printf 'processor\t: 0\nvendor_id\t: %s\nmodel name\t: Some CPU\n\n' "$1" >"$FAKE/cpuinfo"
+    shift
+    printf '%s\n' "00:00.0 Host bridge [0600]: Advanced Micro Devices, Inc. [AMD] Root Complex [1022:14d8]" \
+        "$@" >"$FAKE/lspci"
+}
+
+INTEL_GPU="00:02.0 VGA compatible controller [0300]: Intel Corporation Arc Graphics 130V/140V GPU [8086:64a0] (rev 04)"
+AMD_GPU="03:00.0 VGA compatible controller [0300]: Advanced Micro Devices, Inc. [AMD/ATI] Navi 31 [1002:744c] (rev c8)"
+NVIDIA_GPU="01:00.0 3D controller [0302]: NVIDIA Corporation AD107M [GeForce RTX 4060 Max-Q] [10de:28e0] (rev a1)"
+HW_LISTS=("hardware-any=sof-firmware" "hardware-intel=intel-ucode vulkan-intel"
+    "hardware-amd=amd-ucode vulkan-radeon" "hardware-nvidia=vulkan-nouveau")
+
 # For tests where paru is not installed yet: moves the paru shim aside for makepkg to install.
 without_paru() { mv "$FAKE_BIN/paru" "$FAKE/paru.real"; }
 
@@ -117,7 +135,7 @@ run_steps() {
     summary="$(mktemp "$SCRATCH/summary.XXXX")"
     STATUS=0
     OUT="$(env PATH="$FAKE_BIN:$SYS_BIN" HOME="$FAKE" DOTFILES_MINIMAL="$minimal" \
-        DOTFILES_SUMMARY_FILE="$summary" DOTFILES_PACKAGES_DIR="${LISTS:-}" \
+        DOTFILES_SUMMARY_FILE="$summary" DOTFILES_PACKAGES_DIR="${LISTS:-}" DOTFILES_CPUINFO="$FAKE/cpuinfo" \
         DOTFILES_SERVICES_FILE="${SERVICES:-}" DOTFILES_NO_SYSTEM="${DOTFILES_NO_SYSTEM:-false}" \
         bash -c 'source "$1/common/bootstrap/lib.sh"; shift; for s in "$@"; do run_step "$s" || exit 1; done' \
         bash "$REPO" "$@" 2>&1)" || STATUS=$?
@@ -305,6 +323,62 @@ test_every_required_service_comes_from_a_core_package() {
     for unit in auto-cpufreq proton.VPN openlogi-agent; do
         grep -qE "^(system|user) $unit .* optional" "$file" || fail "$unit is not optional"
     done
+}
+
+test_hardware_installs_the_intel_set_on_an_intel_machine() {
+    setup_fakes
+    make_lists "${HW_LISTS[@]}"
+    fake_hardware GenuineIntel "$INTEL_GPU"
+    run_steps false hardware
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    [[ "$(grep -c '^pacman -S ' "$CALLS")" -eq 1 ]] || fail "not one batch"
+    grep -q "^pacman -S --needed --noconfirm sof-firmware intel-ucode vulkan-intel$" "$CALLS" \
+        || fail "batch is not hardware-any + hardware-intel"
+}
+
+test_hardware_installs_the_amd_set_on_an_amd_machine() {
+    setup_fakes
+    make_lists "${HW_LISTS[@]}"
+    fake_hardware AuthenticAMD "$AMD_GPU"
+    run_steps false hardware
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    grep -q "^pacman -S --needed --noconfirm sof-firmware amd-ucode vulkan-radeon$" "$CALLS" \
+        || fail "batch is not hardware-any + hardware-amd"
+}
+
+test_hardware_installs_both_sets_for_an_intel_cpu_with_an_amd_gpu() {
+    setup_fakes
+    make_lists "${HW_LISTS[@]}"
+    fake_hardware GenuineIntel "$INTEL_GPU" "$AMD_GPU"
+    run_steps false hardware
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    [[ "$(grep -c '^pacman -S ' "$CALLS")" -eq 1 ]] || fail "not one batch"
+    local batch
+    batch="$(grep '^pacman -S ' "$CALLS")"
+    for pkg in sof-firmware intel-ucode vulkan-intel amd-ucode vulkan-radeon; do
+        [[ " $batch " == *" $pkg "* ]] || fail "$pkg not in the batch: $batch"
+    done
+}
+
+test_hardware_warns_about_an_nvidia_gpu_and_skips_its_drivers() {
+    setup_fakes
+    make_lists "${HW_LISTS[@]}"
+    fake_hardware GenuineIntel "$INTEL_GPU" "$NVIDIA_GPU"
+    run_steps false hardware
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    ! grep -q nouveau "$CALLS" || fail "installed NVIDIA drivers"
+    grep -q "^pacman -S --needed --noconfirm sof-firmware intel-ucode vulkan-intel$" "$CALLS" \
+        || fail "did not install the rest"
+    grep -qi "^warning	.*nvidia" <<<"$SUMMARY" || fail "no NVIDIA warning in the summary: $SUMMARY"
+}
+
+test_hardware_warning_is_printed_in_the_summary() {
+    local summary
+    summary="$(mktemp "$SCRATCH/summary.XXXX")"
+    printf 'warning\tNVIDIA GPU: drivers not installed\n' >"$summary"
+    OUT="$(DOTFILES_SUMMARY_FILE="$summary" bash -c 'source "$1/common/bootstrap/lib.sh"; print_summary' bash "$REPO" 2>&1)"
+    CALLS=/dev/null
+    grep -q "NVIDIA GPU: drivers not installed" <<<"$OUT" || fail "warning not printed"
 }
 
 for t in $(declare -F | awk '{print $3}' | grep '^test_'); do

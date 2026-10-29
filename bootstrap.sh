@@ -98,7 +98,7 @@ trap 'print_summary; rm -f "$DOTFILES_SUMMARY_FILE"' EXIT
 if [[ "$DOTFILES_STOW_ONLY" == true ]]; then
     steps=(stow)
 else
-    steps=(preflight packages paru aur shell node)
+    steps=(preflight packages paru aur hardware shell node)
     [[ "$DOTFILES_SPICETIFY" == true ]] && steps+=(spicetify)
     steps+=(stow)
     steps+=(services)
