@@ -1,0 +1,28 @@
+# Apps: installed by default, skipped by --minimal.
+# Official repo packages, installed with pacman.
+capitaine-cursors
+chromium
+darktable
+dbeaver
+discord
+firefox
+gimp
+gst-thumbnailers
+inkscape
+lazydocker
+libreoffice-fresh
+nemo-image-converter
+obsidian
+openrgb
+proton-vpn-cli
+proton-vpn-gtk-app
+qbittorrent
+rawtherapee
+sassc
+smartmontools
+steam
+telegram-desktop
+unixodbc
+waydroid
+xdg-desktop-portal-gnome
+xorg-xinit

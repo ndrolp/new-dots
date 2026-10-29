@@ -1,0 +1,17 @@
+# Core desktop: always installed.
+# AUR packages, installed one by one with paru.
+arc-icon-theme-full-git
+auto-cpufreq-git
+aylurs-gtk-shell-git
+bibata-cursor-theme
+catppuccin-gtk-theme-macchiato
+hyprdynamicmonitors-bin
+kvantum-theme-catppuccin-git
+libastal-meta
+paru
+postman-bin
+pyprland-git
+qml-language-server-bin
+visual-studio-code-bin
+waypaper-git
+wlctl-git
