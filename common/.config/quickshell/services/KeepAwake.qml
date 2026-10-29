@@ -3,8 +3,8 @@ import Quickshell.Wayland
 import QtQuick
 
 // Keep-awake: while on, the session doesn't go idle. The shell owns the one
-// instance, so the control center tile and the keep-awake bar element share
-// it, and it isn't saved, so every shell start begins with it off.
+// instance, so the control center tile, the keep-awake bar element and its
+// popup share it, and it isn't saved, so every shell start begins with it off.
 Scope {
     id: root
 

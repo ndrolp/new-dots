@@ -27,6 +27,8 @@ calculator and how qalc is run and answers
 (`components/panels/SearchQuery.js`), which emoji the emoji picker finds
 (`components/panels/EmojiSearch.js`), and how the keybind cheatsheet groups
 and filters `hyprctl binds -j` (`components/panels/KeybindCheatsheet.js`),
+what the keep-awake bar element shows and its popup's switch
+(`components/bar/KeepAwakeElement.qml`, `components/panels/KeepAwakePopupBody.qml`),
 and which popup is open across the bars (`modules/OpenPopup.js`).
 They run with QtTest outside of `qs`:
 

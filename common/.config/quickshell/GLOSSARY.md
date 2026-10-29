@@ -45,7 +45,7 @@ Una pantalla que otra app (un navegador en una llamada, OBS…) lee por PipeWire
 _Avoid_: screencast, stream (para esto)
 
 **Keep-awake** (mantener despierto):
-Mientras está activo, la sesión no pasa a inactiva: no se atenúa ni se apaga la pantalla ni se suspende. Se activa y desactiva desde el control center. El bar element keep-awake aparece solo mientras está activo, y al pulsarlo se desactiva. Siempre empieza desactivado al arrancar la shell.
+Mientras está activo, la sesión no pasa a inactiva: no se atenúa ni se apaga la pantalla ni se suspende. Se activa y desactiva desde el control center o desde el popup del bar element keep-awake. Ese bar element se muestra siempre: una taza llena en verde mientras está activo y una taza vacía en el color de subtexto mientras no; al pulsarlo se abre su popup, con un interruptor para activarlo o desactivarlo. Siempre empieza desactivado al arrancar la shell.
 _Avoid_: Caffeine, idle inhibitor (para la función), no dormir
 
 **Night light** (luz nocturna):

@@ -27,8 +27,9 @@ carries the decisions out, so they are tested without Quickshell.
 ## Keep-awake
 
 `KeepAwake.qml` is the shell's one keep-awake. Its `on` is never saved, so it
-starts off on every shell start. The control center tile toggles it and the
-keep-awake bar element, shown only while it is on, turns it off. While on it
+starts off on every shell start. The control center tile and the switch in the
+keep-awake popup both toggle it; the keep-awake bar element, always shown, opens
+that popup and shows a filled cup while it is on. While on it
 holds an `IdleInhibitor` on a transparent, click-through 1×1 window of its own,
 because an inhibitor only counts while its window is shown and the control
 center hides its window when closed.

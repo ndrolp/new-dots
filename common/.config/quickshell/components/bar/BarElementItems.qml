@@ -103,8 +103,8 @@ Item {
         "clock": pomodoroButton
     })
 
-    // Enabled elements with nothing to show (no player, battery, recording,
-    // keep-awake or sound) are hidden.
+    // Enabled elements with nothing to show (no player, battery, recording
+    // or sound) are hidden.
     function itemVisible(element) {
         if (!BarProfileModel.elementEnabled(appearance.barElements, element))
             return false;
@@ -114,8 +114,6 @@ Item {
             return hasBattery;
         if (element === "recording")
             return RecordingIndicator.shown(recordings);
-        if (element === "keepAwake")
-            return keepAwake.on;
         if (element === "cava")
             return !cava.silent;
         return true;
@@ -270,43 +268,16 @@ Item {
         }
     }
 
-    // Shown only while keep-awake is on; a click turns it off.
-    Rectangle {
+    KeepAwakeElement {
         id: keepAwakeButton
 
+        appearance: root.appearance
+        keepAwake: root.keepAwake
+        grouped: root.elementGrouped("keepAwake")
         visible: root.itemVisible("keepAwake")
         x: root.elementX("keepAwake")
-        width: keepAwakeIcon.implicitWidth + 16
         height: root.itemHeight
-        radius: root.appearance.radius
-        color: keepAwakeHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("keepAwake") || root.appearance.pillsTransparent
-                || root.appearance.transparentBarSlanted
-                ? "transparent" : theme.surface
-        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("keepAwake") ? 1 : 0
-        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
-
-        Behavior on color {
-            ColorAnimation { duration: root.appearance.motion.short }
-        }
-
-        HoverHandler {
-            id: keepAwakeHover
-        }
-
-        Text {
-            id: keepAwakeIcon
-
-            anchors.centerIn: parent
-            text: "󰒲"
-            color: theme.green
-            font.pixelSize: root.appearance.textSize
-            font.bold: true
-        }
-
-        TapHandler {
-            onTapped: root.keepAwake.on = false
-        }
+        onPopupRequested: root.popupRequested("keepAwake")
     }
 
     Rectangle {

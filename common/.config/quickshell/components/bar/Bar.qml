@@ -169,6 +169,7 @@ Variants {
                 popupAnchorProvider: barContent
                 activePopup: panel.activePopup
                 pomodoro: panel.pomodoro
+                keepAwake: panel.keepAwake
                 systemMonitor: panel.systemMonitor
 
                 onPopupClosed: function(popup) {

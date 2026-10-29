@@ -8,6 +8,8 @@ Item {
     required property var appearance
     required property var barWindow
     required property var pomodoro
+    // The shell's keep-awake (services/KeepAwake.qml).
+    required property var keepAwake
     required property var systemMonitor
     property string activePopup: ""
     // The bar content; places popups under the bar element that opened them.
@@ -23,6 +25,11 @@ Item {
     PomodoroPopup {
         popups: root
         pomodoro: root.pomodoro
+    }
+
+    KeepAwakePopup {
+        popups: root
+        keepAwake: root.keepAwake
     }
 
     MediaPopup {
