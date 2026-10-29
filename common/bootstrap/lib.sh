@@ -49,10 +49,11 @@ dotfiles_host() {
 }
 
 # package_list <group>...: the packages in common/packages/<group>.txt, without comments or blank lines.
+# DOTFILES_PACKAGES_DIR reads the lists from another dir instead (for tests).
 package_list() {
     local group file
     for group in "$@"; do
-        file="$DOTFILES_DIR/common/packages/$group.txt"
+        file="${DOTFILES_PACKAGES_DIR:-$DOTFILES_DIR/common/packages}/$group.txt"
         [[ -f "$file" ]] || { error "Package list not found: $file"; return 1; }
         sed -e 's/#.*//' -e 's/[[:space:]]//g' "$file" | grep -v '^$' || true
     done
