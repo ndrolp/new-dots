@@ -92,11 +92,13 @@ case "$url" in
     https://github.com/spicetify/cli/releases/download/v2.40.0/spicetify-2.40.0-linux-amd64.tar.gz)
         tar czf "$out" -C "$FAKE" spicetify ;;
     https://raw.githubusercontent.com/spicetify/marketplace/main/resources/install.sh)
-        cat <<'"'INSTALLER'"'
-echo "marketplace-installer" >>"$FAKE/calls"
+        # FAKE_CUT_MARKETPLACE: the connection drops after the first line.
+        installer='"'"'echo "marketplace-installer" >>"$FAKE/calls"
 mkdir -p "$HOME/.config/spicetify/CustomApps/marketplace"
-spicetify apply
-INSTALLER
+spicetify apply'"'"'
+        [[ -z "${FAKE_CUT_MARKETPLACE:-}" ]] || installer="${installer%%$'"'"'\n'"'"'*}"
+        if [[ -n "$out" ]]; then echo "$installer" >"$out"; else echo "$installer"; fi
+        [[ -z "${FAKE_CUT_MARKETPLACE:-}" ]] || exit 18
         ;;
     *) echo "unexpected url $url" >&2; exit 1 ;;
 esac'
@@ -128,6 +130,14 @@ test_installs_spicetify_and_the_marketplace_into_a_writable_spotify_and_applies(
         || fail "installed the marketplace before the backup"
     grep -q "^installed	spicetify$" <<<"$SUMMARY" || fail "summary does not list spicetify: $SUMMARY"
     grep -q "^installed	spicetify marketplace$" <<<"$SUMMARY" || fail "summary does not list the marketplace: $SUMMARY"
+}
+
+test_a_marketplace_download_cut_short_runs_none_of_it() {
+    setup_fakes
+    FAKE_CUT_MARKETPLACE=1 run_spicetify_step
+    [[ $STATUS -ne 0 ]] || fail "a failed marketplace download exited 0"
+    ! grep -q "^marketplace-installer$" "$CALLS" || fail "ran the part of the installer that downloaded"
+    ! grep -q "^installed	spicetify marketplace$" <<<"$SUMMARY" || fail "reports the marketplace installed: $SUMMARY"
 }
 
 test_installs_without_prompting_or_editing_shell_files() {
@@ -180,7 +190,7 @@ test_before_spotify_was_opened_installs_spicetify_but_waits_to_apply() {
     grep -q "^marketplace-installer$" "$CALLS" || fail "did not install the marketplace"
 }
 
-for t in $(declare -F | awk '{print $3}' | grep '^test_'); do
+for t in $(declare -F | awk '{print $3}' | grep "^test_.*${1:-}"); do
     echo "$t"
     ( set -e; "$t" )
     if [[ $? -eq 0 ]]; then PASSED=$((PASSED + 1)); else FAILED=$((FAILED + 1)); fi

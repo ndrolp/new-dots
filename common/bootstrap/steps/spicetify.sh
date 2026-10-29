@@ -61,5 +61,9 @@ sudo chmod -R a+wr "$spotify_dir/Apps"
 spicetify backup apply
 
 info "Installing the spicetify marketplace..."
-curl -fsSL https://raw.githubusercontent.com/spicetify/marketplace/main/resources/install.sh | sh
+# Downloaded whole first, so a dropped connection runs none of it.
+marketplace_installer="$(mktemp)"
+trap 'rm -f "$marketplace_installer"' EXIT
+curl -fsSL -o "$marketplace_installer" https://raw.githubusercontent.com/spicetify/marketplace/main/resources/install.sh
+sh "$marketplace_installer"
 summary_add installed "spicetify marketplace"
