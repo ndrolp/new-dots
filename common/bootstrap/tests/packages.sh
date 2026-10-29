@@ -183,6 +183,16 @@ test_a_second_packages_run_installs_nothing_and_says_so() {
         || fail "not reported as skipped: $SUMMARY"
 }
 
+test_an_empty_package_list_runs_no_pacman_batch() {
+    setup_fakes
+    make_lists "core=" "apps="
+    run_steps false packages
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    ! grep -qE "^pacman -(S|T)( |$)" "$CALLS" || fail "ran pacman for an empty list"
+    grep -q "^skipped	pacman packages: core apps (nothing to install)$" <<<"$SUMMARY" \
+        || fail "not reported as skipped: $SUMMARY"
+}
+
 test_a_failing_pacman_batch_fails_the_step() {
     setup_fakes
     make_lists "core=zsh" "apps=steam"
@@ -232,6 +242,7 @@ test_paru_is_not_rebuilt_when_installed() {
     run_steps false paru
     [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
     ! grep -q "^makepkg" "$CALLS" || fail "rebuilt paru"
+    ! grep -q "^rustup" "$CALLS" || fail "changed the rust toolchain with nothing to build"
 }
 
 # The upgrade outlasts sudo's timeout, so without a keep-alive the install batch would prompt again.

@@ -25,7 +25,8 @@ error() { printf "${RED}error: %s${NC}\n" "$*" >&2; }
 # bootstrap.sh sets it; a step run on its own has no summary to add to.
 DOTFILES_SUMMARY_FILE="${DOTFILES_SUMMARY_FILE:-/dev/null}"
 
-# summary_add <installed|skipped|failed|backed-up|warning> <what>
+# summary_add <step-ok|installed|skipped|backed-up|warning|failed> <what>
+# (step-ok is what run_step records for a step that finished; steps use the others.)
 summary_add() { printf '%s\t%s\n' "$1" "$2" >>"$DOTFILES_SUMMARY_FILE"; }
 
 # system_changes_allowed <what>: false under --no-system, after recording <what> as skipped.
@@ -70,10 +71,16 @@ package_list() {
 
 # pacman_install <what> <package>...: installs the packages in one sudo pacman batch and records
 # <what> as installed, or, when pacman -T finds every one already there, runs nothing and records
-# <what> as skipped (so a second run says it changed nothing). A failed batch returns non-zero.
+# <what> as skipped (so a second run says it changed nothing). An empty list runs nothing and is
+# recorded as skipped too. A failed batch returns non-zero.
 pacman_install() {
     local what="$1"
     shift
+    if (($# == 0)); then
+        info "No $what to install."
+        summary_add skipped "$what (nothing to install)"
+        return 0
+    fi
     if [[ -z "$(pacman -T "$@" || true)" ]]; then
         info "All $what are already installed."
         summary_add skipped "$what (already installed)"
