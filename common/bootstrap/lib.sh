@@ -37,6 +37,16 @@ dotfiles_host() {
     fi
 }
 
+# package_list <group>...: the packages in common/packages/<group>.txt, without comments or blank lines.
+package_list() {
+    local group file
+    for group in "$@"; do
+        file="$DOTFILES_DIR/common/packages/$group.txt"
+        [[ -f "$file" ]] || { error "Package list not found: $file"; return 1; }
+        sed -e 's/#.*//' -e 's/[[:space:]]//g' "$file" | grep -v '^$' || true
+    done
+}
+
 # run_step <name>: runs steps/<name>.sh in its own process and records how it went.
 run_step() {
     local name="$1"

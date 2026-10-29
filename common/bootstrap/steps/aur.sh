@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# Installs the AUR package list with paru.
+# Installs the AUR package groups with paru: core-aur, and apps-aur unless --minimal.
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 
-pkg_list="$DOTFILES_DIR/common/packages/paru.txt"
-[[ -f "$pkg_list" ]] || { error "Package list not found: $pkg_list"; exit 1; }
+groups=(core-aur)
+[[ "${DOTFILES_MINIMAL:-false}" == true ]] || groups+=(apps-aur)
+packages="$(package_list "${groups[@]}")"
 
-info "Installing AUR packages..."
-paru -S --needed --noconfirm - <"$pkg_list"
-summary_add installed "AUR packages from paru.txt"
+info "Installing AUR packages (${groups[*]})..."
+paru -S --needed --noconfirm - <<<"$packages"
+summary_add installed "AUR packages: ${groups[*]}"
