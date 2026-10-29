@@ -44,7 +44,8 @@ change_login_shell() {
         info "The login shell is already zsh."
         summary_add skipped "chsh (login shell is already zsh)"
     elif system_changes_allowed "chsh to zsh"; then
-        zsh_path="$(command -v zsh)"
+        # The path listed in /etc/shells: chsh refuses others, and PATH may find /usr/sbin/zsh first.
+        zsh_path="$(grep -m1 '/zsh$' /etc/shells 2>/dev/null || command -v zsh)"
         info "Changing the login shell to $zsh_path..."
         sudo chsh -s "$zsh_path" "$user"
         summary_add installed "login shell: zsh"
