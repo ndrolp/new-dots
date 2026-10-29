@@ -15,6 +15,35 @@ Usage: bootstrap.sh [options]
 EOF
 }
 
+# Run outside a clone (curl ... | bash), the script clones the repo to ~/.dotfiles and
+# re-runs itself from there. DOTFILES_REPO_URL overrides where it clones from (for tests).
+DOTFILES_REPO_URL="${DOTFILES_REPO_URL:-https://github.com/ndrolp/new-dots.git}"
+DOTFILES_SSH_URL="git@github.com:ndrolp/new-dots.git"
+
+clone_and_reexec() {
+    local clone_dir="$HOME/.dotfiles"
+    if ! command -v git >/dev/null 2>&1; then
+        echo "Installing git..."
+        sudo pacman -S --needed --noconfirm git
+    fi
+    if [[ -d "$clone_dir/.git" ]]; then
+        echo "Updating the existing clone in $clone_dir..."
+        git -C "$clone_dir" pull --ff-only "$DOTFILES_REPO_URL" \
+            || echo "warning: could not update $clone_dir, running it as it is" >&2
+    elif [[ -e "$clone_dir" ]]; then
+        echo "$clone_dir exists but is not a git clone; move it away and run again." >&2
+        exit 1
+    else
+        echo "Cloning $DOTFILES_REPO_URL into $clone_dir..."
+        git clone --recurse-submodules "$DOTFILES_REPO_URL" "$clone_dir"
+    fi
+    git -C "$clone_dir" remote set-url origin "$DOTFILES_SSH_URL"
+    echo "origin is now $DOTFILES_SSH_URL: add an SSH key to GitHub before you push."
+    exec bash "$clone_dir/bootstrap.sh" "$@"
+}
+
+DOTFILES_ARGS=("$@")
+
 DOTFILES_HOST=""
 DOTFILES_MINIMAL=false
 DOTFILES_STOW_ONLY=false
@@ -50,7 +79,12 @@ if [[ "$(id -u)" -eq 0 ]]; then
     exit 1
 fi
 
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+self="${BASH_SOURCE[0]:-}"
+if [[ -z "$self" || ! -f "$(dirname "$self")/common/bootstrap/lib.sh" ]]; then
+    clone_and_reexec "${DOTFILES_ARGS[@]}"
+fi
+
+DOTFILES_DIR="$(cd "$(dirname "$self")" && pwd -P)"
 DOTFILES_SUMMARY_FILE="$(mktemp)"
 export DOTFILES_DIR DOTFILES_HOST DOTFILES_MINIMAL DOTFILES_STOW_ONLY DOTFILES_NO_SYSTEM DOTFILES_SPICETIFY DOTFILES_SUMMARY_FILE
 source "$DOTFILES_DIR/common/bootstrap/lib.sh"
