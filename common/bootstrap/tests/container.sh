@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Tests for scripts/test-bootstrap. Needs Docker; each test starts a fresh archlinux container.
+# An argument runs only the tests whose name contains it.
 set -uo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
@@ -71,7 +72,63 @@ test_no_container_is_left_behind_when_interrupted() {
     [[ "$after" == "$before" ]] || fail "containers left behind: $(comm -13 <(echo "$before") <(echo "$after"))"
 }
 
-for t in $(declare -F | awk '{print $3}' | grep '^test_'); do
+# Runs the shell, node and stow steps twice for real (network installers included) in a
+# fresh container, then prints the resulting state. zsh, git and curl are preinstalled
+# here because the packages step is not run. chsh is allowed: it only changes the container.
+read -r -d '' SHELL_NODE_SETUP <<'EOF' || true
+set -euo pipefail
+pacman -Syu --noconfirm --needed sudo stow zsh git curl >/dev/null
+useradd -m tester
+echo 'tester ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/tester
+mkdir /home/tester/.dotfiles
+tar -C /src --exclude=./.git --exclude=./.claude/worktrees -cf - . | tar -C /home/tester/.dotfiles -xf -
+chown -R tester:tester /home/tester/.dotfiles
+cd /home/tester
+exec runuser -u tester -- env HOME=/home/tester USER=tester LOGNAME=tester bash -c '
+    run() {
+        DOTFILES_SUMMARY_FILE="$(mktemp)" DOTFILES_HOST=none bash -c "
+            source ~/.dotfiles/common/bootstrap/lib.sh
+            for s in shell node stow; do run_step \$s || exit 1; done
+            print_summary"
+    }
+    echo "=== first run"; run
+    echo "=== second run"; run
+    echo "=== state"
+    [[ -f ~/.oh-my-zsh/oh-my-zsh.sh ]] && echo "state: oh-my-zsh"
+    for p in zsh-autosuggestions zsh-syntax-highlighting; do
+        [[ -d ~/.config/zsh_custom/plugins/$p/.git ]] && echo "state: plugin $p"
+    done
+    [[ -f ~/.config/zsh_custom/themes/spaceship.zsh-theme ]] && echo "state: spaceship theme"
+    echo "state: login shell $(getent passwd tester | cut -d: -f7)"
+    echo "state: zshrc $(readlink -f ~/.zshrc)"
+    echo "state: node $(bash -c "source ~/.nvm/nvm.sh && node --version")"
+    echo "state: zsh loads $(zsh -ic "echo \$ZSH_THEME \$NVM_DIR" 2>/dev/null | tail -1)"
+'
+EOF
+
+test_shell_and_node_steps_install_for_real_and_skip_on_a_second_run() {
+    STATUS=0
+    OUT="$(docker run --rm --label dotfiles.test-bootstrap=1 -v "$REPO:/src:ro" \
+        "${TEST_BOOTSTRAP_IMAGE:-archlinux:latest}" bash -c "$SHELL_NODE_SETUP" 2>&1)" || STATUS=$?
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    local state second
+    state="$(sed -n '/^=== state/,$p' <<<"$OUT")"
+    second="$(sed -n '/^=== second run/,/^=== state/p' <<<"$OUT")"
+    for want in "oh-my-zsh" "plugin zsh-autosuggestions" "plugin zsh-syntax-highlighting" "spaceship theme" \
+        "zshrc /home/tester/.dotfiles/common/.zshrc" "zsh loads spaceship /home/tester/.nvm"; do
+        grep -qx "state: $want" <<<"$state" || fail "missing after the run: $want"
+    done
+    grep -qE "^state: login shell /.*/zsh$" <<<"$state" || fail "login shell is not zsh"
+    grep -qE "^state: node v[0-9]+\." <<<"$state" || fail "no node installed"
+    local reinstalled
+    reinstalled="$(sed -n '/^Installed:/,/^Skipped:/p' <<<"$second" | grep '^  - ' | grep -v 'stow:' || true)"
+    [[ -z "$reinstalled" ]] || fail "second run installed again: $reinstalled"
+    for what in oh-my-zsh zsh-autosuggestions zsh-syntax-highlighting "spaceship theme" "chsh" nvm "node LTS"; do
+        grep -q -- "- $what" <<<"$second" || fail "second run does not report $what as skipped"
+    done
+}
+
+for t in $(declare -F | awk '{print $3}' | grep '^test_' | grep -- "${1:-}"); do
     echo "$t"
     ( set -e; "$t" )
     if [[ $? -eq 0 ]]; then PASSED=$((PASSED + 1)); else FAILED=$((FAILED + 1)); fi
