@@ -202,7 +202,7 @@ export ZELLIJ_CONFIG_DIR="$HOME/.config/zellij"
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 
-export PATH=$PATH:/home/ndro/.spicetify
+export PATH="$PATH:$HOME/.spicetify"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 alias dotsync='~/.dotfiles/bootstrap.sh --stow-only'
@@ -220,8 +220,6 @@ alias copilot_shell="copilot --resume=8759e196-980d-4fa5-9c70-9b5fc4dfdaeb"
 
 # Created by `pipx` on 2025-07-27 12:40:09
 export PATH="$PATH:/home/ndrolp/.local/bin"
-
-export PATH=$PATH:/home/ndrolp/.spicetify
 
 
 # opencode
