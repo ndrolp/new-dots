@@ -101,6 +101,48 @@ test_a_pre_existing_file_is_backed_up_and_replaced_by_the_link() {
     grep -A20 "Backed up:" <<<"$OUT" | grep -q ".zshrc" || fail "summary does not list the backed-up .zshrc"
 }
 
+test_a_second_run_backs_up_nothing() {
+    TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
+    echo "mine" >"$TEST_HOME/.zshrc"
+    rerun_bootstrap --stow-only --host omelas
+    [[ $STATUS -eq 0 ]] || fail "first run exited $STATUS"
+    local before
+    before="$(find "$TEST_HOME/.dotfiles-backup" | sort)"
+    sleep 1
+    rerun_bootstrap --stow-only --host omelas
+    [[ $STATUS -eq 0 ]] || fail "second run exited $STATUS"
+    ! grep -q "Backed up:" <<<"$OUT" || fail "second run backed something up"
+    [[ "$(find "$TEST_HOME/.dotfiles-backup" | sort)" == "$before" ]] || fail "second run changed ~/.dotfiles-backup"
+}
+
+test_a_file_in_the_way_of_a_host_link_is_backed_up_keeping_its_path() {
+    TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
+    local rel=.config/hyprdynamicmonitors/config.toml
+    mkdir -p "$TEST_HOME/$(dirname "$rel")"
+    echo "mine" >"$TEST_HOME/$rel"
+    rerun_bootstrap --stow-only --host omelas
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    [[ "$(readlink -f "$TEST_HOME/$rel")" == "$REPO/host-omelas/$rel" ]] || fail "$rel is not linked into host-omelas"
+    local backups=("$TEST_HOME"/.dotfiles-backup/*/"$rel")
+    [[ "$(cat "${backups[0]}")" == mine ]] || fail "no backup of $rel at its relative path"
+}
+
+test_an_unknown_host_stows_common_only_with_a_note() {
+    run_bootstrap --stow-only --host no-such-host
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    grep -qi "no host-no-such-host dir.*common only" <<<"$OUT" || fail "no note about stowing common only"
+    [[ ! -e "$TEST_HOME/.config/hyprdynamicmonitors" ]] || fail "stowed a host dir"
+}
+
+test_host_sodoma_stows_sodoma() {
+    run_bootstrap --stow-only --host sodoma
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    grep -q "stow: host-sodoma" <<<"$OUT" || fail "summary does not list host-sodoma"
+    local f
+    f="$(cd "$REPO/host-sodoma" && find . -type f | head -1)"
+    [[ "$(readlink -f "$TEST_HOME/$f")" == "$(readlink -f "$REPO/host-sodoma/$f")" ]] || fail "$f is not linked from host-sodoma"
+}
+
 # Runs a snippet the way a step does: sourcing lib.sh with the env bootstrap.sh exports.
 # Sets OUT, STATUS and SUMMARY (the lines the snippet added to the summary).
 run_as_step() {
