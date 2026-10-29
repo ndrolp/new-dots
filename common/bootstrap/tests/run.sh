@@ -466,6 +466,12 @@ test_a_second_node_run_installs_nothing_and_says_so() {
     grep -q "^skipped	node LTS" <<<"$SUMMARY" || fail "node LTS not reported as skipped: $SUMMARY"
 }
 
+# The pacman nvm puts its own copy in /usr/share/nvm; the node step installs nvm in ~/.nvm.
+test_no_package_list_installs_nvm() {
+    OUT="$(grep -lx 'nvm' "$REPO"/common/packages/*.txt || true)"
+    [[ -z "$OUT" ]] || fail "a package list installs nvm with pacman"
+}
+
 # fake_nvm_in <dir>: an nvm already installed in <dir>, with an LTS node.
 fake_nvm_in() {
     mkdir -p "$1"

@@ -55,7 +55,6 @@ nemo-fileroller
 network-manager-applet
 networkmanager
 noto-fonts-cjk
-nvm
 nwg-look
 papirus-icon-theme
 pciutils
