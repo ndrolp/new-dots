@@ -203,7 +203,7 @@ export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || pr
 export PATH=$PATH:/home/ndro/.spicetify
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-alias dotsync='(cd ~/.dotfiles && ./bootstrap.sh --no-bootstrap)'
+alias dotsync='~/.dotfiles/bootstrap.sh --stow-only'
 alias tk='zellij --layout ~/.config/zellij/layouts/tomekeeper.kdl'
 alias envact="source venv/bin/activate"
 alias adbwireless="~/.dotfiles/scripts/adb_wireless_helper/wireless_helper.sh"
