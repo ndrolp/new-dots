@@ -58,6 +58,7 @@ noto-fonts-cjk
 nvm
 nwg-look
 papirus-icon-theme
+pciutils
 pavucontrol
 picom
 pipewire
