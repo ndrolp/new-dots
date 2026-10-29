@@ -2,6 +2,7 @@ import QtQuick
 import QtTest
 import "../config/BarProfileModel.js" as BarProfileModel
 import "../config/SchemaMigrations.js" as SchemaMigrations
+import "../components/bar/BarElementItems.js" as BarElementItems
 
 TestCase {
     name: "BarElements"
@@ -314,6 +315,15 @@ TestCase {
 
         compare(zone(barElements, "center").slice(0, 2), ["recording", "keepAwake"]);
         compare(BarProfileModel.elementEnabled(barElements, "keepAwake"), true);
+    }
+
+    // Keep-awake has something to show while off too: the outline cup that
+    // opens its popup.
+    function test_keepAwakeIsShownWhileOff() {
+        const barElements = BarProfileModel.normalizeBarElements(minimalElements());
+        const nothingGoingOn = { hasPlayer: false, hasBattery: false, recording: false, cavaSilent: true };
+
+        compare(BarElementItems.itemVisible("keepAwake", barElements, nothingGoingOn), true);
     }
 
     function test_keepAwakeCanBeMovedToAnotherZone() {

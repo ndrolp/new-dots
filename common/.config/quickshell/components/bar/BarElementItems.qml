@@ -9,6 +9,7 @@ import QtQuick
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 import "../StatusText.js" as StatusText
+import "BarElementItems.js" as BarElementItems
 import "RecordingIndicator.js" as RecordingIndicator
 
 // The bar elements that need no component of their own (notifications,
@@ -104,19 +105,14 @@ Item {
     })
 
     // Enabled elements with nothing to show (no player, battery, recording
-    // or sound) are hidden.
+    // or sound) are hidden; see BarElementItems.js.
     function itemVisible(element) {
-        if (!BarProfileModel.elementEnabled(appearance.barElements, element))
-            return false;
-        if (element === "media")
-            return player !== null;
-        if (element === "battery")
-            return hasBattery;
-        if (element === "recording")
-            return RecordingIndicator.shown(recordings);
-        if (element === "cava")
-            return !cava.silent;
-        return true;
+        return BarElementItems.itemVisible(element, appearance.barElements, {
+            hasPlayer: player !== null,
+            hasBattery: hasBattery,
+            recording: RecordingIndicator.shown(recordings),
+            cavaSilent: cava.silent
+        });
     }
 
     Component.onCompleted: updatePlayer()
