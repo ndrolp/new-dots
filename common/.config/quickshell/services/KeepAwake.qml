@@ -1,17 +1,52 @@
 import Quickshell
+import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
+import "KeepAwakeState.js" as KeepAwakeState
 
 // Keep-awake: while on, the session doesn't go idle. The shell owns the one
 // instance, so the control center tile, the keep-awake bar element and its
-// popup share it, and it isn't saved, so every shell start begins with it off.
+// popup share it, and it isn't saved, so every shell start begins with it off
+// and "until turned off" selected. Turning it on uses the selected duration;
+// when a timed one runs out it turns off and sends a notification. That is
+// decided in KeepAwakeState.js; this only carries it out.
 Scope {
     id: root
 
-    property bool on: false
+    readonly property bool on: state.on
+    // The selected duration in minutes, 0 for "until turned off".
+    readonly property int duration: state.duration
+    // Whether a countdown is running, and the whole seconds left on it.
+    readonly property bool timed: KeepAwakeState.timed(state)
+    property int secondsLeft: 0
+    property var state: KeepAwakeState.off
 
     function toggle() {
-        on = !on;
+        follow(KeepAwakeState.toggled(state, Date.now()));
+    }
+
+    function chooseDuration(minutes) {
+        follow(KeepAwakeState.durationChosen(state, minutes, Date.now()));
+    }
+
+    function follow(next) {
+        state = next;
+        secondsLeft = KeepAwakeState.secondsLeft(next, Date.now());
+        if (next.ended)
+            endedNotification.exec(KeepAwakeState.endedNotificationCommand);
+    }
+
+    // Counts down while timed. The time left comes from the clock, not from
+    // counting ticks, so a late tick doesn't stretch the countdown.
+    Timer {
+        interval: 1000
+        repeat: true
+        running: root.timed
+        onTriggered: root.follow(KeepAwakeState.ticked(root.state, Date.now()))
+    }
+
+    Process {
+        id: endedNotification
     }
 
     // An idle inhibitor counts only while its surface is shown, so it gets a

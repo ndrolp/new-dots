@@ -1,6 +1,6 @@
 import QtQuick
 
-// The keep-awake popup: keep-awake's on/off switch.
+// The keep-awake popup: keep-awake's on/off switch, duration and time left.
 BarPopup {
     id: root
 

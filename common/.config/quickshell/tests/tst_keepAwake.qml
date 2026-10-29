@@ -6,13 +6,16 @@ import "../config" as Config
 import "../config/Motion.js" as Motion
 
 // The keep-awake bar element, always shown with a cup that is filled while
-// keep-awake is on, and the popup it opens with keep-awake's on/off switch.
+// keep-awake is on, and the popup it opens with keep-awake's on/off switch,
+// its duration choice and the time left on a timed keep-awake.
 // Pointer events don't reach items under qmltestrunner offscreen, so the
-// switch is toggled through its signal.
+// switch and the duration buttons are pressed through their signals.
 TestCase {
     name: "KeepAwake"
     width: 400
     height: 400
+    // Shown, so that `visible` tells what the popup shows.
+    visible: true
     when: windowShown
 
     Config.Theme {
@@ -36,9 +39,16 @@ TestCase {
 
         QtObject {
             property bool on: false
+            property int duration: 0
+            property bool timed: false
+            property int secondsLeft: 0
 
             function toggle() {
                 on = !on;
+            }
+
+            function chooseDuration(minutes) {
+                duration = minutes;
             }
         }
     }
@@ -128,5 +138,73 @@ TestCase {
         item.keepAwake.toggle();
 
         compare(switchOf(item).checked, true);
+    }
+
+    // The popup's duration button labelled `label`.
+    function durationButton(item, label) {
+        if (item.label === label && item.activated !== undefined)
+            return item;
+        for (let i = 0; i < item.children.length; i++) {
+            const found = durationButton(item.children[i], label);
+            if (found)
+                return found;
+        }
+        return null;
+    }
+
+    // The popup's text reading `text`, if it is shown.
+    function shownText(item, text) {
+        if (!item.visible)
+            return null;
+        if (item.text === text)
+            return item;
+        for (let i = 0; i < item.children.length; i++) {
+            const found = shownText(item.children[i], text);
+            if (found)
+                return found;
+        }
+        return null;
+    }
+
+    function test_thePopupOffersUntilTurnedOffAndThreeDurations() {
+        const item = makePopupBody(false);
+
+        verify(durationButton(item, "Until turned off"));
+        verify(durationButton(item, "30 min"));
+        verify(durationButton(item, "1 h"));
+        verify(durationButton(item, "2 h"));
+    }
+
+    function test_choosingADurationInThePopupSelectsIt() {
+        const item = makePopupBody(true);
+
+        durationButton(item, "1 h").activated();
+
+        compare(item.keepAwake.duration, 60);
+    }
+
+    function test_theSelectedDurationIsShownInTheAccentColor() {
+        const item = makePopupBody(false);
+
+        compare(durationButton(item, "Until turned off").labelColor, theme.accent);
+        compare(durationButton(item, "30 min").labelColor, theme.textMuted);
+
+        item.keepAwake.chooseDuration(30);
+
+        compare(durationButton(item, "30 min").labelColor, theme.accent);
+    }
+
+    function test_whileTimedThePopupShowsTheTimeLeft() {
+        const item = makePopupBody(true);
+        item.keepAwake.timed = true;
+        item.keepAwake.secondsLeft = 29 * 60 + 5;
+
+        verify(shownText(item, "29:05 left"));
+    }
+
+    function test_withoutACountdownThePopupShowsNoTimeLeft() {
+        const item = makePopupBody(true);
+
+        compare(shownText(item, "0:00 left"), null);
     }
 }
