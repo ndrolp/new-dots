@@ -101,6 +101,19 @@ test_a_pre_existing_file_is_backed_up_and_replaced_by_the_link() {
     grep -A20 "Backed up:" <<<"$OUT" | grep -q ".zshrc" || fail "summary does not list the backed-up .zshrc"
 }
 
+test_a_pre_existing_symlink_stow_does_not_own_is_backed_up_and_replaced() {
+    TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
+    mkdir -p "$TEST_HOME/mine"
+    echo "mine" >"$TEST_HOME/mine/zshrc"
+    ln -s "$TEST_HOME/mine/zshrc" "$TEST_HOME/.zshrc"
+    rerun_bootstrap --stow-only --host no-such-host
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    [[ "$(readlink -f "$TEST_HOME/.zshrc")" == "$REPO/common/.zshrc" ]] || fail ".zshrc is not linked into the repo"
+    local backups=("$TEST_HOME"/.dotfiles-backup/*/.zshrc)
+    [[ "$(readlink "${backups[0]}")" == "$TEST_HOME/mine/zshrc" ]] || fail "the old .zshrc link is not under ~/.dotfiles-backup/<ts>/"
+    grep -A20 "Backed up:" <<<"$OUT" | grep -q ".zshrc" || fail "summary does not list the backed-up .zshrc"
+}
+
 test_a_second_run_backs_up_nothing() {
     TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
     echo "mine" >"$TEST_HOME/.zshrc"
