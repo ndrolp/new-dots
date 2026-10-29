@@ -49,6 +49,17 @@ test_package_steps_install_core_and_report_a_bogus_aur_package_as_failed() {
     grep -q "stow: common" <<<"$OUT" || fail "the run stopped before stow"
 }
 
+test_a_pre_existing_zshrc_is_backed_up_and_linked_in_the_container() {
+    STATUS=0
+    OUT="$(TEST_BOOTSTRAP_BEFORE='echo mine >~/.zshrc' \
+        TEST_BOOTSTRAP_AFTER='[ "$(readlink -f ~/.zshrc)" = ~/.dotfiles/common/.zshrc ] && echo ZSHRC-LINKED
+                              [ "$(cat ~/.dotfiles-backup/*/.zshrc)" = mine ] && echo ZSHRC-BACKED-UP' \
+        "$HARNESS" --stow-only 2>&1)" || STATUS=$?
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    grep -q ZSHRC-LINKED <<<"$OUT" || fail "~/.zshrc is not a link into the repo"
+    grep -q ZSHRC-BACKED-UP <<<"$OUT" || fail "the old ~/.zshrc is not in ~/.dotfiles-backup/<ts>/"
+}
+
 harness_containers() { docker ps -aq --filter label=dotfiles.test-bootstrap=1 | sort; }
 
 test_no_container_is_left_behind_after_a_pass_or_a_failure() {
