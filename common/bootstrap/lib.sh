@@ -28,6 +28,17 @@ DOTFILES_SUMMARY_FILE="${DOTFILES_SUMMARY_FILE:-/dev/null}"
 # summary_add <installed|skipped|failed|backed-up> <what>
 summary_add() { printf '%s\t%s\n' "$1" "$2" >>"$DOTFILES_SUMMARY_FILE"; }
 
+# system_changes_allowed <what>: false under --no-system, after recording <what> as skipped.
+# Guard every system-wide change (enabling services, chsh) with it:
+#   if system_changes_allowed "chsh to zsh"; then chsh -s ...; fi
+system_changes_allowed() {
+    if [[ "${DOTFILES_NO_SYSTEM:-false}" == true ]]; then
+        info "Skipping $1 (--no-system)."
+        summary_add skipped "$1 (--no-system)"
+        return 1
+    fi
+}
+
 # Host whose host-<name> dir is stowed: --host, else the machine's hostname.
 dotfiles_host() {
     if [[ -n "${DOTFILES_HOST:-}" ]]; then
