@@ -1,0 +1,4 @@
+# Any machine, whatever the vendor: firmware and GPU tools.
+# Hardware lists are picked by detected vendor. Official repo packages.
+mesa-utils
+sof-firmware

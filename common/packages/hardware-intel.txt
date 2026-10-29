@@ -1,0 +1,6 @@
+# Intel CPU/GPU: microcode and video drivers.
+# Hardware lists are picked by detected vendor. Official repo packages.
+intel-media-driver
+intel-ucode
+libva-intel-driver
+vulkan-intel

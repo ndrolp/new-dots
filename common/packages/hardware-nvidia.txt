@@ -1,0 +1,4 @@
+# NVIDIA GPU (nouveau). Not installed by bootstrap for now: NVIDIA is warned about and skipped.
+# Hardware lists are picked by detected vendor. Official repo packages.
+vulkan-nouveau
+xf86-video-nouveau
