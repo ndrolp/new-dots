@@ -48,6 +48,11 @@ hl.bind(
 	hl.dsp.exec_cmd(qs .. "audio-sinks toggle"),
 	{ description = "Toggle audio output picker" }
 )
+hl.bind(
+	mainMod .. " + SHIFT + i",
+	hl.dsp.exec_cmd(qs .. "keep-awake toggle"),
+	{ description = "Toggle keep-awake" }
+)
 hl.bind(win .. " + t", hl.dsp.exec_cmd(qs .. "themes toggle"), { description = "Toggle theme picker" })
 hl.bind(
 	mainMod .. " + SHIFT + r",
