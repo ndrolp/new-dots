@@ -363,6 +363,8 @@ test_services_already_enabled_are_not_enabled_again() {
     run_steps false services
     [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
     ! grep -q " enable " "$CALLS" || fail "enabled an enabled unit again"
+    grep -q "^systemctl is-enabled .*sddm$" "$CALLS" || fail "sddm's state not checked"
+    ! grep -q "^sudo systemctl is-enabled" "$CALLS" || fail "checked a unit's state with sudo"
     grep -q "^skipped	2 services (already enabled)$" <<<"$SUMMARY" || fail "skip not in the summary: $SUMMARY"
 }
 

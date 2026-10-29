@@ -58,6 +58,12 @@ dotfiles_host() {
     fi
 }
 
+# list_lines <file>: the lines of a list file (package lists, services.txt) without # comments,
+# leading or trailing blanks, or empty lines.
+list_lines() {
+    sed -e 's/#.*//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' "$1" | grep -v '^$' || true
+}
+
 # package_list <group>...: the packages in common/packages/<group>.txt, without comments or blank lines.
 # DOTFILES_PACKAGES_DIR reads the lists from another dir instead (for tests).
 package_list() {
@@ -65,8 +71,15 @@ package_list() {
     for group in "$@"; do
         file="${DOTFILES_PACKAGES_DIR:-$DOTFILES_DIR/common/packages}/$group.txt"
         [[ -f "$file" ]] || { error "Package list not found: $file"; return 1; }
-        sed -e 's/#.*//' -e 's/[[:space:]]//g' "$file" | grep -v '^$' || true
+        list_lines "$file"
     done
+}
+
+# package_groups [suffix]: the package groups a run installs, one per line: core<suffix>, and
+# apps<suffix> unless --minimal. package_groups -aur gives the AUR groups.
+package_groups() {
+    echo "core${1:-}"
+    [[ "${DOTFILES_MINIMAL:-false}" == true ]] || echo "apps${1:-}"
 }
 
 # pacman_install <what> <package>...: installs the packages in one sudo pacman batch and records
