@@ -1,5 +1,6 @@
 import QtQuick
 import "../../config" as Config
+import "../../services/KeepAwakeState.js" as KeepAwakeState
 
 // The keep-awake bar element: a cup, filled and green while keep-awake is on,
 // an outline in the subtext color while it is off. A click asks for the
@@ -12,7 +13,6 @@ Rectangle {
     required property var keepAwake
     // Whether the element sits in a group, which draws its background.
     property bool grouped: false
-    readonly property alias icon: keepAwakeIcon
     signal popupRequested()
 
     width: keepAwakeIcon.width + 16
@@ -39,14 +39,14 @@ Rectangle {
         id: onCup
 
         font: keepAwakeIcon.font
-        text: "󰅶"
+        text: KeepAwakeState.cups.on
     }
 
     TextMetrics {
         id: offCup
 
         font: keepAwakeIcon.font
-        text: "󰛊"
+        text: KeepAwakeState.cups.off
     }
 
     Text {
@@ -57,7 +57,7 @@ Rectangle {
         // move the elements next to it.
         width: Math.ceil(Math.max(onCup.advanceWidth, offCup.advanceWidth))
         horizontalAlignment: Text.AlignHCenter
-        text: root.keepAwake.on ? onCup.text : offCup.text
+        text: KeepAwakeState.cup(root.keepAwake.on)
         color: root.keepAwake.on ? theme.green : theme.textMuted
         font.pixelSize: root.appearance.textSize
         font.bold: true

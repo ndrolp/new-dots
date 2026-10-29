@@ -210,7 +210,7 @@ PanelWindow {
                                 : root.sinkType.includes("hdmi") || root.sinkType.includes("displayport")
                                     ? "󰍹" : "󰓃")
                             : root.mode === "profile" ? "󰘳"
-                            : root.mode === "keepAwake" ? (root.keepAwakeOn ? "󰅶" : "󰛊")
+                            : root.mode === "keepAwake" ? KeepAwakeState.cup(root.keepAwakeOn)
                             : "󰪛"
                     color: root.highlighted ? theme.background
                         : root.mode === "volume" ? theme.blue

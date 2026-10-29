@@ -21,7 +21,7 @@ Column {
 
     PopupHeader {
         appearance: root.appearance
-        icon: root.keepAwake.on ? "󰅶" : "󰛊"
+        icon: KeepAwakeState.cup(root.keepAwake.on)
         iconColor: root.keepAwake.on ? theme.green : theme.textMuted
         title: "Keep-awake"
         subtitle: root.keepAwake.on ? "The screen stays on and the PC won't suspend"
@@ -56,7 +56,7 @@ Column {
 
                 appearance: root.appearance
                 // "Until turned off" takes the room its longer label needs.
-                width: modelData.minutes === 0 ? durations.width * 0.4
+                width: modelData.minutes === KeepAwakeState.untilTurnedOff ? durations.width * 0.4
                     : (durations.width * 0.6 - durations.spacing * 3) / 3
                 label: modelData.label
                 labelColor: root.keepAwake.duration === modelData.minutes ? theme.accent : theme.textMuted

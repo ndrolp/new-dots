@@ -33,11 +33,11 @@ TestCase {
     function test_choosingUntilTurnedOffWhileOnKeepsItOnWithNoCountdown() {
         const on = KeepAwakeState.toggled(KeepAwakeState.durationChosen(KeepAwakeState.off, 60, 0), 0);
 
-        const untimed = KeepAwakeState.durationChosen(on, 0, 5 * minute);
+        const untimed = KeepAwakeState.durationChosen(on, KeepAwakeState.untilTurnedOff, 5 * minute);
 
         compare(untimed.on, true);
         compare(KeepAwakeState.timed(untimed), false);
-        compare(KeepAwakeState.ticked(untimed, 600 * minute).on, true);
+        compare(KeepAwakeState.ticked(untimed, 600 * minute).state.on, true);
     }
 
     function test_choosingADurationWhileOffOnlySelectsIt() {
@@ -50,11 +50,11 @@ TestCase {
 
     function test_theShellStartsOffWithUntilTurnedOffSelected() {
         compare(KeepAwakeState.off.on, false);
-        compare(KeepAwakeState.off.duration, 0);
+        compare(KeepAwakeState.off.duration, KeepAwakeState.untilTurnedOff);
     }
 
     function test_thePopupOffersUntilTurnedOffAndThreeDurations() {
-        compare(KeepAwakeState.durations.map(d => d.minutes), [0, 30, 60, 120]);
+        compare(KeepAwakeState.durations.map(d => d.minutes), [KeepAwakeState.untilTurnedOff, 30, 60, 120]);
         compare(KeepAwakeState.durations.map(d => d.label), ["Until turned off", "30 min", "1 h", "2 h"]);
     }
 
@@ -63,24 +63,24 @@ TestCase {
     }
 
     function test_beforeTheCountdownRunsOutKeepAwakeStaysOn() {
-        const ticked = KeepAwakeState.ticked(timedOn(30, 0), 30 * minute - 1);
+        const tick = KeepAwakeState.ticked(timedOn(30, 0), 30 * minute - 1);
 
-        compare(ticked.on, true);
-        compare(ticked.ended, false);
-        compare(KeepAwakeState.secondsLeft(ticked, 30 * minute - 1), 1);
+        compare(tick.state.on, true);
+        compare(tick.ended, false);
+        compare(KeepAwakeState.secondsLeft(tick.state, 30 * minute - 1), 1);
     }
 
     function test_whenTheCountdownRunsOutKeepAwakeTurnsOffAndSaysItEnded() {
-        const ended = KeepAwakeState.ticked(timedOn(30, 0), 30 * minute);
+        const tick = KeepAwakeState.ticked(timedOn(30, 0), 30 * minute);
 
-        compare(ended.on, false);
-        compare(ended.ended, true);
-        compare(KeepAwakeState.timed(ended), false);
-        compare(KeepAwakeState.secondsLeft(ended, 30 * minute), 0);
+        compare(tick.state.on, false);
+        compare(tick.ended, true);
+        compare(KeepAwakeState.timed(tick.state), false);
+        compare(KeepAwakeState.secondsLeft(tick.state, 30 * minute), 0);
     }
 
     function test_theSelectedDurationOutlivesTheCountdownRunningOut() {
-        const ended = KeepAwakeState.ticked(timedOn(60, 0), 61 * minute);
+        const ended = KeepAwakeState.ticked(timedOn(60, 0), 61 * minute).state;
 
         compare(ended.duration, 60);
         compare(KeepAwakeState.secondsLeft(KeepAwakeState.toggled(ended, 61 * minute), 61 * minute), 60 * 60);
@@ -90,7 +90,6 @@ TestCase {
         const offByHand = KeepAwakeState.toggled(timedOn(30, 0), 10 * minute);
 
         compare(offByHand.on, false);
-        compare(offByHand.ended, false);
         compare(KeepAwakeState.timed(offByHand), false);
         compare(KeepAwakeState.ticked(offByHand, 30 * minute).ended, false);
     }
@@ -99,14 +98,14 @@ TestCase {
         const offByHand = KeepAwakeState.toggled(KeepAwakeState.toggled(KeepAwakeState.off, 0), 10 * minute);
 
         compare(offByHand.on, false);
-        compare(offByHand.ended, false);
+        compare(KeepAwakeState.ticked(offByHand, 600 * minute).ended, false);
     }
 
     function test_anEndedKeepAwakeEndsOnlyOnce() {
-        const ended = KeepAwakeState.ticked(timedOn(30, 0), 30 * minute);
+        const ended = KeepAwakeState.ticked(timedOn(30, 0), 30 * minute).state;
 
         compare(KeepAwakeState.ticked(ended, 31 * minute).ended, false);
-        compare(KeepAwakeState.durationChosen(ended, 60, 31 * minute).ended, false);
+        compare(KeepAwakeState.ticked(KeepAwakeState.durationChosen(ended, 60, 31 * minute), 31 * minute).ended, false);
     }
 
     function test_theEndNotificationIsANormalOneFromKeepAwake() {
@@ -114,6 +113,11 @@ TestCase {
             "notify-send", "-a", "Keep-awake", "-u", "normal",
             "Keep-awake ended", "The PC can go idle and sleep again."
         ]);
+    }
+
+    function test_keepAwakeShowsAFilledCupWhileOnAndAnOutlineOneWhileOff() {
+        compare(KeepAwakeState.cup(true), "󰅶");
+        compare(KeepAwakeState.cup(false), "󰛊");
     }
 
     function test_theTimeLeftReadsAsMinutesAndSecondsOrHours() {
@@ -128,7 +132,7 @@ TestCase {
     }
 
     function test_theKeybindOsdSaysOnWithoutADurationUntilTurnedOff() {
-        compare(KeepAwakeState.osdLabel(true, 0), "Keep-awake on");
+        compare(KeepAwakeState.osdLabel(true, KeepAwakeState.untilTurnedOff), "Keep-awake on");
     }
 
     function test_theKeybindOsdSaysOnWithTheSelectedDuration() {

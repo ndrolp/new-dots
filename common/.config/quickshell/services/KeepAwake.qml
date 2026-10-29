@@ -13,27 +13,32 @@ import "KeepAwakeState.js" as KeepAwakeState
 Scope {
     id: root
 
-    readonly property bool on: state.on
-    // The selected duration in minutes, 0 for "until turned off".
-    readonly property int duration: state.duration
+    readonly property bool on: internal.state.on
+    // The selected duration in minutes, or KeepAwakeState.untilTurnedOff.
+    readonly property int duration: internal.state.duration
     // Whether a countdown is running, and the whole seconds left on it.
-    readonly property bool timed: KeepAwakeState.timed(state)
-    property int secondsLeft: 0
-    property var state: KeepAwakeState.off
+    readonly property bool timed: KeepAwakeState.timed(internal.state)
+    readonly property int secondsLeft: internal.secondsLeft
 
     function toggle() {
-        follow(KeepAwakeState.toggled(state, Date.now()));
+        setState(KeepAwakeState.toggled(internal.state, Date.now()));
     }
 
     function chooseDuration(minutes) {
-        follow(KeepAwakeState.durationChosen(state, minutes, Date.now()));
+        setState(KeepAwakeState.durationChosen(internal.state, minutes, Date.now()));
     }
 
-    function follow(next) {
-        state = next;
-        secondsLeft = KeepAwakeState.secondsLeft(next, Date.now());
-        if (next.ended)
-            endedNotification.exec(KeepAwakeState.endedNotificationCommand);
+    // Takes on `next` (from KeepAwakeState.js) and reads the time left on it.
+    function setState(next) {
+        internal.state = next;
+        internal.secondsLeft = KeepAwakeState.secondsLeft(next, Date.now());
+    }
+
+    QtObject {
+        id: internal
+
+        property var state: KeepAwakeState.off
+        property int secondsLeft: 0
     }
 
     // Counts down while timed. The time left comes from the clock, not from
@@ -42,7 +47,12 @@ Scope {
         interval: 1000
         repeat: true
         running: root.timed
-        onTriggered: root.follow(KeepAwakeState.ticked(root.state, Date.now()))
+        onTriggered: {
+            const tick = KeepAwakeState.ticked(internal.state, Date.now());
+            root.setState(tick.state);
+            if (tick.ended)
+                endedNotification.exec(KeepAwakeState.endedNotificationCommand);
+        }
     }
 
     Process {

@@ -79,18 +79,30 @@ TestCase {
         return createTemporaryObject(element, this, { keepAwake: keepAwake(on) });
     }
 
-    function test_whileOffTheElementShowsAnOutlineCupInTheSubtextColor() {
-        const item = makeElement(false);
+    // The element's cup: the text showing either cup.
+    function cupOf(item) {
+        if (item.text === "󰅶" || item.text === "󰛊")
+            return item;
+        for (let i = 0; i < item.children.length; i++) {
+            const found = cupOf(item.children[i]);
+            if (found)
+                return found;
+        }
+        return null;
+    }
 
-        compare(item.icon.text, "󰛊");
-        compare(item.icon.color, theme.textMuted);
+    function test_whileOffTheElementShowsAnOutlineCupInTheSubtextColor() {
+        const cup = cupOf(makeElement(false));
+
+        compare(cup.text, "󰛊");
+        compare(cup.color, theme.textMuted);
     }
 
     function test_whileOnTheElementShowsAFilledCupInGreen() {
-        const item = makeElement(true);
+        const cup = cupOf(makeElement(true));
 
-        compare(item.icon.text, "󰅶");
-        compare(item.icon.color, theme.green);
+        compare(cup.text, "󰅶");
+        compare(cup.color, theme.green);
     }
 
     function test_turningKeepAwakeOnOrOffDoesNotChangeTheElementsWidth() {
