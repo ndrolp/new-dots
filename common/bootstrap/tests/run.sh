@@ -73,14 +73,74 @@ test_each_run_writes_a_log_and_prints_a_summary() {
 }
 
 test_a_failing_step_exits_non_zero_and_still_prints_the_summary() {
+    EXTRA_PATH="$SCRATCH/failing-stow"
+    mkdir -p "$EXTRA_PATH"
+    printf '#!/bin/sh\nexit 1\n' >"$EXTRA_PATH/stow"
+    chmod +x "$EXTRA_PATH/stow"
     run_bootstrap --stow-only --host no-such-host
-    rm "$TEST_HOME/.zshrc" && echo "mine" >"$TEST_HOME/.zshrc"
-    rm -rf "$TEST_HOME/.config"
-    STATUS=0
-    OUT="$(cd "$TEST_HOME" && HOME="$TEST_HOME" bash "$BOOTSTRAP" --stow-only --host no-such-host 2>&1)" || STATUS=$?
-    [[ $STATUS -ne 0 ]] || fail "stow conflict exited 0"
+    [[ $STATUS -ne 0 ]] || fail "a failing stow exited 0"
     grep -q "Failed:" <<<"$OUT" || fail "summary does not list the failure"
     grep -q "step stow" <<<"$OUT" || fail "summary does not name the failed step"
+}
+
+# Runs bootstrap again in the current TEST_HOME. Sets OUT and STATUS.
+rerun_bootstrap() {
+    STATUS=0
+    OUT="$(cd "$TEST_HOME" && env HOME="$TEST_HOME" bash "$BOOTSTRAP" "$@" 2>&1)" || STATUS=$?
+}
+
+test_a_pre_existing_file_is_backed_up_and_replaced_by_the_link() {
+    TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
+    echo "mine" >"$TEST_HOME/.zshrc"
+    rerun_bootstrap --stow-only --host no-such-host
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    [[ "$(readlink -f "$TEST_HOME/.zshrc")" == "$REPO/common/.zshrc" ]] || fail ".zshrc is not linked into the repo"
+    local backups=("$TEST_HOME"/.dotfiles-backup/*/.zshrc)
+    [[ -f "${backups[0]}" ]] || fail "no .zshrc under ~/.dotfiles-backup/<ts>/"
+    [[ "$(cat "${backups[0]}")" == mine ]] || fail "the backup does not hold the old .zshrc"
+    grep -A20 "Backed up:" <<<"$OUT" | grep -q ".zshrc" || fail "summary does not list the backed-up .zshrc"
+}
+
+test_a_second_run_backs_up_nothing() {
+    TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
+    echo "mine" >"$TEST_HOME/.zshrc"
+    rerun_bootstrap --stow-only --host omelas
+    [[ $STATUS -eq 0 ]] || fail "first run exited $STATUS"
+    local before
+    before="$(find "$TEST_HOME/.dotfiles-backup" | sort)"
+    sleep 1
+    rerun_bootstrap --stow-only --host omelas
+    [[ $STATUS -eq 0 ]] || fail "second run exited $STATUS"
+    ! grep -q "Backed up:" <<<"$OUT" || fail "second run backed something up"
+    [[ "$(find "$TEST_HOME/.dotfiles-backup" | sort)" == "$before" ]] || fail "second run changed ~/.dotfiles-backup"
+}
+
+test_a_file_in_the_way_of_a_host_link_is_backed_up_keeping_its_path() {
+    TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
+    local rel=.config/hyprdynamicmonitors/config.toml
+    mkdir -p "$TEST_HOME/$(dirname "$rel")"
+    echo "mine" >"$TEST_HOME/$rel"
+    rerun_bootstrap --stow-only --host omelas
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    [[ "$(readlink -f "$TEST_HOME/$rel")" == "$REPO/host-omelas/$rel" ]] || fail "$rel is not linked into host-omelas"
+    local backups=("$TEST_HOME"/.dotfiles-backup/*/"$rel")
+    [[ "$(cat "${backups[0]}")" == mine ]] || fail "no backup of $rel at its relative path"
+}
+
+test_an_unknown_host_stows_common_only_with_a_note() {
+    run_bootstrap --stow-only --host no-such-host
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    grep -qi "no host-no-such-host dir.*common only" <<<"$OUT" || fail "no note about stowing common only"
+    [[ ! -e "$TEST_HOME/.config/hyprdynamicmonitors" ]] || fail "stowed a host dir"
+}
+
+test_host_sodoma_stows_sodoma() {
+    run_bootstrap --stow-only --host sodoma
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    grep -q "stow: host-sodoma" <<<"$OUT" || fail "summary does not list host-sodoma"
+    local f
+    f="$(cd "$REPO/host-sodoma" && find . -type f | head -1)"
+    [[ "$(readlink -f "$TEST_HOME/$f")" == "$(readlink -f "$REPO/host-sodoma/$f")" ]] || fail "$f is not linked from host-sodoma"
 }
 
 # Runs a snippet the way a step does: sourcing lib.sh with the env bootstrap.sh exports.
