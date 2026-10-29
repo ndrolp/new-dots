@@ -107,6 +107,61 @@ test_without_no_system_system_changes_go_ahead() {
     [[ -z "$SUMMARY" ]] || fail "recorded a skip without --no-system: $SUMMARY"
 }
 
+# A bare repo holding the working tree as it is now, standing in for GitHub.
+make_remote() {
+    REMOTE="$SCRATCH/remote.git"
+    [[ -d "$REMOTE" ]] && return 0
+    local src="$SCRATCH/remote-src"
+    mkdir -p "$src"
+    (cd "$REPO" && git ls-files -co --exclude-standard -z | tar --null --no-recursion -T - -cf - | tar -xf - -C "$src")
+    git -C "$src" init -q -b main
+    git -C "$src" add -A
+    git -C "$src" -c user.name=t -c user.email=t@t commit -qm snapshot
+    git clone -q --bare "$src" "$REMOTE"
+}
+
+# Pipes bootstrap.sh into bash, the way curl | bash does, from a cwd outside any clone.
+pipe_bootstrap() {
+    make_remote
+    STATUS=0
+    OUT="$(cd "$TEST_HOME" && env HOME="$TEST_HOME" DOTFILES_REPO_URL="file://$REMOTE" bash -s -- "$@" <"$BOOTSTRAP" 2>&1)" || STATUS=$?
+}
+
+test_piped_into_bash_clones_the_repo_and_runs_from_the_clone() {
+    TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
+    pipe_bootstrap --stow-only --host no-such-host
+    [[ $STATUS -eq 0 ]] || fail "piped bootstrap exited $STATUS"
+    [[ -f "$TEST_HOME/.dotfiles/bootstrap.sh" ]] || fail "repo was not cloned to ~/.dotfiles"
+    [[ "$(readlink -f "$TEST_HOME/.zshrc")" == "$TEST_HOME/.dotfiles/common/.zshrc" ]] \
+        || fail ".zshrc is not linked from the clone"
+}
+
+test_the_clone_pushes_over_ssh_and_says_to_add_a_key() {
+    TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
+    pipe_bootstrap --stow-only --host no-such-host
+    [[ $STATUS -eq 0 ]] || fail "piped bootstrap exited $STATUS"
+    [[ "$(git -C "$TEST_HOME/.dotfiles" remote get-url origin)" == "git@github.com:ndrolp/new-dots.git" ]] \
+        || fail "origin is $(git -C "$TEST_HOME/.dotfiles" remote get-url origin)"
+    grep -qi "ssh key" <<<"$OUT" || fail "no reminder to add an SSH key"
+}
+
+test_a_second_run_updates_the_existing_clone_instead_of_recloning() {
+    TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
+    pipe_bootstrap --stow-only --host no-such-host
+    [[ $STATUS -eq 0 ]] || fail "first run exited $STATUS"
+    touch "$TEST_HOME/.dotfiles/marker-from-first-run"
+    local work="$SCRATCH/remote-work"
+    rm -rf "$work" && git clone -q "$REMOTE" "$work"
+    echo new >"$work/pushed-after-first-run"
+    git -C "$work" add -A && git -C "$work" -c user.name=t -c user.email=t@t commit -qm next && git -C "$work" push -q
+    pipe_bootstrap --stow-only --host no-such-host
+    [[ $STATUS -eq 0 ]] || fail "second run exited $STATUS"
+    [[ -e "$TEST_HOME/.dotfiles/marker-from-first-run" ]] || fail "the clone was replaced"
+    [[ -e "$TEST_HOME/.dotfiles/pushed-after-first-run" ]] || fail "the clone was not updated"
+    [[ "$(git -C "$TEST_HOME/.dotfiles" remote get-url origin)" == "git@github.com:ndrolp/new-dots.git" ]] \
+        || fail "origin changed on the second run"
+}
+
 for t in $(declare -F | awk '{print $3}' | grep '^test_'); do
     echo "$t"
     ( set -e; "$t" )
