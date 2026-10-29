@@ -141,6 +141,23 @@ test_shell_and_node_steps_install_for_real_and_skip_on_a_second_run() {
     done
 }
 
+# No systemd in the container, so the services step can only be checked under --no-system.
+test_services_step_changes_nothing_under_no_system() {
+    STATUS=0
+    OUT="$(docker run --rm --name "dotfiles-test-services-$$" --label dotfiles.test-bootstrap=1 \
+        -v "$REPO:/src:ro" "${TEST_BOOTSTRAP_IMAGE:-archlinux:latest}" bash -c '
+            useradd -m tester
+            cp -r /src/common /tmp/common
+            runuser -u tester -- env HOME=/home/tester DOTFILES_DIR=/tmp DOTFILES_NO_SYSTEM=true \
+                DOTFILES_SUMMARY_FILE=/tmp/summary bash -c "
+                    source /tmp/common/bootstrap/lib.sh
+                    run_step services && print_summary"
+            id -nG tester' 2>&1)" || STATUS=$?
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    grep -q -- "- services and the docker group (--no-system)" <<<"$OUT" || fail "skip not in the summary"
+    ! grep -qw docker <<<"$(tail -1 <<<"$OUT")" || fail "tester was added to docker"
+}
+
 for t in $(declare -F | awk '{print $3}' | grep '^test_' | grep -- "${1:-}"); do
     echo "$t"
     ( set -e; "$t" )

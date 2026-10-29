@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Tests for the preflight, packages, paru, aur and hardware steps. pacman, paru, sudo, rustup, git,
-# makepkg and lspci are PATH shims that log their calls, so nothing is installed and no root is needed.
+# Tests for the preflight, packages, paru, aur, hardware and services steps. pacman, paru, sudo,
+# rustup, git, makepkg, lspci, systemctl, usermod and id are PATH shims that log their calls, so
+# nothing is installed or enabled and no root is needed.
 set -uo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
@@ -14,7 +15,7 @@ FAILED=0
 SYS_BIN="$SCRATCH/sysbin"
 mkdir -p "$SYS_BIN"
 for cmd in /usr/bin/*; do
-    case "${cmd##*/}" in pacman | paru | sudo | rustup | git | makepkg | lspci) continue ;; esac
+    case "${cmd##*/}" in pacman | paru | sudo | rustup | git | makepkg | lspci | systemctl | usermod) continue ;; esac
     ln -s "$cmd" "$SYS_BIN/"
 done
 
@@ -79,6 +80,25 @@ touch "$FAKE/installed/$pkg"'
     : >"$FAKE/lspci"
     : >"$FAKE/cpuinfo"
     shim lspci 'echo "lspci $*" >>"$FAKE/calls"; cat "$FAKE/lspci"'
+    # systemctl: is-enabled succeeds for units in $FAKE/enabled (as <system|user>-<unit>);
+    # enable adds them there; enabling a unit named bogus-* fails.
+    shim systemctl '
+echo "systemctl $*" >>"$FAKE/calls"
+scope=system
+[[ "$1" == --user ]] && { scope=user; shift; }
+case "$1" in
+    is-enabled) [[ -e "$FAKE/enabled/$scope-${!#}" ]] ;;
+    enable) [[ "$2" != bogus-* ]] || exit 1; mkdir -p "$FAKE/enabled"; touch "$FAKE/enabled/$scope-$2" ;;
+esac'
+    shim usermod 'echo "usermod $*" >>"$FAKE/calls"'
+    # id -nG: the user is in the groups listed in FAKE_GROUPS.
+    shim id '[[ "$1" == -nG ]] && { echo "${FAKE_GROUPS:-wheel}"; exit 0; }; exec /usr/bin/id "$@"'
+}
+
+# A services list; each arg is one line of it.
+make_services() {
+    SERVICES="$(mktemp "$SCRATCH/services.XXXX")"
+    { echo "# a comment"; printf '%s\n' "$@"; } >"$SERVICES"
 }
 
 # fake_hardware <cpu vendor_id> <lspci -nn line>...: the machine the hardware step sees.
@@ -115,7 +135,8 @@ run_steps() {
     summary="$(mktemp "$SCRATCH/summary.XXXX")"
     STATUS=0
     OUT="$(env PATH="$FAKE_BIN:$SYS_BIN" HOME="$FAKE" DOTFILES_MINIMAL="$minimal" \
-        DOTFILES_SUMMARY_FILE="$summary" DOTFILES_PACKAGES_DIR="$LISTS" DOTFILES_CPUINFO="$FAKE/cpuinfo" \
+        DOTFILES_SUMMARY_FILE="$summary" DOTFILES_PACKAGES_DIR="${LISTS:-}" DOTFILES_CPUINFO="$FAKE/cpuinfo" \
+        DOTFILES_SERVICES_FILE="${SERVICES:-}" DOTFILES_NO_SYSTEM="${DOTFILES_NO_SYSTEM:-false}" \
         bash -c 'source "$1/common/bootstrap/lib.sh"; shift; for s in "$@"; do run_step "$s" || exit 1; done' \
         bash "$REPO" "$@" 2>&1)" || STATUS=$?
     SUMMARY="$(cat "$summary")"
@@ -216,6 +237,92 @@ test_keep_alive_stops_when_the_bootstrap_ends() {
     sleep 2
     after="$(grep -c -- '^sudo -n' "$CALLS" || true)"
     [[ "$before" == "$after" ]] || fail "keep-alive still refreshing sudo after the run"
+}
+
+test_services_enables_system_units_with_sudo_and_user_units_as_the_user() {
+    setup_fakes
+    make_services "system sddm sddm" "system docker docker" "user pipewire pipewire"
+    run_steps false services
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    grep -q "^sudo systemctl enable sddm$" "$CALLS" || fail "sddm not enabled with sudo"
+    grep -q "^sudo systemctl enable docker$" "$CALLS" || fail "docker not enabled with sudo"
+    grep -q "^systemctl --user enable pipewire$" "$CALLS" || fail "pipewire not enabled as a user unit"
+    ! grep -q "^sudo systemctl --user" "$CALLS" || fail "a user unit was enabled with sudo"
+    grep -q "^installed	.*sddm" <<<"$SUMMARY" || fail "sddm not in the summary: $SUMMARY"
+}
+
+test_services_enables_an_optional_unit_only_when_its_package_is_installed() {
+    setup_fakes
+    make_services "system auto-cpufreq auto-cpufreq-git optional" "user openlogi-agent openlogi-bin optional" "system sddm not-installed-but-required"
+    touch "$FAKE/installed/openlogi-bin"
+    run_steps false services
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    ! grep -q "enable auto-cpufreq" "$CALLS" || fail "enabled auto-cpufreq without its package"
+    grep -q "^systemctl --user enable openlogi-agent$" "$CALLS" || fail "openlogi-agent not enabled"
+    grep -q "^sudo systemctl enable sddm$" "$CALLS" || fail "a required unit was skipped for its package"
+    grep -q "^skipped	.*auto-cpufreq.*auto-cpufreq-git" <<<"$SUMMARY" || fail "skip not in the summary: $SUMMARY"
+}
+
+test_services_adds_the_user_to_the_docker_group_once() {
+    setup_fakes
+    make_services "system docker docker"
+    run_steps false services
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    grep -q "^sudo usermod -aG docker $(whoami)$" "$CALLS" || fail "user not added to docker"
+    grep -q "^installed	.*docker group" <<<"$SUMMARY" || fail "not in the summary: $SUMMARY"
+    : >"$CALLS"
+    FAKE_GROUPS="wheel docker" run_steps false services
+    ! grep -q "usermod" "$CALLS" || fail "added the user to docker again"
+}
+
+test_services_are_skipped_under_no_system() {
+    setup_fakes
+    make_services "system docker docker" "user pipewire pipewire"
+    DOTFILES_NO_SYSTEM=true run_steps false services
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    ! grep -q -e systemctl -e usermod "$CALLS" || fail "changed the system under --no-system"
+    grep -q "^skipped	.*(--no-system)" <<<"$SUMMARY" || fail "skip not in the summary: $SUMMARY"
+}
+
+test_services_already_enabled_are_not_enabled_again() {
+    setup_fakes
+    make_services "system sddm sddm" "user pipewire pipewire"
+    mkdir -p "$FAKE/enabled"
+    touch "$FAKE/enabled/system-sddm" "$FAKE/enabled/user-pipewire"
+    run_steps false services
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    ! grep -q " enable " "$CALLS" || fail "enabled an enabled unit again"
+    grep -q "^skipped	2 services (already enabled)$" <<<"$SUMMARY" || fail "skip not in the summary: $SUMMARY"
+}
+
+test_a_unit_that_fails_to_enable_is_listed_and_the_rest_go_on() {
+    setup_fakes
+    make_services "system bogus-unit bogus" "system sddm sddm"
+    run_steps false services
+    grep -q "^sudo systemctl enable sddm$" "$CALLS" || fail "stopped after the failing unit"
+    grep -q "^failed	.*bogus-unit" <<<"$SUMMARY" || fail "failure not in the summary: $SUMMARY"
+}
+
+# A required unit whose package is not always installed would fail on every --minimal machine.
+test_every_required_service_comes_from_a_core_package() {
+    local file="$REPO/common/bootstrap/services.txt" core scope unit package optional
+    OUT=""
+    [[ -f "$file" ]] || fail "no services list at $file"
+    core="$(cat "$REPO"/common/packages/core.txt "$REPO"/common/packages/core-aur.txt)"
+    while read -r scope unit package optional; do
+        [[ "$scope" == system || "$scope" == user ]] || fail "$unit: scope is '$scope'"
+        [[ -n "$package" ]] || fail "$unit: no package"
+        [[ -z "$optional" || "$optional" == optional ]] || fail "$unit: fourth column is '$optional'"
+        [[ "$optional" == optional ]] || grep -qx "$package" <<<"$core" ||
+            fail "$unit is required but $package is not in core or core-aur"
+    done < <(sed -e 's/#.*//' "$file" | grep -v '^[[:space:]]*$')
+    for unit in sddm NetworkManager bluetooth docker cups pipewire pipewire-pulse wireplumber \
+        hyprdynamicmonitors auto-cpufreq proton.VPN openlogi-agent; do
+        grep -qE "^(system|user) $unit " "$file" || fail "$unit is not in the list"
+    done
+    for unit in auto-cpufreq proton.VPN openlogi-agent; do
+        grep -qE "^(system|user) $unit .* optional" "$file" || fail "$unit is not optional"
+    done
 }
 
 test_hardware_installs_the_intel_set_on_an_intel_machine() {

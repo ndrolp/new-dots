@@ -101,6 +101,7 @@ else
     steps=(preflight packages paru aur hardware shell node)
     [[ "$DOTFILES_SPICETIFY" == true ]] && steps+=(spicetify)
     steps+=(stow)
+    steps+=(services)
 fi
 
 for step in "${steps[@]}"; do
