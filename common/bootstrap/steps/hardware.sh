@@ -58,5 +58,4 @@ done
 mapfile -t packages < <(package_list "${groups[@]}")
 
 info "Installing hardware packages (${groups[*]})..."
-sudo pacman -S --needed --noconfirm "${packages[@]}"
-summary_add installed "hardware packages: ${groups[*]}"
+pacman_install "hardware packages: ${groups[*]}" "${packages[@]}"

@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Runs every test suite of the repo and says which failed. None needs root or touches the system.
+#   scripts/test-all               the fast suites (seconds)
+#   scripts/test-all --container   also the Docker suite (common/bootstrap/tests/container.sh, slow)
+# For the full bootstrap in a container, run scripts/test-bootstrap --minimal by hand.
+set -uo pipefail
+
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+suites=(
+    common/bootstrap/tests/run.sh
+    common/bootstrap/tests/packages.sh
+    common/bootstrap/tests/spicetify.sh
+    scripts/test-sync-packages
+)
+
+case "${1:-}" in
+    --container) suites+=(common/bootstrap/tests/container.sh) ;;
+    "") ;;
+    *)
+        echo "Usage: scripts/test-all [--container]" >&2
+        exit 2
+        ;;
+esac
+
+failed=()
+for suite in "${suites[@]}"; do
+    printf '\n=== %s\n' "$suite"
+    bash "$REPO/$suite" || failed+=("$suite")
+done
+
+echo
+if ((${#failed[@]})); then
+    printf 'FAILED suites:\n'
+    printf '  %s\n' "${failed[@]}"
+    exit 1
+fi
+echo "All ${#suites[@]} suites passed."

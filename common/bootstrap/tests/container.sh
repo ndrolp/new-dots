@@ -50,6 +50,33 @@ test_package_steps_install_core_and_report_a_bogus_aur_package_as_failed() {
     grep -q "stow: common" <<<"$OUT" || fail "the run stopped before stow"
 }
 
+# The whole bootstrap with the real core, core-aur and hardware lists (--minimal leaves out the
+# apps groups), then a second run in the same container. AUR packages that fail to build are
+# reported, not fatal, so they are allowed here. Very slow: builds every core-aur package (~40 min).
+test_full_minimal_run_passes_and_a_second_run_changes_nothing() {
+    STATUS=0
+    OUT="$(TEST_BOOTSTRAP_BEFORE='echo mine >~/.zshrc' \
+        TEST_BOOTSTRAP_AFTER='echo "=== second run"
+                              bash ~/.dotfiles/bootstrap.sh --no-system --minimal --host omelas || exit
+                              [ "$(readlink -f ~/.zshrc)" = ~/.dotfiles/common/.zshrc ] && echo ZSHRC-LINKED
+                              [ "$(cat ~/.dotfiles-backup/*/.zshrc)" = mine ] && echo ZSHRC-BACKED-UP' \
+        "$HARNESS" --minimal --host omelas 2>&1)" || STATUS=$?
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    local first second
+    first="$(sed '/^=== second run/,$d' <<<"$OUT")"
+    second="$(sed -n '/^=== second run/,$p' <<<"$OUT")"
+    for what in "pacman packages: core" "hardware packages: hardware-any" "paru" oh-my-zsh nvm "stow: common" "stow: host-omelas"; do
+        sed -n '/^Installed:/,/^[A-Z]/p' <<<"$first" | grep -q -- "- $what" || fail "first run did not install $what"
+    done
+    grep -q ZSHRC-LINKED <<<"$OUT" || fail "~/.zshrc is not a link into the repo"
+    grep -q ZSHRC-BACKED-UP <<<"$OUT" || fail "the old ~/.zshrc is not in ~/.dotfiles-backup/<ts>/"
+    ! grep -q "^Installed:" <<<"$second" || fail "second run installed something"
+    ! grep -q "^Backed up:" <<<"$second" || fail "second run backed something up"
+    local other_failures
+    other_failures="$(sed -n '/^Failed:/,/^Log:/{/^  - /p}' <<<"$second" | grep -v "^  - AUR: " || true)"
+    [[ -z "$other_failures" ]] || fail "second run failed something besides AUR builds: $other_failures"
+}
+
 test_a_pre_existing_zshrc_is_backed_up_and_linked_in_the_container() {
     STATUS=0
     OUT="$(TEST_BOOTSTRAP_BEFORE='echo mine >~/.zshrc' \
@@ -139,6 +166,38 @@ test_shell_and_node_steps_install_for_real_and_skip_on_a_second_run() {
     for what in oh-my-zsh zsh-autosuggestions zsh-syntax-highlighting "spaceship theme" "chsh" nvm "node LTS"; do
         grep -q -- "- $what" <<<"$second" || fail "second run does not report $what as skipped"
     done
+}
+
+# curl ... | bash on a fresh machine: no git and no ~/.dotfiles yet. The repo is served from a
+# bare snapshot of the working tree (uncommitted files included) through DOTFILES_REPO_URL.
+test_piped_bootstrap_installs_git_clones_the_repo_and_stows_in_a_fresh_container() {
+    local snap
+    snap="$(mktemp -d)"
+    (cd "$REPO" && git ls-files -co --exclude-standard -z | tar --null --no-recursion -T - -cf - | tar -xf - -C "$snap")
+    git -C "$snap" init -q -b main && git -C "$snap" add -A \
+        && git -C "$snap" -c user.name=t -c user.email=t@t commit -qm snapshot
+    git clone -q --bare "$snap" "$snap.git"
+    STATUS=0
+    OUT="$(docker run --rm --label dotfiles.test-bootstrap=1 -v "$snap.git:/remote.git:ro" \
+        -v "$REPO/bootstrap.sh:/bootstrap.sh:ro" "${TEST_BOOTSTRAP_IMAGE:-archlinux:latest}" bash -c '
+            set -euo pipefail
+            pacman -Syu --noconfirm --needed sudo stow >/dev/null
+            useradd -m tester
+            echo "tester ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/tester
+            cp -r /remote.git /srv/remote.git && chown -R tester:tester /srv/remote.git
+            command -v git || echo "state: no git before"
+            cd /tmp
+            runuser -u tester -- env HOME=/home/tester USER=tester LOGNAME=tester \
+                DOTFILES_REPO_URL=file:///srv/remote.git bash -s -- --no-system --stow-only </bootstrap.sh
+            cd /home/tester
+            echo "state: origin $(runuser -u tester -- git -C .dotfiles remote get-url origin)"
+            echo "state: zshrc $(readlink -f .zshrc)"' 2>&1)" || STATUS=$?
+    rm -rf "$snap" "$snap.git"
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    grep -qx "state: no git before" <<<"$OUT" || fail "git was already installed, the install path was not exercised"
+    grep -q "Installing git" <<<"$OUT" || fail "the piped bootstrap did not install git"
+    grep -qx "state: origin git@github.com:ndrolp/new-dots.git" <<<"$OUT" || fail "origin is not the SSH URL"
+    grep -qx "state: zshrc /home/tester/.dotfiles/common/.zshrc" <<<"$OUT" || fail ".zshrc is not linked from the clone"
 }
 
 # No systemd in the container, so the services step can only be checked under --no-system.

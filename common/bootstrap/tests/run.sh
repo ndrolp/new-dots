@@ -115,6 +115,16 @@ test_a_second_run_backs_up_nothing() {
     [[ "$(find "$TEST_HOME/.dotfiles-backup" | sort)" == "$before" ]] || fail "second run changed ~/.dotfiles-backup"
 }
 
+test_a_second_stow_run_reports_the_links_as_already_there() {
+    TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
+    rerun_bootstrap --stow-only --host omelas
+    rerun_bootstrap --stow-only --host omelas
+    [[ $STATUS -eq 0 ]] || fail "second run exited $STATUS"
+    ! grep -q "^Installed:" <<<"$OUT" || fail "second run reports installs"
+    grep -q -- "- stow: common (already linked)" <<<"$OUT" || fail "common not reported as already linked"
+    grep -q -- "- stow: host-omelas (already linked)" <<<"$OUT" || fail "host-omelas not reported as already linked"
+}
+
 test_a_file_in_the_way_of_a_host_link_is_backed_up_keeping_its_path() {
     TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
     local rel=.config/hyprdynamicmonitors/config.toml
