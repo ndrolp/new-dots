@@ -39,6 +39,15 @@ system_changes_allowed() {
     fi
 }
 
+# The preflight step writes the sudo keep-alive's PID here; bootstrap.sh stops it on exit.
+DOTFILES_KEEPALIVE_PID_FILE="${DOTFILES_KEEPALIVE_PID_FILE:-}"
+
+stop_keepalive() {
+    [[ -n "$DOTFILES_KEEPALIVE_PID_FILE" && -s "$DOTFILES_KEEPALIVE_PID_FILE" ]] || return 0
+    kill "$(cat "$DOTFILES_KEEPALIVE_PID_FILE")" 2>/dev/null || true
+    rm -f "$DOTFILES_KEEPALIVE_PID_FILE"
+}
+
 # Host whose host-<name> dir is stowed: --host, else the machine's hostname.
 dotfiles_host() {
     if [[ -n "${DOTFILES_HOST:-}" ]]; then

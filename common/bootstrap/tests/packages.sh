@@ -259,6 +259,46 @@ test_keep_alive_stops_when_the_bootstrap_ends() {
     [[ "$before" == "$after" ]] || fail "keep-alive still refreshing sudo after the run"
 }
 
+# run_bootstrap_with_real_preflight [VAR=value...]: runs bootstrap.sh from a copy of the repo whose
+# steps, all but preflight, do nothing. Sets OUT and STATUS; KEEPALIVE_SECONDS is the refresh interval.
+run_bootstrap_with_real_preflight() {
+    local copy step
+    copy="$(mktemp -d "$SCRATCH/repo.XXXX")"
+    mkdir -p "$copy/common/bootstrap/steps"
+    cp "$REPO/bootstrap.sh" "$copy/"
+    cp "$REPO/common/bootstrap/lib.sh" "$copy/common/bootstrap/"
+    for step in "$REPO"/common/bootstrap/steps/*.sh; do
+        echo 'exit 0' >"$copy/common/bootstrap/steps/${step##*/}"
+    done
+    cp "$REPO/common/bootstrap/steps/preflight.sh" "$copy/common/bootstrap/steps/"
+    STATUS=0
+    OUT="$(env PATH="$FAKE_BIN:$SYS_BIN" HOME="$FAKE" DOTFILES_SUDO_KEEPALIVE_SECONDS="$KEEPALIVE_SECONDS" \
+        bash "$copy/bootstrap.sh" --host none --no-system 2>&1)" || STATUS=$?
+}
+
+test_the_keep_alive_is_stopped_when_the_bootstrap_exits() {
+    setup_fakes
+    KEEPALIVE_SECONDS=987
+    run_bootstrap_with_real_preflight
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    sleep 0.5
+    ! pgrep -f "sleep $KEEPALIVE_SECONDS" >/dev/null || fail "the keep-alive is still waiting to refresh sudo"
+}
+
+test_the_keep_alive_refreshes_sudo_right_away() {
+    setup_fakes
+    make_lists
+    DOTFILES_SUDO_KEEPALIVE_SECONDS=986 run_steps false preflight
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    local i
+    for i in 1 2 3 4 5 6 7 8 9 10; do
+        grep -q -- '^sudo -n -v' "$CALLS" && break
+        sleep 0.2
+    done
+    pkill -f "sleep 986" || true
+    grep -q -- '^sudo -n -v' "$CALLS" || fail "no refresh before the first interval"
+}
+
 test_services_enables_system_units_with_sudo_and_user_units_as_the_user() {
     setup_fakes
     make_services "system sddm sddm" "system docker docker" "user pipewire pipewire"
@@ -415,7 +455,7 @@ test_hardware_warning_is_printed_in_the_summary() {
     grep -q "NVIDIA GPU: drivers not installed" <<<"$OUT" || fail "warning not printed"
 }
 
-for t in $(declare -F | awk '{print $3}' | grep '^test_'); do
+for t in $(declare -F | awk '{print $3}' | grep "^test_.*${1:-}"); do
     echo "$t"
     ( set -e; "$t" )
     if [[ $? -eq 0 ]]; then PASSED=$((PASSED + 1)); else FAILED=$((FAILED + 1)); echo "  FAILED"; fi
