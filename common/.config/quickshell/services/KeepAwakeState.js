@@ -76,3 +76,12 @@ function timeLeftLabel(seconds) {
         return hours + ":" + pad(minutes) + ":" + pad(secs);
     return minutes + ":" + pad(secs);
 }
+
+// What the OSD says when the keybind toggles keep-awake: off, on, or on with
+// the selected duration as the popup names it ("Keep-awake on · 1 h").
+function osdLabel(on, duration) {
+    if (!on)
+        return "Keep-awake off";
+    const chosen = durations.find(d => d.minutes === duration);
+    return duration > 0 && chosen ? "Keep-awake on · " + chosen.label : "Keep-awake on";
+}

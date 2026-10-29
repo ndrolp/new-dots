@@ -7,6 +7,7 @@ import QtQuick
 import QtQuick.Effects
 import "../../config" as Config
 import "AudioOutputs.js" as AudioOutputs
+import "../../services/KeepAwakeState.js" as KeepAwakeState
 
 PanelWindow {
     id: root
@@ -20,7 +21,11 @@ PanelWindow {
     property string sinkName: ""
     property string sinkType: ""
     property string profileName: ""
-    readonly property bool compact: mode === "caps"
+    property bool keepAwakeOn: false
+    property string keepAwakeLabel: ""
+    readonly property bool compact: mode === "caps" || mode === "keepAwake"
+    // Caps lock on or keep-awake on: the icon sits on the accent.
+    readonly property bool highlighted: mode === "caps" ? capsLocked : mode === "keepAwake" && keepAwakeOn
 
     readonly property var audio: Pipewire.defaultAudioSink && Pipewire.defaultAudioSink.audio
         ? Pipewire.defaultAudioSink.audio : null
@@ -74,6 +79,14 @@ PanelWindow {
     function showBarProfile(name) {
         mode = "profile";
         profileName = name;
+        reveal = 1;
+        dismissTimer.restart();
+    }
+
+    function showKeepAwake(on, duration) {
+        mode = "keepAwake";
+        keepAwakeOn = on;
+        keepAwakeLabel = KeepAwakeState.osdLabel(on, duration);
         reveal = 1;
         dismissTimer.restart();
     }
@@ -184,7 +197,7 @@ PanelWindow {
                 width: 42
                 height: 42
                 radius: 21
-                color: root.mode === "caps" && root.capsLocked ? theme.accent : theme.backgroundSecondary
+                color: root.highlighted ? theme.accent : theme.backgroundSecondary
 
                 Text {
                     anchors.centerIn: parent
@@ -197,8 +210,9 @@ PanelWindow {
                                 : root.sinkType.includes("hdmi") || root.sinkType.includes("displayport")
                                     ? "󰍹" : "󰓃")
                             : root.mode === "profile" ? "󰘳"
+                            : root.mode === "keepAwake" ? (root.keepAwakeOn ? "󰅶" : "󰛊")
                             : "󰪛"
-                    color: root.mode === "caps" && root.capsLocked ? theme.background
+                    color: root.highlighted ? theme.background
                         : root.mode === "volume" ? theme.blue
                         : root.mode === "brightness" ? theme.yellow
                         : root.mode === "sink" || root.mode === "profile" ? theme.accent : theme.textMuted
@@ -220,6 +234,7 @@ PanelWindow {
                         : root.mode === "brightness" ? "Brightness"
                         : root.mode === "sink" ? sinkName
                         : root.mode === "profile" ? profileName + " bar profile"
+                        : root.mode === "keepAwake" ? keepAwakeLabel
                         : root.capsLocked ? "Caps Lock on" : "Caps Lock off"
                     color: theme.text
                     elide: Text.ElideRight

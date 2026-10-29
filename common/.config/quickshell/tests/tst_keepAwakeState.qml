@@ -122,4 +122,18 @@ TestCase {
         compare(KeepAwakeState.timeLeftLabel(2 * 3600), "2:00:00");
         compare(KeepAwakeState.timeLeftLabel(3600 + 61), "1:01:01");
     }
+
+    function test_theKeybindOsdSaysKeepAwakeIsOffWhenTurnedOff() {
+        compare(KeepAwakeState.osdLabel(false, 60), "Keep-awake off");
+    }
+
+    function test_theKeybindOsdSaysOnWithoutADurationUntilTurnedOff() {
+        compare(KeepAwakeState.osdLabel(true, 0), "Keep-awake on");
+    }
+
+    function test_theKeybindOsdSaysOnWithTheSelectedDuration() {
+        compare(KeepAwakeState.osdLabel(true, 30), "Keep-awake on · 30 min");
+        compare(KeepAwakeState.osdLabel(true, 60), "Keep-awake on · 1 h");
+        compare(KeepAwakeState.osdLabel(true, 120), "Keep-awake on · 2 h");
+    }
 }

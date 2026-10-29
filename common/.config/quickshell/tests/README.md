@@ -30,8 +30,8 @@ and filters `hyprctl binds -j` (`components/panels/KeybindCheatsheet.js`),
 what the keep-awake bar element shows and its popup's switch, duration choice
 and time left (`components/bar/KeepAwakeElement.qml`,
 `components/panels/KeepAwakePopupBody.qml`), keep-awake's duration and
-countdown: starting, restarting, running out and turning off by hand
-(`services/KeepAwakeState.js`),
+countdown: starting, restarting, running out and turning off by hand, and
+what the keybind's OSD says (`services/KeepAwakeState.js`),
 and which popup is open across the bars (`modules/OpenPopup.js`).
 They run with QtTest outside of `qs`:
 

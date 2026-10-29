@@ -4,7 +4,8 @@ import QtQuick
 import "../components/panels" as Panels
 
 // The on-screen display: IPC shows it for the volume and brightness keys, and
-// the rest of the shell for audio outputs and bar profiles.
+// the rest of the shell for audio outputs, bar profiles and the keep-awake
+// keybind.
 Scope {
     id: root
 
@@ -16,6 +17,10 @@ Scope {
 
     function showBarProfile(name) {
         osdPopup.showBarProfile(name);
+    }
+
+    function showKeepAwake(on, duration) {
+        osdPopup.showKeepAwake(on, duration);
     }
 
     Panels.OsdPopup {

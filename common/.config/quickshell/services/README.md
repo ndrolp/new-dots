@@ -37,7 +37,9 @@ off and sends a "Keep-awake ended" notification through `notify-send`; turning
 it off by hand sends none. Those decisions live in `KeepAwakeState.js`. While on it
 holds an `IdleInhibitor` on a transparent, click-through 1×1 window of its own,
 because an inhibitor only counts while its window is shown and the control
-center hides its window when closed.
+center hides its window when closed. The `keep-awake toggle` IPC call
+(`modules/KeepAwake.qml`, bound to ALT+SHIFT+I) toggles it too and is the only
+toggle that shows the OSD, labelled by `KeepAwakeState.osdLabel`.
 
 ## Night light
 

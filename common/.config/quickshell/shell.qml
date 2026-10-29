@@ -102,6 +102,11 @@ ShellRoot {
         appearance: appearance
     }
 
+    Modules.KeepAwake {
+        keepAwake: keepAwake
+        osd: osd
+    }
+
     Modules.BarProfiles {
         id: barProfiles
 

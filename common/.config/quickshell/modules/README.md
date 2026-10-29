@@ -22,6 +22,8 @@ adding or editing one file here.
 - `Notifications.qml`: the notification server, popups, sound and panel.
 - `BarProfiles.qml`: the default bar profile for new monitors and the
   `bar-profiles` IPC calls.
+- `KeepAwake.qml`: the `keep-awake` IPC call the keybind runs, which toggles
+  keep-awake and shows the OSD.
 - `Osd.qml`, `Lock.qml` (the one lock screen and the `lock` IPC call) and
   `LowBattery.qml`.
 
