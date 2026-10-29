@@ -260,8 +260,8 @@ cat >"$NVM_DIR/nvm.sh" <<'NVM'
 nvm() {
     echo "nvm $*" >>"$CALLS"
     case "$1" in
-        version) [ -e "$NVM_DIR/lts-installed" ] && echo v22.0.0 || echo N/A ;;
-        install) [ "$2" = --lts ] && touch "$NVM_DIR/lts-installed" ;;
+        version) [ -e "$NVM_DIR/lts-installed" ] && echo v22.0.0 || { echo N/A; return 3; } ;;
+        install) [ -z "$FAKE_NVM_INSTALL_FAIL" ] || return 1; [ "$2" = --lts ] && touch "$NVM_DIR/lts-installed" ;;
     esac
 }
 NVM
@@ -389,14 +389,60 @@ test_a_second_node_run_installs_nothing_and_says_so() {
     grep -q "^skipped	node LTS" <<<"$SUMMARY" || fail "node LTS not reported as skipped: $SUMMARY"
 }
 
-test_node_uses_nvm_dir_when_it_is_set() {
+# fake_nvm_in <dir>: an nvm already installed in <dir>, with an LTS node.
+fake_nvm_in() {
+    mkdir -p "$1"
+    printf 'nvm() { echo "nvm $*" >>"$CALLS"; echo v22.0.0; }\n' >"$1/nvm.sh"
+}
+
+test_node_uses_nvm_dir_when_it_holds_an_nvm() {
+    fresh_home
+    fake_nvm_in "$TEST_HOME/elsewhere"
+    run_step_alone node NVM_DIR="$TEST_HOME/elsewhere"
+    [[ $STATUS -eq 0 ]] || fail "node step exited $STATUS"
+    grep -q "^nvm version" "$CALLS" || fail "did not use the nvm in NVM_DIR: $(cat "$CALLS")"
+    [[ ! -e "$TEST_HOME/.nvm" ]] || fail "installed a second nvm in ~/.nvm"
+}
+
+# A shell that once ran with spaceship's XDG_CONFIG_HOME exports NVM_DIR=~/.config/nvm, where no nvm is.
+test_node_ignores_a_stale_nvm_dir_and_installs_into_home() {
     fresh_home
     run_step_alone node NVM_DIR="$TEST_HOME/.config/nvm"
     [[ $STATUS -eq 0 ]] || fail "node step exited $STATUS"
-    [[ -f "$TEST_HOME/.config/nvm/nvm.sh" ]] || fail "nvm not installed into NVM_DIR"
+    [[ -f "$TEST_HOME/.nvm/nvm.sh" ]] || fail "nvm is not in ~/.nvm"
+    [[ ! -e "$TEST_HOME/.config/nvm" ]] || fail "created a second nvm at the stale NVM_DIR"
 }
 
-for t in $(declare -F | awk '{print $3}' | grep '^test_'); do
+test_a_failing_node_install_fails_the_node_step() {
+    fresh_home
+    run_step_alone node FAKE_NVM_INSTALL_FAIL=1
+    [[ $STATUS -ne 0 ]] || fail "a failed nvm install --lts exited 0"
+    ! grep -q "^installed	node" <<<"$SUMMARY" || fail "reports node installed: $SUMMARY"
+}
+
+# zshrc_nvm_dir <NVM_DIR or empty>: the NVM_DIR the .zshrc ends up with, run with only its nvm lines.
+zshrc_nvm_dir() {
+    env -i HOME="$TEST_HOME" ${1:+NVM_DIR="$1"} zsh -fc "$(grep NVM_DIR "$REPO/common/.zshrc")
+echo \$NVM_DIR"
+}
+
+test_zshrc_ignores_a_stale_nvm_dir() {
+    fresh_home
+    OUT="$(zshrc_nvm_dir "$TEST_HOME/.config/nvm")"
+    [[ "$OUT" == "$TEST_HOME/.nvm" ]] || fail "a stale NVM_DIR gives $OUT"
+    OUT="$(zshrc_nvm_dir "")"
+    [[ "$OUT" == "$TEST_HOME/.nvm" ]] || fail "no NVM_DIR gives $OUT"
+}
+
+test_zshrc_keeps_an_nvm_dir_that_holds_an_nvm() {
+    fresh_home
+    fake_nvm_in "$TEST_HOME/elsewhere"
+    OUT="$(CALLS=/dev/null zshrc_nvm_dir "$TEST_HOME/elsewhere")"
+    [[ "$OUT" == "$TEST_HOME/elsewhere" ]] || fail "NVM_DIR is $OUT"
+}
+
+# run.sh [name filter]: runs only the tests whose name contains the filter.
+for t in $(declare -F | awk '{print $3}' | grep "^test_.*${1:-}"); do
     echo "$t"
     ( set -e; "$t" )
     if [[ $? -eq 0 ]]; then PASSED=$((PASSED + 1)); else FAILED=$((FAILED + 1)); fi

@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# Installs nvm (in $NVM_DIR, default ~/.nvm) and the latest LTS node.
+# Installs nvm (in ~/.nvm, or in $NVM_DIR when an nvm is already there) and the latest LTS node.
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 
 NVM_INSTALLER="https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh"
-export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+# An inherited NVM_DIR with no nvm in it (e.g. ~/.config/nvm from an old shell) does not count.
+[[ -s "${NVM_DIR:-}/nvm.sh" ]] || NVM_DIR="$HOME/.nvm"
+export NVM_DIR
 
 if [[ -s "$NVM_DIR/nvm.sh" ]]; then
     info "nvm already installed."
@@ -18,15 +20,25 @@ else
     summary_add installed nvm
 fi
 
-# nvm.sh is not written for set -eu.
+# run_nvm <args>: nvm.sh and its function are not written for set -eu, so they run without it.
+run_nvm() {
+    local status=0
+    set +eu
+    nvm "$@" || status=$?
+    set -eu
+    return "$status"
+}
+
 set +eu
 source "$NVM_DIR/nvm.sh"
-lts="$(nvm version 'lts/*')"
+set -eu
+
+lts="$(run_nvm version 'lts/*' || true)"
 if [[ -n "$lts" && "$lts" != N/A ]]; then
     info "node $lts (LTS) already installed."
     summary_add skipped "node LTS (already installed: $lts)"
 else
     info "Installing the latest LTS node..."
-    nvm install --lts || exit 1
-    summary_add installed "node $(nvm version 'lts/*') (LTS)"
+    run_nvm install --lts
+    summary_add installed "node $(run_nvm version 'lts/*') (LTS)"
 fi

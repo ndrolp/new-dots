@@ -198,8 +198,8 @@ export ZELLIJ_CONFIG_DIR="$HOME/.config/zellij"
 #
 
 # Not the XDG_CONFIG_HOME form: the spaceship theme sets XDG_CONFIG_HOME, which would point this away from
-# ~/.nvm, where the bootstrap installs nvm.
-export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+# ~/.nvm, where the bootstrap installs nvm. An inherited NVM_DIR counts only if it holds an nvm.
+[ -s "${NVM_DIR:-}/nvm.sh" ] || export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 
 export PATH="$PATH:$HOME/.spicetify"
