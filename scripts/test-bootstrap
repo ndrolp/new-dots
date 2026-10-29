@@ -24,12 +24,17 @@ mkdir /home/tester/.dotfiles
 tar -C /src --exclude=./.git --exclude=./.claude/worktrees -cf - . | tar -C /home/tester/.dotfiles -xf -
 chown -R tester:tester /home/tester/.dotfiles
 cd /home/tester
-as_tester() { runuser -u tester -- env HOME=/home/tester USER=tester LOGNAME=tester "$@"; }
+as_tester() {
+    runuser -u tester -- env HOME=/home/tester USER=tester LOGNAME=tester \
+        ${DOTFILES_PACKAGES_DIR:+DOTFILES_PACKAGES_DIR="$DOTFILES_PACKAGES_DIR"} "$@"
+}
 as_tester bash -c "$TEST_BOOTSTRAP_BEFORE"
 as_tester bash /home/tester/.dotfiles/bootstrap.sh --no-system "$@"
 as_tester bash -c "$TEST_BOOTSTRAP_AFTER"
 EOF
 
-docker run --rm --label dotfiles.test-bootstrap=1 \
+# DOTFILES_PACKAGES_DIR, when set, is passed on (a path inside the container, e.g.
+# /home/tester/.dotfiles/common/bootstrap/tests/fixtures/packages for short test lists).
+docker run --rm --label dotfiles.test-bootstrap=1 -e DOTFILES_PACKAGES_DIR \
     -e TEST_BOOTSTRAP_BEFORE="${TEST_BOOTSTRAP_BEFORE:-}" -e TEST_BOOTSTRAP_AFTER="${TEST_BOOTSTRAP_AFTER:-}" \
     -v "$REPO:/src:ro" "$IMAGE" bash -c "$SETUP" bash "$@"
