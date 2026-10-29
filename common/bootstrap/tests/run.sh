@@ -83,6 +83,30 @@ test_a_failing_step_exits_non_zero_and_still_prints_the_summary() {
     grep -q "step stow" <<<"$OUT" || fail "summary does not name the failed step"
 }
 
+# Runs a snippet the way a step does: sourcing lib.sh with the env bootstrap.sh exports.
+# Sets OUT, STATUS and SUMMARY (the lines the snippet added to the summary).
+run_as_step() {
+    local no_system="$1" snippet="$2" summary
+    summary="$(mktemp "$SCRATCH/summary.XXXX")"
+    STATUS=0
+    OUT="$(env DOTFILES_NO_SYSTEM="$no_system" DOTFILES_SUMMARY_FILE="$summary" \
+        bash -c "source '$REPO/common/bootstrap/lib.sh'; $snippet" 2>&1)" || STATUS=$?
+    SUMMARY="$(cat "$summary")"
+}
+
+test_no_system_makes_system_changes_skip_and_says_so() {
+    run_as_step true 'if system_changes_allowed "chsh to zsh"; then echo CHANGED; fi'
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    ! grep -q CHANGED <<<"$OUT" || fail "made a system change under --no-system"
+    grep -q "^skipped.*chsh to zsh.*--no-system" <<<"$SUMMARY" || fail "summary does not record the skip: $SUMMARY"
+}
+
+test_without_no_system_system_changes_go_ahead() {
+    run_as_step false 'if system_changes_allowed "chsh to zsh"; then echo CHANGED; fi'
+    grep -q CHANGED <<<"$OUT" || fail "skipped a system change without --no-system"
+    [[ -z "$SUMMARY" ]] || fail "recorded a skip without --no-system: $SUMMARY"
+}
+
 # A bare repo holding the working tree as it is now, standing in for GitHub.
 make_remote() {
     REMOTE="$SCRATCH/remote.git"
