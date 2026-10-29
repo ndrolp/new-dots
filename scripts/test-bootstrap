@@ -5,13 +5,12 @@
 #   scripts/test-bootstrap --minimal --host omelas
 # The repo's working tree (uncommitted changes included, .git left out) is copied
 # to ~/.dotfiles in the container; the host repo is mounted read-only and never changed.
-# The container is removed afterwards, also on failure or Ctrl-C.
+# --rm removes the container afterwards, also on failure or Ctrl-C (docker forwards the signal).
 # TEST_BOOTSTRAP_IMAGE overrides the image (default archlinux:latest).
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 IMAGE="${TEST_BOOTSTRAP_IMAGE:-archlinux:latest}"
-NAME="test-bootstrap-$$-$RANDOM"
 
 # Runs as root in the container; "$@" is the bootstrap args.
 read -r -d '' SETUP <<'EOF' || true
@@ -27,7 +26,5 @@ exec runuser -u tester -- env HOME=/home/tester USER=tester LOGNAME=tester \
     bash /home/tester/.dotfiles/bootstrap.sh --no-system "$@"
 EOF
 
-trap 'docker rm -f "$NAME" >/dev/null 2>&1 || true' EXIT INT TERM
-
-docker run --rm --name "$NAME" --label dotfiles.test-bootstrap=1 \
+docker run --rm --label dotfiles.test-bootstrap=1 \
     -v "$REPO:/src:ro" "$IMAGE" bash -c "$SETUP" bash "$@"
