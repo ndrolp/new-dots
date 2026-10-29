@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Tests for scripts/sync-packages. Package lists and installed packages are
+# injected, so nothing here reads pacman. Run: scripts/test-sync-packages
+set -uo pipefail
+
+SYNC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/sync-packages"
+WORK="$(mktemp -d)"
+trap 'rm -rf "$WORK"' EXIT
+
+failures=0
+current=""
+
+# A fresh machine for each test: an empty list dir and nothing installed.
+setup() {
+  current="$1"
+  rm -rf "$WORK"/*
+  mkdir -p "$WORK/lists"
+  : >"$WORK/explicit"
+  : >"$WORK/installed"
+}
+
+list() { printf '%s\n' "${@:2}" >"$WORK/lists/$1"; }
+explicitly_installed() { printf '%s\n' "$@" >>"$WORK/explicit"; printf '%s\n' "$@" >>"$WORK/installed"; }
+installed_as_dependency() { printf '%s\n' "$@" >>"$WORK/installed"; }
+
+sync() {
+  "$SYNC" --lists "$WORK/lists" --explicit "$WORK/explicit" --installed "$WORK/installed"
+}
+
+# The lines under a report section's heading, up to the next blank line.
+section() {
+  awk -v h="$1" 'index($0, h) == 1 { on = 1; next } on && /^$/ { exit } on { sub(/^ +/, ""); print }'
+}
+
+expect_eq() {
+  if [[ "$1" != "$2" ]]; then
+    printf 'FAIL %s\n  expected: %q\n  actual:   %q\n' "$current" "$2" "$1"
+    failures=$((failures + 1))
+  fi
+}
+
+setup "reports an explicitly installed package that no list names"
+list core.txt git
+explicitly_installed git firefox
+expect_eq "$(sync | section 'Installed but unlisted')" "firefox"
+
+setup "reports a listed package that is not installed, naming its list"
+list core.txt git ripgrep
+list apps-aur.txt spotify
+explicitly_installed git
+expect_eq "$(sync | section 'Listed but not installed')" $'ripgrep (core.txt)\nspotify (apps-aur.txt)'
+
+setup "a listed package installed as a dependency counts as installed"
+list core.txt git unzip
+explicitly_installed git
+installed_as_dependency unzip
+expect_eq "$(sync | section 'Listed but not installed')" ""
+
+setup "comments and blank lines in a list name no package"
+list core.txt "# Core desktop" "" "git  # version control"
+explicitly_installed git
+expect_eq "$(sync | section 'Listed but not installed')" ""
+expect_eq "$(sync | section 'Installed but unlisted')" ""
+
+setup "changes no file"
+list core.txt git ripgrep
+explicitly_installed git firefox
+before="$(cd "$WORK" && find . -type f -exec sha256sum {} + | sort)"
+sync >/dev/null
+after="$(cd "$WORK" && find . -type f -exec sha256sum {} + | sort)"
+expect_eq "$after" "$before"
+
+if ((failures)); then
+  printf '%d failure(s)\n' "$failures"
+  exit 1
+fi
+echo "all sync-packages tests passed"
