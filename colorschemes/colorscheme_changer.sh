@@ -157,11 +157,12 @@ NODE
 }
 
 # GTK3 apps restyle live through gsettings, and settings.ini names the same theme so the two can't drift.
+# A theme without GTK4 files still applies to GTK3; the GTK4 links are left alone and the step fails.
 apply_gtk() {
   local theme link settings="$HOME/.config/gtk-3.0/settings.ini"
   theme="$(sed -n 's/.*gtk-theme "\(.*\)".*/\1/p' "$THEME_FOLDER/gtk/colors.sh")"
   [ -n "$theme" ]
-  if [ ! -d "$HOME/.themes/$theme/gtk-4.0" ]; then
+  if [ ! -d "$HOME/.themes/$theme" ]; then
     echo "GTK theme $theme is not installed in ~/.themes" >&2
     return 1
   fi
@@ -177,6 +178,10 @@ apply_gtk() {
     sed -i --follow-symlinks "/^\[Settings\]/a gtk-theme-name=$theme" "$settings"
   fi
 
+  if [ ! -d "$HOME/.themes/$theme/gtk-4.0" ]; then
+    echo "GTK theme $theme has no GTK4 files; GTK4 apps keep their theme" >&2
+    return 1
+  fi
   mkdir -p "$HOME/.config/gtk-4.0"
   for link in gtk.css gtk-dark.css assets; do
     ln -sfn "$HOME/.themes/$theme/gtk-4.0/$link" "$HOME/.config/gtk-4.0/$link"

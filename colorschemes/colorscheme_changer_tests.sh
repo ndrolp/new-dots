@@ -61,13 +61,15 @@ SHIM
 }
 
 # install_gtk_themes <home>: gives <home> GTK as the desktop has it: every colorscheme's GTK theme in
-# ~/.themes (except $MISSING_GTK_THEME), a GTK3 settings.ini holding settings besides the theme, and the
+# ~/.themes (except $MISSING_GTK_THEME, and without a gtk-4.0 folder for $GTK3_ONLY_THEME), a GTK3 settings.ini holding settings besides the theme, and the
 # GTK4 links pointing at the everforest theme.
 install_gtk_themes() {
     local home="$1" theme dir link
     for theme in $(sed -n 's/.*gtk-theme "\(.*\)".*/\1/p' "$COLORSCHEMES"/*/gtk/colors.sh); do
         [[ "$theme" == "${MISSING_GTK_THEME:-}" ]] && continue
-        for dir in gtk-3.0 gtk-4.0/assets; do mkdir -p "$home/.themes/$theme/$dir"; done
+        mkdir -p "$home/.themes/$theme/gtk-3.0"
+        [[ "$theme" == "${GTK3_ONLY_THEME:-}" ]] && continue
+        mkdir -p "$home/.themes/$theme/gtk-4.0/assets"
         touch "$home/.themes/$theme/gtk-4.0/"{gtk.css,gtk-dark.css}
     done
     mkdir -p "$home/.config/gtk-3.0" "$home/.config/gtk-4.0"
@@ -234,6 +236,19 @@ test_a_missing_gtk_theme_fails_the_gtk_step() {
     MISSING_GTK_THEME=Nordic-darker change_colorscheme nord
     [[ "$NOTIFICATIONS" == *gtk* ]] || fail "the gtk step did not fail"
     [[ -e "$HOME_DIR/.config/gtk-4.0/gtk.css" ]] || fail "GTK4 gtk.css was pointed at the missing theme"
+}
+
+test_a_gtk_theme_without_gtk4_still_applies_gtk3_and_fails_the_gtk_step() {
+    GTK3_ONLY_THEME=Nordic-darker change_colorscheme nord
+    grep -qx "gsettings set org.gnome.desktop.interface gtk-theme Nordic-darker" "$CALLS" \
+        || fail "gsettings gtk-theme was not set to Nordic-darker"
+    grep -qx "gsettings set org.gnome.desktop.interface color-scheme prefer-dark" "$CALLS" \
+        || fail "color-scheme was not set to prefer-dark"
+    grep -qx "gtk-theme-name=Nordic-darker" "$HOME_DIR/.config/gtk-3.0/settings.ini" \
+        || fail "GTK3 settings.ini does not name Nordic-darker"
+    [[ "$NOTIFICATIONS" == *gtk* ]] || fail "the gtk step did not fail"
+    [[ "$(readlink "$HOME_DIR/.config/gtk-4.0/gtk.css")" == "$HOME_DIR/.themes/Everforest-B-MB-Dark/gtk-4.0/gtk.css" ]] \
+        || fail "the GTK4 links were touched"
 }
 
 for t in $(declare -F | awk '{print $3}' | grep "^test_.*${1:-}"); do
