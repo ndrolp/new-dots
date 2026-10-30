@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
-# Tests for applying a colorscheme with colorscheme_changer.sh. The changer runs against a scratch HOME
-# holding a copy of the colorschemes, and every program it drives is a PATH shim that logs its calls, so
-# the live session is never touched. (This file sits beside the changer rather than in a tests/ folder
-# because every folder in colorschemes/ is listed as a colorscheme.)
+# Tests for applying a colorscheme with colorscheme_changer.sh, run through the shared harness
+# (colorscheme_changer_harness.sh): a scratch HOME and a PATH shim, logging its calls, for every program
+# the changer drives, so the live session is never touched. (This file sits beside the changer rather than
+# in a tests/ folder because every folder in colorschemes/ is listed as a colorscheme.)
 # Run: colorschemes/colorscheme_changer_tests.sh [name filter]
 set -uo pipefail
 
 COLORSCHEMES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$COLORSCHEMES/colorscheme_changer_harness.sh"
 SCRATCH="$(mktemp -d)"
 trap 'rm -rf "$SCRATCH"' EXIT
 PASSED=0
 FAILED=0
+
+# Every colorscheme's GTK theme, as its gtk/colors.sh names it.
+GTK_THEMES=(Catppuccin-BL-MB-Dark Everforest-B-MB-Dark Gruvbox-BL-MB-Dark-Medium Nordic-darker Tokyonight-BL-MB-Dark)
 
 fail() {
     echo "  FAIL: $*"
@@ -20,52 +24,36 @@ fail() {
     return 1
 }
 
-# change_colorscheme [--failing "<tool>..."] <args>...: runs the changer with <args>. Every program it
-# drives is a shim that logs "<tool> <args>" to $CALLS; the --failing ones also exit 1. nvim is the real
-# one, but the changer only sees the nvim sockets in $RUN_DIR (default: an empty folder), and when
-# $NVIM_THEME is set it replaces every colorscheme's nvim/theme.lua. $ACTIVE_COLORSCHEME, when set, is
-# written to theme.txt first. Sets OUT to the changer's output,
+# change_colorscheme [--failing "<tool>..."] <args>...: runs the changer with <args> (see changer_home and
+# run_changer in the harness). nvim is the real one, but the changer only sees the nvim sockets in
+# $RUN_DIR, and when $NVIM_THEME is set it replaces every colorscheme's nvim/theme.lua.
+# $ACTIVE_COLORSCHEME, when set, is written to theme.txt first. Sets OUT to the changer's output,
 # NOTIFICATIONS to the notify-send calls, one per line, and HOME_DIR to the scratch HOME.
 change_colorscheme() {
-    local failing="" home bin tool theme
+    local theme
     if [[ "$1" == --failing ]]; then
-        failing="$2"
+        changer_home --failing "$2"
         shift 2
+    else
+        changer_home
     fi
-    home="$(mktemp -d "$SCRATCH/home.XXXX")"
-    bin="$home/bin"
-    mkdir -p "$home/.dotfiles" "$bin" "$home/.config/"{hypr/custom,waybar/custom,rofi/custom,nvim/lua/settings/core,quickshell/config}
-    cp -r "$COLORSCHEMES" "$home/.dotfiles/colorschemes"
-    [[ -z "${ACTIVE_COLORSCHEME:-}" ]] || echo "$ACTIVE_COLORSCHEME" >"$home/.dotfiles/colorschemes/theme.txt"
-    install_gtk_themes "$home"
+    [[ -z "${ACTIVE_COLORSCHEME:-}" ]] || echo "$ACTIVE_COLORSCHEME" >"$HOME_DIR/.dotfiles/colorschemes/theme.txt"
+    install_gtk_themes "$HOME_DIR"
     if [[ -n "${NVIM_THEME:-}" ]]; then
-        for theme in "$home"/.dotfiles/colorschemes/*/nvim/theme.lua; do
+        for theme in "$HOME_DIR"/.dotfiles/colorschemes/*/nvim/theme.lua; do
             printf '%s\n' "$NVIM_THEME" >"$theme"
         done
     fi
-    mkdir -p "$home/run"
-    for tool in hyprctl kitten ags quickshell gsettings rofi node setsid notify-send; do
-        cat >"$bin/$tool" <<SHIM
-#!/bin/sh
-echo "$tool \$*" >>"\$HOME/calls"
-case " $failing " in *" $tool "*) exit 1 ;; esac
-exit 0
-SHIM
-    done
-    chmod +x "$bin"/*
-    CALLS="$home/calls"
-    : >"$CALLS"
-    HOME_DIR="$home"
-    OUT="$(HOME="$home" XDG_RUNTIME_DIR="${RUN_DIR:-$home/run}" PATH="$bin:$PATH" bash "$home/.dotfiles/colorschemes/colorscheme_changer.sh" "$@" 2>&1)"
+    run_changer "$@"
     NOTIFICATIONS="$(grep "^notify-send " "$CALLS" || true)"
 }
 
 # install_gtk_themes <home>: gives <home> GTK as the desktop has it: every colorscheme's GTK theme in
-# ~/.themes (except $MISSING_GTK_THEME, and without a gtk-4.0 folder for $GTK3_ONLY_THEME), a GTK3 settings.ini holding settings besides the theme, and the
-# GTK4 links pointing at the everforest theme.
+# ~/.themes (except $MISSING_GTK_THEME, and without a gtk-4.0 folder for $GTK3_ONLY_THEME), a GTK3
+# settings.ini holding settings besides the theme, and the GTK4 links pointing at the everforest theme.
 install_gtk_themes() {
-    local home="$1" theme dir link
-    for theme in $(sed -n 's/.*gtk-theme "\(.*\)".*/\1/p' "$COLORSCHEMES"/*/gtk/colors.sh); do
+    local home="$1" theme link
+    for theme in "${GTK_THEMES[@]}"; do
         [[ "$theme" == "${MISSING_GTK_THEME:-}" ]] && continue
         mkdir -p "$home/.themes/$theme/gtk-3.0"
         [[ "$theme" == "${GTK3_ONLY_THEME:-}" ]] && continue
@@ -102,8 +90,9 @@ stop_nvims() { [[ ${#NVIM_PIDS[@]} -eq 0 ]] || kill "${NVIM_PIDS[@]}" 2>/dev/nul
 # colorscheme_in <socket>: the colorscheme name the nvim on <socket> is using.
 colorscheme_in() { nvim --server "$1" --remote-expr 'get(g:, "colors_name", "")'; }
 
-# A built-in colorscheme each nvim is switched to, standing in for the plugin colorschemes.
-SWITCHED_THEME='vim.cmd.colorscheme("desert")'
+# The nvim/theme.lua every colorscheme gets in these tests: it loads nvim's built-in "desert", standing in
+# for the plugin themes.
+APPLIED_NVIM_THEME='vim.cmd.colorscheme("desert")'
 
 test_a_failing_step_does_not_stop_the_later_steps() {
     change_colorscheme --failing "kitten" nord
@@ -137,20 +126,21 @@ test_applying_links_the_colorschemes_quickshell_colours_and_asks_the_shell_to_re
 
 test_applying_does_not_restart_quickshell() {
     change_colorscheme nord
-    ! grep -q "^quickshell kill\|^setsid " "$CALLS" || fail "quickshell was restarted"
+    [[ "$(grep "^quickshell " "$CALLS" | grep -vc "^quickshell ipc ")" -eq 0 ]] \
+        || fail "quickshell was run for more than its IPC"
 }
 
-test_applying_switches_every_running_nvim_to_the_colorscheme() {
+test_every_running_nvim_follows_an_applied_colorscheme() {
     trap stop_nvims EXIT
     local first second
     start_nvim
     first="$SOCKET"
     start_nvim
     second="$SOCKET"
-    NVIM_THEME="$SWITCHED_THEME" change_colorscheme nord
-    [[ "$(colorscheme_in "$first")" == desert ]] || fail "the first nvim did not switch"
-    [[ "$(colorscheme_in "$second")" == desert ]] || fail "the second nvim did not switch"
-    [[ -z "$NOTIFICATIONS" ]] || fail "switching the nvims notified"
+    NVIM_THEME="$APPLIED_NVIM_THEME" change_colorscheme nord
+    [[ "$(colorscheme_in "$first")" == desert ]] || fail "the first nvim did not follow"
+    [[ "$(colorscheme_in "$second")" == desert ]] || fail "the second nvim did not follow"
+    [[ -z "$NOTIFICATIONS" ]] || fail "the nvims following notified"
 }
 
 test_a_dead_nvim_socket_fails_the_nvim_step_without_stopping_the_other_nvims() {
@@ -159,8 +149,8 @@ test_a_dead_nvim_socket_fails_the_nvim_step_without_stopping_the_other_nvims() {
     start_nvim
     alive="$SOCKET"
     : >"$RUN_DIR/nvim.1.0"
-    NVIM_THEME="$SWITCHED_THEME" change_colorscheme nord
-    [[ "$(colorscheme_in "$alive")" == desert ]] || fail "the live nvim did not switch"
+    NVIM_THEME="$APPLIED_NVIM_THEME" change_colorscheme nord
+    [[ "$(colorscheme_in "$alive")" == desert ]] || fail "the live nvim did not follow"
     [[ "$NOTIFICATIONS" == *nvim* ]] || fail "the notification does not name nvim"
 }
 

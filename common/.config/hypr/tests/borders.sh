@@ -6,6 +6,7 @@ set -uo pipefail
 
 HYPR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COLORSCHEMES="$HYPR/../../../colorschemes"
+source "$COLORSCHEMES/colorscheme_changer_harness.sh"
 SCRATCH="$(mktemp -d)"
 trap 'rm -rf "$SCRATCH"' EXIT
 PASSED=0
@@ -48,23 +49,14 @@ borders_with() {
     run_hypr_config "$config" "require('modules.appearence.borders')"
 }
 
-# change_colorscheme <args>...: runs the colorscheme changer against a scratch HOME holding a copy of the
-# colorschemes. Every program it drives is a PATH shim; hyprctl records which colours file the Hyprland
-# colours link points at when it is asked to reload. XDG_RUNTIME_DIR holds no nvim sockets, so no running
-# nvim is switched. Sets OUT to that record.
+# change_colorscheme <args>...: runs the colorscheme changer through the shared harness
+# (colorschemes/colorscheme_changer_harness.sh), with hyprctl recording which colours file the Hyprland
+# colours link points at when it is asked to reload. No running nvim is reached. Sets OUT to that record.
 change_colorscheme() {
-    local home bin tool
-    home="$(mktemp -d "$SCRATCH/home.XXXX")"
-    bin="$home/bin"
-    mkdir -p "$home/.dotfiles" "$bin" "$home/.config/"{hypr/custom,waybar/custom,rofi/custom,nvim/lua/settings/core,quickshell/config}
-    cp -r "$COLORSCHEMES" "$home/.dotfiles/colorschemes"
-    for tool in kitten quickshell gsettings rofi node setsid notify-send; do
-        printf '#!/bin/sh\n' >"$bin/$tool"
-    done
-    printf '#!/bin/sh\nreadlink "$HOME/.config/hypr/custom/colors.lua" >>"$HOME/reloads"\n' >"$bin/hyprctl"
-    chmod +x "$bin"/*
-    HOME="$home" XDG_RUNTIME_DIR="$home" PATH="$bin:$PATH" bash "$COLORSCHEMES/colorscheme_changer.sh" "$@" >/dev/null 2>&1
-    OUT="$(sed "s|^$home|~|" "$home/reloads" 2>/dev/null)"
+    changer_home
+    printf '#!/bin/sh\nreadlink "$HOME/.config/hypr/custom/colors.lua" >>"$HOME/reloads"\n' >"$HOME_DIR/bin/hyprctl"
+    run_changer "$@"
+    OUT="$(sed "s|^$HOME_DIR|~|" "$HOME_DIR/reloads" 2>/dev/null)"
 }
 
 test_the_focused_border_takes_the_accent_and_unfocused_ones_the_border_colour() {
