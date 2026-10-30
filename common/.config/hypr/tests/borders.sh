@@ -50,7 +50,8 @@ borders_with() {
 
 # change_colorscheme <args>...: runs the colorscheme changer against a scratch HOME holding a copy of the
 # colorschemes. Every program it drives is a PATH shim; hyprctl records which colours file the Hyprland
-# colours link points at when it is asked to reload. Sets OUT to that record.
+# colours link points at when it is asked to reload. XDG_RUNTIME_DIR holds no nvim sockets, so no running
+# nvim is switched. Sets OUT to that record.
 change_colorscheme() {
     local home bin tool
     home="$(mktemp -d "$SCRATCH/home.XXXX")"
@@ -62,7 +63,7 @@ change_colorscheme() {
     done
     printf '#!/bin/sh\nreadlink "$HOME/.config/hypr/custom/colors.lua" >>"$HOME/reloads"\n' >"$bin/hyprctl"
     chmod +x "$bin"/*
-    HOME="$home" PATH="$bin:$PATH" bash "$COLORSCHEMES/colorscheme_changer.sh" "$@" >/dev/null 2>&1
+    HOME="$home" XDG_RUNTIME_DIR="$home" PATH="$bin:$PATH" bash "$COLORSCHEMES/colorscheme_changer.sh" "$@" >/dev/null 2>&1
     OUT="$(sed "s|^$home|~|" "$home/reloads" 2>/dev/null)"
 }
 
