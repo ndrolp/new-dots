@@ -60,6 +60,10 @@ case "$SELECTED_FOLDER" in
     VSCODE_THEME="Dracula Theme"
     ;;
   carbonfox) KITTY_THEME="Carbonfox" ;;
+  bloodmoon)
+    KITTY_THEME="Bloodmoon"
+    VSCODE_THEME="Midnight Crimson"
+    ;;
   *) KITTY_THEME="$SELECTED_FOLDER" ;;
 esac
 

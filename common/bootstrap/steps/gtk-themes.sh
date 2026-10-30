@@ -27,6 +27,16 @@ install_fausto() {
     rm -rf "$dir"
 }
 
+# install_vinceliuice <repo> <installer options...>: builds the theme from a vinceliuice repo, whose
+# installer is at its top. Its exit status is not trusted either, like install_fausto's.
+install_vinceliuice() {
+    local repo="$1" dir="$work_dir/$1"
+    shift
+    git clone --quiet --depth=1 "https://github.com/vinceliuice/$repo.git" "$dir"
+    (cd "$dir" && bash install.sh -d "$themes_dir" "$@" </dev/null) || true
+    rm -rf "$dir"
+}
+
 # install_release <owner/repo> <asset>: unpacks a release .tar.xz into ~/.themes.
 install_release() {
     local asset="$work_dir/${2##*/}"
@@ -47,6 +57,7 @@ while read -r name source repo options; do
     # shellcheck disable=SC2086
     case "$source" in
         fausto) install_fausto "$repo" $options || true ;;
+        vinceliuice) install_vinceliuice "$repo" $options || true ;;
         release) install_release "$repo" $options || true ;;
         *) error "unknown source '$source' for $name" ;;
     esac
