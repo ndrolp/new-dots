@@ -3,16 +3,16 @@
 -- modules from package.loaded on every reload, so a switched link is picked up without a restart.
 -- Without usable colours (fresh checkout, broken link) the borders fall back to the old greys.
 
-local function hex(value)
+local function hex_digits(value)
 	return type(value) == "string" and value:match("^#?(%x%x%x%x%x%x)$")
 end
 
 local active, inactive = "rgba(535353ee)", "rgba(2b2b2baa)"
 
 local ok, colors = pcall(require, "custom.colors")
-if ok and type(colors) == "table" and hex(colors.accent) and hex(colors.border) then
-	active = "rgb(" .. hex(colors.accent) .. ")"
-	inactive = "rgb(" .. hex(colors.border) .. ")"
+if ok and type(colors) == "table" and hex_digits(colors.accent) and hex_digits(colors.border) then
+	active = "rgb(" .. hex_digits(colors.accent) .. ")"
+	inactive = "rgb(" .. hex_digits(colors.border) .. ")"
 end
 
 hl.config({
