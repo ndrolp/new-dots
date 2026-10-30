@@ -15,6 +15,6 @@ Kanagawa-Dark            fausto   Kanagawa-GKT-Theme    -c dark --tweaks macos
 Rosepine-Dark            fausto   Rose-Pine-GTK-Theme   -c dark --tweaks macos
 Nightfox-Dark-Carbonfox  fausto   Nightfox-GTK-Theme    -c dark --tweaks carbonfox macos
 Colloid-Red-Dark         vinceliuice  Colloid-gtk-theme  -t red -c dark --tweaks rimless
-Colloid-Red-Dark-Nord    vinceliuice  Colloid-gtk-theme  -t red -c dark --tweaks nord black rimless
+Colloid-Red-Dark-Nord    vinceliuice  Colloid-gtk-theme  -t red -c dark --tweaks nord rimless
 Nordic-darker            release  EliverLara/Nordic     Nordic-darker.tar.xz
 Dracula                  release  dracula/gtk           Dracula.tar.xz
