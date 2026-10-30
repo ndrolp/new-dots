@@ -108,8 +108,19 @@ apply_kitty() {
   kitten themes --reload-in=all "$KITTY_THEME"
 }
 
+# New nvims load the linked theme.lua at startup; running ones re-source it through their server
+# socket. Every socket is tried, and any that can't be reached fails the step afterwards.
 apply_nvim() {
   ln -sf "$THEME_FOLDER/nvim/theme.lua" "$NVIM_COLORS"
+  [ -n "${XDG_RUNTIME_DIR:-}" ] || return 0
+
+  local socket unreachable=0
+  for socket in "$XDG_RUNTIME_DIR"/nvim.*.0; do
+    [ -e "$socket" ] || continue
+    timeout 5 nvim --server "$socket" --remote-expr "execute('source $NVIM_COLORS')" >/dev/null \
+      || unreachable=1
+  done
+  return "$unreachable"
 }
 
 apply_rofi() {
