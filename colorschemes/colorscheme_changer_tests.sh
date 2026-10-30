@@ -23,7 +23,8 @@ fail() {
 # change_colorscheme [--failing "<tool>..."] <args>...: runs the changer with <args>. Every program it
 # drives is a shim that logs "<tool> <args>" to $CALLS; the --failing ones also exit 1. nvim is the real
 # one, but the changer only sees the nvim sockets in $RUN_DIR (default: an empty folder), and when
-# $NVIM_THEME is set it replaces every colorscheme's nvim/theme.lua. Sets OUT to the changer's output,
+# $NVIM_THEME is set it replaces every colorscheme's nvim/theme.lua. $ACTIVE_COLORSCHEME, when set, is
+# written to theme.txt first. Sets OUT to the changer's output,
 # NOTIFICATIONS to the notify-send calls, one per line, and HOME_DIR to the scratch HOME.
 change_colorscheme() {
     local failing="" home bin tool theme
@@ -35,6 +36,7 @@ change_colorscheme() {
     bin="$home/bin"
     mkdir -p "$home/.dotfiles" "$bin" "$home/.config/"{hypr/custom,waybar/custom,rofi/custom,nvim/lua/settings/core,quickshell/config}
     cp -r "$COLORSCHEMES" "$home/.dotfiles/colorschemes"
+    [[ -z "${ACTIVE_COLORSCHEME:-}" ]] || echo "$ACTIVE_COLORSCHEME" >"$home/.dotfiles/colorschemes/theme.txt"
     install_gtk_themes "$home"
     if [[ -n "${NVIM_THEME:-}" ]]; then
         for theme in "$home"/.dotfiles/colorschemes/*/nvim/theme.lua; do
@@ -166,9 +168,31 @@ test_new_nvims_start_in_the_applied_colorscheme() {
         || fail "theme.lua does not link to nord's"
 }
 
-test_previewing_only_reloads_hyprland() {
+test_previewing_does_not_change_the_active_colorscheme() {
+    ACTIVE_COLORSCHEME=everforestdark change_colorscheme --preview nord
+    [[ "$(cat "$HOME_DIR/.dotfiles/colorschemes/theme.txt")" == everforestdark ]] || fail "theme.txt was written"
+}
+
+test_applying_makes_the_colorscheme_the_active_one() {
+    ACTIVE_COLORSCHEME=everforestdark change_colorscheme nord
+    [[ "$(cat "$HOME_DIR/.dotfiles/colorschemes/theme.txt")" == nord ]] || fail "theme.txt does not name nord"
+}
+
+test_previewing_recolours_hyprland_and_quickshell() {
     change_colorscheme --preview nord
-    [[ "$(cut -d' ' -f1 "$CALLS")" == hyprctl ]] || fail "preview drove more than hyprctl"
+    [[ "$(readlink "$HOME_DIR/.config/hypr/custom/colors.lua")" == "$HOME_DIR/.dotfiles/colorschemes/nord/hypr/colors.lua" ]] \
+        || fail "Hyprland colours not linked"
+    grep -qx "hyprctl reload" "$CALLS" || fail "Hyprland was not reloaded"
+    [[ "$(readlink "$HOME_DIR/.config/quickshell/config/colors.json")" == "$HOME_DIR/.dotfiles/colorschemes/nord/quickshell/colors.json" ]] \
+        || fail "Quickshell colours not linked"
+    grep -qx "quickshell ipc --path $HOME_DIR/.config/quickshell call colorscheme reload" "$CALLS" \
+        || fail "the shell was not asked to reload its colours"
+}
+
+test_previewing_drives_only_hyprland_and_quickshell() {
+    change_colorscheme --preview nord
+    [[ "$(cut -d' ' -f1 "$CALLS" | sort -u | tr '\n' ' ')" == "hyprctl quickshell " ]] \
+        || fail "preview drove more than hyprctl and quickshell"
 }
 
 test_a_failing_preview_sends_no_notification() {

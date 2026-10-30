@@ -50,10 +50,6 @@ case "$SELECTED_FOLDER" in
   *) KITTY_THEME="$SELECTED_FOLDER" ;;
 esac
 
-# Store selected theme
-mkdir -p "$THEME_STATE_DIR"
-echo "$SELECTED_FOLDER" > "$THEME_FILE"
-
 echo "$SELECTED_FOLDER"
 
 THEME_FOLDER="$HOME/.dotfiles/colorschemes/$SELECTED_FOLDER"
@@ -63,11 +59,25 @@ link_hypr_colors() {
   ln -sf "$THEME_FOLDER/hypr/colors.lua" "$HYPRLAND_LUA_COLORS"
 }
 
+# The shell can't see the link change by itself, so it is asked to read its colours again: it
+# recolours in place, without restarting.
+recolour_quickshell() {
+  ln -sf "$THEME_FOLDER/quickshell/colors.json" "$HOME/.config/quickshell/config/colors.json"
+  quickshell ipc --path "$HOME/.config/quickshell" call colorscheme reload
+}
+
+# A colorscheme preview recolours Hyprland and Quickshell only and leaves the active colorscheme
+# (theme.txt) alone; the selector previews the active colorscheme again to leave the preview.
 if [ "$PREVIEW_MODE" = true ]; then
   link_hypr_colors
   hyprctl reload
+  recolour_quickshell
   exit 0
 fi
+
+# Only applying makes the colorscheme the active one.
+mkdir -p "$THEME_STATE_DIR"
+echo "$SELECTED_FOLDER" > "$THEME_FILE"
 
 # Steps: each one updates one part of the desktop. `step <name> <function> [args...]` runs the function
 # in a subshell with errexit and pipefail, so its first failing command fails the step, and a failed step
@@ -174,10 +184,7 @@ apply_gtk() {
 }
 
 apply_quickshell() {
-  # The shell can't see the link change by itself, so it is asked to read its colours again: it
-  # recolours in place, without restarting.
-  ln -sf "$THEME_FOLDER/quickshell/colors.json" "$HOME/.config/quickshell/config/colors.json"
-  quickshell ipc --path "$HOME/.config/quickshell" call colorscheme reload
+  recolour_quickshell
 }
 
 step waybar apply_waybar
