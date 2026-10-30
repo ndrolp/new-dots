@@ -11,6 +11,7 @@ suites=(
     common/bootstrap/tests/packages.sh
     common/bootstrap/tests/spicetify.sh
     scripts/test-sync-packages
+    common/.config/hypr/tests/borders.sh
 )
 
 case "${1:-}" in
