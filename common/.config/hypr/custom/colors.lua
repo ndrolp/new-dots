@@ -1,1 +1,1 @@
-/home/ndrolp/.dotfiles/colorschemes/nord/hypr/colors.lua
+/home/ndrolp/.dotfiles/colorschemes/coralnord/hypr/colors.lua
