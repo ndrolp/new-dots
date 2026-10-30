@@ -1,0 +1,19 @@
+# Units the services step enables (only enabled, not started; skipped under --no-system).
+# <system|user> <unit> <package that ships it> [optional]
+# A required unit's package must be in core.txt or core-aur.txt (tests check this).
+# An optional unit is enabled only when its package is installed.
+
+system sddm            sddm
+system NetworkManager  networkmanager
+system bluetooth       bluez
+system docker          docker
+system cups            cups
+
+user pipewire              pipewire
+user pipewire-pulse        pipewire-pulse
+user wireplumber           wireplumber
+user hyprdynamicmonitors   hyprdynamicmonitors-bin
+
+system auto-cpufreq    auto-cpufreq-git    optional
+system proton.VPN      proton-vpn-daemon   optional
+user openlogi-agent    openlogi-bin        optional

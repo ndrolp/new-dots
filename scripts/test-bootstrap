@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Runs bootstrap.sh in a throwaway archlinux container, as a non-root user with
+# passwordless sudo, always with --no-system. Extra args go to bootstrap.sh:
+#   scripts/test-bootstrap --stow-only
+#   scripts/test-bootstrap --minimal --host omelas
+# The repo's working tree (uncommitted changes included, .git left out) is copied
+# to ~/.dotfiles in the container; the host repo is mounted read-only and never changed.
+# --rm removes the container afterwards, also on failure or Ctrl-C (docker forwards the signal).
+# TEST_BOOTSTRAP_IMAGE overrides the image (default archlinux:latest).
+# TEST_BOOTSTRAP_BEFORE / TEST_BOOTSTRAP_AFTER: shell run as the user in ~ before / after
+# the bootstrap (e.g. to plant a ~/.zshrc, then check what became of it).
+set -euo pipefail
+
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+IMAGE="${TEST_BOOTSTRAP_IMAGE:-archlinux:latest}"
+
+# Runs as root in the container; "$@" is the bootstrap args.
+read -r -d '' SETUP <<'EOF' || true
+set -euo pipefail
+pacman -Syu --noconfirm --needed sudo stow >/dev/null
+useradd -m tester
+echo 'tester ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/tester
+mkdir /home/tester/.dotfiles
+tar -C /src --exclude=./.git --exclude=./.claude/worktrees -cf - . | tar -C /home/tester/.dotfiles -xf -
+chown -R tester:tester /home/tester/.dotfiles
+cd /home/tester
+as_tester() {
+    runuser -u tester -- env HOME=/home/tester USER=tester LOGNAME=tester \
+        ${DOTFILES_PACKAGES_DIR:+DOTFILES_PACKAGES_DIR="$DOTFILES_PACKAGES_DIR"} "$@"
+}
+as_tester bash -c "$TEST_BOOTSTRAP_BEFORE"
+as_tester bash /home/tester/.dotfiles/bootstrap.sh --no-system "$@"
+as_tester bash -c "$TEST_BOOTSTRAP_AFTER"
+EOF
+
+# DOTFILES_PACKAGES_DIR, when set, is passed on (a path inside the container, e.g.
+# /home/tester/.dotfiles/common/bootstrap/tests/fixtures/packages for short test lists).
+docker run --rm --label dotfiles.test-bootstrap=1 -e DOTFILES_PACKAGES_DIR \
+    -e TEST_BOOTSTRAP_BEFORE="${TEST_BOOTSTRAP_BEFORE:-}" -e TEST_BOOTSTRAP_AFTER="${TEST_BOOTSTRAP_AFTER:-}" \
+    -v "$REPO:/src:ro" "$IMAGE" bash -c "$SETUP" bash "$@"

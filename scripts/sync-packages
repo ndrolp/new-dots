@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Print how the installed packages and the package lists in common/packages/
+# have drifted apart. Print-only: never installs, removes or edits anything.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# For list_lines, which reads a list the way the bootstrap does.
+source "$ROOT/common/bootstrap/lib.sh"
+lists="$ROOT/common/packages"
+explicit=""
+installed=""
+
+usage() {
+    cat <<EOF
+Usage: sync-packages [--lists DIR] [--explicit FILE] [--installed FILE]
+
+Reports packages installed explicitly but named in no list, and packages
+named in a list but not installed at all. Changes nothing.
+
+  --lists DIR        package lists to read (default: common/packages)
+  --explicit FILE    explicitly installed packages, one per line
+                     (default: pacman -Qqe)
+  --installed FILE   all installed packages, one per line (default: pacman -Qq)
+EOF
+}
+
+while (($#)); do
+    case "$1" in
+        --lists) lists="$2"; shift 2 ;;
+        --explicit) explicit="$2"; shift 2 ;;
+        --installed) installed="$2"; shift 2 ;;
+        -h | --help) usage; exit 0 ;;
+        *) usage >&2; exit 2 ;;
+    esac
+done
+
+# "<package> <list file>" for every package named in a list, ignoring
+# comments and blank lines.
+listed_with_list() {
+    local file
+    for file in "$lists"/*.txt; do
+        list_lines "$file" | sed "s|\$| ${file##*/}|"
+    done | sort -u
+}
+
+explicit_packages() {
+    if [[ -n "$explicit" ]]; then sort -u "$explicit"; else pacman -Qqe | sort -u; fi
+}
+
+installed_packages() {
+    if [[ -n "$installed" ]]; then sort -u "$installed"; else pacman -Qq | sort -u; fi
+}
+
+echo "Installed but unlisted:"
+explicit_packages | comm -23 - <(listed_with_list | cut -d' ' -f1 | sort -u) | sed 's/^/  /'
+echo
+
+echo "Listed but not installed:"
+listed_with_list | awk 'NR == FNR { have[$1]; next } !($1 in have) { printf "  %s (%s)\n", $1, $2 }' \
+    <(installed_packages) -
+echo

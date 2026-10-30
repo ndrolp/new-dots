@@ -197,13 +197,15 @@ export ZELLIJ_CONFIG_DIR="$HOME/.config/zellij"
 # fi
 #
 
-export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+# Not the XDG_CONFIG_HOME form: the spaceship theme sets XDG_CONFIG_HOME, which would point this away from
+# ~/.nvm, where the bootstrap installs nvm. An inherited NVM_DIR counts only if it holds an nvm.
+[ -s "${NVM_DIR:-}/nvm.sh" ] || export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 
-export PATH=$PATH:/home/ndro/.spicetify
+export PATH="$PATH:$HOME/.spicetify"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-alias dotsync='(cd ~/.dotfiles && ./bootstrap.sh --no-bootstrap)'
+alias dotsync='~/.dotfiles/bootstrap.sh --stow-only'
 alias tk='zellij --layout ~/.config/zellij/layouts/tomekeeper.kdl'
 alias envact="source venv/bin/activate"
 alias adbwireless="~/.dotfiles/scripts/adb_wireless_helper/wireless_helper.sh"
@@ -218,8 +220,6 @@ alias copilot_shell="copilot --resume=8759e196-980d-4fa5-9c70-9b5fc4dfdaeb"
 
 # Created by `pipx` on 2025-07-27 12:40:09
 export PATH="$PATH:/home/ndrolp/.local/bin"
-
-export PATH=$PATH:/home/ndrolp/.spicetify
 
 
 # opencode
