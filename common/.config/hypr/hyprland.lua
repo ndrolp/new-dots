@@ -94,13 +94,7 @@ hl.config({
 		gaps_in = 5,
 		gaps_out = 10,
 
-		border_size = 0,
-
-		col = {
-			active_border = { colors = { "rgba(535353ee)", "rgba(535353ee)" }, angle = 45 },
-			inactive_border = "rgba(2b2b2baa)",
-		},
-		-- #535353
+		-- Border size and colours come from the colorscheme: modules/appearence/borders.lua
 
 		-- Set to true to enable resizing windows by clicking and dragging on borders and gaps
 		resize_on_border = false,
@@ -132,6 +126,7 @@ hl.config({
 	},
 })
 
+require("modules.appearence.borders")
 require("modules.animations.core")
 
 -- See https://wiki.hypr.land/Configuring/Layouts/Dwindle-Layout/ for more
