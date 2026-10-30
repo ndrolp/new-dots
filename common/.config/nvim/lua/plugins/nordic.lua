@@ -1,4 +1,4 @@
--- Builds crimsonvoid's nvim colorscheme: colorschemes/crimsonvoid/nvim/theme.lua sets it up.
+-- Builds coralnord's nvim colorscheme: colorschemes/coralnord/nvim/theme.lua sets it up.
 return {
 	"AlexvZyl/nordic.nvim",
 	lazy = false,

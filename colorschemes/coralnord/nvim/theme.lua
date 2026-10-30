@@ -1,5 +1,5 @@
 vim.o.background = "dark"
--- nordic.nvim shares crimsonvoid's River Bed greys; its reds become Coral Tree. The background is left
+-- nordic.nvim shares coralnord's River Bed greys; its reds become Coral Tree. The background is left
 -- to kitty so terminal transparency shows through.
 require("nordic").setup({
 	transparent = { bg = true },
