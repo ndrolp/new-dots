@@ -13,4 +13,11 @@ return {
 			require("mini.icons").setup()
 		end,
 	},
+	-- Builds the nvim colorscheme of colorschemes with no upstream one (bloodmoon).
+	{
+		"echasnovski/mini.base16",
+		version = false,
+		lazy = false,
+		priority = 1000,
+	},
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Tests for the gtk-themes step. git and curl are PATH shims: git clone gives a fake Fausto repo
-# whose installer builds the theme named in $FAKE/builds, and curl gives a .tar.xz holding the
+# Tests for the gtk-themes step. git and curl are PATH shims: git clone gives a fake Fausto or
+# vinceliuice repo whose installer builds the theme named in $FAKE/builds, and curl gives a .tar.xz holding the
 # theme named there, so nothing is downloaded and the real ~/.themes is never touched.
 set -uo pipefail
 
@@ -65,7 +65,7 @@ shim() {
     chmod +x "$FAKE_BIN/$1"
 }
 
-# Fresh fakes per test, with an empty HOME. $FAKE/builds maps a Fausto repo or a release asset to
+# Fresh fakes per test, with an empty HOME. $FAKE/builds maps a repo or a release asset to
 # "<theme it builds> [installer exit status]"; a source missing from it builds nothing.
 setup_fakes() {
     FAKE="$(mktemp -d "$SCRATCH/fake.XXXX")"
@@ -79,10 +79,14 @@ setup_fakes() {
 echo "git $*" >>"$FAKE/calls"
 [[ "$1" == clone ]] || exit 0
 dir="${!#}"
-repo="$(basename "${@: -2:1}" .git)"
-mkdir -p "$dir/themes"
+url="${@: -2:1}"
+repo="$(basename "$url" .git)"
+# Fausto repos keep the installer in themes/, vinceliuice ones at the top.
+installer_dir="$dir"
+[[ "$url" == */Fausto-Korpsvart/* ]] && installer_dir="$dir/themes"
+mkdir -p "$installer_dir"
 read -r theme status < <(awk -v r="$repo" '"'"'$1 == r { print $2, $3 }'"'"' "$FAKE/builds")
-cat >"$dir/themes/install.sh" <<EOF
+cat >"$installer_dir/install.sh" <<EOF
 echo "install.sh $repo \$*" >>"\$FAKE/calls"
 [[ -z "$theme" ]] || mkdir -p "\$2/$theme/gtk-4.0"
 exit ${status:-0}
@@ -126,6 +130,20 @@ test_builds_a_fausto_theme_into_the_themes_folder() {
     grep -q "^install.sh Kanagawa-GKT-Theme -d $FAKE/home/.themes -c dark --tweaks macos$" "$CALLS" \
         || fail "did not run the installer with the listed options"
     grep -q "^installed	GTK theme Kanagawa-Dark$" <<<"$SUMMARY" || fail "summary does not list it: $SUMMARY"
+}
+
+test_builds_a_vinceliuice_theme_into_the_themes_folder() {
+    setup_fakes
+    echo "Colloid-gtk-theme Colloid-Red-Dark" >"$FAKE/builds"
+    write_list "Colloid-Red-Dark vinceliuice Colloid-gtk-theme -t red -c dark --tweaks rimless"
+    run_step
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    [[ -d "$FAKE/home/.themes/Colloid-Red-Dark/gtk-4.0" ]] || fail "Colloid-Red-Dark is not in ~/.themes"
+    grep -q "^git clone .*--depth=1 https://github.com/vinceliuice/Colloid-gtk-theme.git" "$CALLS" \
+        || fail "did not clone the repo shallowly"
+    grep -q "^install.sh Colloid-gtk-theme -d $FAKE/home/.themes -t red -c dark --tweaks rimless$" "$CALLS" \
+        || fail "did not run the installer with the listed options"
+    grep -q "^installed	GTK theme Colloid-Red-Dark$" <<<"$SUMMARY" || fail "summary does not list it: $SUMMARY"
 }
 
 test_unpacks_a_release_theme_into_the_themes_folder() {

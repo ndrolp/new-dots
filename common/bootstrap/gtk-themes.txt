@@ -2,6 +2,8 @@
 # every colorscheme's GTK theme is listed here).
 # <theme name> fausto <Fausto-Korpsvart repo> <installer options...>
 #   built with the repo's themes/install.sh, which needs sassc
+# <theme name> vinceliuice <vinceliuice repo> <installer options...>
+#   built with the repo's install.sh
 # <theme name> release <GitHub owner/repo> <release asset>
 #   the asset is a .tar.xz from the repo's latest release that holds the theme's folder
 
@@ -12,5 +14,6 @@ Tokyonight-Dark-Moon     fausto   Tokyonight-GTK-Theme  -c dark --tweaks moon ma
 Kanagawa-Dark            fausto   Kanagawa-GKT-Theme    -c dark --tweaks macos
 Rosepine-Dark            fausto   Rose-Pine-GTK-Theme   -c dark --tweaks macos
 Nightfox-Dark-Carbonfox  fausto   Nightfox-GTK-Theme    -c dark --tweaks carbonfox macos
+Colloid-Red-Dark         vinceliuice  Colloid-gtk-theme  -t red -c dark --tweaks rimless
 Nordic-darker            release  EliverLara/Nordic     Nordic-darker.tar.xz
 Dracula                  release  dracula/gtk           Dracula.tar.xz
