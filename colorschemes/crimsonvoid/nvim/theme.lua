@@ -3,14 +3,14 @@ vim.o.background = "dark"
 require("mini.base16").setup({
 	palette = {
 		base00 = "#000000", -- background
-		base01 = "#1c1c1c", -- surface
-		base02 = "#2a2a2a", -- selection
+		base01 = "#2e3440", -- surface
+		base02 = "#434c5e", -- selection
 		base03 = "#5c5c5c", -- comments
 		base04 = "#9a9a9a", -- muted text
 		base05 = "#e6e6e6", -- text
 		base06 = "#f0f0f0",
 		base07 = "#fafafa",
-		base08 = "#e01e37", -- accent
+		base08 = "#a86b6b", -- accent
 		base09 = "#e0874f", -- orange
 		base0A = "#d9b45e", -- yellow
 		base0B = "#8fb07a", -- green

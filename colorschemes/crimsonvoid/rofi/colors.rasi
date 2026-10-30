@@ -1,7 +1,7 @@
 * {
     bg0: #000000;
-    bg1: #1c1c1c;
+    bg1: #2e3440;
     fg: #e6e6e6;
-    blue: #e01e37;
+    blue: #a86b6b;
     urgent: #ff2a2a;
 }
