@@ -69,26 +69,55 @@ if [ "$PREVIEW_MODE" = true ]; then
   exit 0
 fi
 
-echo "LINKING WAYBAR"
-ln -sf "$THEME_FOLDER/waybar/colors.css" "$WAYBAR_COLORS"
+# Steps: each one updates one part of the desktop. `step <name> <function> [args...]` runs the function
+# in a subshell with errexit and pipefail, so its first failing command fails the step, and a failed step
+# never stops the ones after it. Once every step has run, one notification names the failed steps; a
+# fully successful apply is silent. A new step is an apply_<name> function plus one `step` line below.
+FAILED_STEPS=()
 
-echo "LINKING HYPR COLORS"
-link_hypr_colors
-ln -sf "$THEME_FOLDER/hyprlock/colors.conf" "$HYPRLOCK_COLORS"
-hyprctl reload
+step() {
+  local name="$1"
+  shift
+  echo "==> $name"
+  (
+    set -eo pipefail
+    "$@"
+  )
+  [ $? -eq 0 ] || FAILED_STEPS+=("$name")
+}
 
-echo "APPLYING KITTY THEME"
-kitten themes --reload-in=all "$KITTY_THEME"
+report_failed_steps() {
+  [ ${#FAILED_STEPS[@]} -eq 0 ] && return 0
+  local names
+  names="$(printf '%s, ' "${FAILED_STEPS[@]}")"
+  notify-send -u critical "Colorscheme $SELECTED_FOLDER applied with errors" \
+    "Failed steps: ${names%, }"
+}
 
-# APPLY NVIM THEME
-echo "LINKING NVIM"
-ln -sf "$THEME_FOLDER/nvim/theme.lua" "$NVIM_COLORS"
+apply_waybar() {
+  ln -sf "$THEME_FOLDER/waybar/colors.css" "$WAYBAR_COLORS"
+}
 
-echo "LINKING ROFI"
-ln -sf "$THEME_FOLDER/rofi/colors.rasi" "$ROFI_COLORS"
+apply_hyprland() {
+  link_hypr_colors
+  ln -sf "$THEME_FOLDER/hyprlock/colors.conf" "$HYPRLOCK_COLORS"
+  hyprctl reload
+}
 
-if [ -n "${VSCODE_THEME:-}" ] && [ -f "$VSCODE_SETTINGS" ]; then
-  echo "APPLYING VS CODE THEME"
+apply_kitty() {
+  kitten themes --reload-in=all "$KITTY_THEME"
+}
+
+apply_nvim() {
+  ln -sf "$THEME_FOLDER/nvim/theme.lua" "$NVIM_COLORS"
+}
+
+apply_rofi() {
+  ln -sf "$THEME_FOLDER/rofi/colors.rasi" "$ROFI_COLORS"
+}
+
+apply_vscode() {
+  [ -n "${VSCODE_THEME:-}" ] && [ -f "$VSCODE_SETTINGS" ] || return 0
   node - "$VSCODE_SETTINGS" "$VSCODE_THEME" <<'NODE'
 const fs = require("fs");
 const [settingsPath, theme] = process.argv.slice(2);
@@ -104,25 +133,36 @@ const temporaryPath = settingsPath + ".theme-update";
 fs.writeFileSync(temporaryPath, updated);
 fs.renameSync(temporaryPath, settingsPath);
 NODE
-fi
+}
 
-source "$THEME_FOLDER/gtk/colors.sh"
+apply_gtk() {
+  source "$THEME_FOLDER/gtk/colors.sh"
+  mkdir -p ~/.config/gtk-4.0
+  echo -e "[Settings]\ngtk-theme-name=THEME_NAME" > ~/.config/gtk-4.0/settings.ini
+}
 
-mkdir -p ~/.config/gtk-4.0
-echo -e "[Settings]\ngtk-theme-name=THEME_NAME" > ~/.config/gtk-4.0/settings.ini
+apply_quickshell() {
+  ln -sf "$THEME_FOLDER/quickshell/Theme.qml" "$HOME/.config/quickshell/config/Theme.qml"
 
-ags request theme "$SELECTED_FOLDER"
+  # The apply process belongs to the running shell, so schedule its replacement
+  # independently before asking Quickshell to terminate the current instances.
+  setsid sh -c 'sleep 0.5; exec "$HOME/.config/quickshell/start.sh"' \
+    </dev/null >/dev/null 2>&1 &
 
-echo "RESTARTING QUICKSHELL"
-ln -sf "$THEME_FOLDER/quickshell/Theme.qml" "$HOME/.config/quickshell/config/Theme.qml"
+  quickshell list --json \
+    | sed -n 's/.*"pid":[[:space:]]*\([0-9][0-9]*\).*/\1/p' \
+    | while read -r quickshell_pid; do
+        quickshell kill --pid "$quickshell_pid"
+      done
+}
 
-# The apply process belongs to the running shell, so schedule its replacement
-# independently before asking Quickshell to terminate the current instances.
-setsid sh -c 'sleep 0.5; exec "$HOME/.config/quickshell/start.sh"' \
-  </dev/null >/dev/null 2>&1 &
+step waybar apply_waybar
+step hyprland apply_hyprland
+step kitty apply_kitty
+step nvim apply_nvim
+step rofi apply_rofi
+step vscode apply_vscode
+step gtk apply_gtk
+step quickshell apply_quickshell
 
-quickshell list --json \
-  | sed -n 's/.*"pid":[[:space:]]*\([0-9][0-9]*\).*/\1/p' \
-  | while read -r quickshell_pid; do
-      quickshell kill --pid "$quickshell_pid"
-    done
+report_failed_steps

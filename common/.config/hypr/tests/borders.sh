@@ -57,7 +57,7 @@ change_colorscheme() {
     bin="$home/bin"
     mkdir -p "$home/.dotfiles" "$bin" "$home/.config/"{hypr/custom,waybar/custom,rofi/custom,nvim/lua/settings/core,quickshell/config}
     cp -r "$COLORSCHEMES" "$home/.dotfiles/colorschemes"
-    for tool in kitten ags quickshell gsettings rofi node setsid; do
+    for tool in kitten quickshell gsettings rofi node setsid notify-send; do
         printf '#!/bin/sh\n' >"$bin/$tool"
     done
     printf '#!/bin/sh\nreadlink "$HOME/.config/hypr/custom/colors.lua" >>"$HOME/reloads"\n' >"$bin/hyprctl"
