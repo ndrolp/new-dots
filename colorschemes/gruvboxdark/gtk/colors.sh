@@ -1,4 +1,4 @@
 #!/bin/bash
 
-gsettings set org.gnome.desktop.interface gtk-theme "Gruvbox-BL-MB-Dark-Medium"
+gsettings set org.gnome.desktop.interface gtk-theme "Gruvbox-Dark-Medium"
 

@@ -148,6 +148,8 @@ main() {
         steps=(stow)
     else
         steps=(preflight packages paru aur hardware shell node)
+        # Building GTK themes needs sassc, from the apps group.
+        [[ "$DOTFILES_MINIMAL" == true ]] || steps+=(gtk-themes)
         [[ "$DOTFILES_SPICETIFY" == true ]] && steps+=(spicetify)
         steps+=(stow)
         steps+=(services)

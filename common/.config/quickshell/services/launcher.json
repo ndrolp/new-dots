@@ -3,10 +3,10 @@
         "code"
     ],
     "recent": [
-        "org.gnome.baobab",
-        "com.obsproject.Studio",
-        "com.microsoft.VSCode",
         "org.gnome.Nautilus",
-        "blueman-manager"
+        "org.kde.dolphin",
+        "com.obsproject.Studio",
+        "org.gnome.baobab",
+        "com.microsoft.VSCode"
     ]
 }

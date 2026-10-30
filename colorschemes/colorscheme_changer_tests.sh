@@ -13,8 +13,8 @@ trap 'rm -rf "$SCRATCH"' EXIT
 PASSED=0
 FAILED=0
 
-# Every colorscheme's GTK theme, as its gtk/colors.sh names it.
-GTK_THEMES=(Catppuccin-BL-MB-Dark Everforest-B-MB-Dark Gruvbox-BL-MB-Dark-Medium Nordic-darker Tokyonight-BL-MB-Dark)
+# Every colorscheme's GTK theme: the bootstrap's list of them (its tests check it names each one).
+mapfile -t GTK_THEMES < <(sed 's/#.*//' "$COLORSCHEMES/../common/bootstrap/gtk-themes.txt" | awk 'NF { print $1 }')
 
 fail() {
     echo "  FAIL: $*"
@@ -61,10 +61,10 @@ install_gtk_themes() {
         touch "$home/.themes/$theme/gtk-4.0/"{gtk.css,gtk-dark.css}
     done
     mkdir -p "$home/.config/gtk-3.0" "$home/.config/gtk-4.0"
-    printf '[Settings]\ngtk-theme-name=Everforest-B-MB-Dark\ngtk-icon-theme-name=Papirus-Dark\n' \
+    printf '[Settings]\ngtk-theme-name=Everforest-Dark\ngtk-icon-theme-name=Papirus-Dark\n' \
         >"$home/.config/gtk-3.0/settings.ini"
     for link in gtk.css gtk-dark.css assets; do
-        ln -s "$home/.themes/Everforest-B-MB-Dark/gtk-4.0/$link" "$home/.config/gtk-4.0/$link"
+        ln -s "$home/.themes/Everforest-Dark/gtk-4.0/$link" "$home/.config/gtk-4.0/$link"
     done
 }
 
@@ -237,7 +237,7 @@ test_a_gtk_theme_without_gtk4_still_applies_gtk3_and_fails_the_gtk_step() {
     grep -qx "gtk-theme-name=Nordic-darker" "$HOME_DIR/.config/gtk-3.0/settings.ini" \
         || fail "GTK3 settings.ini does not name Nordic-darker"
     [[ "$NOTIFICATIONS" == *gtk* ]] || fail "the gtk step did not fail"
-    [[ "$(readlink "$HOME_DIR/.config/gtk-4.0/gtk.css")" == "$HOME_DIR/.themes/Everforest-B-MB-Dark/gtk-4.0/gtk.css" ]] \
+    [[ "$(readlink "$HOME_DIR/.config/gtk-4.0/gtk.css")" == "$HOME_DIR/.themes/Everforest-Dark/gtk-4.0/gtk.css" ]] \
         || fail "the GTK4 links were touched"
 }
 

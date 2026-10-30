@@ -47,6 +47,19 @@ case "$SELECTED_FOLDER" in
     KITTY_THEME="Everforestdark"
     VSCODE_THEME="Everforest Pro Dark"
     ;;
+  kanagawa)
+    KITTY_THEME="Kanagawa"
+    VSCODE_THEME="Kanagawa"
+    ;;
+  rosepine)
+    KITTY_THEME="Rosé Pine"
+    VSCODE_THEME="Rosé Pine"
+    ;;
+  dracula)
+    KITTY_THEME="Dracula"
+    VSCODE_THEME="Dracula Theme"
+    ;;
+  carbonfox) KITTY_THEME="Carbonfox" ;;
   *) KITTY_THEME="$SELECTED_FOLDER" ;;
 esac
 

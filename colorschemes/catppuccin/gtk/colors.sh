@@ -1,3 +1,3 @@
 #!/bin/bash
 
-gsettings set org.gnome.desktop.interface gtk-theme "Catppuccin-BL-MB-Dark"
+gsettings set org.gnome.desktop.interface gtk-theme "Catppuccin-Dark-MB"

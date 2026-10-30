@@ -1,0 +1,16 @@
+# GTK themes the gtk-themes step installs into ~/.themes: one per colorscheme (tests check that
+# every colorscheme's GTK theme is listed here).
+# <theme name> fausto <Fausto-Korpsvart repo> <installer options...>
+#   built with the repo's themes/install.sh, which needs sassc
+# <theme name> release <GitHub owner/repo> <release asset>
+#   the asset is a .tar.xz from the repo's latest release that holds the theme's folder
+
+Catppuccin-Dark-MB       fausto   Catppuccin-GTK-Theme  -m dark --tweaks macos
+Everforest-Dark          fausto   Everforest-GTK-Theme  -c dark --tweaks macos
+Gruvbox-Dark-Medium      fausto   Gruvbox-GTK-Theme     -c dark --tweaks medium macos
+Tokyonight-Dark-Moon     fausto   Tokyonight-GTK-Theme  -c dark --tweaks moon macos
+Kanagawa-Dark            fausto   Kanagawa-GKT-Theme    -c dark --tweaks macos
+Rosepine-Dark            fausto   Rose-Pine-GTK-Theme   -c dark --tweaks macos
+Nightfox-Dark-Carbonfox  fausto   Nightfox-GTK-Theme    -c dark --tweaks carbonfox macos
+Nordic-darker            release  EliverLara/Nordic     Nordic-darker.tar.xz
+Dracula                  release  dracula/gtk           Dracula.tar.xz

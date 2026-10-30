@@ -1,0 +1,13 @@
+@define-color background #161616;
+@define-color background-secondary #0c0c0c;
+@define-color surface #252525;
+@define-color surface-hover #353535;
+@define-color border #404040;
+@define-color foreground #f2f4f8;
+@define-color muted #b6b8bb;
+@define-color accent #78a9ff;
+@define-color red #ee5396;
+@define-color orange #3ddbd9;
+@define-color yellow #08bdba;
+@define-color blue #33b1ff;
+@define-color purple #be95ff;
