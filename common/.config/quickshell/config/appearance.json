@@ -13,6 +13,15 @@
                         }
                     },
                     {
+                        "enabled": false,
+                        "id": "cava",
+                        "options": {
+                            "barCount": 12,
+                            "barWidth": 3,
+                            "color": "blue"
+                        }
+                    },
+                    {
                         "enabled": true,
                         "id": "arch",
                         "joinPrevious": true
@@ -101,6 +110,11 @@
                     {
                         "enabled": true,
                         "id": "recording",
+                        "joinPrevious": true
+                    },
+                    {
+                        "enabled": true,
+                        "id": "keepAwake",
                         "joinPrevious": true
                     },
                     {
@@ -509,6 +523,8 @@
         }
     },
     "doNotDisturb": false,
+    "nightLightTemperature": 4000,
     "notificationPopupLocation": "top-right",
+    "reduceMotion": false,
     "schemaVersion": 9
 }
