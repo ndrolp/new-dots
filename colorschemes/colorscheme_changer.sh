@@ -2,7 +2,7 @@
 
 WAYBAR_COLORS="$HOME/.config/waybar/custom/colors.css"
 HYPRLAND_COLORS="$HOME/.config/hypr/custom/colors.conf"
-HYPRLAND_BORDER_COLORS="$HOME/.config/hypr/custom/colors.lua"
+HYPRLAND_LUA_COLORS="$HOME/.config/hypr/custom/colors.lua"
 HYPRLOCK_COLORS="$HOME/.config/hypr/custom/hyprlock-colors.conf"
 NVIM_COLORS="$HOME/.config/nvim/lua/settings/core/theme.lua"
 ROFI_COLORS="$HOME/.config/rofi/custom/colors.rasi"
@@ -58,9 +58,13 @@ echo "$SELECTED_FOLDER"
 
 THEME_FOLDER="$HOME/.dotfiles/colorschemes/$SELECTED_FOLDER"
 
-if [ "$PREVIEW_MODE" = true ]; then
+link_hypr_colors() {
   ln -sf "$THEME_FOLDER/hypr/colors.conf" "$HYPRLAND_COLORS"
-  ln -sf "$THEME_FOLDER/hypr/colors.lua" "$HYPRLAND_BORDER_COLORS"
+  ln -sf "$THEME_FOLDER/hypr/colors.lua" "$HYPRLAND_LUA_COLORS"
+}
+
+if [ "$PREVIEW_MODE" = true ]; then
+  link_hypr_colors
   hyprctl reload
   exit 0
 fi
@@ -69,8 +73,7 @@ echo "LINKING WAYBAR"
 ln -sf "$THEME_FOLDER/waybar/colors.css" "$WAYBAR_COLORS"
 
 echo "LINKING HYPR COLORS"
-ln -sf "$THEME_FOLDER/hypr/colors.conf" "$HYPRLAND_COLORS"
-ln -sf "$THEME_FOLDER/hypr/colors.lua" "$HYPRLAND_BORDER_COLORS"
+link_hypr_colors
 ln -sf "$THEME_FOLDER/hyprlock/colors.conf" "$HYPRLOCK_COLORS"
 hyprctl reload
 
