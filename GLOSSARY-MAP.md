@@ -20,6 +20,10 @@ _Avoid_: Switch, set (for this)
 Showing a colorscheme on Hyprland and Quickshell only, without making it the active one; leaving the preview returns to the active colorscheme.
 _Avoid_: Temporary theme, try-on
 
+**Terminal transparency**:
+How see-through kitty's background is. It belongs to the terminal, not to any colorscheme, so applying a colorscheme never changes it.
+_Avoid_: Theme opacity
+
 ## Relationships
 
 - **Quickshell → Hyprland**: Quickshell reads workspaces and monitors from Hyprland; monitor names are shared between the two.
