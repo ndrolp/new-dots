@@ -12,3 +12,4 @@ jdinhlife.gruvbox                        Gruvbox Dark Medium
 arcticicestudio.nord-visual-studio-code  Nord
 keifererikson.nightfox                   Carbonfox
 devhippo.midnight-crimson                Midnight Crimson
+dnlytras.nord-wave                       Nord Wave
