@@ -22,7 +22,7 @@ fail() {
 
 # change_colorscheme [--failing "<tool>..."] <args>...: runs the changer with <args>. Every program it
 # drives is a shim that logs "<tool> <args>" to $CALLS; the --failing ones also exit 1. Sets OUT to the
-# changer's output and NOTIFICATIONS to the notify-send calls, one per line.
+# changer's output, HOME_DIR to its scratch HOME and NOTIFICATIONS to the notify-send calls, one per line.
 change_colorscheme() {
     local failing="" home bin tool
     if [[ "$1" == --failing ]]; then
@@ -42,6 +42,7 @@ exit 0
 SHIM
     done
     chmod +x "$bin"/*
+    HOME_DIR="$home"
     CALLS="$home/calls"
     : >"$CALLS"
     OUT="$(HOME="$home" PATH="$bin:$PATH" bash "$home/.dotfiles/colorschemes/colorscheme_changer.sh" "$@" 2>&1)"
@@ -52,7 +53,7 @@ calls_to() { grep -c "^$1 " "$CALLS" || true; }
 
 test_a_failing_step_does_not_stop_the_later_steps() {
     change_colorscheme --failing "kitten" nord
-    [[ "$(calls_to quickshell)" -gt 0 ]] || fail "quickshell was never restarted after kitty failed"
+    [[ "$(calls_to quickshell)" -gt 0 ]] || fail "quickshell was never asked to reload after kitty failed"
 }
 
 test_an_apply_with_failed_steps_sends_one_notification_naming_them() {
@@ -70,6 +71,19 @@ test_a_successful_apply_sends_no_notification() {
 test_applying_does_not_ask_ags_for_the_theme() {
     change_colorscheme nord
     [[ "$(calls_to ags)" -eq 0 ]] || fail "ags was called"
+}
+
+test_applying_links_the_colorschemes_quickshell_colours_and_asks_the_shell_to_reload_them() {
+    change_colorscheme nord
+    [[ "$(readlink "$HOME_DIR/.config/quickshell/config/colors.json")" == "$HOME_DIR/.dotfiles/colorschemes/nord/quickshell/colors.json" ]] \
+        || fail "colours not linked"
+    grep -qx "quickshell ipc --path $HOME_DIR/.config/quickshell call colorscheme reload" "$CALLS" \
+        || fail "the shell was not asked to reload its colours"
+}
+
+test_applying_does_not_restart_quickshell() {
+    change_colorscheme nord
+    ! grep -q "^quickshell kill\|^setsid " "$CALLS" || fail "quickshell was restarted"
 }
 
 test_previewing_only_reloads_hyprland() {

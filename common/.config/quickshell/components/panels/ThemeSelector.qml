@@ -5,6 +5,7 @@ import Quickshell.Wayland
 import QtQuick
 import Qt.labs.folderlistmodel
 import "../../config" as Config
+import "../../config/ColorschemeColors.js" as ColorschemeColors
 
 Variants {
     id: root
@@ -251,11 +252,13 @@ Variants {
                         border.color: active ? theme.accent : "transparent"
                         border.width: active ? 1 : 0
 
-                        Loader {
-                            id: themeDefinition
+                        property var colours: ColorschemeColors.fallback
 
-                            source: "file:///home/ndrolp/.dotfiles/colorschemes/"
-                                + themeTile.themeName + "/quickshell/Theme.qml"
+                        FileView {
+                            path: "/home/ndrolp/.dotfiles/colorschemes/"
+                                + themeTile.themeName + "/quickshell/colors.json"
+
+                            onLoaded: themeTile.colours = ColorschemeColors.fromJson(text())
                         }
 
                         Behavior on color {
@@ -273,12 +276,12 @@ Variants {
                                 spacing: 4
 
                                 Repeater {
-                                    model: themeDefinition.item ? [
-                                        themeDefinition.item.accent,
-                                        themeDefinition.item.blue,
-                                        themeDefinition.item.green,
-                                        themeDefinition.item.red
-                                    ] : [theme.accent, theme.blue, theme.green, theme.red]
+                                    model: [
+                                        themeTile.colours.accent,
+                                        themeTile.colours.blue,
+                                        themeTile.colours.green,
+                                        themeTile.colours.red
+                                    ]
 
                                     delegate: Rectangle {
                                         required property color modelData
@@ -295,8 +298,7 @@ Variants {
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: parent.width - 94
                                 text: themeTile.themeName
-                                color: themeDefinition.item
-                                    ? themeDefinition.item.text : theme.text
+                                color: themeTile.colours.text
                                 elide: Text.ElideRight
                                 font.family: theme.fontFamily
                                 font.pixelSize: 14

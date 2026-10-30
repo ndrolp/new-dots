@@ -142,18 +142,10 @@ apply_gtk() {
 }
 
 apply_quickshell() {
-  ln -sf "$THEME_FOLDER/quickshell/Theme.qml" "$HOME/.config/quickshell/config/Theme.qml"
-
-  # The apply process belongs to the running shell, so schedule its replacement
-  # independently before asking Quickshell to terminate the current instances.
-  setsid sh -c 'sleep 0.5; exec "$HOME/.config/quickshell/start.sh"' \
-    </dev/null >/dev/null 2>&1 &
-
-  quickshell list --json \
-    | sed -n 's/.*"pid":[[:space:]]*\([0-9][0-9]*\).*/\1/p' \
-    | while read -r quickshell_pid; do
-        quickshell kill --pid "$quickshell_pid"
-      done
+  # The shell can't see the link change by itself, so it is asked to read its colours again: it
+  # recolours in place, without restarting.
+  ln -sf "$THEME_FOLDER/quickshell/colors.json" "$HOME/.config/quickshell/config/colors.json"
+  quickshell ipc --path "$HOME/.config/quickshell" call colorscheme reload
 }
 
 step waybar apply_waybar

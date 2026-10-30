@@ -87,14 +87,14 @@ test_colours_missing_a_value_fall_back_to_the_greys() {
     [[ "$OUT" == "$GREYS" ]] || fail "did not fall back to the greys"
 }
 
-# Each colorscheme's Hyprland colours are copied by hand from its Quickshell theme; they must agree.
+# Each colorscheme's Hyprland colours are copied by hand from its Quickshell colours; they must agree.
 test_each_colorschemes_hyprland_colours_match_its_quickshell_accent_and_border() {
-    local theme name expected
-    qml() { sed -n "s/.*property color $1: \"\(#[0-9a-fA-F]*\)\".*/\1/p" "$theme" | tr -d '#'; }
-    for theme in "$COLORSCHEMES"/*/quickshell/Theme.qml; do
-        name="$(basename "$(dirname "$(dirname "$theme")")")"
+    local colours name expected
+    colour() { sed -n "s/.*\"$1\": *\"#\([0-9a-fA-F]*\)\".*/\1/p" "$colours"; }
+    for colours in "$COLORSCHEMES"/*/quickshell/colors.json; do
+        name="$(basename "$(dirname "$(dirname "$colours")")")"
         borders_with "$(cat "$COLORSCHEMES/$name/hypr/colors.lua" 2>/dev/null || echo 'return {}')"
-        expected=$'2\trgb('"$(qml accent)"$')\trgb('"$(qml border)"')'
+        expected=$'2\trgb('"$(colour accent)"$')\trgb('"$(colour border)"')'
         [[ "$OUT" == "$expected" ]] || fail "$name: expected $expected"
     done
 }

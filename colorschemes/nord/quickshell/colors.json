@@ -1,0 +1,18 @@
+{
+    "background": "#2e3440",
+    "backgroundSecondary": "#242933",
+    "surface": "#3b4252",
+    "surfaceHover": "#434c5e",
+    "border": "#4c566a",
+    "accent": "#88c0d0",
+    "accentHover": "#8fbcbb",
+    "green": "#a3be8c",
+    "red": "#bf616a",
+    "orange": "#d08770",
+    "yellow": "#ebcb8b",
+    "purple": "#b48ead",
+    "blue": "#81a1c1",
+    "text": "#eceff4",
+    "textMuted": "#d8dee9",
+    "textDisabled": "#616e88"
+}
