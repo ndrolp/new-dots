@@ -38,7 +38,10 @@ case "$SELECTED_FOLDER" in
     KITTY_THEME="Catppuccin"
     VSCODE_THEME="Catppuccin Mocha"
     ;;
-  gruvboxdark) KITTY_THEME="Gruvbox Dark" ;;
+  gruvboxdark)
+    KITTY_THEME="Gruvbox Dark"
+    VSCODE_THEME="Gruvbox Dark Medium"
+    ;;
   tokyonight)
     KITTY_THEME="Tokyo Night"
     VSCODE_THEME="Tokyo Night"
@@ -59,7 +62,14 @@ case "$SELECTED_FOLDER" in
     KITTY_THEME="Dracula"
     VSCODE_THEME="Dracula Theme"
     ;;
-  carbonfox) KITTY_THEME="Carbonfox" ;;
+  carbonfox)
+    KITTY_THEME="Carbonfox"
+    VSCODE_THEME="Carbonfox"
+    ;;
+  nord)
+    KITTY_THEME="nord"
+    VSCODE_THEME="Nord"
+    ;;
   bloodmoon)
     KITTY_THEME="Bloodmoon"
     VSCODE_THEME="Midnight Crimson"

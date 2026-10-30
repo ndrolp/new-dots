@@ -1,0 +1,14 @@
+# VS Code theme extensions the vscode-themes step installs: one per colorscheme (tests check that
+# every VSCODE_THEME in colorschemes/colorscheme_changer.sh is a label here).
+# <extension id> <theme label, as the changer's VSCODE_THEME names it>
+
+catppuccin.catppuccin-vsc                Catppuccin Mocha
+enkia.tokyo-night                        Tokyo Night
+andreilucaci.everforest-pro              Everforest Pro Dark
+qufiwefefwoyn.kanagawa                   Kanagawa
+mvllow.rose-pine                         Rosé Pine
+dracula-theme.theme-dracula              Dracula Theme
+jdinhlife.gruvbox                        Gruvbox Dark Medium
+arcticicestudio.nord-visual-studio-code  Nord
+keifererikson.nightfox                   Carbonfox
+devhippo.midnight-crimson                Midnight Crimson
