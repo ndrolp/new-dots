@@ -1,2 +1,2 @@
--- Window border colours for Hyprland, copied from quickshell/Theme.qml (accent, border).
+-- Window border colours for Hyprland, copied from quickshell/colors.json (accent, border).
 return { accent = "#7aa2f7", border = "#3b4261" }

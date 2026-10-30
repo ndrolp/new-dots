@@ -6,6 +6,7 @@ set -uo pipefail
 
 HYPR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COLORSCHEMES="$HYPR/../../../colorschemes"
+source "$COLORSCHEMES/colorscheme_changer_harness.sh"
 SCRATCH="$(mktemp -d)"
 trap 'rm -rf "$SCRATCH"' EXIT
 PASSED=0
@@ -48,22 +49,14 @@ borders_with() {
     run_hypr_config "$config" "require('modules.appearence.borders')"
 }
 
-# change_colorscheme <args>...: runs the colorscheme changer against a scratch HOME holding a copy of the
-# colorschemes. Every program it drives is a PATH shim; hyprctl records which colours file the Hyprland
-# colours link points at when it is asked to reload. Sets OUT to that record.
+# change_colorscheme <args>...: runs the colorscheme changer through the shared harness
+# (colorschemes/colorscheme_changer_harness.sh), with hyprctl recording which colours file the Hyprland
+# colours link points at when it is asked to reload. No running nvim is reached. Sets OUT to that record.
 change_colorscheme() {
-    local home bin tool
-    home="$(mktemp -d "$SCRATCH/home.XXXX")"
-    bin="$home/bin"
-    mkdir -p "$home/.dotfiles" "$bin" "$home/.config/"{hypr/custom,waybar/custom,rofi/custom,nvim/lua/settings/core,quickshell/config}
-    cp -r "$COLORSCHEMES" "$home/.dotfiles/colorschemes"
-    for tool in kitten ags quickshell gsettings rofi node setsid; do
-        printf '#!/bin/sh\n' >"$bin/$tool"
-    done
-    printf '#!/bin/sh\nreadlink "$HOME/.config/hypr/custom/colors.lua" >>"$HOME/reloads"\n' >"$bin/hyprctl"
-    chmod +x "$bin"/*
-    HOME="$home" PATH="$bin:$PATH" bash "$COLORSCHEMES/colorscheme_changer.sh" "$@" >/dev/null 2>&1
-    OUT="$(sed "s|^$home|~|" "$home/reloads" 2>/dev/null)"
+    changer_home
+    printf '#!/bin/sh\nreadlink "$HOME/.config/hypr/custom/colors.lua" >>"$HOME/reloads"\n' >"$HOME_DIR/bin/hyprctl"
+    run_changer "$@"
+    OUT="$(sed "s|^$HOME_DIR|~|" "$HOME_DIR/reloads" 2>/dev/null)"
 }
 
 test_the_focused_border_takes_the_accent_and_unfocused_ones_the_border_colour() {
@@ -87,14 +80,14 @@ test_colours_missing_a_value_fall_back_to_the_greys() {
     [[ "$OUT" == "$GREYS" ]] || fail "did not fall back to the greys"
 }
 
-# Each colorscheme's Hyprland colours are copied by hand from its Quickshell theme; they must agree.
+# Each colorscheme's Hyprland colours are copied by hand from its Quickshell colours; they must agree.
 test_each_colorschemes_hyprland_colours_match_its_quickshell_accent_and_border() {
-    local theme name expected
-    qml() { sed -n "s/.*property color $1: \"\(#[0-9a-fA-F]*\)\".*/\1/p" "$theme" | tr -d '#'; }
-    for theme in "$COLORSCHEMES"/*/quickshell/Theme.qml; do
-        name="$(basename "$(dirname "$(dirname "$theme")")")"
+    local colours name expected
+    colour() { sed -n "s/.*\"$1\": *\"#\([0-9a-fA-F]*\)\".*/\1/p" "$colours"; }
+    for colours in "$COLORSCHEMES"/*/quickshell/colors.json; do
+        name="$(basename "$(dirname "$(dirname "$colours")")")"
         borders_with "$(cat "$COLORSCHEMES/$name/hypr/colors.lua" 2>/dev/null || echo 'return {}')"
-        expected=$'2\trgb('"$(qml accent)"$')\trgb('"$(qml border)"')'
+        expected=$'2\trgb('"$(colour accent)"$')\trgb('"$(colour border)"')'
         [[ "$OUT" == "$expected" ]] || fail "$name: expected $expected"
     done
 }

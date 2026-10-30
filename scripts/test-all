@@ -12,6 +12,7 @@ suites=(
     common/bootstrap/tests/spicetify.sh
     scripts/test-sync-packages
     common/.config/hypr/tests/borders.sh
+    colorschemes/colorscheme_changer_tests.sh
 )
 
 case "${1:-}" in
