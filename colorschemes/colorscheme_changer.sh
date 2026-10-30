@@ -74,6 +74,10 @@ case "$SELECTED_FOLDER" in
     KITTY_THEME="Bloodmoon"
     VSCODE_THEME="Midnight Crimson"
     ;;
+  crimsonvoid)
+    KITTY_THEME="Crimsonvoid"
+    VSCODE_THEME="Midnight Crimson"
+    ;;
   *) KITTY_THEME="$SELECTED_FOLDER" ;;
 esac
 
