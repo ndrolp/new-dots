@@ -61,6 +61,10 @@ _Avoid_: Menu, dropdown, status popup
 El conjunto de iconos de aplicaciones y de la bandeja que usa el escritorio (hoy Papirus-Dark). Lo decide GTK y Quickshell lo sigue; es el mismo para todos los temas de color y no cambia al cambiar de tema.
 _Avoid_: Tema (a secas), que en este proyecto es el *colorscheme* (ver GLOSSARY-MAP)
 
+**Colorscheme selector** (selector de colorscheme):
+El panel a pantalla completa que lista los colorschemes, hace un *colorscheme preview* del que está resaltado y lo aplica al pulsar Enter. Al cerrarlo sin aplicar se vuelve al colorscheme activo.
+_Avoid_: Theme selector, theme picker, selector de temas
+
 **Control center** (centro de control):
 El panel con los conmutadores rápidos y los deslizadores (Wi-Fi, Bluetooth, no molestar, volumen, brillo). No es un popup: no pertenece a ningún bar element, aunque igual que un popup va anclado o flotante según la barra.
 _Avoid_: Control panel, quick settings, panel de control
