@@ -33,6 +33,7 @@ change_colorscheme() {
     bin="$home/bin"
     mkdir -p "$home/.dotfiles" "$bin" "$home/.config/"{hypr/custom,waybar/custom,rofi/custom,nvim/lua/settings/core,quickshell/config}
     cp -r "$COLORSCHEMES" "$home/.dotfiles/colorschemes"
+    install_gtk_themes "$home"
     for tool in hyprctl kitten ags quickshell gsettings rofi node setsid notify-send; do
         cat >"$bin/$tool" <<SHIM
 #!/bin/sh
@@ -42,10 +43,29 @@ exit 0
 SHIM
     done
     chmod +x "$bin"/*
+    HOME_DIR="$home"
     CALLS="$home/calls"
     : >"$CALLS"
     OUT="$(HOME="$home" PATH="$bin:$PATH" bash "$home/.dotfiles/colorschemes/colorscheme_changer.sh" "$@" 2>&1)"
     NOTIFICATIONS="$(grep "^notify-send " "$CALLS" || true)"
+}
+
+# install_gtk_themes <home>: gives <home> GTK as the desktop has it: every colorscheme's GTK theme in
+# ~/.themes (except $MISSING_GTK_THEME), a GTK3 settings.ini holding settings besides the theme, and the
+# GTK4 links pointing at the everforest theme.
+install_gtk_themes() {
+    local home="$1" theme dir link
+    for theme in $(sed -n 's/.*gtk-theme "\(.*\)".*/\1/p' "$COLORSCHEMES"/*/gtk/colors.sh); do
+        [[ "$theme" == "${MISSING_GTK_THEME:-}" ]] && continue
+        for dir in gtk-3.0 gtk-4.0/assets; do mkdir -p "$home/.themes/$theme/$dir"; done
+        touch "$home/.themes/$theme/gtk-4.0/"{gtk.css,gtk-dark.css}
+    done
+    mkdir -p "$home/.config/gtk-3.0" "$home/.config/gtk-4.0"
+    printf '[Settings]\ngtk-theme-name=Everforest-B-MB-Dark\ngtk-icon-theme-name=Papirus-Dark\n' \
+        >"$home/.config/gtk-3.0/settings.ini"
+    for link in gtk.css gtk-dark.css assets; do
+        ln -s "$home/.themes/Everforest-B-MB-Dark/gtk-4.0/$link" "$home/.config/gtk-4.0/$link"
+    done
 }
 
 calls_to() { grep -c "^$1 " "$CALLS" || true; }
@@ -80,6 +100,42 @@ test_previewing_only_reloads_hyprland() {
 test_a_failing_preview_sends_no_notification() {
     change_colorscheme --failing hyprctl --preview nord
     [[ -z "$NOTIFICATIONS" ]] || fail "a preview notified"
+}
+
+test_applying_names_the_gtk_theme_in_gsettings_and_gtk3_settings() {
+    change_colorscheme nord
+    grep -qx "gsettings set org.gnome.desktop.interface gtk-theme Nordic-darker" "$CALLS" \
+        || fail "gsettings gtk-theme was not set to Nordic-darker"
+    grep -qx "gtk-theme-name=Nordic-darker" "$HOME_DIR/.config/gtk-3.0/settings.ini" \
+        || fail "GTK3 settings.ini does not name Nordic-darker"
+    grep -qx "gtk-icon-theme-name=Papirus-Dark" "$HOME_DIR/.config/gtk-3.0/settings.ini" \
+        || fail "GTK3 settings.ini lost its other settings"
+}
+
+test_applying_points_the_gtk4_links_at_the_gtk_theme() {
+    change_colorscheme nord
+    local link
+    for link in gtk.css gtk-dark.css assets; do
+        [[ "$(readlink "$HOME_DIR/.config/gtk-4.0/$link")" == "$HOME_DIR/.themes/Nordic-darker/gtk-4.0/$link" ]] \
+            || fail "GTK4 $link does not point at Nordic-darker"
+    done
+}
+
+test_applying_prefers_dark() {
+    change_colorscheme nord
+    grep -qx "gsettings set org.gnome.desktop.interface color-scheme prefer-dark" "$CALLS" \
+        || fail "color-scheme was not set to prefer-dark"
+}
+
+test_applying_does_not_write_a_placeholder_theme_into_gtk4_settings() {
+    change_colorscheme nord
+    ! grep -qs "THEME_NAME" "$HOME_DIR/.config/gtk-4.0/settings.ini" || fail "GTK4 settings.ini got THEME_NAME"
+}
+
+test_a_missing_gtk_theme_fails_the_gtk_step() {
+    MISSING_GTK_THEME=Nordic-darker change_colorscheme nord
+    [[ "$NOTIFICATIONS" == *gtk* ]] || fail "the gtk step did not fail"
+    [[ -e "$HOME_DIR/.config/gtk-4.0/gtk.css" ]] || fail "GTK4 gtk.css was pointed at the missing theme"
 }
 
 for t in $(declare -F | awk '{print $3}' | grep "^test_.*${1:-}"); do
