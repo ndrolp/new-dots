@@ -33,8 +33,10 @@ and time left (`components/bar/KeepAwakeElement.qml`,
 countdown: starting, restarting, running out and turning off by hand, and
 what the keybind's OSD says (`services/KeepAwakeState.js`),
 which popup is open across the bars (`modules/OpenPopup.js`),
-and the theme's colours read from the active colorscheme's colours file,
-falling back to everforestdark's (`config/ColorschemeColors.js`).
+the active colorscheme's colours read from its colours file,
+falling back to everforestdark's (`config/ColorschemeColors.js`), and which
+colorscheme preview the colorscheme selector runs, one at a time
+(`components/panels/ColorschemePreview.js`).
 They run with QtTest outside of `qs`:
 
 ```sh

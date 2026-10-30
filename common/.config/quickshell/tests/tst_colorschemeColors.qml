@@ -3,7 +3,7 @@ import QtTest
 import "../config" as Config
 import "../config/ColorschemeColors.js" as ColorschemeColors
 
-// The theme's 16 colours come from the active colorscheme's colours file;
+// The shell's 16 colours are the active colorscheme's, from its colours file;
 // when that file is missing or broken the shell keeps everforestdark's.
 TestCase {
     name: "ColorschemeColors"

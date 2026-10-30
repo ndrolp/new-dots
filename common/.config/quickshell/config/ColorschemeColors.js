@@ -1,6 +1,6 @@
 .pragma library
 
-// The theme's 16 colours, read from the active colorscheme's colours file
+// The active colorscheme's 16 colours, read from the active colorscheme's colours file
 // (config/colors.json, a link to colorschemes/<name>/quickshell/colors.json
 // set by the colorscheme changer). Every Theme shares one live copy, kept
 // by ColorschemeColorsFile.qml, which reads the file again when the shell is

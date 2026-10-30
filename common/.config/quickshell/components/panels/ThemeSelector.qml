@@ -6,6 +6,7 @@ import QtQuick
 import Qt.labs.folderlistmodel
 import "../../config" as Config
 import "../../config/ColorschemeColors.js" as ColorschemeColors
+import "ColorschemePreview.js" as ColorschemePreview
 
 Variants {
     id: root
@@ -27,7 +28,7 @@ Variants {
             && Hyprland.focusedWorkspace.monitor.name === monitor.name
         property string activeTheme: ""
         property string previewTheme: ""
-        property string requestedPreviewTheme: ""
+        property var preview: ColorschemePreview.idle
         property bool applyingTheme: false
 
         screen: modelData
@@ -66,17 +67,17 @@ Variants {
         }
 
         function previewSelectedTheme(themeName) {
-            if (themeName === "" || requestedPreviewTheme === themeName)
+            runPreview(ColorschemePreview.requested(preview, themeName));
+        }
+
+        function runPreview(step) {
+            preview = step.state;
+            if (step.start === "")
                 return;
 
-            requestedPreviewTheme = themeName;
-            if (themePreview.running)
-                return;
-
-            themePreview.previewedTheme = themeName;
             themePreview.command = [
                 "/home/ndrolp/.dotfiles/colorschemes/colorscheme_changer.sh",
-                "--preview", themeName
+                "--preview", step.start
             ];
             themePreview.running = true;
         }
@@ -119,12 +120,7 @@ Variants {
         Process {
             id: themePreview
 
-            property string previewedTheme: ""
-
-            onExited: {
-                if (selector.requestedPreviewTheme !== previewedTheme)
-                    selector.previewSelectedTheme(selector.requestedPreviewTheme);
-            }
+            onExited: selector.runPreview(ColorschemePreview.exited(selector.preview))
         }
 
         Process {
@@ -135,7 +131,7 @@ Variants {
             stdout: SplitParser {
                 onRead: data => {
                     selector.activeTheme = data.trim();
-                    selector.requestedPreviewTheme = selector.activeTheme;
+                    selector.preview = ColorschemePreview.shown(selector.preview, selector.activeTheme).state;
 
                     for (let index = 0; index < themes.count; index++) {
                         if (themes.get(index, "fileName") === selector.activeTheme) {
