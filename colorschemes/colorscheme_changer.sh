@@ -108,8 +108,19 @@ apply_kitty() {
   kitten themes --reload-in=all "$KITTY_THEME"
 }
 
+# New nvims load the linked theme.lua at startup; running ones re-source it through their server
+# socket. Every socket is tried, and any that can't be reached fails the step afterwards.
 apply_nvim() {
   ln -sf "$THEME_FOLDER/nvim/theme.lua" "$NVIM_COLORS"
+  [ -n "${XDG_RUNTIME_DIR:-}" ] || return 0
+
+  local socket unreachable=0
+  for socket in "$XDG_RUNTIME_DIR"/nvim.*.0; do
+    [ -e "$socket" ] || continue
+    timeout 5 nvim --server "$socket" --remote-expr "execute('source $NVIM_COLORS')" >/dev/null \
+      || unreachable=1
+  done
+  return "$unreachable"
 }
 
 apply_rofi() {
@@ -135,10 +146,31 @@ fs.renameSync(temporaryPath, settingsPath);
 NODE
 }
 
+# GTK3 apps restyle live through gsettings, and settings.ini names the same theme so the two can't drift.
 apply_gtk() {
-  source "$THEME_FOLDER/gtk/colors.sh"
-  mkdir -p ~/.config/gtk-4.0
-  echo -e "[Settings]\ngtk-theme-name=THEME_NAME" > ~/.config/gtk-4.0/settings.ini
+  local theme link settings="$HOME/.config/gtk-3.0/settings.ini"
+  theme="$(sed -n 's/.*gtk-theme "\(.*\)".*/\1/p' "$THEME_FOLDER/gtk/colors.sh")"
+  [ -n "$theme" ]
+  if [ ! -d "$HOME/.themes/$theme/gtk-4.0" ]; then
+    echo "GTK theme $theme is not installed in ~/.themes" >&2
+    return 1
+  fi
+
+  gsettings set org.gnome.desktop.interface gtk-theme "$theme"
+  gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+
+  mkdir -p "$(dirname "$settings")"
+  [ -f "$settings" ] || echo "[Settings]" >"$settings"
+  if grep -q '^gtk-theme-name=' "$settings"; then
+    sed -i --follow-symlinks "s|^gtk-theme-name=.*|gtk-theme-name=$theme|" "$settings"
+  else
+    sed -i --follow-symlinks "/^\[Settings\]/a gtk-theme-name=$theme" "$settings"
+  fi
+
+  mkdir -p "$HOME/.config/gtk-4.0"
+  for link in gtk.css gtk-dark.css assets; do
+    ln -sfn "$HOME/.themes/$theme/gtk-4.0/$link" "$HOME/.config/gtk-4.0/$link"
+  done
 }
 
 apply_quickshell() {
