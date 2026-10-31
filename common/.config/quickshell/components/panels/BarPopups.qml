@@ -18,7 +18,8 @@ Item {
     required property var nightLight
     // The control center plugin; off, the control center is notifications only.
     property bool controlsEnabled: true
-    // The stage the control center takes the next time it opens.
+    // The control center's stage: the one it is at while open, the one it
+    // takes the next time it opens.
     property string controlCenterStage: "collapsed"
     property string activePopup: ""
     // The bar content; places popups under the bar element that opened them.
@@ -34,6 +35,9 @@ Item {
     signal screenCaptureRequested()
     // The control center's pencil: the settings panel at its section.
     signal controlCenterSettingsRequested()
+    // The open control center switched stage by itself (its handle, the
+    // audio output tile).
+    signal controlCenterStageSwitched(string stage)
 
     ControlCenterPopup {
         popups: root

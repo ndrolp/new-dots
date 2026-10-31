@@ -19,7 +19,8 @@ Variants {
     required property var nightLight
     // The control center plugin; off, the control center is notifications only.
     property bool controlsEnabled: true
-    // The stage the control center takes the next time it opens.
+    // The control center's stage: the one it is at while open, the one it
+    // takes the next time it opens.
     property string controlCenterStage: "collapsed"
     required property var keepAwake
     required property var screenShares
@@ -38,6 +39,7 @@ Variants {
     signal screenCaptureRequested()
     // The control center's pencil, on `panelWindow`'s bar.
     signal controlCenterSettingsRequested(var screen, var panelWindow)
+    signal controlCenterStageSwitched(string stage)
 
     model: Quickshell.screens
 
@@ -202,6 +204,9 @@ Variants {
                 onScreenCaptureRequested: bar.screenCaptureRequested()
                 onControlCenterSettingsRequested: bar.controlCenterSettingsRequested(panel.modelData,
                     panel)
+                onControlCenterStageSwitched: function(stage) {
+                    bar.controlCenterStageSwitched(stage);
+                }
             }
 
         }

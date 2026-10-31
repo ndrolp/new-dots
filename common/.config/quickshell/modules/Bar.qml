@@ -27,7 +27,9 @@ Scope {
     required property var osd
 
     property var openPopup: OpenPopup.none
-    // The stage the control center takes the next time it opens.
+    // The control center's stage: the one it is at while open (its handle
+    // and audio output tile report switches back), the one it takes the next
+    // time it opens.
     property string controlCenterStage: "collapsed"
 
     // The control center's tiles asked for these; the control center module
@@ -43,10 +45,16 @@ Scope {
             root.workspaceService.focusedMonitorDescription());
     }
 
-    // `stage` is "collapsed" (SUPER+N) or "expanded" (SUPER+C).
+    // SUPER+N asks for "collapsed", SUPER+C for "expanded": closed, it opens
+    // at that stage; open at the other stage, it switches; open at that one,
+    // it closes (OpenPopup.controlCenterShortcut).
     function toggleControlCenter(stage) {
-        root.controlCenterStage = stage;
-        togglePopupOnFocusedBar("controlCenter");
+        const next = OpenPopup.controlCenterShortcut(root.openPopup, root.controlCenterStage, stage,
+            bars(), root.workspaceService.focusedMonitorDescription(),
+            root.plugins.controlCenterEnabled);
+        // The stage first: an opening reads it.
+        root.controlCenterStage = next.stage;
+        root.openPopup = next.open;
     }
 
     // Opens the control center on the focused bar; it stays open if it is.
@@ -99,10 +107,12 @@ Scope {
         }
 
         onPopupRequested: function(popup, panelWindow) {
-            // The bell opens the control center collapsed.
-            if (popup === "controlCenter")
+            // The bell just opens the control center collapsed, or closes it
+            // (at whatever stage it is).
+            const next = OpenPopup.requested(root.openPopup, popup, panelWindow);
+            if (next.popup === "controlCenter")
                 root.controlCenterStage = "collapsed";
-            root.openPopup = OpenPopup.requested(root.openPopup, popup, panelWindow);
+            root.openPopup = next;
         }
 
         onPopupClosed: function(popup, panelWindow) {
@@ -117,6 +127,9 @@ Scope {
         onClipboardRequested: root.clipboardRequested()
         onPowerMenuRequested: root.powerMenuRequested()
         onScreenCaptureRequested: root.screenCaptureRequested()
+        onControlCenterStageSwitched: function(stage) {
+            root.controlCenterStage = stage;
+        }
         // The pencil closes the control center and opens the settings panel
         // at its section, on the same bar.
         onControlCenterSettingsRequested: function(screen, panelWindow) {
