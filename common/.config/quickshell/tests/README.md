@@ -72,3 +72,11 @@ the launcher history and wallpaper services create those files when missing:
 ```sh
 common/.config/quickshell/tests/state-files.sh
 ```
+
+`startup.sh` checks that `start.sh` creates the machine-local colorscheme links
+(`colorschemes/active` and `shown`) before Quickshell starts, through the
+colorscheme changer's harness, so no live session is touched:
+
+```sh
+common/.config/quickshell/tests/startup.sh
+```

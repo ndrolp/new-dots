@@ -16,6 +16,7 @@ suites=(
     common/.config/hypr/tests/borders.sh
     colorschemes/colorscheme_changer_tests.sh
     common/.config/quickshell/tests/state-files.sh
+    common/.config/quickshell/tests/startup.sh
 )
 
 case "${1:-}" in
