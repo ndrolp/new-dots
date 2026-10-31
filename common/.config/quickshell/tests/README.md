@@ -11,7 +11,11 @@ active, muted, disabled and icon-only (`ControlTile.qml`, `ControlSlider.qml`;
 `ControlCenterBody.qml` itself needs Quickshell's services and isn't tested
 here), the control center's collapsed and expanded stages: the stage each
 way of opening it asks for, the chevron and the drag on its handle, and
-notifications only with its plugin off (`ControlCenterLayout.qml`), the settings panel's own parts (`SettingsNumber`,
+notifications only with its plugin off (`ControlCenterLayout.qml`), the
+control center's tile list: its order, hidden tiles, the collapsed row of the
+first 6 visible tiles and the migration that seeds it
+(`config/ControlCenterTiles.js`), and the settings panel's Control center
+section that edits it (`ControlCenterSettings.qml`), the settings panel's own parts (`SettingsNumber`,
 `SettingsSwitchRow`, `SettingsChoice`, `SettingsGrid`…), its frame
 (`ConfigPanel.qml`) and the settings panel sections built from them, the Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named

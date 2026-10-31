@@ -35,6 +35,15 @@ Feature {
         }
     }
 
+    // Opens the panel on that bar at `section`, or shows `section` if it is
+    // already open there.
+    function openSectionOn(section, barScreen, panelWindow) {
+        screen = barScreen;
+        window = panelWindow;
+        panelWindowItem.openSection(section);
+        open = true;
+    }
+
     // A bar came up: the panel attaches to the first one until asked from
     // another.
     function offerWindow(barScreen, panelWindow) {
@@ -46,6 +55,8 @@ Feature {
     }
 
     Panels.ConfigPanelWindow {
+        id: panelWindowItem
+
         appearance: root.appearance
         monitors: root.monitors
         wallpapers: root.wallpapers

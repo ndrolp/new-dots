@@ -8,13 +8,15 @@ import QtQuick
 import "../../config" as Config
 import "." as Panels
 import "../VolumeText.js" as VolumeText
+import "../../config/ControlCenterTiles.js" as ControlCenterTiles
 
 // The control center's controls: the tiles, the sliders (volume,
 // brightness, night light's temperature), the media row and the system
-// stats. Collapsed, only the row of quick tiles shows (Wi-Fi, Bluetooth, do
-// not disturb, mic, keep-awake, night light), as icons; expanded, every tile
-// with its label and the rest of the controls. Kept apart from any window:
-// the host places it and closes it when asked.
+// stats. The tiles come from the stored list (`barAppearance.controlCenterTiles`,
+// see config/ControlCenterTiles.js): collapsed, only the first 6 visible
+// tiles show, as icons; expanded, every visible tile with its label, the
+// pencil that edits the list and the rest of the controls. Kept apart from
+// any window: the host places it and closes it when asked.
 Column {
     id: body
 
@@ -28,7 +30,8 @@ Column {
     // The shell's night light (services/NightLight.qml).
     required property var nightLight
     // Whether the host is showing it: it reads brightness, the power
-    // profile and the clipboard when shown, and Caps Lock while shown.
+    // profile and the clipboard when shown, and Caps Lock while shown (any
+    // tile can sit in the collapsed row).
     property bool shown: false
     // The expanded control center: every control, not just the quick tiles.
     property bool expanded: false
@@ -51,6 +54,8 @@ Column {
     signal clipboardRequested()
     signal powerMenuRequested()
     signal screenCaptureRequested()
+    // The pencil: edit the tile list in the settings panel.
+    signal tileSettingsRequested()
 
     spacing: 12
 
@@ -154,19 +159,28 @@ Column {
         }
     }
 
-    Grid {
-        id: tiles
+    // Every tile, by its id in the stored list (config/ControlCenterTiles.js).
+    readonly property var tileComponents: ({
+        "wifi": wifiTile,
+        "bluetooth": bluetoothTile,
+        "doNotDisturb": doNotDisturbTile,
+        "microphone": microphoneTile,
+        "keepAwake": keepAwakeTile,
+        "nightLight": nightLightTile,
+        "audioOutput": audioOutputTile,
+        "lock": lockTile,
+        "displaysOff": displaysOffTile,
+        "powerProfile": powerProfileTile,
+        "screenCapture": screenCaptureTile,
+        "clipboard": clipboardTile,
+        "power": powerTile,
+        "capsLock": capsLockTile
+    })
 
-        readonly property real tileWidth: (width - columnSpacing * (columns - 1)) / columns
-
-        width: parent.width
-        // The quick tiles fit one row when collapsed.
-        columns: body.expanded ? 4 : 6
-        columnSpacing: 4
-        rowSpacing: 4
+    Component {
+        id: wifiTile
 
         ControlTile {
-            width: tiles.tileWidth
             labelShown: body.expanded
             appearance: body.barAppearance
             label: Networking.wifiEnabled ? "Wi-Fi" : "Wi-Fi off"
@@ -175,9 +189,12 @@ Column {
             active: Networking.wifiEnabled
             onTriggered: Networking.wifiEnabled = !Networking.wifiEnabled
         }
+    }
+
+    Component {
+        id: bluetoothTile
 
         ControlTile {
-            width: tiles.tileWidth
             labelShown: body.expanded
             appearance: body.barAppearance
             label: active ? "Bluetooth" : "BT off"
@@ -188,9 +205,12 @@ Column {
             controlEnabled: body.bluetoothAdapter !== null
             onTriggered: bluetoothPower.setEnabled(!body.bluetoothAdapter.enabled)
         }
+    }
+
+    Component {
+        id: doNotDisturbTile
 
         ControlTile {
-            width: tiles.tileWidth
             labelShown: body.expanded
             appearance: body.barAppearance
             label: active ? "Do not disturb" : "DND off"
@@ -199,9 +219,12 @@ Column {
             active: body.barAppearance.doNotDisturb
             onTriggered: body.doNotDisturbToggled()
         }
+    }
+
+    Component {
+        id: microphoneTile
 
         ControlTile {
-            width: tiles.tileWidth
             labelShown: body.expanded
             appearance: body.barAppearance
             label: active ? "Mic on" : "Mic off"
@@ -211,9 +234,12 @@ Column {
             controlEnabled: body.microphone !== null
             onTriggered: body.toggleMicrophone()
         }
+    }
+
+    Component {
+        id: keepAwakeTile
 
         ControlTile {
-            width: tiles.tileWidth
             labelShown: body.expanded
             appearance: body.barAppearance
             label: body.keepAwake.on ? "Awake" : "Sleep allowed"
@@ -222,9 +248,12 @@ Column {
             active: body.keepAwake.on
             onTriggered: body.keepAwake.toggle()
         }
+    }
+
+    Component {
+        id: nightLightTile
 
         ControlTile {
-            width: tiles.tileWidth
             labelShown: body.expanded
             appearance: body.barAppearance
             label: body.nightLight.on ? "Night light" : "Night light off"
@@ -233,10 +262,13 @@ Column {
             active: body.nightLight.on
             onTriggered: body.nightLight.toggle()
         }
+    }
+
+    Component {
+        id: audioOutputTile
 
         ControlTile {
-            width: tiles.tileWidth
-            visible: body.expanded
+            labelShown: body.expanded
             appearance: body.barAppearance
             label: "Audio output"
             icon: "󰓃"
@@ -246,10 +278,13 @@ Column {
                 body.close();
             }
         }
+    }
+
+    Component {
+        id: lockTile
 
         ControlTile {
-            width: tiles.tileWidth
-            visible: body.expanded
+            labelShown: body.expanded
             appearance: body.barAppearance
             label: "Lock"
             icon: "󰌾"
@@ -260,10 +295,13 @@ Column {
                 body.close();
             }
         }
+    }
+
+    Component {
+        id: displaysOffTile
 
         ControlTile {
-            width: tiles.tileWidth
-            visible: body.expanded
+            labelShown: body.expanded
             appearance: body.barAppearance
             label: "Displays off"
             icon: "󰍹"
@@ -274,10 +312,13 @@ Column {
                 body.close();
             }
         }
+    }
+
+    Component {
+        id: powerProfileTile
 
         ControlTile {
-            width: tiles.tileWidth
-            visible: body.expanded
+            labelShown: body.expanded
             appearance: body.barAppearance
             label: body.powerProfile
             icon: "󱐋"
@@ -285,10 +326,13 @@ Column {
             active: true
             onTriggered: body.cyclePowerProfile()
         }
+    }
+
+    Component {
+        id: screenCaptureTile
 
         ControlTile {
-            width: tiles.tileWidth
-            visible: body.expanded
+            labelShown: body.expanded
             appearance: body.barAppearance
             label: body.screenCapture.recording ? "Recording" : "Capture"
             icon: body.screenCapture.recording ? "󰑋" : "󰄀"
@@ -296,36 +340,91 @@ Column {
             active: body.screenCapture.recording
             onTriggered: body.screenCaptureRequested()
         }
+    }
+
+    Component {
+        id: clipboardTile
 
         ControlTile {
-            width: tiles.tileWidth
-            visible: body.expanded
+            labelShown: body.expanded
             appearance: body.barAppearance
             label: body.clipboardHistory.entries.length + " copied"
             icon: "󰅌"
             accentColor: theme.accent
             onTriggered: body.clipboardRequested()
         }
+    }
+
+    Component {
+        id: powerTile
 
         ControlTile {
-            width: tiles.tileWidth
-            visible: body.expanded
+            labelShown: body.expanded
             appearance: body.barAppearance
             label: "Power"
             icon: "󰐥"
             accentColor: theme.red
             onTriggered: body.powerMenuRequested()
         }
+    }
+
+    Component {
+        id: capsLockTile
 
         ControlTile {
-            width: tiles.tileWidth
-            visible: body.expanded
+            labelShown: body.expanded
             appearance: body.barAppearance
             label: "Caps " + (body.capsLocked ? "on" : "off")
             icon: "󰘲"
             accentColor: theme.yellow
             active: body.capsLocked
             interactive: false
+        }
+    }
+
+    // Collapsed, the first 6 visible tiles; expanded, every visible tile.
+    readonly property var shownTiles: body.expanded
+        ? ControlCenterTiles.visibleTiles(body.barAppearance.controlCenterTiles)
+        : ControlCenterTiles.collapsedTiles(body.barAppearance.controlCenterTiles)
+
+    Grid {
+        id: tiles
+
+        readonly property real tileWidth: (width - columnSpacing * (columns - 1)) / columns
+
+        width: parent.width
+        // The collapsed row fits one line.
+        columns: body.expanded ? 4 : ControlCenterTiles.collapsedRowSize
+        columnSpacing: 4
+        rowSpacing: 4
+
+        Repeater {
+            model: body.shownTiles
+
+            delegate: Loader {
+                required property string modelData
+
+                width: tiles.tileWidth
+                sourceComponent: body.tileComponents[modelData] || null
+            }
+        }
+    }
+
+    // Expanded only: the pencil opens the settings panel at the Control
+    // center section.
+    Item {
+        width: parent.width
+        height: editTilesButton.height
+        visible: body.expanded
+
+        PopupButton {
+            id: editTilesButton
+
+            anchors.right: parent.right
+            width: 36
+            appearance: body.barAppearance
+            label: "󰏫"
+            onActivated: body.tileSettingsRequested()
         }
     }
 

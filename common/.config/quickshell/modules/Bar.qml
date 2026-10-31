@@ -119,5 +119,11 @@ Scope {
         onClipboardRequested: root.clipboardRequested()
         onPowerMenuRequested: root.powerMenuRequested()
         onScreenCaptureRequested: root.screenCaptureRequested()
+        // The pencil closes the control center and opens the settings panel
+        // at its section, on the same bar.
+        onControlCenterSettingsRequested: function(screen, panelWindow) {
+            root.closePopup();
+            root.settings.openSectionOn("ControlCenter", screen, panelWindow);
+        }
     }
 }
