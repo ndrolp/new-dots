@@ -219,6 +219,17 @@ test_with_the_filter_registered_other_changes_to_vs_codes_settings_still_show() 
         || fail "git diff: $(git -C "$HOME_DIR/.dotfiles" diff -- common/.config/Code)"
 }
 
+test_with_the_filter_registered_applying_and_previewing_leave_git_status_empty() {
+    changer_home
+    commit_dotfiles
+    register_vscode_theme_filter
+    run_changer nord
+    run_changer --preview kanagawa
+    run_changer rosepine
+    [[ -z "$(git -C "$HOME_DIR/.dotfiles" status --porcelain)" ]] \
+        || fail "git status: $(git -C "$HOME_DIR/.dotfiles" status --porcelain)"
+}
+
 test_applying_never_stages_edits_to_vs_codes_settings() {
     local registered
     for registered in true false; do
