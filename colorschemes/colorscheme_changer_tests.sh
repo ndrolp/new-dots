@@ -177,6 +177,14 @@ test_listing_names_every_colorscheme_but_not_the_active_link() {
         kanagawa nord rosepine tokyonight)" ]] || fail "unexpected list"
 }
 
+test_listing_names_every_colorscheme_but_not_the_shown_link() {
+    ACTIVE_COLORSCHEME=nord change_colorscheme --preview kanagawa
+    [[ -L "$HOME_DIR/.dotfiles/colorschemes/shown" ]] || fail "previewing left no shown link"
+    run_changer --list
+    [[ "$OUT" == "$(printf '%s\n' bloodmoon carbonfox catppuccin coralnord dracula everforestdark gruvboxdark \
+        kanagawa nord rosepine tokyonight)" ]] || fail "unexpected list"
+}
+
 test_the_active_link_cannot_be_applied_as_a_colorscheme() {
     ACTIVE_COLORSCHEME=nord change_colorscheme active || true
     [[ "$(readlink "$HOME_DIR/.dotfiles/colorschemes/active")" == nord ]] || fail "the active link was moved"
