@@ -4,8 +4,8 @@ import "../components/panels" as Panels
 import "../config" as Config
 import "../config/Motion.js" as Motion
 
-// A tile of the control center: a toggle or action with a colored icon and a
-// label. Pointer events don't reach items under qmltestrunner offscreen, so
+// A tile of the control center: a switch (on or off) or an action with a
+// colored icon and a label. Pointer events don't reach items under qmltestrunner offscreen, so
 // hover and taps aren't checked here.
 TestCase {
     name: "ControlTile"
