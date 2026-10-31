@@ -31,9 +31,10 @@ TestCase {
 
         QtObject {
             property var items: []
+            readonly property var ongoing: items.filter(item => item.resident)
             readonly property var groups: {
                 const groups = [];
-                items.forEach(item => {
+                items.filter(item => !item.resident).forEach(item => {
                     let group = groups.find(candidate => candidate.appName === item.appName);
                     if (!group) {
                         group = { appName: item.appName, items: [] };
@@ -54,11 +55,11 @@ TestCase {
             }
 
             function removeGroup(appName) {
-                items = items.filter(item => item.appName !== appName);
+                items = items.filter(item => item.resident || item.appName !== appName);
             }
 
             function clear() {
-                items = [];
+                items = items.filter(item => item.resident);
             }
         }
     }
@@ -70,6 +71,10 @@ TestCase {
             appearance: barAppearance
             width: 400
         }
+    }
+
+    function ongoingEntry(id, appName) {
+        return Object.assign(entry(id, false, appName), { summary: "Syncing " + id, resident: true });
     }
 
     function entry(id, unread, appName) {
@@ -180,6 +185,36 @@ TestCase {
         button(item, "Clear all").activated();
 
         compare(cards(item).length, 0);
+    }
+
+    function test_ongoingNotificationsArePinnedAboveTheRest() {
+        const item = makeBody([entry(1, false), ongoingEntry(2, "Discord"), entry(3, false, "Discord")]);
+
+        compare(cards(item).map(card => card.entry.summary), ["Syncing 2", "Download 1", "Download 3"]);
+    }
+
+    function test_clearAllKeepsOngoingNotifications() {
+        const item = makeBody([entry(1, false), ongoingEntry(2), entry(3, false, "Discord")]);
+
+        button(item, "Clear all").activated();
+
+        compare(cards(item).map(card => card.entry.summary), ["Syncing 2"]);
+        compare(item.notificationHistory.items.map(entry => entry.id), [2]);
+    }
+
+    function test_withOnlyOngoingNotificationsThereIsNothingToClear() {
+        const item = makeBody([ongoingEntry(1)]);
+
+        verify(!button(item, "Clear all").visible);
+        compare(texts(item).indexOf("No notifications"), -1);
+    }
+
+    function test_dismissingAnOngoingCardRemovesIt() {
+        const item = makeBody([ongoingEntry(1), entry(2, false)]);
+
+        cards(item)[0].dismissed();
+
+        compare(item.notificationHistory.items.map(entry => entry.id), [2]);
     }
 
     function test_aDismissedCardLeavesTheHistory() {

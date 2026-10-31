@@ -1,7 +1,6 @@
 import Quickshell.Bluetooth
 import Quickshell.Io
 import Quickshell.Networking
-import Quickshell.Services.Mpris
 import Quickshell.Services.Pipewire
 import Quickshell.Services.UPower
 import QtQuick
@@ -11,8 +10,8 @@ import "../VolumeText.js" as VolumeText
 import "../../config/ControlCenterTiles.js" as ControlCenterTiles
 
 // The control center's controls: the tiles, the sliders (volume,
-// brightness, night light's temperature), the media row and the system
-// stats. The tiles come from the stored list (`barAppearance.controlCenterTiles`,
+// brightness, night light's temperature) and the system stats (the media
+// card is the popup's, pinned above it). The tiles come from the stored list (`barAppearance.controlCenterTiles`,
 // see config/ControlCenterTiles.js): collapsed, only the first 6 visible
 // tiles show, as icons; expanded, every visible tile with its label, the
 // pencil that edits the list and the rest of the controls. Kept apart from
@@ -40,8 +39,6 @@ Column {
     readonly property var microphone: Pipewire.defaultAudioSource?.audio || null
     readonly property var bluetoothAdapter: Bluetooth.defaultAdapter
     readonly property var battery: UPower.displayDevice
-    readonly property var player: Mpris.players.values.find(candidate => candidate.isPlaying)
-        || (Mpris.players.values.length > 0 ? Mpris.players.values[0] : null)
     property real volume: audio && !audio.muted ? audio.volume : 0
     property real brightness: 0.7
     property bool capsLocked: false
@@ -487,54 +484,6 @@ Column {
             appearance: body.barAppearance
             text: body.nightLight.failureHint
             wrapMode: Text.Wrap
-        }
-    }
-
-    PopupRow {
-        width: parent.width
-        height: body.expanded && body.player ? 44 : 0
-        visible: height > 0
-        appearance: body.barAppearance
-        interactive: false
-
-        Row {
-            anchors.fill: parent
-            anchors.leftMargin: 8
-            anchors.rightMargin: 8
-            spacing: 10
-
-            Panels.Text {
-                anchors.verticalCenter: parent.verticalCenter
-                text: body.player && body.player.isPlaying ? "󰏤" : "󰐊"
-                color: theme.green
-                font.pixelSize: body.barAppearance.textSize + 5
-
-                TapHandler {
-                    onTapped: {
-                        if (body.player && body.player.canTogglePlaying)
-                            body.player.togglePlaying();
-                    }
-                }
-            }
-
-            Column {
-                anchors.verticalCenter: parent.verticalCenter
-                width: parent.width - 48
-                spacing: 1
-
-                PopupTitle {
-                    width: parent.width
-                    appearance: body.barAppearance
-                    text: body.player ? body.player.trackTitle : ""
-                    font.pixelSize: body.barAppearance.textSize
-                }
-
-                PopupLabel {
-                    width: parent.width
-                    appearance: body.barAppearance
-                    text: body.player ? body.player.trackArtist : ""
-                }
-            }
         }
     }
 

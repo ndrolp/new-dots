@@ -29,6 +29,8 @@ Scope {
 
         onNotification: notification => {
             notification.tracked = true;
+            // An ongoing card leaves when its app ends the notification.
+            notification.closed.connect(() => root.notificationHistory.closed(notification));
             root.notificationHistory.add(notification);
 
             // Kept notifications sent again after a reload rebuild the

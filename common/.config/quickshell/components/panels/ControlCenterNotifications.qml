@@ -7,6 +7,8 @@ import "." as Panels
 // Opening the control center marks everything read, so the bell's badge
 // clears; the cards that arrived since you last looked stay highlighted
 // until it closes. The header keeps "Clear all"; do not disturb is a tile.
+// Ongoing notifications (the `resident` hint) are pinned on top, never
+// stacked, and "Clear all" leaves them.
 // Each notification is a NotificationCard.
 Column {
     id: root
@@ -19,6 +21,8 @@ Column {
     // The notifications unread when it opened: highlighted until it closes.
     property var freshIds: []
     readonly property var groups: notificationHistory.groups
+    // Ongoing notifications: pinned above the stacks, outside the scroll.
+    readonly property var ongoing: notificationHistory.ongoing
     readonly property var highlightedIds: notificationHistory.items
         .filter(item => highlighted(item)).map(item => item.id)
     // The apps whose stacks are expanded, until the control center closes.
@@ -99,8 +103,33 @@ Column {
         }
     }
 
+    Column {
+        id: ongoingCards
+
+        visible: root.ongoing.length > 0
+        width: parent.width
+        spacing: 8
+
+        Repeater {
+            model: root.ongoing
+
+            delegate: Panels.NotificationCard {
+                required property var modelData
+
+                width: ongoingCards.width
+                appearance: root.appearance
+                entry: modelData
+                highlighted: root.highlighted(modelData)
+                currentTime: root.currentTime
+
+                onDismissed: root.notificationHistory.remove(modelData.id)
+                onCloseRequested: root.closeRequested()
+            }
+        }
+    }
+
     Panels.Text {
-        visible: root.groups.length === 0
+        visible: root.groups.length === 0 && root.ongoing.length === 0
         width: parent.width
         height: 64
         horizontalAlignment: Text.AlignHCenter
