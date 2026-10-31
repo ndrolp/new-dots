@@ -94,6 +94,37 @@ TestCase {
         compare(sent.dismissCount, 0);
     }
 
+    // After a shell reload the server sends again the notifications it kept
+    // (keepOnReload), oldest first, marked lastGeneration.
+    function test_afterAReloadTheHistoryHoldsTheKeptNotificationsNewestFirst() {
+        const item = createTemporaryObject(history, this);
+
+        item.add(notification({ summary: "Older", lastGeneration: true }));
+        item.add(notification({ summary: "Newer", lastGeneration: true }));
+
+        compare(item.items.map(entry => entry.summary), ["Newer", "Older"]);
+    }
+
+    function test_aKeptNotificationComesBackAlreadyRead() {
+        const item = createTemporaryObject(history, this);
+
+        item.add(notification({ summary: "Kept", lastGeneration: true }));
+        item.add(notification({ summary: "New" }));
+
+        compare(item.items.map(entry => entry.unread), [true, false]);
+        compare(item.unreadCount, 1);
+    }
+
+    function test_aCardRebuiltAfterAReloadStillDismissesItsNotification() {
+        const item = createTemporaryObject(history, this);
+        const kept = notification({ lastGeneration: true });
+
+        item.add(kept);
+        item.remove(item.items[0].id);
+
+        compare(kept.dismissCount, 1);
+    }
+
     function test_removingACardDismissesItsNotification() {
         const item = createTemporaryObject(history, this);
         const sent = notification();

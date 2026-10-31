@@ -4,9 +4,12 @@ import Quickshell.Services.Notifications
 import QtQuick
 import "../components/panels" as Panels
 
-// The shell's notification server and the on-screen popups it shows; the
+// The shell's notification server and the toasts it shows; the
 // notifications themselves are listed in the control center, the bell's
-// popup. Do not disturb stops both the popups and the sound.
+// popup. Every notification stays tracked while its card is in the history
+// (NotificationHistory dismisses it when the card leaves), so its actions keep
+// working after the toast hides. Do not disturb stops the toasts and the
+// sound only.
 Scope {
     id: root
 
@@ -25,24 +28,13 @@ Scope {
         keepOnReload: true
 
         onNotification: notification => {
-            notification.tracked = !root.appearance.doNotDisturb;
+            notification.tracked = true;
             root.notificationHistory.add(notification);
 
-            if (!root.appearance.doNotDisturb)
+            // Kept notifications sent again after a reload rebuild the
+            // history quietly.
+            if (!root.appearance.doNotDisturb && !notification.lastGeneration)
                 notificationSound.exec(["pw-play", "/usr/share/sounds/freedesktop/stereo/message.oga"]);
-        }
-    }
-
-    Connections {
-        target: root.appearance
-
-        function onDoNotDisturbChanged() {
-            if (!root.appearance.doNotDisturb)
-                return;
-
-            notificationServer.trackedNotifications.forEach(notification => {
-                notification.tracked = false;
-            });
         }
     }
 

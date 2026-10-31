@@ -49,8 +49,11 @@ QtObject {
     }
 
     // An entry keeps the notification's text, app icon and image as plain
-    // values, since the Notification object (`notification`, for its actions)
-    // goes away once the server lets it go.
+    // values next to the Notification object itself (`notification`, for its
+    // actions), which stays alive until the card leaves the history.
+    // After a shell reload the server sends its kept notifications again
+    // (`lastGeneration`), oldest first, so adding them rebuilds the history;
+    // they come back read, since they were there before the reload.
     function add(notification) {
         const appName = notification.appName || "";
         const summary = notification.summary || "";
@@ -67,7 +70,7 @@ QtObject {
             body: body,
             notification: notification,
             count: existing ? existing.count + 1 : 1,
-            unread: true,
+            unread: !notification.lastGeneration,
             timestamp: Date.now()
         };
         const rest = items.filter((item, index) => index !== existingIndex);
