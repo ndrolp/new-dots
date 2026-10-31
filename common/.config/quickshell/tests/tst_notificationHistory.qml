@@ -117,6 +117,35 @@ TestCase {
         compare(ongoing.dismissCount, 0);
     }
 
+    // A replacement (`replaces_id`) changes the same Notification object in
+    // place; the server doesn't send it again.
+    function test_aNotificationReplacedInPlaceUpdatesItsCardText() {
+        const item = createTemporaryObject(history, this);
+        const ongoing = notification({ summary: "Syncing", body: "10%", resident: true });
+
+        item.add(ongoing);
+        const id = item.ongoing[0].id;
+        ongoing.summary = "Syncing photos";
+        ongoing.body = "60%";
+        item.updated(ongoing);
+
+        compare(item.ongoing.map(entry => [entry.id, entry.summary, entry.body]),
+            [[id, "Syncing photos", "60%"]]);
+        compare(ongoing.dismissCount, 0);
+    }
+
+    function test_anUpdateToANotificationNoLongerListedChangesNothing() {
+        const item = createTemporaryObject(history, this);
+        const sent = notification();
+
+        item.add(sent);
+        item.remove(item.items[0].id);
+        sent.summary = "Changed";
+        item.updated(sent);
+
+        compare(item.items.length, 0);
+    }
+
     function test_aNotificationTheAppClosesKeepsItsCard() {
         const item = createTemporaryObject(history, this);
         const sent = notification();

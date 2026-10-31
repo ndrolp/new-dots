@@ -120,6 +120,22 @@ QtObject {
         updateItems(items.filter(item => item !== entry), notification);
     }
 
+    // The app replaced `notification` (`replaces_id`): the server changes the
+    // same object in place and doesn't send it again, so its card takes the
+    // new text, icon and image where it is (an ongoing card's progress).
+    function updated(notification) {
+        if (!items.some(item => item.notification === notification))
+            return;
+
+        updateItems(items.map(item => item.notification !== notification ? item
+            : Object.assign({}, item, {
+                appIcon: notification.appIcon || "",
+                image: notification.image || "",
+                summary: notification.summary || "",
+                body: notification.body || ""
+            })));
+    }
+
     // "Clear all": every notification but the ongoing ones.
     function clear() {
         updateItems(items.filter(item => item.resident));

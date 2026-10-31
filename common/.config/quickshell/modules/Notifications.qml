@@ -31,6 +31,13 @@ Scope {
             notification.tracked = true;
             // An ongoing card leaves when its app ends the notification.
             notification.closed.connect(() => root.notificationHistory.closed(notification));
+            // A replacement changes this object in place (no new
+            // `notification`), so its card follows the new text.
+            const updated = () => root.notificationHistory.updated(notification);
+            notification.summaryChanged.connect(updated);
+            notification.bodyChanged.connect(updated);
+            notification.appIconChanged.connect(updated);
+            notification.imageChanged.connect(updated);
             root.notificationHistory.add(notification);
 
             // Kept notifications sent again after a reload rebuild the
