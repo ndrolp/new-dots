@@ -26,3 +26,7 @@ common/.config/Code/Cache Storage*
 
 # The active colorscheme is machine-local (docs/adr/0001-active-colorscheme-is-machine-local.md)
 colorschemes/active
+
+# Quickshell runtime state, machine-local (created by Quickshell when missing)
+common/.config/quickshell/services/launcher.json
+common/.config/quickshell/config/wallpapers.json
