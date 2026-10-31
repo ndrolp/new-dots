@@ -83,7 +83,13 @@ QtObject {
         };
         const rest = items.filter((item, index) => index !== existingIndex);
 
-        updateItems([entry].concat(rest).slice(0, 50));
+        updateItems(capped([entry].concat(rest)));
+    }
+
+    // The newest 50 ordinary cards; ongoing ones don't count and always stay.
+    function capped(list) {
+        let ordinary = 0;
+        return list.filter(item => item.resident || ordinary++ < 50);
     }
 
     function markAllRead() {

@@ -141,6 +141,24 @@ TestCase {
         compare(sent.slice(1).filter(each => each.dismissCount > 0).length, 0);
     }
 
+    // Only "Clear all" can't remove an ongoing card, so the cap can't either.
+    function test_theFiftyCardCapNeverDropsAnOngoingNotification() {
+        const item = createTemporaryObject(history, this);
+        const ongoing = notification({ summary: "Syncing", resident: true });
+        const sent = [];
+
+        item.add(ongoing);
+        for (let index = 0; index < 51; index++) {
+            sent.push(notification({ summary: "Message " + index }));
+            item.add(sent[index]);
+        }
+
+        compare(item.ongoing.map(entry => entry.summary), ["Syncing"]);
+        compare(ongoing.dismissCount, 0);
+        compare(item.items.filter(entry => !entry.resident).length, 50);
+        compare(sent[0].dismissCount, 1);
+    }
+
     function test_aRepeatDismissesTheNotificationItReplaces() {
         const item = createTemporaryObject(history, this);
         const first = notification();
