@@ -1,1 +1,1 @@
-/home/ndrolp/.dotfiles/colorschemes/everforestdark/hypr/colors.lua
+../../../../colorschemes/shown/hypr/colors.lua

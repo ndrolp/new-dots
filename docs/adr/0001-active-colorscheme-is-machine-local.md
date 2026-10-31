@@ -5,5 +5,6 @@ Applying a colorscheme used to rewrite about a dozen tracked files (symlinks, `t
 ## Consequences
 
 - One gitignored symlink, `colorschemes/active`, names the active colorscheme. Every tracked colour link points through it, so those links never change.
+- A colorscheme preview must not touch tracked files either, so a second gitignored symlink, `colorschemes/shown`, names the colorscheme Hyprland and Quickshell are showing. Their tracked colour links point through it instead. A preview moves only `shown`; applying moves `active` and `shown`.
 - kitty includes a colour file through `active` instead of being rewritten by `kitten themes`.
 - VS Code has no include mechanism, so a git clean filter (`.gitattributes`) stores `workbench.colorTheme` as the default colorscheme's VS Code theme no matter what the working copy says. The filter has to be registered in each clone's git config, which bootstrap does. Without it, applying shows up as a diff again. It never corrupts anything.

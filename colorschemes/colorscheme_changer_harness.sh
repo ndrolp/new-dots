@@ -21,7 +21,7 @@ CHANGER_HARNESS_COLOUR_LINKS=(
 )
 
 # changer_home [--failing "<tool>..."]: makes a scratch HOME laid out as stow leaves it: ~/.dotfiles holds
-# a copy of the colorschemes (with no active colorscheme) and the repo's colour links under
+# a copy of the colorschemes (with no active or shown colorscheme) and the repo's colour links under
 # common/.config, and each ~/.config/<app> links to its common/.config/<app>. Also a shim for every
 # program the changer drives that logs "<tool> <args>" to $CALLS; the --failing ones also exit 1. A test
 # may replace a shim in $HOME_DIR/bin before run_changer. Sets HOME_DIR and CALLS.
@@ -34,7 +34,7 @@ changer_home() {
     bin="$HOME_DIR/bin"
     mkdir -p "$HOME_DIR/.dotfiles" "$bin" "$HOME_DIR/run" "$HOME_DIR/.config"
     cp -r "$CHANGER_HARNESS_COLORSCHEMES" "$HOME_DIR/.dotfiles/colorschemes"
-    rm -f "$HOME_DIR/.dotfiles/colorschemes/active"
+    rm -f "$HOME_DIR/.dotfiles/colorschemes/active" "$HOME_DIR/.dotfiles/colorschemes/shown"
     for link in "${CHANGER_HARNESS_COLOUR_LINKS[@]}"; do
         mkdir -p "$(dirname "$HOME_DIR/.dotfiles/common/.config/$link")"
         cp -P "$CHANGER_HARNESS_REPO/common/.config/$link" "$HOME_DIR/.dotfiles/common/.config/$link"
