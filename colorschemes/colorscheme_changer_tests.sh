@@ -27,7 +27,7 @@ fail() {
 # change_colorscheme [--failing "<tool>..."] <args>...: runs the changer with <args> (see changer_home and
 # run_changer in the harness). nvim is the real one, but the changer only sees the nvim sockets in
 # $RUN_DIR, and when $NVIM_THEME is set it replaces every colorscheme's nvim/theme.lua.
-# $ACTIVE_COLORSCHEME, when set, is written to theme.txt first. Sets OUT to the changer's output,
+# $ACTIVE_COLORSCHEME, when set, is made the active colorscheme first. Sets OUT to the changer's output,
 # NOTIFICATIONS to the notify-send calls, one per line, and HOME_DIR to the scratch HOME.
 change_colorscheme() {
     local theme
@@ -37,7 +37,7 @@ change_colorscheme() {
     else
         changer_home
     fi
-    [[ -z "${ACTIVE_COLORSCHEME:-}" ]] || echo "$ACTIVE_COLORSCHEME" >"$HOME_DIR/.dotfiles/colorschemes/theme.txt"
+    [[ -z "${ACTIVE_COLORSCHEME:-}" ]] || ln -s "$ACTIVE_COLORSCHEME" "$HOME_DIR/.dotfiles/colorschemes/active"
     install_gtk_themes "$HOME_DIR"
     if [[ -n "${NVIM_THEME:-}" ]]; then
         for theme in "$HOME_DIR"/.dotfiles/colorschemes/*/nvim/theme.lua; do
@@ -93,6 +93,49 @@ colorscheme_in() { nvim --server "$1" --remote-expr 'get(g:, "colors_name", "")'
 # The nvim/theme.lua every colorscheme gets in these tests: it loads nvim's built-in "desert", standing in
 # for the plugin themes.
 APPLIED_NVIM_THEME='vim.cmd.colorscheme("desert")'
+
+# commit_dotfiles: makes the scratch ~/.dotfiles a git repo, with the repo's .gitignore, and commits it.
+commit_dotfiles() {
+    cp "$COLORSCHEMES/../.gitignore" "$HOME_DIR/.dotfiles/.gitignore"
+    git -C "$HOME_DIR/.dotfiles" init -q
+    git -C "$HOME_DIR/.dotfiles" add -A
+    git -C "$HOME_DIR/.dotfiles" -c user.name=t -c user.email=t@t commit -qm dotfiles
+}
+
+# The colour links an apply leaves alone, and the default-colorscheme record.
+UNCHANGED_BY_APPLY=(
+    common/.config/waybar/custom/colors.css
+    common/.config/hypr/custom/hyprlock-colors.conf
+    common/.config/nvim/lua/settings/core/theme.lua
+    common/.config/rofi/custom/colors.rasi
+    colorschemes/default.txt
+)
+
+test_applying_leaves_the_tracked_colour_links_and_the_default_colorscheme_unchanged() {
+    changer_home
+    commit_dotfiles
+    run_changer everforestdark
+    run_changer nord
+    [[ -z "$(git -C "$HOME_DIR/.dotfiles" status --porcelain -- "${UNCHANGED_BY_APPLY[@]}")" ]] \
+        || fail "git status: $(git -C "$HOME_DIR/.dotfiles" status --porcelain -- "${UNCHANGED_BY_APPLY[@]}")"
+}
+
+test_the_colour_links_lead_to_the_applied_colorschemes_colours() {
+    change_colorscheme nord
+    local app file
+    for app in waybar/custom/colors.css:waybar/colors.css hypr/custom/hyprlock-colors.conf:hyprlock/colors.conf \
+        nvim/lua/settings/core/theme.lua:nvim/theme.lua rofi/custom/colors.rasi:rofi/colors.rasi; do
+        file="$(readlink -f "$HOME_DIR/.config/${app%%:*}")"
+        [[ "$file" == "$HOME_DIR/.dotfiles/colorschemes/nord/${app#*:}" ]] || fail "${app%%:*} leads to $file"
+    done
+}
+
+test_the_active_colorscheme_link_is_gitignored() {
+    changer_home
+    commit_dotfiles
+    run_changer nord
+    git -C "$HOME_DIR/.dotfiles" check-ignore -q colorschemes/active || fail "colorschemes/active is not ignored"
+}
 
 test_a_failing_step_does_not_stop_the_later_steps() {
     change_colorscheme --failing "kitten" nord
@@ -156,18 +199,18 @@ test_a_dead_nvim_socket_fails_the_nvim_step_without_stopping_the_other_nvims() {
 
 test_new_nvims_start_in_the_applied_colorscheme() {
     change_colorscheme nord
-    [[ "$(readlink "$HOME_DIR/.config/nvim/lua/settings/core/theme.lua")" == "$HOME_DIR/.dotfiles/colorschemes/nord/nvim/theme.lua" ]] \
-        || fail "theme.lua does not link to nord's"
+    [[ "$(readlink -f "$HOME_DIR/.config/nvim/lua/settings/core/theme.lua")" == "$HOME_DIR/.dotfiles/colorschemes/nord/nvim/theme.lua" ]] \
+        || fail "theme.lua does not lead to nord's"
 }
 
 test_previewing_does_not_change_the_active_colorscheme() {
     ACTIVE_COLORSCHEME=everforestdark change_colorscheme --preview nord
-    [[ "$(cat "$HOME_DIR/.dotfiles/colorschemes/theme.txt")" == everforestdark ]] || fail "theme.txt was written"
+    [[ "$(readlink "$HOME_DIR/.dotfiles/colorschemes/active")" == everforestdark ]] || fail "the active link was moved"
 }
 
 test_applying_makes_the_colorscheme_the_active_one() {
     ACTIVE_COLORSCHEME=everforestdark change_colorscheme nord
-    [[ "$(cat "$HOME_DIR/.dotfiles/colorschemes/theme.txt")" == nord ]] || fail "theme.txt does not name nord"
+    [[ "$(readlink "$HOME_DIR/.dotfiles/colorschemes/active")" == nord ]] || fail "the active link does not name nord"
 }
 
 test_previewing_recolours_hyprland_and_quickshell() {

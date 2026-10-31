@@ -1,18 +1,26 @@
 #!/usr/bin/env bash
 
-WAYBAR_COLORS="$HOME/.config/waybar/custom/colors.css"
 HYPRLAND_COLORS="$HOME/.config/hypr/custom/colors.conf"
 HYPRLAND_LUA_COLORS="$HOME/.config/hypr/custom/colors.lua"
-HYPRLOCK_COLORS="$HOME/.config/hypr/custom/hyprlock-colors.conf"
 NVIM_COLORS="$HOME/.config/nvim/lua/settings/core/theme.lua"
-ROFI_COLORS="$HOME/.config/rofi/custom/colors.rasi"
 VSCODE_SETTINGS="$HOME/.config/Code/User/settings.json"
 
 TARGET_DIR="$HOME/.dotfiles/colorschemes"
 
-# Theme state storage
-THEME_STATE_DIR="$HOME/.dotfiles/colorschemes/"
-THEME_FILE="$THEME_STATE_DIR/theme.txt"
+# The active colorscheme is machine-local (docs/adr/0001-active-colorscheme-is-machine-local.md): the
+# gitignored link `active` names it, and the tracked colour links (waybar, hyprlock, nvim, rofi) point
+# through it, so applying moves only this link. default.txt, tracked, names the default colorscheme,
+# which `active` starts from whenever it is missing; an apply never writes it.
+ACTIVE_LINK="$TARGET_DIR/active"
+DEFAULT_FILE="$TARGET_DIR/default.txt"
+
+# ensure_active: creates the active link from the default colorscheme when it is missing.
+ensure_active() {
+  [ -L "$ACTIVE_LINK" ] && [ -d "$ACTIVE_LINK" ] && return 0
+  ln -sfn "$(cat "$DEFAULT_FILE")" "$ACTIVE_LINK"
+}
+
+ensure_active
 
 PREVIEW_MODE=false
 
@@ -98,7 +106,7 @@ recolour_quickshell() {
 }
 
 # A colorscheme preview recolours Hyprland and Quickshell only and leaves the active colorscheme
-# (theme.txt) alone; the selector previews the active colorscheme again to leave the preview.
+# alone; the selector previews the active colorscheme again to leave the preview.
 if [ "$PREVIEW_MODE" = true ]; then
   link_hypr_colors
   hyprctl reload
@@ -107,8 +115,7 @@ if [ "$PREVIEW_MODE" = true ]; then
 fi
 
 # Only applying makes the colorscheme the active one.
-mkdir -p "$THEME_STATE_DIR"
-echo "$SELECTED_FOLDER" > "$THEME_FILE"
+ln -sfn "$SELECTED_FOLDER" "$ACTIVE_LINK"
 
 # Steps: each one updates one part of the desktop. `step <name> <function> [args...]` runs the function
 # in a subshell with errexit and pipefail, so its first failing command fails the step, and a failed step
@@ -135,13 +142,8 @@ report_failed_steps() {
     "Failed steps: ${names%, }"
 }
 
-apply_waybar() {
-  ln -sf "$THEME_FOLDER/waybar/colors.css" "$WAYBAR_COLORS"
-}
-
 apply_hyprland() {
   link_hypr_colors
-  ln -sf "$THEME_FOLDER/hyprlock/colors.conf" "$HYPRLOCK_COLORS"
   hyprctl reload
 }
 
@@ -149,10 +151,9 @@ apply_kitty() {
   kitten themes --reload-in=all "$KITTY_THEME"
 }
 
-# New nvims load the linked theme.lua at startup; running ones re-source it through their server
+# New nvims load theme.lua, linked through the active colorscheme, at startup; running ones re-source it through their server
 # socket. Every socket is tried, and any that can't be reached fails the step afterwards.
 apply_nvim() {
-  ln -sf "$THEME_FOLDER/nvim/theme.lua" "$NVIM_COLORS"
   [ -n "${XDG_RUNTIME_DIR:-}" ] || return 0
 
   local socket unreachable=0
@@ -162,10 +163,6 @@ apply_nvim() {
       || unreachable=1
   done
   return "$unreachable"
-}
-
-apply_rofi() {
-  ln -sf "$THEME_FOLDER/rofi/colors.rasi" "$ROFI_COLORS"
 }
 
 apply_vscode() {
@@ -223,11 +220,9 @@ apply_quickshell() {
   recolour_quickshell
 }
 
-step waybar apply_waybar
 step hyprland apply_hyprland
 step kitty apply_kitty
 step nvim apply_nvim
-step rofi apply_rofi
 step vscode apply_vscode
 step gtk apply_gtk
 step quickshell apply_quickshell

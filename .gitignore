@@ -23,3 +23,6 @@ common/.config/Code/Cache Storage*
 
 # Claude Code agent worktrees
 .claude/worktrees/
+
+# The active colorscheme is machine-local (docs/adr/0001-active-colorscheme-is-machine-local.md)
+colorschemes/active
