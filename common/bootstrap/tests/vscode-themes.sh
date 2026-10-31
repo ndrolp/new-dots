@@ -139,14 +139,16 @@ test_without_vscode_the_step_skips() {
     grep -q "^skipped	VS Code themes (VS Code is not installed)$" <<<"$SUMMARY" || fail "skip not reported: $SUMMARY"
 }
 
-test_every_colorschemes_vscode_theme_is_listed() {
+test_every_colorscheme_names_a_vscode_theme_that_is_listed() {
     OUT=""
     CALLS=/dev/null
-    local changer="$REPO/colorschemes/colorscheme_changer.sh" theme
-    while read -r theme; do
+    local scheme theme
+    for scheme in "$REPO"/colorschemes/*/; do
+        [[ -f "$scheme/vscode-theme.txt" ]] || fail "$(basename "$scheme") names no VS Code theme"
+        theme="$(cat "$scheme/vscode-theme.txt")"
         sed 's/#.*//' "$REPO/common/bootstrap/vscode-themes.txt" | awk 'NF { $1 = ""; sub(/^ +/, ""); print }' \
-            | grep -qxF "$theme" || fail "$theme (from the colorscheme changer) is not in vscode-themes.txt"
-    done < <(sed -n 's/.*VSCODE_THEME="\(.*\)".*/\1/p' "$changer")
+            | grep -qxF "$theme" || fail "$theme (from $(basename "$scheme")) is not in vscode-themes.txt"
+    done
 }
 
 for t in $(declare -F | awk '{print $3}' | grep "^test_.*${1:-}"); do

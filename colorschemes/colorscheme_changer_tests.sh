@@ -18,7 +18,7 @@ mapfile -t GTK_THEMES < <(sed 's/#.*//' "$COLORSCHEMES/../common/bootstrap/gtk-t
 
 fail() {
     echo "  FAIL: $*"
-    echo "$OUT" | sed 's/^/    | /'
+    echo "${OUT:-}" | sed 's/^/    | /'
     echo "  calls:"
     sed 's/^/    | /' "$CALLS" 2>/dev/null
     return 1
@@ -27,7 +27,7 @@ fail() {
 # change_colorscheme [--failing "<tool>..."] <args>...: runs the changer with <args> (see changer_home and
 # run_changer in the harness). nvim is the real one, but the changer only sees the nvim sockets in
 # $RUN_DIR, and when $NVIM_THEME is set it replaces every colorscheme's nvim/theme.lua.
-# $ACTIVE_COLORSCHEME, when set, is written to theme.txt first. Sets OUT to the changer's output,
+# $ACTIVE_COLORSCHEME, when set, is made the active colorscheme first. Sets OUT to the changer's output,
 # NOTIFICATIONS to the notify-send calls, one per line, and HOME_DIR to the scratch HOME.
 change_colorscheme() {
     local theme
@@ -37,7 +37,7 @@ change_colorscheme() {
     else
         changer_home
     fi
-    [[ -z "${ACTIVE_COLORSCHEME:-}" ]] || echo "$ACTIVE_COLORSCHEME" >"$HOME_DIR/.dotfiles/colorschemes/theme.txt"
+    [[ -z "${ACTIVE_COLORSCHEME:-}" ]] || ln -s "$ACTIVE_COLORSCHEME" "$HOME_DIR/.dotfiles/colorschemes/active"
     install_gtk_themes "$HOME_DIR"
     if [[ -n "${NVIM_THEME:-}" ]]; then
         for theme in "$HOME_DIR"/.dotfiles/colorschemes/*/nvim/theme.lua; do
@@ -94,16 +94,205 @@ colorscheme_in() { nvim --server "$1" --remote-expr 'get(g:, "colors_name", "")'
 # for the plugin themes.
 APPLIED_NVIM_THEME='vim.cmd.colorscheme("desert")'
 
+# commit_dotfiles: makes the scratch ~/.dotfiles a git repo, with the repo's .gitignore and .gitattributes,
+# and commits it.
+commit_dotfiles() {
+    cp "$COLORSCHEMES/../.gitignore" "$COLORSCHEMES/../.gitattributes" "$HOME_DIR/.dotfiles/"
+    git -C "$HOME_DIR/.dotfiles" init -q
+    git -C "$HOME_DIR/.dotfiles" add -A
+    # The repo tracks VS Code's settings file although .gitignore matches it.
+    git -C "$HOME_DIR/.dotfiles" add -f common/.config/Code/User/settings.json
+    git -C "$HOME_DIR/.dotfiles" -c user.name=t -c user.email=t@t commit -qm dotfiles
+}
+
+# The colour links an apply leaves alone, and the default-colorscheme record.
+UNCHANGED_BY_APPLY=(
+    common/.config/waybar/custom/colors.css
+    common/.config/hypr/custom/hyprlock-colors.conf
+    common/.config/nvim/lua/settings/core/theme.lua
+    common/.config/rofi/custom/colors.rasi
+    colorschemes/default.txt
+    common/.config/kitty
+)
+
+test_applying_leaves_the_tracked_colour_links_and_the_default_colorscheme_unchanged() {
+    changer_home
+    commit_dotfiles
+    run_changer everforestdark
+    run_changer nord
+    [[ -z "$(git -C "$HOME_DIR/.dotfiles" status --porcelain -- "${UNCHANGED_BY_APPLY[@]}")" ]] \
+        || fail "git status: $(git -C "$HOME_DIR/.dotfiles" status --porcelain -- "${UNCHANGED_BY_APPLY[@]}")"
+}
+
+test_the_colour_links_lead_to_the_applied_colorschemes_colours() {
+    change_colorscheme nord
+    local app file
+    for app in waybar/custom/colors.css:waybar/colors.css hypr/custom/hyprlock-colors.conf:hyprlock/colors.conf \
+        nvim/lua/settings/core/theme.lua:nvim/theme.lua rofi/custom/colors.rasi:rofi/colors.rasi; do
+        file="$(readlink -f "$HOME_DIR/.config/${app%%:*}")"
+        [[ "$file" == "$HOME_DIR/.dotfiles/colorschemes/nord/${app#*:}" ]] || fail "${app%%:*} leads to $file"
+    done
+}
+
+test_the_active_colorscheme_link_is_gitignored() {
+    changer_home
+    commit_dotfiles
+    run_changer nord
+    git -C "$HOME_DIR/.dotfiles" check-ignore -q colorschemes/active || fail "colorschemes/active is not ignored"
+}
+
+test_asking_for_the_active_colorscheme_names_it() {
+    ACTIVE_COLORSCHEME=kanagawa change_colorscheme --active
+    [[ "$OUT" == kanagawa ]] || fail "expected kanagawa"
+    [[ ! -s "$CALLS" ]] || fail "asking drove a program"
+}
+
+test_without_an_active_link_the_default_colorscheme_becomes_active() {
+    changer_home
+    echo rosepine >"$HOME_DIR/.dotfiles/colorschemes/default.txt"
+    run_changer --active
+    [[ "$OUT" == rosepine ]] || fail "expected the default, rosepine"
+    [[ "$(readlink "$HOME_DIR/.dotfiles/colorschemes/active")" == rosepine ]] || fail "the active link was not created"
+}
+
+test_a_default_naming_a_missing_colorscheme_fails_loudly_and_links_nothing() {
+    changer_home
+    echo nosuch >"$HOME_DIR/.dotfiles/colorschemes/default.txt"
+    ! run_changer --active || fail "asking for the active colorscheme succeeded"
+    [[ "$OUT" == *nosuch* ]] || fail "the error does not name the missing colorscheme"
+    [[ ! -L "$HOME_DIR/.dotfiles/colorschemes/active" ]] || fail "an active link was created"
+    [[ ! -L "$HOME_DIR/.dotfiles/colorschemes/shown" ]] || fail "a shown link was created"
+}
+
+test_an_apply_without_an_active_link_leaves_the_default_colorscheme_alone() {
+    changer_home
+    run_changer nord
+    [[ "$(cat "$HOME_DIR/.dotfiles/colorschemes/default.txt")" == everforestdark ]] || fail "default.txt was written"
+    [[ "$(readlink "$HOME_DIR/.dotfiles/colorschemes/active")" == nord ]] || fail "nord is not active"
+}
+
+test_listing_names_every_colorscheme_but_not_the_active_link() {
+    ACTIVE_COLORSCHEME=nord change_colorscheme --list
+    [[ "$OUT" == "$(printf '%s\n' bloodmoon carbonfox catppuccin coralnord dracula everforestdark gruvboxdark \
+        kanagawa nord rosepine tokyonight)" ]] || fail "unexpected list"
+}
+
+test_listing_names_every_colorscheme_but_not_the_shown_link() {
+    ACTIVE_COLORSCHEME=nord change_colorscheme --preview kanagawa
+    [[ -L "$HOME_DIR/.dotfiles/colorschemes/shown" ]] || fail "previewing left no shown link"
+    run_changer --list
+    [[ "$OUT" == "$(printf '%s\n' bloodmoon carbonfox catppuccin coralnord dracula everforestdark gruvboxdark \
+        kanagawa nord rosepine tokyonight)" ]] || fail "unexpected list"
+}
+
+test_the_active_link_cannot_be_applied_as_a_colorscheme() {
+    ACTIVE_COLORSCHEME=nord change_colorscheme active || true
+    [[ "$(readlink "$HOME_DIR/.dotfiles/colorschemes/active")" == nord ]] || fail "the active link was moved"
+    [[ ! -s "$CALLS" ]] || fail "applying active drove a program"
+}
+
+# vscode_settings_diff <home>: the lines VS Code's settings file in <home> changed, against the repo's.
+vscode_settings_diff() {
+    diff "$COLORSCHEMES/../common/.config/Code/User/settings.json" "$1/.config/Code/User/settings.json"
+}
+
+test_applying_switches_vs_codes_theme_and_nothing_else_in_its_settings() {
+    change_colorscheme nord
+    [[ "$(vscode_settings_diff "$HOME_DIR" | grep '^[<>]')" == "$(printf '%s\n' \
+        '<     "workbench.colorTheme": "Everforest Pro Dark",' \
+        '>     "workbench.colorTheme": "Nord",')" ]] || fail "settings diff: $(vscode_settings_diff "$HOME_DIR")"
+}
+
+test_applying_names_a_theme_with_non_ascii_characters_in_vs_code() {
+    change_colorscheme rosepine
+    grep -qxF '    "workbench.colorTheme": "Rosé Pine",' "$HOME_DIR/.config/Code/User/settings.json" \
+        || fail "settings: $(vscode_settings_diff "$HOME_DIR")"
+}
+
+# register_vscode_theme_filter: registers the VS Code theme clean filter in the scratch ~/.dotfiles, as
+# bootstrap does.
+register_vscode_theme_filter() {
+    "$HOME_DIR/.dotfiles/colorschemes/vscode_theme.sh" --register
+}
+
+test_with_the_filter_registered_applying_leaves_vs_codes_settings_out_of_git_status() {
+    changer_home
+    commit_dotfiles
+    register_vscode_theme_filter
+    run_changer nord
+    grep -qF '"workbench.colorTheme": "Nord"' "$HOME_DIR/.config/Code/User/settings.json" || fail "nord was not applied"
+    [[ -z "$(git -C "$HOME_DIR/.dotfiles" status --porcelain -- common/.config/Code)" ]] \
+        || fail "git status: $(git -C "$HOME_DIR/.dotfiles" status --porcelain -- common/.config/Code)"
+}
+
+test_with_the_filter_registered_other_changes_to_vs_codes_settings_still_show() {
+    changer_home
+    commit_dotfiles
+    register_vscode_theme_filter
+    run_changer nord
+    sed -i 's/"editor.fontSize": 14/"editor.fontSize": 15/' "$HOME_DIR/.config/Code/User/settings.json"
+    [[ "$(git -C "$HOME_DIR/.dotfiles" diff -U0 -- common/.config/Code | grep '^[-+] ')" == "$(printf '%s\n' \
+        '-    "editor.fontSize": 14,' '+    "editor.fontSize": 15,')" ]] \
+        || fail "git diff: $(git -C "$HOME_DIR/.dotfiles" diff -- common/.config/Code)"
+}
+
+test_with_the_filter_registered_applying_and_previewing_leave_git_status_empty() {
+    changer_home
+    commit_dotfiles
+    register_vscode_theme_filter
+    run_changer nord
+    run_changer --preview kanagawa
+    run_changer rosepine
+    [[ -z "$(git -C "$HOME_DIR/.dotfiles" status --porcelain)" ]] \
+        || fail "git status: $(git -C "$HOME_DIR/.dotfiles" status --porcelain)"
+}
+
+test_applying_never_stages_edits_to_vs_codes_settings() {
+    local registered
+    for registered in true false; do
+        changer_home
+        commit_dotfiles
+        [[ $registered == false ]] || register_vscode_theme_filter
+        sed -i 's/"editor.fontSize": 14/"editor.fontSize": 15/' "$HOME_DIR/.config/Code/User/settings.json"
+        run_changer nord
+        [[ -z "$(git -C "$HOME_DIR/.dotfiles" diff --cached --name-only)" ]] \
+            || fail "filter registered: $registered; staged: $(git -C "$HOME_DIR/.dotfiles" diff --cached --name-only)"
+        ! git -C "$HOME_DIR/.dotfiles" diff --quiet -- common/.config/Code || fail "filter registered: $registered; the edit vanished"
+    done
+}
+
+test_without_the_filter_applying_shows_vs_codes_theme_as_a_change() {
+    changer_home
+    commit_dotfiles
+    run_changer nord
+    [[ "$(git -C "$HOME_DIR/.dotfiles" status --porcelain -- common/.config/Code)" == " M common/.config/Code/User/settings.json" ]] \
+        || fail "git status: $(git -C "$HOME_DIR/.dotfiles" status --porcelain)"
+}
+
+# vscode_theme_filter <file>: runs the clean filter over <file>, as git does.
+vscode_theme_filter() { "$COLORSCHEMES/vscode_theme.sh" --default <"$1"; }
+
+test_the_filter_stores_the_default_colorschemes_theme_and_every_other_byte_as_is() {
+    changer_home
+    run_changer nord
+    local settings="$HOME_DIR/.config/Code/User/settings.json"
+    printf '    "workbench.colorTheme": "Nord"' >>"$settings" # no final newline, a second setting
+    OUT="$(vscode_theme_filter "$settings" | diff - <(cat "$COLORSCHEMES/../common/.config/Code/User/settings.json"; \
+        printf '    "workbench.colorTheme": "Everforest Pro Dark"'))" || fail "filtered settings differ"
+    cmp -s <(vscode_theme_filter "$settings") <(vscode_theme_filter "$settings" | "$COLORSCHEMES/vscode_theme.sh" --default) \
+        || fail "filtering twice differs from filtering once"
+}
+
 test_a_failing_step_does_not_stop_the_later_steps() {
-    change_colorscheme --failing "kitten" nord
-    [[ "$(calls_to quickshell)" -gt 0 ]] || fail "quickshell was never asked to reload after kitty failed"
+    change_colorscheme --failing "hyprctl" nord
+    [[ "$(calls_to quickshell)" -gt 0 ]] || fail "quickshell was never asked to reload after hyprland failed"
 }
 
 test_an_apply_with_failed_steps_sends_one_notification_naming_them() {
-    change_colorscheme --failing "kitten gsettings" nord
+    change_colorscheme --failing "hyprctl gsettings" nord
     [[ "$(calls_to notify-send)" -eq 1 ]] || fail "expected exactly one notification"
-    [[ "$NOTIFICATIONS" == *kitty* && "$NOTIFICATIONS" == *gtk* ]] || fail "notification does not name kitty and gtk"
-    [[ "$NOTIFICATIONS" != *hyprland* ]] || fail "notification names a step that succeeded"
+    [[ "$NOTIFICATIONS" == *hyprland* && "$NOTIFICATIONS" == *gtk* ]] || fail "notification does not name hyprland and gtk"
+    [[ "$NOTIFICATIONS" != *quickshell* ]] || fail "notification names a step that succeeded"
 }
 
 test_a_successful_apply_sends_no_notification() {
@@ -111,15 +300,98 @@ test_a_successful_apply_sends_no_notification() {
     [[ -z "$NOTIFICATIONS" ]] || fail "a successful apply notified"
 }
 
+# Running kittys reread their config, and with it the colours it includes, on SIGUSR1: no remote control
+# or `kitten themes` needed.
+test_applying_asks_every_running_kitty_to_reload_its_config() {
+    change_colorscheme nord
+    grep -qx "pkill -USR1 -u $(id -u) -x kitty" "$CALLS" || fail "kitty was not asked to reload"
+    [[ "$(calls_to kitten)" -eq 0 ]] || fail "kitten was run"
+}
+
+# pkill_exiting <status>: makes the pkill shim exit with <status> (1: no kitty was running; 3: pkill failed).
+pkill_exiting() {
+    printf '#!/bin/sh\necho "pkill $*" >>"$HOME/calls"\nexit %s\n' "$1" >"$HOME_DIR/bin/pkill"
+}
+
+test_applying_with_no_kitty_running_is_not_a_failure() {
+    changer_home
+    install_gtk_themes "$HOME_DIR"
+    pkill_exiting 1
+    run_changer nord
+    ! grep -q "^notify-send " "$CALLS" || fail "no kitty running notified"
+}
+
+test_a_failing_kitty_reload_fails_the_kitty_step() {
+    changer_home
+    pkill_exiting 3
+    run_changer nord
+    grep "^notify-send " "$CALLS" | grep -q kitty || fail "the kitty step did not fail"
+}
+
+# kitty_config [<file>]: kitty's config as kitty reads it, from <file> (default: ~/.config/kitty/kitty.conf
+# in the scratch HOME), with every include replaced by the file it names, relative to ~/.config/kitty;
+# like kitty, it skips an include whose file is missing (the harness copies only the colour files).
+kitty_config() {
+    local file="${1:-$HOME_DIR/.config/kitty/kitty.conf}" line included
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        if [[ "$line" =~ ^[[:space:]]*include[[:space:]]+(.+)$ ]]; then
+            included="${BASH_REMATCH[1]}"
+            included="${included/#\~/$HOME_DIR}"
+            [[ "$included" == /* ]] || included="$HOME_DIR/.config/kitty/$included"
+            [[ -f "$included" ]] || continue
+            kitty_config "$included"
+        else
+            printf '%s\n' "$line"
+        fi
+    done <"$file"
+}
+
+# kitty_setting <name>: the value kitty ends up with for <name> (the last one set wins).
+kitty_setting() { kitty_config | awk -v name="$1" '$1 == name { value = $2 } END { print value }'; }
+
+test_kitty_takes_the_applied_colorschemes_colours() {
+    change_colorscheme nord
+    [[ "$(kitty_setting background)" == "#2E3440" ]] || fail "background is $(kitty_setting background)"
+    run_changer gruvboxdark
+    [[ "$(kitty_setting background)" == "#1d2021" ]] || fail "background is $(kitty_setting background)"
+}
+
+test_terminal_transparency_survives_applying_every_colorscheme() {
+    changer_home
+    local scheme
+    for scheme in $(bash "$HOME_DIR/.dotfiles/colorschemes/colorscheme_changer.sh" --list); do
+        run_changer "$scheme"
+        [[ "$(kitty_setting background_opacity)" == 0.80 ]] \
+            || fail "$scheme leaves background_opacity at $(kitty_setting background_opacity)"
+    done
+}
+
+test_every_colorscheme_has_its_own_kitty_colours() {
+    changer_home
+    local scheme colours
+    for scheme in $(bash "$HOME_DIR/.dotfiles/colorschemes/colorscheme_changer.sh" --list); do
+        colours="$COLORSCHEMES/$scheme/kitty.conf"
+        [[ -f "$colours" && ! -L "$colours" ]] || fail "$scheme has no kitty.conf of its own"
+        ! grep -q "^[[:space:]]*include" "$colours" || fail "$scheme's kitty.conf includes another file"
+        grep -q "^foreground[[:space:]]" "$colours" && grep -q "^background[[:space:]]" "$colours" \
+            || fail "$scheme's kitty.conf sets no foreground or background"
+    done
+}
+
+test_the_kitty_themes_folder_and_backup_are_gone() {
+    [[ ! -e "$COLORSCHEMES/../common/.config/kitty/themes" ]] || fail "kitty's themes folder is still there"
+    [[ ! -e "$COLORSCHEMES/../common/.config/kitty/kitty.conf.bak" ]] || fail "kitty.conf.bak is still there"
+}
+
 test_applying_does_not_ask_ags_for_the_theme() {
     change_colorscheme nord
     [[ "$(calls_to ags)" -eq 0 ]] || fail "ags was called"
 }
 
-test_applying_links_the_colorschemes_quickshell_colours_and_asks_the_shell_to_reload_them() {
+test_applying_leads_quickshells_colours_to_the_colorschemes_and_asks_the_shell_to_reload_them() {
     change_colorscheme nord
-    [[ "$(readlink "$HOME_DIR/.config/quickshell/config/colors.json")" == "$HOME_DIR/.dotfiles/colorschemes/nord/quickshell/colors.json" ]] \
-        || fail "colours not linked"
+    [[ "$(readlink -f "$HOME_DIR/.config/quickshell/config/colors.json")" == "$HOME_DIR/.dotfiles/colorschemes/nord/quickshell/colors.json" ]] \
+        || fail "colours do not lead to nord's"
     grep -qx "quickshell ipc --path $HOME_DIR/.config/quickshell call colorscheme reload" "$CALLS" \
         || fail "the shell was not asked to reload its colours"
 }
@@ -156,27 +428,51 @@ test_a_dead_nvim_socket_fails_the_nvim_step_without_stopping_the_other_nvims() {
 
 test_new_nvims_start_in_the_applied_colorscheme() {
     change_colorscheme nord
-    [[ "$(readlink "$HOME_DIR/.config/nvim/lua/settings/core/theme.lua")" == "$HOME_DIR/.dotfiles/colorschemes/nord/nvim/theme.lua" ]] \
-        || fail "theme.lua does not link to nord's"
+    [[ "$(readlink -f "$HOME_DIR/.config/nvim/lua/settings/core/theme.lua")" == "$HOME_DIR/.dotfiles/colorschemes/nord/nvim/theme.lua" ]] \
+        || fail "theme.lua does not lead to nord's"
 }
 
 test_previewing_does_not_change_the_active_colorscheme() {
     ACTIVE_COLORSCHEME=everforestdark change_colorscheme --preview nord
-    [[ "$(cat "$HOME_DIR/.dotfiles/colorschemes/theme.txt")" == everforestdark ]] || fail "theme.txt was written"
+    [[ "$(readlink "$HOME_DIR/.dotfiles/colorschemes/active")" == everforestdark ]] || fail "the active link was moved"
+}
+
+test_previewing_then_leaving_the_preview_leaves_git_status_clean() {
+    ACTIVE_COLORSCHEME=everforestdark change_colorscheme --active
+    commit_dotfiles
+    run_changer --preview nord
+    run_changer --preview everforestdark
+    [[ -z "$(git -C "$HOME_DIR/.dotfiles" status --porcelain)" ]] \
+        || fail "git status: $(git -C "$HOME_DIR/.dotfiles" status --porcelain)"
+}
+
+test_without_a_shown_link_hyprland_and_quickshell_show_the_active_colorscheme() {
+    ACTIVE_COLORSCHEME=kanagawa change_colorscheme --active
+    [[ "$(readlink -f "$HOME_DIR/.config/hypr/custom/colors.lua")" == "$HOME_DIR/.dotfiles/colorschemes/kanagawa/hypr/colors.lua" ]] \
+        || fail "Hyprland colours do not lead to kanagawa's"
+    [[ "$(readlink -f "$HOME_DIR/.config/quickshell/config/colors.json")" == "$HOME_DIR/.dotfiles/colorschemes/kanagawa/quickshell/colors.json" ]] \
+        || fail "Quickshell colours do not lead to kanagawa's"
+}
+
+test_the_shown_colorscheme_link_is_gitignored() {
+    changer_home
+    commit_dotfiles
+    run_changer --preview nord
+    git -C "$HOME_DIR/.dotfiles" check-ignore -q colorschemes/shown || fail "colorschemes/shown is not ignored"
 }
 
 test_applying_makes_the_colorscheme_the_active_one() {
     ACTIVE_COLORSCHEME=everforestdark change_colorscheme nord
-    [[ "$(cat "$HOME_DIR/.dotfiles/colorschemes/theme.txt")" == nord ]] || fail "theme.txt does not name nord"
+    [[ "$(readlink "$HOME_DIR/.dotfiles/colorschemes/active")" == nord ]] || fail "the active link does not name nord"
 }
 
 test_previewing_recolours_hyprland_and_quickshell() {
     change_colorscheme --preview nord
-    [[ "$(readlink "$HOME_DIR/.config/hypr/custom/colors.lua")" == "$HOME_DIR/.dotfiles/colorschemes/nord/hypr/colors.lua" ]] \
-        || fail "Hyprland colours not linked"
+    [[ "$(readlink -f "$HOME_DIR/.config/hypr/custom/colors.lua")" == "$HOME_DIR/.dotfiles/colorschemes/nord/hypr/colors.lua" ]] \
+        || fail "Hyprland colours do not lead to nord's"
     grep -qx "hyprctl reload" "$CALLS" || fail "Hyprland was not reloaded"
-    [[ "$(readlink "$HOME_DIR/.config/quickshell/config/colors.json")" == "$HOME_DIR/.dotfiles/colorschemes/nord/quickshell/colors.json" ]] \
-        || fail "Quickshell colours not linked"
+    [[ "$(readlink -f "$HOME_DIR/.config/quickshell/config/colors.json")" == "$HOME_DIR/.dotfiles/colorschemes/nord/quickshell/colors.json" ]] \
+        || fail "Quickshell colours do not lead to nord's"
     grep -qx "quickshell ipc --path $HOME_DIR/.config/quickshell call colorscheme reload" "$CALLS" \
         || fail "the shell was not asked to reload its colours"
 }

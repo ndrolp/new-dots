@@ -5,22 +5,47 @@
 # is listed as a colorscheme.) Needs SCRATCH, a scratch folder the caller removes.
 
 CHANGER_HARNESS_COLORSCHEMES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CHANGER_HARNESS_REPO="$(cd "$CHANGER_HARNESS_COLORSCHEMES/.." && pwd)"
 
-# changer_home [--failing "<tool>..."]: makes a scratch HOME with the config folders the changer links
-# into and a copy of the colorschemes, and a shim for every program the changer drives that logs
-# "<tool> <args>" to $CALLS; the --failing ones also exit 1. A test may replace a shim in $HOME_DIR/bin
-# before run_changer. Sets HOME_DIR and CALLS.
+# The repo's colour links, as tracked under common/.config, and kitty's config, which includes one.
+CHANGER_HARNESS_COLOUR_LINKS=(
+    waybar/custom/colors.css
+    hypr/custom/colors.conf
+    hypr/custom/colors.lua
+    hypr/custom/hyprlock-colors.conf
+    nvim/lua/settings/core/theme.lua
+    rofi/custom/colors.rasi
+    quickshell/config/colors.json
+    kitty/colorscheme.conf
+    kitty/kitty.conf
+)
+
+# changer_home [--failing "<tool>..."]: makes a scratch HOME laid out as stow leaves it: ~/.dotfiles holds
+# a copy of the colorschemes (with no active or shown colorscheme), the repo's colour links and VS Code's
+# settings file under common/.config, and each ~/.config/<app> links to its common/.config/<app>. Also a
+# shim for every program the changer drives that logs "<tool> <args>" to $CALLS; the --failing ones also
+# exit 1. A test may replace a shim in $HOME_DIR/bin before run_changer. Sets HOME_DIR and CALLS.
 changer_home() {
-    local failing="" bin tool
+    local failing="" bin tool link app
     if [[ "${1:-}" == --failing ]]; then
         failing="$2"
     fi
     HOME_DIR="$(mktemp -d "$SCRATCH/home.XXXX")"
     bin="$HOME_DIR/bin"
-    mkdir -p "$HOME_DIR/.dotfiles" "$bin" "$HOME_DIR/run" \
-        "$HOME_DIR/.config/"{hypr/custom,waybar/custom,rofi/custom,nvim/lua/settings/core,quickshell/config}
+    mkdir -p "$HOME_DIR/.dotfiles" "$bin" "$HOME_DIR/run" "$HOME_DIR/.config"
     cp -r "$CHANGER_HARNESS_COLORSCHEMES" "$HOME_DIR/.dotfiles/colorschemes"
-    for tool in hyprctl kitten ags quickshell gsettings rofi node notify-send; do
+    rm -f "$HOME_DIR/.dotfiles/colorschemes/active" "$HOME_DIR/.dotfiles/colorschemes/shown"
+    for link in "${CHANGER_HARNESS_COLOUR_LINKS[@]}"; do
+        mkdir -p "$(dirname "$HOME_DIR/.dotfiles/common/.config/$link")"
+        cp -P "$CHANGER_HARNESS_REPO/common/.config/$link" "$HOME_DIR/.dotfiles/common/.config/$link"
+    done
+    mkdir -p "$HOME_DIR/.dotfiles/common/.config/Code/User"
+    cp "$CHANGER_HARNESS_REPO/common/.config/Code/User/settings.json" \
+        "$HOME_DIR/.dotfiles/common/.config/Code/User/"
+    for app in hypr waybar rofi nvim quickshell kitty Code; do
+        ln -s "../.dotfiles/common/.config/$app" "$HOME_DIR/.config/$app"
+    done
+    for tool in hyprctl pkill ags quickshell gsettings rofi node notify-send; do
         cat >"$bin/$tool" <<SHIM
 #!/bin/sh
 echo "$tool \$*" >>"\$HOME/calls"

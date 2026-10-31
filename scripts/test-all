@@ -11,9 +11,12 @@ suites=(
     common/bootstrap/tests/packages.sh
     common/bootstrap/tests/spicetify.sh
     common/bootstrap/tests/gtk-themes.sh
+    common/bootstrap/tests/colorscheme.sh
     scripts/test-sync-packages
     common/.config/hypr/tests/borders.sh
     colorschemes/colorscheme_changer_tests.sh
+    common/.config/quickshell/tests/state-files.sh
+    common/.config/quickshell/tests/startup.sh
 )
 
 case "${1:-}" in

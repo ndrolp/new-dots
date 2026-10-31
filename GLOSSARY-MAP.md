@@ -20,6 +20,10 @@ _Avoid_: Current theme, selected theme
 The colorscheme a fresh install starts with, before anything has been applied. It is the only colorscheme choice the repo records.
 _Avoid_: Base theme
 
+**Shown colorscheme**:
+The colorscheme Hyprland and Quickshell are showing right now. It is the active colorscheme, except during a colorscheme preview, when it is the one being previewed.
+_Avoid_: Preview theme, displayed theme
+
 **Apply** (a colorscheme):
 Make a colorscheme the active one everywhere at once: Hyprland, Quickshell, nvim, GTK, kitty, VS Code and rofi. Only applying changes which colorscheme is active.
 _Avoid_: Switch, set (for this)

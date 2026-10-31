@@ -3,7 +3,6 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
-import Qt.labs.folderlistmodel
 import "../../config" as Config
 import "../../config/ColorschemeColors.js" as ColorschemeColors
 import "ColorschemePreview.js" as ColorschemePreview
@@ -13,6 +12,11 @@ Variants {
 
     required property var appearance
     property bool open: false
+
+    // The repo's colorschemes folder. The shell's folder is common/.config/quickshell in the repo (stow
+    // links ~/.config/quickshell to it), and the system resolves ".." through that link.
+    readonly property string colorschemes: Quickshell.shellPath("../../../colorschemes")
+    readonly property string changer: colorschemes + "/colorscheme_changer.sh"
 
     signal closeRequested()
 
@@ -30,6 +34,10 @@ Variants {
         property string previewTheme: ""
         property var preview: ColorschemePreview.idle
         property bool applyingTheme: false
+        // The colorschemes the changer is listing, and whether the list is being replaced (moving the
+        // selection then is not a choice to preview).
+        property var listedThemes: []
+        property bool refreshingList: false
 
         screen: modelData
         visible: root.open && focusedMonitor
@@ -46,13 +54,11 @@ Variants {
             right: true
         }
 
-        FolderListModel {
+        // The colorschemes, listed by the changer each time the selector opens, so a new colorscheme
+        // folder shows without reloading the shell: the colorschemes folder also holds the active and
+        // shown links, which are not colorschemes.
+        ListModel {
             id: themes
-
-            folder: "file:///home/ndrolp/.dotfiles/colorschemes"
-            showDirs: true
-            showFiles: false
-            showDotAndDotDot: false
         }
 
         Config.Theme {
@@ -76,7 +82,7 @@ Variants {
                 return;
 
             themePreview.command = [
-                "/home/ndrolp/.dotfiles/colorschemes/colorscheme_changer.sh",
+                root.changer,
                 "--preview", step.start
             ];
             themePreview.running = true;
@@ -85,6 +91,29 @@ Variants {
         function previewCurrent() {
             if (themeList.currentItem)
                 previewSelectedTheme(themeList.currentItem.themeName);
+        }
+
+        function refreshThemes() {
+            if (themeListing.running)
+                return;
+
+            listedThemes = [];
+            themeListing.running = true;
+        }
+
+        // showListedThemes: replaces the list with the one the changer gave, when it differs.
+        function showListedThemes() {
+            let same = listedThemes.length === themes.count;
+            for (let index = 0; same && index < themes.count; index++)
+                same = themes.get(index).fileName === listedThemes[index];
+            if (same)
+                return;
+
+            refreshingList = true;
+            themes.clear();
+            for (const name of listedThemes)
+                themes.append({ fileName: name });
+            refreshingList = false;
         }
 
         function loadActiveTheme() {
@@ -106,7 +135,7 @@ Variants {
 
             applyingTheme = true;
             themeApply.command = [
-                "/home/ndrolp/.dotfiles/colorschemes/colorscheme_changer.sh",
+                root.changer,
                 themeList.currentItem.themeName
             ];
             themeApply.running = true;
@@ -124,9 +153,30 @@ Variants {
         }
 
         Process {
+            id: themeListing
+
+            command: [root.changer, "--list"]
+
+            stdout: SplitParser {
+                onRead: data => {
+                    if (data.trim() !== "")
+                        selector.listedThemes.push(data.trim());
+                }
+            }
+
+            onExited: {
+                selector.showListedThemes();
+                if (selector.visible)
+                    selector.loadActiveTheme();
+            }
+        }
+
+        // The active colorscheme is the machine-local link colorschemes/active; the changer reads it
+        // (and creates it from the default colorscheme when it is missing).
+        Process {
             id: themeState
 
-            command: ["sh", "-c", "cat ~/.dotfiles/colorschemes/theme.txt 2>/dev/null"]
+            command: [root.changer, "--active"]
 
             stdout: SplitParser {
                 onRead: data => {
@@ -134,7 +184,7 @@ Variants {
                     selector.preview = ColorschemePreview.shown(selector.preview, selector.activeTheme).state;
 
                     for (let index = 0; index < themes.count; index++) {
-                        if (themes.get(index, "fileName") === selector.activeTheme) {
+                        if (themes.get(index).fileName === selector.activeTheme) {
                             themeList.currentIndex = index;
                             themeList.positionViewAtIndex(index, ListView.Contain);
                             break;
@@ -147,7 +197,7 @@ Variants {
         onVisibleChanged: {
             if (visible) {
                 applyingTheme = false;
-                loadActiveTheme();
+                refreshThemes();
             }
         }
 
@@ -222,7 +272,7 @@ Variants {
                     preferredHighlightEnd: height - 52
 
                     onCurrentIndexChanged: {
-                        if (selector.visible)
+                        if (selector.visible && !selector.refreshingList)
                             selector.previewCurrent();
                     }
 
@@ -251,8 +301,8 @@ Variants {
                         property var colours: ColorschemeColors.fallback
 
                         FileView {
-                            path: "/home/ndrolp/.dotfiles/colorschemes/"
-                                + themeTile.themeName + "/quickshell/colors.json"
+                            path: root.colorschemes + "/" + themeTile.themeName
+                                + "/quickshell/colors.json"
 
                             onLoaded: themeTile.colours = ColorschemeColors.fromJson(text())
                         }

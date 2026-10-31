@@ -1,0 +1,4 @@
+# VS Code's theme follows the active colorscheme, which is machine-local; the repo always stores the
+# default colorscheme's theme (docs/adr/0001-active-colorscheme-is-machine-local.md). Bootstrap registers
+# the filter (colorschemes/vscode_theme.sh --register).
+common/.config/Code/User/settings.json filter=vscode-theme

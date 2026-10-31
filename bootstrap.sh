@@ -145,13 +145,13 @@ main() {
 
     local steps step
     if [[ "$DOTFILES_STOW_ONLY" == true ]]; then
-        steps=(stow)
+        steps=(stow colorscheme)
     else
         steps=(preflight packages paru aur hardware shell node)
         # Building GTK themes needs sassc, from the apps group.
         [[ "$DOTFILES_MINIMAL" == true ]] || steps+=(gtk-themes vscode-themes)
         [[ "$DOTFILES_SPICETIFY" == true ]] && steps+=(spicetify)
-        steps+=(stow)
+        steps+=(stow colorscheme)
         steps+=(services)
     fi
 

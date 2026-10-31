@@ -1,6 +1,6 @@
 # VS Code theme extensions the vscode-themes step installs: one per colorscheme (tests check that
-# every VSCODE_THEME in colorschemes/colorscheme_changer.sh is a label here).
-# <extension id> <theme label, as the changer's VSCODE_THEME names it>
+# every colorscheme's colorschemes/<name>/vscode-theme.txt is a label here).
+# <extension id> <theme label, as the colorscheme's vscode-theme.txt names it>
 
 catppuccin.catppuccin-vsc                Catppuccin Mocha
 enkia.tokyo-night                        Tokyo Night

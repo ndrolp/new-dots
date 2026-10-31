@@ -1,1 +1,1 @@
-/home/ndrolp/.dotfiles/colorschemes/everforestdark/nvim/theme.lua
+../../../../../../colorschemes/active/nvim/theme.lua
