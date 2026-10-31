@@ -77,12 +77,37 @@ TestCase {
         compare(textOf(item, "󰤨").color, theme.textMuted);
     }
 
-    function test_aTileIsARowOfTheBarRadius() {
+    // A tile is a card of the bar radius: a faint fill and a subtle border.
+    function test_aTileIsABorderedCardOfTheBarRadius() {
         const item = make();
 
-        compare(item.height, 38);
+        compare(item.height, 64);
         compare(item.radius, 12);
-        compare(item.color, Qt.rgba(0, 0, 0, 0));
+        compare(item.color, theme.backgroundSecondary);
+        compare(item.border.width, 1);
+        compare(item.border.color, Qt.rgba(theme.border.r, theme.border.g, theme.border.b, 0.5));
+    }
+
+    function test_anActiveTileIsTintedWithItsColor() {
+        const item = make({ active: true });
+
+        compare(item.color, Qt.rgba(theme.purple.r, theme.purple.g, theme.purple.b, 0.15));
+        compare(item.border.color, Qt.rgba(theme.purple.r, theme.purple.g, theme.purple.b, 0.35));
+    }
+
+    // The icon sits above the label, and a long label stays inside the tile.
+    function test_theIconSitsAboveItsLabelAndALongLabelIsElided() {
+        const item = make({ label: "A label far too long for any tile" });
+        const icon = textOf(item, "󰤨");
+        const label = textOf(item, "A label far too long for any tile");
+
+        verify(icon.mapToItem(item, 0, 0).y < label.mapToItem(item, 0, 0).y);
+        verify(label.width <= item.width);
+        compare(label.elide, Text.ElideRight);
+    }
+
+    function test_anIconOnlyTileIsShorter() {
+        compare(make({ labelShown: false }).height, 44);
     }
 
     function test_anEnabledTileIsOpaqueAndInteractive() {

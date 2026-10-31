@@ -48,7 +48,7 @@ Column {
     // The audio output tile: the host opens the audio output subpage.
     signal audioOutputsRequested()
 
-    spacing: 12
+    spacing: 8
 
     Config.Theme {
         id: theme
@@ -174,7 +174,7 @@ Column {
         ControlTile {
             labelShown: body.expanded
             appearance: body.barAppearance
-            label: Networking.wifiEnabled ? "Wi-Fi" : "Wi-Fi off"
+            label: "Wi-Fi"
             icon: "󰤨"
             accentColor: theme.purple
             active: Networking.wifiEnabled
@@ -188,7 +188,7 @@ Column {
         ControlTile {
             labelShown: body.expanded
             appearance: body.barAppearance
-            label: active ? "Bluetooth" : "BT off"
+            label: "Bluetooth"
             icon: "󰂯"
             accentColor: theme.blue
             active: body.bluetoothAdapter !== null
@@ -204,7 +204,7 @@ Column {
         ControlTile {
             labelShown: body.expanded
             appearance: body.barAppearance
-            label: active ? "Do not disturb" : "DND off"
+            label: "DND"
             icon: "󰂛"
             accentColor: theme.purple
             active: body.barAppearance.doNotDisturb
@@ -218,7 +218,7 @@ Column {
         ControlTile {
             labelShown: body.expanded
             appearance: body.barAppearance
-            label: active ? "Mic on" : "Mic off"
+            label: "Mic"
             icon: "󰍬"
             accentColor: theme.red
             active: body.microphone !== null && !body.microphone.muted
@@ -233,7 +233,7 @@ Column {
         ControlTile {
             labelShown: body.expanded
             appearance: body.barAppearance
-            label: body.controlCenter.keepAwake.on ? "Awake" : "Sleep allowed"
+            label: "Awake"
             icon: "󰒲"
             accentColor: theme.green
             active: body.controlCenter.keepAwake.on
@@ -247,7 +247,7 @@ Column {
         ControlTile {
             labelShown: body.expanded
             appearance: body.barAppearance
-            label: body.controlCenter.nightLight.on ? "Night light" : "Night light off"
+            label: "Night light"
             icon: "󰖔"
             accentColor: theme.orange
             active: body.controlCenter.nightLight.on
@@ -261,7 +261,7 @@ Column {
         ControlTile {
             labelShown: body.expanded
             appearance: body.barAppearance
-            label: "Audio output"
+            label: "Output"
             icon: "󰓃"
             accentColor: theme.accent
             // Opens the audio output subpage; the control center stays open.
@@ -292,7 +292,7 @@ Column {
         ControlTile {
             labelShown: body.expanded
             appearance: body.barAppearance
-            label: "Displays off"
+            label: "Displays"
             icon: "󰍹"
             accentColor: theme.orange
             onTriggered: {
@@ -309,7 +309,8 @@ Column {
         ControlTile {
             labelShown: body.expanded
             appearance: body.barAppearance
-            label: body.powerProfile
+            label: ({ "power-saver": "Saver", "balanced": "Balanced",
+                "performance": "Performance" })[body.powerProfile] || body.powerProfile
             icon: "󱐋"
             accentColor: theme.green
             active: true
@@ -363,7 +364,7 @@ Column {
         ControlTile {
             labelShown: body.expanded
             appearance: body.barAppearance
-            label: "Caps " + (body.capsLocked ? "on" : "off")
+            label: "Caps"
             icon: "󰘲"
             accentColor: theme.yellow
             active: body.capsLocked
@@ -384,8 +385,8 @@ Column {
         width: parent.width
         // The collapsed row fits one line.
         columns: body.expanded ? 4 : ControlCenterTiles.collapsedRowSize
-        columnSpacing: 4
-        rowSpacing: 4
+        columnSpacing: 8
+        rowSpacing: 8
 
         Repeater {
             model: body.shownTiles
@@ -410,18 +411,20 @@ Column {
             id: editTilesButton
 
             anchors.right: parent.right
-            width: 36
+            width: 30
+            height: 24
             appearance: body.barAppearance
             label: "󰏫"
+            labelColor: theme.textMuted
             onActivated: body.controlCenter.openPanel(Names.controlCenter.tileSettings)
         }
     }
 
     // Volume and brightness, then night light's temperature.
-    Column {
+    ControlCard {
         width: parent.width
         visible: body.expanded
-        spacing: 12
+        appearance: body.barAppearance
 
         Row {
             width: parent.width
@@ -480,42 +483,58 @@ Column {
         }
     }
 
-    Row {
+    ControlCard {
         width: parent.width
         visible: body.expanded
-        spacing: 10
+        appearance: body.barAppearance
 
-        Repeater {
-            model: [
-                { label: "Battery", value: body.battery
-                    ? Math.round(body.battery.percentage * 100) + "%" : "--",
-                    icon: "󰁹", color: theme.green },
-                { label: "Uptime", value: body.controlCenter.systemMonitor.formatUptime(),
-                    icon: "󰅐", color: theme.blue },
-                { label: "Disk", value: body.controlCenter.systemMonitor.diskTotalGiB > 0
-                    ? body.controlCenter.systemMonitor.diskUsedGiB.toFixed(0) + " / "
-                        + body.controlCenter.systemMonitor.diskTotalGiB.toFixed(0) + " GiB" : "--",
-                    icon: "󰋊", color: theme.purple }
-            ]
+        Row {
+            width: parent.width
+            spacing: 10
 
-            delegate: Column {
-                required property var modelData
+            Repeater {
+                model: [
+                    { label: "Battery", value: body.battery
+                        ? Math.round(body.battery.percentage * 100) + "%" : "--",
+                        icon: "󰁹", color: theme.green },
+                    { label: "Uptime", value: body.controlCenter.systemMonitor.formatUptime(),
+                        icon: "󰅐", color: theme.blue },
+                    { label: "Disk", value: body.controlCenter.systemMonitor.diskTotalGiB > 0
+                        ? body.controlCenter.systemMonitor.diskUsedGiB.toFixed(0) + " / "
+                            + body.controlCenter.systemMonitor.diskTotalGiB.toFixed(0) + " GiB" : "--",
+                        icon: "󰋊", color: theme.purple }
+                ]
 
-                width: (parent.width - parent.spacing * 2) / 3
-                spacing: 2
+                // A colored icon over a muted label and the value.
+                delegate: Column {
+                    required property var modelData
 
-                PopupLabel {
-                    width: parent.width
-                    appearance: body.barAppearance
-                    text: modelData.icon + "  " + modelData.label
-                }
+                    width: (parent.width - parent.spacing * 2) / 3
+                    spacing: 2
 
-                Panels.Text {
-                    width: parent.width
-                    text: modelData.value
-                    color: theme.text
-                    elide: Text.ElideRight
-                    font.pixelSize: body.barAppearance.textSize - 1
+                    Panels.Text {
+                        width: parent.width
+                        horizontalAlignment: Text.AlignHCenter
+                        text: modelData.icon
+                        color: modelData.color
+                        font.pixelSize: body.barAppearance.textSize + 5
+                    }
+
+                    PopupLabel {
+                        width: parent.width
+                        horizontalAlignment: Text.AlignHCenter
+                        appearance: body.barAppearance
+                        text: modelData.label
+                    }
+
+                    Panels.Text {
+                        width: parent.width
+                        horizontalAlignment: Text.AlignHCenter
+                        text: modelData.value
+                        color: theme.text
+                        elide: Text.ElideRight
+                        font.pixelSize: body.barAppearance.textSize - 1
+                    }
                 }
             }
         }
