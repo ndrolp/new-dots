@@ -89,6 +89,19 @@ TestCase {
         compare(open.window, leftBar);
     }
 
+    // Quick settings' control center button opens it, never closes it.
+    function test_openingOnTheFocusedBarKeepsItOpenWhenItAlreadyIs() {
+        const open = OpenPopup.openedOnFocusedBar(OpenPopup.none, "controlCenter", bars, "AOC");
+        compare(open.popup, "controlCenter");
+        compare(open.window, rightBar);
+        compare(OpenPopup.openedOnFocusedBar(open, "controlCenter", bars, "AOC"), open);
+    }
+
+    function test_openingWithNoShownBarChangesNothing() {
+        const open = OpenPopup.requested(OpenPopup.none, "battery", leftBar);
+        compare(OpenPopup.openedOnFocusedBar(open, "controlCenter", [], "AOC"), open);
+    }
+
     function test_ipcWithNoShownBarChangesNothing() {
         const open = OpenPopup.requested(OpenPopup.none, "battery", leftBar);
         compare(OpenPopup.toggledOnFocusedBar(open, "controlCenter", [], "AOC"), open);

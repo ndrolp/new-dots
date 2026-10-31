@@ -7,9 +7,11 @@ popups: where a popup opens (`components/panels/PopupPlacement.js`), the
 outline of an attached popup (`PopupOutline.js`), the surface every popup
 draws on (`PopupSurface.qml`), the shared popup parts (`PopupTitle`,
 `PopupHeader`, `PopupRow`…), the control center's tiles and sliders,
-active, muted and disabled (`ControlTile.qml`, `ControlSlider.qml`;
+active, muted, disabled and icon-only (`ControlTile.qml`, `ControlSlider.qml`;
 `ControlCenterBody.qml` itself needs Quickshell's services and isn't tested
-here), the settings panel's own parts (`SettingsNumber`,
+here), the control center's collapsed and expanded stages: the stage each
+way of opening it asks for, the chevron and the drag on its handle, and
+notifications only with its plugin off (`ControlCenterLayout.qml`), the settings panel's own parts (`SettingsNumber`,
 `SettingsSwitchRow`, `SettingsChoice`, `SettingsGrid`…), its frame
 (`ConfigPanel.qml`) and the settings panel sections built from them, the Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
@@ -39,7 +41,7 @@ which popup is open across the bars and which bar IPC opens one on
 (`modules/OpenPopup.js`), which bar element a popup opens under
 (`components/bar/BarElementItems.js`), the notifications in the control
 center: marking them read on open, highlighting the ones that arrived since
-you last looked, Clear all and do not disturb
+you last looked, and Clear all
 (`components/panels/ControlCenterNotifications.qml`),
 the active colorscheme's colours read from its colours file,
 falling back to everforestdark's (`config/ColorschemeColors.js`), and which

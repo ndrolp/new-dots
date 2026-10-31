@@ -37,3 +37,12 @@ function toggledOnFocusedBar(open, popup, bars, focusedMonitor) {
     const window = focusedBar(bars, focusedMonitor);
     return window === null ? open : requested(open, popup, window);
 }
+
+// Opens a popup on the focused bar (e.g. quick settings' control center
+// button); one already open there stays open.
+function openedOnFocusedBar(open, popup, bars, focusedMonitor) {
+    const window = focusedBar(bars, focusedMonitor);
+    if (window === null || isOpen(open, popup, window))
+        return open;
+    return { popup: popup, window: window };
+}

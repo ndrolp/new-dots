@@ -9,17 +9,17 @@ import "../../config" as Config
 import "." as Panels
 import "../VolumeText.js" as VolumeText
 
-// The control center's controls: do not disturb, the sliders (volume,
-// brightness, night light's temperature), the tiles, the media row and the
-// system stats. Kept apart from any window so a full-screen control center
-// or a bar's popup can host it; the host places it, gives it its keyboard
-// focus and closes it when asked.
+// The control center's controls: the tiles, the sliders (volume,
+// brightness, night light's temperature), the media row and the system
+// stats. Collapsed, only the row of quick tiles shows (Wi-Fi, Bluetooth, do
+// not disturb, mic, keep-awake, night light), as icons; expanded, every tile
+// with its label and the rest of the controls. Kept apart from any window:
+// the host places it and closes it when asked.
 Column {
     id: body
 
-    // The shell's appearance, for do not disturb.
-    required property var appearance
-    // The bar it is shown from, as its popups see it.
+    // The bar it is shown from, as its popups see it (with the global
+    // `doNotDisturb`).
     required property var barAppearance
     required property var clipboardHistory
     required property var screenCapture
@@ -30,6 +30,8 @@ Column {
     // Whether the host is showing it: it reads brightness, the power
     // profile and the clipboard when shown, and Caps Lock while shown.
     property bool shown: false
+    // The expanded control center: every control, not just the quick tiles.
+    property bool expanded: false
 
     readonly property var audio: Pipewire.defaultAudioSink?.audio || null
     readonly property var microphone: Pipewire.defaultAudioSource?.audio || null
@@ -43,6 +45,8 @@ Column {
     property string powerProfile: "balanced"
 
     signal closeRequested()
+    // The do not disturb tile was pressed; the shell owns the setting.
+    signal doNotDisturbToggled()
     signal audioSinksRequested()
     signal clipboardRequested()
     signal powerMenuRequested()
@@ -150,71 +154,78 @@ Column {
         }
     }
 
-    PopupHeader {
-        appearance: body.barAppearance
-        title: "Controls"
+    Grid {
+        id: tiles
 
-        Row {
-            spacing: 8
+        readonly property real tileWidth: (width - columnSpacing * (columns - 1)) / columns
 
-            PopupLabel {
-                anchors.verticalCenter: parent.verticalCenter
-                appearance: body.barAppearance
-                text: "Do not disturb"
-            }
-
-            PopupSwitch {
-                anchors.verticalCenter: parent.verticalCenter
-                appearance: body.barAppearance
-                checked: body.appearance.doNotDisturb
-                onToggled: body.appearance.doNotDisturb = !body.appearance.doNotDisturb
-            }
-        }
-    }
-
-    Row {
         width: parent.width
-        spacing: 16
-
-        ControlSlider {
-            width: (parent.width - parent.spacing) / 2
-            appearance: body.barAppearance
-            label: "Volume"
-            icon: "󰕾"
-            accentColor: theme.blue
-            valueText: body.audio && !body.audio.muted
-                ? VolumeText.percentage(body.audio.volume) : "Muted"
-            from: 0
-            to: 1
-            value: body.volume
-            onAdjusted: position => body.setVolume(position)
-        }
-
-        ControlSlider {
-            width: (parent.width - parent.spacing) / 2
-            appearance: body.barAppearance
-            label: "Brightness"
-            icon: "󰃠"
-            accentColor: theme.yellow
-            valueText: Math.round(body.brightness * 100) + "%"
-            from: 0.01
-            to: 1
-            value: body.brightness
-            onAdjusted: position => {
-                body.brightness = position;
-                body.setBrightness(position);
-            }
-        }
-    }
-
-    // Night light: its toggle, a tile wide, beside its temperature.
-    Row {
-        width: parent.width
-        spacing: tiles.columnSpacing
+        // The quick tiles fit one row when collapsed.
+        columns: body.expanded ? 4 : 6
+        columnSpacing: 4
+        rowSpacing: 4
 
         ControlTile {
-            anchors.verticalCenter: parent.verticalCenter
             width: tiles.tileWidth
+            labelShown: body.expanded
+            appearance: body.barAppearance
+            label: Networking.wifiEnabled ? "Wi-Fi" : "Wi-Fi off"
+            icon: "󰤨"
+            accentColor: theme.purple
+            active: Networking.wifiEnabled
+            onTriggered: Networking.wifiEnabled = !Networking.wifiEnabled
+        }
+
+        ControlTile {
+            width: tiles.tileWidth
+            labelShown: body.expanded
+            appearance: body.barAppearance
+            label: active ? "Bluetooth" : "BT off"
+            icon: "󰂯"
+            accentColor: theme.blue
+            active: body.bluetoothAdapter !== null
+                && body.bluetoothAdapter.enabled
+            controlEnabled: body.bluetoothAdapter !== null
+            onTriggered: bluetoothPower.setEnabled(!body.bluetoothAdapter.enabled)
+        }
+
+        ControlTile {
+            width: tiles.tileWidth
+            labelShown: body.expanded
+            appearance: body.barAppearance
+            label: active ? "Do not disturb" : "DND off"
+            icon: "󰂛"
+            accentColor: theme.purple
+            active: body.barAppearance.doNotDisturb
+            onTriggered: body.doNotDisturbToggled()
+        }
+
+        ControlTile {
+            width: tiles.tileWidth
+            labelShown: body.expanded
+            appearance: body.barAppearance
+            label: active ? "Mic on" : "Mic off"
+            icon: "󰍬"
+            accentColor: theme.red
+            active: body.microphone !== null && !body.microphone.muted
+            controlEnabled: body.microphone !== null
+            onTriggered: body.toggleMicrophone()
+        }
+
+        ControlTile {
+            width: tiles.tileWidth
+            labelShown: body.expanded
+            appearance: body.barAppearance
+            label: body.keepAwake.on ? "Awake" : "Sleep allowed"
+            icon: "󰒲"
+            accentColor: theme.green
+            active: body.keepAwake.on
+            onTriggered: body.keepAwake.toggle()
+        }
+
+        ControlTile {
+            width: tiles.tileWidth
+            labelShown: body.expanded
             appearance: body.barAppearance
             label: body.nightLight.on ? "Night light" : "Night light off"
             icon: "󰖔"
@@ -223,41 +234,9 @@ Column {
             onTriggered: body.nightLight.toggle()
         }
 
-        ControlSlider {
-            anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - tiles.tileWidth - parent.spacing
-            appearance: body.barAppearance
-            label: "Temperature"
-            icon: "󰔏"
-            accentColor: theme.orange
-            valueText: body.nightLight.temperature + " K"
-            from: body.nightLight.minTemperature
-            to: body.nightLight.maxTemperature
-            value: body.nightLight.temperature
-            onAdjusted: position => body.nightLight.setTemperature(position)
-        }
-    }
-
-    PopupLabel {
-        width: parent.width
-        visible: text !== ""
-        appearance: body.barAppearance
-        text: body.nightLight.failureHint
-        wrapMode: Text.Wrap
-    }
-
-    Grid {
-        id: tiles
-
-        readonly property real tileWidth: (width - columnSpacing * (columns - 1)) / columns
-
-        width: parent.width
-        columns: 4
-        columnSpacing: 4
-        rowSpacing: 4
-
         ControlTile {
             width: tiles.tileWidth
+            visible: body.expanded
             appearance: body.barAppearance
             label: "Audio output"
             icon: "󰓃"
@@ -270,6 +249,7 @@ Column {
 
         ControlTile {
             width: tiles.tileWidth
+            visible: body.expanded
             appearance: body.barAppearance
             label: "Lock"
             icon: "󰌾"
@@ -283,6 +263,7 @@ Column {
 
         ControlTile {
             width: tiles.tileWidth
+            visible: body.expanded
             appearance: body.barAppearance
             label: "Displays off"
             icon: "󰍹"
@@ -296,6 +277,7 @@ Column {
 
         ControlTile {
             width: tiles.tileWidth
+            visible: body.expanded
             appearance: body.barAppearance
             label: body.powerProfile
             icon: "󱐋"
@@ -306,49 +288,7 @@ Column {
 
         ControlTile {
             width: tiles.tileWidth
-            appearance: body.barAppearance
-            label: Networking.wifiEnabled ? "Wi-Fi" : "Wi-Fi off"
-            icon: "󰤨"
-            accentColor: theme.purple
-            active: Networking.wifiEnabled
-            onTriggered: Networking.wifiEnabled = !Networking.wifiEnabled
-        }
-
-        ControlTile {
-            width: tiles.tileWidth
-            appearance: body.barAppearance
-            label: active ? "Bluetooth" : "BT off"
-            icon: "󰂯"
-            accentColor: theme.blue
-            active: body.bluetoothAdapter !== null
-                && body.bluetoothAdapter.enabled
-            controlEnabled: body.bluetoothAdapter !== null
-            onTriggered: bluetoothPower.setEnabled(!body.bluetoothAdapter.enabled)
-        }
-
-        ControlTile {
-            width: tiles.tileWidth
-            appearance: body.barAppearance
-            label: active ? "Mic on" : "Mic off"
-            icon: "󰍬"
-            accentColor: theme.red
-            active: body.microphone !== null && !body.microphone.muted
-            controlEnabled: body.microphone !== null
-            onTriggered: body.toggleMicrophone()
-        }
-
-        ControlTile {
-            width: tiles.tileWidth
-            appearance: body.barAppearance
-            label: body.keepAwake.on ? "Awake" : "Sleep allowed"
-            icon: "󰒲"
-            accentColor: theme.green
-            active: body.keepAwake.on
-            onTriggered: body.keepAwake.toggle()
-        }
-
-        ControlTile {
-            width: tiles.tileWidth
+            visible: body.expanded
             appearance: body.barAppearance
             label: body.screenCapture.recording ? "Recording" : "Capture"
             icon: body.screenCapture.recording ? "󰑋" : "󰄀"
@@ -359,6 +299,7 @@ Column {
 
         ControlTile {
             width: tiles.tileWidth
+            visible: body.expanded
             appearance: body.barAppearance
             label: body.clipboardHistory.entries.length + " copied"
             icon: "󰅌"
@@ -368,6 +309,7 @@ Column {
 
         ControlTile {
             width: tiles.tileWidth
+            visible: body.expanded
             appearance: body.barAppearance
             label: "Power"
             icon: "󰐥"
@@ -377,6 +319,7 @@ Column {
 
         ControlTile {
             width: tiles.tileWidth
+            visible: body.expanded
             appearance: body.barAppearance
             label: "Caps " + (body.capsLocked ? "on" : "off")
             icon: "󰘲"
@@ -386,9 +329,72 @@ Column {
         }
     }
 
+    // Volume and brightness, then night light's temperature.
+    Column {
+        width: parent.width
+        visible: body.expanded
+        spacing: 12
+
+        Row {
+            width: parent.width
+            spacing: 16
+
+            ControlSlider {
+                width: (parent.width - parent.spacing) / 2
+                appearance: body.barAppearance
+                label: "Volume"
+                icon: "󰕾"
+                accentColor: theme.blue
+                valueText: body.audio && !body.audio.muted
+                    ? VolumeText.percentage(body.audio.volume) : "Muted"
+                from: 0
+                to: 1
+                value: body.volume
+                onAdjusted: position => body.setVolume(position)
+            }
+
+            ControlSlider {
+                width: (parent.width - parent.spacing) / 2
+                appearance: body.barAppearance
+                label: "Brightness"
+                icon: "󰃠"
+                accentColor: theme.yellow
+                valueText: Math.round(body.brightness * 100) + "%"
+                from: 0.01
+                to: 1
+                value: body.brightness
+                onAdjusted: position => {
+                    body.brightness = position;
+                    body.setBrightness(position);
+                }
+            }
+        }
+
+        ControlSlider {
+            width: parent.width
+            appearance: body.barAppearance
+            label: "Temperature"
+            icon: "󰔏"
+            accentColor: theme.orange
+            valueText: body.nightLight.temperature + " K"
+            from: body.nightLight.minTemperature
+            to: body.nightLight.maxTemperature
+            value: body.nightLight.temperature
+            onAdjusted: position => body.nightLight.setTemperature(position)
+        }
+
+        PopupLabel {
+            width: parent.width
+            visible: text !== ""
+            appearance: body.barAppearance
+            text: body.nightLight.failureHint
+            wrapMode: Text.Wrap
+        }
+    }
+
     PopupRow {
         width: parent.width
-        height: body.player ? 44 : 0
+        height: body.expanded && body.player ? 44 : 0
         visible: height > 0
         appearance: body.barAppearance
         interactive: false
@@ -436,6 +442,7 @@ Column {
 
     Row {
         width: parent.width
+        visible: body.expanded
         spacing: 10
 
         Repeater {

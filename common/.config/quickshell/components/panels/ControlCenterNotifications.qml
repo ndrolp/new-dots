@@ -5,7 +5,7 @@ import "." as Panels
 // The notifications in the control center, newest first and grouped by app.
 // Opening the control center marks everything read, so the bell's badge
 // clears; the cards that arrived since you last looked stay highlighted
-// until it closes. The header keeps "Clear all" and do not disturb.
+// until it closes. The header keeps "Clear all"; do not disturb is a tile.
 Column {
     id: root
 
@@ -17,9 +17,6 @@ Column {
     // The notifications unread when it opened: highlighted until it closes.
     property var freshIds: []
     readonly property var groups: notificationHistory.groups
-
-    // The do not disturb button was pressed; the shell owns the setting.
-    signal doNotDisturbToggled()
 
     spacing: 8
 
@@ -76,24 +73,6 @@ Column {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             spacing: 4
-
-            Panels.PopupButton {
-                id: doNotDisturbButton
-
-                appearance: root.appearance
-                width: doNotDisturbMetrics.width + 20
-                label: root.appearance.doNotDisturb ? "DND on" : "DND off"
-                labelColor: root.appearance.doNotDisturb ? theme.accent : theme.textMuted
-                onActivated: root.doNotDisturbToggled()
-
-                TextMetrics {
-                    id: doNotDisturbMetrics
-
-                    text: doNotDisturbButton.label
-                    font.family: theme.fontFamily
-                    font.pixelSize: doNotDisturbButton.labelSize
-                }
-            }
 
             Panels.PopupButton {
                 id: clearButton
