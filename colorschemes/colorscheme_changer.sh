@@ -61,47 +61,36 @@ list_colorschemes | grep -qxF -- "$SELECTED_FOLDER" || exit 1
 case "$SELECTED_FOLDER" in
   catppuccin)
     KITTY_THEME="Catppuccin"
-    VSCODE_THEME="Catppuccin Mocha"
     ;;
   gruvboxdark)
     KITTY_THEME="Gruvbox Dark"
-    VSCODE_THEME="Gruvbox Dark Medium"
     ;;
   tokyonight)
     KITTY_THEME="Tokyo Night"
-    VSCODE_THEME="Tokyo Night"
     ;;
   everforest|everforestdark)
     KITTY_THEME="Everforestdark"
-    VSCODE_THEME="Everforest Pro Dark"
     ;;
   kanagawa)
     KITTY_THEME="Kanagawa"
-    VSCODE_THEME="Kanagawa"
     ;;
   rosepine)
     KITTY_THEME="Rosé Pine"
-    VSCODE_THEME="Rosé Pine"
     ;;
   dracula)
     KITTY_THEME="Dracula"
-    VSCODE_THEME="Dracula Theme"
     ;;
   carbonfox)
     KITTY_THEME="Carbonfox"
-    VSCODE_THEME="Carbonfox"
     ;;
   nord)
     KITTY_THEME="nord"
-    VSCODE_THEME="Nord"
     ;;
   bloodmoon)
     KITTY_THEME="Bloodmoon"
-    VSCODE_THEME="Midnight Crimson"
     ;;
   coralnord)
     KITTY_THEME="Coralnord"
-    VSCODE_THEME="Nord Wave"
     ;;
   *) KITTY_THEME="$SELECTED_FOLDER" ;;
 esac
@@ -182,23 +171,19 @@ apply_nvim() {
   return "$unreachable"
 }
 
+# Each colorscheme names its VS Code theme in vscode-theme.txt. VS Code can't include another file, so
+# the theme is written into its tracked settings file; the git clean filter (vscode_theme.sh --default)
+# keeps that out of git.
 apply_vscode() {
-  [ -n "${VSCODE_THEME:-}" ] && [ -f "$VSCODE_SETTINGS" ] || return 0
-  node - "$VSCODE_SETTINGS" "$VSCODE_THEME" <<'NODE'
-const fs = require("fs");
-const [settingsPath, theme] = process.argv.slice(2);
-const settings = fs.readFileSync(settingsPath, "utf8");
-const themeSetting = /("workbench\.colorTheme"\s*:\s*)"[^"]*"/;
-
-if (!themeSetting.test(settings))
-  throw new Error("VS Code's workbench.colorTheme setting was not found.");
-
-const updated = settings.replace(themeSetting, (_, prefix) =>
-  prefix + JSON.stringify(theme));
-const temporaryPath = settingsPath + ".theme-update";
-fs.writeFileSync(temporaryPath, updated);
-fs.renameSync(temporaryPath, settingsPath);
-NODE
+  local theme_file="$THEME_FOLDER/vscode-theme.txt" settings
+  [ -f "$theme_file" ] && [ -f "$VSCODE_SETTINGS" ] || return 0
+  settings="$(readlink -f "$VSCODE_SETTINGS")"
+  if ! grep -q '"workbench\.colorTheme"' "$settings"; then
+    echo "VS Code's workbench.colorTheme setting was not found." >&2
+    return 1
+  fi
+  "$TARGET_DIR/vscode_theme.sh" "$(cat "$theme_file")" <"$settings" >"$settings.theme-update"
+  mv "$settings.theme-update" "$settings"
 }
 
 # GTK3 apps restyle live through gsettings, and settings.ini names the same theme so the two can't drift.

@@ -170,6 +170,24 @@ test_the_active_link_cannot_be_applied_as_a_colorscheme() {
     [[ ! -s "$CALLS" ]] || fail "applying active drove a program"
 }
 
+# vscode_settings_diff <home>: the lines VS Code's settings file in <home> changed, against the repo's.
+vscode_settings_diff() {
+    diff "$COLORSCHEMES/../common/.config/Code/User/settings.json" "$1/.config/Code/User/settings.json"
+}
+
+test_applying_switches_vs_codes_theme_and_nothing_else_in_its_settings() {
+    change_colorscheme nord
+    [[ "$(vscode_settings_diff "$HOME_DIR" | grep '^[<>]')" == "$(printf '%s\n' \
+        '<     "workbench.colorTheme": "Everforest Pro Dark",' \
+        '>     "workbench.colorTheme": "Nord",')" ]] || fail "settings diff: $(vscode_settings_diff "$HOME_DIR")"
+}
+
+test_applying_names_a_theme_with_non_ascii_characters_in_vs_code() {
+    change_colorscheme rosepine
+    grep -qxF '    "workbench.colorTheme": "Rosé Pine",' "$HOME_DIR/.config/Code/User/settings.json" \
+        || fail "settings: $(vscode_settings_diff "$HOME_DIR")"
+}
+
 test_a_failing_step_does_not_stop_the_later_steps() {
     change_colorscheme --failing "kitten" nord
     [[ "$(calls_to quickshell)" -gt 0 ]] || fail "quickshell was never asked to reload after kitty failed"
