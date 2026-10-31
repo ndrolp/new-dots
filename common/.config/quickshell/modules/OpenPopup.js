@@ -46,3 +46,21 @@ function openedOnFocusedBar(open, popup, bars, focusedMonitor) {
         return open;
     return { popup: popup, window: window };
 }
+
+// SUPER+C and SUPER+N move between the control center's stages. Each asks
+// for its own stage (`preferred`: "expanded" for SUPER+C, "collapsed" for
+// SUPER+N): closed (or open on another bar), the control center opens at it
+// on the focused bar; open at the other stage, it switches to it; open at
+// it, it closes. `stage` is the stage it is at now. With the control center
+// plugin off (`controlsEnabled` false) it has no stages, so the shortcut just
+// toggles it. Returns { open, stage }.
+function controlCenterShortcut(open, stage, preferred, bars, focusedMonitor, controlsEnabled) {
+    const window = focusedBar(bars, focusedMonitor);
+    if (window === null)
+        return { open: open, stage: stage };
+    if (isOpen(open, "controlCenter", window)) {
+        const closes = stage === preferred || !controlsEnabled;
+        return { open: closes ? none : open, stage: closes ? stage : preferred };
+    }
+    return { open: { popup: "controlCenter", window: window }, stage: preferred };
+}

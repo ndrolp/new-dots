@@ -106,4 +106,67 @@ TestCase {
         const open = OpenPopup.requested(OpenPopup.none, "battery", leftBar);
         compare(OpenPopup.toggledOnFocusedBar(open, "controlCenter", [], "AOC"), open);
     }
+    // SUPER+C asks for "expanded", SUPER+N for "collapsed". Closed, the
+    // shortcut opens the control center at its stage on the focused bar.
+    function test_aShortcutOpensTheClosedControlCenterAtItsStage() {
+        const next = OpenPopup.controlCenterShortcut(OpenPopup.none, "collapsed", "expanded",
+            bars, "AOC", true);
+        compare(next.open.popup, "controlCenter");
+        compare(next.open.window, rightBar);
+        compare(next.stage, "expanded");
+    }
+
+    function controlCenterOn(window) {
+        return OpenPopup.requested(OpenPopup.none, "controlCenter", window);
+    }
+
+    // SUPER+C on the open collapsed control center expands it; SUPER+N on
+    // the expanded one collapses it. It stays open.
+    function test_aShortcutSwitchesTheOpenControlCenterToItsStage() {
+        const open = controlCenterOn(rightBar);
+        const expanded = OpenPopup.controlCenterShortcut(open, "collapsed", "expanded", bars, "AOC",
+            true);
+        compare(expanded.open, open);
+        compare(expanded.stage, "expanded");
+        const collapsed = OpenPopup.controlCenterShortcut(open, "expanded", "collapsed", bars,
+            "AOC", true);
+        compare(collapsed.open, open);
+        compare(collapsed.stage, "collapsed");
+    }
+
+    // SUPER+C on the expanded control center closes it; SUPER+N on the
+    // collapsed one closes it.
+    function test_aShortcutClosesTheControlCenterAtItsOwnStage() {
+        const open = controlCenterOn(rightBar);
+        compare(OpenPopup.controlCenterShortcut(open, "expanded", "expanded", bars, "AOC", true).open,
+            OpenPopup.none);
+        compare(OpenPopup.controlCenterShortcut(open, "collapsed", "collapsed", bars, "AOC", true)
+            .open, OpenPopup.none);
+    }
+
+    // Open on another monitor's bar, it moves to the focused one rather than
+    // closing.
+    function test_aShortcutMovesTheControlCenterOpenOnAnotherBarToTheFocusedOne() {
+        const next = OpenPopup.controlCenterShortcut(controlCenterOn(leftBar), "expanded",
+            "expanded", bars, "AOC", true);
+        compare(next.open.window, rightBar);
+        compare(next.stage, "expanded");
+    }
+
+    function test_aShortcutWithNoShownBarChangesNothing() {
+        const open = controlCenterOn(leftBar);
+        const next = OpenPopup.controlCenterShortcut(open, "collapsed", "expanded", [], "AOC", true);
+        compare(next.open, open);
+        compare(next.stage, "collapsed");
+    }
+
+    // With the control center plugin off it has no stages: either shortcut
+    // opens it and, open, closes it.
+    function test_withThePluginOffAShortcutJustTogglesIt() {
+        const opened = OpenPopup.controlCenterShortcut(OpenPopup.none, "collapsed", "expanded",
+            bars, "AOC", false);
+        compare(opened.open.window, rightBar);
+        compare(OpenPopup.controlCenterShortcut(opened.open, "collapsed", "expanded", bars, "AOC",
+            false).open, OpenPopup.none);
+    }
 }

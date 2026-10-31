@@ -5,13 +5,15 @@ import "." as Panels
 // The control center's two stages. Collapsed shows the tile row above the
 // notifications; expanded shows every control in place of them. Whatever
 // opens it asks for a stage (`requestedStage`): the bell and SUPER+N ask for
-// "collapsed", SUPER+C for "expanded". The handle under the controls
-// switches stages: tap its chevron, or drag it down to expand and up to
-// collapse. With the control center plugin off (`controlsEnabled` false) it
-// is notifications only: no controls, no handle, never expanded.
-// Expanded, the audio output tile opens a subpage (`subpage`
-// "audioOutputs") in place of the controls; its back arrow (`back()`)
-// returns to the expanded stage. Each opening starts without it.
+// "collapsed", SUPER+C for "expanded"; a new request while it is open
+// switches it in place. The handle under the controls switches stages: tap
+// its chevron, or drag it down to expand and up to collapse. With the
+// control center plugin off (`controlsEnabled` false) it is notifications
+// only: no controls, no handle, never expanded.
+// The audio output tile opens a subpage (`subpage` "audioOutputs") in place
+// of the controls, expanding first when it sits in the collapsed row; its
+// back arrow (`back()`) returns to the expanded stage. Each opening, and
+// collapsing, leaves it.
 // Above everything, in both stages, sits `pinned` (the media card).
 Column {
     id: root
@@ -48,10 +50,24 @@ Column {
         }
     }
 
-    // The audio output tile: only the expanded control center has it.
+    // SUPER+C / SUPER+N while it is open: it switches in place.
+    onRequestedStageChanged: {
+        if (open)
+            stage = requestedStage;
+    }
+
+    // Collapsing leaves the subpage.
+    onExpandedChanged: {
+        if (!expanded)
+            subpage = "";
+    }
+
+    // The audio output tile; in the collapsed row it expands first.
     function openAudioOutputs() {
-        if (expanded)
-            subpage = "audioOutputs";
+        if (!controlsEnabled)
+            return;
+        stage = "expanded";
+        subpage = "audioOutputs";
     }
 
     // The subpage's back arrow.

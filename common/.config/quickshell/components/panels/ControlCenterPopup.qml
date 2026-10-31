@@ -19,7 +19,10 @@ BarPopup {
     required property var keepAwake
     required property var nightLight
     property bool controlsEnabled: true
-    // The stage the next opening takes: "collapsed" or "expanded".
+    // The stage the next opening takes, "collapsed" or "expanded"; changed
+    // while open, it switches to it. The stage the open control center
+    // switches to by itself (the handle, the audio output tile) goes back up
+    // as `popups.controlCenterStageSwitched`, so SUPER+C/SUPER+N know it.
     property string requestedStage: "collapsed"
 
     popup: "controlCenter"
@@ -33,6 +36,11 @@ BarPopup {
         open: root.open
         controlsEnabled: root.controlsEnabled
         requestedStage: root.requestedStage
+
+        onStageChanged: {
+            if (root.open)
+                root.popups.controlCenterStageSwitched(stage);
+        }
 
         pinned: Component {
             ControlCenterMediaCard {
