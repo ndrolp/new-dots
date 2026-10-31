@@ -65,6 +65,31 @@ test_an_active_colorscheme_is_left_alone() {
     [[ "$(readlink "$DOTFILES/colorschemes/active")" == nord ]] || fail "the active colorscheme changed"
 }
 
+# dotfiles_clone: dotfiles_copy, plus VS Code's settings file, .gitattributes and .gitignore, committed
+# in a fresh git repo, as a clone has them.
+dotfiles_clone() {
+    dotfiles_copy
+    mkdir -p "$DOTFILES/common/.config/Code/User"
+    cp "$REPO/common/.config/Code/User/settings.json" "$DOTFILES/common/.config/Code/User/"
+    cp "$REPO/.gitattributes" "$REPO/.gitignore" "$DOTFILES/"
+    git -C "$DOTFILES" init -q
+    git -C "$DOTFILES" add -A
+    git -C "$DOTFILES" add -f common/.config/Code/User/settings.json
+    git -C "$DOTFILES" -c user.name=t -c user.email=t@t commit -qm dotfiles
+}
+
+test_the_vscode_theme_filter_is_registered_so_a_theme_change_is_not_a_diff() {
+    dotfiles_clone
+    run_colorscheme_step
+    run_colorscheme_step
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    local settings="$DOTFILES/common/.config/Code/User/settings.json"
+    sed -i 's/"workbench.colorTheme": "[^"]*"/"workbench.colorTheme": "Nord"/' "$settings"
+    git -C "$DOTFILES" diff --quiet || fail "the theme change is a diff: $(git -C "$DOTFILES" diff)"
+    [[ "$(git -C "$DOTFILES" config --get-all filter.vscode-theme.clean | wc -l)" -eq 1 ]] \
+        || fail "registered more than once: $(git -C "$DOTFILES" config --get-all filter.vscode-theme.clean)"
+}
+
 test_a_full_run_sets_up_the_colorscheme() {
     run_bootstrap_with_stub_steps
     [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
