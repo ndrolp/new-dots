@@ -38,13 +38,6 @@ Scope {
     signal powerMenuRequested()
     signal screenCaptureRequested()
 
-    // IPC toggles `popup` on the focused monitor's bar; when that bar lacks
-    // the popup's element, the popup opens at its right edge.
-    function togglePopupOnFocusedBar(popup) {
-        root.openPopup = OpenPopup.toggledOnFocusedBar(root.openPopup, popup, bars(),
-            root.workspaceService.focusedMonitorDescription());
-    }
-
     // SUPER+N asks for "collapsed", SUPER+C for "expanded": closed, it opens
     // at that stage; open at the other stage, it switches; open at that one,
     // it closes (OpenPopup.controlCenterShortcut).
