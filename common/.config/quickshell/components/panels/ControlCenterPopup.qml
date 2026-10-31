@@ -2,6 +2,7 @@ import Quickshell.Services.Mpris
 import Quickshell.Services.Pipewire
 import QtQuick
 import "MediaCard.js" as MediaCard
+import "ControlCenterNames.js" as Names
 
 // The control center: the popup of the bell bar element (saved id
 // "notifications"). Collapsed, it shows the tile row above today's
@@ -24,9 +25,9 @@ BarPopup {
     // while open, it switches to it. The stage the open control center
     // switches to by itself (the handle, the audio output tile) goes back up
     // as `popups.controlCenterStageSwitched`, so SUPER+C/SUPER+N know it.
-    property string requestedStage: "collapsed"
+    property string requestedStage: Names.controlCenter.collapsed
 
-    popup: "controlCenter"
+    popup: Names.controlCenter.popup
     implicitWidth: 424
 
     ControlCenterLayout {

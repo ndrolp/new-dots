@@ -10,6 +10,7 @@ import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 import "../StatusText.js" as StatusText
 import "BarElementItems.js" as BarElementItems
+import "../panels/ControlCenterNames.js" as Names
 import "RecordingIndicator.js" as RecordingIndicator
 
 // The bar elements that need no component of their own (notifications,
@@ -184,7 +185,7 @@ Item {
 
         MouseArea {
             anchors.fill: parent
-            onClicked: root.popupRequested("controlCenter")
+            onClicked: root.popupRequested(Names.controlCenter.popup)
         }
     }
 
