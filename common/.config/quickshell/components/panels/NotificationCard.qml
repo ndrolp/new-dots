@@ -65,14 +65,9 @@ Item {
     }
 
     // Letting go of a sideways drag: past the threshold the card slides out
-    // and is dismissed, otherwise it snaps back.
+    // and is dismissed, otherwise it snaps back (SwipeToDismiss).
     function swipeReleased() {
-        if (NotificationCard.swipeDismisses(face.x, root.width)) {
-            swipeOut.to = face.x < 0 ? -root.width : root.width;
-            swipeOut.restart();
-        } else {
-            snapBack.restart();
-        }
+        swipe.letGo();
     }
 
     function relativeTime(timestamp) {
@@ -91,33 +86,13 @@ Item {
         id: theme
     }
 
-    NumberAnimation {
-        id: swipeOut
-
-        target: face
-        property: "x"
-        duration: root.appearance.motion.medium
-        easing.type: root.appearance.motion.easing
-        onFinished: root.dismissed()
-    }
-
-    NumberAnimation {
-        id: snapBack
-
-        target: face
-        property: "x"
-        to: 0
-        duration: root.appearance.motion.medium
-        easing.type: root.appearance.motion.easing
-    }
-
     Rectangle {
         id: face
 
         width: root.width
         height: content.implicitHeight + 24
         radius: root.appearance.radius
-        opacity: 1 - Math.min(1, Math.abs(x) / Math.max(1, root.width)) * 0.8
+        opacity: swipe.swipeOpacity
         color: cardHover.hovered ? theme.surfaceHover
             : root.highlighted ? Qt.rgba(theme.accent.r, theme.accent.g, theme.accent.b, 0.12)
             : theme.backgroundSecondary
@@ -139,14 +114,13 @@ Item {
             id: cardHover
         }
 
-        DragHandler {
+        Panels.SwipeToDismiss {
+            id: swipe
+
             target: face
-            xAxis.enabled: true
-            yAxis.enabled: false
-            onActiveChanged: {
-                if (!active)
-                    root.swipeReleased();
-            }
+            motion: root.appearance.motion
+            swipeWidth: root.width
+            onSwiped: root.dismissed()
         }
 
         TapHandler {

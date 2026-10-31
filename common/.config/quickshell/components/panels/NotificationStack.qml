@@ -1,7 +1,6 @@
 import QtQuick
 import "../../config" as Config
 import "." as Panels
-import "NotificationCard.js" as NotificationCard
 
 // One app's notifications in the control center, under the app's name. Two
 // or more collapse into an app stack: the newest notification card with
@@ -48,12 +47,7 @@ Item {
     // threshold it slides out and the group is dismissed, otherwise it snaps
     // back.
     function swipeReleased() {
-        if (NotificationCard.swipeDismisses(stackFace.x, root.width)) {
-            swipeOut.to = stackFace.x < 0 ? -root.width : root.width;
-            swipeOut.restart();
-        } else {
-            snapBack.restart();
-        }
+        swipe.letGo();
     }
 
     function highlighted(record) {
@@ -62,26 +56,6 @@ Item {
 
     Config.Theme {
         id: theme
-    }
-
-    NumberAnimation {
-        id: swipeOut
-
-        target: stackFace
-        property: "x"
-        duration: root.appearance.motion.medium
-        easing.type: root.appearance.motion.easing
-        onFinished: root.groupDismissed()
-    }
-
-    NumberAnimation {
-        id: snapBack
-
-        target: stackFace
-        property: "x"
-        to: 0
-        duration: root.appearance.motion.medium
-        easing.type: root.appearance.motion.easing
     }
 
     Column {
@@ -142,7 +116,7 @@ Item {
 
                 width: parent.width
                 height: parent.height
-                opacity: 1 - Math.min(1, Math.abs(x) / Math.max(1, root.width)) * 0.8
+                opacity: swipe.swipeOpacity
 
                 Rectangle {
                     x: 8
@@ -176,14 +150,13 @@ Item {
                     currentTime: root.currentTime
                 }
 
-                DragHandler {
+                Panels.SwipeToDismiss {
+                    id: swipe
+
                     target: stackFace
-                    xAxis.enabled: true
-                    yAxis.enabled: false
-                    onActiveChanged: {
-                        if (!active)
-                            root.swipeReleased();
-                    }
+                    motion: root.appearance.motion
+                    swipeWidth: root.width
+                    onSwiped: root.groupDismissed()
                 }
 
                 TapHandler {
