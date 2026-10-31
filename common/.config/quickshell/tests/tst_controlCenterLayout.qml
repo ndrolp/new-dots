@@ -129,6 +129,21 @@ TestCase {
         compare(layout.expanded, false);
     }
 
+    // SUPER+C on the open collapsed control center asks for "expanded", and
+    // SUPER+N on the expanded one for "collapsed": it switches in place.
+    function test_whileOpenItSwitchesToANewlyRequestedStage() {
+        const layout = makeLayout();
+        opened(layout, "collapsed");
+
+        layout.requestedStage = "expanded";
+        compare(layout.expanded, true);
+        verify(!notificationsShown(layout));
+
+        layout.requestedStage = "collapsed";
+        compare(layout.expanded, false);
+        verify(notificationsShown(layout));
+    }
+
     function test_theChevronSwitchesStagesAndCollapsingBringsTheListBack() {
         const layout = makeLayout();
         opened(layout, "collapsed");
@@ -230,14 +245,37 @@ TestCase {
         verify(!audioOutputsShown(layout));
     }
 
-    // The subpage belongs to the expanded control center.
-    function test_collapsedOrWithThePluginOffThereIsNoSubpage() {
-        const collapsed = makeLayout();
-        opened(collapsed, "collapsed");
-        collapsed.openAudioOutputs();
-        compare(collapsed.subpage, "");
-        verify(!audioOutputsShown(collapsed));
+    // The audio output tile in the collapsed row expands the control center
+    // and opens the subpage; the back arrow then leaves it expanded.
+    function test_theCollapsedAudioOutputTileExpandsAndOpensTheSubpage() {
+        const layout = makeLayout();
+        opened(layout, "collapsed");
 
+        layout.openAudioOutputs();
+        compare(layout.expanded, true);
+        verify(audioOutputsShown(layout));
+        verify(!notificationsShown(layout));
+
+        layout.back();
+        compare(layout.expanded, true);
+        verify(controlsShown(layout));
+    }
+
+    // Collapsing (SUPER+N) leaves the subpage; expanding again shows the
+    // controls, not the subpage.
+    function test_collapsingLeavesTheSubpage() {
+        const layout = makeLayout();
+        opened(layout, "expanded");
+        layout.openAudioOutputs();
+
+        layout.requestedStage = "collapsed";
+        layout.requestedStage = "expanded";
+        verify(controlsShown(layout));
+        verify(!audioOutputsShown(layout));
+    }
+
+    // With the plugin off there are no controls, so no subpage.
+    function test_withThePluginOffThereIsNoSubpage() {
         const off = makeLayout({ controlsEnabled: false });
         opened(off, "expanded");
         off.openAudioOutputs();
