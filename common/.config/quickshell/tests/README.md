@@ -63,3 +63,12 @@ common/.config/quickshell/tests/run.sh
 - The script uses the Qt 6 `qmltestrunner` (`/usr/lib/qt6/bin/qmltestrunner`;
   override with `QMLTESTRUNNER`). Extra arguments go to `qmltestrunner`, e.g.
   `run.sh test_savingUnderANewNameAddsAProfile`.
+
+`state-files.sh` checks that Quickshell's runtime state (`services/launcher.json`,
+`config/wallpapers.json`) is untracked and gitignored while `appearance.json`
+stays tracked, and starts a headless `qs` on a scratch config to check that
+the launcher history and wallpaper services create those files when missing:
+
+```sh
+common/.config/quickshell/tests/state-files.sh
+```
