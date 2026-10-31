@@ -100,7 +100,7 @@ test_the_full_config_with_the_tracked_colours_link_gives_everforestdarks_borders
     cp -r "$HYPR/." "$config"
     tracked="$(readlink "$HYPR/custom/colors.lua")"
     tracked="${tracked#*/colorschemes/shown/}"
-    ln -sf "$COLORSCHEMES/$(cat "$COLORSCHEMES/default.txt")/$tracked" "$config/custom/colors.lua"
+    ln -sf "$COLORSCHEMES/$("$COLORSCHEMES/colorscheme_changer.sh" --default)/$tracked" "$config/custom/colors.lua"
     run_hypr_config "$config" "dofile('$config/hyprland.lua')"
     [[ "$OUT" == "$EVERFOREST" ]] || fail "wrong borders"
 }

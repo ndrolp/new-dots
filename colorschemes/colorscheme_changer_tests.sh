@@ -195,7 +195,7 @@ test_applying_names_a_theme_with_non_ascii_characters_in_vs_code() {
 # register_vscode_theme_filter: registers the VS Code theme clean filter in the scratch ~/.dotfiles, as
 # bootstrap does.
 register_vscode_theme_filter() {
-    git -C "$HOME_DIR/.dotfiles" config filter.vscode-theme.clean 'colorschemes/vscode_theme.sh --default'
+    "$HOME_DIR/.dotfiles/colorschemes/vscode_theme.sh" --register
 }
 
 test_with_the_filter_registered_applying_leaves_vs_codes_settings_out_of_git_status() {

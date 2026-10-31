@@ -11,9 +11,8 @@ active="$("$DOTFILES_DIR/colorschemes/colorscheme_changer.sh" --active)"
 info "Active colorscheme: $active"
 
 # VS Code can't include another file, so applying writes the theme into its tracked settings file. The
-# clean filter named in .gitattributes stores the default colorscheme's theme instead; git only runs it
-# once it is registered in the clone's config. The command runs from the top of the work tree.
+# clean filter named in .gitattributes stores the default colorscheme's theme instead, once registered.
 if [[ -e "$DOTFILES_DIR/.git" ]]; then
-    git -C "$DOTFILES_DIR" config filter.vscode-theme.clean 'colorschemes/vscode_theme.sh --default'
+    "$DOTFILES_DIR/colorschemes/vscode_theme.sh" --register
     info "Registered the VS Code theme filter."
 fi
