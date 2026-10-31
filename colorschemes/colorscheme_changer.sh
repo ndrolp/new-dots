@@ -60,50 +60,39 @@ list_colorschemes | grep -qxF -- "$SELECTED_FOLDER" || exit 1
 
 case "$SELECTED_FOLDER" in
   catppuccin)
-    KITTY_THEME="Catppuccin"
     VSCODE_THEME="Catppuccin Mocha"
     ;;
   gruvboxdark)
-    KITTY_THEME="Gruvbox Dark"
     VSCODE_THEME="Gruvbox Dark Medium"
     ;;
   tokyonight)
-    KITTY_THEME="Tokyo Night"
     VSCODE_THEME="Tokyo Night"
     ;;
   everforest|everforestdark)
-    KITTY_THEME="Everforestdark"
     VSCODE_THEME="Everforest Pro Dark"
     ;;
   kanagawa)
-    KITTY_THEME="Kanagawa"
     VSCODE_THEME="Kanagawa"
     ;;
   rosepine)
-    KITTY_THEME="Rosé Pine"
     VSCODE_THEME="Rosé Pine"
     ;;
   dracula)
-    KITTY_THEME="Dracula"
     VSCODE_THEME="Dracula Theme"
     ;;
   carbonfox)
-    KITTY_THEME="Carbonfox"
     VSCODE_THEME="Carbonfox"
     ;;
   nord)
-    KITTY_THEME="nord"
     VSCODE_THEME="Nord"
     ;;
   bloodmoon)
-    KITTY_THEME="Bloodmoon"
     VSCODE_THEME="Midnight Crimson"
     ;;
   coralnord)
-    KITTY_THEME="Coralnord"
     VSCODE_THEME="Nord Wave"
     ;;
-  *) KITTY_THEME="$SELECTED_FOLDER" ;;
+  *) ;;
 esac
 
 echo "$SELECTED_FOLDER"
@@ -164,8 +153,13 @@ apply_hyprland() {
   hyprctl reload
 }
 
+# kitty.conf includes the active colorscheme's kitty.conf through the tracked link colorscheme.conf, so
+# kitty's config never changes; running kittys reread it on SIGUSR1, which needs no remote control. No
+# kitty running (pkill exits 1) is not a failure.
 apply_kitty() {
-  kitten themes --reload-in=all "$KITTY_THEME"
+  local status=0
+  pkill -USR1 -u "$(id -u)" -x kitty || status=$?
+  [ "$status" -le 1 ]
 }
 
 # New nvims load theme.lua, linked through the active colorscheme, at startup; running ones re-source it through their server

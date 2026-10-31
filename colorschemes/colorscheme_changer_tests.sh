@@ -18,7 +18,7 @@ mapfile -t GTK_THEMES < <(sed 's/#.*//' "$COLORSCHEMES/../common/bootstrap/gtk-t
 
 fail() {
     echo "  FAIL: $*"
-    echo "$OUT" | sed 's/^/    | /'
+    echo "${OUT:-}" | sed 's/^/    | /'
     echo "  calls:"
     sed 's/^/    | /' "$CALLS" 2>/dev/null
     return 1
@@ -109,6 +109,7 @@ UNCHANGED_BY_APPLY=(
     common/.config/nvim/lua/settings/core/theme.lua
     common/.config/rofi/custom/colors.rasi
     colorschemes/default.txt
+    common/.config/kitty
 )
 
 test_applying_leaves_the_tracked_colour_links_and_the_default_colorscheme_unchanged() {
@@ -171,20 +172,104 @@ test_the_active_link_cannot_be_applied_as_a_colorscheme() {
 }
 
 test_a_failing_step_does_not_stop_the_later_steps() {
-    change_colorscheme --failing "kitten" nord
-    [[ "$(calls_to quickshell)" -gt 0 ]] || fail "quickshell was never asked to reload after kitty failed"
+    change_colorscheme --failing "hyprctl" nord
+    [[ "$(calls_to quickshell)" -gt 0 ]] || fail "quickshell was never asked to reload after hyprland failed"
 }
 
 test_an_apply_with_failed_steps_sends_one_notification_naming_them() {
-    change_colorscheme --failing "kitten gsettings" nord
+    change_colorscheme --failing "hyprctl gsettings" nord
     [[ "$(calls_to notify-send)" -eq 1 ]] || fail "expected exactly one notification"
-    [[ "$NOTIFICATIONS" == *kitty* && "$NOTIFICATIONS" == *gtk* ]] || fail "notification does not name kitty and gtk"
-    [[ "$NOTIFICATIONS" != *hyprland* ]] || fail "notification names a step that succeeded"
+    [[ "$NOTIFICATIONS" == *hyprland* && "$NOTIFICATIONS" == *gtk* ]] || fail "notification does not name hyprland and gtk"
+    [[ "$NOTIFICATIONS" != *quickshell* ]] || fail "notification names a step that succeeded"
 }
 
 test_a_successful_apply_sends_no_notification() {
     change_colorscheme nord
     [[ -z "$NOTIFICATIONS" ]] || fail "a successful apply notified"
+}
+
+# Running kittys reread their config, and with it the colours it includes, on SIGUSR1: no remote control
+# or `kitten themes` needed.
+test_applying_asks_every_running_kitty_to_reload_its_config() {
+    change_colorscheme nord
+    grep -qx "pkill -USR1 -u $(id -u) -x kitty" "$CALLS" || fail "kitty was not asked to reload"
+    [[ "$(calls_to kitten)" -eq 0 ]] || fail "kitten was run"
+}
+
+# pkill_exiting <status>: makes the pkill shim exit with <status> (1: no kitty was running; 3: pkill failed).
+pkill_exiting() {
+    printf '#!/bin/sh\necho "pkill $*" >>"$HOME/calls"\nexit %s\n' "$1" >"$HOME_DIR/bin/pkill"
+}
+
+test_applying_with_no_kitty_running_is_not_a_failure() {
+    changer_home
+    install_gtk_themes "$HOME_DIR"
+    pkill_exiting 1
+    run_changer nord
+    ! grep -q "^notify-send " "$CALLS" || fail "no kitty running notified"
+}
+
+test_a_failing_kitty_reload_fails_the_kitty_step() {
+    changer_home
+    pkill_exiting 3
+    run_changer nord
+    grep "^notify-send " "$CALLS" | grep -q kitty || fail "the kitty step did not fail"
+}
+
+# kitty_config [<file>]: kitty's config as kitty reads it, from <file> (default: ~/.config/kitty/kitty.conf
+# in the scratch HOME), with every include replaced by the file it names, relative to ~/.config/kitty;
+# like kitty, it skips an include whose file is missing (the harness copies only the colour files).
+kitty_config() {
+    local file="${1:-$HOME_DIR/.config/kitty/kitty.conf}" line included
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        if [[ "$line" =~ ^[[:space:]]*include[[:space:]]+(.+)$ ]]; then
+            included="${BASH_REMATCH[1]}"
+            included="${included/#\~/$HOME_DIR}"
+            [[ "$included" == /* ]] || included="$HOME_DIR/.config/kitty/$included"
+            [[ -f "$included" ]] || continue
+            kitty_config "$included"
+        else
+            printf '%s\n' "$line"
+        fi
+    done <"$file"
+}
+
+# kitty_setting <name>: the value kitty ends up with for <name> (the last one set wins).
+kitty_setting() { kitty_config | awk -v name="$1" '$1 == name { value = $2 } END { print value }'; }
+
+test_kitty_takes_the_applied_colorschemes_colours() {
+    change_colorscheme nord
+    [[ "$(kitty_setting background)" == "#2E3440" ]] || fail "background is $(kitty_setting background)"
+    run_changer gruvboxdark
+    [[ "$(kitty_setting background)" == "#1d2021" ]] || fail "background is $(kitty_setting background)"
+}
+
+test_terminal_transparency_survives_applying_every_colorscheme() {
+    changer_home
+    local scheme
+    for scheme in $(bash "$HOME_DIR/.dotfiles/colorschemes/colorscheme_changer.sh" --list); do
+        run_changer "$scheme"
+        [[ "$(kitty_setting background_opacity)" == 0.80 ]] \
+            || fail "$scheme leaves background_opacity at $(kitty_setting background_opacity)"
+    done
+}
+
+test_every_colorscheme_has_its_own_kitty_colours() {
+    changer_home
+    local scheme colours
+    for scheme in $(bash "$HOME_DIR/.dotfiles/colorschemes/colorscheme_changer.sh" --list); do
+        colours="$COLORSCHEMES/$scheme/kitty.conf"
+        [[ -f "$colours" && ! -L "$colours" ]] || fail "$scheme has no kitty.conf of its own"
+        ! grep -q "^[[:space:]]*include" "$colours" || fail "$scheme's kitty.conf includes another file"
+        grep -q "^foreground[[:space:]]" "$colours" && grep -q "^background[[:space:]]" "$colours" \
+            || fail "$scheme's kitty.conf sets no foreground or background"
+    done
+}
+
+test_the_kitty_themes_folder_and_backup_are_gone() {
+    [[ ! -e "$COLORSCHEMES/../common/.config/kitty/themes" ]] || fail "kitty's themes folder is still there"
+    [[ ! -e "$COLORSCHEMES/../common/.config/kitty/kitty.conf.bak" ]] || fail "kitty.conf.bak is still there"
+    ! grep -q "KITTY_THEME" "$COLORSCHEMES/colorscheme_changer.sh" || fail "the changer still names kitty themes"
 }
 
 test_applying_does_not_ask_ags_for_the_theme() {
