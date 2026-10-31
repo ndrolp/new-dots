@@ -22,8 +22,117 @@ TestCase {
             image: "",
             summary: "Download finished",
             body: "",
-            actions: []
+            actions: [],
+            lastGeneration: false,
+            dismissCount: 0,
+            dismiss() {
+                this.dismissCount++;
+            }
         }, properties || {});
+    }
+
+    function test_dismissingAStackDismissesEachOfItsNotifications() {
+        const item = createTemporaryObject(history, this);
+        const first = notification({ summary: "Download 1" });
+        const second = notification({ summary: "Download 2" });
+        const other = notification({ appName: "Discord", summary: "Message" });
+
+        item.add(first);
+        item.add(other);
+        item.add(second);
+        item.removeGroup("Firefox");
+
+        compare([first.dismissCount, second.dismissCount, other.dismissCount], [1, 1, 0]);
+    }
+
+    function test_clearAllDismissesEveryNotification() {
+        const item = createTemporaryObject(history, this);
+        const first = notification({ summary: "Download 1" });
+        const second = notification({ appName: "Discord", summary: "Message" });
+
+        item.add(first);
+        item.add(second);
+        item.clear();
+
+        compare([first.dismissCount, second.dismissCount], [1, 1]);
+    }
+
+    function test_theNotificationFallingPastTheFiftiethCardIsDismissed() {
+        const item = createTemporaryObject(history, this);
+        const sent = [];
+
+        for (let index = 0; index < 51; index++) {
+            sent.push(notification({ summary: "Message " + index }));
+            item.add(sent[index]);
+        }
+
+        compare(item.items.length, 50);
+        compare(sent[0].dismissCount, 1);
+        compare(sent.slice(1).filter(each => each.dismissCount > 0).length, 0);
+    }
+
+    function test_aRepeatDismissesTheNotificationItReplaces() {
+        const item = createTemporaryObject(history, this);
+        const first = notification();
+        const repeat = notification();
+
+        item.add(first);
+        item.add(repeat);
+
+        compare(first.dismissCount, 1);
+        compare(repeat.dismissCount, 0);
+        compare(item.items[0].notification, repeat);
+    }
+
+    function test_openingTheControlCenterDoesNotDismissAnything() {
+        const item = createTemporaryObject(history, this);
+        const sent = notification();
+
+        item.add(sent);
+        item.markAllRead();
+
+        compare(sent.dismissCount, 0);
+    }
+
+    // After a shell reload the server sends again the notifications it kept
+    // (keepOnReload), oldest first, marked lastGeneration.
+    function test_afterAReloadTheHistoryHoldsTheKeptNotificationsNewestFirst() {
+        const item = createTemporaryObject(history, this);
+
+        item.add(notification({ summary: "Older", lastGeneration: true }));
+        item.add(notification({ summary: "Newer", lastGeneration: true }));
+
+        compare(item.items.map(entry => entry.summary), ["Newer", "Older"]);
+    }
+
+    function test_aKeptNotificationComesBackAlreadyRead() {
+        const item = createTemporaryObject(history, this);
+
+        item.add(notification({ summary: "Kept", lastGeneration: true }));
+        item.add(notification({ summary: "New" }));
+
+        compare(item.items.map(entry => entry.unread), [true, false]);
+        compare(item.unreadCount, 1);
+    }
+
+    function test_aCardRebuiltAfterAReloadStillDismissesItsNotification() {
+        const item = createTemporaryObject(history, this);
+        const kept = notification({ lastGeneration: true });
+
+        item.add(kept);
+        item.remove(item.items[0].id);
+
+        compare(kept.dismissCount, 1);
+    }
+
+    function test_removingACardDismissesItsNotification() {
+        const item = createTemporaryObject(history, this);
+        const sent = notification();
+
+        item.add(sent);
+        item.remove(item.items[0].id);
+
+        compare(sent.dismissCount, 1);
     }
 
     function test_anEntryKeepsTheAppIconAndImageItWasSentWith() {
