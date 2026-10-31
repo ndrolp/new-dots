@@ -34,6 +34,10 @@ Variants {
         property string previewTheme: ""
         property var preview: ColorschemePreview.idle
         property bool applyingTheme: false
+        // The colorschemes the changer is listing, and whether the list is being replaced (moving the
+        // selection then is not a choice to preview).
+        property var listedThemes: []
+        property bool refreshingList: false
 
         screen: modelData
         visible: root.open && focusedMonitor
@@ -50,13 +54,12 @@ Variants {
             right: true
         }
 
-        // The colorschemes, listed once by the changer: the colorschemes folder also holds the
-        // active-colorscheme link, which is not one of them.
+        // The colorschemes, listed by the changer each time the selector opens, so a new colorscheme
+        // folder shows without reloading the shell: the colorschemes folder also holds the active and
+        // shown links, which are not colorschemes.
         ListModel {
             id: themes
         }
-
-        Component.onCompleted: themeListing.running = true
 
         Config.Theme {
             id: theme
@@ -88,6 +91,29 @@ Variants {
         function previewCurrent() {
             if (themeList.currentItem)
                 previewSelectedTheme(themeList.currentItem.themeName);
+        }
+
+        function refreshThemes() {
+            if (themeListing.running)
+                return;
+
+            listedThemes = [];
+            themeListing.running = true;
+        }
+
+        // showListedThemes: replaces the list with the one the changer gave, when it differs.
+        function showListedThemes() {
+            let same = listedThemes.length === themes.count;
+            for (let index = 0; same && index < themes.count; index++)
+                same = themes.get(index).fileName === listedThemes[index];
+            if (same)
+                return;
+
+            refreshingList = true;
+            themes.clear();
+            for (const name of listedThemes)
+                themes.append({ fileName: name });
+            refreshingList = false;
         }
 
         function loadActiveTheme() {
@@ -134,11 +160,12 @@ Variants {
             stdout: SplitParser {
                 onRead: data => {
                     if (data.trim() !== "")
-                        themes.append({ fileName: data.trim() });
+                        selector.listedThemes.push(data.trim());
                 }
             }
 
             onExited: {
+                selector.showListedThemes();
                 if (selector.visible)
                     selector.loadActiveTheme();
             }
@@ -170,7 +197,7 @@ Variants {
         onVisibleChanged: {
             if (visible) {
                 applyingTheme = false;
-                loadActiveTheme();
+                refreshThemes();
             }
         }
 
@@ -245,7 +272,7 @@ Variants {
                     preferredHighlightEnd: height - 52
 
                     onCurrentIndexChanged: {
-                        if (selector.visible)
+                        if (selector.visible && !selector.refreshingList)
                             selector.previewCurrent();
                     }
 
