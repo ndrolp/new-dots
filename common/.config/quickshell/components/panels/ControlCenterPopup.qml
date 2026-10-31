@@ -82,7 +82,7 @@ BarPopup {
                     // Any tile can sit in the collapsed row, so it reads the power
                     // profile, Caps Lock and the clipboard whenever it is open.
                     shown: root.open
-                    expanded: layout.expanded
+                    expanded: layout.shownExpanded
 
                     onCloseRequested: root.popups.popupClosed(root.popup)
                     onAudioOutputsRequested: layout.openAudioOutputs()

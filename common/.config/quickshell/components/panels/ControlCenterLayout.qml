@@ -17,6 +17,10 @@ import "ControlCenterNames.js" as Names
 // collapsing, leaves it.
 // Above everything, in both stages, sit the ongoing notifications
 // (`ongoing`: the media card and the `resident` notifications).
+// Switching stages or subpages while open fades out what is shown first,
+// then fades in the new contents (`shownExpanded`, `shownSubpage` lag behind
+// `expanded` and `subpage` until the fade-out ends); opening shows the
+// requested stage at once, and so does reduce motion.
 Column {
     id: root
 
@@ -42,6 +46,14 @@ Column {
     // The open subpage, Names.controlCenter.noSubpage for none.
     property string subpage: Names.controlCenter.noSubpage
     readonly property bool subpageOpen: expanded && subpage !== Names.controlCenter.noSubpage
+    // What is on screen: `expanded` and `subpage` once the fade-out between
+    // them has ended. The controls read `shownExpanded`.
+    property bool shownExpanded: expanded
+    property string shownSubpage: subpage
+    readonly property bool shownSubpageOpen: shownExpanded
+        && shownSubpage !== Names.controlCenter.noSubpage
+    // The stage's contents fade through 0 while it switches.
+    property real stageOpacity: 1
 
     // How far the handle is dragged before it switches stages.
     readonly property int dragThreshold: 24
@@ -52,6 +64,54 @@ Column {
         if (open) {
             stage = requestedStage;
             subpage = Names.controlCenter.noSubpage;
+            showNow();
+        }
+    }
+
+    // Shows the current stage and subpage, with no fade.
+    function showNow() {
+        stageFade.stop();
+        shownExpanded = expanded;
+        shownSubpage = subpage;
+        stageOpacity = 1;
+    }
+
+    // Fades from what is shown to the current stage and subpage.
+    function switchShown() {
+        if (shownExpanded === expanded && shownSubpage === subpage && !stageFade.running)
+            return;
+        if (!open || appearance.motion.brief === 0)
+            showNow();
+        else
+            stageFade.restart();
+    }
+
+    onSubpageChanged: switchShown()
+
+    SequentialAnimation {
+        id: stageFade
+
+        NumberAnimation {
+            target: root
+            property: "stageOpacity"
+            to: 0
+            duration: root.appearance.motion.brief
+            easing.type: root.appearance.motion.easing
+        }
+
+        ScriptAction {
+            script: {
+                root.shownExpanded = root.expanded;
+                root.shownSubpage = root.subpage;
+            }
+        }
+
+        NumberAnimation {
+            target: root
+            property: "stageOpacity"
+            to: 1
+            duration: root.appearance.motion.short
+            easing.type: root.appearance.motion.easing
         }
     }
 
@@ -65,6 +125,7 @@ Column {
     onExpandedChanged: {
         if (!expanded)
             subpage = Names.controlCenter.noSubpage;
+        switchShown();
     }
 
     // The audio output tile; in the collapsed row it expands first.
@@ -106,14 +167,16 @@ Column {
     Loader {
         width: parent.width
         active: root.controlsEnabled
-        visible: active && !root.subpageOpen
+        visible: active && !root.shownSubpageOpen
+        opacity: root.stageOpacity
         sourceComponent: root.controls
     }
 
     Loader {
         width: parent.width
-        active: root.subpageOpen && root.subpage === Names.controlCenter.audioOutputs
+        active: root.shownSubpageOpen && root.shownSubpage === Names.controlCenter.audioOutputs
         visible: active
+        opacity: root.stageOpacity
         sourceComponent: root.audioOutputs
     }
 
@@ -123,7 +186,8 @@ Column {
         objectName: "stageHandle"
         width: parent.width
         height: 22
-        visible: root.controlsEnabled && !root.subpageOpen
+        visible: root.controlsEnabled && !root.shownSubpageOpen
+        opacity: root.stageOpacity
 
         Rectangle {
             anchors.centerIn: parent
@@ -169,7 +233,8 @@ Column {
         id: notificationsLoader
 
         width: parent.width
-        visible: !root.expanded
+        visible: !root.shownExpanded
+        opacity: root.stageOpacity
         sourceComponent: root.notifications
     }
 }

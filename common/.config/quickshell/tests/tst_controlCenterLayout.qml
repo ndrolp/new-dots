@@ -77,6 +77,14 @@ TestCase {
         }
     }
 
+    QtObject {
+        id: movingAppearance
+
+        property int radius: 12
+        property int textSize: 13
+        readonly property var motion: Motion.motion(false)
+    }
+
     function makeLayout(properties) {
         const layout = createTemporaryObject(layoutComponent, this, properties || {});
         verify(layout);
@@ -106,6 +114,31 @@ TestCase {
         const list = findChild(layout, "notifications");
         verify(list);
         return list.visible;
+    }
+
+    // With motion, switching stages while open fades out what is shown
+    // before the new stage replaces it, then fades it in.
+    function test_switchingStagesFadesOutBeforeShowingTheNewStage() {
+        const layout = makeLayout({ appearance: movingAppearance });
+        opened(layout, "collapsed");
+        compare(layout.stageOpacity, 1);
+
+        layout.toggleStage();
+        compare(layout.expanded, true);
+        verify(notificationsShown(layout));
+        tryCompare(layout, "shownExpanded", true);
+        verify(!notificationsShown(layout));
+        tryCompare(layout, "stageOpacity", 1);
+    }
+
+    // Opening shows the requested stage at once, with no fade.
+    function test_openingShowsTheRequestedStageAtOnce() {
+        const layout = makeLayout({ appearance: movingAppearance });
+        opened(layout, "expanded");
+
+        compare(layout.shownExpanded, true);
+        compare(layout.stageOpacity, 1);
+        verify(!notificationsShown(layout));
     }
 
     function test_theBellOpensItCollapsedWithTheTileRowAboveTheNotifications() {
