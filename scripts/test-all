@@ -15,6 +15,7 @@ suites=(
     scripts/test-sync-packages
     common/.config/hypr/tests/borders.sh
     colorschemes/colorscheme_changer_tests.sh
+    common/.config/quickshell/tests/state-files.sh
 )
 
 case "${1:-}" in
