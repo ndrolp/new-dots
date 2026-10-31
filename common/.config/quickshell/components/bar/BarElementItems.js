@@ -20,3 +20,16 @@ function itemVisible(element, barElements, status) {
         return !status.cavaSilent;
     return true;
 }
+
+// The bar element a popup opens under, for popups not named after theirs.
+// The control center is the bell's popup, whose saved id stays
+// "notifications".
+var popupElements = Object.freeze({
+    "system": "systemMonitor",
+    "pomodoro": "clock",
+    "controlCenter": "notifications"
+});
+
+function popupElement(popup) {
+    return popupElements[popup] || popup;
+}

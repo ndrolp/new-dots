@@ -4,29 +4,16 @@ import Quickshell.Services.Notifications
 import QtQuick
 import "../components/panels" as Panels
 
-// The shell's notification server, the popups it shows and the notification
-// panel. Do not disturb stops both the popups and the sound.
-Feature {
+// The shell's notification server and the on-screen popups it shows; the
+// notifications themselves are listed in the control center, the bell's
+// popup. Do not disturb stops both the popups and the sound.
+Scope {
     id: root
 
     required property var appearance
     required property var notificationHistory
-    // The bar the panel attaches to when IPC opens it before any bar asked.
-    property var fallbackWindow: null
-    property var window: null
-
-    // The notifications button on a bar: the panel moves to that bar and
-    // opens, or closes.
-    function toggleOn(panelWindow) {
-        window = panelWindow;
-        open = !open;
-    }
-
-    // A bar came up: the panel attaches to the first one.
-    function offerWindow(panelWindow) {
-        if (window === null)
-            window = panelWindow;
-    }
+    // The bar module, which opens the control center on the focused bar.
+    required property var bar
 
     NotificationServer {
         id: notificationServer
@@ -68,23 +55,11 @@ Feature {
         notificationServer: notificationServer
     }
 
-    Panels.NotificationPanel {
-        appearance: root.appearance
-        notificationServer: notificationServer
-        notificationHistory: root.notificationHistory
-        open: root.open
-        targetWindow: root.window
-
-        onCloseRequested: root.open = false
-    }
-
     IpcHandler {
         target: "notifications"
 
         function toggle() {
-            if (root.window === null)
-                root.window = root.fallbackWindow;
-            root.toggle();
+            root.bar.togglePopupOnFocusedBar("controlCenter");
         }
     }
 }

@@ -35,7 +35,12 @@ and time left (`components/bar/KeepAwakeElement.qml`,
 `components/panels/KeepAwakePopupBody.qml`), keep-awake's duration and
 countdown: starting, restarting, running out and turning off by hand, and
 what the keybind's OSD says (`services/KeepAwakeState.js`),
-which popup is open across the bars (`modules/OpenPopup.js`),
+which popup is open across the bars and which bar IPC opens one on
+(`modules/OpenPopup.js`), which bar element a popup opens under
+(`components/bar/BarElementItems.js`), the notifications in the control
+center: marking them read on open, highlighting the ones that arrived since
+you last looked, Clear all and do not disturb
+(`components/panels/ControlCenterNotifications.qml`),
 the active colorscheme's colours read from its colours file,
 falling back to everforestdark's (`config/ColorschemeColors.js`), and which
 colorscheme preview the colorscheme selector runs, one at a time

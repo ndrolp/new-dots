@@ -52,4 +52,45 @@ TestCase {
         compare(OpenPopup.closed(open, "battery", leftBar), open);
         compare(OpenPopup.closed(open, "network", rightBar), open);
     }
+
+    // IPC (`notifications toggle`) opens a popup on the bar of the monitor
+    // with keyboard focus.
+    readonly property var bars: [
+        { window: leftBar, monitor: "Philips", visible: true },
+        { window: rightBar, monitor: "AOC", visible: true }
+    ]
+
+    function test_ipcOpensThePopupOnTheFocusedMonitorsBar() {
+        const open = OpenPopup.toggledOnFocusedBar(OpenPopup.none, "controlCenter", bars, "AOC");
+        compare(open.popup, "controlCenter");
+        compare(open.window, rightBar);
+    }
+
+    function test_ipcAgainOnTheSameBarClosesIt() {
+        const open = OpenPopup.toggledOnFocusedBar(OpenPopup.none, "controlCenter", bars, "AOC");
+        compare(OpenPopup.toggledOnFocusedBar(open, "controlCenter", bars, "AOC"), OpenPopup.none);
+    }
+
+    function test_ipcReplacesAnotherOpenPopup() {
+        const open = OpenPopup.requested(OpenPopup.none, "battery", leftBar);
+        const next = OpenPopup.toggledOnFocusedBar(open, "controlCenter", bars, "Philips");
+        compare(next.popup, "controlCenter");
+        compare(next.window, leftBar);
+    }
+
+    // A monitor whose bar is hidden can't hold the popup: it opens on the
+    // first bar that is shown.
+    function test_ipcFallsBackToAShownBarWhenTheFocusedOneIsHidden() {
+        const hidden = [
+            { window: leftBar, monitor: "Philips", visible: true },
+            { window: rightBar, monitor: "AOC", visible: false }
+        ];
+        const open = OpenPopup.toggledOnFocusedBar(OpenPopup.none, "controlCenter", hidden, "AOC");
+        compare(open.window, leftBar);
+    }
+
+    function test_ipcWithNoShownBarChangesNothing() {
+        const open = OpenPopup.requested(OpenPopup.none, "battery", leftBar);
+        compare(OpenPopup.toggledOnFocusedBar(open, "controlCenter", [], "AOC"), open);
+    }
 }

@@ -38,7 +38,6 @@ Item {
     // Whether an element sits in a group, provided by the bar's walk.
     property var elementGrouped: element => false
     signal popupRequested(string popup)
-    signal notificationRequested()
 
     readonly property var audio: Pipewire.defaultAudioSink && Pipewire.defaultAudioSink.audio
         ? Pipewire.defaultAudioSink.audio : null
@@ -185,7 +184,7 @@ Item {
 
         MouseArea {
             anchors.fill: parent
-            onClicked: root.notificationRequested()
+            onClicked: root.popupRequested("controlCenter")
         }
     }
 

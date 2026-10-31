@@ -263,6 +263,20 @@ TestCase {
         verify(elementRow(built.item, "Keep-awake"));
     }
 
+    // The bell opens the control center, so it is labelled after it; bar
+    // profiles still store it as `notifications`.
+    function test_theBellIsListedAsTheControlCenterAndSavedAsNotifications() {
+        const built = make();
+        const bell = elementRow(built.item, "Control center");
+        const bellSwitch = all(bell, child => child.checked !== undefined && child.toggled === undefined)[0];
+
+        verify(!elementRow(built.item, "Notifications"));
+        verify(bellSwitch.checked);
+        mouseClick(bellSwitch);
+
+        compare(built.appearance.calls, [["enabled", "notifications", false]]);
+    }
+
     function enableCava(appearance) {
         appearance.barElements = Object.assign({}, appearance.barElements, {
             right: appearance.barElements.right.map(element => element.id === "cava"

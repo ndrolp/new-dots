@@ -121,7 +121,7 @@ ShellRoot {
 
         appearance: appearance
         notificationHistory: notificationHistory
-        fallbackWindow: settings.window
+        bar: bar
     }
 
     Panels.BackgroundClock {
@@ -264,6 +264,8 @@ ShellRoot {
     }
 
     Modules.Bar {
+        id: bar
+
         appearance: appearance
         monitors: monitors
         pomodoro: pomodoro
@@ -275,7 +277,6 @@ ShellRoot {
         systemMonitor: systemMonitor
         workspaceService: workspaceService
         settings: settings
-        notifications: notifications
         osd: osd
     }
 }
