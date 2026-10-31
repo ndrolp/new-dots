@@ -121,7 +121,7 @@ ShellRoot {
 
         appearance: appearance
         notificationHistory: notificationHistory
-        bar: bar
+        controlCenter: controlCenter
     }
 
     Panels.BackgroundClock {
@@ -227,6 +227,14 @@ ShellRoot {
 
         bar: bar
         plugins: plugins
+        appearance: appearance
+        settings: settings
+        notificationHistory: notificationHistory
+        screenCapture: screenCapture
+        clipboardHistory: clipboardHistory
+        systemMonitor: systemMonitor
+        keepAwake: keepAwake
+        nightLight: nightLight
         clipboardSelector: clipboardSelector
         powerMenu: powerMenu
         screenCaptureChooser: screenCaptureChooser
@@ -263,10 +271,8 @@ ShellRoot {
         pomodoro: pomodoro
         notificationHistory: notificationHistory
         screenCapture: screenCapture
-        clipboardHistory: clipboardHistory
-        nightLight: nightLight
-        plugins: plugins
         keepAwake: keepAwake
+        controlCenter: controlCenter
         screenShares: screenShares
         cava: cava
         systemMonitor: systemMonitor

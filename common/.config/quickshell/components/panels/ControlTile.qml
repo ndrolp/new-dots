@@ -2,8 +2,8 @@ import QtQuick
 import "../../config" as Config
 import "." as Panels
 
-// A Tile of the control center: a toggle or action, a row with a colored icon
-// and a label. An active tile shows it with its color; the rest stay muted
+// A Tile of the control center: a switch (on or off) or an action, a row
+// with a colored icon and a label. An active tile shows it with its color; the rest stay muted
 // until hovered. A tile whose control isn't available is faded and doesn't
 // react.
 PopupRow {

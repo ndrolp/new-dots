@@ -3,6 +3,7 @@ import Quickshell.Io
 import Quickshell.Services.Notifications
 import QtQuick
 import "../components/panels" as Panels
+import "../components/panels/ControlCenterNames.js" as Names
 
 // The shell's notification server and the toasts it shows; the
 // notifications themselves are listed in the control center, the bell's
@@ -15,8 +16,8 @@ Scope {
 
     required property var appearance
     required property var notificationHistory
-    // The bar module, which opens the control center on the focused bar.
-    required property var bar
+    // The control center module, which opens it on the focused bar.
+    required property var controlCenter
 
     NotificationServer {
         id: notificationServer
@@ -31,6 +32,13 @@ Scope {
             notification.tracked = true;
             // An ongoing card leaves when its app ends the notification.
             notification.closed.connect(() => root.notificationHistory.closed(notification));
+            // A replacement changes this object in place (no new
+            // `notification`), so its card follows the new text.
+            const updated = () => root.notificationHistory.updated(notification);
+            notification.summaryChanged.connect(updated);
+            notification.bodyChanged.connect(updated);
+            notification.appIconChanged.connect(updated);
+            notification.imageChanged.connect(updated);
             root.notificationHistory.add(notification);
 
             // Kept notifications sent again after a reload rebuild the
@@ -53,7 +61,7 @@ Scope {
         target: "notifications"
 
         function toggle() {
-            root.bar.toggleControlCenter("collapsed");
+            root.controlCenter.toggle(Names.controlCenter.collapsed);
         }
     }
 }

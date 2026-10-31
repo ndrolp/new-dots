@@ -1,6 +1,7 @@
 import QtQuick
 import "../../config" as Config
 import "." as Panels
+import "ControlCenterNames.js" as Names
 
 // The control center's two stages. Collapsed shows the tile row above the
 // notifications; expanded shows every control in place of them. Whatever
@@ -14,7 +15,8 @@ import "." as Panels
 // of the controls, expanding first when it sits in the collapsed row; its
 // back arrow (`back()`) returns to the expanded stage. Each opening, and
 // collapsing, leaves it.
-// Above everything, in both stages, sits `pinned` (the media card).
+// Above everything, in both stages, sit the ongoing notifications
+// (`ongoing`: the media card and the `resident` notifications).
 Column {
     id: root
 
@@ -22,21 +24,24 @@ Column {
     // Whether the control center is open; each opening takes `requestedStage`.
     property bool open: false
     property bool controlsEnabled: true
-    property string requestedStage: "collapsed"
-    property string stage: "collapsed"
-    readonly property bool expanded: controlsEnabled && stage === "expanded"
+    property string requestedStage: Names.controlCenter.collapsed
+    property string stage: Names.controlCenter.collapsed
+    readonly property bool expanded: controlsEnabled && stage === Names.controlCenter.expanded
     // The tiles and the rest of the controls; they read `expanded` to show
     // the tile row or everything.
     property Component controls: null
     property Component notifications: null
+    // The notifications list, once loaded (it always is): the ongoing
+    // notifications read its highlighting.
+    readonly property var notificationsItem: notificationsLoader.item
     // The audio output subpage: the outputs, with a back arrow.
     property Component audioOutputs: null
-    // Pinned on top in both stages (the media card); it takes no room while
-    // its height is 0.
-    property Component pinned: null
-    // The open subpage, "" for none.
-    property string subpage: ""
-    readonly property bool subpageOpen: expanded && subpage !== ""
+    // The ongoing notifications, on top in both stages; they take no room
+    // while their height is 0.
+    property Component ongoing: null
+    // The open subpage, Names.controlCenter.noSubpage for none.
+    property string subpage: Names.controlCenter.noSubpage
+    readonly property bool subpageOpen: expanded && subpage !== Names.controlCenter.noSubpage
 
     // How far the handle is dragged before it switches stages.
     readonly property int dragThreshold: 24
@@ -46,7 +51,7 @@ Column {
     onOpenChanged: {
         if (open) {
             stage = requestedStage;
-            subpage = "";
+            subpage = Names.controlCenter.noSubpage;
         }
     }
 
@@ -59,33 +64,33 @@ Column {
     // Collapsing leaves the subpage.
     onExpandedChanged: {
         if (!expanded)
-            subpage = "";
+            subpage = Names.controlCenter.noSubpage;
     }
 
     // The audio output tile; in the collapsed row it expands first.
     function openAudioOutputs() {
         if (!controlsEnabled)
             return;
-        stage = "expanded";
-        subpage = "audioOutputs";
+        stage = Names.controlCenter.expanded;
+        subpage = Names.controlCenter.audioOutputs;
     }
 
     // The subpage's back arrow.
     function back() {
-        subpage = "";
+        subpage = Names.controlCenter.noSubpage;
     }
 
     // The chevron: expand when collapsed, collapse when expanded.
     function toggleStage() {
         if (controlsEnabled)
-            stage = expanded ? "collapsed" : "expanded";
+            stage = expanded ? Names.controlCenter.collapsed : Names.controlCenter.expanded;
     }
 
     // The handle was dragged `distance` pixels: down expands, up collapses.
     function dragged(distance) {
         if (!controlsEnabled || Math.abs(distance) < dragThreshold)
             return;
-        stage = distance > 0 ? "expanded" : "collapsed";
+        stage = distance > 0 ? Names.controlCenter.expanded : Names.controlCenter.collapsed;
     }
 
     Config.Theme {
@@ -95,7 +100,7 @@ Column {
     Loader {
         width: parent.width
         visible: item !== null && item.height > 0
-        sourceComponent: root.pinned
+        sourceComponent: root.ongoing
     }
 
     Loader {
@@ -107,7 +112,7 @@ Column {
 
     Loader {
         width: parent.width
-        active: root.subpageOpen && root.subpage === "audioOutputs"
+        active: root.subpageOpen && root.subpage === Names.controlCenter.audioOutputs
         visible: active
         sourceComponent: root.audioOutputs
     }
@@ -161,6 +166,8 @@ Column {
     }
 
     Loader {
+        id: notificationsLoader
+
         width: parent.width
         visible: !root.expanded
         sourceComponent: root.notifications

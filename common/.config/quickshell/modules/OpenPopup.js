@@ -1,4 +1,5 @@
 .pragma library
+.import "../components/panels/ControlCenterNames.js" as Names
 
 // Which popup is open, and on which bar (its panel window): at most one at a
 // time across every monitor.
@@ -58,9 +59,9 @@ function controlCenterShortcut(open, stage, preferred, bars, focusedMonitor, con
     const window = focusedBar(bars, focusedMonitor);
     if (window === null)
         return { open: open, stage: stage };
-    if (isOpen(open, "controlCenter", window)) {
+    if (isOpen(open, Names.controlCenter.popup, window)) {
         const closes = stage === preferred || !controlsEnabled;
         return { open: closes ? none : open, stage: closes ? stage : preferred };
     }
-    return { open: { popup: "controlCenter", window: window }, stage: preferred };
+    return { open: { popup: Names.controlCenter.popup, window: window }, stage: preferred };
 }

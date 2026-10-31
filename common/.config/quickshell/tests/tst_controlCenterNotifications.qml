@@ -73,11 +73,11 @@ TestCase {
         }
     }
 
-    function ongoingEntry(id, appName) {
-        return Object.assign(entry(id, false, appName), { summary: "Syncing " + id, resident: true });
+    function ongoingRecord(id, appName) {
+        return Object.assign(record(id, false, appName), { summary: "Syncing " + id, resident: true });
     }
 
-    function entry(id, unread, appName) {
+    function record(id, unread, appName) {
         return {
             id: id,
             appName: appName || "Firefox",
@@ -120,7 +120,7 @@ TestCase {
     }
 
     function highlightedSummaries(item) {
-        return cards(item).filter(card => card.highlighted).map(card => card.entry.summary);
+        return cards(item).filter(card => card.highlighted).map(card => card.record.summary);
     }
 
     function stacks(item) {
@@ -136,7 +136,7 @@ TestCase {
     }
 
     function test_openingMarksEverythingRead() {
-        const item = makeBody([entry(1, true), entry(2, true)]);
+        const item = makeBody([record(1, true), record(2, true)]);
 
         item.open = true;
 
@@ -144,7 +144,7 @@ TestCase {
     }
 
     function test_cardsThatArrivedSinceYouLastLookedAreHighlightedUntilItCloses() {
-        const item = makeBody([entry(1, true), entry(2, false)]);
+        const item = makeBody([record(1, true), record(2, false)]);
 
         item.open = true;
         compare(highlightedSummaries(item), ["Download 1"]);
@@ -154,7 +154,7 @@ TestCase {
     }
 
     function test_reopeningHighlightsNothingYouAlreadySaw() {
-        const item = makeBody([entry(1, true)]);
+        const item = makeBody([record(1, true)]);
 
         item.open = true;
         item.open = false;
@@ -164,61 +164,54 @@ TestCase {
     }
 
     function test_aCardArrivingWhileOpenIsHighlighted() {
-        const item = makeBody([entry(1, false)]);
+        const item = makeBody([record(1, false)]);
 
         item.open = true;
-        item.notificationHistory.items = [entry(2, true)].concat(item.notificationHistory.items);
+        item.notificationHistory.items = [record(2, true)].concat(item.notificationHistory.items);
 
         compare(highlightedSummaries(item), ["Download 2"]);
     }
 
     function test_thereIsNoSearchFieldOrUnreadFilter() {
-        const item = makeBody([entry(1, true)]);
+        const item = makeBody([record(1, true)]);
 
         compare(find(item, child => child instanceof TextInput), null);
         compare(find(item, child => child.text === "Unread" || child.label === "Unread"), null);
     }
 
     function test_clearAllRemovesEveryCard() {
-        const item = makeBody([entry(1, true), entry(2, false)]);
+        const item = makeBody([record(1, true), record(2, false)]);
 
         button(item, "Clear all").activated();
 
         compare(cards(item).length, 0);
     }
 
-    function test_ongoingNotificationsArePinnedAboveTheRest() {
-        const item = makeBody([entry(1, false), ongoingEntry(2, "Discord"), entry(3, false, "Discord")]);
+    // They sit on top of the control center in both stages
+    // (ControlCenterOngoing), not in this list.
+    function test_ongoingNotificationsAreLeftOutOfTheList() {
+        const item = makeBody([record(1, false), ongoingRecord(2, "Discord"), record(3, false, "Discord")]);
 
-        compare(cards(item).map(card => card.entry.summary), ["Syncing 2", "Download 1", "Download 3"]);
+        compare(cards(item).map(card => card.record.summary), ["Download 1", "Download 3"]);
     }
 
     function test_clearAllKeepsOngoingNotifications() {
-        const item = makeBody([entry(1, false), ongoingEntry(2), entry(3, false, "Discord")]);
+        const item = makeBody([record(1, false), ongoingRecord(2), record(3, false, "Discord")]);
 
         button(item, "Clear all").activated();
 
-        compare(cards(item).map(card => card.entry.summary), ["Syncing 2"]);
-        compare(item.notificationHistory.items.map(entry => entry.id), [2]);
+        compare(item.notificationHistory.items.map(record => record.id), [2]);
     }
 
     function test_withOnlyOngoingNotificationsThereIsNothingToClear() {
-        const item = makeBody([ongoingEntry(1)]);
+        const item = makeBody([ongoingRecord(1)]);
 
         verify(!button(item, "Clear all").visible);
         compare(texts(item).indexOf("No notifications"), -1);
     }
 
-    function test_dismissingAnOngoingCardRemovesIt() {
-        const item = makeBody([ongoingEntry(1), entry(2, false)]);
-
-        cards(item)[0].dismissed();
-
-        compare(item.notificationHistory.items.map(entry => entry.id), [2]);
-    }
-
     function test_aDismissedCardLeavesTheHistory() {
-        const item = makeBody([entry(1, false), entry(2, false, "Discord")]);
+        const item = makeBody([record(1, false), record(2, false, "Discord")]);
 
         cards(item)[0].dismissed();
 
@@ -226,7 +219,7 @@ TestCase {
     }
 
     function test_aCardAskingToCloseClosesTheControlCenter() {
-        const item = makeBody([entry(1, false)]);
+        const item = makeBody([record(1, false)]);
         let closeRequests = 0;
         item.closeRequested.connect(() => closeRequests++);
 
@@ -244,15 +237,15 @@ TestCase {
     }
 
     function test_twoNotificationsFromOneAppShowAsAStackWithTheNewestCard() {
-        const item = makeBody([entry(2, false), entry(1, false), entry(3, false, "Discord")]);
+        const item = makeBody([record(2, false), record(1, false), record(3, false, "Discord")]);
 
         compare(stacks(item).length, 1);
-        compare(cards(stacks(item)[0]).map(card => card.entry.summary), ["Download 2"]);
+        compare(cards(stacks(item)[0]).map(card => card.record.summary), ["Download 2"]);
         verify(texts(stacks(item)[0]).indexOf("+1 more") !== -1);
     }
 
     function test_anAppWithASingleNotificationShowsAPlainCard() {
-        const item = makeBody([entry(1, false), entry(2, false, "Discord")]);
+        const item = makeBody([record(1, false), record(2, false, "Discord")]);
 
         compare(stacks(item).length, 0);
         compare(cards(item).length, 2);
@@ -260,56 +253,56 @@ TestCase {
     }
 
     function test_tappingAStackShowsEveryCardOfThatApp() {
-        const item = makeBody([entry(3, false), entry(2, false), entry(1, false)]);
+        const item = makeBody([record(3, false), record(2, false), record(1, false)]);
 
         stacks(item)[0].tap();
 
-        compare(cards(item).map(card => card.entry.summary), ["Download 3", "Download 2", "Download 1"]);
+        compare(cards(item).map(card => card.record.summary), ["Download 3", "Download 2", "Download 1"]);
         compare(texts(item).filter(text => text.endsWith(" more")), []);
     }
 
     function test_showLessCollapsesAnExpandedStackAgain() {
-        const item = makeBody([entry(2, false), entry(1, false)]);
+        const item = makeBody([record(2, false), record(1, false)]);
 
         stacks(item)[0].tap();
         button(item, "Show less").activated();
 
-        compare(cards(item).map(card => card.entry.summary), ["Download 2"]);
+        compare(cards(item).map(card => card.record.summary), ["Download 2"]);
         verify(texts(item).indexOf("+1 more") !== -1);
     }
 
     function test_anExpandedStackStaysExpandedWhenOneOfItsCardsIsDismissed() {
-        const item = makeBody([entry(3, false), entry(2, false), entry(1, false)]);
+        const item = makeBody([record(3, false), record(2, false), record(1, false)]);
 
         stacks(item)[0].tap();
         cards(item)[0].dismissed();
 
-        compare(cards(item).map(card => card.entry.summary), ["Download 2", "Download 1"]);
+        compare(cards(item).map(card => card.record.summary), ["Download 2", "Download 1"]);
     }
 
     function test_reopeningTheControlCenterCollapsesTheStacks() {
-        const item = makeBody([entry(2, false), entry(1, false)]);
+        const item = makeBody([record(2, false), record(1, false)]);
 
         item.open = true;
         stacks(item)[0].tap();
         item.open = false;
 
-        compare(cards(item).map(card => card.entry.summary), ["Download 2"]);
+        compare(cards(item).map(card => card.record.summary), ["Download 2"]);
     }
 
     function test_swipingACollapsedStackDismissesEveryNotificationOfThatApp() {
-        const item = makeBody([entry(3, false), entry(2, false, "Discord"), entry(1, false)]);
+        const item = makeBody([record(3, false), record(2, false, "Discord"), record(1, false)]);
         const stack = stacks(item)[0];
 
         stack.swipeOffset = -stack.width * 0.5;
         stack.swipeReleased();
 
         tryVerify(() => item.notificationHistory.items.length === 1);
-        compare(item.notificationHistory.items.map(entry => entry.id), [2]);
+        compare(item.notificationHistory.items.map(record => record.id), [2]);
     }
 
     function test_aShortSwipeSnapsTheStackBack() {
-        const item = makeBody([entry(2, false), entry(1, false)]);
+        const item = makeBody([record(2, false), record(1, false)]);
         const stack = stacks(item)[0];
 
         stack.swipeOffset = stack.width * 0.2;
@@ -321,7 +314,7 @@ TestCase {
     }
 
     function test_theCollapsedStackIsHighlightedWhenAnyOfItsCardsArrivedSinceYouLastLooked() {
-        const item = makeBody([entry(2, false), entry(1, true)]);
+        const item = makeBody([record(2, false), record(1, true)]);
 
         item.open = true;
 

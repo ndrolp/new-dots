@@ -1,5 +1,6 @@
 .pragma library
 .import "../../config/BarProfileModel.js" as BarProfileModel
+.import "../panels/ControlCenterNames.js" as Names
 
 // Which of BarElementItems' elements are shown: pure, no Quickshell.
 
@@ -27,7 +28,7 @@ function itemVisible(element, barElements, status) {
 var popupElements = Object.freeze({
     "system": "systemMonitor",
     "pomodoro": "clock",
-    "controlCenter": "notifications"
+    [Names.controlCenter.popup]: "notifications"
 });
 
 function popupElement(popup) {

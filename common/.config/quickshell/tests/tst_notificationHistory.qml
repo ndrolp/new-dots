@@ -66,18 +66,18 @@ TestCase {
         item.add(other);
         item.clear();
 
-        compare(item.items.map(entry => entry.summary), ["Playing"]);
+        compare(item.items.map(record => record.summary), ["Playing"]);
         compare(ongoing.dismissCount, 0);
     }
 
-    function test_ongoingNotificationsArePinnedApartFromTheAppStacks() {
+    function test_ongoingNotificationsAreKeptApartFromTheAppStacks() {
         const item = createTemporaryObject(history, this);
 
         item.add(notification({ summary: "Download 1" }));
         item.add(notification({ summary: "Syncing", resident: true }));
         item.add(notification({ summary: "Download 2" }));
 
-        compare(item.ongoing.map(entry => entry.summary), ["Syncing"]);
+        compare(item.ongoing.map(record => record.summary), ["Syncing"]);
         compare(item.groups.map(group => summaries(group)), [["Download 2", "Download 1"]]);
     }
 
@@ -89,7 +89,7 @@ TestCase {
         item.add(notification({ summary: "Download 1" }));
         item.removeGroup("Firefox");
 
-        compare(item.items.map(entry => entry.summary), ["Syncing"]);
+        compare(item.items.map(record => record.summary), ["Syncing"]);
         compare(ongoing.dismissCount, 0);
     }
 
@@ -113,8 +113,37 @@ TestCase {
         item.add(notification({ summary: "Download 1" }));
         item.closed(ongoing);
 
-        compare(item.items.map(entry => entry.summary), ["Download 1"]);
+        compare(item.items.map(record => record.summary), ["Download 1"]);
         compare(ongoing.dismissCount, 0);
+    }
+
+    // A replacement (`replaces_id`) changes the same Notification object in
+    // place; the server doesn't send it again.
+    function test_aNotificationReplacedInPlaceUpdatesItsCardText() {
+        const item = createTemporaryObject(history, this);
+        const ongoing = notification({ summary: "Syncing", body: "10%", resident: true });
+
+        item.add(ongoing);
+        const id = item.ongoing[0].id;
+        ongoing.summary = "Syncing photos";
+        ongoing.body = "60%";
+        item.updated(ongoing);
+
+        compare(item.ongoing.map(record => [record.id, record.summary, record.body]),
+            [[id, "Syncing photos", "60%"]]);
+        compare(ongoing.dismissCount, 0);
+    }
+
+    function test_anUpdateToANotificationNoLongerListedChangesNothing() {
+        const item = createTemporaryObject(history, this);
+        const sent = notification();
+
+        item.add(sent);
+        item.remove(item.items[0].id);
+        sent.summary = "Changed";
+        item.updated(sent);
+
+        compare(item.items.length, 0);
     }
 
     function test_aNotificationTheAppClosesKeepsItsCard() {
@@ -139,6 +168,24 @@ TestCase {
         compare(item.items.length, 50);
         compare(sent[0].dismissCount, 1);
         compare(sent.slice(1).filter(each => each.dismissCount > 0).length, 0);
+    }
+
+    // Only "Clear all" can't remove an ongoing card, so the cap can't either.
+    function test_theFiftyCardCapNeverDropsAnOngoingNotification() {
+        const item = createTemporaryObject(history, this);
+        const ongoing = notification({ summary: "Syncing", resident: true });
+        const sent = [];
+
+        item.add(ongoing);
+        for (let index = 0; index < 51; index++) {
+            sent.push(notification({ summary: "Message " + index }));
+            item.add(sent[index]);
+        }
+
+        compare(item.ongoing.map(record => record.summary), ["Syncing"]);
+        compare(ongoing.dismissCount, 0);
+        compare(item.items.filter(record => !record.resident).length, 50);
+        compare(sent[0].dismissCount, 1);
     }
 
     function test_aRepeatDismissesTheNotificationItReplaces() {
@@ -172,7 +219,7 @@ TestCase {
         item.add(notification({ summary: "Older", lastGeneration: true }));
         item.add(notification({ summary: "Newer", lastGeneration: true }));
 
-        compare(item.items.map(entry => entry.summary), ["Newer", "Older"]);
+        compare(item.items.map(record => record.summary), ["Newer", "Older"]);
     }
 
     function test_aKeptNotificationComesBackAlreadyRead() {
@@ -181,7 +228,7 @@ TestCase {
         item.add(notification({ summary: "Kept", lastGeneration: true }));
         item.add(notification({ summary: "New" }));
 
-        compare(item.items.map(entry => entry.unread), [true, false]);
+        compare(item.items.map(record => record.unread), [true, false]);
         compare(item.unreadCount, 1);
     }
 
@@ -205,7 +252,7 @@ TestCase {
         compare(sent.dismissCount, 1);
     }
 
-    function test_anEntryKeepsTheAppIconAndImageItWasSentWith() {
+    function test_aRecordKeepsTheAppIconAndImageItWasSentWith() {
         const item = createTemporaryObject(history, this);
 
         item.add(notification({ appIcon: "firefox", image: "image://qsimage/1" }));
@@ -227,7 +274,7 @@ TestCase {
     }
 
     function summaries(group) {
-        return group.items.map(entry => entry.summary);
+        return group.items.map(record => record.summary);
     }
 
     function test_notificationsFromOneAppGroupTogetherNewestFirst() {
@@ -251,7 +298,7 @@ TestCase {
 
         item.removeGroup("Firefox");
 
-        compare(item.items.map(entry => entry.summary), ["Message"]);
+        compare(item.items.map(record => record.summary), ["Message"]);
         compare(item.groups.map(group => group.appName), ["Discord"]);
     }
 
@@ -264,6 +311,6 @@ TestCase {
 
         item.removeGroup(item.groups[1].appName);
 
-        compare(item.items.map(entry => entry.summary), ["Message"]);
+        compare(item.items.map(record => record.summary), ["Message"]);
     }
 }

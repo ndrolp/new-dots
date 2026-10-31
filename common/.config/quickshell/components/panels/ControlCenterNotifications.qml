@@ -7,8 +7,9 @@ import "." as Panels
 // Opening the control center marks everything read, so the bell's badge
 // clears; the cards that arrived since you last looked stay highlighted
 // until it closes. The header keeps "Clear all"; do not disturb is a tile.
-// Ongoing notifications (the `resident` hint) are pinned on top, never
-// stacked, and "Clear all" leaves them.
+// Ongoing notifications (the `resident` hint) aren't listed here: they sit
+// on top of the control center in both stages (ControlCenterOngoing), and
+// "Clear all" leaves them.
 // Each notification is a NotificationCard.
 Column {
     id: root
@@ -21,7 +22,8 @@ Column {
     // The notifications unread when it opened: highlighted until it closes.
     property var freshIds: []
     readonly property var groups: notificationHistory.groups
-    // Ongoing notifications: pinned above the stacks, outside the scroll.
+    // Ongoing notifications, shown on top (ControlCenterOngoing): with only
+    // those there is still something to show, so no "No notifications".
     readonly property var ongoing: notificationHistory.ongoing
     readonly property var highlightedIds: notificationHistory.items
         .filter(item => highlighted(item)).map(item => item.id)
@@ -47,8 +49,8 @@ Column {
     }
 
     // Arrived since you last looked: unread when it opened, or arrived while open.
-    function highlighted(entry) {
-        return entry.unread || freshIds.indexOf(entry.id) !== -1;
+    function highlighted(record) {
+        return record.unread || freshIds.indexOf(record.id) !== -1;
     }
 
     Config.Theme {
@@ -103,31 +105,6 @@ Column {
         }
     }
 
-    Column {
-        id: ongoingCards
-
-        visible: root.ongoing.length > 0
-        width: parent.width
-        spacing: 8
-
-        Repeater {
-            model: root.ongoing
-
-            delegate: Panels.NotificationCard {
-                required property var modelData
-
-                width: ongoingCards.width
-                appearance: root.appearance
-                entry: modelData
-                highlighted: root.highlighted(modelData)
-                currentTime: root.currentTime
-
-                onDismissed: root.notificationHistory.remove(modelData.id)
-                onCloseRequested: root.closeRequested()
-            }
-        }
-    }
-
     Panels.Text {
         visible: root.groups.length === 0 && root.ongoing.length === 0
         width: parent.width
@@ -169,7 +146,7 @@ Column {
                     currentTime: root.currentTime
                     expanded: root.expandedApps.indexOf(modelData.appName) !== -1
 
-                    onEntryDismissed: id => root.notificationHistory.remove(id)
+                    onRecordDismissed: id => root.notificationHistory.remove(id)
                     onGroupDismissed: root.notificationHistory.removeGroup(modelData.appName)
                     onCloseRequested: root.closeRequested()
                     onExpandToggled: root.toggleExpanded(modelData.appName)

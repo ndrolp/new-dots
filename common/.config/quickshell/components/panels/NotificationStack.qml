@@ -1,7 +1,6 @@
 import QtQuick
 import "../../config" as Config
 import "." as Panels
-import "NotificationCard.js" as NotificationCard
 
 // One app's notifications in the control center, under the app's name. Two
 // or more collapse into an app stack: the newest notification card with
@@ -27,7 +26,7 @@ Item {
     property alias swipeOffset: stackFace.x
 
     // A card is done with: remove that notification from the history.
-    signal entryDismissed(var id)
+    signal recordDismissed(var id)
     // The collapsed stack was swiped away: remove the whole group.
     signal groupDismissed()
     // A card ran its default action: the control center should close.
@@ -48,40 +47,15 @@ Item {
     // threshold it slides out and the group is dismissed, otherwise it snaps
     // back.
     function swipeReleased() {
-        if (NotificationCard.swipeDismisses(stackFace.x, root.width)) {
-            swipeOut.to = stackFace.x < 0 ? -root.width : root.width;
-            swipeOut.restart();
-        } else {
-            snapBack.restart();
-        }
+        swipe.letGo();
     }
 
-    function highlighted(entry) {
-        return root.highlightedIds.indexOf(entry.id) !== -1;
+    function highlighted(record) {
+        return root.highlightedIds.indexOf(record.id) !== -1;
     }
 
     Config.Theme {
         id: theme
-    }
-
-    NumberAnimation {
-        id: swipeOut
-
-        target: stackFace
-        property: "x"
-        duration: root.appearance.motion.medium
-        easing.type: root.appearance.motion.easing
-        onFinished: root.groupDismissed()
-    }
-
-    NumberAnimation {
-        id: snapBack
-
-        target: stackFace
-        property: "x"
-        to: 0
-        duration: root.appearance.motion.medium
-        easing.type: root.appearance.motion.easing
     }
 
     Column {
@@ -142,7 +116,7 @@ Item {
 
                 width: parent.width
                 height: parent.height
-                opacity: 1 - Math.min(1, Math.abs(x) / Math.max(1, root.width)) * 0.8
+                opacity: swipe.swipeOpacity
 
                 Rectangle {
                     x: 8
@@ -171,19 +145,18 @@ Item {
                     width: parent.width
                     enabled: false
                     appearance: root.appearance
-                    entry: root.group.items[0]
-                    highlighted: root.group.items.some(entry => root.highlighted(entry))
+                    record: root.group.items[0]
+                    highlighted: root.group.items.some(record => root.highlighted(record))
                     currentTime: root.currentTime
                 }
 
-                DragHandler {
+                Panels.SwipeToDismiss {
+                    id: swipe
+
                     target: stackFace
-                    xAxis.enabled: true
-                    yAxis.enabled: false
-                    onActiveChanged: {
-                        if (!active)
-                            root.swipeReleased();
-                    }
+                    motion: root.appearance.motion
+                    swipeWidth: root.width
+                    onSwiped: root.groupDismissed()
                 }
 
                 TapHandler {
@@ -206,11 +179,11 @@ Item {
 
                     width: root.width
                     appearance: root.appearance
-                    entry: modelData
+                    record: modelData
                     highlighted: root.highlighted(modelData)
                     currentTime: root.currentTime
 
-                    onDismissed: root.entryDismissed(modelData.id)
+                    onDismissed: root.recordDismissed(modelData.id)
                     onCloseRequested: root.closeRequested()
                 }
             }
