@@ -6,7 +6,7 @@ import QtQuick
 // opened on the focused monitor's bar. This module holds its `control-center`
 // IPC call, which opens it expanded (SUPER+C), and the panels its tiles open:
 // clipboard, power menu and capture close it and open in its place, unless
-// their plugin is off; the audio output selector opens as it closes.
+// their plugin is off. The audio output tile opens a subpage inside it.
 Scope {
     id: root
 
@@ -14,7 +14,6 @@ Scope {
     required property var bar
     required property var plugins
     // The features its tiles open.
-    required property var audioOutputSelector
     required property var clipboardSelector
     required property var powerMenu
     required property var screenCaptureChooser
@@ -37,11 +36,6 @@ Scope {
 
     Connections {
         target: root.bar
-
-        function onAudioOutputsRequested() {
-            root.bar.closePopup();
-            root.audioOutputSelector.open = true;
-        }
 
         function onClipboardRequested() {
             root.switchTo(root.clipboardSelector);

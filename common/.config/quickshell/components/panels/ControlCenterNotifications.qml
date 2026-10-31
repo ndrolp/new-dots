@@ -2,7 +2,8 @@ import QtQuick
 import "../../config" as Config
 import "." as Panels
 
-// The notifications in the control center, newest first and grouped by app.
+// The notifications in the control center, newest first and grouped by app;
+// an app with two or more is an app stack (NotificationStack).
 // Opening the control center marks everything read, so the bell's badge
 // clears; the cards that arrived since you last looked stay highlighted
 // until it closes. The header keeps "Clear all"; do not disturb is a tile.
@@ -18,6 +19,10 @@ Column {
     // The notifications unread when it opened: highlighted until it closes.
     property var freshIds: []
     readonly property var groups: notificationHistory.groups
+    readonly property var highlightedIds: notificationHistory.items
+        .filter(item => highlighted(item)).map(item => item.id)
+    // The apps whose stacks are expanded, until the control center closes.
+    property var expandedApps: []
 
     // A card ran its default action: the control center should close.
     signal closeRequested()
@@ -28,6 +33,13 @@ Column {
         // A card arriving while open counts as seen once it closes.
         freshIds = open ? notificationHistory.items.filter(item => item.unread).map(item => item.id) : [];
         notificationHistory.markAllRead();
+        expandedApps = [];
+    }
+
+    function toggleExpanded(appName) {
+        expandedApps = expandedApps.indexOf(appName) === -1
+            ? expandedApps.concat([appName])
+            : expandedApps.filter(name => name !== appName);
     }
 
     // Arrived since you last looked: unread when it opened, or arrived while open.
@@ -118,34 +130,20 @@ Column {
             Repeater {
                 model: root.groups
 
-                delegate: Column {
+                delegate: Panels.NotificationStack {
                     required property var modelData
 
                     width: notificationGroups.width
-                    spacing: 6
+                    appearance: root.appearance
+                    group: modelData
+                    highlightedIds: root.highlightedIds
+                    currentTime: root.currentTime
+                    expanded: root.expandedApps.indexOf(modelData.appName) !== -1
 
-                    Panels.PopupLabel {
-                        appearance: root.appearance
-                        width: parent.width
-                        text: modelData.appName
-                    }
-
-                    Repeater {
-                        model: parent.modelData.items
-
-                        delegate: Panels.NotificationCard {
-                            required property var modelData
-
-                            width: notificationGroups.width
-                            appearance: root.appearance
-                            entry: modelData
-                            highlighted: root.highlighted(modelData)
-                            currentTime: root.currentTime
-
-                            onDismissed: root.notificationHistory.remove(modelData.id)
-                            onCloseRequested: root.closeRequested()
-                        }
-                    }
+                    onEntryDismissed: id => root.notificationHistory.remove(id)
+                    onGroupDismissed: root.notificationHistory.removeGroup(modelData.appName)
+                    onCloseRequested: root.closeRequested()
+                    onExpandToggled: root.toggleExpanded(modelData.appName)
                 }
             }
         }

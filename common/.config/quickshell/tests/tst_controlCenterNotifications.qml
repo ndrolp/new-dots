@@ -53,6 +53,10 @@ TestCase {
                 items = items.filter(item => item.id !== id);
             }
 
+            function removeGroup(appName) {
+                items = items.filter(item => item.appName !== appName);
+            }
+
             function clear() {
                 items = [];
             }
@@ -68,10 +72,10 @@ TestCase {
         }
     }
 
-    function entry(id, unread) {
+    function entry(id, unread, appName) {
         return {
             id: id,
-            appName: "Firefox",
+            appName: appName || "Firefox",
             summary: "Download " + id,
             body: "",
             notification: null,
@@ -107,11 +111,19 @@ TestCase {
     }
 
     function cards(item) {
-        return findAll(item, child => child.objectName === "notificationCard");
+        return findAll(item, child => child.objectName === "notificationCard" && child.visible);
     }
 
     function highlightedSummaries(item) {
         return cards(item).filter(card => card.highlighted).map(card => card.entry.summary);
+    }
+
+    function stacks(item) {
+        return findAll(item, child => child.objectName === "notificationStack");
+    }
+
+    function texts(item) {
+        return findAll(item, child => child.visible && typeof child.text === "string").map(child => child.text);
     }
 
     function button(item, label) {
@@ -171,7 +183,7 @@ TestCase {
     }
 
     function test_aDismissedCardLeavesTheHistory() {
-        const item = makeBody([entry(1, false), entry(2, false)]);
+        const item = makeBody([entry(1, false), entry(2, false, "Discord")]);
 
         cards(item)[0].dismissed();
 
@@ -194,5 +206,90 @@ TestCase {
 
         compare(button(item, "DND off"), null);
         compare(button(item, "DND on"), null);
+    }
+
+    function test_twoNotificationsFromOneAppShowAsAStackWithTheNewestCard() {
+        const item = makeBody([entry(2, false), entry(1, false), entry(3, false, "Discord")]);
+
+        compare(stacks(item).length, 1);
+        compare(cards(stacks(item)[0]).map(card => card.entry.summary), ["Download 2"]);
+        verify(texts(stacks(item)[0]).indexOf("+1 more") !== -1);
+    }
+
+    function test_anAppWithASingleNotificationShowsAPlainCard() {
+        const item = makeBody([entry(1, false), entry(2, false, "Discord")]);
+
+        compare(stacks(item).length, 0);
+        compare(cards(item).length, 2);
+        compare(texts(item).filter(text => text.endsWith(" more")), []);
+    }
+
+    function test_tappingAStackShowsEveryCardOfThatApp() {
+        const item = makeBody([entry(3, false), entry(2, false), entry(1, false)]);
+
+        stacks(item)[0].tap();
+
+        compare(cards(item).map(card => card.entry.summary), ["Download 3", "Download 2", "Download 1"]);
+        compare(texts(item).filter(text => text.endsWith(" more")), []);
+    }
+
+    function test_showLessCollapsesAnExpandedStackAgain() {
+        const item = makeBody([entry(2, false), entry(1, false)]);
+
+        stacks(item)[0].tap();
+        button(item, "Show less").activated();
+
+        compare(cards(item).map(card => card.entry.summary), ["Download 2"]);
+        verify(texts(item).indexOf("+1 more") !== -1);
+    }
+
+    function test_anExpandedStackStaysExpandedWhenOneOfItsCardsIsDismissed() {
+        const item = makeBody([entry(3, false), entry(2, false), entry(1, false)]);
+
+        stacks(item)[0].tap();
+        cards(item)[0].dismissed();
+
+        compare(cards(item).map(card => card.entry.summary), ["Download 2", "Download 1"]);
+    }
+
+    function test_reopeningTheControlCenterCollapsesTheStacks() {
+        const item = makeBody([entry(2, false), entry(1, false)]);
+
+        item.open = true;
+        stacks(item)[0].tap();
+        item.open = false;
+
+        compare(cards(item).map(card => card.entry.summary), ["Download 2"]);
+    }
+
+    function test_swipingACollapsedStackDismissesEveryNotificationOfThatApp() {
+        const item = makeBody([entry(3, false), entry(2, false, "Discord"), entry(1, false)]);
+        const stack = stacks(item)[0];
+
+        stack.swipeOffset = -stack.width * 0.5;
+        stack.swipeReleased();
+
+        tryVerify(() => item.notificationHistory.items.length === 1);
+        compare(item.notificationHistory.items.map(entry => entry.id), [2]);
+    }
+
+    function test_aShortSwipeSnapsTheStackBack() {
+        const item = makeBody([entry(2, false), entry(1, false)]);
+        const stack = stacks(item)[0];
+
+        stack.swipeOffset = stack.width * 0.2;
+        stack.swipeReleased();
+
+        tryCompare(stack, "swipeOffset", 0);
+        wait(50);
+        compare(item.notificationHistory.items.length, 2);
+    }
+
+    function test_theCollapsedStackIsHighlightedWhenAnyOfItsCardsArrivedSinceYouLastLooked() {
+        const item = makeBody([entry(2, false), entry(1, true)]);
+
+        item.open = true;
+
+        compare(highlightedSummaries(item), ["Download 2"]);
     }
 }

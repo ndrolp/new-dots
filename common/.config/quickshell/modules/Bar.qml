@@ -32,7 +32,6 @@ Scope {
 
     // The control center's tiles asked for these; the control center module
     // opens them (modules/ControlCenter.qml).
-    signal audioOutputsRequested()
     signal clipboardRequested()
     signal powerMenuRequested()
     signal screenCaptureRequested()
@@ -115,7 +114,6 @@ Scope {
         }
 
         onDoNotDisturbToggled: root.appearance.doNotDisturb = !root.appearance.doNotDisturb
-        onAudioOutputsRequested: root.audioOutputsRequested()
         onClipboardRequested: root.clipboardRequested()
         onPowerMenuRequested: root.powerMenuRequested()
         onScreenCaptureRequested: root.screenCaptureRequested()

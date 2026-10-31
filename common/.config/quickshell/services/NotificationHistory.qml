@@ -9,13 +9,18 @@ QtObject {
     readonly property int unreadCount: items.reduce((count, item) => count
         + (item.unread ? item.count : 0), 0)
 
+    // The app a notification is grouped (and stacked) under.
+    function groupName(item) {
+        return item.appName || "Unknown application";
+    }
+
     function updateItems(updatedItems) {
         items = updatedItems;
 
         const groupedItems = [];
 
         items.forEach(item => {
-            const appName = item.appName || "Unknown application";
+            const appName = groupName(item);
             let groupIndex = groupedItems.findIndex(group => group.appName === appName);
 
             if (groupIndex < 0) {
@@ -68,6 +73,11 @@ QtObject {
 
     function remove(id) {
         updateItems(items.filter(item => item.id !== id));
+    }
+
+    // Dismisses a whole app stack: every notification of that group.
+    function removeGroup(appName) {
+        updateItems(items.filter(item => groupName(item) !== appName));
     }
 
     function clear() {
