@@ -96,8 +96,10 @@ Item {
         color: cardHover.hovered ? theme.surfaceHover
             : root.highlighted ? Qt.rgba(theme.accent.r, theme.accent.g, theme.accent.b, 0.12)
             : theme.backgroundSecondary
-        border.width: root.highlighted ? 1 : 0
-        border.color: Qt.rgba(theme.accent.r, theme.accent.g, theme.accent.b, 0.35)
+        border.width: 1
+        border.color: root.highlighted
+            ? Qt.rgba(theme.accent.r, theme.accent.g, theme.accent.b, 0.35)
+            : Qt.rgba(theme.border.r, theme.border.g, theme.border.b, 0.5)
 
         Behavior on color {
             ColorAnimation { duration: root.appearance.motion.short }
