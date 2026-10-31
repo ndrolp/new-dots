@@ -11,6 +11,25 @@ const tileIds = [
     "power", "capsLock"
 ];
 
+// What the settings panel calls each tile (the tiles' own labels change with
+// their state).
+const tileLabels = {
+    "wifi": "Wi-Fi",
+    "bluetooth": "Bluetooth",
+    "doNotDisturb": "Do not disturb",
+    "microphone": "Microphone",
+    "keepAwake": "Keep-awake",
+    "nightLight": "Night light",
+    "audioOutput": "Audio output",
+    "lock": "Lock",
+    "displaysOff": "Displays off",
+    "powerProfile": "Power profile",
+    "screenCapture": "Screen capture",
+    "clipboard": "Clipboard",
+    "power": "Power menu",
+    "capsLock": "Caps Lock"
+};
+
 // How many visible tiles the collapsed control center's row holds.
 const collapsedRowSize = 6;
 
