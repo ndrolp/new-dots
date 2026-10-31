@@ -8,7 +8,8 @@ import "../IconSource.js" as IconSource
 // style. Tapping it runs its default action, then it is removed and the
 // control center closes; one without a default action expands instead.
 // Its action buttons run their action and remove it. Swiping it sideways
-// past the threshold dismisses it.
+// past the threshold dismisses it. An ongoing notification (`entry.resident`)
+// stays after its actions run; only swiping or × removes it.
 // `entry` is a NotificationHistory item; its `notification` is the live
 // Quickshell Notification, or null once the server has let it go.
 Item {
@@ -48,7 +49,8 @@ Item {
         const action = NotificationCard.defaultAction(root.actions);
         if (action) {
             action.invoke();
-            root.dismissed();
+            if (!root.entry.resident)
+                root.dismissed();
             root.closeRequested();
         } else {
             root.expanded = !root.expanded;
@@ -58,7 +60,8 @@ Item {
     // One of the action buttons was pressed.
     function invokeAction(action) {
         action.invoke();
-        root.dismissed();
+        if (!root.entry.resident)
+            root.dismissed();
     }
 
     // Letting go of a sideways drag: past the threshold the card slides out

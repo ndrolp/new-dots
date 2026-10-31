@@ -212,6 +212,28 @@ TestCase {
         compare(dismissedSpy.count, 1);
     }
 
+    // The server doesn't remove a resident notification when an action runs.
+    function test_tappingAnOngoingCardRunsItsDefaultActionAndKeepsIt() {
+        const defaultAction = action("default", "Open");
+        const item = makeCard({ resident: true, notification: { actions: [defaultAction] } });
+
+        item.tap();
+
+        compare(defaultAction.invoked, 1);
+        compare(dismissedSpy.count, 0);
+        compare(closeSpy.count, 1);
+    }
+
+    function test_anOngoingCardsActionButtonKeepsTheCard() {
+        const pause = action("pause", "Pause");
+        const item = makeCard({ resident: true, notification: { actions: [pause] } });
+
+        actionButtons(item)[0].activated();
+
+        compare(pause.invoked, 1);
+        compare(dismissedSpy.count, 0);
+    }
+
     function test_theCloseButtonShowsOnlyOnHoverAndDismissesTheCard() {
         const defaultAction = action("default", "Open");
         const item = makeCard({ notification: { actions: [defaultAction] } });
