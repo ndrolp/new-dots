@@ -78,6 +78,23 @@ TestCase {
         }, properties || {});
     }
 
+    function findAll(item, test, found) {
+        found = found || [];
+        if (test(item))
+            found.push(item);
+        for (let i = 0; i < item.children.length; i++)
+            findAll(item.children[i], test, found);
+        return found;
+    }
+
+    function find(item, test) {
+        return findAll(item, test)[0] || null;
+    }
+
+    function actionButtons(item) {
+        return findAll(item, child => child.objectName === "notificationActionButton");
+    }
+
     function makeCard(properties) {
         const item = createTemporaryObject(card, this, { entry: entry(properties) });
         dismissedSpy.clear();
@@ -120,6 +137,62 @@ TestCase {
 
         verify(item.expanded);
         compare(dismissedSpy.count, 0);
+    }
+
+    function test_theChevronExpandsAndCollapsesALongBody() {
+        const item = makeCard({ body: "A body long enough to need more than two lines on a card this wide. ".repeat(6) });
+        const chevron = find(item, child => child.objectName === "expandButton");
+
+        verify(chevron.visible);
+        const collapsedHeight = item.implicitHeight;
+
+        chevron.activated();
+        verify(item.expanded);
+        tryVerify(() => item.implicitHeight > collapsedHeight);
+
+        chevron.activated();
+        verify(!item.expanded);
+        tryCompare(item, "implicitHeight", collapsedHeight);
+    }
+
+    function test_aShortBodyHasNoChevron() {
+        const item = makeCard({ body: "Short" });
+
+        verify(!find(item, child => child.objectName === "expandButton").visible);
+    }
+
+    function test_theActionButtonsShowEveryActionButTheDefaultOne() {
+        const item = makeCard({ notification: { actions: [
+            action("default", "Open"), action("reply", "Reply"), action("mark-read", "Mark as read")
+        ] } });
+
+        compare(actionButtons(item).map(button => button.label), ["Reply", "Mark as read"]);
+    }
+
+    function test_anActionButtonInvokesItsActionAndRemovesTheCard() {
+        const defaultAction = action("default", "Open");
+        const markRead = action("mark-read", "Mark as read");
+        const item = makeCard({ notification: { actions: [defaultAction, markRead] } });
+
+        actionButtons(item)[0].activated();
+
+        compare(markRead.invoked, 1);
+        compare(defaultAction.invoked, 0);
+        compare(dismissedSpy.count, 1);
+    }
+
+    function test_theCloseButtonShowsOnlyOnHoverAndDismissesTheCard() {
+        const defaultAction = action("default", "Open");
+        const item = makeCard({ notification: { actions: [defaultAction] } });
+        const close = find(item, child => child.objectName === "dismissButton");
+
+        verify(!close.visible);
+
+        close.activated();
+
+        compare(dismissedSpy.count, 1);
+        compare(defaultAction.invoked, 0);
+        compare(closeSpy.count, 0);
     }
 
     function test_draggingACardSidewaysPastTheThresholdDismissesIt() {

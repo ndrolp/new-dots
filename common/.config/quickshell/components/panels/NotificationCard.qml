@@ -6,7 +6,8 @@ import "NotificationCard.js" as NotificationCard
 // A notification card: one notification in the control center, Android
 // style. Tapping it runs its default action, then it is removed and the
 // control center closes; one without a default action expands instead.
-// Swiping it sideways past the threshold dismisses it.
+// Its action buttons run their action and remove it. Swiping it sideways
+// past the threshold dismisses it.
 // `entry` is a NotificationHistory item; its `notification` is the live
 // Quickshell Notification, or null once the server has let it go.
 Item {
@@ -14,8 +15,13 @@ Item {
 
     required property var appearance
     required property var entry
+    // Arrived since you last looked.
+    property bool highlighted: false
+    // Now, for the relative time; the list ticks it while it is shown.
+    property double currentTime: Date.now()
 
     readonly property var actions: entry.notification ? entry.notification.actions : []
+    readonly property var buttonActions: NotificationCard.buttonActions(actions)
     // Showing the full body.
     property bool expanded: false
     // How far the card has been dragged sideways.
@@ -41,6 +47,12 @@ Item {
         }
     }
 
+    // One of the action buttons was pressed.
+    function invokeAction(action) {
+        action.invoke();
+        root.dismissed();
+    }
+
     // Letting go of a sideways drag: past the threshold the card slides out
     // and is dismissed, otherwise it snaps back.
     function swipeReleased() {
@@ -50,6 +62,22 @@ Item {
         } else {
             snapBack.restart();
         }
+    }
+
+    function relativeTime(timestamp) {
+        const elapsedSeconds = Math.max(0, Math.floor((currentTime - timestamp) / 1000));
+
+        if (elapsedSeconds < 60)
+            return "now";
+        if (elapsedSeconds < 3600)
+            return Math.floor(elapsedSeconds / 60) + "m";
+        if (elapsedSeconds < 86400)
+            return Math.floor(elapsedSeconds / 3600) + "h";
+        return Math.floor(elapsedSeconds / 86400) + "d";
+    }
+
+    Config.Theme {
+        id: theme
     }
 
     NumberAnimation {
@@ -72,12 +100,33 @@ Item {
         easing.type: root.appearance.motion.easing
     }
 
-    Item {
+    Rectangle {
         id: face
 
         width: root.width
-        height: 70
+        height: content.implicitHeight + 24
+        radius: root.appearance.radius
         opacity: 1 - Math.min(1, Math.abs(x) / Math.max(1, root.width)) * 0.8
+        color: cardHover.hovered ? theme.surfaceHover
+            : root.highlighted ? Qt.rgba(theme.accent.r, theme.accent.g, theme.accent.b, 0.12)
+            : theme.backgroundSecondary
+        border.width: root.highlighted ? 1 : 0
+        border.color: Qt.rgba(theme.accent.r, theme.accent.g, theme.accent.b, 0.35)
+
+        Behavior on color {
+            ColorAnimation { duration: root.appearance.motion.short }
+        }
+
+        Behavior on height {
+            NumberAnimation {
+                duration: root.appearance.motion.medium
+                easing.type: root.appearance.motion.easing
+            }
+        }
+
+        HoverHandler {
+            id: cardHover
+        }
 
         DragHandler {
             target: face
@@ -90,7 +139,182 @@ Item {
         }
 
         TapHandler {
-            onTapped: root.tap()
+            // A tap on one of the card's own buttons is that button's.
+            onTapped: eventPoint => {
+                const onButton = [dismissButton, expandButton, actionButtons].some(control => {
+                    const point = face.mapToItem(control, eventPoint.position.x, eventPoint.position.y);
+                    return control.visible && control.contains(point);
+                });
+                if (!onButton)
+                    root.tap();
+            }
+        }
+
+        Rectangle {
+            id: iconFrame
+
+            x: 12
+            y: 12
+            width: 36
+            height: 36
+            radius: width / 2
+            color: Qt.rgba(theme.accent.r, theme.accent.g, theme.accent.b, 0.16)
+
+            Panels.Text {
+                anchors.centerIn: parent
+                text: "󰂚"
+                color: root.highlighted ? theme.accent : theme.textMuted
+                font.pixelSize: 18
+            }
+        }
+
+        // The fallback for swiping: shown while the card is hovered.
+        Panels.PopupButton {
+            id: dismissButton
+
+            objectName: "dismissButton"
+            appearance: root.appearance
+            visible: cardHover.hovered
+            x: 2
+            y: 2
+            z: 1
+            width: 20
+            height: 20
+            radius: width / 2
+            color: hovered ? theme.surfaceHover : theme.surface
+            border.width: 1
+            border.color: theme.border
+            label: "󰅖"
+            labelColor: theme.textMuted
+            labelSize: 12
+            onActivated: root.dismissed()
+        }
+
+        Column {
+            id: content
+
+            x: iconFrame.x + iconFrame.width + 12
+            y: 12
+            width: face.width - x - 12
+            spacing: 3
+
+            Item {
+                width: parent.width
+                height: titleLine.implicitHeight
+
+                Panels.Text {
+                    id: titleLine
+
+                    anchors.left: parent.left
+                    anchors.right: meta.left
+                    anchors.rightMargin: 8
+                    text: root.entry.summary || "Notification"
+                    color: theme.text
+                    elide: Text.ElideRight
+                    font.pixelSize: root.appearance.textSize
+                    font.bold: true
+                }
+
+                Row {
+                    id: meta
+
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 6
+
+                    Rectangle {
+                        visible: root.entry.count > 1
+                        width: 24
+                        height: 18
+                        radius: 9
+                        color: theme.accent
+
+                        Panels.Text {
+                            anchors.centerIn: parent
+                            text: root.entry.count
+                            color: theme.background
+                            font.pixelSize: root.appearance.textSize - 3
+                        }
+                    }
+
+                    Panels.Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: root.relativeTime(root.entry.timestamp)
+                        color: theme.textMuted
+                        font.pixelSize: root.appearance.textSize - 3
+                    }
+
+                    // Expands the full body; only there while it doesn't fit.
+                    Panels.PopupButton {
+                        id: expandButton
+
+                        objectName: "expandButton"
+                        appearance: root.appearance
+                        visible: root.expanded || bodyText.truncated
+                        width: 24
+                        height: 20
+                        label: root.expanded ? "󰅃" : "󰅀"
+                        labelColor: theme.textMuted
+                        onActivated: root.expanded = !root.expanded
+                    }
+                }
+            }
+
+            Panels.Text {
+                id: bodyText
+
+                width: parent.width
+                visible: text !== ""
+                text: root.entry.body
+                color: theme.textMuted
+                textFormat: Text.PlainText
+                wrapMode: Text.Wrap
+                maximumLineCount: root.expanded ? 1000 : 2
+                elide: Text.ElideRight
+                font.pixelSize: root.appearance.textSize - 2
+            }
+
+            Item {
+                width: 1
+                height: 4
+                visible: root.buttonActions.length > 0
+            }
+
+            Flow {
+                id: actionButtons
+
+                width: parent.width
+                spacing: 6
+                visible: root.buttonActions.length > 0
+
+                Repeater {
+                    model: root.buttonActions
+
+                    delegate: Panels.PopupButton {
+                        id: actionButton
+
+                        required property var modelData
+
+                        objectName: "notificationActionButton"
+                        appearance: root.appearance
+                        width: Math.min(160, actionMetrics.width + 24)
+                        height: 28
+                        color: hovered ? theme.accentHover : Qt.rgba(theme.accent.r, theme.accent.g, theme.accent.b, 0.18)
+                        label: modelData.text
+                        labelColor: hovered ? theme.background : theme.accent
+                        labelSize: root.appearance.textSize - 2
+                        onActivated: root.invokeAction(modelData)
+
+                        TextMetrics {
+                            id: actionMetrics
+
+                            text: actionButton.label
+                            font.family: theme.fontFamily
+                            font.pixelSize: actionButton.labelSize
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -12,6 +12,11 @@ function swipeDismisses(offset, width) {
     return width > 0 && Math.abs(offset) >= width * swipeThreshold;
 }
 
+// The actions shown as buttons: all but the default one, which a tap runs.
+function buttonActions(actions) {
+    return (actions || []).filter(action => action.identifier !== "default");
+}
+
 // The action a tap runs: the notification's default action, or null when it
 // has none (the card then expands instead).
 function defaultAction(actions) {
