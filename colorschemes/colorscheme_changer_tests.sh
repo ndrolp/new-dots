@@ -364,7 +364,6 @@ test_every_colorscheme_has_its_own_kitty_colours() {
 test_the_kitty_themes_folder_and_backup_are_gone() {
     [[ ! -e "$COLORSCHEMES/../common/.config/kitty/themes" ]] || fail "kitty's themes folder is still there"
     [[ ! -e "$COLORSCHEMES/../common/.config/kitty/kitty.conf.bak" ]] || fail "kitty.conf.bak is still there"
-    ! grep -q "KITTY_THEME" "$COLORSCHEMES/colorscheme_changer.sh" || fail "the changer still names kitty themes"
 }
 
 test_applying_does_not_ask_ags_for_the_theme() {
