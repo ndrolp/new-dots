@@ -6,7 +6,7 @@ import "../config/Motion.js" as Motion
 // The notifications in the control center: opening it marks everything read
 // (the bell's badge clears), and the cards that arrived since you last looked
 // stay highlighted until it closes. There is no search or Unread filter; the
-// header keeps "Clear all" and do not disturb.
+// header keeps "Clear all"; do not disturb is a tile.
 // Pointer events don't reach items under qmltestrunner offscreen, so buttons
 // are pressed through their signals.
 TestCase {
@@ -200,14 +200,12 @@ TestCase {
         compare(closeRequests, 1);
     }
 
-    function test_theDoNotDisturbButtonAsksToToggleIt() {
+    // Do not disturb is a tile of the control center now, not a header button.
+    function test_theHeaderHasNoDoNotDisturbButton() {
         const item = makeBody([]);
-        let toggled = 0;
-        item.doNotDisturbToggled.connect(() => toggled++);
 
-        button(item, "DND off").activated();
-
-        compare(toggled, 1);
+        compare(button(item, "DND off"), null);
+        compare(button(item, "DND on"), null);
     }
 
     function test_twoNotificationsFromOneAppShowAsAStackWithTheNewestCard() {

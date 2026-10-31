@@ -59,7 +59,7 @@ Scope {
         target: "notifications"
 
         function toggle() {
-            root.bar.togglePopupOnFocusedBar("controlCenter");
+            root.bar.toggleControlCenter("collapsed");
         }
     }
 }

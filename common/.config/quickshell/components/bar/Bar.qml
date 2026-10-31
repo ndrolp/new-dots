@@ -15,6 +15,12 @@ Variants {
     required property var pomodoro
     required property var notificationHistory
     required property var screenCapture
+    required property var clipboardHistory
+    required property var nightLight
+    // The control center plugin; off, the control center is notifications only.
+    property bool controlsEnabled: true
+    // The stage the control center takes the next time it opens.
+    property string controlCenterStage: "collapsed"
     required property var keepAwake
     required property var screenShares
     required property var cava
@@ -27,6 +33,10 @@ Variants {
     signal popupClosed(string popup, var panelWindow)
     signal audioOutputSelected(var output)
     signal doNotDisturbToggled()
+    signal audioOutputsRequested()
+    signal clipboardRequested()
+    signal powerMenuRequested()
+    signal screenCaptureRequested()
 
     model: Quickshell.screens
 
@@ -170,6 +180,11 @@ Variants {
                 keepAwake: panel.keepAwake
                 systemMonitor: panel.systemMonitor
                 notificationHistory: panel.notificationHistory
+                screenCapture: panel.screenCapture
+                clipboardHistory: bar.clipboardHistory
+                nightLight: bar.nightLight
+                controlsEnabled: bar.controlsEnabled
+                controlCenterStage: bar.controlCenterStage
 
                 onPopupClosed: function(popup) {
                     bar.popupClosed(popup, panel);
@@ -180,6 +195,10 @@ Variants {
                 }
 
                 onDoNotDisturbToggled: bar.doNotDisturbToggled()
+                onAudioOutputsRequested: bar.audioOutputsRequested()
+                onClipboardRequested: bar.clipboardRequested()
+                onPowerMenuRequested: bar.powerMenuRequested()
+                onScreenCaptureRequested: bar.screenCaptureRequested()
             }
 
         }

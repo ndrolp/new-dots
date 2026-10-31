@@ -1,51 +1,66 @@
+import Quickshell
 import Quickshell.Io
 import QtQuick
-import "../components/panels" as Panels
 
-Feature {
+// The control center is the bell's popup (components/panels/ControlCenterPopup.qml),
+// opened on the focused monitor's bar. This module holds its `control-center`
+// IPC call, which opens it expanded (SUPER+C), and the panels its tiles open:
+// clipboard, power menu and capture close it and open in its place, unless
+// their plugin is off; the audio output selector opens as it closes.
+Scope {
     id: root
 
-    required property var appearance
-    required property var monitors
-    required property var workspaceService
-    required property var clipboardHistory
-    required property var screenCapture
-    required property var systemMonitor
-    required property var keepAwake
-    required property var nightLight
+    // The bar module, which opens the control center on the focused bar.
+    required property var bar
     required property var plugins
-    // The features its buttons open.
+    // The features its tiles open.
     required property var audioOutputSelector
     required property var clipboardSelector
     required property var powerMenu
     required property var screenCaptureChooser
 
-    available: plugins.controlCenterEnabled
+    // Off: the control center is notifications only, with no controls.
+    readonly property bool available: plugins.controlCenterEnabled
 
-    Panels.ControlCenter {
-        appearance: root.appearance
-        monitors: root.monitors
-        workspaceService: root.workspaceService
-        clipboardHistory: root.clipboardHistory
-        screenCapture: root.screenCapture
-        systemMonitor: root.systemMonitor
-        keepAwake: root.keepAwake
-        nightLight: root.nightLight
-        open: root.open
+    // Opens it expanded on the focused bar, or keeps it open there.
+    function openExpanded() {
+        bar.openControlCenter("expanded");
+    }
 
-        onCloseRequested: root.open = false
-        // Audio outputs open over the control center, which stays open.
-        onAudioSinksRequested: root.audioOutputSelector.open = true
-        onClipboardRequested: root.switchTo(root.clipboardSelector)
-        onPowerMenuRequested: root.switchTo(root.powerMenu)
-        onScreenCaptureRequested: root.switchTo(root.screenCaptureChooser)
+    function switchTo(other) {
+        if (!other.available)
+            return;
+
+        bar.closePopup();
+        other.open = true;
+    }
+
+    Connections {
+        target: root.bar
+
+        function onAudioOutputsRequested() {
+            root.bar.closePopup();
+            root.audioOutputSelector.open = true;
+        }
+
+        function onClipboardRequested() {
+            root.switchTo(root.clipboardSelector);
+        }
+
+        function onPowerMenuRequested() {
+            root.switchTo(root.powerMenu);
+        }
+
+        function onScreenCaptureRequested() {
+            root.switchTo(root.screenCaptureChooser);
+        }
     }
 
     IpcHandler {
         target: "control-center"
 
         function toggle() {
-            root.toggle();
+            root.bar.toggleControlCenter("expanded");
         }
     }
 }
