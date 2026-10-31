@@ -1,5 +1,6 @@
 import Quickshell
 import QtQuick
+import "SwitchTo.js" as SwitchTo
 
 // A part of the shell that opens and closes: it owns whether it is open, and
 // the panel and IPC handler declared inside it follow `open`. A feature
@@ -29,13 +30,15 @@ Scope {
         open = !open;
     }
 
-    // Closes this feature and opens `other` in its place, unless `other`'s
-    // plugin is off, in which case this one stays open.
-    function switchTo(other) {
-        if (!other.available)
-            return;
+    // Opens it (what another part calls to open it in its place).
+    function show() {
+        open = true;
+    }
 
-        open = false;
-        other.open = true;
+    // Closes this feature and opens `other` (anything with `available` and
+    // `show()`) in its place, unless `other`'s plugin is off, in which case
+    // this one stays open.
+    function switchTo(other) {
+        SwitchTo.switchTo(() => root.open = false, other);
     }
 }

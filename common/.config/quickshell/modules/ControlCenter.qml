@@ -1,6 +1,7 @@
 import Quickshell
 import Quickshell.Io
 import QtQuick
+import "SwitchTo.js" as SwitchTo
 
 // The control center is the bell's popup (components/panels/ControlCenterPopup.qml),
 // opened on the focused monitor's bar. This module holds its `control-center`
@@ -21,17 +22,15 @@ Scope {
     // Off: the control center is notifications only, with no controls.
     readonly property bool available: plugins.controlCenterEnabled
 
-    // Opens it expanded on the focused bar, or keeps it open there.
-    function openExpanded() {
+    // Opens it expanded on the focused bar, or keeps it open there (quick
+    // settings' button, through Feature.switchTo).
+    function show() {
         bar.openControlCenter("expanded");
     }
 
+    // A tile opens `other` in its place.
     function switchTo(other) {
-        if (!other.available)
-            return;
-
-        bar.closePopup();
-        other.open = true;
+        SwitchTo.switchTo(() => root.bar.closePopup(), other);
     }
 
     Connections {
