@@ -139,6 +139,37 @@ TestCase {
         compare(dismissedSpy.count, 0);
     }
 
+    function test_aCardShowsTheImageItWasSent() {
+        const item = makeCard({ appIcon: "firefox", image: "file:///tmp/cover.png" });
+
+        compare(item.iconSource, "file:///tmp/cover.png");
+    }
+
+    function test_aCardWithoutAnImageShowsTheAppIcon() {
+        const item = makeCard({ appIcon: "firefox" });
+
+        compare(item.iconSource, "image://icon/firefox?fallback=application-x-executable");
+    }
+
+    function test_aCardWithNeitherShowsTheBell() {
+        const item = makeCard();
+
+        compare(item.iconSource, "");
+        verify(find(item, child => child.text === "󰂚").visible);
+    }
+
+    function test_anIconThatDoesNotLoadFallsBackToTheBell() {
+        const item = makeCard({ image: "file:///nonexistent/cover.png" });
+
+        tryVerify(() => find(item, child => child.text === "󰂚").visible);
+    }
+
+    function test_anImageThatDoesNotLoadFallsBackToTheAppIcon() {
+        const item = makeCard({ appIcon: "firefox", image: "file:///nonexistent/cover.png" });
+
+        tryCompare(item, "iconSource", "image://icon/firefox?fallback=application-x-executable");
+    }
+
     function test_theChevronExpandsAndCollapsesALongBody() {
         const item = makeCard({ body: "A body long enough to need more than two lines on a card this wide. ".repeat(6) });
         const chevron = find(item, child => child.objectName === "expandButton");

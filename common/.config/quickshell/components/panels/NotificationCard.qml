@@ -2,6 +2,7 @@ import QtQuick
 import "../../config" as Config
 import "." as Panels
 import "NotificationCard.js" as NotificationCard
+import "../IconSource.js" as IconSource
 
 // A notification card: one notification in the control center, Android
 // style. Tapping it runs its default action, then it is removed and the
@@ -20,6 +21,13 @@ Item {
     // Now, for the relative time; the list ticks it while it is shown.
     property double currentTime: Date.now()
 
+    // The image the notification was sent with, or else its app's icon; ""
+    // (the bell) when it has neither. An image that won't load falls back to
+    // the app icon, and an icon that won't load to the bell.
+    property bool imageFailed: false
+    readonly property bool showsImage: !!entry.image && !imageFailed
+    readonly property string iconSource: showsImage ? entry.image
+        : entry.appIcon ? IconSource.forName(entry.appIcon) : ""
     readonly property var actions: entry.notification ? entry.notification.actions : []
     readonly property var buttonActions: NotificationCard.buttonActions(actions)
     // Showing the full body.
@@ -159,9 +167,29 @@ Item {
             height: 36
             radius: width / 2
             color: Qt.rgba(theme.accent.r, theme.accent.g, theme.accent.b, 0.16)
+            clip: true
+
+            Image {
+                id: iconImage
+
+                readonly property bool showsImage: root.showsImage
+
+                anchors.fill: parent
+                anchors.margins: showsImage ? 0 : 6
+                source: root.iconSource
+                sourceSize.width: 72
+                sourceSize.height: 72
+                fillMode: showsImage ? Image.PreserveAspectCrop : Image.PreserveAspectFit
+                asynchronous: true
+                onStatusChanged: {
+                    if (status === Image.Error && showsImage)
+                        root.imageFailed = true;
+                }
+            }
 
             Panels.Text {
                 anchors.centerIn: parent
+                visible: iconImage.status !== Image.Ready
                 text: "󰂚"
                 color: root.highlighted ? theme.accent : theme.textMuted
                 font.pixelSize: 18
