@@ -187,10 +187,12 @@ TestCase {
         compare(cards(item).length, 0);
     }
 
-    function test_ongoingNotificationsArePinnedAboveTheRest() {
+    // They sit on top of the control center in both stages
+    // (ControlCenterOngoing), not in this list.
+    function test_ongoingNotificationsAreLeftOutOfTheList() {
         const item = makeBody([entry(1, false), ongoingEntry(2, "Discord"), entry(3, false, "Discord")]);
 
-        compare(cards(item).map(card => card.entry.summary), ["Syncing 2", "Download 1", "Download 3"]);
+        compare(cards(item).map(card => card.entry.summary), ["Download 1", "Download 3"]);
     }
 
     function test_clearAllKeepsOngoingNotifications() {
@@ -198,7 +200,6 @@ TestCase {
 
         button(item, "Clear all").activated();
 
-        compare(cards(item).map(card => card.entry.summary), ["Syncing 2"]);
         compare(item.notificationHistory.items.map(entry => entry.id), [2]);
     }
 
@@ -207,14 +208,6 @@ TestCase {
 
         verify(!button(item, "Clear all").visible);
         compare(texts(item).indexOf("No notifications"), -1);
-    }
-
-    function test_dismissingAnOngoingCardRemovesIt() {
-        const item = makeBody([ongoingEntry(1), entry(2, false)]);
-
-        cards(item)[0].dismissed();
-
-        compare(item.notificationHistory.items.map(entry => entry.id), [2]);
     }
 
     function test_aDismissedCardLeavesTheHistory() {

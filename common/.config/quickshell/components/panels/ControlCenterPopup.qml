@@ -8,7 +8,8 @@ import "MediaCard.js" as MediaCard
 // notifications; expanded, every control in their place
 // (ControlCenterLayout), and the audio output tile opens the audio output
 // subpage. With the control center plugin off it is notifications only.
-// While a player is active its media card is pinned on top, in both stages.
+// The ongoing notifications (the media card while a player is active, and
+// the `resident` notifications) stay on top in both stages.
 BarPopup {
     id: root
 
@@ -42,11 +43,17 @@ BarPopup {
                 root.popups.controlCenterStageSwitched(stage);
         }
 
-        pinned: Component {
-            ControlCenterMediaCard {
+        ongoing: Component {
+            ControlCenterOngoing {
                 width: layout.width
                 appearance: root.appearance
+                notificationHistory: root.notificationHistory
                 player: MediaCard.activePlayer(Mpris.players.values)
+                open: root.open
+                highlightedIds: layout.notificationsItem
+                    ? layout.notificationsItem.highlightedIds : []
+
+                onCloseRequested: root.popups.popupClosed(root.popup)
             }
         }
 

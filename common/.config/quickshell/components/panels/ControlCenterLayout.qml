@@ -14,7 +14,8 @@ import "." as Panels
 // of the controls, expanding first when it sits in the collapsed row; its
 // back arrow (`back()`) returns to the expanded stage. Each opening, and
 // collapsing, leaves it.
-// Above everything, in both stages, sits `pinned` (the media card).
+// Above everything, in both stages, sit the ongoing notifications
+// (`ongoing`: the media card and the `resident` notifications).
 Column {
     id: root
 
@@ -29,11 +30,14 @@ Column {
     // the tile row or everything.
     property Component controls: null
     property Component notifications: null
+    // The notifications list, once loaded (it always is): the ongoing
+    // notifications read its highlighting.
+    readonly property var notificationsItem: notificationsLoader.item
     // The audio output subpage: the outputs, with a back arrow.
     property Component audioOutputs: null
-    // Pinned on top in both stages (the media card); it takes no room while
-    // its height is 0.
-    property Component pinned: null
+    // The ongoing notifications, on top in both stages; they take no room
+    // while their height is 0.
+    property Component ongoing: null
     // The open subpage, "" for none.
     property string subpage: ""
     readonly property bool subpageOpen: expanded && subpage !== ""
@@ -95,7 +99,7 @@ Column {
     Loader {
         width: parent.width
         visible: item !== null && item.height > 0
-        sourceComponent: root.pinned
+        sourceComponent: root.ongoing
     }
 
     Loader {
@@ -161,6 +165,8 @@ Column {
     }
 
     Loader {
+        id: notificationsLoader
+
         width: parent.width
         visible: !root.expanded
         sourceComponent: root.notifications
