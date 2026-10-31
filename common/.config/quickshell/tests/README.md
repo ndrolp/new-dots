@@ -56,7 +56,10 @@ card: the image or app icon it shows, the chevron, tapping it (default
 action or expand), its action buttons, the × and how far a swipe has to go
 to dismiss it (`components/panels/NotificationCard.qml`,
 `NotificationCard.js`), what the notification history keeps of a
-notification, how it groups them by app and dismisses a whole group
+notification, how it groups them by app and dismisses a whole group,
+dismissing a notification whenever its card leaves the history (a card,
+a stack or Clear all removed, a repeat, the 50-entry cap) and rebuilding
+the history from the notifications kept over a reload
 (`services/NotificationHistory.qml`),
 the active colorscheme's colours read from its colours file,
 falling back to everforestdark's (`config/ColorschemeColors.js`), and which
