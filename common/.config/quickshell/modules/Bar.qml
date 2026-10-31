@@ -4,7 +4,7 @@ import "../components/bar" as BarComponents
 import "OpenPopup.js" as OpenPopup
 
 // A bar on every monitor, and which of their popups is open (OpenPopup.js).
-// Its settings and notifications buttons open those panels on that bar.
+// Its settings button opens the settings panel on that bar.
 Scope {
     id: root
 
@@ -19,12 +19,25 @@ Scope {
     required property var systemMonitor
     required property var workspaceService
     required property var settings
-    required property var notifications
     required property var osd
 
     property var openPopup: OpenPopup.none
 
+    // IPC toggles `popup` on the focused monitor's bar; when that bar lacks
+    // the popup's element, the popup opens at its right edge.
+    function togglePopupOnFocusedBar(popup) {
+        const bars = [];
+        for (let index = 0; index < barWindows.instances.length; index++) {
+            const panel = barWindows.instances[index];
+            bars.push({ window: panel, monitor: panel.monitorDescription, visible: panel.visible });
+        }
+        root.openPopup = OpenPopup.toggledOnFocusedBar(root.openPopup, popup, bars,
+            root.workspaceService.focusedMonitorDescription());
+    }
+
     BarComponents.Bar {
+        id: barWindows
+
         appearance: root.appearance
         configOpen: root.settings.open
         activePopup: root.openPopup.popup
@@ -45,7 +58,6 @@ Scope {
 
         onPanelReady: function(screen, panelWindow) {
             root.settings.offerWindow(screen, panelWindow);
-            root.notifications.offerWindow(panelWindow);
         }
 
         onPopupRequested: function(popup, panelWindow) {
@@ -60,8 +72,6 @@ Scope {
             root.osd.showAudioOutput(output);
         }
 
-        onNotificationRequested: function(panelWindow) {
-            root.notifications.toggleOn(panelWindow);
-        }
+        onDoNotDisturbToggled: root.appearance.doNotDisturb = !root.appearance.doNotDisturb
     }
 }

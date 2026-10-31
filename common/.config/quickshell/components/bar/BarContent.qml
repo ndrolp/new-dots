@@ -26,7 +26,6 @@ Item {
 
     signal configRequested(var screen)
     signal popupRequested(string popup)
-    signal notificationRequested()
     readonly property var zoneNames: ["left", "center", "right"]
     readonly property real slantedPadding: appearance.barTransparent && appearance.transparentBarSlanted
         ? appearance.horizontalPadding : 0
@@ -312,7 +311,5 @@ Item {
         onPopupRequested: function(popup) {
             root.popupRequested(popup);
         }
-
-        onNotificationRequested: root.notificationRequested()
     }
 }

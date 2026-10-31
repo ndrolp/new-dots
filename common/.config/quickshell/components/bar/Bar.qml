@@ -26,7 +26,7 @@ Variants {
     signal popupRequested(string popup, var panelWindow)
     signal popupClosed(string popup, var panelWindow)
     signal audioOutputSelected(var output)
-    signal notificationRequested(var panelWindow)
+    signal doNotDisturbToggled()
 
     model: Quickshell.screens
 
@@ -158,8 +158,6 @@ Variants {
                     onPopupRequested: function(popup) {
                         bar.popupRequested(popup, panel);
                     }
-
-                    onNotificationRequested: bar.notificationRequested(panel)
                 }
             }
 
@@ -171,6 +169,7 @@ Variants {
                 pomodoro: panel.pomodoro
                 keepAwake: panel.keepAwake
                 systemMonitor: panel.systemMonitor
+                notificationHistory: panel.notificationHistory
 
                 onPopupClosed: function(popup) {
                     bar.popupClosed(popup, panel);
@@ -179,6 +178,8 @@ Variants {
                 onAudioOutputSelected: function(output) {
                     bar.audioOutputSelected(output);
                 }
+
+                onDoNotDisturbToggled: bar.doNotDisturbToggled()
             }
 
         }

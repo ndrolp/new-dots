@@ -32,32 +32,6 @@ QtObject {
         groups = groupedItems;
     }
 
-    function filteredGroups(query, unreadOnly) {
-        const normalizedQuery = query.trim().toLowerCase();
-        const filteredItems = items.filter(item => {
-            const matchesQuery = normalizedQuery === ""
-                || item.appName.toLowerCase().indexOf(normalizedQuery) !== -1
-                || item.summary.toLowerCase().indexOf(normalizedQuery) !== -1
-                || item.body.toLowerCase().indexOf(normalizedQuery) !== -1;
-            return matchesQuery && (!unreadOnly || item.unread);
-        });
-        const filteredGroups = [];
-
-        filteredItems.forEach(item => {
-            const appName = item.appName || "Unknown application";
-            let group = filteredGroups.find(candidate => candidate.appName === appName);
-
-            if (!group) {
-                group = { appName: appName, items: [] };
-                filteredGroups.push(group);
-            }
-
-            group.items.push(item);
-        });
-
-        return filteredGroups;
-    }
-
     function add(notification) {
         const appName = notification.appName || "";
         const summary = notification.summary || "";
