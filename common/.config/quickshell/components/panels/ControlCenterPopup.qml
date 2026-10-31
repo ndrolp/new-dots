@@ -1,10 +1,11 @@
+import Quickshell.Services.Pipewire
 import QtQuick
 
 // The control center: the popup of the bell bar element (saved id
 // "notifications"). Collapsed, it shows the tile row above today's
 // notifications; expanded, every control in their place
-// (ControlCenterLayout). With the control center plugin off it is
-// notifications only.
+// (ControlCenterLayout), and the audio output tile opens the audio output
+// subpage. With the control center plugin off it is notifications only.
 BarPopup {
     id: root
 
@@ -45,10 +46,32 @@ BarPopup {
 
                 onCloseRequested: root.popups.popupClosed(root.popup)
                 onDoNotDisturbToggled: root.popups.doNotDisturbToggled()
-                onAudioSinksRequested: root.popups.audioOutputsRequested()
+                onAudioSinksRequested: layout.openAudioOutputs()
                 onClipboardRequested: root.popups.clipboardRequested()
                 onPowerMenuRequested: root.popups.powerMenuRequested()
                 onScreenCaptureRequested: root.popups.screenCaptureRequested()
+            }
+        }
+
+        // Choosing an output switches to it with the same OSD as the audio
+        // output selector; the control center stays open.
+        audioOutputs: Component {
+            ControlCenterAudioOutputs {
+                width: layout.width
+                appearance: root.appearance
+                outputs: Pipewire.nodes.values.filter(node => node.isSink)
+                current: Pipewire.defaultAudioSink
+
+                onOutputChosen: output => {
+                    Pipewire.preferredDefaultAudioSink = output;
+                    root.popups.audioOutputSelected(output);
+                }
+                onBackRequested: layout.back()
+
+                // Binds the outputs, so their names and the default are known.
+                PwObjectTracker {
+                    objects: Pipewire.nodes.values
+                }
             }
         }
 

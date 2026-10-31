@@ -45,6 +45,16 @@ TestCase {
     }
 
     Component {
+        id: fakeAudioOutputs
+
+        Rectangle {
+            objectName: "audioOutputs"
+            width: 400
+            height: 120
+        }
+    }
+
+    Component {
         id: layoutComponent
 
         Panels.ControlCenterLayout {
@@ -52,6 +62,7 @@ TestCase {
             width: 400
             controls: fakeControls
             notifications: fakeNotifications
+            audioOutputs: fakeAudioOutputs
         }
     }
 
@@ -73,6 +84,11 @@ TestCase {
     function controlsShown(layout) {
         const controls = findChild(layout, "controls");
         return controls !== null && controls.visible;
+    }
+
+    function audioOutputsShown(layout) {
+        const page = findChild(layout, "audioOutputs");
+        return page !== null && page.visible;
     }
 
     function notificationsShown(layout) {
@@ -172,5 +188,61 @@ TestCase {
         compare(layout.expanded, false);
         verify(!controlsShown(layout));
         verify(notificationsShown(layout));
+    }
+
+    // The audio output tile opens the audio output subpage inside the
+    // expanded control center, in place of the other controls; it stays open.
+    function test_theAudioOutputTileOpensTheSubpageInPlaceOfTheControls() {
+        const layout = makeLayout();
+        opened(layout, "expanded");
+        verify(!audioOutputsShown(layout));
+
+        layout.openAudioOutputs();
+        compare(layout.subpage, "audioOutputs");
+        verify(audioOutputsShown(layout));
+        verify(!controlsShown(layout));
+        verify(!notificationsShown(layout));
+        compare(findChild(layout, "stageHandle").visible, false);
+    }
+
+    function test_theBackArrowReturnsToTheExpandedStage() {
+        const layout = makeLayout();
+        opened(layout, "expanded");
+        layout.openAudioOutputs();
+
+        layout.back();
+        compare(layout.subpage, "");
+        compare(layout.expanded, true);
+        verify(controlsShown(layout));
+        verify(!audioOutputsShown(layout));
+        verify(!notificationsShown(layout));
+    }
+
+    function test_eachOpeningStartsWithoutTheSubpage() {
+        const layout = makeLayout();
+        opened(layout, "expanded");
+        layout.openAudioOutputs();
+        closed(layout);
+
+        opened(layout, "expanded");
+        compare(layout.subpage, "");
+        verify(controlsShown(layout));
+        verify(!audioOutputsShown(layout));
+    }
+
+    // The subpage belongs to the expanded control center.
+    function test_collapsedOrWithThePluginOffThereIsNoSubpage() {
+        const collapsed = makeLayout();
+        opened(collapsed, "collapsed");
+        collapsed.openAudioOutputs();
+        compare(collapsed.subpage, "");
+        verify(!audioOutputsShown(collapsed));
+
+        const off = makeLayout({ controlsEnabled: false });
+        opened(off, "expanded");
+        off.openAudioOutputs();
+        compare(off.subpage, "");
+        verify(!audioOutputsShown(off));
+        verify(notificationsShown(off));
     }
 }

@@ -33,7 +33,6 @@ Variants {
     signal popupClosed(string popup, var panelWindow)
     signal audioOutputSelected(var output)
     signal doNotDisturbToggled()
-    signal audioOutputsRequested()
     signal clipboardRequested()
     signal powerMenuRequested()
     signal screenCaptureRequested()
@@ -195,7 +194,6 @@ Variants {
                 }
 
                 onDoNotDisturbToggled: bar.doNotDisturbToggled()
-                onAudioOutputsRequested: bar.audioOutputsRequested()
                 onClipboardRequested: bar.clipboardRequested()
                 onPowerMenuRequested: bar.powerMenuRequested()
                 onScreenCaptureRequested: bar.screenCaptureRequested()

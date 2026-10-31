@@ -227,7 +227,6 @@ ShellRoot {
 
         bar: bar
         plugins: plugins
-        audioOutputSelector: audioOutputSelector
         clipboardSelector: clipboardSelector
         powerMenu: powerMenu
         screenCaptureChooser: screenCaptureChooser
