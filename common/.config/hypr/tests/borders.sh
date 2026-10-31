@@ -51,10 +51,10 @@ borders_with() {
 
 # change_colorscheme <args>...: runs the colorscheme changer through the shared harness
 # (colorschemes/colorscheme_changer_harness.sh), with hyprctl recording which colours file the Hyprland
-# colours link points at when it is asked to reload. No running nvim is reached. Sets OUT to that record.
+# colours link leads to when it is asked to reload. No running nvim is reached. Sets OUT to that record.
 change_colorscheme() {
     changer_home
-    printf '#!/bin/sh\nreadlink "$HOME/.config/hypr/custom/colors.lua" >>"$HOME/reloads"\n' >"$HOME_DIR/bin/hyprctl"
+    printf '#!/bin/sh\nreadlink -f "$HOME/.config/hypr/custom/colors.lua" >>"$HOME/reloads"\n' >"$HOME_DIR/bin/hyprctl"
     run_changer "$@"
     OUT="$(sed "s|^$HOME_DIR|~|" "$HOME_DIR/reloads" 2>/dev/null)"
 }
@@ -92,14 +92,15 @@ test_each_colorschemes_hyprland_colours_match_its_quickshell_accent_and_border()
     done
 }
 
-# The whole Hyprland config, with the colours link as tracked in the repo (everforestdark), ends up with
-# everforestdark's borders: no later setting overrides them.
+# The whole Hyprland config, with the colours link as tracked in the repo, ends up with the borders of
+# the colorscheme a fresh clone shows, the default (everforestdark): no later setting overrides them.
 test_the_full_config_with_the_tracked_colours_link_gives_everforestdarks_borders() {
     local config tracked
     config="$(mktemp -d "$SCRATCH/full.XXXX")"
     cp -r "$HYPR/." "$config"
     tracked="$(readlink "$HYPR/custom/colors.lua")"
-    ln -sf "$COLORSCHEMES/${tracked#*/colorschemes/}" "$config/custom/colors.lua"
+    tracked="${tracked#*/colorschemes/shown/}"
+    ln -sf "$COLORSCHEMES/$(cat "$COLORSCHEMES/default.txt")/$tracked" "$config/custom/colors.lua"
     run_hypr_config "$config" "dofile('$config/hyprland.lua')"
     [[ "$OUT" == "$EVERFOREST" ]] || fail "wrong borders"
 }

@@ -192,10 +192,10 @@ test_applying_does_not_ask_ags_for_the_theme() {
     [[ "$(calls_to ags)" -eq 0 ]] || fail "ags was called"
 }
 
-test_applying_links_the_colorschemes_quickshell_colours_and_asks_the_shell_to_reload_them() {
+test_applying_leads_quickshells_colours_to_the_colorschemes_and_asks_the_shell_to_reload_them() {
     change_colorscheme nord
-    [[ "$(readlink "$HOME_DIR/.config/quickshell/config/colors.json")" == "$HOME_DIR/.dotfiles/colorschemes/nord/quickshell/colors.json" ]] \
-        || fail "colours not linked"
+    [[ "$(readlink -f "$HOME_DIR/.config/quickshell/config/colors.json")" == "$HOME_DIR/.dotfiles/colorschemes/nord/quickshell/colors.json" ]] \
+        || fail "colours do not lead to nord's"
     grep -qx "quickshell ipc --path $HOME_DIR/.config/quickshell call colorscheme reload" "$CALLS" \
         || fail "the shell was not asked to reload its colours"
 }
@@ -241,6 +241,30 @@ test_previewing_does_not_change_the_active_colorscheme() {
     [[ "$(readlink "$HOME_DIR/.dotfiles/colorschemes/active")" == everforestdark ]] || fail "the active link was moved"
 }
 
+test_previewing_then_leaving_the_preview_leaves_git_status_clean() {
+    ACTIVE_COLORSCHEME=everforestdark change_colorscheme --active
+    commit_dotfiles
+    run_changer --preview nord
+    run_changer --preview everforestdark
+    [[ -z "$(git -C "$HOME_DIR/.dotfiles" status --porcelain)" ]] \
+        || fail "git status: $(git -C "$HOME_DIR/.dotfiles" status --porcelain)"
+}
+
+test_without_a_shown_link_hyprland_and_quickshell_show_the_active_colorscheme() {
+    ACTIVE_COLORSCHEME=kanagawa change_colorscheme --active
+    [[ "$(readlink -f "$HOME_DIR/.config/hypr/custom/colors.lua")" == "$HOME_DIR/.dotfiles/colorschemes/kanagawa/hypr/colors.lua" ]] \
+        || fail "Hyprland colours do not lead to kanagawa's"
+    [[ "$(readlink -f "$HOME_DIR/.config/quickshell/config/colors.json")" == "$HOME_DIR/.dotfiles/colorschemes/kanagawa/quickshell/colors.json" ]] \
+        || fail "Quickshell colours do not lead to kanagawa's"
+}
+
+test_the_shown_colorscheme_link_is_gitignored() {
+    changer_home
+    commit_dotfiles
+    run_changer --preview nord
+    git -C "$HOME_DIR/.dotfiles" check-ignore -q colorschemes/shown || fail "colorschemes/shown is not ignored"
+}
+
 test_applying_makes_the_colorscheme_the_active_one() {
     ACTIVE_COLORSCHEME=everforestdark change_colorscheme nord
     [[ "$(readlink "$HOME_DIR/.dotfiles/colorschemes/active")" == nord ]] || fail "the active link does not name nord"
@@ -248,11 +272,11 @@ test_applying_makes_the_colorscheme_the_active_one() {
 
 test_previewing_recolours_hyprland_and_quickshell() {
     change_colorscheme --preview nord
-    [[ "$(readlink "$HOME_DIR/.config/hypr/custom/colors.lua")" == "$HOME_DIR/.dotfiles/colorschemes/nord/hypr/colors.lua" ]] \
-        || fail "Hyprland colours not linked"
+    [[ "$(readlink -f "$HOME_DIR/.config/hypr/custom/colors.lua")" == "$HOME_DIR/.dotfiles/colorschemes/nord/hypr/colors.lua" ]] \
+        || fail "Hyprland colours do not lead to nord's"
     grep -qx "hyprctl reload" "$CALLS" || fail "Hyprland was not reloaded"
-    [[ "$(readlink "$HOME_DIR/.config/quickshell/config/colors.json")" == "$HOME_DIR/.dotfiles/colorschemes/nord/quickshell/colors.json" ]] \
-        || fail "Quickshell colours not linked"
+    [[ "$(readlink -f "$HOME_DIR/.config/quickshell/config/colors.json")" == "$HOME_DIR/.dotfiles/colorschemes/nord/quickshell/colors.json" ]] \
+        || fail "Quickshell colours do not lead to nord's"
     grep -qx "quickshell ipc --path $HOME_DIR/.config/quickshell call colorscheme reload" "$CALLS" \
         || fail "the shell was not asked to reload its colours"
 }

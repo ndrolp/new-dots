@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-HYPRLAND_COLORS="$HOME/.config/hypr/custom/colors.conf"
-HYPRLAND_LUA_COLORS="$HOME/.config/hypr/custom/colors.lua"
 NVIM_COLORS="$HOME/.config/nvim/lua/settings/core/theme.lua"
 VSCODE_SETTINGS="$HOME/.config/Code/User/settings.json"
 
@@ -21,7 +19,19 @@ ensure_active() {
   ln -sfn "$(cat "$DEFAULT_FILE")" "$ACTIVE_LINK"
 }
 
+# The colorscheme Hyprland and Quickshell are showing is machine-local too: the gitignored link `shown`.
+# Their tracked colour links (hypr colors.conf/colors.lua, quickshell colors.json) point through it, so a
+# colorscheme preview moves only this link and never the active one. It starts from the active
+# colorscheme whenever it is missing.
+SHOWN_LINK="$TARGET_DIR/shown"
+
+ensure_shown() {
+  [ -L "$SHOWN_LINK" ] && [ -d "$SHOWN_LINK" ] && return 0
+  ln -sfn "$(readlink "$ACTIVE_LINK")" "$SHOWN_LINK"
+}
+
 ensure_active
+ensure_shown
 
 # list_colorschemes: every colorscheme, one per line, sorted; the active link is not a folder, so it is
 # not listed.
@@ -110,29 +120,29 @@ echo "$SELECTED_FOLDER"
 
 THEME_FOLDER="$TARGET_DIR/$SELECTED_FOLDER"
 
-link_hypr_colors() {
-  ln -sf "$THEME_FOLDER/hypr/colors.conf" "$HYPRLAND_COLORS"
-  ln -sf "$THEME_FOLDER/hypr/colors.lua" "$HYPRLAND_LUA_COLORS"
+# Hyprland's and Quickshell's colour links go through `shown`, so showing a colorscheme moves only it.
+show_colorscheme() {
+  ln -sfn "$SELECTED_FOLDER" "$SHOWN_LINK"
 }
 
 # The shell can't see the link change by itself, so it is asked to read its colours again: it
 # recolours in place, without restarting.
 recolour_quickshell() {
-  ln -sf "$THEME_FOLDER/quickshell/colors.json" "$HOME/.config/quickshell/config/colors.json"
   quickshell ipc --path "$HOME/.config/quickshell" call colorscheme reload
 }
 
 # A colorscheme preview recolours Hyprland and Quickshell only and leaves the active colorscheme
 # alone; the selector previews the active colorscheme again to leave the preview.
 if [ "$PREVIEW_MODE" = true ]; then
-  link_hypr_colors
+  show_colorscheme
   hyprctl reload
   recolour_quickshell
   exit 0
 fi
 
-# Only applying makes the colorscheme the active one.
+# Only applying makes the colorscheme the active one. It is shown as well, before any step reloads.
 ln -sfn "$SELECTED_FOLDER" "$ACTIVE_LINK"
+show_colorscheme
 
 # Steps: each one updates one part of the desktop. `step <name> <function> [args...]` runs the function
 # in a subshell with errexit and pipefail, so its first failing command fails the step, and a failed step
@@ -160,7 +170,6 @@ report_failed_steps() {
 }
 
 apply_hyprland() {
-  link_hypr_colors
   hyprctl reload
 }
 
