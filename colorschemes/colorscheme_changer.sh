@@ -22,6 +22,24 @@ ensure_active() {
 
 ensure_active
 
+# list_colorschemes: every colorscheme, one per line, sorted; the active link is not a folder, so it is
+# not listed.
+list_colorschemes() {
+  find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort
+}
+
+# --list prints the colorschemes (the theme selector lists them this way).
+if [ "${1:-}" = "--list" ]; then
+  list_colorschemes
+  exit 0
+fi
+
+# --active prints the active colorscheme (the theme selector reads it this way) and changes nothing else.
+if [ "${1:-}" = "--active" ]; then
+  basename "$(readlink "$ACTIVE_LINK")"
+  exit 0
+fi
+
 PREVIEW_MODE=false
 
 if [ "${1:-}" = "--preview" ]; then
@@ -32,14 +50,12 @@ fi
 SELECTED_FOLDER="${1:-}"
 
 if [ -z "$SELECTED_FOLDER" ]; then
-  SELECTED_FOLDER=$(find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' \
-    | sed '/^$/d' \
-    | sort \
+  SELECTED_FOLDER=$(list_colorschemes \
     | rofi -dmenu -l 5 -columns 1 -font "FiraCode Nerd Font 10" -no-show-icons -i)
 fi
 
 [ -z "$SELECTED_FOLDER" ] && exit 0
-[ -d "$TARGET_DIR/$SELECTED_FOLDER" ] || exit 1
+list_colorschemes | grep -qxF -- "$SELECTED_FOLDER" || exit 1
 
 case "$SELECTED_FOLDER" in
   catppuccin)

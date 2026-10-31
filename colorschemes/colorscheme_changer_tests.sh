@@ -137,6 +137,39 @@ test_the_active_colorscheme_link_is_gitignored() {
     git -C "$HOME_DIR/.dotfiles" check-ignore -q colorschemes/active || fail "colorschemes/active is not ignored"
 }
 
+test_asking_for_the_active_colorscheme_names_it() {
+    ACTIVE_COLORSCHEME=kanagawa change_colorscheme --active
+    [[ "$OUT" == kanagawa ]] || fail "expected kanagawa"
+    [[ ! -s "$CALLS" ]] || fail "asking drove a program"
+}
+
+test_without_an_active_link_the_default_colorscheme_becomes_active() {
+    changer_home
+    echo rosepine >"$HOME_DIR/.dotfiles/colorschemes/default.txt"
+    run_changer --active
+    [[ "$OUT" == rosepine ]] || fail "expected the default, rosepine"
+    [[ "$(readlink "$HOME_DIR/.dotfiles/colorschemes/active")" == rosepine ]] || fail "the active link was not created"
+}
+
+test_an_apply_without_an_active_link_leaves_the_default_colorscheme_alone() {
+    changer_home
+    run_changer nord
+    [[ "$(cat "$HOME_DIR/.dotfiles/colorschemes/default.txt")" == everforestdark ]] || fail "default.txt was written"
+    [[ "$(readlink "$HOME_DIR/.dotfiles/colorschemes/active")" == nord ]] || fail "nord is not active"
+}
+
+test_listing_names_every_colorscheme_but_not_the_active_link() {
+    ACTIVE_COLORSCHEME=nord change_colorscheme --list
+    [[ "$OUT" == "$(printf '%s\n' bloodmoon carbonfox catppuccin coralnord dracula everforestdark gruvboxdark \
+        kanagawa nord rosepine tokyonight)" ]] || fail "unexpected list"
+}
+
+test_the_active_link_cannot_be_applied_as_a_colorscheme() {
+    ACTIVE_COLORSCHEME=nord change_colorscheme active || true
+    [[ "$(readlink "$HOME_DIR/.dotfiles/colorschemes/active")" == nord ]] || fail "the active link was moved"
+    [[ ! -s "$CALLS" ]] || fail "applying active drove a program"
+}
+
 test_a_failing_step_does_not_stop_the_later_steps() {
     change_colorscheme --failing "kitten" nord
     [[ "$(calls_to quickshell)" -gt 0 ]] || fail "quickshell was never asked to reload after kitty failed"
