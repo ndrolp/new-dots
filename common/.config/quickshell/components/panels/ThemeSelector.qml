@@ -3,7 +3,6 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
-import Qt.labs.folderlistmodel
 import "../../config" as Config
 import "../../config/ColorschemeColors.js" as ColorschemeColors
 import "ColorschemePreview.js" as ColorschemePreview
@@ -46,14 +45,13 @@ Variants {
             right: true
         }
 
-        FolderListModel {
+        // The colorschemes, listed once by the changer: the colorschemes folder also holds the
+        // active-colorscheme link, which is not one of them.
+        ListModel {
             id: themes
-
-            folder: "file:///home/ndrolp/.dotfiles/colorschemes"
-            showDirs: true
-            showFiles: false
-            showDotAndDotDot: false
         }
+
+        Component.onCompleted: themeListing.running = true
 
         Config.Theme {
             id: theme
@@ -124,9 +122,29 @@ Variants {
         }
 
         Process {
+            id: themeListing
+
+            command: ["/home/ndrolp/.dotfiles/colorschemes/colorscheme_changer.sh", "--list"]
+
+            stdout: SplitParser {
+                onRead: data => {
+                    if (data.trim() !== "")
+                        themes.append({ fileName: data.trim() });
+                }
+            }
+
+            onExited: {
+                if (selector.visible)
+                    selector.loadActiveTheme();
+            }
+        }
+
+        // The active colorscheme is the machine-local link colorschemes/active; the changer reads it
+        // (and creates it from the default colorscheme when it is missing).
+        Process {
             id: themeState
 
-            command: ["sh", "-c", "cat ~/.dotfiles/colorschemes/theme.txt 2>/dev/null"]
+            command: ["/home/ndrolp/.dotfiles/colorschemes/colorscheme_changer.sh", "--active"]
 
             stdout: SplitParser {
                 onRead: data => {
@@ -134,7 +152,7 @@ Variants {
                     selector.preview = ColorschemePreview.shown(selector.preview, selector.activeTheme).state;
 
                     for (let index = 0; index < themes.count; index++) {
-                        if (themes.get(index, "fileName") === selector.activeTheme) {
+                        if (themes.get(index).fileName === selector.activeTheme) {
                             themeList.currentIndex = index;
                             themeList.positionViewAtIndex(index, ListView.Contain);
                             break;
