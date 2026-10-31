@@ -14,7 +14,18 @@ QtObject {
         return item.appName || "Unknown application";
     }
 
+    // Every change goes through here, so a notification whose card leaves
+    // the history (removed, its group or all cleared, replaced by a repeat,
+    // or past the 50-entry cap) is dismissed: the server keeps a notification
+    // alive exactly as long as its card is listed.
     function updateItems(updatedItems) {
+        const kept = updatedItems.map(item => item.notification);
+
+        items.forEach(item => {
+            if (item.notification && kept.indexOf(item.notification) < 0)
+                item.notification.dismiss();
+        });
+
         items = updatedItems;
 
         const groupedItems = [];
