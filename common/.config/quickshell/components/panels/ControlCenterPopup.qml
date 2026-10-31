@@ -73,7 +73,7 @@ BarPopup {
 
                 onCloseRequested: root.popups.popupClosed(root.popup)
                 onDoNotDisturbToggled: root.popups.doNotDisturbToggled()
-                onAudioSinksRequested: layout.openAudioOutputs()
+                onAudioOutputsRequested: layout.openAudioOutputs()
                 onClipboardRequested: root.popups.clipboardRequested()
                 onPowerMenuRequested: root.popups.powerMenuRequested()
                 onScreenCaptureRequested: root.popups.screenCaptureRequested()

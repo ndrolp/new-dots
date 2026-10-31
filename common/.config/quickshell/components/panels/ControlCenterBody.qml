@@ -49,7 +49,7 @@ Column {
     // The do not disturb tile was pressed; the shell owns the setting.
     signal doNotDisturbToggled()
     // The audio output tile: the host opens the audio output subpage.
-    signal audioSinksRequested()
+    signal audioOutputsRequested()
     signal clipboardRequested()
     signal powerMenuRequested()
     signal screenCaptureRequested()
@@ -273,7 +273,7 @@ Column {
             icon: "󰓃"
             accentColor: theme.accent
             // Opens the audio output subpage; the control center stays open.
-            onTriggered: body.audioSinksRequested()
+            onTriggered: body.audioOutputsRequested()
         }
     }
 

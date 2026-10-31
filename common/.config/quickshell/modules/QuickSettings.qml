@@ -23,7 +23,7 @@ Feature {
         open: root.open
 
         onCloseRequested: root.open = false
-        onAudioSinksRequested: root.switchTo(root.audioOutputSelector)
+        onAudioOutputsRequested: root.switchTo(root.audioOutputSelector)
         onControlCenterRequested: {
             if (!root.controlCenter.available)
                 return;
