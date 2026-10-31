@@ -19,3 +19,21 @@ function requested(open, popup, window) {
 function closed(open, popup, window) {
     return isOpen(open, popup, window) ? none : open;
 }
+
+// The bar IPC opens popups on: the focused monitor's, or the first shown bar
+// when that monitor's bar is hidden; null when no bar is shown.
+// `bars` is [{ window, monitor (its description), visible }].
+function focusedBar(bars, focusedMonitor) {
+    const shown = bars.filter(bar => bar.visible);
+    const focused = shown.find(bar => bar.monitor === focusedMonitor);
+    const bar = focused || shown[0];
+    return bar ? bar.window : null;
+}
+
+// IPC toggles a popup (e.g. `notifications toggle`): it opens on the focused
+// bar, or closes if it was open there. Its element missing from that bar is
+// fine: the popup then opens at the bar's edge (PopupPlacement.js).
+function toggledOnFocusedBar(open, popup, bars, focusedMonitor) {
+    const window = focusedBar(bars, focusedMonitor);
+    return window === null ? open : requested(open, popup, window);
+}
