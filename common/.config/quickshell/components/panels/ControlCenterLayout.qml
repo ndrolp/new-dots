@@ -9,6 +9,9 @@ import "." as Panels
 // switches stages: tap its chevron, or drag it down to expand and up to
 // collapse. With the control center plugin off (`controlsEnabled` false) it
 // is notifications only: no controls, no handle, never expanded.
+// Expanded, the audio output tile opens a subpage (`subpage`
+// "audioOutputs") in place of the controls; its back arrow (`back()`)
+// returns to the expanded stage. Each opening starts without it.
 Column {
     id: root
 
@@ -23,6 +26,11 @@ Column {
     // the tile row or everything.
     property Component controls: null
     property Component notifications: null
+    // The audio output subpage: the outputs, with a back arrow.
+    property Component audioOutputs: null
+    // The open subpage, "" for none.
+    property string subpage: ""
+    readonly property bool subpageOpen: expanded && subpage !== ""
 
     // How far the handle is dragged before it switches stages.
     readonly property int dragThreshold: 24
@@ -30,8 +38,21 @@ Column {
     spacing: 8
 
     onOpenChanged: {
-        if (open)
+        if (open) {
             stage = requestedStage;
+            subpage = "";
+        }
+    }
+
+    // The audio output tile: only the expanded control center has it.
+    function openAudioOutputs() {
+        if (expanded)
+            subpage = "audioOutputs";
+    }
+
+    // The subpage's back arrow.
+    function back() {
+        subpage = "";
     }
 
     // The chevron: expand when collapsed, collapse when expanded.
@@ -54,8 +75,15 @@ Column {
     Loader {
         width: parent.width
         active: root.controlsEnabled
-        visible: active
+        visible: active && !root.subpageOpen
         sourceComponent: root.controls
+    }
+
+    Loader {
+        width: parent.width
+        active: root.subpageOpen && root.subpage === "audioOutputs"
+        visible: active
+        sourceComponent: root.audioOutputs
     }
 
     Item {
@@ -64,7 +92,7 @@ Column {
         objectName: "stageHandle"
         width: parent.width
         height: 22
-        visible: root.controlsEnabled
+        visible: root.controlsEnabled && !root.subpageOpen
 
         Rectangle {
             anchors.centerIn: parent
