@@ -13,6 +13,11 @@ Variants {
     required property var appearance
     property bool open: false
 
+    // The repo's colorschemes folder. The shell's folder is common/.config/quickshell in the repo (stow
+    // links ~/.config/quickshell to it), and the system resolves ".." through that link.
+    readonly property string colorschemes: Quickshell.shellPath("../../../colorschemes")
+    readonly property string changer: colorschemes + "/colorscheme_changer.sh"
+
     signal closeRequested()
 
     model: Quickshell.screens
@@ -74,7 +79,7 @@ Variants {
                 return;
 
             themePreview.command = [
-                "/home/ndrolp/.dotfiles/colorschemes/colorscheme_changer.sh",
+                root.changer,
                 "--preview", step.start
             ];
             themePreview.running = true;
@@ -104,7 +109,7 @@ Variants {
 
             applyingTheme = true;
             themeApply.command = [
-                "/home/ndrolp/.dotfiles/colorschemes/colorscheme_changer.sh",
+                root.changer,
                 themeList.currentItem.themeName
             ];
             themeApply.running = true;
@@ -124,7 +129,7 @@ Variants {
         Process {
             id: themeListing
 
-            command: ["/home/ndrolp/.dotfiles/colorschemes/colorscheme_changer.sh", "--list"]
+            command: [root.changer, "--list"]
 
             stdout: SplitParser {
                 onRead: data => {
@@ -144,7 +149,7 @@ Variants {
         Process {
             id: themeState
 
-            command: ["/home/ndrolp/.dotfiles/colorschemes/colorscheme_changer.sh", "--active"]
+            command: [root.changer, "--active"]
 
             stdout: SplitParser {
                 onRead: data => {
@@ -269,8 +274,8 @@ Variants {
                         property var colours: ColorschemeColors.fallback
 
                         FileView {
-                            path: "/home/ndrolp/.dotfiles/colorschemes/"
-                                + themeTile.themeName + "/quickshell/colors.json"
+                            path: root.colorschemes + "/" + themeTile.themeName
+                                + "/quickshell/colors.json"
 
                             onLoaded: themeTile.colours = ColorschemeColors.fromJson(text())
                         }
