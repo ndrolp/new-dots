@@ -130,7 +130,8 @@ TestCase {
         const appearance = fixtures.migrated().appearance;
 
         compare(Object.keys(appearance).sort(),
-            ["barProfiles", "doNotDisturb", "notificationPopupLocation", "schemaVersion"]);
+            ["barProfiles", "controlCenterTiles", "doNotDisturb", "notificationPopupLocation",
+                "schemaVersion"]);
     }
 
     function test_theOldActiveProfilesTopLevelValuesWinOverItsSavedCopy() {

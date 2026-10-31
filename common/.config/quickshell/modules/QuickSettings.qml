@@ -23,7 +23,7 @@ Feature {
         open: root.open
 
         onCloseRequested: root.open = false
-        onAudioSinksRequested: root.switchTo(root.audioOutputSelector)
+        onAudioOutputsRequested: root.switchTo(root.audioOutputSelector)
         onControlCenterRequested: root.switchTo(root.controlCenter)
         onSettingsRequested: root.switchTo(root.settings)
         onThemeSelectorRequested: root.switchTo(root.themeSelector)

@@ -121,7 +121,7 @@ ShellRoot {
 
         appearance: appearance
         notificationHistory: notificationHistory
-        fallbackWindow: settings.window
+        controlCenter: controlCenter
     }
 
     Panels.BackgroundClock {
@@ -225,16 +225,16 @@ ShellRoot {
     Modules.ControlCenter {
         id: controlCenter
 
+        bar: bar
+        plugins: plugins
         appearance: appearance
-        monitors: monitors
-        workspaceService: workspaceService
-        clipboardHistory: clipboardHistory
+        settings: settings
+        notificationHistory: notificationHistory
         screenCapture: screenCapture
+        clipboardHistory: clipboardHistory
         systemMonitor: systemMonitor
         keepAwake: keepAwake
         nightLight: nightLight
-        plugins: plugins
-        audioOutputSelector: audioOutputSelector
         clipboardSelector: clipboardSelector
         powerMenu: powerMenu
         screenCaptureChooser: screenCaptureChooser
@@ -264,18 +264,20 @@ ShellRoot {
     }
 
     Modules.Bar {
+        id: bar
+
         appearance: appearance
         monitors: monitors
         pomodoro: pomodoro
         notificationHistory: notificationHistory
         screenCapture: screenCapture
         keepAwake: keepAwake
+        controlCenter: controlCenter
         screenShares: screenShares
         cava: cava
         systemMonitor: systemMonitor
         workspaceService: workspaceService
         settings: settings
-        notifications: notifications
         osd: osd
     }
 }

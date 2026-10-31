@@ -3,30 +3,21 @@ import Quickshell.Io
 import Quickshell.Services.Notifications
 import QtQuick
 import "../components/panels" as Panels
+import "../components/panels/ControlCenterNames.js" as Names
 
-// The shell's notification server, the popups it shows and the notification
-// panel. Do not disturb stops both the popups and the sound.
-Feature {
+// The shell's notification server and the toasts it shows; the
+// notifications themselves are listed in the control center, the bell's
+// popup. Every notification stays tracked while its card is in the history
+// (NotificationHistory dismisses it when the card leaves), so its actions keep
+// working after the toast hides. Do not disturb stops the toasts and the
+// sound only.
+Scope {
     id: root
 
     required property var appearance
     required property var notificationHistory
-    // The bar the panel attaches to when IPC opens it before any bar asked.
-    property var fallbackWindow: null
-    property var window: null
-
-    // The notifications button on a bar: the panel moves to that bar and
-    // opens, or closes.
-    function toggleOn(panelWindow) {
-        window = panelWindow;
-        open = !open;
-    }
-
-    // A bar came up: the panel attaches to the first one.
-    function offerWindow(panelWindow) {
-        if (window === null)
-            window = panelWindow;
-    }
+    // The control center module, which opens it on the focused bar.
+    required property var controlCenter
 
     NotificationServer {
         id: notificationServer
@@ -38,24 +29,22 @@ Feature {
         keepOnReload: true
 
         onNotification: notification => {
-            notification.tracked = !root.appearance.doNotDisturb;
+            notification.tracked = true;
+            // An ongoing card leaves when its app ends the notification.
+            notification.closed.connect(() => root.notificationHistory.closed(notification));
+            // A replacement changes this object in place (no new
+            // `notification`), so its card follows the new text.
+            const updated = () => root.notificationHistory.updated(notification);
+            notification.summaryChanged.connect(updated);
+            notification.bodyChanged.connect(updated);
+            notification.appIconChanged.connect(updated);
+            notification.imageChanged.connect(updated);
             root.notificationHistory.add(notification);
 
-            if (!root.appearance.doNotDisturb)
+            // Kept notifications sent again after a reload rebuild the
+            // history quietly.
+            if (!root.appearance.doNotDisturb && !notification.lastGeneration)
                 notificationSound.exec(["pw-play", "/usr/share/sounds/freedesktop/stereo/message.oga"]);
-        }
-    }
-
-    Connections {
-        target: root.appearance
-
-        function onDoNotDisturbChanged() {
-            if (!root.appearance.doNotDisturb)
-                return;
-
-            notificationServer.trackedNotifications.forEach(notification => {
-                notification.tracked = false;
-            });
         }
     }
 
@@ -68,23 +57,11 @@ Feature {
         notificationServer: notificationServer
     }
 
-    Panels.NotificationPanel {
-        appearance: root.appearance
-        notificationServer: notificationServer
-        notificationHistory: root.notificationHistory
-        open: root.open
-        targetWindow: root.window
-
-        onCloseRequested: root.open = false
-    }
-
     IpcHandler {
         target: "notifications"
 
         function toggle() {
-            if (root.window === null)
-                root.window = root.fallbackWindow;
-            root.toggle();
+            root.controlCenter.toggle(Names.controlCenter.collapsed);
         }
     }
 }

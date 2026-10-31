@@ -10,6 +10,7 @@ import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 import "../StatusText.js" as StatusText
 import "BarElementItems.js" as BarElementItems
+import "../panels/ControlCenterNames.js" as Names
 import "RecordingIndicator.js" as RecordingIndicator
 
 // The bar elements that need no component of their own (notifications,
@@ -38,7 +39,6 @@ Item {
     // Whether an element sits in a group, provided by the bar's walk.
     property var elementGrouped: element => false
     signal popupRequested(string popup)
-    signal notificationRequested()
 
     readonly property var audio: Pipewire.defaultAudioSink && Pipewire.defaultAudioSink.audio
         ? Pipewire.defaultAudioSink.audio : null
@@ -185,7 +185,7 @@ Item {
 
         MouseArea {
             anchors.fill: parent
-            onClicked: root.notificationRequested()
+            onClicked: root.popupRequested(Names.controlCenter.popup)
         }
     }
 

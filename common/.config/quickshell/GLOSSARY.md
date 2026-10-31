@@ -53,7 +53,7 @@ Mientras está activa, los colores de la pantalla se vuelven más cálidos (los 
 _Avoid_: Blue light filter, filtro de luz azul, modo noche, hyprsunset (para la función)
 
 **Popup**:
-La ventana pequeña que se despliega desde un bar element al pulsarlo (Bluetooth, red, batería, audio, media…). Pertenece a ese bar element y se cierra al perder el foco.
+La ventana pequeña que se despliega desde un bar element al pulsarlo (Bluetooth, red, batería, audio, media, control center…). Pertenece a ese bar element y se cierra al perder el foco; solo hay uno abierto a la vez en todos los monitores.
 Con la barra opaca un popup va **anclado** (attached): sale de la barra como si fuera parte de ella. Con la barra transparente va **flotante** (floating), separado de la barra.
 _Avoid_: Menu, dropdown, status popup
 
@@ -66,8 +66,28 @@ El panel a pantalla completa que lista los colorschemes, hace un *colorscheme pr
 _Avoid_: Theme selector, theme picker, selector de temas
 
 **Control center** (centro de control):
-El panel con los conmutadores rápidos y los deslizadores (Wi-Fi, Bluetooth, no molestar, volumen, brillo). No es un popup: no pertenece a ningún bar element, aunque igual que un popup va anclado o flotante según la barra.
-_Avoid_: Control panel, quick settings, panel de control
+El popup del bar element *control center* (la campana con el contador de no leídas) que reúne, como la cortina de Android, los tiles y deslizadores y las notificaciones. Tiene dos etapas: **collapsed** y **expanded**. SUPER+N lo abre collapsed y SUPER+C expanded, en la barra del monitor enfocado; si esa barra no tiene el bar element, se abre en el borde derecho. Con el plugin *Control center* desactivado solo muestra las notificaciones.
+_Avoid_: Notification center, notification panel, shade, cortina, control panel, quick settings, panel de control
+
+**Collapsed control center** (control center plegado):
+La etapa con la que se abre el control center por defecto: una fila con los seis primeros tiles visibles y, debajo, las notificaciones.
+_Avoid_: Modo compacto, mini
+
+**Expanded control center** (control center desplegado):
+La etapa en la que todos los tiles visibles, los deslizadores (volumen, brillo, temperatura) y los datos del sistema ocupan el lugar de las notificaciones. Se llega desde el collapsed con el chevron o arrastrando el asa, y plegarlo devuelve las notificaciones.
+_Avoid_: Quick settings, página de ajustes
+
+**Tile**:
+Un conmutador o acción del control center (Wi-Fi, Bluetooth, no molestar, micrófono, keep-awake, night light, audio output…). Hay una sola lista ordenada de tiles para toda la shell, guardada en `appearance.json` y editada en la sección *Control center* del settings panel: cada tile se puede ocultar y mover, y los seis primeros visibles forman la fila del collapsed control center.
+_Avoid_: Toggle, botón rápido, quick setting
+
+**Notification card** (tarjeta de notificación):
+Cómo se muestra una notificación en el control center: icono o imagen de la app, título, cuerpo (desplegable con su chevron) y botones de acción. Pulsarla ejecuta su acción por defecto, la quita y cierra el control center; deslizarla de lado la descarta. Las de una misma app se apilan: se ve la más reciente con «+N more», y al pulsar la pila se despliega.
+_Avoid_: Entrada, item, toast (que es la notificación que aparece sola en pantalla)
+
+**Ongoing notification** (notificación en curso):
+Una notificación con la marca `resident`, o la tarjeta de media mientras algo suena, que va fijada arriba del todo en el control center y que *Clear all* no quita.
+_Avoid_: Persistente, sticky, pinned
 
 **Keybind cheatsheet** (chuleta de atajos):
 El panel que lista todos los atajos de teclado de Hyprland con su descripción, agrupados por modificadores (`SUPER + SHIFT`, `ALT`…) y filtrables por tecla o descripción. Los lee de `hyprctl binds -j` cada vez que se abre, así que nunca se queda desfasado. Se abre por IPC (`keybinds toggle`) o desde la búsqueda unificada.

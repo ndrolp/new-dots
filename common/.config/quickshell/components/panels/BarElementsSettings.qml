@@ -26,7 +26,7 @@ Column {
             "systemMonitor": "System monitor",
             "currentApp": "Current app",
             "workspaces": "Workspaces",
-            "notifications": "Notifications",
+            "notifications": "Control center",
             "recording": "Recording indicator",
             "keepAwake": "Keep-awake",
             "media": "Media",

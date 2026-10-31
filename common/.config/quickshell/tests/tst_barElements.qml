@@ -459,4 +459,14 @@ TestCase {
         compare(BarProfileModel.elementOption(BarProfileModel.savedProfile(saved, name).barElements,
             "cava", "barCount"), 20);
     }
+
+    // The control center is the bell's popup; the bell keeps its saved id.
+    function test_theControlCenterOpensUnderTheNotificationsElement() {
+        compare(BarElementItems.popupElement("controlCenter"), "notifications");
+    }
+
+    function test_aPopupNamedAfterItsElementOpensUnderIt() {
+        compare(BarElementItems.popupElement("battery"), "battery");
+        compare(BarElementItems.popupElement("pomodoro"), "clock");
+    }
 }

@@ -3,6 +3,7 @@ import QtTest
 import "../components/panels" as Panels
 import "../config/Motion.js" as Motion
 import "../config" as Config
+import "../config/ControlCenterTiles.js" as ControlCenterTiles
 
 // The settings panel's frame: its title, the sidebar of sections and the
 // section shown. Only the section title is bold.
@@ -23,6 +24,7 @@ TestCase {
         property int textSize: 13
         readonly property var motion: Motion.motion(false)
         property string notificationPopupLocation: "top-right"
+        readonly property var controlCenterTiles: ControlCenterTiles.defaultTiles()
     }
 
     Component {
@@ -76,5 +78,23 @@ TestCase {
         compare(hint.color, theme.textMuted);
         compare(hint.font.pixelSize, 12);
         verify(hint.appearance !== undefined, "it is a settings hint");
+    }
+
+    function test_searchingForTilesFindsTheControlCenterSection() {
+        const item = createTemporaryObject(panel, this, { sectionQuery: "tiles" });
+
+        compare(item.filteredSections.map(section => section.label), ["Control center"]);
+    }
+
+    // The pencil in the expanded control center opens the panel at its section.
+    function test_openingAtTheControlCenterSectionShowsItsTiles() {
+        const item = createTemporaryObject(panel, this);
+
+        item.openSection("ControlCenter");
+
+        compare(item.currentSection, "ControlCenter");
+        verify(all(item, child => child.text === "Control center" && child.font !== undefined
+            && child.font.bold)[0], "its title");
+        verify(all(item, child => child.tileLabel === "Night light")[0], "its tiles");
     }
 }

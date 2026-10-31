@@ -91,25 +91,4 @@ TestCase {
         compare(PopupPlacement.room({ attached: true, inset: 12, joinRadius: 6 }),
             { top: 0, side: 6, bottom: 0 });
     }
-
-    // The Control center opens centered at the top of its monitor, attached
-    // like a popup on an opaque bar and floating otherwise. Takes the bar of
-    // that monitor; its height is the bar window's, so it counts any top margin.
-    readonly property var controlCenterBar: ({ barVisible: true, barTransparent: false, barHeight: 40, spacing: 8 })
-
-    function controlCenter(fields) {
-        return PopupPlacement.controlCenter(Object.assign({}, controlCenterBar, fields));
-    }
-
-    function test_theControlCenterHangsFromAnOpaqueBar() {
-        compare(controlCenter({}), { attached: true, y: 40 });
-    }
-
-    function test_theControlCenterFloatsBelowATransparentBar() {
-        compare(controlCenter({ barTransparent: true, barHeight: 50 }), { attached: false, y: 58 });
-    }
-
-    function test_theControlCenterFloatsAtTheTopOfAMonitorWithoutABar() {
-        compare(controlCenter({ barVisible: false }), { attached: false, y: 8 });
-    }
 }

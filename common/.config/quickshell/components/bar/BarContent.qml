@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Effects
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
+import "BarElementItems.js" as BarElementItemsModel
 
 Item {
     id: root
@@ -25,7 +26,6 @@ Item {
 
     signal configRequested(var screen)
     signal popupRequested(string popup)
-    signal notificationRequested()
     readonly property var zoneNames: ["left", "center", "right"]
     readonly property real slantedPadding: appearance.barTransparent && appearance.transparentBarSlanted
         ? appearance.horizontalPadding : 0
@@ -40,12 +40,6 @@ Item {
         "workspaces": workspaces
     }, barElementItems.items)
 
-    // The bar element each popup opens from, when its name differs.
-    readonly property var popupElements: ({
-        "system": "systemMonitor",
-        "pomodoro": "clock"
-    })
-
     // Bar elements are drawn with one walk per zone, in the order the profile
     // lists them; enabled elements with nothing to show take no space.
     function elementItem(element) {
@@ -53,7 +47,7 @@ Item {
     }
 
     function popupElement(popup) {
-        return popupElements[popup] || popup;
+        return BarElementItemsModel.popupElement(popup);
     }
 
     function elementVisible(element) {
@@ -317,7 +311,5 @@ Item {
         onPopupRequested: function(popup) {
             root.popupRequested(popup);
         }
-
-        onNotificationRequested: root.notificationRequested()
     }
 }

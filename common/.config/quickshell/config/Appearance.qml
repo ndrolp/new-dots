@@ -4,6 +4,7 @@ import "BarProfileModel.js" as BarProfileModel
 import "Motion.js" as Motion
 import "../services/NightLightState.js" as NightLightState
 import "SchemaMigrations.js" as SchemaMigrations
+import "ControlCenterTiles.js" as ControlCenterTiles
 
 // Saved bar profiles and global settings (appearance.json), plus the bar
 // profile the settings panel edits and its pending changes, which live in
@@ -18,6 +19,18 @@ QtObject {
     property alias reduceMotion: settings.reduceMotion
     // The night light temperature, in kelvin (see services/NightLightState.js).
     property alias nightLightTemperature: settings.nightLightTemperature
+    // The control center's tiles, in order, each shown or hidden
+    // ([{ id, enabled }], see ControlCenterTiles); global, not per profile.
+    readonly property var controlCenterTiles: ControlCenterTiles.completeTiles(settings.controlCenterTiles)
+
+    function setControlCenterTileEnabled(tile, enabled) {
+        settings.controlCenterTiles = ControlCenterTiles.setTileEnabled(controlCenterTiles, tile,
+            enabled);
+    }
+
+    function moveControlCenterTile(tile, offset) {
+        settings.controlCenterTiles = ControlCenterTiles.moveTile(controlCenterTiles, tile, offset);
+    }
 
     // How long animations take and how they ease (see Motion).
     readonly property var motion: Motion.motion(settings.reduceMotion)
@@ -223,6 +236,7 @@ QtObject {
             property bool doNotDisturb: false
             property bool reduceMotion: false
             property int nightLightTemperature: NightLightState.defaultTemperature
+            property var controlCenterTiles: ControlCenterTiles.defaultTiles()
         }
     }
 }

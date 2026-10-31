@@ -6,7 +6,24 @@ and schema migrations (`config/SchemaMigrations.js`). They also cover the
 popups: where a popup opens (`components/panels/PopupPlacement.js`), the
 outline of an attached popup (`PopupOutline.js`), the surface every popup
 draws on (`PopupSurface.qml`), the shared popup parts (`PopupTitle`,
-`PopupHeader`, `PopupRow`…), the settings panel's own parts (`SettingsNumber`,
+`PopupHeader`, `PopupRow`…), the control center's tiles and sliders,
+active, muted, disabled and icon-only (`ControlTile.qml`, `ControlSlider.qml`;
+`ControlCenterBody.qml` itself needs Quickshell's services and isn't tested
+here), the control center's collapsed and expanded stages: the stage each
+way of opening it asks for, the chevron and the drag on its handle, and
+notifications only with its plugin off, and the ongoing notifications on
+top in both stages (`ControlCenterLayout.qml`): the media card above the
+`resident` notifications, their highlighting and dismissing one
+(`ControlCenterOngoing.qml`), the media card itself: which
+player it follows, the track and its playback controls
+(`ControlCenterMediaCard.qml`, `MediaCard.js`), its
+audio output subpage: opening it in place of the controls, the back arrow,
+the outputs it lists and choosing one (`ControlCenterLayout.qml`,
+`ControlCenterAudioOutputs.qml`), the control center's tile list: its order,
+hidden tiles, the collapsed row of the first 6 visible tiles and the
+migration that seeds it (`config/ControlCenterTiles.js`), and the settings
+panel's Control center section that edits it (`ControlCenterSettings.qml`),
+the settings panel's own parts (`SettingsNumber`,
 `SettingsSwitchRow`, `SettingsChoice`, `SettingsGrid`…), its frame
 (`ConfigPanel.qml`) and the settings panel sections built from them, the Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
@@ -32,7 +49,30 @@ and time left (`components/bar/KeepAwakeElement.qml`,
 `components/panels/KeepAwakePopupBody.qml`), keep-awake's duration and
 countdown: starting, restarting, running out and turning off by hand, and
 what the keybind's OSD says (`services/KeepAwakeState.js`),
-which popup is open across the bars (`modules/OpenPopup.js`),
+which popup is open across the bars and which bar IPC opens one on
+(`modules/OpenPopup.js`), one part of the shell opening another in its
+place unless its plugin is off (`modules/SwitchTo.js`), which bar element a popup opens under
+(`components/bar/BarElementItems.js`), the notifications in the control
+center: marking them read on open, highlighting the ones that arrived since
+you last looked, Clear all, that ongoing notifications stay out of
+the list, and app stacks: an app's notifications
+stacked under the newest card with "+N more", expanding and collapsing, and
+swiping a stack away (`components/panels/ControlCenterNotifications.qml`,
+`NotificationStack.qml`), the notification
+card: the image or app icon it shows, the chevron, tapping it (default
+action or expand), its action buttons, the × and how far a swipe has to go
+to dismiss it, and an ongoing card staying after its actions run
+(`components/panels/NotificationCard.qml`,
+`NotificationCard.js`), what the notification history keeps of a
+notification, how it groups them by app and dismisses a whole group,
+dismissing a notification whenever its card leaves the history (a card,
+a stack or Clear all removed, a repeat, the 50-card cap, which never
+drops an ongoing one), a card following a notification the app replaces
+in place, and rebuilding
+the history from the notifications kept over a reload, and the ongoing
+notifications (`resident`) that Clear all and a stack swipe keep and that
+leave when their app closes them
+(`services/NotificationHistory.qml`),
 the active colorscheme's colours read from its colours file,
 falling back to everforestdark's (`config/ColorschemeColors.js`), and which
 colorscheme preview the colorscheme selector runs, one at a time

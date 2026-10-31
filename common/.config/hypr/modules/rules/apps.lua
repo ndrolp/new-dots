@@ -90,14 +90,3 @@ hl.layer_rule({
 	dim_around = false,
 	animation = "popin",
 })
-
--- The Control center is its own layer. It is blurred like the bar's popups
--- so it matches them when it hangs from the bar.
-hl.layer_rule({
-	name = "ndro-shell-control-center",
-	match = { namespace = "ndro-shell-control-center" },
-	ignore_alpha = 0.1,
-	blur = true,
-	dim_around = false,
-	animation = "popin",
-})

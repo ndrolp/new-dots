@@ -15,6 +15,8 @@ Variants {
     required property var pomodoro
     required property var notificationHistory
     required property var screenCapture
+    // The control center module, handed to its popup.
+    required property var controlCenter
     required property var keepAwake
     required property var screenShares
     required property var cava
@@ -26,7 +28,6 @@ Variants {
     signal popupRequested(string popup, var panelWindow)
     signal popupClosed(string popup, var panelWindow)
     signal audioOutputSelected(var output)
-    signal notificationRequested(var panelWindow)
 
     model: Quickshell.screens
 
@@ -59,6 +60,7 @@ Variants {
                 property var barElements: bar.appearance.barProfileValue(panel.profileName, "barElements")
                 // Global, not part of the bar profile.
                 property bool doNotDisturb: bar.appearance.doNotDisturb
+                property var controlCenterTiles: bar.appearance.controlCenterTiles
                 property var motion: bar.appearance.motion
             }
             property bool configOpen: bar.configOpen
@@ -158,8 +160,6 @@ Variants {
                     onPopupRequested: function(popup) {
                         bar.popupRequested(popup, panel);
                     }
-
-                    onNotificationRequested: bar.notificationRequested(panel)
                 }
             }
 
@@ -171,6 +171,7 @@ Variants {
                 pomodoro: panel.pomodoro
                 keepAwake: panel.keepAwake
                 systemMonitor: panel.systemMonitor
+                controlCenter: bar.controlCenter
 
                 onPopupClosed: function(popup) {
                     bar.popupClosed(popup, panel);

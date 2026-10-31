@@ -18,7 +18,7 @@ Variants {
     property bool open: false
 
     signal closeRequested()
-    signal audioSinksRequested()
+    signal audioOutputsRequested()
     signal controlCenterRequested()
     signal settingsRequested()
     signal themeSelectorRequested()
@@ -202,7 +202,7 @@ Variants {
             else if (action.id === "mute")
                 run(["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"]);
             else if (action.id === "output")
-                root.audioSinksRequested();
+                root.audioOutputsRequested();
             else if (action.id === "brightness-down")
                 run(["brightnessctl", "set", "5%-"]);
             else if (action.id === "brightness-up")

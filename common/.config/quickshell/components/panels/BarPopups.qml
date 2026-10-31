@@ -11,11 +11,19 @@ Item {
     // The shell's keep-awake (services/KeepAwake.qml).
     required property var keepAwake
     required property var systemMonitor
+    // The control center module (modules/ControlCenter.qml): its services,
+    // stage and the panels its tiles open, handed to its popup as one.
+    required property var controlCenter
     property string activePopup: ""
     // The bar content; places popups under the bar element that opened them.
     property var popupAnchorProvider: null
     signal popupClosed(string popup)
     signal audioOutputSelected(var output)
+
+    ControlCenterPopup {
+        popups: root
+        controlCenter: root.controlCenter
+    }
 
     SystemPopup {
         popups: root
