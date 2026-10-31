@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Makes the default colorscheme (colorschemes/default.txt) the active one when no colorscheme is active,
 # as on a fresh clone. The active colorscheme is machine-local: the gitignored link colorschemes/active
-# (docs/adr/0001-active-colorscheme-is-machine-local.md). An active colorscheme is left alone. In a clone,
-# also registers the git filter that keeps VS Code's theme out of git.
+# (docs/adr/0001-active-colorscheme-is-machine-local.md). An active colorscheme is left alone. The
+# gitignored link colorschemes/shown, which Hyprland and Quickshell show, starts from it the same way.
+# In a clone, also registers the git filter that keeps VS Code's theme out of git.
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 
