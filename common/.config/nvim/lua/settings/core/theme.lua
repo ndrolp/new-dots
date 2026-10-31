@@ -1,1 +1,1 @@
-/home/ndrolp/.dotfiles/colorschemes/coralnord/nvim/theme.lua
+/home/ndrolp/.dotfiles/colorschemes/everforestdark/nvim/theme.lua

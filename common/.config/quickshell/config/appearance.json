@@ -114,12 +114,12 @@
                     },
                     {
                         "enabled": true,
-                        "id": "keepAwake",
+                        "id": "tray",
                         "joinPrevious": true
                     },
                     {
                         "enabled": true,
-                        "id": "tray",
+                        "id": "keepAwake",
                         "joinPrevious": true
                     }
                 ],
@@ -133,8 +133,8 @@
             "barTransparent": true,
             "barTransparentBorder": false,
             "elementVerticalPadding": 8,
-            "groupRadius": 12,
-            "horizontalPadding": 8,
+            "groupRadius": 31,
+            "horizontalPadding": 13,
             "pillVerticalPadding": 2,
             "pillsTransparent": false,
             "radius": 20,
@@ -463,16 +463,21 @@
                     },
                     {
                         "enabled": true,
-                        "id": "audio",
+                        "id": "cava",
                         "joinPrevious": true,
                         "options": {
-                            "meterVisible": true
+                            "barCount": 12,
+                            "barWidth": 3,
+                            "color": "blue"
                         }
                     },
                     {
                         "enabled": true,
-                        "id": "network",
-                        "joinPrevious": true
+                        "id": "audio",
+                        "joinPrevious": true,
+                        "options": {
+                            "meterVisible": false
+                        }
                     },
                     {
                         "enabled": true,
@@ -494,6 +499,15 @@
                     },
                     {
                         "enabled": true,
+                        "id": "keepAwake"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "network",
+                        "joinPrevious": true
+                    },
+                    {
+                        "enabled": true,
                         "id": "bluetooth",
                         "joinPrevious": true
                     },
@@ -509,11 +523,11 @@
             "barTransparent": true,
             "barTransparentBorder": true,
             "elementVerticalPadding": 5,
-            "groupRadius": 3,
-            "horizontalPadding": 10,
+            "groupRadius": 26,
+            "horizontalPadding": 8,
             "pillVerticalPadding": 2,
-            "pillsTransparent": false,
-            "radius": 3,
+            "pillsTransparent": true,
+            "radius": 24,
             "spacing": 4,
             "textSize": 13,
             "transparentBarSlanted": false,

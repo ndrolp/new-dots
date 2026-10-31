@@ -3,10 +3,10 @@
         "code"
     ],
     "recent": [
+        "com.microsoft.VSCode",
         "org.gnome.Nautilus",
         "org.kde.dolphin",
         "com.obsproject.Studio",
-        "org.gnome.baobab",
-        "com.microsoft.VSCode"
+        "org.gnome.baobab"
     ]
 }
