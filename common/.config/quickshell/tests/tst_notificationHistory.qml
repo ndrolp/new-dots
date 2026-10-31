@@ -57,6 +57,76 @@ TestCase {
         compare([first.dismissCount, second.dismissCount], [1, 1]);
     }
 
+    function test_clearAllKeepsOngoingNotifications() {
+        const item = createTemporaryObject(history, this);
+        const ongoing = notification({ appName: "Spotify", summary: "Playing", resident: true });
+        const other = notification({ summary: "Download 1" });
+
+        item.add(ongoing);
+        item.add(other);
+        item.clear();
+
+        compare(item.items.map(entry => entry.summary), ["Playing"]);
+        compare(ongoing.dismissCount, 0);
+    }
+
+    function test_ongoingNotificationsArePinnedApartFromTheAppStacks() {
+        const item = createTemporaryObject(history, this);
+
+        item.add(notification({ summary: "Download 1" }));
+        item.add(notification({ summary: "Syncing", resident: true }));
+        item.add(notification({ summary: "Download 2" }));
+
+        compare(item.ongoing.map(entry => entry.summary), ["Syncing"]);
+        compare(item.groups.map(group => summaries(group)), [["Download 2", "Download 1"]]);
+    }
+
+    function test_dismissingAStackKeepsTheAppsOngoingNotifications() {
+        const item = createTemporaryObject(history, this);
+        const ongoing = notification({ summary: "Syncing", resident: true });
+
+        item.add(ongoing);
+        item.add(notification({ summary: "Download 1" }));
+        item.removeGroup("Firefox");
+
+        compare(item.items.map(entry => entry.summary), ["Syncing"]);
+        compare(ongoing.dismissCount, 0);
+    }
+
+    function test_removingAnOngoingCardDismissesIt() {
+        const item = createTemporaryObject(history, this);
+        const ongoing = notification({ resident: true });
+
+        item.add(ongoing);
+        item.remove(item.ongoing[0].id);
+
+        compare(item.ongoing.length, 0);
+        compare(ongoing.dismissCount, 1);
+    }
+
+    // "Clear all" can't remove it, so the app ending it is what does.
+    function test_anOngoingNotificationTheAppClosesLeavesTheHistory() {
+        const item = createTemporaryObject(history, this);
+        const ongoing = notification({ summary: "Syncing", resident: true });
+
+        item.add(ongoing);
+        item.add(notification({ summary: "Download 1" }));
+        item.closed(ongoing);
+
+        compare(item.items.map(entry => entry.summary), ["Download 1"]);
+        compare(ongoing.dismissCount, 0);
+    }
+
+    function test_aNotificationTheAppClosesKeepsItsCard() {
+        const item = createTemporaryObject(history, this);
+        const sent = notification();
+
+        item.add(sent);
+        item.closed(sent);
+
+        compare(item.items.length, 1);
+    }
+
     function test_theNotificationFallingPastTheFiftiethCardIsDismissed() {
         const item = createTemporaryObject(history, this);
         const sent = [];

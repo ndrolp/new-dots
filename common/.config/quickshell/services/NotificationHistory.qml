@@ -4,7 +4,11 @@ QtObject {
     id: root
 
     property var items: []
+    // The app stacks, without the ongoing notifications.
     property var groups: []
+    // The ongoing notifications (the `resident` hint), newest first: pinned
+    // above the stacks, and neither "Clear all" nor a stack swipe removes them.
+    property var ongoing: []
     property int nextId: 0
     readonly property int unreadCount: items.reduce((count, item) => count
         + (item.unread ? item.count : 0), 0)
@@ -17,12 +21,14 @@ QtObject {
     // Every change goes through here, so a notification whose card leaves
     // the history (removed, its group or all cleared, replaced by a repeat,
     // or past the 50-entry cap) is dismissed: the server keeps a notification
-    // alive exactly as long as its card is listed.
-    function updateItems(updatedItems) {
+    // alive exactly as long as its card is listed. `alreadyClosed`, the
+    // notification the server just closed, isn't dismissed again.
+    function updateItems(updatedItems, alreadyClosed) {
         const kept = updatedItems.map(item => item.notification);
 
         items.forEach(item => {
-            if (item.notification && kept.indexOf(item.notification) < 0)
+            if (item.notification && item.notification !== alreadyClosed
+                    && kept.indexOf(item.notification) < 0)
                 item.notification.dismiss();
         });
 
@@ -30,7 +36,7 @@ QtObject {
 
         const groupedItems = [];
 
-        items.forEach(item => {
+        items.filter(item => !item.resident).forEach(item => {
             const appName = groupName(item);
             let groupIndex = groupedItems.findIndex(group => group.appName === appName);
 
@@ -46,6 +52,7 @@ QtObject {
         });
 
         groups = groupedItems;
+        ongoing = items.filter(item => item.resident);
     }
 
     // An entry keeps the notification's text, app icon and image as plain
@@ -69,6 +76,7 @@ QtObject {
             summary: summary,
             body: body,
             notification: notification,
+            resident: !!notification.resident,
             count: existing ? existing.count + 1 : 1,
             unread: !notification.lastGeneration,
             timestamp: Date.now()
@@ -89,12 +97,25 @@ QtObject {
         updateItems(items.filter(item => item.id !== id));
     }
 
-    // Dismisses a whole app stack: every notification of that group.
+    // Dismisses a whole app stack: every notification of that group except
+    // its ongoing ones, which aren't in the stack.
     function removeGroup(appName) {
-        updateItems(items.filter(item => groupName(item) !== appName));
+        updateItems(items.filter(item => item.resident || groupName(item) !== appName));
     }
 
+    // The server closed `notification` (the app ended it, or it was
+    // dismissed). An ongoing card leaves with it, since "Clear all" can't
+    // remove it; any other card stays, as text, until you dismiss it.
+    function closed(notification) {
+        const entry = items.find(item => item.notification === notification);
+        if (!entry || !entry.resident)
+            return;
+
+        updateItems(items.filter(item => item !== entry), notification);
+    }
+
+    // "Clear all": every notification but the ongoing ones.
     function clear() {
-        updateItems([]);
+        updateItems(items.filter(item => item.resident));
     }
 }
