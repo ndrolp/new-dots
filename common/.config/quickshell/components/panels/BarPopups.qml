@@ -29,7 +29,6 @@ Item {
     // flips it.
     signal doNotDisturbToggled()
     // The control center's tiles ask the shell to open these panels.
-    signal audioOutputsRequested()
     signal clipboardRequested()
     signal powerMenuRequested()
     signal screenCaptureRequested()
