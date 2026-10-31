@@ -15,13 +15,8 @@ Variants {
     required property var pomodoro
     required property var notificationHistory
     required property var screenCapture
-    required property var clipboardHistory
-    required property var nightLight
-    // The control center plugin; off, the control center is notifications only.
-    property bool controlsEnabled: true
-    // The control center's stage: the one it is at while open, the one it
-    // takes the next time it opens.
-    property string controlCenterStage: "collapsed"
+    // The control center module, handed to its popup.
+    required property var controlCenter
     required property var keepAwake
     required property var screenShares
     required property var cava
@@ -33,13 +28,6 @@ Variants {
     signal popupRequested(string popup, var panelWindow)
     signal popupClosed(string popup, var panelWindow)
     signal audioOutputSelected(var output)
-    signal doNotDisturbToggled()
-    signal clipboardRequested()
-    signal powerMenuRequested()
-    signal screenCaptureRequested()
-    // The control center's pencil, on `panelWindow`'s bar.
-    signal controlCenterSettingsRequested(var screen, var panelWindow)
-    signal controlCenterStageSwitched(string stage)
 
     model: Quickshell.screens
 
@@ -183,12 +171,7 @@ Variants {
                 pomodoro: panel.pomodoro
                 keepAwake: panel.keepAwake
                 systemMonitor: panel.systemMonitor
-                notificationHistory: panel.notificationHistory
-                screenCapture: panel.screenCapture
-                clipboardHistory: bar.clipboardHistory
-                nightLight: bar.nightLight
-                controlsEnabled: bar.controlsEnabled
-                controlCenterStage: bar.controlCenterStage
+                controlCenter: bar.controlCenter
 
                 onPopupClosed: function(popup) {
                     bar.popupClosed(popup, panel);
@@ -196,16 +179,6 @@ Variants {
 
                 onAudioOutputSelected: function(output) {
                     bar.audioOutputSelected(output);
-                }
-
-                onDoNotDisturbToggled: bar.doNotDisturbToggled()
-                onClipboardRequested: bar.clipboardRequested()
-                onPowerMenuRequested: bar.powerMenuRequested()
-                onScreenCaptureRequested: bar.screenCaptureRequested()
-                onControlCenterSettingsRequested: bar.controlCenterSettingsRequested(panel.modelData,
-                    panel)
-                onControlCenterStageSwitched: function(stage) {
-                    bar.controlCenterStageSwitched(stage);
                 }
             }
 

@@ -21,7 +21,7 @@ Column {
     property double currentTime: Date.now()
     readonly property var ongoing: notificationHistory.ongoing
 
-    // A card ran its default action: the control center should close.
+    // One of its cards ran its default action: close the control center.
     signal closeRequested()
 
     spacing: 8

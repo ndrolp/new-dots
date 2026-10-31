@@ -8,10 +8,11 @@ import "../../config" as Config
 import "." as Panels
 import "../VolumeText.js" as VolumeText
 import "../../config/ControlCenterTiles.js" as ControlCenterTiles
+import "ControlCenterNames.js" as Names
 
 // The control center's controls: the tiles, the sliders (volume,
-// brightness, night light's temperature) and the system stats (the media
-// card is one of the ongoing notifications on top, the popup's). The tiles
+// brightness, night light's temperature) and the system stats; the media
+// card is not here but with the ongoing notifications above. The tiles
 // come from the stored list (`barAppearance.controlCenterTiles`, see
 // config/ControlCenterTiles.js): collapsed, only the first 6 visible
 // tiles show, as icons; expanded, every visible tile with its label, the
@@ -23,12 +24,10 @@ Column {
     // The bar it is shown from, as its popups see it (with the global
     // `doNotDisturb`).
     required property var barAppearance
-    required property var clipboardHistory
-    required property var screenCapture
-    required property var systemMonitor
-    required property var keepAwake
-    // The shell's night light (services/NightLight.qml).
-    required property var nightLight
+    // What the tiles read (clipboardHistory, screenCapture, systemMonitor,
+    // keepAwake, nightLight) and ask for (toggleDoNotDisturb, openPanel):
+    // the control center module, handed down by the popup.
+    required property var controlCenter
     // Whether the host is showing it: it reads brightness, the power
     // profile and the clipboard when shown, and Caps Lock while shown (any
     // tile can sit in the collapsed row).
@@ -46,15 +45,8 @@ Column {
     property string powerProfile: "balanced"
 
     signal closeRequested()
-    // The do not disturb tile was pressed; the shell owns the setting.
-    signal doNotDisturbToggled()
     // The audio output tile: the host opens the audio output subpage.
     signal audioOutputsRequested()
-    signal clipboardRequested()
-    signal powerMenuRequested()
-    signal screenCaptureRequested()
-    // The pencil: edit the tile list in the settings panel.
-    signal tileSettingsRequested()
 
     spacing: 12
 
@@ -216,7 +208,7 @@ Column {
             icon: "󰂛"
             accentColor: theme.purple
             active: body.barAppearance.doNotDisturb
-            onTriggered: body.doNotDisturbToggled()
+            onTriggered: body.controlCenter.toggleDoNotDisturb()
         }
     }
 
@@ -241,11 +233,11 @@ Column {
         ControlTile {
             labelShown: body.expanded
             appearance: body.barAppearance
-            label: body.keepAwake.on ? "Awake" : "Sleep allowed"
+            label: body.controlCenter.keepAwake.on ? "Awake" : "Sleep allowed"
             icon: "󰒲"
             accentColor: theme.green
-            active: body.keepAwake.on
-            onTriggered: body.keepAwake.toggle()
+            active: body.controlCenter.keepAwake.on
+            onTriggered: body.controlCenter.keepAwake.toggle()
         }
     }
 
@@ -255,11 +247,11 @@ Column {
         ControlTile {
             labelShown: body.expanded
             appearance: body.barAppearance
-            label: body.nightLight.on ? "Night light" : "Night light off"
+            label: body.controlCenter.nightLight.on ? "Night light" : "Night light off"
             icon: "󰖔"
             accentColor: theme.orange
-            active: body.nightLight.on
-            onTriggered: body.nightLight.toggle()
+            active: body.controlCenter.nightLight.on
+            onTriggered: body.controlCenter.nightLight.toggle()
         }
     }
 
@@ -331,11 +323,11 @@ Column {
         ControlTile {
             labelShown: body.expanded
             appearance: body.barAppearance
-            label: body.screenCapture.recording ? "Recording" : "Capture"
-            icon: body.screenCapture.recording ? "󰑋" : "󰄀"
-            accentColor: body.screenCapture.recording ? theme.red : theme.orange
-            active: body.screenCapture.recording
-            onTriggered: body.screenCaptureRequested()
+            label: body.controlCenter.screenCapture.recording ? "Recording" : "Capture"
+            icon: body.controlCenter.screenCapture.recording ? "󰑋" : "󰄀"
+            accentColor: body.controlCenter.screenCapture.recording ? theme.red : theme.orange
+            active: body.controlCenter.screenCapture.recording
+            onTriggered: body.controlCenter.openPanel(Names.controlCenter.screenCapture)
         }
     }
 
@@ -345,10 +337,10 @@ Column {
         ControlTile {
             labelShown: body.expanded
             appearance: body.barAppearance
-            label: body.clipboardHistory.entries.length + " copied"
+            label: body.controlCenter.clipboardHistory.entries.length + " copied"
             icon: "󰅌"
             accentColor: theme.accent
-            onTriggered: body.clipboardRequested()
+            onTriggered: body.controlCenter.openPanel(Names.controlCenter.clipboard)
         }
     }
 
@@ -361,7 +353,7 @@ Column {
             label: "Power"
             icon: "󰐥"
             accentColor: theme.red
-            onTriggered: body.powerMenuRequested()
+            onTriggered: body.controlCenter.openPanel(Names.controlCenter.powerMenu)
         }
     }
 
@@ -421,7 +413,7 @@ Column {
             width: 36
             appearance: body.barAppearance
             label: "󰏫"
-            onActivated: body.tileSettingsRequested()
+            onActivated: body.controlCenter.openPanel(Names.controlCenter.tileSettings)
         }
     }
 
@@ -472,18 +464,18 @@ Column {
             label: "Temperature"
             icon: "󰔏"
             accentColor: theme.orange
-            valueText: body.nightLight.temperature + " K"
-            from: body.nightLight.minTemperature
-            to: body.nightLight.maxTemperature
-            value: body.nightLight.temperature
-            onAdjusted: position => body.nightLight.setTemperature(position)
+            valueText: body.controlCenter.nightLight.temperature + " K"
+            from: body.controlCenter.nightLight.minTemperature
+            to: body.controlCenter.nightLight.maxTemperature
+            value: body.controlCenter.nightLight.temperature
+            onAdjusted: position => body.controlCenter.nightLight.setTemperature(position)
         }
 
         PopupLabel {
             width: parent.width
             visible: text !== ""
             appearance: body.barAppearance
-            text: body.nightLight.failureHint
+            text: body.controlCenter.nightLight.failureHint
             wrapMode: Text.Wrap
         }
     }
@@ -498,11 +490,11 @@ Column {
                 { label: "Battery", value: body.battery
                     ? Math.round(body.battery.percentage * 100) + "%" : "--",
                     icon: "󰁹", color: theme.green },
-                { label: "Uptime", value: body.systemMonitor.formatUptime(),
+                { label: "Uptime", value: body.controlCenter.systemMonitor.formatUptime(),
                     icon: "󰅐", color: theme.blue },
-                { label: "Disk", value: body.systemMonitor.diskTotalGiB > 0
-                    ? body.systemMonitor.diskUsedGiB.toFixed(0) + " / "
-                        + body.systemMonitor.diskTotalGiB.toFixed(0) + " GiB" : "--",
+                { label: "Disk", value: body.controlCenter.systemMonitor.diskTotalGiB > 0
+                    ? body.controlCenter.systemMonitor.diskUsedGiB.toFixed(0) + " / "
+                        + body.controlCenter.systemMonitor.diskTotalGiB.toFixed(0) + " GiB" : "--",
                     icon: "󰋊", color: theme.purple }
             ]
 
