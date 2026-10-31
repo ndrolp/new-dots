@@ -5,7 +5,8 @@ HYPRLAND_LUA_COLORS="$HOME/.config/hypr/custom/colors.lua"
 NVIM_COLORS="$HOME/.config/nvim/lua/settings/core/theme.lua"
 VSCODE_SETTINGS="$HOME/.config/Code/User/settings.json"
 
-TARGET_DIR="$HOME/.dotfiles/colorschemes"
+# The colorschemes are the folders beside this script.
+TARGET_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # The active colorscheme is machine-local (docs/adr/0001-active-colorscheme-is-machine-local.md): the
 # gitignored link `active` names it, and the tracked colour links (waybar, hyprlock, nvim, rofi) point
@@ -107,7 +108,7 @@ esac
 
 echo "$SELECTED_FOLDER"
 
-THEME_FOLDER="$HOME/.dotfiles/colorschemes/$SELECTED_FOLDER"
+THEME_FOLDER="$TARGET_DIR/$SELECTED_FOLDER"
 
 link_hypr_colors() {
   ln -sf "$THEME_FOLDER/hypr/colors.conf" "$HYPRLAND_COLORS"
