@@ -1,12 +1,17 @@
 import QtQuick
 import QtTest
 import "../config/ControlCenterTiles.js" as ControlCenterTiles
+import "../config/SchemaMigrations.js" as SchemaMigrations
 
 // The control center's tile list: one global ordered list where each tile
 // can be hidden and moved. The first 6 visible tiles form the collapsed
 // control center's row; the expanded one shows every visible tile.
 TestCase {
     name: "ControlCenterTiles"
+
+    Fixtures {
+        id: fixtures
+    }
 
     function tiles(spec) {
         // "wifi,-bluetooth" → wifi shown, bluetooth hidden.
@@ -88,5 +93,26 @@ TestCase {
 
     function test_withFewerThanSixVisibleTilesThereIsNoDivider() {
         compare(ControlCenterTiles.dividerAfter(tiles("wifi,-lock,power")), "");
+    }
+
+    // Existing configs get the order the control center showed before the
+    // list was configurable, every tile shown; it is global, not per profile.
+    function test_migratingSeedsTheDefaultTileOrder() {
+        const migrated = SchemaMigrations.migrate(fixtures.read("appearance.json"),
+            fixtures.read("monitors.json")).appearance;
+
+        compare(migrated.controlCenterTiles, tiles("wifi,bluetooth,doNotDisturb,microphone,"
+            + "keepAwake,nightLight,audioOutput,lock,displaysOff,powerProfile,screenCapture,"
+            + "clipboard,power,capsLock"));
+        for (const name in migrated.barProfiles)
+            compare(migrated.barProfiles[name].controlCenterTiles, undefined, name);
+    }
+
+    function test_migratingKeepsATileListAlreadyStored() {
+        const version9 = { schemaVersion: 9, barProfiles: {},
+            controlCenterTiles: tiles("power,-wifi") };
+
+        compare(SchemaMigrations.migrate(version9, {}).appearance.controlCenterTiles,
+            tiles("power,-wifi"));
     }
 }
