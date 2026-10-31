@@ -17,5 +17,6 @@ BarPopup {
         open: root.open
 
         onDoNotDisturbToggled: root.popups.doNotDisturbToggled()
+        onCloseRequested: root.popups.popupClosed(root.popup)
     }
 }
