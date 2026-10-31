@@ -4,7 +4,7 @@ import "../components/panels" as Panels
 import "../components/panels/MediaCard.js" as MediaCard
 import "../config/Motion.js" as Motion
 
-// The media card pinned on top of the control center, in both stages, while
+// The media card, ongoing on top of the control center in both stages while
 // a player is active: its track, artist and the playback controls.
 // Pointer events don't reach items under qmltestrunner offscreen, so buttons
 // are pressed through their signals.

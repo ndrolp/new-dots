@@ -11,8 +11,9 @@ import "../../config/ControlCenterTiles.js" as ControlCenterTiles
 
 // The control center's controls: the tiles, the sliders (volume,
 // brightness, night light's temperature) and the system stats (the media
-// card is the popup's, pinned above it). The tiles come from the stored list (`barAppearance.controlCenterTiles`,
-// see config/ControlCenterTiles.js): collapsed, only the first 6 visible
+// card is one of the ongoing notifications on top, the popup's). The tiles
+// come from the stored list (`barAppearance.controlCenterTiles`, see
+// config/ControlCenterTiles.js): collapsed, only the first 6 visible
 // tiles show, as icons; expanded, every visible tile with its label, the
 // pencil that edits the list and the rest of the controls. Kept apart from
 // any window: the host places it and closes it when asked.

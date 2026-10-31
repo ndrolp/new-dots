@@ -6,8 +6,8 @@ QtObject {
     property var items: []
     // The app stacks, without the ongoing notifications.
     property var groups: []
-    // The ongoing notifications (the `resident` hint), newest first: pinned
-    // above the stacks, and neither "Clear all" nor a stack swipe removes them.
+    // The ongoing notifications (the `resident` hint), newest first: on top
+    // of the control center, apart from the stacks, and neither "Clear all" nor a stack swipe removes them.
     property var ongoing: []
     property int nextId: 0
     readonly property int unreadCount: items.reduce((count, item) => count

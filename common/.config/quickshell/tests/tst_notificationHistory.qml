@@ -70,7 +70,7 @@ TestCase {
         compare(ongoing.dismissCount, 0);
     }
 
-    function test_ongoingNotificationsArePinnedApartFromTheAppStacks() {
+    function test_ongoingNotificationsAreKeptApartFromTheAppStacks() {
         const item = createTemporaryObject(history, this);
 
         item.add(notification({ summary: "Download 1" }));

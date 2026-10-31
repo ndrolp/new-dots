@@ -11,8 +11,10 @@ active, muted, disabled and icon-only (`ControlTile.qml`, `ControlSlider.qml`;
 `ControlCenterBody.qml` itself needs Quickshell's services and isn't tested
 here), the control center's collapsed and expanded stages: the stage each
 way of opening it asks for, the chevron and the drag on its handle, and
-notifications only with its plugin off, and the media card pinned on top
-in both stages (`ControlCenterLayout.qml`), the media card itself: which
+notifications only with its plugin off, and the ongoing notifications on
+top in both stages (`ControlCenterLayout.qml`): the media card above the
+`resident` notifications, their highlighting and dismissing one
+(`ControlCenterOngoing.qml`), the media card itself: which
 player it follows, the track and its playback controls
 (`ControlCenterMediaCard.qml`, `MediaCard.js`), its
 audio output subpage: opening it in place of the controls, the back arrow,
@@ -51,8 +53,8 @@ which popup is open across the bars and which bar IPC opens one on
 (`modules/OpenPopup.js`), which bar element a popup opens under
 (`components/bar/BarElementItems.js`), the notifications in the control
 center: marking them read on open, highlighting the ones that arrived since
-you last looked, Clear all, ongoing notifications pinned on top that Clear
-all keeps, and app stacks: an app's notifications
+you last looked, Clear all, that ongoing notifications stay out of
+the list, and app stacks: an app's notifications
 stacked under the newest card with "+N more", expanding and collapsing, and
 swiping a stack away (`components/panels/ControlCenterNotifications.qml`,
 `NotificationStack.qml`), the notification
@@ -63,7 +65,9 @@ to dismiss it, and an ongoing card staying after its actions run
 `NotificationCard.js`), what the notification history keeps of a
 notification, how it groups them by app and dismisses a whole group,
 dismissing a notification whenever its card leaves the history (a card,
-a stack or Clear all removed, a repeat, the 50-entry cap) and rebuilding
+a stack or Clear all removed, a repeat, the 50-card cap, which never
+drops an ongoing one), a card following a notification the app replaces
+in place, and rebuilding
 the history from the notifications kept over a reload, and the ongoing
 notifications (`resident`) that Clear all and a stack swipe keep and that
 leave when their app closes them

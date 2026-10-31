@@ -2,8 +2,9 @@ import QtQuick
 import "../../config" as Config
 import "." as Panels
 
-// The media card: pinned on top of the control center, in both stages,
-// while a player is active (MediaCard.activePlayer). It shows the track,
+// The media card: an ongoing notification on top of the control center, in
+// both stages, while a player is active (MediaCard.activePlayer); it is
+// drawn by ControlCenterOngoing. It shows the track,
 // the artist and the playback controls; with no `player` it is hidden and
 // takes no room. `player` is a Quickshell MprisPlayer.
 Rectangle {
