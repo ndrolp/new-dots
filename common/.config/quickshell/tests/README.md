@@ -6,7 +6,10 @@ and schema migrations (`config/SchemaMigrations.js`). They also cover the
 popups: where a popup opens (`components/panels/PopupPlacement.js`), the
 outline of an attached popup (`PopupOutline.js`), the surface every popup
 draws on (`PopupSurface.qml`), the shared popup parts (`PopupTitle`,
-`PopupHeader`, `PopupRow`…), the settings panel's own parts (`SettingsNumber`,
+`PopupHeader`, `PopupRow`…), the control center's tiles and sliders,
+active, muted and disabled (`ControlTile.qml`, `ControlSlider.qml`;
+`ControlCenterBody.qml` itself needs Quickshell's services and isn't tested
+here), the settings panel's own parts (`SettingsNumber`,
 `SettingsSwitchRow`, `SettingsChoice`, `SettingsGrid`…), its frame
 (`ConfigPanel.qml`) and the settings panel sections built from them, the Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
