@@ -24,9 +24,14 @@ default_colorscheme() {
   cat "$DEFAULT_FILE"
 }
 
-# ensure_link <link> <colorscheme>: points <link> at <colorscheme> unless it already leads to one.
+# ensure_link <link> <colorscheme>: points <link> at <colorscheme> unless it already leads to one. A
+# <colorscheme> that is not a colorscheme folder fails, saying so, and links nothing.
 ensure_link() {
   [ -L "$1" ] && [ -d "$1" ] && return 0
+  if [ -z "$2" ] || [ ! -d "$COLORSCHEMES/$2" ] || [ -L "$COLORSCHEMES/$2" ]; then
+    echo "colorscheme_changer.sh: cannot create $(basename "$1"): '$2' is not a colorscheme" >&2
+    return 1
+  fi
   ln -sfn "$2" "$1"
 }
 
@@ -46,8 +51,8 @@ if [ "${1:-}" = "--default" ]; then
   exit 0
 fi
 
-ensure_active
-ensure_shown
+ensure_active || exit 1
+ensure_shown || exit 1
 
 # list_colorschemes: every colorscheme, one per line, sorted; the active and shown links are not
 # folders, so they are not listed.

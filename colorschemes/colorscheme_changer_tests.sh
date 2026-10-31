@@ -155,6 +155,15 @@ test_without_an_active_link_the_default_colorscheme_becomes_active() {
     [[ "$(readlink "$HOME_DIR/.dotfiles/colorschemes/active")" == rosepine ]] || fail "the active link was not created"
 }
 
+test_a_default_naming_a_missing_colorscheme_fails_loudly_and_links_nothing() {
+    changer_home
+    echo nosuch >"$HOME_DIR/.dotfiles/colorschemes/default.txt"
+    ! run_changer --active || fail "asking for the active colorscheme succeeded"
+    [[ "$OUT" == *nosuch* ]] || fail "the error does not name the missing colorscheme"
+    [[ ! -L "$HOME_DIR/.dotfiles/colorschemes/active" ]] || fail "an active link was created"
+    [[ ! -L "$HOME_DIR/.dotfiles/colorschemes/shown" ]] || fail "a shown link was created"
+}
+
 test_an_apply_without_an_active_link_leaves_the_default_colorscheme_alone() {
     changer_home
     run_changer nord
