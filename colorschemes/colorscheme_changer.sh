@@ -4,48 +4,65 @@ NVIM_COLORS="$HOME/.config/nvim/lua/settings/core/theme.lua"
 VSCODE_SETTINGS="$HOME/.config/Code/User/settings.json"
 
 # The colorschemes are the folders beside this script.
-TARGET_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+COLORSCHEMES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # The active colorscheme is machine-local (docs/adr/0001-active-colorscheme-is-machine-local.md): the
 # gitignored link `active` names it, and the tracked colour links (waybar, hyprlock, nvim, rofi) point
 # through it, so applying moves only this link. default.txt, tracked, names the default colorscheme,
 # which `active` starts from whenever it is missing; an apply never writes it.
-ACTIVE_LINK="$TARGET_DIR/active"
-DEFAULT_FILE="$TARGET_DIR/default.txt"
-
-# ensure_active: creates the active link from the default colorscheme when it is missing.
-ensure_active() {
-  [ -L "$ACTIVE_LINK" ] && [ -d "$ACTIVE_LINK" ] && return 0
-  ln -sfn "$(cat "$DEFAULT_FILE")" "$ACTIVE_LINK"
-}
+ACTIVE_LINK="$COLORSCHEMES/active"
+DEFAULT_FILE="$COLORSCHEMES/default.txt"
 
 # The colorscheme Hyprland and Quickshell are showing is machine-local too: the gitignored link `shown`.
 # Their tracked colour links (hypr colors.conf/colors.lua, quickshell colors.json) point through it, so a
 # colorscheme preview moves only this link and never the active one. It starts from the active
 # colorscheme whenever it is missing.
-SHOWN_LINK="$TARGET_DIR/shown"
+SHOWN_LINK="$COLORSCHEMES/shown"
 
-ensure_shown() {
-  [ -L "$SHOWN_LINK" ] && [ -d "$SHOWN_LINK" ] && return 0
-  ln -sfn "$(readlink "$ACTIVE_LINK")" "$SHOWN_LINK"
+# default_colorscheme: the default colorscheme's name, as default.txt records it.
+default_colorscheme() {
+  cat "$DEFAULT_FILE"
 }
+
+# ensure_link <link> <colorscheme>: points <link> at <colorscheme> unless it already leads to one.
+ensure_link() {
+  [ -L "$1" ] && [ -d "$1" ] && return 0
+  ln -sfn "$2" "$1"
+}
+
+# ensure_active: creates the active link from the default colorscheme when it is missing.
+ensure_active() {
+  ensure_link "$ACTIVE_LINK" "$(default_colorscheme)"
+}
+
+# ensure_shown: creates the shown link from the active colorscheme when it is missing.
+ensure_shown() {
+  ensure_link "$SHOWN_LINK" "$(readlink "$ACTIVE_LINK")"
+}
+
+# --default prints the default colorscheme and changes nothing (VS Code's git filter reads it this way).
+if [ "${1:-}" = "--default" ]; then
+  default_colorscheme
+  exit 0
+fi
 
 ensure_active
 ensure_shown
 
-# list_colorschemes: every colorscheme, one per line, sorted; the active link is not a folder, so it is
-# not listed.
+# list_colorschemes: every colorscheme, one per line, sorted; the active and shown links are not
+# folders, so they are not listed.
 list_colorschemes() {
-  find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort
+  find "$COLORSCHEMES" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort
 }
 
-# --list prints the colorschemes (the theme selector lists them this way).
+# --list prints the colorschemes (the colorscheme selector lists them this way).
 if [ "${1:-}" = "--list" ]; then
   list_colorschemes
   exit 0
 fi
 
-# --active prints the active colorscheme (the theme selector reads it this way) and changes nothing else.
+# --active prints the active colorscheme (the colorscheme selector reads it this way) and changes nothing
+# else.
 if [ "${1:-}" = "--active" ]; then
   basename "$(readlink "$ACTIVE_LINK")"
   exit 0
@@ -58,23 +75,28 @@ if [ "${1:-}" = "--preview" ]; then
   shift
 fi
 
-SELECTED_FOLDER="${1:-}"
+COLORSCHEME="${1:-}"
 
-if [ -z "$SELECTED_FOLDER" ]; then
-  SELECTED_FOLDER=$(list_colorschemes \
+if [ -z "$COLORSCHEME" ]; then
+  COLORSCHEME=$(list_colorschemes \
     | rofi -dmenu -l 5 -columns 1 -font "FiraCode Nerd Font 10" -no-show-icons -i)
 fi
 
-[ -z "$SELECTED_FOLDER" ] && exit 0
-list_colorschemes | grep -qxF -- "$SELECTED_FOLDER" || exit 1
+[ -z "$COLORSCHEME" ] && exit 0
+list_colorschemes | grep -qxF -- "$COLORSCHEME" || exit 1
 
-echo "$SELECTED_FOLDER"
+echo "$COLORSCHEME"
 
-THEME_FOLDER="$TARGET_DIR/$SELECTED_FOLDER"
+COLORSCHEME_FOLDER="$COLORSCHEMES/$COLORSCHEME"
 
 # Hyprland's and Quickshell's colour links go through `shown`, so showing a colorscheme moves only it.
 show_colorscheme() {
-  ln -sfn "$SELECTED_FOLDER" "$SHOWN_LINK"
+  ln -sfn "$COLORSCHEME" "$SHOWN_LINK"
+}
+
+# The other colour links go through `active`, so making a colorscheme the active one moves only it.
+activate_colorscheme() {
+  ln -sfn "$COLORSCHEME" "$ACTIVE_LINK"
 }
 
 # The shell can't see the link change by itself, so it is asked to read its colours again: it
@@ -93,7 +115,7 @@ if [ "$PREVIEW_MODE" = true ]; then
 fi
 
 # Only applying makes the colorscheme the active one. It is shown as well, before any step reloads.
-ln -sfn "$SELECTED_FOLDER" "$ACTIVE_LINK"
+activate_colorscheme
 show_colorscheme
 
 # Steps: each one updates one part of the desktop. `step <name> <function> [args...]` runs the function
@@ -117,7 +139,7 @@ report_failed_steps() {
   [ ${#FAILED_STEPS[@]} -eq 0 ] && return 0
   local names
   names="$(printf '%s, ' "${FAILED_STEPS[@]}")"
-  notify-send -u critical "Colorscheme $SELECTED_FOLDER applied with errors" \
+  notify-send -u critical "Colorscheme $COLORSCHEME applied with errors" \
     "Failed steps: ${names%, }"
 }
 
@@ -134,8 +156,9 @@ apply_kitty() {
   [ "$status" -le 1 ]
 }
 
-# New nvims load theme.lua, linked through the active colorscheme, at startup; running ones re-source it through their server
-# socket. Every socket is tried, and any that can't be reached fails the step afterwards.
+# New nvims load theme.lua, linked through the active colorscheme, at startup; running ones re-source it
+# through their server socket. Every socket is tried, and any that can't be reached fails the step
+# afterwards.
 apply_nvim() {
   [ -n "${XDG_RUNTIME_DIR:-}" ] || return 0
 
@@ -152,14 +175,14 @@ apply_nvim() {
 # the theme is written into its tracked settings file; the git clean filter (vscode_theme.sh --default)
 # keeps that out of git.
 apply_vscode() {
-  local theme_file="$THEME_FOLDER/vscode-theme.txt" settings
+  local theme_file="$COLORSCHEME_FOLDER/vscode-theme.txt" settings
   [ -f "$theme_file" ] && [ -f "$VSCODE_SETTINGS" ] || return 0
   settings="$(readlink -f "$VSCODE_SETTINGS")"
   if ! grep -q '"workbench\.colorTheme"' "$settings"; then
     echo "VS Code's workbench.colorTheme setting was not found." >&2
     return 1
   fi
-  "$TARGET_DIR/vscode_theme.sh" "$(cat "$theme_file")" <"$settings" >"$settings.theme-update"
+  "$COLORSCHEMES/vscode_theme.sh" "$(cat "$theme_file")" <"$settings" >"$settings.theme-update"
   mv "$settings.theme-update" "$settings"
   refresh_git_stat "$settings"
 }
@@ -180,7 +203,7 @@ refresh_git_stat() {
 # A theme without GTK4 files still applies to GTK3; the GTK4 links are left alone and the step fails.
 apply_gtk() {
   local theme link settings="$HOME/.config/gtk-3.0/settings.ini"
-  theme="$(sed -n 's/.*gtk-theme "\(.*\)".*/\1/p' "$THEME_FOLDER/gtk/colors.sh")"
+  theme="$(sed -n 's/.*gtk-theme "\(.*\)".*/\1/p' "$COLORSCHEME_FOLDER/gtk/colors.sh")"
   [ -n "$theme" ]
   if [ ! -d "$HOME/.themes/$theme" ]; then
     echo "GTK theme $theme is not installed in ~/.themes" >&2

@@ -23,8 +23,8 @@ CHANGER_HARNESS_COLOUR_LINKS=(
 # changer_home [--failing "<tool>..."]: makes a scratch HOME laid out as stow leaves it: ~/.dotfiles holds
 # a copy of the colorschemes (with no active or shown colorscheme), the repo's colour links and VS Code's
 # settings file under common/.config, and each ~/.config/<app> links to its common/.config/<app>. Also a
-# shim for every program the changer drives that logs "<tool> <args>" to $CALLS; the --failing ones also exit 1. A test
-# may replace a shim in $HOME_DIR/bin before run_changer. Sets HOME_DIR and CALLS.
+# shim for every program the changer drives that logs "<tool> <args>" to $CALLS; the --failing ones also
+# exit 1. A test may replace a shim in $HOME_DIR/bin before run_changer. Sets HOME_DIR and CALLS.
 changer_home() {
     local failing="" bin tool link app
     if [[ "${1:-}" == --failing ]]; then
@@ -40,7 +40,8 @@ changer_home() {
         cp -P "$CHANGER_HARNESS_REPO/common/.config/$link" "$HOME_DIR/.dotfiles/common/.config/$link"
     done
     mkdir -p "$HOME_DIR/.dotfiles/common/.config/Code/User"
-    cp "$CHANGER_HARNESS_REPO/common/.config/Code/User/settings.json" "$HOME_DIR/.dotfiles/common/.config/Code/User/"
+    cp "$CHANGER_HARNESS_REPO/common/.config/Code/User/settings.json" \
+        "$HOME_DIR/.dotfiles/common/.config/Code/User/"
     for app in hypr waybar rofi nvim quickshell kitty Code; do
         ln -s "../.dotfiles/common/.config/$app" "$HOME_DIR/.config/$app"
     done
