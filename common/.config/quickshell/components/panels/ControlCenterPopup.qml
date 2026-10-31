@@ -23,81 +23,103 @@ BarPopup {
     popup: Names.controlCenter.popup
     implicitWidth: 424
 
-    ControlCenterLayout {
-        id: layout
+    // Switching stages while open grows or shrinks the control center to
+    // its new height instead of jumping, showing what has unfolded so far.
+    // Opening doesn't: the popup's own reveal covers that.
+    Item {
+        id: stageClip
 
         width: parent.width
-        appearance: root.appearance
-        open: root.open
-        controlsEnabled: root.controlCenter.controlsEnabled
-        requestedStage: root.controlCenter.stage
+        height: layout.height
+        clip: heightAnimation.running
 
-        // It switched by itself (the handle, the audio output tile): the
-        // module keeps the stage, so SUPER+C/SUPER+N know it.
-        onStageChanged: {
-            if (root.open)
-                root.controlCenter.stage = stage;
-        }
+        Behavior on height {
+            enabled: root.open && root.reveal === 1
 
-        ongoing: Component {
-            ControlCenterOngoing {
-                width: layout.width
-                appearance: root.appearance
-                notificationHistory: root.controlCenter.notificationHistory
-                player: MediaCard.activePlayer(Mpris.players.values)
-                open: root.open
-                highlightedIds: layout.notificationsItem
-                    ? layout.notificationsItem.highlightedIds : []
+            NumberAnimation {
+                id: heightAnimation
 
-                onCloseRequested: root.popups.popupClosed(root.popup)
+                duration: root.appearance.motion.long
+                easing.type: root.appearance.motion.easing
             }
         }
 
-        controls: Component {
-            ControlCenterBody {
-                width: layout.width
-                barAppearance: root.appearance
-                controlCenter: root.controlCenter
-                // Any tile can sit in the collapsed row, so it reads the power
-                // profile, Caps Lock and the clipboard whenever it is open.
-                shown: root.open
-                expanded: layout.expanded
+        ControlCenterLayout {
+            id: layout
 
-                onCloseRequested: root.popups.popupClosed(root.popup)
-                onAudioOutputsRequested: layout.openAudioOutputs()
+            width: parent.width
+            appearance: root.appearance
+            open: root.open
+            controlsEnabled: root.controlCenter.controlsEnabled
+            requestedStage: root.controlCenter.stage
+
+            // It switched by itself (the handle, the audio output tile): the
+            // module keeps the stage, so SUPER+C/SUPER+N know it.
+            onStageChanged: {
+                if (root.open)
+                    root.controlCenter.stage = stage;
             }
-        }
 
-        // Choosing an output switches to it with the same OSD as the audio
-        // output selector; the control center stays open.
-        audioOutputs: Component {
-            ControlCenterAudioOutputs {
-                width: layout.width
-                appearance: root.appearance
-                outputs: Pipewire.nodes.values.filter(node => node.isSink)
-                current: Pipewire.defaultAudioSink
+            ongoing: Component {
+                ControlCenterOngoing {
+                    width: layout.width
+                    appearance: root.appearance
+                    notificationHistory: root.controlCenter.notificationHistory
+                    player: MediaCard.activePlayer(Mpris.players.values)
+                    open: root.open
+                    highlightedIds: layout.notificationsItem
+                        ? layout.notificationsItem.highlightedIds : []
 
-                onOutputChosen: output => {
-                    Pipewire.preferredDefaultAudioSink = output;
-                    root.popups.audioOutputSelected(output);
-                }
-                onBackRequested: layout.back()
-
-                // Binds the outputs, so their names and the default are known.
-                PwObjectTracker {
-                    objects: Pipewire.nodes.values
+                    onCloseRequested: root.popups.popupClosed(root.popup)
                 }
             }
-        }
 
-        notifications: Component {
-            ControlCenterNotifications {
-                width: layout.width
-                appearance: root.appearance
-                notificationHistory: root.controlCenter.notificationHistory
-                open: root.open
+            controls: Component {
+                ControlCenterBody {
+                    width: layout.width
+                    barAppearance: root.appearance
+                    controlCenter: root.controlCenter
+                    // Any tile can sit in the collapsed row, so it reads the power
+                    // profile, Caps Lock and the clipboard whenever it is open.
+                    shown: root.open
+                    expanded: layout.expanded
 
-                onCloseRequested: root.popups.popupClosed(root.popup)
+                    onCloseRequested: root.popups.popupClosed(root.popup)
+                    onAudioOutputsRequested: layout.openAudioOutputs()
+                }
+            }
+
+            // Choosing an output switches to it with the same OSD as the audio
+            // output selector; the control center stays open.
+            audioOutputs: Component {
+                ControlCenterAudioOutputs {
+                    width: layout.width
+                    appearance: root.appearance
+                    outputs: Pipewire.nodes.values.filter(node => node.isSink)
+                    current: Pipewire.defaultAudioSink
+
+                    onOutputChosen: output => {
+                        Pipewire.preferredDefaultAudioSink = output;
+                        root.popups.audioOutputSelected(output);
+                    }
+                    onBackRequested: layout.back()
+
+                    // Binds the outputs, so their names and the default are known.
+                    PwObjectTracker {
+                        objects: Pipewire.nodes.values
+                    }
+                }
+            }
+
+            notifications: Component {
+                ControlCenterNotifications {
+                    width: layout.width
+                    appearance: root.appearance
+                    notificationHistory: root.controlCenter.notificationHistory
+                    open: root.open
+
+                    onCloseRequested: root.popups.popupClosed(root.popup)
+                }
             }
         }
     }
