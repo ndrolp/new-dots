@@ -184,6 +184,19 @@ apply_vscode() {
   fi
   "$TARGET_DIR/vscode_theme.sh" "$(cat "$theme_file")" <"$settings" >"$settings.theme-update"
   mv "$settings.theme-update" "$settings"
+  refresh_git_stat "$settings"
+}
+
+# refresh_git_stat <file>: git counts a tracked file whose size changed as modified without running its
+# clean filter, so after the theme changes size `git status` would list the settings file even though the
+# filter stores it unchanged. When the filtered file matches the index, re-adding it stages nothing and
+# only refreshes that stat. Otherwise (other edits, or the filter not registered) it is left alone.
+refresh_git_stat() {
+  local dir file
+  dir="$(dirname "$1")" file="$(basename "$1")"
+  git -C "$dir" ls-files --error-unmatch -- "$file" >/dev/null 2>&1 || return 0
+  git -C "$dir" diff --quiet -- "$file" || return 0
+  git -C "$dir" add -- "$file"
 }
 
 # GTK3 apps restyle live through gsettings, and settings.ini names the same theme so the two can't drift.

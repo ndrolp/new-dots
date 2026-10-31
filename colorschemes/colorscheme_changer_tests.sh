@@ -94,11 +94,14 @@ colorscheme_in() { nvim --server "$1" --remote-expr 'get(g:, "colors_name", "")'
 # for the plugin themes.
 APPLIED_NVIM_THEME='vim.cmd.colorscheme("desert")'
 
-# commit_dotfiles: makes the scratch ~/.dotfiles a git repo, with the repo's .gitignore, and commits it.
+# commit_dotfiles: makes the scratch ~/.dotfiles a git repo, with the repo's .gitignore and .gitattributes,
+# and commits it.
 commit_dotfiles() {
-    cp "$COLORSCHEMES/../.gitignore" "$HOME_DIR/.dotfiles/.gitignore"
+    cp "$COLORSCHEMES/../.gitignore" "$COLORSCHEMES/../.gitattributes" "$HOME_DIR/.dotfiles/"
     git -C "$HOME_DIR/.dotfiles" init -q
     git -C "$HOME_DIR/.dotfiles" add -A
+    # The repo tracks VS Code's settings file although .gitignore matches it.
+    git -C "$HOME_DIR/.dotfiles" add -f common/.config/Code/User/settings.json
     git -C "$HOME_DIR/.dotfiles" -c user.name=t -c user.email=t@t commit -qm dotfiles
 }
 
@@ -186,6 +189,69 @@ test_applying_names_a_theme_with_non_ascii_characters_in_vs_code() {
     change_colorscheme rosepine
     grep -qxF '    "workbench.colorTheme": "Rosé Pine",' "$HOME_DIR/.config/Code/User/settings.json" \
         || fail "settings: $(vscode_settings_diff "$HOME_DIR")"
+}
+
+# register_vscode_theme_filter: registers the VS Code theme clean filter in the scratch ~/.dotfiles, as
+# bootstrap does.
+register_vscode_theme_filter() {
+    git -C "$HOME_DIR/.dotfiles" config filter.vscode-theme.clean 'colorschemes/vscode_theme.sh --default'
+}
+
+test_with_the_filter_registered_applying_leaves_vs_codes_settings_out_of_git_status() {
+    changer_home
+    commit_dotfiles
+    register_vscode_theme_filter
+    run_changer nord
+    grep -qF '"workbench.colorTheme": "Nord"' "$HOME_DIR/.config/Code/User/settings.json" || fail "nord was not applied"
+    [[ -z "$(git -C "$HOME_DIR/.dotfiles" status --porcelain -- common/.config/Code)" ]] \
+        || fail "git status: $(git -C "$HOME_DIR/.dotfiles" status --porcelain -- common/.config/Code)"
+}
+
+test_with_the_filter_registered_other_changes_to_vs_codes_settings_still_show() {
+    changer_home
+    commit_dotfiles
+    register_vscode_theme_filter
+    run_changer nord
+    sed -i 's/"editor.fontSize": 14/"editor.fontSize": 15/' "$HOME_DIR/.config/Code/User/settings.json"
+    [[ "$(git -C "$HOME_DIR/.dotfiles" diff -U0 -- common/.config/Code | grep '^[-+] ')" == "$(printf '%s\n' \
+        '-    "editor.fontSize": 14,' '+    "editor.fontSize": 15,')" ]] \
+        || fail "git diff: $(git -C "$HOME_DIR/.dotfiles" diff -- common/.config/Code)"
+}
+
+test_applying_never_stages_edits_to_vs_codes_settings() {
+    local registered
+    for registered in true false; do
+        changer_home
+        commit_dotfiles
+        [[ $registered == false ]] || register_vscode_theme_filter
+        sed -i 's/"editor.fontSize": 14/"editor.fontSize": 15/' "$HOME_DIR/.config/Code/User/settings.json"
+        run_changer nord
+        [[ -z "$(git -C "$HOME_DIR/.dotfiles" diff --cached --name-only)" ]] \
+            || fail "filter registered: $registered; staged: $(git -C "$HOME_DIR/.dotfiles" diff --cached --name-only)"
+        ! git -C "$HOME_DIR/.dotfiles" diff --quiet -- common/.config/Code || fail "filter registered: $registered; the edit vanished"
+    done
+}
+
+test_without_the_filter_applying_shows_vs_codes_theme_as_a_change() {
+    changer_home
+    commit_dotfiles
+    run_changer nord
+    [[ "$(git -C "$HOME_DIR/.dotfiles" status --porcelain -- common/.config/Code)" == " M common/.config/Code/User/settings.json" ]] \
+        || fail "git status: $(git -C "$HOME_DIR/.dotfiles" status --porcelain)"
+}
+
+# vscode_theme_filter <file>: runs the clean filter over <file>, as git does.
+vscode_theme_filter() { "$COLORSCHEMES/vscode_theme.sh" --default <"$1"; }
+
+test_the_filter_stores_the_default_colorschemes_theme_and_every_other_byte_as_is() {
+    changer_home
+    run_changer nord
+    local settings="$HOME_DIR/.config/Code/User/settings.json"
+    printf '    "workbench.colorTheme": "Nord"' >>"$settings" # no final newline, a second setting
+    OUT="$(vscode_theme_filter "$settings" | diff - <(cat "$COLORSCHEMES/../common/.config/Code/User/settings.json"; \
+        printf '    "workbench.colorTheme": "Everforest Pro Dark"'))" || fail "filtered settings differ"
+    cmp -s <(vscode_theme_filter "$settings") <(vscode_theme_filter "$settings" | "$COLORSCHEMES/vscode_theme.sh" --default) \
+        || fail "filtering twice differs from filtering once"
 }
 
 test_a_failing_step_does_not_stop_the_later_steps() {
