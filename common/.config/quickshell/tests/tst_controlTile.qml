@@ -11,6 +11,7 @@ TestCase {
     name: "ControlTile"
     width: 400
     height: 400
+    visible: true
     when: windowShown
 
     Config.Theme {
@@ -98,6 +99,14 @@ TestCase {
 
         compare(item.opacity, 0.45);
         verify(!item.interactive);
+    }
+
+    // The collapsed control center's tile row shows icons only.
+    function test_aTileCanShowItsIconAlone() {
+        const item = make({ labelShown: false });
+
+        verify(textOf(item, "󰤨").visible);
+        verify(!textOf(item, "Wi-Fi").visible);
     }
 
     function test_aDisabledTileCanStillShowItsState() {
