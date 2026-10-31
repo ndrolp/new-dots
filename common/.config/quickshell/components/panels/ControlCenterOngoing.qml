@@ -48,7 +48,7 @@ Column {
 
             width: root.width
             appearance: root.appearance
-            entry: modelData
+            record: modelData
             highlighted: root.highlightedIds.indexOf(modelData.id) !== -1
             currentTime: root.currentTime
 

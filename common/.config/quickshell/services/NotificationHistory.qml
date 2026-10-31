@@ -20,7 +20,7 @@ QtObject {
 
     // Every change goes through here, so a notification whose card leaves
     // the history (removed, its group or all cleared, replaced by a repeat,
-    // or past the 50-entry cap) is dismissed: the server keeps a notification
+    // or past the 50-card cap) is dismissed: the server keeps a notification
     // alive exactly as long as its card is listed. `alreadyClosed`, the
     // notification the server just closed, isn't dismissed again.
     function updateItems(updatedItems, alreadyClosed) {
@@ -55,7 +55,7 @@ QtObject {
         ongoing = items.filter(item => item.resident);
     }
 
-    // An entry keeps the notification's text, app icon and image as plain
+    // A record keeps the notification's text, app icon and image as plain
     // values next to the Notification object itself (`notification`, for its
     // actions), which stays alive until the card leaves the history.
     // After a shell reload the server sends its kept notifications again
@@ -68,7 +68,7 @@ QtObject {
         const existingIndex = items.findIndex(item => item.appName === appName
             && item.summary === summary && item.body === body);
         const existing = existingIndex >= 0 ? items[existingIndex] : null;
-        const entry = {
+        const record = {
             id: existing ? existing.id : nextId++,
             appName: appName,
             appIcon: notification.appIcon || "",
@@ -83,7 +83,7 @@ QtObject {
         };
         const rest = items.filter((item, index) => index !== existingIndex);
 
-        updateItems(capped([entry].concat(rest)));
+        updateItems(capped([record].concat(rest)));
     }
 
     // The newest 50 ordinary cards; ongoing ones don't count and always stay.
@@ -113,11 +113,11 @@ QtObject {
     // dismissed). An ongoing card leaves with it, since "Clear all" can't
     // remove it; any other card stays, as text, until you dismiss it.
     function closed(notification) {
-        const entry = items.find(item => item.notification === notification);
-        if (!entry || !entry.resident)
+        const record = items.find(item => item.notification === notification);
+        if (!record || !record.resident)
             return;
 
-        updateItems(items.filter(item => item !== entry), notification);
+        updateItems(items.filter(item => item !== record), notification);
     }
 
     // The app replaced `notification` (`replaces_id`): the server changes the

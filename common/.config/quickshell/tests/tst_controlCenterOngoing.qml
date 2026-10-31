@@ -62,7 +62,7 @@ TestCase {
         }
     }
 
-    function ongoingEntry(id) {
+    function ongoingRecord(id) {
         return {
             id: id,
             appName: "Syncthing",
@@ -96,14 +96,14 @@ TestCase {
     }
 
     function test_showsTheOngoingNotificationsNewestFirst() {
-        const item = makeOngoing([ongoingEntry(2), ongoingEntry(1)]);
+        const item = makeOngoing([ongoingRecord(2), ongoingRecord(1)]);
 
-        compare(cards(item).map(card => card.entry.summary), ["Syncing 2", "Syncing 1"]);
+        compare(cards(item).map(card => card.record.summary), ["Syncing 2", "Syncing 1"]);
     }
 
     function test_theMediaCardSitsAboveTheOngoingNotifications() {
         const player = createTemporaryObject(fakePlayer, this);
-        const item = makeOngoing([ongoingEntry(1)], { player: player });
+        const item = makeOngoing([ongoingRecord(1)], { player: player });
         const media = findAll(item, child => child.objectName === "mediaCard")[0];
 
         verify(media.visible);
@@ -117,21 +117,21 @@ TestCase {
     }
 
     function test_dismissingAnOngoingCardRemovesIt() {
-        const item = makeOngoing([ongoingEntry(1), ongoingEntry(2)]);
+        const item = makeOngoing([ongoingRecord(1), ongoingRecord(2)]);
 
         cards(item)[0].dismissed();
 
-        compare(item.notificationHistory.items.map(entry => entry.id), [2]);
+        compare(item.notificationHistory.items.map(record => record.id), [2]);
     }
 
     function test_anOngoingCardIsHighlightedLikeTheNotificationsBelow() {
-        const item = makeOngoing([ongoingEntry(1), ongoingEntry(2)], { highlightedIds: [2] });
+        const item = makeOngoing([ongoingRecord(1), ongoingRecord(2)], { highlightedIds: [2] });
 
         compare(cards(item).map(card => card.highlighted), [false, true]);
     }
 
     function test_aCardAskingToCloseClosesTheControlCenter() {
-        const item = makeOngoing([ongoingEntry(1)]);
+        const item = makeOngoing([ongoingRecord(1)]);
         let closeRequests = 0;
         item.closeRequested.connect(() => closeRequests++);
 

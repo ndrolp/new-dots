@@ -49,8 +49,8 @@ Column {
     }
 
     // Arrived since you last looked: unread when it opened, or arrived while open.
-    function highlighted(entry) {
-        return entry.unread || freshIds.indexOf(entry.id) !== -1;
+    function highlighted(record) {
+        return record.unread || freshIds.indexOf(record.id) !== -1;
     }
 
     Config.Theme {
@@ -146,7 +146,7 @@ Column {
                     currentTime: root.currentTime
                     expanded: root.expandedApps.indexOf(modelData.appName) !== -1
 
-                    onEntryDismissed: id => root.notificationHistory.remove(id)
+                    onRecordDismissed: id => root.notificationHistory.remove(id)
                     onGroupDismissed: root.notificationHistory.removeGroup(modelData.appName)
                     onCloseRequested: root.closeRequested()
                     onExpandToggled: root.toggleExpanded(modelData.appName)

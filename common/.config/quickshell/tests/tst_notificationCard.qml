@@ -63,7 +63,7 @@ TestCase {
         return createTemporaryObject(fakeAction, this, { identifier: identifier, text: text || identifier });
     }
 
-    function entry(properties) {
+    function record(properties) {
         return Object.assign({
             id: 1,
             appName: "Firefox",
@@ -96,7 +96,7 @@ TestCase {
     }
 
     function makeCard(properties) {
-        const item = createTemporaryObject(card, this, { entry: entry(properties) });
+        const item = createTemporaryObject(card, this, { record: record(properties) });
         dismissedSpy.clear();
         closeSpy.clear();
         dismissedSpy.target = item;

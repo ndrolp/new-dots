@@ -66,7 +66,7 @@ TestCase {
         item.add(other);
         item.clear();
 
-        compare(item.items.map(entry => entry.summary), ["Playing"]);
+        compare(item.items.map(record => record.summary), ["Playing"]);
         compare(ongoing.dismissCount, 0);
     }
 
@@ -77,7 +77,7 @@ TestCase {
         item.add(notification({ summary: "Syncing", resident: true }));
         item.add(notification({ summary: "Download 2" }));
 
-        compare(item.ongoing.map(entry => entry.summary), ["Syncing"]);
+        compare(item.ongoing.map(record => record.summary), ["Syncing"]);
         compare(item.groups.map(group => summaries(group)), [["Download 2", "Download 1"]]);
     }
 
@@ -89,7 +89,7 @@ TestCase {
         item.add(notification({ summary: "Download 1" }));
         item.removeGroup("Firefox");
 
-        compare(item.items.map(entry => entry.summary), ["Syncing"]);
+        compare(item.items.map(record => record.summary), ["Syncing"]);
         compare(ongoing.dismissCount, 0);
     }
 
@@ -113,7 +113,7 @@ TestCase {
         item.add(notification({ summary: "Download 1" }));
         item.closed(ongoing);
 
-        compare(item.items.map(entry => entry.summary), ["Download 1"]);
+        compare(item.items.map(record => record.summary), ["Download 1"]);
         compare(ongoing.dismissCount, 0);
     }
 
@@ -129,7 +129,7 @@ TestCase {
         ongoing.body = "60%";
         item.updated(ongoing);
 
-        compare(item.ongoing.map(entry => [entry.id, entry.summary, entry.body]),
+        compare(item.ongoing.map(record => [record.id, record.summary, record.body]),
             [[id, "Syncing photos", "60%"]]);
         compare(ongoing.dismissCount, 0);
     }
@@ -182,9 +182,9 @@ TestCase {
             item.add(sent[index]);
         }
 
-        compare(item.ongoing.map(entry => entry.summary), ["Syncing"]);
+        compare(item.ongoing.map(record => record.summary), ["Syncing"]);
         compare(ongoing.dismissCount, 0);
-        compare(item.items.filter(entry => !entry.resident).length, 50);
+        compare(item.items.filter(record => !record.resident).length, 50);
         compare(sent[0].dismissCount, 1);
     }
 
@@ -219,7 +219,7 @@ TestCase {
         item.add(notification({ summary: "Older", lastGeneration: true }));
         item.add(notification({ summary: "Newer", lastGeneration: true }));
 
-        compare(item.items.map(entry => entry.summary), ["Newer", "Older"]);
+        compare(item.items.map(record => record.summary), ["Newer", "Older"]);
     }
 
     function test_aKeptNotificationComesBackAlreadyRead() {
@@ -228,7 +228,7 @@ TestCase {
         item.add(notification({ summary: "Kept", lastGeneration: true }));
         item.add(notification({ summary: "New" }));
 
-        compare(item.items.map(entry => entry.unread), [true, false]);
+        compare(item.items.map(record => record.unread), [true, false]);
         compare(item.unreadCount, 1);
     }
 
@@ -252,7 +252,7 @@ TestCase {
         compare(sent.dismissCount, 1);
     }
 
-    function test_anEntryKeepsTheAppIconAndImageItWasSentWith() {
+    function test_aRecordKeepsTheAppIconAndImageItWasSentWith() {
         const item = createTemporaryObject(history, this);
 
         item.add(notification({ appIcon: "firefox", image: "image://qsimage/1" }));
@@ -274,7 +274,7 @@ TestCase {
     }
 
     function summaries(group) {
-        return group.items.map(entry => entry.summary);
+        return group.items.map(record => record.summary);
     }
 
     function test_notificationsFromOneAppGroupTogetherNewestFirst() {
@@ -298,7 +298,7 @@ TestCase {
 
         item.removeGroup("Firefox");
 
-        compare(item.items.map(entry => entry.summary), ["Message"]);
+        compare(item.items.map(record => record.summary), ["Message"]);
         compare(item.groups.map(group => group.appName), ["Discord"]);
     }
 
@@ -311,6 +311,6 @@ TestCase {
 
         item.removeGroup(item.groups[1].appName);
 
-        compare(item.items.map(entry => entry.summary), ["Message"]);
+        compare(item.items.map(record => record.summary), ["Message"]);
     }
 }

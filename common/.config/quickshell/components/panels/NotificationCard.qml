@@ -8,15 +8,15 @@ import "../IconSource.js" as IconSource
 // style. Tapping it runs its default action, then it is removed and the
 // control center closes; one without a default action expands instead.
 // Its action buttons run their action and remove it. Swiping it sideways
-// past the threshold dismisses it. An ongoing notification (`entry.resident`)
+// past the threshold dismisses it. An ongoing notification (`record.resident`)
 // stays after its actions run; only swiping or × removes it.
-// `entry` is a NotificationHistory item; its `notification` is the live
+// `record` is a NotificationHistory item; its `notification` is the live
 // Quickshell Notification, or null once the server has let it go.
 Item {
     id: root
 
     required property var appearance
-    required property var entry
+    required property var record
     // Arrived since you last looked.
     property bool highlighted: false
     // Now, for the relative time; the list ticks it while it is shown.
@@ -26,10 +26,10 @@ Item {
     // (the bell) when it has neither. An image that won't load falls back to
     // the app icon, and an icon that won't load to the bell.
     property bool imageFailed: false
-    readonly property bool showsImage: !!entry.image && !imageFailed
-    readonly property string iconSource: showsImage ? entry.image
-        : entry.appIcon ? IconSource.forName(entry.appIcon) : ""
-    readonly property var actions: entry.notification ? entry.notification.actions : []
+    readonly property bool showsImage: !!record.image && !imageFailed
+    readonly property string iconSource: showsImage ? record.image
+        : record.appIcon ? IconSource.forName(record.appIcon) : ""
+    readonly property var actions: record.notification ? record.notification.actions : []
     readonly property var buttonActions: NotificationCard.buttonActions(actions)
     // Showing the full body.
     property bool expanded: false
@@ -49,7 +49,7 @@ Item {
         const action = NotificationCard.defaultAction(root.actions);
         if (action) {
             action.invoke();
-            if (!root.entry.resident)
+            if (!root.record.resident)
                 root.dismissed();
             root.closeRequested();
         } else {
@@ -60,7 +60,7 @@ Item {
     // One of the action buttons was pressed.
     function invokeAction(action) {
         action.invoke();
-        if (!root.entry.resident)
+        if (!root.record.resident)
             root.dismissed();
     }
 
@@ -239,7 +239,7 @@ Item {
                     anchors.left: parent.left
                     anchors.right: meta.left
                     anchors.rightMargin: 8
-                    text: root.entry.summary || "Notification"
+                    text: root.record.summary || "Notification"
                     color: theme.text
                     elide: Text.ElideRight
                     font.pixelSize: root.appearance.textSize
@@ -254,7 +254,7 @@ Item {
                     spacing: 6
 
                     Rectangle {
-                        visible: root.entry.count > 1
+                        visible: root.record.count > 1
                         width: 24
                         height: 18
                         radius: 9
@@ -262,7 +262,7 @@ Item {
 
                         Panels.Text {
                             anchors.centerIn: parent
-                            text: root.entry.count
+                            text: root.record.count
                             color: theme.background
                             font.pixelSize: root.appearance.textSize - 3
                         }
@@ -270,7 +270,7 @@ Item {
 
                     Panels.Text {
                         anchors.verticalCenter: parent.verticalCenter
-                        text: root.relativeTime(root.entry.timestamp)
+                        text: root.relativeTime(root.record.timestamp)
                         color: theme.textMuted
                         font.pixelSize: root.appearance.textSize - 3
                     }
@@ -296,7 +296,7 @@ Item {
 
                 width: parent.width
                 visible: text !== ""
-                text: root.entry.body
+                text: root.record.body
                 color: theme.textMuted
                 textFormat: Text.PlainText
                 wrapMode: Text.Wrap

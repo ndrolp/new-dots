@@ -27,7 +27,7 @@ Item {
     property alias swipeOffset: stackFace.x
 
     // A card is done with: remove that notification from the history.
-    signal entryDismissed(var id)
+    signal recordDismissed(var id)
     // The collapsed stack was swiped away: remove the whole group.
     signal groupDismissed()
     // A card ran its default action: the control center should close.
@@ -56,8 +56,8 @@ Item {
         }
     }
 
-    function highlighted(entry) {
-        return root.highlightedIds.indexOf(entry.id) !== -1;
+    function highlighted(record) {
+        return root.highlightedIds.indexOf(record.id) !== -1;
     }
 
     Config.Theme {
@@ -171,8 +171,8 @@ Item {
                     width: parent.width
                     enabled: false
                     appearance: root.appearance
-                    entry: root.group.items[0]
-                    highlighted: root.group.items.some(entry => root.highlighted(entry))
+                    record: root.group.items[0]
+                    highlighted: root.group.items.some(record => root.highlighted(record))
                     currentTime: root.currentTime
                 }
 
@@ -206,11 +206,11 @@ Item {
 
                     width: root.width
                     appearance: root.appearance
-                    entry: modelData
+                    record: modelData
                     highlighted: root.highlighted(modelData)
                     currentTime: root.currentTime
 
-                    onDismissed: root.entryDismissed(modelData.id)
+                    onDismissed: root.recordDismissed(modelData.id)
                     onCloseRequested: root.closeRequested()
                 }
             }
