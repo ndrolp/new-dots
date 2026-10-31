@@ -13,7 +13,7 @@ hl.monitor({
 hl.monitor({
 	output = "desc:Philips Consumer Electronics Company PHL 243V7 0x00009A4C",
 	mode = "1920x1080@74.97Hz",
-	position = "-2560x0",
+	position = "-1080x-240",
 	scale = 1,
 	transform = 1,
 })
