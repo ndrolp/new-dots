@@ -1,11 +1,14 @@
+import Quickshell.Services.Mpris
 import Quickshell.Services.Pipewire
 import QtQuick
+import "MediaCard.js" as MediaCard
 
 // The control center: the popup of the bell bar element (saved id
 // "notifications"). Collapsed, it shows the tile row above today's
 // notifications; expanded, every control in their place
 // (ControlCenterLayout), and the audio output tile opens the audio output
 // subpage. With the control center plugin off it is notifications only.
+// While a player is active its media card is pinned on top, in both stages.
 BarPopup {
     id: root
 
@@ -30,6 +33,14 @@ BarPopup {
         open: root.open
         controlsEnabled: root.controlsEnabled
         requestedStage: root.requestedStage
+
+        pinned: Component {
+            ControlCenterMediaCard {
+                width: layout.width
+                appearance: root.appearance
+                player: MediaCard.activePlayer(Mpris.players.values)
+            }
+        }
 
         controls: Component {
             ControlCenterBody {

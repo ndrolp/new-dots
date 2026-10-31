@@ -11,7 +11,10 @@ active, muted, disabled and icon-only (`ControlTile.qml`, `ControlSlider.qml`;
 `ControlCenterBody.qml` itself needs Quickshell's services and isn't tested
 here), the control center's collapsed and expanded stages: the stage each
 way of opening it asks for, the chevron and the drag on its handle, and
-notifications only with its plugin off (`ControlCenterLayout.qml`), its
+notifications only with its plugin off, and the media card pinned on top
+in both stages (`ControlCenterLayout.qml`), the media card itself: which
+player it follows, the track and its playback controls
+(`ControlCenterMediaCard.qml`, `MediaCard.js`), its
 audio output subpage: opening it in place of the controls, the back arrow,
 the outputs it lists and choosing one (`ControlCenterLayout.qml`,
 `ControlCenterAudioOutputs.qml`), the control center's tile list: its order,
@@ -48,18 +51,22 @@ which popup is open across the bars and which bar IPC opens one on
 (`modules/OpenPopup.js`), which bar element a popup opens under
 (`components/bar/BarElementItems.js`), the notifications in the control
 center: marking them read on open, highlighting the ones that arrived since
-you last looked, Clear all and app stacks: an app's notifications
+you last looked, Clear all, ongoing notifications pinned on top that Clear
+all keeps, and app stacks: an app's notifications
 stacked under the newest card with "+N more", expanding and collapsing, and
 swiping a stack away (`components/panels/ControlCenterNotifications.qml`,
 `NotificationStack.qml`), the notification
 card: the image or app icon it shows, the chevron, tapping it (default
 action or expand), its action buttons, the × and how far a swipe has to go
-to dismiss it (`components/panels/NotificationCard.qml`,
+to dismiss it, and an ongoing card staying after its actions run
+(`components/panels/NotificationCard.qml`,
 `NotificationCard.js`), what the notification history keeps of a
 notification, how it groups them by app and dismisses a whole group,
 dismissing a notification whenever its card leaves the history (a card,
 a stack or Clear all removed, a repeat, the 50-entry cap) and rebuilding
-the history from the notifications kept over a reload
+the history from the notifications kept over a reload, and the ongoing
+notifications (`resident`) that Clear all and a stack swipe keep and that
+leave when their app closes them
 (`services/NotificationHistory.qml`),
 the active colorscheme's colours read from its colours file,
 falling back to everforestdark's (`config/ColorschemeColors.js`), and which

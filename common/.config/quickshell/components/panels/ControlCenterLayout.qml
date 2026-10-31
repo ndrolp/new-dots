@@ -12,6 +12,7 @@ import "." as Panels
 // Expanded, the audio output tile opens a subpage (`subpage`
 // "audioOutputs") in place of the controls; its back arrow (`back()`)
 // returns to the expanded stage. Each opening starts without it.
+// Above everything, in both stages, sits `pinned` (the media card).
 Column {
     id: root
 
@@ -28,6 +29,9 @@ Column {
     property Component notifications: null
     // The audio output subpage: the outputs, with a back arrow.
     property Component audioOutputs: null
+    // Pinned on top in both stages (the media card); it takes no room while
+    // its height is 0.
+    property Component pinned: null
     // The open subpage, "" for none.
     property string subpage: ""
     readonly property bool subpageOpen: expanded && subpage !== ""
@@ -70,6 +74,12 @@ Column {
 
     Config.Theme {
         id: theme
+    }
+
+    Loader {
+        width: parent.width
+        visible: item !== null && item.height > 0
+        sourceComponent: root.pinned
     }
 
     Loader {

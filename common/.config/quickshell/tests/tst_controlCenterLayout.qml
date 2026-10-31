@@ -55,6 +55,16 @@ TestCase {
     }
 
     Component {
+        id: fakePinned
+
+        Rectangle {
+            objectName: "pinned"
+            width: 400
+            height: 64
+        }
+    }
+
+    Component {
         id: layoutComponent
 
         Panels.ControlCenterLayout {
@@ -63,6 +73,7 @@ TestCase {
             controls: fakeControls
             notifications: fakeNotifications
             audioOutputs: fakeAudioOutputs
+            pinned: fakePinned
         }
     }
 
@@ -244,5 +255,30 @@ TestCase {
         compare(off.subpage, "");
         verify(!audioOutputsShown(off));
         verify(notificationsShown(off));
+    }
+
+    function pinnedShown(layout) {
+        const card = findChild(layout, "pinned");
+        return card !== null && card.visible;
+    }
+
+    // The media card: on top in both stages, and with the plugin off.
+    function test_thePinnedCardShowsOnTopInBothStages() {
+        const layout = makeLayout();
+
+        opened(layout, "collapsed");
+        verify(pinnedShown(layout));
+        closed(layout);
+        opened(layout, "expanded");
+        verify(pinnedShown(layout));
+        verify(findChild(layout, "pinned").mapToItem(layout, 0, 0).y
+            < findChild(layout, "controls").mapToItem(layout, 0, 0).y);
+    }
+
+    function test_thePinnedCardShowsWithThePluginOff() {
+        const layout = makeLayout({ controlsEnabled: false });
+        opened(layout, "collapsed");
+
+        verify(pinnedShown(layout));
     }
 }
