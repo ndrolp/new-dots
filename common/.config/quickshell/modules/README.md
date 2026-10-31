@@ -9,17 +9,21 @@ adding or editing one file here.
   `open`, and a part behind a plugin passes the plugin's switch as
   `available`, which keeps it closed and its IPC toggle idle while off.
   `switchTo(other)` closes one part and opens another, the way a control
-  center button opens the power menu. A module that opens other parts gets
+  center tile opens the power menu. A module that opens other parts gets
   them as properties (`ControlCenter`, `QuickSettings`, `UnifiedSearch`).
 - One module per panel: `ApplicationLauncher`, `AudioOutputSelector`,
-  `ClipboardSelector`, `CommandLauncher`, `ControlCenter`, `KeybindCheatsheet`,
+  `ClipboardSelector`, `CommandLauncher`, `KeybindCheatsheet`,
   `PowerMenu`, `QuickSearch`, `QuickSettings`, `ScreenCapture` (the chooser),
   `Settings`, `ThemeSelector`, `UnifiedSearch`, `WallpaperSelector`,
   `WindowSwitcher` and `WorkspaceOverview`.
 - `Bar.qml`: a bar on every monitor, and which popup is open
-  (`OpenPopup.js`, tested). Its settings and notifications buttons open those
-  panels on that bar.
-- `Notifications.qml`: the notification server, popups, sound and panel.
+  (`OpenPopup.js`, tested). Its settings button opens the settings panel on
+  that bar, and the bell opens the control center, its popup.
+- `ControlCenter.qml`: not a `Feature`: the control center is the bell's
+  popup. It holds the `control-center` IPC call (opens it expanded) and opens
+  the panels its tiles ask for, closing it.
+- `Notifications.qml`: the notification server, popups and sound, and the
+  `notifications` IPC call (opens the control center collapsed).
 - `BarProfiles.qml`: the default bar profile for new monitors and the
   `bar-profiles` IPC calls.
 - `KeepAwake.qml`: the `keep-awake` IPC call the keybind runs, which toggles

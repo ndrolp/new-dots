@@ -67,18 +67,3 @@ function room(placement) {
 
     return { top: placement.inset, side: placement.inset, bottom: placement.inset };
 }
-
-// Where the Control center opens: centered at the top of its monitor,
-// attached like a popup on an opaque bar, floating below a transparent one or
-// at the top of a monitor without a bar.
-// Takes { barVisible, barTransparent, barHeight (the bar window's), spacing }.
-function controlCenter(placement) {
-    if (!placement.barVisible)
-        return { attached: false, y: placement.spacing };
-
-    const isAttached = attached(placement);
-    return {
-        attached: isAttached,
-        y: isAttached ? placement.barHeight : placement.barHeight + placement.spacing
-    };
-}

@@ -225,14 +225,7 @@ ShellRoot {
     Modules.ControlCenter {
         id: controlCenter
 
-        appearance: appearance
-        monitors: monitors
-        workspaceService: workspaceService
-        clipboardHistory: clipboardHistory
-        screenCapture: screenCapture
-        systemMonitor: systemMonitor
-        keepAwake: keepAwake
-        nightLight: nightLight
+        bar: bar
         plugins: plugins
         audioOutputSelector: audioOutputSelector
         clipboardSelector: clipboardSelector
@@ -271,6 +264,9 @@ ShellRoot {
         pomodoro: pomodoro
         notificationHistory: notificationHistory
         screenCapture: screenCapture
+        clipboardHistory: clipboardHistory
+        nightLight: nightLight
+        plugins: plugins
         keepAwake: keepAwake
         screenShares: screenShares
         cava: cava

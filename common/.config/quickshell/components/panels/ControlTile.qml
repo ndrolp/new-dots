@@ -14,6 +14,8 @@ PopupRow {
     required property color accentColor
     property bool active: false
     property bool controlEnabled: true
+    // Off, the tile is its icon alone (the collapsed control center's row).
+    property bool labelShown: true
 
     signal triggered()
 
@@ -43,6 +45,7 @@ PopupRow {
 
         Panels.Text {
             anchors.verticalCenter: parent.verticalCenter
+            visible: tile.labelShown
             text: tile.label
             color: tile.active ? tileTheme.text : tileTheme.textMuted
             font.pixelSize: tile.appearance.textSize - 2

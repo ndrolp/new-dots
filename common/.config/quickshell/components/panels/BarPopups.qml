@@ -12,6 +12,14 @@ Item {
     required property var keepAwake
     required property var systemMonitor
     required property var notificationHistory
+    required property var screenCapture
+    required property var clipboardHistory
+    // The shell's night light (services/NightLight.qml).
+    required property var nightLight
+    // The control center plugin; off, the control center is notifications only.
+    property bool controlsEnabled: true
+    // The stage the control center takes the next time it opens.
+    property string controlCenterStage: "collapsed"
     property string activePopup: ""
     // The bar content; places popups under the bar element that opened them.
     property var popupAnchorProvider: null
@@ -20,10 +28,22 @@ Item {
     // Do not disturb is a global setting, not the bar profile's: the shell
     // flips it.
     signal doNotDisturbToggled()
+    // The control center's tiles ask the shell to open these panels.
+    signal audioOutputsRequested()
+    signal clipboardRequested()
+    signal powerMenuRequested()
+    signal screenCaptureRequested()
 
     ControlCenterPopup {
         popups: root
         notificationHistory: root.notificationHistory
+        screenCapture: root.screenCapture
+        clipboardHistory: root.clipboardHistory
+        systemMonitor: root.systemMonitor
+        keepAwake: root.keepAwake
+        nightLight: root.nightLight
+        controlsEnabled: root.controlsEnabled
+        requestedStage: root.controlCenterStage
     }
 
     SystemPopup {
