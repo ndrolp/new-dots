@@ -12,6 +12,14 @@ Terms that span every context.
 A named set of colours (catppuccin, everforestdark…) applied to the whole desktop at once — Hyprland, Quickshell, the terminal, the editor — and switched with the colorscheme changer.
 _Avoid_: Theme (on its own), palette
 
+**Active colorscheme**:
+The colorscheme a machine is currently showing. It belongs to that machine, not to the repo, so two machines can each have a different one.
+_Avoid_: Current theme, selected theme
+
+**Default colorscheme**:
+The colorscheme a fresh install starts with, before anything has been applied. It is the only colorscheme choice the repo records.
+_Avoid_: Base theme
+
 **Apply** (a colorscheme):
 Make a colorscheme the active one everywhere at once: Hyprland, Quickshell, nvim, GTK, kitty, VS Code and rofi. Only applying changes which colorscheme is active.
 _Avoid_: Switch, set (for this)
