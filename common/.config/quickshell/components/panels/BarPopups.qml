@@ -32,6 +32,8 @@ Item {
     signal clipboardRequested()
     signal powerMenuRequested()
     signal screenCaptureRequested()
+    // The control center's pencil: the settings panel at its section.
+    signal controlCenterSettingsRequested()
 
     ControlCenterPopup {
         popups: root

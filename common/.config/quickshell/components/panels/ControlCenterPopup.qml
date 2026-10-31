@@ -40,8 +40,9 @@ BarPopup {
                 systemMonitor: root.systemMonitor
                 keepAwake: root.keepAwake
                 nightLight: root.nightLight
-                // Brightness, the power profile and Caps Lock only show expanded.
-                shown: root.open && layout.expanded
+                // Any tile can sit in the collapsed row, so it reads the power
+                // profile, Caps Lock and the clipboard whenever it is open.
+                shown: root.open
                 expanded: layout.expanded
 
                 onCloseRequested: root.popups.popupClosed(root.popup)
@@ -50,6 +51,7 @@ BarPopup {
                 onClipboardRequested: root.popups.clipboardRequested()
                 onPowerMenuRequested: root.popups.powerMenuRequested()
                 onScreenCaptureRequested: root.popups.screenCaptureRequested()
+                onTileSettingsRequested: root.popups.controlCenterSettingsRequested()
             }
         }
 

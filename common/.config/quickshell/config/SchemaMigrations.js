@@ -1,6 +1,7 @@
 .pragma library
 .import "BarProfileModel.js" as BarProfileModel
 .import "DesktopWidgetsModel.js" as DesktopWidgetsModel
+.import "ControlCenterTiles.js" as ControlCenterTiles
 
 // Schema migrations of appearance.json and monitors.json: pure functions over
 // the stored state, no Quickshell.
@@ -456,10 +457,20 @@ function renameElementVerticalPadding(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
+// Step 10: the control center's tiles become one global list, seeded with
+// the order it showed before: the quick tiles first, every tile shown.
+function seedControlCenterTiles(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+    if (migrated.controlCenterTiles === undefined)
+        migrated.controlCenterTiles = ControlCenterTiles.defaultTiles();
+
+    return { appearance: migrated, monitors: monitors };
+}
+
 const migrationSteps = [
     migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
     migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles, explicitMonitorEntries,
-    moveOptionsOntoElements, renameElementVerticalPadding
+    moveOptionsOntoElements, renameElementVerticalPadding, seedControlCenterTiles
 ];
 const schemaVersion = migrationSteps.length;
 

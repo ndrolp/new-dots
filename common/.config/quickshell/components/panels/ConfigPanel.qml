@@ -29,6 +29,10 @@ Rectangle {
             keywords: "notification popup location position"
         },
         {
+            label: "Control center", icon: "󰒓", section: "ControlCenter",
+            keywords: "tiles quick settings order collapsed row expanded hide show"
+        },
+        {
             label: "Motion", icon: "󰑮", section: "Motion",
             keywords: "animations reduce motion speed instant"
         },
@@ -79,6 +83,8 @@ Rectangle {
             properties.cava = root.cava;
         } else if (currentSection === "Notifications") {
             source = "NotificationSettings.qml";
+        } else if (currentSection === "ControlCenter") {
+            source = "ControlCenterSettings.qml";
         } else if (currentSection === "Motion") {
             source = "MotionSettings.qml";
         } else if (currentSection === "Monitors") {
@@ -109,6 +115,18 @@ Rectangle {
     }
 
     Component.onCompleted: loadCurrentSection()
+
+    // Shows `section` straight away, without the transition: the panel is
+    // being opened at it (e.g. from the control center's pencil).
+    function openSection(section) {
+        sectionTransition.stop();
+        sectionLoader.opacity = 1;
+        if (section === currentSection)
+            return;
+
+        currentSection = section;
+        loadCurrentSection();
+    }
 
     function selectSection(section) {
         if (section === currentSection || sectionTransition.running)
@@ -253,6 +271,7 @@ Rectangle {
                     Text {
                         text: root.currentSection === "Bar" ? "Bar"
                             : root.currentSection === "Notifications" ? "Notifications"
+                            : root.currentSection === "ControlCenter" ? "Control center"
                             : root.currentSection === "Monitors" ? "Displays"
                                 : root.currentSection === "Labels" ? "Workspace Labels"
                                     : root.currentSection === "Bookmarks" ? "Quick Search"
@@ -270,6 +289,8 @@ Rectangle {
                             ? "Edit a bar profile: its sizes, style and elements."
                             : root.currentSection === "Notifications"
                                 ? "Choose where notification popups appear."
+                            : root.currentSection === "ControlCenter"
+                                ? "Choose the control center's tiles and their order."
                             : root.currentSection === "Monitors"
                                 ? "Set workspace ranges and shell visibility for each monitor."
                                 : root.currentSection === "Labels"

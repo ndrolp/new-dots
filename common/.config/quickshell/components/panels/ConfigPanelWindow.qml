@@ -17,6 +17,10 @@ PanelWindow {
 
     signal closeRequested()
 
+    function openSection(section) {
+        configPanel.openSection(section);
+    }
+
     visible: reveal > 0 && targetWindow !== null
     screen: targetWindow ? targetWindow.screen : null
     color: "transparent"

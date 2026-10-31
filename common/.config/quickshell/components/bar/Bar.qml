@@ -36,6 +36,8 @@ Variants {
     signal clipboardRequested()
     signal powerMenuRequested()
     signal screenCaptureRequested()
+    // The control center's pencil, on `panelWindow`'s bar.
+    signal controlCenterSettingsRequested(var screen, var panelWindow)
 
     model: Quickshell.screens
 
@@ -68,6 +70,7 @@ Variants {
                 property var barElements: bar.appearance.barProfileValue(panel.profileName, "barElements")
                 // Global, not part of the bar profile.
                 property bool doNotDisturb: bar.appearance.doNotDisturb
+                property var controlCenterTiles: bar.appearance.controlCenterTiles
                 property var motion: bar.appearance.motion
             }
             property bool configOpen: bar.configOpen
@@ -197,6 +200,8 @@ Variants {
                 onClipboardRequested: bar.clipboardRequested()
                 onPowerMenuRequested: bar.powerMenuRequested()
                 onScreenCaptureRequested: bar.screenCaptureRequested()
+                onControlCenterSettingsRequested: bar.controlCenterSettingsRequested(panel.modelData,
+                    panel)
             }
 
         }
