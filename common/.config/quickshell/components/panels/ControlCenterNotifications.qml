@@ -6,6 +6,7 @@ import "." as Panels
 // Opening the control center marks everything read, so the bell's badge
 // clears; the cards that arrived since you last looked stay highlighted
 // until it closes. The header keeps "Clear all"; do not disturb is a tile.
+// Each notification is a NotificationCard.
 Column {
     id: root
 
@@ -18,6 +19,9 @@ Column {
     property var freshIds: []
     readonly property var groups: notificationHistory.groups
 
+    // A card ran its default action: the control center should close.
+    signal closeRequested()
+
     spacing: 8
 
     onOpenChanged: {
@@ -29,18 +33,6 @@ Column {
     // Arrived since you last looked: unread when it opened, or arrived while open.
     function highlighted(entry) {
         return entry.unread || freshIds.indexOf(entry.id) !== -1;
-    }
-
-    function relativeTime(timestamp) {
-        const elapsedSeconds = Math.max(0, Math.floor((currentTime - timestamp) / 1000));
-
-        if (elapsedSeconds < 60)
-            return "now";
-        if (elapsedSeconds < 3600)
-            return Math.floor(elapsedSeconds / 60) + "m";
-        if (elapsedSeconds < 86400)
-            return Math.floor(elapsedSeconds / 3600) + "h";
-        return Math.floor(elapsedSeconds / 86400) + "d";
     }
 
     Config.Theme {
@@ -141,152 +133,17 @@ Column {
                     Repeater {
                         model: parent.modelData.items
 
-                        delegate: Rectangle {
-                            id: card
-
+                        delegate: Panels.NotificationCard {
                             required property var modelData
-                            readonly property var entry: modelData
-                            readonly property bool highlighted: root.highlighted(modelData)
-                            readonly property var actions: modelData.notification
-                                ? modelData.notification.actions : []
 
-                            objectName: "notificationCard"
                             width: notificationGroups.width
-                            height: 70 + (actions.length > 0 ? 36 : 0)
-                            radius: root.appearance.radius
-                            color: cardHover.hovered ? theme.surfaceHover
-                                : highlighted ? Qt.rgba(theme.accent.r, theme.accent.g, theme.accent.b, 0.12)
-                                : theme.backgroundSecondary
-                            border.width: highlighted ? 1 : 0
-                            border.color: Qt.rgba(theme.accent.r, theme.accent.g, theme.accent.b, 0.35)
+                            appearance: root.appearance
+                            entry: modelData
+                            highlighted: root.highlighted(modelData)
+                            currentTime: root.currentTime
 
-                            Behavior on color {
-                                ColorAnimation { duration: root.appearance.motion.short }
-                            }
-
-                            HoverHandler {
-                                id: cardHover
-                            }
-
-                            Panels.Text {
-                                anchors.left: parent.left
-                                anchors.leftMargin: 12
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: "󰂚"
-                                color: card.highlighted ? theme.accent : theme.textMuted
-                                font.pixelSize: 18
-                            }
-
-                            Rectangle {
-                                anchors.right: parent.right
-                                anchors.rightMargin: 10
-                                anchors.top: parent.top
-                                anchors.topMargin: 8
-                                visible: card.modelData.count > 1
-                                width: 24
-                                height: 20
-                                radius: 10
-                                color: theme.accent
-
-                                Panels.Text {
-                                    anchors.centerIn: parent
-                                    text: card.modelData.count
-                                    color: theme.background
-                                    font.pixelSize: root.appearance.textSize - 3
-                                }
-                            }
-
-                            Column {
-                                anchors.left: parent.left
-                                anchors.leftMargin: 42
-                                anchors.right: parent.right
-                                anchors.rightMargin: card.modelData.count > 1 ? 42 : 14
-                                anchors.top: parent.top
-                                anchors.topMargin: 11
-                                spacing: 2
-
-                                Panels.Text {
-                                    width: parent.width
-                                    text: card.modelData.summary || "Notification"
-                                    color: theme.text
-                                    elide: Text.ElideRight
-                                    font.pixelSize: root.appearance.textSize
-                                    font.bold: true
-                                }
-
-                                Panels.Text {
-                                    width: parent.width
-                                    visible: text !== ""
-                                    text: card.modelData.body
-                                    color: theme.textMuted
-                                    textFormat: Text.PlainText
-                                    elide: Text.ElideRight
-                                    font.pixelSize: root.appearance.textSize - 2
-                                }
-                            }
-
-                            Panels.Text {
-                                anchors.right: parent.right
-                                anchors.rightMargin: card.modelData.count > 1 ? 42 : 14
-                                anchors.bottom: parent.bottom
-                                anchors.bottomMargin: card.actions.length > 0 ? 38 : 9
-                                text: root.relativeTime(card.modelData.timestamp)
-                                color: theme.textMuted
-                                font.pixelSize: root.appearance.textSize - 3
-                            }
-
-                            Row {
-                                anchors.left: parent.left
-                                anchors.leftMargin: 42
-                                anchors.right: parent.right
-                                anchors.rightMargin: 12
-                                anchors.bottom: parent.bottom
-                                anchors.bottomMargin: 8
-                                height: 28
-                                spacing: 6
-                                visible: card.actions.length > 0
-
-                                Repeater {
-                                    model: card.actions
-
-                                    delegate: Rectangle {
-                                        required property var modelData
-
-                                        width: Math.min(140, actionLabel.implicitWidth + 18)
-                                        height: parent.height
-                                        radius: root.appearance.radius
-                                        color: actionHover.hovered ? theme.accentHover : theme.accent
-
-                                        HoverHandler {
-                                            id: actionHover
-                                        }
-
-                                        Panels.Text {
-                                            id: actionLabel
-
-                                            anchors.centerIn: parent
-                                            text: modelData.text
-                                            color: theme.background
-                                            font.pixelSize: root.appearance.textSize - 2
-                                            font.bold: true
-                                        }
-
-                                        TapHandler {
-                                            onTapped: {
-                                                modelData.invoke();
-                                                root.notificationHistory.remove(card.modelData.id);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            TapHandler {
-                                onTapped: {
-                                    if (card.actions.length === 0)
-                                        root.notificationHistory.remove(card.modelData.id);
-                                }
-                            }
+                            onDismissed: root.notificationHistory.remove(modelData.id)
+                            onCloseRequested: root.closeRequested()
                         }
                     }
                 }

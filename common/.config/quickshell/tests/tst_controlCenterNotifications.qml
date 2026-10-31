@@ -170,6 +170,24 @@ TestCase {
         compare(cards(item).length, 0);
     }
 
+    function test_aDismissedCardLeavesTheHistory() {
+        const item = makeBody([entry(1, false), entry(2, false)]);
+
+        cards(item)[0].dismissed();
+
+        compare(item.notificationHistory.items.map(item => item.id), [2]);
+    }
+
+    function test_aCardAskingToCloseClosesTheControlCenter() {
+        const item = makeBody([entry(1, false)]);
+        let closeRequests = 0;
+        item.closeRequested.connect(() => closeRequests++);
+
+        cards(item)[0].closeRequested();
+
+        compare(closeRequests, 1);
+    }
+
     // Do not disturb is a tile of the control center now, not a header button.
     function test_theHeaderHasNoDoNotDisturbButton() {
         const item = makeBody([]);

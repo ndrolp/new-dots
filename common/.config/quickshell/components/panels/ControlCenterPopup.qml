@@ -58,6 +58,8 @@ BarPopup {
                 appearance: root.appearance
                 notificationHistory: root.notificationHistory
                 open: root.open
+
+                onCloseRequested: root.popups.popupClosed(root.popup)
             }
         }
     }
