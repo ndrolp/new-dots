@@ -32,43 +32,31 @@ QtObject {
         groups = groupedItems;
     }
 
+    // An entry keeps the notification's text, app icon and image as plain
+    // values, since the Notification object (`notification`, for its actions)
+    // goes away once the server lets it go.
     function add(notification) {
         const appName = notification.appName || "";
         const summary = notification.summary || "";
         const body = notification.body || "";
-        const timestamp = Date.now();
         const existingIndex = items.findIndex(item => item.appName === appName
             && item.summary === summary && item.body === body);
-
-        if (existingIndex >= 0) {
-            const updatedItems = items.slice();
-            const existing = updatedItems[existingIndex];
-            updatedItems.splice(existingIndex, 1);
-            updatedItems.unshift({
-                id: existing.id,
-                appName: appName,
-                summary: summary,
-                body: body,
-                notification: notification,
-                count: existing.count + 1,
-                unread: true,
-                timestamp: timestamp
-            });
-            updateItems(updatedItems);
-            return;
-        }
-
+        const existing = existingIndex >= 0 ? items[existingIndex] : null;
         const entry = {
-            id: nextId++,
+            id: existing ? existing.id : nextId++,
             appName: appName,
+            appIcon: notification.appIcon || "",
+            image: notification.image || "",
             summary: summary,
             body: body,
             notification: notification,
-            count: 1,
+            count: existing ? existing.count + 1 : 1,
             unread: true,
-            timestamp: timestamp
+            timestamp: Date.now()
         };
-        updateItems([entry].concat(items).slice(0, 50));
+        const rest = items.filter((item, index) => index !== existingIndex);
+
+        updateItems([entry].concat(rest).slice(0, 50));
     }
 
     function markAllRead() {
