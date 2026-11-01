@@ -88,18 +88,6 @@ TestCase {
         compare(AppMenuModel.openPanelCommand("nope", "/s"), []);
     }
 
-    // Like CurrentApp: Hyprland's active window counts only while it is on
-    // the focused workspace.
-    function test_theFocusedWindowIsTheActiveOneOnTheFocusedWorkspace() {
-        const window = { workspace: { id: 3 } };
-
-        compare(AppMenuModel.focusedWindow(window, { id: 3 }), window);
-        compare(AppMenuModel.focusedWindow(window, { id: 4 }), null);
-        compare(AppMenuModel.focusedWindow({ workspace: null }, { id: 3 }), null);
-        compare(AppMenuModel.focusedWindow(null, { id: 3 }), null);
-        compare(AppMenuModel.focusedWindow(window, null), null);
-    }
-
     function test_quitPolitelyClosesEveryWindowOfTheApp() {
         const windows = [
             { appId: "firefox", address: "0xa1" },

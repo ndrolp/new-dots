@@ -159,13 +159,6 @@ function findMenu(menuList, id) {
     return menuList.find(menu => menu.id === id) || menuList[0] || null;
 }
 
-// The focused window, as CurrentApp follows it: Hyprland's active window
-// while it is on the focused workspace, or null.
-function focusedWindow(activeToplevel, focusedWorkspace) {
-    return activeToplevel && activeToplevel.workspace && focusedWorkspace
-        && activeToplevel.workspace.id === focusedWorkspace.id ? activeToplevel : null;
-}
-
 function windowAddress(address) {
     if (!/^(?:0x)?[0-9a-f]+$/i.test(address || ""))
         return "";
@@ -215,27 +208,29 @@ function windowMenu(window) {
     };
 }
 
+// The Hyprland dispatch for each Window menu operation, from the window it
+// targets (`window = "address:0x…"`) and the action; null when the action
+// can't be dispatched.
+const windowDispatches = Object.freeze({
+    toggleFloating: target => "hl.dsp.window.float({ action = \"toggle\", " + target + " })",
+    toggleFullscreen: target => "hl.dsp.window.fullscreen({ action = \"toggle\", " + target + " })",
+    togglePin: target => "hl.dsp.window.pin({ " + target + " })",
+    close: target => "hl.dsp.window.close({ " + target + " })",
+    moveToWorkspace: (target, windowAction) => Number.isInteger(windowAction.workspace)
+        ? "hl.dsp.window.move({ workspace = " + windowAction.workspace + ", " + target + " })" : null
+});
+
 // The hyprctl command for a Window menu action, or null when it can't be
-// run safely (no usable address, a workspace that isn't a number).
+// run safely (no usable address, a workspace that isn't a number, an
+// unknown operation).
 function windowCommand(windowAction) {
     const address = windowAddress(windowAction.address);
-    if (address === "")
+    const dispatcher = Object.prototype.hasOwnProperty.call(windowDispatches, windowAction.operation)
+        ? windowDispatches[windowAction.operation] : null;
+    if (address === "" || !dispatcher)
         return null;
-    const target = "window = \"address:" + address + "\"";
-    let dispatch;
-    if (windowAction.operation === "toggleFloating")
-        dispatch = "hl.dsp.window.float({ action = \"toggle\", " + target + " })";
-    else if (windowAction.operation === "toggleFullscreen")
-        dispatch = "hl.dsp.window.fullscreen({ action = \"toggle\", " + target + " })";
-    else if (windowAction.operation === "togglePin")
-        dispatch = "hl.dsp.window.pin({ " + target + " })";
-    else if (windowAction.operation === "close")
-        dispatch = "hl.dsp.window.close({ " + target + " })";
-    else if (windowAction.operation === "moveToWorkspace" && Number.isInteger(windowAction.workspace))
-        dispatch = "hl.dsp.window.move({ workspace = " + windowAction.workspace + ", " + target + " })";
-    else
-        return null;
-    return ["hyprctl", "dispatch", dispatch];
+    const dispatch = dispatcher("window = \"address:" + address + "\"", windowAction);
+    return dispatch ? ["hyprctl", "dispatch", dispatch] : null;
 }
 
 // ---- The app's own menus ----------------------------------------------

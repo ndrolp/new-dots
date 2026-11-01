@@ -2,6 +2,7 @@ import Quickshell
 import Quickshell.Hyprland
 import QtQuick
 import "AppMenuModel.js" as AppMenuModel
+import "FocusedWindow.js" as FocusedWindow
 
 // The app menu's live side: the focused app and its .desktop file, the menus
 // it exports (through `bridge`), the menus AppMenuModel builds for it, and
@@ -15,7 +16,7 @@ QtObject {
     // menus show.
     property var bridge: null
 
-    readonly property var focusedWindow: AppMenuModel.focusedWindow(Hyprland.activeToplevel,
+    readonly property var focusedWindow: FocusedWindow.focusedWindow(Hyprland.activeToplevel,
         Hyprland.focusedWorkspace)
     readonly property string appId: focusedWindow ? windowAppId(focusedWindow) : ""
     // Looked up again when the .desktop files (re)load, which happens after
@@ -74,38 +75,55 @@ QtObject {
         return appId === root.appId ? desktopEntry : DesktopEntries.heuristicLookup(appId);
     }
 
-    // Runs an action from AppMenuModel's menus.
-    function run(action) {
-        if (action.kind === "desktopAction") {
+    // How each kind of action from AppMenuModel's menus runs; a new kind
+    // gets its entry here.
+    readonly property var actionHandlers: ({
+        desktopAction: action => {
             const entry = entryFor(action.appId);
             const desktopAction = entry
                 ? entry.actions.find(candidate => candidate.id === action.actionId) : null;
             if (desktopAction)
                 desktopAction.execute();
-        } else if (action.kind === "newWindow") {
+        },
+        newWindow: action => {
             const entry = entryFor(action.appId);
             if (entry)
                 entry.execute();
             else
                 Quickshell.execDetached([action.appId]);
-        } else if (action.kind === "quit") {
+        },
+        quit: action => {
             const windows = Hyprland.toplevels.values.map(toplevel => ({
                 appId: windowAppId(toplevel),
                 address: toplevel.address
             }));
             for (const command of AppMenuModel.quitCommands(action.appId, windows))
                 Quickshell.execDetached(command);
-        } else if (action.kind === "window") {
+        },
+        window: action => {
             const command = AppMenuModel.windowCommand(action);
             if (command)
                 Quickshell.execDetached(command);
-        } else if (action.kind === "openPanel") {
+        },
+        openPanel: action => {
             const command = AppMenuModel.openPanelCommand(action.panel, Quickshell.shellDir);
             if (command.length > 0)
                 Quickshell.execDetached(command);
-        } else if (action.kind === "dbusMenu" || action.kind === "gtkAction") {
+        },
+        dbusMenu: action => {
+            if (bridge)
+                bridge.activate(action);
+        },
+        gtkAction: action => {
             if (bridge)
                 bridge.activate(action);
         }
+    })
+
+    // Runs an action from AppMenuModel's menus.
+    function run(action) {
+        const handler = actionHandlers[action.kind];
+        if (handler)
+            handler(action);
     }
 }

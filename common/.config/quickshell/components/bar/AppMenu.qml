@@ -3,6 +3,7 @@ import QtQuick
 import "../../config" as Config
 import ".." as Components
 import "../AppMenuModel.js" as AppMenuModel
+import "../FocusedWindow.js" as FocusedWindow
 
 // The app menu bar element: one title per menu of AppMenuModel, the focused
 // app's name in bold first (its .desktop Name, or its appId), then the
@@ -65,9 +66,7 @@ Item {
             popupRequested();
     }
 
-    visible: enabled && menus.length > 0 && monitor !== null && Hyprland.focusedWorkspace
-        && Hyprland.focusedWorkspace.monitor !== null
-        && Hyprland.focusedWorkspace.monitor.name === monitor.name
+    visible: enabled && menus.length > 0 && FocusedWindow.onFocusedMonitor(monitor, Hyprland.focusedWorkspace)
     width: visible ? background.width : 0
     height: background.height
 
