@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Shapes
 import "../../config" as Config
 import "PopupOutline.js" as PopupOutline
 
@@ -61,65 +62,53 @@ Rectangle {
         id: theme
     }
 
-    Canvas {
+    // The attached outline, drawn as a Shape so it reshapes on the GPU each
+    // frame it unfolds or resizes instead of repainting a raster canvas.
+    Shape {
         id: outline
+
+        readonly property real edgeLeft: surface.joinRadius
+        readonly property real edgeRight: edgeLeft + surface.width
+        readonly property real edgeBottom: Math.max(0, surface.unfoldedHeight)
+        readonly property var corners: PopupOutline.attachedCorners({
+            width: surface.width,
+            height: edgeBottom,
+            radius: surface.radius,
+            joinRadius: surface.joinRadius
+        })
 
         x: -surface.joinRadius
         width: surface.width + surface.joinRadius * 2
-        height: Math.ceil(surface.unfoldedHeight)
-        visible: surface.attached
+        height: Math.ceil(edgeBottom)
+        visible: surface.attached && edgeBottom > 0
+        preferredRendererType: Shape.CurveRenderer
 
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
-        onVisibleChanged: requestPaint()
+        ShapePath {
+            fillColor: surface.attachedColor
+            strokeWidth: -1
+            startX: outline.edgeLeft - outline.corners.join
+            startY: 0
 
-        Connections {
-            target: surface
-
-            function onAttachedColorChanged() {
-                outline.requestPaint();
+            PathLine { x: outline.edgeRight + outline.corners.join; y: 0 }
+            PathQuad {
+                x: outline.edgeRight; y: outline.corners.join
+                controlX: outline.edgeRight; controlY: 0
             }
-
-            function onRadiusChanged() {
-                outline.requestPaint();
+            PathLine { x: outline.edgeRight; y: outline.edgeBottom - outline.corners.bottom }
+            PathQuad {
+                x: outline.edgeRight - outline.corners.bottom; y: outline.edgeBottom
+                controlX: outline.edgeRight; controlY: outline.edgeBottom
             }
-
-            function onUnfoldedHeightChanged() {
-                outline.requestPaint();
+            PathLine { x: outline.edgeLeft + outline.corners.bottom; y: outline.edgeBottom }
+            PathQuad {
+                x: outline.edgeLeft; y: outline.edgeBottom - outline.corners.bottom
+                controlX: outline.edgeLeft; controlY: outline.edgeBottom
             }
-        }
-
-        onPaint: {
-            const context = getContext("2d");
-            const left = surface.joinRadius;
-            const right = left + surface.width;
-            const bottom = surface.unfoldedHeight;
-            const corners = PopupOutline.attachedCorners({
-                width: surface.width,
-                height: bottom,
-                radius: surface.radius,
-                joinRadius: surface.joinRadius
-            });
-            const join = corners.join;
-            const round = corners.bottom;
-
-            context.reset();
-            if (!surface.attached || bottom <= 0)
-                return;
-
-            context.fillStyle = surface.attachedColor;
-            context.beginPath();
-            context.moveTo(left - join, 0);
-            context.lineTo(right + join, 0);
-            context.quadraticCurveTo(right, 0, right, join);
-            context.lineTo(right, bottom - round);
-            context.quadraticCurveTo(right, bottom, right - round, bottom);
-            context.lineTo(left + round, bottom);
-            context.quadraticCurveTo(left, bottom, left, bottom - round);
-            context.lineTo(left, join);
-            context.quadraticCurveTo(left, 0, left - join, 0);
-            context.closePath();
-            context.fill();
+            PathLine { x: outline.edgeLeft; y: outline.corners.join }
+            PathQuad {
+                x: outline.edgeLeft - outline.corners.join; y: 0
+                controlX: outline.edgeLeft; controlY: 0
+            }
         }
     }
 

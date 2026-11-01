@@ -18,6 +18,8 @@ Rectangle {
     height: visible ? 64 : 0
     radius: appearance.radius
     color: theme.backgroundSecondary
+    border.width: 1
+    border.color: Qt.rgba(theme.border.r, theme.border.g, theme.border.b, 0.5)
 
     Config.Theme {
         id: theme
