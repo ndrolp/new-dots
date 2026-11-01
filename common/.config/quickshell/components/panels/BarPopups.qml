@@ -10,8 +10,8 @@ Item {
     required property var pomodoro
     // The shell's keep-awake (services/KeepAwake.qml).
     required property var keepAwake
-    // The app menu's bridge to apps' own menus (services/AppMenuBridge.qml).
-    property var appMenuBridge: null
+    // The app menu module (modules/AppMenu.qml).
+    required property var appMenu
     required property var systemMonitor
     // The control center module (modules/ControlCenter.qml): its services,
     // stage and the panels its tiles open, handed to its popup as one.
@@ -47,7 +47,7 @@ Item {
     AppMenuPopup {
         popups: root
         menuId: root.appMenuId
-        bridge: root.appMenuBridge
+        appMenu: root.appMenu
     }
 
     MediaPopup {

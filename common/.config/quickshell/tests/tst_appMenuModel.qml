@@ -71,21 +71,12 @@ TestCase {
     function test_theDesktopMenuOpensTheShellsPanels() {
         const items = AppMenuModel.desktopMenu().items;
 
-        compare(labels(items), ["Open Launcher", "Settings Panel", "Change Wallpaper"]);
+        compare(labels(items), ["Unified Search", "Settings Panel", "Change Wallpaper"]);
         compare(items.map(item => item.action), [
             { kind: "openPanel", panel: "unifiedSearch" },
             { kind: "openPanel", panel: "settings" },
             { kind: "openPanel", panel: "wallpaperSelector" }
         ]);
-    }
-
-    // Opening goes through each panel's IPC handler, as the keybinds do.
-    function test_aPanelOpensThroughItsIpcHandler() {
-        compare(AppMenuModel.openPanelCommand("unifiedSearch", "/home/me/.config/quickshell"),
-            ["quickshell", "ipc", "--path", "/home/me/.config/quickshell", "call", "unified-search", "show"]);
-        compare(AppMenuModel.openPanelCommand("settings", "/s")[5], "config");
-        compare(AppMenuModel.openPanelCommand("wallpaperSelector", "/s")[5], "wallpapers");
-        compare(AppMenuModel.openPanelCommand("nope", "/s"), []);
     }
 
     function test_quitPolitelyClosesEveryWindowOfTheApp() {

@@ -20,8 +20,9 @@ Item {
     // Inside a group the shared background replaces this element's pill.
     property bool grouped: false
     required property var monitorScreen
-    // The shell's services/AppMenuBridge.qml, for the app's own menus.
-    property var bridge: null
+    // The app menu module (modules/AppMenu.qml): the bridge to the app's
+    // own menus and the panels the Desktop menu opens.
+    required property var appMenu
     property bool enabled: true
     property bool popupOpen: false
     // The menu the Popup shows: the one whose title was clicked last.
@@ -82,25 +83,9 @@ Item {
     Components.AppMenuSource {
         id: source
 
-        bridge: root.bridge
-    }
-
-    // The app's own menus are only looked for while some app menu shows.
-    onEnabledChanged: {
-        if (bridge)
-            bridge.setUsing(root, enabled);
-    }
-    onBridgeChanged: {
-        if (bridge)
-            bridge.setUsing(root, enabled);
-    }
-    Component.onCompleted: {
-        if (bridge)
-            bridge.setUsing(root, enabled);
-    }
-    Component.onDestruction: {
-        if (bridge)
-            bridge.setUsing(root, false);
+        appMenu: root.appMenu
+        // The app's own menus are only looked for while some app menu shows.
+        showing: root.enabled
     }
 
     FontMetrics {

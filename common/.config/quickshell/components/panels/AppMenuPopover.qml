@@ -15,9 +15,9 @@ Scope {
     id: root
 
     required property var appearance
-    // The shell's services/AppMenuBridge.qml, for the app's own menus. The
-    // popover can open at any time, so it keeps the bridge running.
-    property var bridge: null
+    // The app menu module (modules/AppMenu.qml): the bridge to the app's
+    // own menus and the panels the Desktop menu opens.
+    property var appMenu: null
     property bool open: false
     // The list as it was when it opened, so it holds still while open.
     property var shownItems: []
@@ -42,16 +42,9 @@ Scope {
     Components.AppMenuSource {
         id: source
 
-        bridge: root.bridge
-    }
-
-    onBridgeChanged: {
-        if (bridge)
-            bridge.setUsing(root, true);
-    }
-    Component.onCompleted: {
-        if (bridge)
-            bridge.setUsing(root, true);
+        appMenu: root.appMenu
+        // The popover can open at any time, so it keeps the bridge running.
+        showing: true
     }
 
     Process {

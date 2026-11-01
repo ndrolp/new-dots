@@ -12,8 +12,8 @@ BarPopup {
     // Which of AppMenuModel's menus to show (AppMenuModel.findMenu); the
     // first (the app-name menu) when none is named.
     property string menuId: ""
-    // The shell's services/AppMenuBridge.qml.
-    property var bridge: null
+    // The app menu module (modules/AppMenu.qml).
+    property var appMenu: null
     // The menus as they were when it opened, so they hold still while it
     // has the keyboard.
     property var shownMenus: []
@@ -31,7 +31,7 @@ BarPopup {
     Components.AppMenuSource {
         id: source
 
-        bridge: root.bridge
+        appMenu: root.appMenu
     }
 
     Column {

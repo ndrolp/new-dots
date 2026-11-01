@@ -17,8 +17,8 @@ Item {
     required property var notificationHistory
     required property var screenCapture
     required property var keepAwake
-    // The app menu's bridge to apps' own menus (services/AppMenuBridge.qml).
-    property var appMenuBridge: null
+    // The app menu module (modules/AppMenu.qml).
+    required property var appMenu
     // The screens other apps share (services/ScreenShares.qml).
     required property var screenShares
     required property var cava
@@ -27,7 +27,7 @@ Item {
     required property var workspaceService
 
     // The menu the app menu's Popup shows (AppMenuPopup.menuId).
-    readonly property string appMenuId: appMenu.menuId
+    readonly property string appMenuId: appMenuElement.menuId
 
     signal configRequested(var screen)
     signal popupRequested(string popup)
@@ -42,7 +42,7 @@ Item {
         "arch": archButton,
         "systemMonitor": systemMonitor,
         "currentApp": currentApp,
-        "appMenu": appMenu,
+        "appMenu": appMenuElement,
         "workspaces": workspaces
     }, barElementItems.items)
 
@@ -270,14 +270,14 @@ Item {
     }
 
     AppMenu {
-        id: appMenu
+        id: appMenuElement
 
         anchors.verticalCenter: parent.verticalCenter
         x: root.elementX("appMenu")
         grouped: root.elementGrouped("appMenu")
         appearance: root.appearance
         monitorScreen: root.monitorScreen
-        bridge: root.appMenuBridge
+        appMenu: root.appMenu
         enabled: root.elementVisible("appMenu")
         popupOpen: root.activePopup === "appMenu"
         onPopupRequested: root.popupRequested("appMenu")

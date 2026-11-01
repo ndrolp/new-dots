@@ -179,6 +179,8 @@ ShellRoot {
     }
 
     Modules.UnifiedSearch {
+        id: unifiedSearch
+
         appearance: appearance
         bookmarks: bookmarks
         clipboardHistory: clipboardHistory
@@ -195,9 +197,15 @@ ShellRoot {
         appearance: appearance
     }
 
-    Modules.AppMenuPopover {
+    Modules.AppMenu {
+        id: appMenu
+
         appearance: appearance
-        appMenuBridge: appMenuBridge
+        bar: bar
+        bridge: appMenuBridge
+        unifiedSearch: unifiedSearch
+        settings: settings
+        wallpaperSelector: wallpaperSelector
     }
 
     Modules.AudioOutputSelector {
@@ -281,7 +289,7 @@ ShellRoot {
         notificationHistory: notificationHistory
         screenCapture: screenCapture
         keepAwake: keepAwake
-        appMenuBridge: appMenuBridge
+        appMenu: appMenu
         controlCenter: controlCenter
         screenShares: screenShares
         cava: cava

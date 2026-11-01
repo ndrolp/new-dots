@@ -5,16 +5,22 @@ import "AppMenuModel.js" as AppMenuModel
 import "FocusedWindow.js" as FocusedWindow
 
 // The app menu's live side: the focused app and its .desktop file, the menus
-// it exports (through `bridge`), the menus AppMenuModel builds for it, and
+// it exports (through the bridge), the menus AppMenuModel builds for it, and
 // running the actions those menus hand over. Anything showing the app menu
 // (its bar element and Popup, the popover) keeps one; the menus themselves
 // are AppMenuModel's.
 QtObject {
     id: root
 
-    // The shell's services/AppMenuBridge.qml; without one, only the shell's
-    // menus show.
-    property var bridge: null
+    // The app menu module (modules/AppMenu.qml): the bridge and the panels
+    // the Desktop menu opens. Without one, only the shell's menus show and
+    // openPanel does nothing.
+    property var appMenu: null
+    readonly property var bridge: appMenu ? appMenu.bridge : null
+    // Whether what keeps this source shows the app menu right now: the
+    // bridge only runs while something does (AppMenuBridge.setUsing).
+    property bool showing: false
+    readonly property bool usingBridge: showing && bridge !== null
 
     readonly property var focusedWindow: FocusedWindow.focusedWindow(Hyprland.activeToplevel,
         Hyprland.focusedWorkspace)
@@ -52,6 +58,19 @@ QtObject {
         return bridge && pid !== undefined ? bridge.exportedFor(pid) : null;
     }
     readonly property var menus: AppMenuModel.menus({ app: app, window: window, exported: exported })
+
+    onUsingBridgeChanged: {
+        if (bridge)
+            bridge.setUsing(root, usingBridge);
+    }
+    Component.onCompleted: {
+        if (usingBridge)
+            bridge.setUsing(root, true);
+    }
+    Component.onDestruction: {
+        if (bridge)
+            bridge.setUsing(root, false);
+    }
 
     // Hyprland's window state (floating, fullscreen, pinned) is only read on
     // a refresh, so one is asked for whenever it changes.
@@ -106,9 +125,8 @@ QtObject {
                 Quickshell.execDetached(command);
         },
         openPanel: action => {
-            const command = AppMenuModel.openPanelCommand(action.panel, Quickshell.shellDir);
-            if (command.length > 0)
-                Quickshell.execDetached(command);
+            if (appMenu)
+                appMenu.openPanel(action.panel);
         },
         dbusMenu: action => {
             if (bridge)

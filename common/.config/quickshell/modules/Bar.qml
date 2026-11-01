@@ -18,8 +18,8 @@ Scope {
     required property var notificationHistory
     required property var screenCapture
     required property var keepAwake
-    // The app menu's bridge to apps' own menus (services/AppMenuBridge.qml).
-    required property var appMenuBridge
+    // The app menu module (modules/AppMenu.qml), for its bar element and Popup.
+    required property var appMenu
     required property var screenShares
     required property var cava
     required property var systemMonitor
@@ -66,7 +66,7 @@ Scope {
         screenCapture: root.screenCapture
         controlCenter: root.controlCenter
         keepAwake: root.keepAwake
-        appMenuBridge: root.appMenuBridge
+        appMenu: root.appMenu
         screenShares: root.screenShares
         cava: root.cava
         systemMonitor: root.systemMonitor

@@ -43,12 +43,6 @@ Feature {
             root.toggle();
         }
 
-        // Opens search with an empty field (the app menu's Desktop menu).
-        function show() {
-            root.query = "";
-            root.show();
-        }
-
         // Opens search on the emoji picker, ":" already typed.
         function emoji() {
             if (!root.available)
