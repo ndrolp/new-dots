@@ -90,8 +90,9 @@ display, `3`/`4` for recordings when `wf-recorder` is installed, and `R` or
 
 `AppMenuBridge.qml` is the shell's one bridge to the menus apps export over
 D-Bus, which the app menu bar element shows after the app's name. It runs
-`app-menu-bridge.py` (python3 with gi) only while some app menu bar element is
-enabled (`setUsing`), tells it the focused window (pid, title, whether it runs
+`app-menu-bridge.py` (python3 with gi) while something shows the app menu
+(`setUsing`): an enabled app menu bar element, or the app menu popover, which
+can open at any time and so keeps it running, tells it the focused window (pid, title, whether it runs
 under XWayland) and keeps what it answers as `exported`, for `exportedPid`.
 The script finds the window's menu two ways, both only for XWayland windows:
 DBusMenu menus registered with `com.canonical.AppMenu.Registrar` (Electron,

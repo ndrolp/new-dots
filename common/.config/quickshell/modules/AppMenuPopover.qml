@@ -7,9 +7,12 @@ Feature {
     id: root
 
     required property var appearance
+    // The app menu's bridge to apps' own menus (services/AppMenuBridge.qml).
+    required property var appMenuBridge
 
     Panels.AppMenuPopover {
         appearance: root.appearance
+        bridge: root.appMenuBridge
         open: root.open
 
         onCloseRequested: root.open = false

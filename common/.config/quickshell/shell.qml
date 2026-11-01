@@ -197,6 +197,7 @@ ShellRoot {
 
     Modules.AppMenuPopover {
         appearance: appearance
+        appMenuBridge: appMenuBridge
     }
 
     Modules.AudioOutputSelector {

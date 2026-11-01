@@ -4,8 +4,9 @@ import Quickshell.Io
 import QtQuick
 
 // The shell's one bridge to the menus apps export over D-Bus (the app's own
-// File, Edit, View...), run by app-menu-bridge.py while some app menu bar
-// element is shown (see setUsing). It follows Hyprland's focused window and
+// File, Edit, View...), run by app-menu-bridge.py while something shows the
+// app menu (see setUsing): an enabled app menu bar element or the app menu
+// popover. It follows Hyprland's focused window and
 // hands over that window's menus raw as `exported`, for `exportedPid`;
 // AppMenuModel.exportedMenus makes menus of them. With no registrar, an app
 // that exports nothing, or no python3-gi, `exported` stays null and the app
@@ -18,7 +19,7 @@ QtObject {
     // or null; it belongs to the window whose pid is `exportedPid`.
     property var exported: null
     property int exportedPid: -1
-    // The app menu bar elements shown right now.
+    // What shows the app menu right now (bar elements, the popover).
     property var users: []
     readonly property bool needed: users.length > 0
 
@@ -29,7 +30,7 @@ QtObject {
             : null;
     }
 
-    // Called by each app menu bar element as it is shown or hidden.
+    // Called by whatever shows the app menu as it starts or stops.
     function setUsing(user, using) {
         const others = users.filter(entry => entry !== user);
         users = using ? others.concat([user]) : others;
