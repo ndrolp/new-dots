@@ -1,0 +1,67 @@
+import Quickshell
+import Quickshell.Hyprland
+import QtQuick
+import "AppMenuModel.js" as AppMenuModel
+
+// The app menu's live side: the focused app and its .desktop file, the menus
+// AppMenuModel builds for it, and running the actions those menus hand over.
+// Anything showing the app menu (its bar element and Popup, the popover)
+// keeps one; the menus themselves are AppMenuModel's.
+QtObject {
+    id: root
+
+    readonly property var focusedWindow: AppMenuModel.focusedWindow(Hyprland.activeToplevel,
+        Hyprland.focusedWorkspace)
+    readonly property string appId: focusedWindow ? windowAppId(focusedWindow) : ""
+    // Looked up again when the .desktop files (re)load, which happens after
+    // startup.
+    readonly property var desktopEntry: {
+        DesktopEntries.applications.values;
+        return appId !== "" ? DesktopEntries.heuristicLookup(appId) : null;
+    }
+    // The focused app as AppMenuModel takes it, or null with no window focused.
+    readonly property var app: appId === "" ? null : {
+        appId: appId,
+        entry: desktopEntry ? {
+            name: desktopEntry.name,
+            actions: desktopEntry.actions.map(action => ({ id: action.id, name: action.name }))
+        } : null
+    }
+    readonly property string appName: app ? AppMenuModel.appName(app) : ""
+    readonly property var menus: AppMenuModel.menus({ app: app })
+
+    function windowAppId(toplevel) {
+        if (toplevel.wayland && toplevel.wayland.appId)
+            return toplevel.wayland.appId;
+        return toplevel.lastIpcObject && toplevel.lastIpcObject.class
+            ? toplevel.lastIpcObject.class : "";
+    }
+
+    function entryFor(appId) {
+        return appId === root.appId ? desktopEntry : DesktopEntries.heuristicLookup(appId);
+    }
+
+    // Runs an action from AppMenuModel's menus.
+    function run(action) {
+        if (action.kind === "desktopAction") {
+            const entry = entryFor(action.appId);
+            const desktopAction = entry
+                ? entry.actions.find(candidate => candidate.id === action.actionId) : null;
+            if (desktopAction)
+                desktopAction.execute();
+        } else if (action.kind === "newWindow") {
+            const entry = entryFor(action.appId);
+            if (entry)
+                entry.execute();
+            else
+                Quickshell.execDetached([action.appId]);
+        } else if (action.kind === "quit") {
+            const windows = Hyprland.toplevels.values.map(toplevel => ({
+                appId: windowAppId(toplevel),
+                address: toplevel.address
+            }));
+            for (const command of AppMenuModel.quitCommands(action.appId, windows))
+                Quickshell.execDetached(command);
+        }
+    }
+}

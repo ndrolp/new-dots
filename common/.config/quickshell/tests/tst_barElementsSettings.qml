@@ -251,6 +251,15 @@ TestCase {
         verify(!all(cava, child => child.checked !== undefined && child.toggled === undefined)[0].checked);
     }
 
+    // A profile that doesn't list it yet still offers it, turned off.
+    function test_theAppMenuIsListedByItsNameTurnedOff() {
+        const built = make();
+        const appMenu = elementRow(built.item, "App menu");
+
+        verify(appMenu);
+        verify(!all(appMenu, child => child.checked !== undefined && child.toggled === undefined)[0].checked);
+    }
+
     function test_theRecordingIndicatorIsListedByItsName() {
         const built = make();
 

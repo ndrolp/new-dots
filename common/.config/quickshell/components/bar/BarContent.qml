@@ -37,6 +37,7 @@ Item {
         "arch": archButton,
         "systemMonitor": systemMonitor,
         "currentApp": currentApp,
+        "appMenu": appMenu,
         "workspaces": workspaces
     }, barElementItems.items)
 
@@ -257,6 +258,19 @@ Item {
         appearance: root.appearance
         monitorScreen: root.monitorScreen
         enabled: root.elementVisible("currentApp")
+    }
+
+    AppMenu {
+        id: appMenu
+
+        anchors.verticalCenter: parent.verticalCenter
+        x: root.elementX("appMenu")
+        grouped: root.elementGrouped("appMenu")
+        appearance: root.appearance
+        monitorScreen: root.monitorScreen
+        enabled: root.elementVisible("appMenu")
+        popupOpen: root.activePopup === "appMenu"
+        onPopupRequested: root.popupRequested("appMenu")
     }
 
     SystemMonitor {

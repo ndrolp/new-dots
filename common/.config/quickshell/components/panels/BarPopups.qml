@@ -40,6 +40,10 @@ Item {
         keepAwake: root.keepAwake
     }
 
+    AppMenuPopup {
+        popups: root
+    }
+
     MediaPopup {
         popups: root
     }

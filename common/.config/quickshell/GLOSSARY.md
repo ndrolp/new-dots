@@ -36,6 +36,10 @@ _Avoid_: System (para el elemento de la barra)
 El bar element que dibuja lo que suena por la audio output actual como barras de frecuencia que se mueven con lo que suena. Se oculta mientras no suena nada y vuelve a aparecer en cuanto hay sonido. No confundir con el bar element *audio*, que muestra y cambia el volumen.
 _Avoid_: Visualizer, waveform, espectro
 
+**App menu** (menú de la app):
+El bar element que muestra en negrita el nombre de la app enfocada (el `Name` de su `.desktop`, o su appId si no tiene) y, al pulsarlo, abre como popup el menú de la app: las acciones de su `.desktop` (p. ej. «New Private Window» de Firefox), *New Window* y *Quit <App>*, que pide cerrar todas sus ventanas sin confirmar nada (las apps con trabajo sin guardar preguntan ellas). Sigue a la ventana enfocada como *CurrentApp*: solo en la barra del monitor enfocado y con una ventana enfocada en su workspace. Empieza desactivado. Sus menús salen de un único modelo (`components/AppMenuModel.js`). No es *CurrentApp*, que es otro bar element; un bar profile puede llevar uno, otro o los dos.
+_Avoid_: Global menu, menubar, CurrentApp (para este elemento)
+
 **Recording indicator** (indicador de grabación):
 El bar element que aparece solo mientras se graba la pantalla y muestra cuánto tiempo lleva la grabación. Cuenta tanto la grabación de la propia shell (la que se inicia desde la captura de pantalla con `wf-recorder`) como cada *screen share*. Al pulsarlo se para la grabación de la propia shell, igual que la tecla para pararla; si solo comparten otras apps, dice cuáles son.
 _Avoid_: REC, botón de grabación, screen recording (para el elemento de la barra)

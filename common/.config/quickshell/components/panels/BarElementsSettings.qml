@@ -25,6 +25,7 @@ Column {
             "arch": "Arch icon",
             "systemMonitor": "System monitor",
             "currentApp": "Current app",
+            "appMenu": "App menu",
             "workspaces": "Workspaces",
             "notifications": "Control center",
             "recording": "Recording indicator",

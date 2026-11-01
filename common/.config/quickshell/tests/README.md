@@ -76,7 +76,11 @@ leave when their app closes them
 the active colorscheme's colours read from its colours file,
 falling back to everforestdark's (`config/ColorschemeColors.js`), and which
 colorscheme preview the colorscheme selector runs, one at a time
-(`components/panels/ColorschemePreview.js`).
+(`components/panels/ColorschemePreview.js`), and the app menu: the menus
+its model builds for the focused window, the app-name menu and how Quit
+closes every window of the app (`components/AppMenuModel.js`), and how a
+menu is drawn, with submenus opening in place
+(`components/panels/AppMenuList.qml`).
 They run with QtTest outside of `qs`:
 
 ```sh
