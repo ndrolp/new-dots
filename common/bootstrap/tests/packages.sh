@@ -398,6 +398,17 @@ test_every_required_service_comes_from_a_core_package() {
     done
 }
 
+# The app menu shows an app's own menus only when GTK apps export them (appmenu-gtk-module) and
+# something owns com.canonical.AppMenu.Registrar (the registrar), so even --minimal gets both.
+test_the_app_menu_dependencies_are_core_packages() {
+    OUT=""
+    CALLS=/dev/null
+    grep -qx appmenu-gtk-module "$REPO/common/packages/core.txt" \
+        || fail "appmenu-gtk-module is not in core"
+    grep -qx vala-panel-appmenu-registrar-git "$REPO/common/packages/core-aur.txt" \
+        || fail "vala-panel-appmenu-registrar-git is not in core-aur"
+}
+
 test_hardware_installs_the_intel_set_on_an_intel_machine() {
     setup_fakes
     make_lists "${HW_LISTS[@]}"

@@ -59,6 +59,10 @@ hl.env("HYPRCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_THEME", "Capitaine Cursors")
 hl.env("HYPRCURSOR_SIZE", "24")
 hl.env("ELECTRON_OZONE_PLATFORM_HINT", "wayland")
+-- GTK apps (under XWayland) export their menus over DBusMenu for the bar's app menu. The registrar
+-- that collects them (com.canonical.AppMenu.Registrar) is started by D-Bus activation on first use:
+-- vala-panel-appmenu-registrar ships its service file, so it needs no autostart line.
+hl.env("GTK_MODULES", "appmenu-gtk-module")
 
 hl.config({
 	cursor = {
