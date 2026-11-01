@@ -9,7 +9,7 @@ import QtQuick
 // popover. It follows Hyprland's focused window and
 // hands over that window's menus raw as `exported`, for `exportedPid`;
 // AppMenuModel.exportedMenus makes menus of them. With no registrar, an app
-// that exports nothing, or no python3-gi, `exported` stays null and the app
+// that exports nothing, or no python-gobject, `exported` stays null and the app
 // menu shows the shell's menus only; the reason goes to the Quickshell log
 // once.
 QtObject {
@@ -47,8 +47,8 @@ QtObject {
     }
 
     function send(message) {
-        if (bridge.running)
-            bridge.write(JSON.stringify(message) + "\n");
+        if (helper.running)
+            helper.write(JSON.stringify(message) + "\n");
     }
 
     function sendFocus() {
@@ -67,15 +67,8 @@ QtObject {
                 Hyprland.refreshToplevels();
         }
     }
-    onNeededChanged: {
-        if (!needed) {
-            exported = null;
-            exportedPid = -1;
-        }
-    }
-
     property var process: Process {
-        id: bridge
+        id: helper
 
         running: root.needed
         command: ["python3", Quickshell.shellDir + "/services/app-menu-bridge.py"]
@@ -100,10 +93,11 @@ QtObject {
             }
         }
 
+        // Stopping it (nothing shows the app menu) ends here too.
         onExited: exitCode => {
             root.exported = null;
             root.exportedPid = -1;
-            if (exitCode !== 0)
+            if (exitCode !== 0 && root.needed)
                 console.log("app menu: app-menu-bridge.py exited with " + exitCode
                     + "; showing the shell menus only");
         }

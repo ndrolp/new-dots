@@ -32,7 +32,7 @@ import sys
 try:
     from gi.repository import Gio, GLib
 except ImportError:
-    print(json.dumps({"log": "app menu: python3-gi is missing; showing the shell menus only"}), flush=True)
+    print(json.dumps({"log": "app menu: python-gobject is missing; showing the shell menus only"}), flush=True)
     sys.exit(0)
 
 REGISTRAR = "com.canonical.AppMenu.Registrar"

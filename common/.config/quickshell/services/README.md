@@ -90,10 +90,11 @@ display, `3`/`4` for recordings when `wf-recorder` is installed, and `R` or
 
 `AppMenuBridge.qml` is the shell's one bridge to the menus apps export over
 D-Bus, which the app menu bar element shows after the app's name. It runs
-`app-menu-bridge.py` (python3 with gi) while something shows the app menu
-(`setUsing`): an enabled app menu bar element, or the app menu popover, which
-can open at any time and so keeps it running, tells it the focused window (pid, title, whether it runs
-under XWayland) and keeps what it answers as `exported`, for `exportedPid`.
+`app-menu-bridge.py` (python3 with python-gobject) while something shows the
+app menu (`setUsing`): an enabled app menu bar element, or the app menu
+popover, which can open at any time and so keeps it running. It tells the
+script the focused window (pid, title, whether it runs under XWayland) and
+keeps what it answers as `exported`, for `exportedPid`.
 The script finds the window's menu two ways, both only for XWayland windows:
 DBusMenu menus registered with `com.canonical.AppMenu.Registrar` (Electron,
 Java, Qt on X11), and the `org.gtk.Menus` menubar GTK apps export through
@@ -104,6 +105,6 @@ focused window's when the D-Bus connection exporting it has the window's pid
 same title wins. It follows the menu's change signals and hands it over again
 when it changes, and runs the items chosen (`activate`). What it hands over is
 raw; `components/AppMenuModel.js` (`exportedMenus`) makes menus of it, tested
-without D-Bus. With no registrar, no `xprop`, no python3-gi or an app that
+without D-Bus. With no registrar, no `xprop`, no python-gobject or an app that
 exports nothing, the app menu shows the shell's menus only; the reason goes to
 the Quickshell log once.
