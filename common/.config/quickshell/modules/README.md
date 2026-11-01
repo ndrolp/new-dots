@@ -14,7 +14,7 @@ adding or editing one file here.
   lives in `SwitchTo.js` (tested), which the control center's tiles use too.
   A module that opens other parts gets them as properties (`ControlCenter`,
   `QuickSettings`, `UnifiedSearch`).
-- One module per panel: `ApplicationLauncher`, `AudioOutputSelector`,
+- One module per panel: `ApplicationLauncher`, `AppMenuPopover`, `AudioOutputSelector`,
   `ClipboardSelector`, `CommandLauncher`, `KeybindCheatsheet`,
   `PowerMenu`, `QuickSearch`, `QuickSettings`, `ScreenCapture` (the chooser),
   `Settings`, `ThemeSelector`, `UnifiedSearch`, `WallpaperSelector`,
