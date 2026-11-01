@@ -1,6 +1,7 @@
 # Core desktop: always installed.
 # Official repo packages, installed with pacman.
 alacritty
+appmenu-gtk-module
 arandr
 autorandr
 awww
