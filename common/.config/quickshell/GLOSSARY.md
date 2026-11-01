@@ -41,7 +41,7 @@ El bar element que muestra en negrita el nombre de la app enfocada (el `Name` de
 _Avoid_: Global menu, menubar, CurrentApp (para este elemento)
 
 **App menu popover** (menú de la app en el cursor):
-El menú de la app enfocada que SUPER+A abre en el cursor del ratón, en el monitor enfocado, como una sola lista: primero las entradas del menú con el nombre de la app y después cada uno de los demás menús del modelo como submenú, así que un menú que se añade al modelo aparece aquí sin más. Sus entradas hacen lo mismo que en el popup del *App menu*. Se cierra al perder el foco, con Escape o al elegir una entrada; sin ventana enfocada no se abre. No es un popup: no pertenece a ningún bar element.
+El menú de la app enfocada que SUPER+A abre en el cursor del ratón, en el monitor enfocado, como una sola lista: primero las entradas del menú con el nombre de la app y después cada uno de los demás menús del modelo como submenú, así que un menú que se añade al modelo aparece aquí sin más. Sus entradas hacen lo mismo que en el popup del *App menu*. Se cierra al perder el foco, con Escape o al elegir una entrada. Sin ventana enfocada abre el menú *Desktop*: *Unified Search*, *Settings Panel* y *Change Wallpaper*. No es un popup: no pertenece a ningún bar element.
 _Avoid_: Context menu, right-click menu, Popup (para esto)
 
 **Recording indicator** (indicador de grabación):
