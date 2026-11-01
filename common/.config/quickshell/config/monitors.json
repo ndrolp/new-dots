@@ -103,7 +103,7 @@
             }
         },
         "Samsung Display Corp. ATNA40HQ01-0": {
-            "barProfile": "media",
+            "barProfile": "minimal",
             "barVisible": true,
             "desktopWidgets": {
                 "backgroundClock": {

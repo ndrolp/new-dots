@@ -372,10 +372,11 @@ Column {
         }
     }
 
-    // Collapsed, the first 6 visible tiles; expanded, every visible tile.
-    readonly property var shownTiles: body.expanded
-        ? ControlCenterTiles.visibleTiles(body.barAppearance.controlCenterTiles)
-        : ControlCenterTiles.collapsedTiles(body.barAppearance.controlCenterTiles)
+    // Every visible tile, created once: collapsed shows only the first 6
+    // (ControlCenterTiles.collapsedTiles), so switching stages doesn't
+    // rebuild them.
+    readonly property var shownTiles: ControlCenterTiles.visibleTiles(
+        body.barAppearance.controlCenterTiles)
 
     Grid {
         id: tiles
@@ -393,8 +394,10 @@ Column {
 
             delegate: Loader {
                 required property string modelData
+                required property int index
 
                 width: tiles.tileWidth
+                visible: body.expanded || index < ControlCenterTiles.collapsedRowSize
                 sourceComponent: body.tileComponents[modelData] || null
             }
         }

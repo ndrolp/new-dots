@@ -39,6 +39,11 @@ BarPopup {
             NumberAnimation {
                 id: heightAnimation
 
+                onRunningChanged: {
+                    if (!running)
+                        root.heldHeight = 0;
+                }
+
                 duration: root.appearance.motion.long
                 easing.type: root.appearance.motion.easing
             }
@@ -48,6 +53,12 @@ BarPopup {
             id: layout
 
             width: parent.width
+            // The window takes the larger of both stages for the whole
+            // animation; the surface grows or shrinks inside it.
+            onHeightChanged: {
+                if (root.open && root.reveal === 1)
+                    root.heldHeight = Math.max(root.heldHeight, stageClip.height, height);
+            }
             appearance: root.appearance
             open: root.open
             controlsEnabled: root.controlCenter.controlsEnabled

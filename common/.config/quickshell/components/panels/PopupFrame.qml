@@ -31,6 +31,10 @@ PopupWindow {
         joinRadius: joinRadius
     })
     property alias reveal: surface.reveal
+    // While a popup resizes itself in an animation it holds the window tall
+    // enough for contents of this height (the larger end), so the window is
+    // resized once instead of every frame; 0 lets it follow the surface.
+    property real heldHeight: 0
     default property alias contents: surface.contents
     // Hidden while still open, e.g. after losing focus.
     signal dismissed()
@@ -63,7 +67,7 @@ PopupWindow {
     })
     color: "transparent"
 
-    implicitHeight: surface.implicitHeight + room.top + room.bottom
+    implicitHeight: Math.max(surface.implicitHeight, heldHeight + surface.padding * 2) + room.top + room.bottom
 
     PopupSurface {
         id: surface

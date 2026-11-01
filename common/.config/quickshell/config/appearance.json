@@ -252,12 +252,16 @@
                     },
                     {
                         "enabled": true,
+                        "id": "keepAwake"
+                    },
+                    {
+                        "enabled": true,
                         "id": "tray"
                     }
                 ]
             },
             "barHeight": 30,
-            "barOpacity": 85,
+            "barOpacity": 80,
             "barTransparent": false,
             "barTransparentBorder": false,
             "elementVerticalPadding": 8,
@@ -536,9 +540,67 @@
             "workspacePadding": 3
         }
     },
+    "controlCenterTiles": [
+        {
+            "enabled": true,
+            "id": "wifi"
+        },
+        {
+            "enabled": true,
+            "id": "bluetooth"
+        },
+        {
+            "enabled": true,
+            "id": "doNotDisturb"
+        },
+        {
+            "enabled": true,
+            "id": "microphone"
+        },
+        {
+            "enabled": true,
+            "id": "keepAwake"
+        },
+        {
+            "enabled": true,
+            "id": "nightLight"
+        },
+        {
+            "enabled": true,
+            "id": "audioOutput"
+        },
+        {
+            "enabled": true,
+            "id": "lock"
+        },
+        {
+            "enabled": true,
+            "id": "displaysOff"
+        },
+        {
+            "enabled": true,
+            "id": "powerProfile"
+        },
+        {
+            "enabled": true,
+            "id": "screenCapture"
+        },
+        {
+            "enabled": true,
+            "id": "clipboard"
+        },
+        {
+            "enabled": true,
+            "id": "power"
+        },
+        {
+            "enabled": true,
+            "id": "capsLock"
+        }
+    ],
     "doNotDisturb": false,
-    "nightLightTemperature": 4000,
+    "nightLightTemperature": 3800,
     "notificationPopupLocation": "top-right",
     "reduceMotion": false,
-    "schemaVersion": 9
+    "schemaVersion": 10
 }
