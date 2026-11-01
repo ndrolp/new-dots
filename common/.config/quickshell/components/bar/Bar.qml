@@ -167,6 +167,7 @@ Variants {
                 appearance: panel.barAppearance
                 barWindow: panel
                 popupAnchorProvider: barContent
+                appMenuId: barContent.appMenuId
                 activePopup: panel.activePopup
                 pomodoro: panel.pomodoro
                 keepAwake: panel.keepAwake

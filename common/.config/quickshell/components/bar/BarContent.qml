@@ -24,6 +24,9 @@ Item {
     required property var systemMonitor
     required property var workspaceService
 
+    // The menu the app menu's Popup shows (AppMenuPopup.menuId).
+    readonly property string appMenuId: appMenu.menuId
+
     signal configRequested(var screen)
     signal popupRequested(string popup)
     readonly property var zoneNames: ["left", "center", "right"]
@@ -134,7 +137,11 @@ Item {
         const item = elementItem(element);
 
         const offset = item.parent === barElementItems ? barElementItems.x : 0;
-        return { x: offset + item.x, width: item.width };
+        // An element with several triggers (the app menu's titles) says
+        // which part opened the popup.
+        const area = item.popupTriggerArea || null;
+        return area ? { x: offset + item.x + area.x, width: area.width }
+            : { x: offset + item.x, width: item.width };
     }
 
     Config.Theme {

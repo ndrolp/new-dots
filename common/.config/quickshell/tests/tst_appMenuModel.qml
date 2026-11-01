@@ -97,4 +97,71 @@ TestCase {
 
         compare(AppMenuModel.quitCommands("firefox", windows), []);
     }
+
+    // The Window menu (#107): acting on the focused window through Hyprland.
+    readonly property var tiledWindow: ({ address: "0xa1", floating: false, fullscreen: false, pinned: false })
+
+    function test_theWindowMenuComesAfterTheAppNameMenu() {
+        const menus = AppMenuModel.menus({ app: firefox, window: tiledWindow });
+
+        compare(menus.map(menu => menu.id), ["app", "window"]);
+        compare(menus[1].title, "Window");
+    }
+
+    function test_noFocusedWindowHasNoWindowMenu() {
+        compare(AppMenuModel.menus({ app: firefox, window: null }).map(menu => menu.id), ["app"]);
+    }
+
+    function test_aTiledWindowOffersFloatFullscreenPinMoveAndClose() {
+        const menu = AppMenuModel.windowMenu(tiledWindow);
+
+        compare(labels(menu.items), ["Float", "Fullscreen", "Pin", "-", "Move to Workspace", "-", "Close Window"]);
+    }
+
+    function test_theLabelsFollowTheWindowsState() {
+        const menu = AppMenuModel.windowMenu({ address: "0xa1", floating: true, fullscreen: true, pinned: true });
+
+        compare(labels(menu.items).slice(0, 3), ["Tile", "Exit Fullscreen", "Unpin"]);
+    }
+
+    function test_moveToWorkspaceIsASubmenuOfWorkspacesOneToTen() {
+        const move = AppMenuModel.windowMenu(tiledWindow).items[4];
+
+        compare(move.kind, "submenu");
+        compare(labels(move.items), ["Workspace 1", "Workspace 2", "Workspace 3", "Workspace 4", "Workspace 5",
+            "Workspace 6", "Workspace 7", "Workspace 8", "Workspace 9", "Workspace 10"]);
+        compare(move.items[2].action, { kind: "window", operation: "moveToWorkspace", address: "0xa1", workspace: 3 });
+    }
+
+    function test_eachWindowItemActsOnThatWindow() {
+        const items = AppMenuModel.windowMenu(tiledWindow).items;
+
+        compare(items[0].action, { kind: "window", operation: "toggleFloating", address: "0xa1" });
+        compare(items[1].action, { kind: "window", operation: "toggleFullscreen", address: "0xa1" });
+        compare(items[2].action, { kind: "window", operation: "togglePin", address: "0xa1" });
+        compare(items[6].action, { kind: "window", operation: "close", address: "0xa1" });
+    }
+
+    function test_windowActionsBecomeHyprlandDispatches() {
+        function command(operation, extra) {
+            return AppMenuModel.windowCommand(Object.assign({ kind: "window", operation: operation, address: "a1" }, extra));
+        }
+
+        compare(command("toggleFloating"),
+            ["hyprctl", "dispatch", "hl.dsp.window.float({ action = \"toggle\", window = \"address:0xa1\" })"]);
+        compare(command("toggleFullscreen"),
+            ["hyprctl", "dispatch", "hl.dsp.window.fullscreen({ action = \"toggle\", window = \"address:0xa1\" })"]);
+        compare(command("togglePin"),
+            ["hyprctl", "dispatch", "hl.dsp.window.pin({ window = \"address:0xa1\" })"]);
+        compare(command("moveToWorkspace", { workspace: 7 }),
+            ["hyprctl", "dispatch", "hl.dsp.window.move({ workspace = 7, window = \"address:0xa1\" })"]);
+        compare(command("close"),
+            ["hyprctl", "dispatch", "hl.dsp.window.close({ window = \"address:0xa1\" })"]);
+    }
+
+    function test_aWindowActionWithoutAUsableAddressOrWorkspaceDoesNothing() {
+        compare(AppMenuModel.windowCommand({ kind: "window", operation: "close", address: "0x1\" }) evil" }), null);
+        compare(AppMenuModel.windowCommand({ kind: "window", operation: "moveToWorkspace", address: "0xa1", workspace: "1 }) evil" }), null);
+        compare(AppMenuModel.windowCommand({ kind: "window", operation: "unknown", address: "0xa1" }), null);
+    }
 }

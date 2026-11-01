@@ -3,10 +3,11 @@ import QtQuick
 import "../../config" as Config
 import ".." as Components
 
-// The app menu bar element: the focused app's name in bold (its .desktop
-// Name, or its appId), opening the app-name menu as a Popup. It follows the
-// focused window like CurrentApp: shown only on the focused monitor's bar,
-// and only while a window there is focused.
+// The app menu bar element: one title per menu of AppMenuModel, the focused
+// app's name in bold first (its .desktop Name, or its appId), then Window.
+// Clicking a title opens that menu as a Popup (`menuId` says which). It
+// follows the focused window like CurrentApp: shown only on the focused
+// monitor's bar, and only while a window there is focused.
 Item {
     id: root
 
@@ -16,29 +17,46 @@ Item {
     required property var monitorScreen
     property bool enabled: true
     property bool popupOpen: false
+    // The menu the Popup shows: the one whose title was clicked last.
+    property string menuId: ""
     signal popupRequested()
 
     readonly property var monitor: Hyprland.monitorFor(monitorScreen)
-    // The first menu's title: the app's name, as the app-name menu is first.
-    readonly property string currentTitle: source.menus.length > 0 ? source.menus[0].title : ""
-    // Held while its Popup is open, so the element doesn't move under it.
-    property string title: currentTitle
+    readonly property var currentMenus: source.menus.map(menu => ({ id: menu.id, title: menu.title }))
+    // Held while its Popup is open, so the titles don't move under it.
+    property var menus: currentMenus
     readonly property real titleMaximumWidth: monitorScreen
         ? Math.max(120, Math.min(260, monitorScreen.width * 0.12)) : 260
+    // Where the open menu's title sits in this element, so the Popup opens
+    // under it rather than under the whole element.
+    readonly property var popupTriggerArea: {
+        const index = menus.findIndex(menu => menu.id === menuId);
+        const title = index >= 0 && titleRepeater.count > index ? titleRepeater.itemAt(index) : null;
+        return title ? { x: background.x + titleRow.x + title.x, width: title.width } : null;
+    }
 
-    visible: enabled && title !== "" && monitor !== null && Hyprland.focusedWorkspace
+    // Opens the menu `id`; while the Popup is open on another menu it
+    // switches to this one instead of closing.
+    function titleClicked(id) {
+        const switching = popupOpen && menuId !== id;
+        menuId = id;
+        if (!switching)
+            popupRequested();
+    }
+
+    visible: enabled && menus.length > 0 && monitor !== null && Hyprland.focusedWorkspace
         && Hyprland.focusedWorkspace.monitor !== null
         && Hyprland.focusedWorkspace.monitor.name === monitor.name
     width: visible ? background.width : 0
     height: background.height
 
-    onCurrentTitleChanged: {
+    onCurrentMenusChanged: {
         if (!popupOpen)
-            title = currentTitle;
+            menus = currentMenus;
     }
     onPopupOpenChanged: {
         if (!popupOpen)
-            title = currentTitle;
+            menus = currentMenus;
     }
 
     Components.AppMenuSource {
@@ -59,51 +77,76 @@ Item {
     Rectangle {
         id: background
 
-        width: name.width + 16
+        width: titleRow.width + 8
         height: root.appearance.barTransparent
             ? root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
             : Math.max(1, root.appearance.barHeight - (root.appearance.elementVerticalPadding * 2))
         radius: root.appearance.radius
-        color: hover.hovered || root.popupOpen ? theme.surfaceHover
-            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
-                || root.grouped ? "transparent" : theme.surface
+        color: root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
+            || root.grouped ? "transparent" : theme.surface
         border.width: root.appearance.barTransparentBorder && !root.grouped ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
-        Behavior on color {
-            ColorAnimation {
-                duration: root.appearance.motion.short
-            }
-        }
+        Row {
+            id: titleRow
 
-        HoverHandler {
-            id: hover
-        }
-
-        Text {
-            id: name
-
-            // Centers the capital letters, not the line box.
             anchors.centerIn: parent
-            anchors.alignWhenCentered: false
-            anchors.verticalCenterOffset: height / 2 - (baselineOffset - nameMetrics.capitalHeight / 2)
-            width: Math.min(root.titleMaximumWidth, implicitWidth)
-            text: root.title
-            color: theme.text
-            elide: Text.ElideRight
-            font.pixelSize: root.appearance.textSize
-            font.bold: true
 
-            FontMetrics {
-                id: nameMetrics
+            Repeater {
+                id: titleRepeater
 
-                font: name.font
+                model: root.menus
+
+                Rectangle {
+                    id: title
+
+                    required property var modelData
+                    required property int index
+                    readonly property bool open: root.popupOpen && root.menuId === modelData.id
+
+                    width: name.width + 12
+                    height: Math.max(1, background.height - 4)
+                    radius: Math.max(0, root.appearance.radius - 2)
+                    color: hover.hovered || open ? theme.surfaceHover : "transparent"
+
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: root.appearance.motion.short
+                        }
+                    }
+
+                    HoverHandler {
+                        id: hover
+                    }
+
+                    Text {
+                        id: name
+
+                        // Centers the capital letters, not the line box.
+                        anchors.centerIn: parent
+                        anchors.alignWhenCentered: false
+                        anchors.verticalCenterOffset: height / 2 - (baselineOffset - nameMetrics.capitalHeight / 2)
+                        width: Math.min(root.titleMaximumWidth, implicitWidth)
+                        text: title.modelData.title
+                        color: theme.text
+                        elide: Text.ElideRight
+                        font.pixelSize: root.appearance.textSize
+                        // The app's name stands out from the other titles.
+                        font.bold: title.index === 0
+
+                        FontMetrics {
+                            id: nameMetrics
+
+                            font: name.font
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: root.titleClicked(title.modelData.id)
+                    }
+                }
             }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: root.popupRequested()
         }
     }
 }

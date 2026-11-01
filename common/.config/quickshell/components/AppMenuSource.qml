@@ -28,7 +28,30 @@ QtObject {
         } : null
     }
     readonly property string appName: app ? AppMenuModel.appName(app) : ""
-    readonly property var menus: AppMenuModel.menus({ app: app })
+    // The focused window as AppMenuModel's Window menu takes it.
+    readonly property var window: {
+        if (!focusedWindow)
+            return null;
+        const ipc = focusedWindow.lastIpcObject || {};
+        return {
+            address: focusedWindow.address,
+            floating: ipc.floating === true,
+            fullscreen: (ipc.fullscreen || 0) > 0,
+            pinned: ipc.pinned === true
+        };
+    }
+    readonly property var menus: AppMenuModel.menus({ app: app, window: window })
+
+    // Hyprland's window state (floating, fullscreen, pinned) is only read on
+    // a refresh, so one is asked for whenever it changes.
+    property Connections windowStateEvents: Connections {
+        target: Hyprland
+
+        function onRawEvent(event) {
+            if (["changefloatingmode", "fullscreen", "pin"].includes(event.name))
+                Hyprland.refreshToplevels();
+        }
+    }
 
     function windowAppId(toplevel) {
         if (toplevel.wayland && toplevel.wayland.appId)
@@ -61,6 +84,10 @@ QtObject {
                 address: toplevel.address
             }));
             for (const command of AppMenuModel.quitCommands(action.appId, windows))
+                Quickshell.execDetached(command);
+        } else if (action.kind === "window") {
+            const command = AppMenuModel.windowCommand(action);
+            if (command)
                 Quickshell.execDetached(command);
         }
     }

@@ -15,6 +15,8 @@ Item {
     // stage and the panels its tiles open, handed to its popup as one.
     required property var controlCenter
     property string activePopup: ""
+    // Which of the app menu's menus its Popup shows (AppMenuPopup.menuId).
+    property string appMenuId: ""
     // The bar content; places popups under the bar element that opened them.
     property var popupAnchorProvider: null
     signal popupClosed(string popup)
@@ -42,6 +44,7 @@ Item {
 
     AppMenuPopup {
         popups: root
+        menuId: root.appMenuId
     }
 
     MediaPopup {

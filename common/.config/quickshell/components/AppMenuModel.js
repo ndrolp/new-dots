@@ -15,6 +15,8 @@
 //   { kind: "desktopAction", appId, actionId }   a .desktop action
 //   { kind: "newWindow", appId }                 runs the app again
 //   { kind: "quit", appId }                      closes every window of the app
+//   { kind: "window", operation, address, workspace? }
+//                                                acts on one window, see windowCommand
 
 const separator = Object.freeze({ kind: "separator" });
 
@@ -48,11 +50,17 @@ function appNameMenu(app) {
     };
 }
 
-// Every menu for the focused window, in order. `context` is { app }, `app`
-// null when no window is focused. Later menus (Window, Desktop, the app's
+// Every menu for the focused window, in order. `context` is { app, window },
+// `app` null when no window is focused, `window` the focused window as
+// windowMenu takes it (or null, leaving the Window menu out). Later menus (Window, Desktop, the app's
 // own global menu) are added to this list.
 function menus(context) {
-    return context.app ? [appNameMenu(context.app)] : [];
+    if (!context.app)
+        return [];
+    const list = [appNameMenu(context.app)];
+    if (context.window)
+        list.push(windowMenu(context.window));
+    return list;
 }
 
 // The focused window, as CurrentApp follows it: Hyprland's active window
@@ -76,4 +84,55 @@ function quitCommands(appId, windows) {
         .filter(window => window.appId === appId && windowAddress(window.address) !== "")
         .map(window => ["hyprctl", "dispatch",
             "hl.dsp.window.close({ window = \"address:" + windowAddress(window.address) + "\" })"]);
+}
+
+// The Window menu: Float/Tile, Fullscreen, Pin, Move to Workspace 1-10 and
+// Close Window, each acting on `window`, which is the focused window as
+// { address, floating, fullscreen, pinned }. The labels say what choosing
+// them does to it now.
+function windowMenu(window) {
+    function windowAction(label, operation, extra) {
+        return action(label, Object.assign({ kind: "window", operation: operation, address: window.address }, extra));
+    }
+
+    const workspaces = [];
+    for (let workspace = 1; workspace <= 10; workspace++)
+        workspaces.push(windowAction("Workspace " + workspace, "moveToWorkspace", { workspace: workspace }));
+
+    return {
+        id: "window",
+        title: "Window",
+        items: [
+            windowAction(window.floating ? "Tile" : "Float", "toggleFloating"),
+            windowAction(window.fullscreen ? "Exit Fullscreen" : "Fullscreen", "toggleFullscreen"),
+            windowAction(window.pinned ? "Unpin" : "Pin", "togglePin"),
+            separator,
+            { kind: "submenu", label: "Move to Workspace", items: workspaces },
+            separator,
+            windowAction("Close Window", "close")
+        ]
+    };
+}
+
+// The hyprctl command for a Window menu action, or null when it can't be
+// run safely (no usable address, a workspace that isn't a number).
+function windowCommand(windowAction) {
+    const address = windowAddress(windowAction.address);
+    if (address === "")
+        return null;
+    const target = "window = \"address:" + address + "\"";
+    let dispatch;
+    if (windowAction.operation === "toggleFloating")
+        dispatch = "hl.dsp.window.float({ action = \"toggle\", " + target + " })";
+    else if (windowAction.operation === "toggleFullscreen")
+        dispatch = "hl.dsp.window.fullscreen({ action = \"toggle\", " + target + " })";
+    else if (windowAction.operation === "togglePin")
+        dispatch = "hl.dsp.window.pin({ " + target + " })";
+    else if (windowAction.operation === "close")
+        dispatch = "hl.dsp.window.close({ " + target + " })";
+    else if (windowAction.operation === "moveToWorkspace" && Number.isInteger(windowAction.workspace))
+        dispatch = "hl.dsp.window.move({ workspace = " + windowAction.workspace + ", " + target + " })";
+    else
+        return null;
+    return ["hyprctl", "dispatch", dispatch];
 }

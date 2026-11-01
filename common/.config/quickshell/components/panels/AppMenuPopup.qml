@@ -1,7 +1,8 @@
 import QtQuick
 import ".." as Components
 
-// The app menu's Popup: the focused app's app-name menu, from AppMenuModel.
+// The app menu's Popup: one of the focused window's menus from AppMenuModel
+// (the app-name menu, Window...), the one whose title was clicked.
 // Choosing an item runs its action and closes the popup.
 BarPopup {
     id: root
