@@ -1,5 +1,6 @@
 import QtQuick
 import QtTest
+import "../components/AppMenuModel.js" as AppMenuModel
 import "../components/panels/AppMenuPopover.js" as AppMenuPopover
 
 // The app menu popover's list: the app-name menu's items first, then every
@@ -28,6 +29,36 @@ TestCase {
             { kind: "separator" },
             { kind: "submenu", label: "Window", items: windowMenu.items }
         ]);
+    }
+
+    // A focused app that exports its own menus (File, View) over DBusMenu.
+    readonly property var exportingApp: ({ appId: "editor", entry: { name: "Editor", actions: [] } })
+    readonly property var tiledWindow: ({ address: "0xa1", floating: false, fullscreen: false, pinned: false })
+    readonly property var editorMenu: ({ kind: "dbusmenu", service: ":1.42", path: "/menu", layout: [0, {}, [
+        [1, { label: "_File", "children-display": "submenu" }, [[11, { label: "_Open…" }, []]]],
+        [2, { label: "_View", "children-display": "submenu" }, [[21, { label: "Zoom In" }, []]]]
+    ]] })
+
+    function popoverFor(exported) {
+        return AppMenuPopover.items(AppMenuModel.menus({ app: exportingApp, window: tiledWindow, exported: exported }));
+    }
+
+    function test_anExportingAppsOwnMenusAreSubmenusBeforeWindow() {
+        const submenus = popoverFor(editorMenu).filter(item => item.kind === "submenu");
+
+        compare(submenus.map(item => item.label), ["File", "View", "Window"]);
+    }
+
+    function test_choosingAnItemInTheAppsOwnMenuClicksItInTheApp() {
+        const file = popoverFor(editorMenu).find(item => item.label === "File");
+
+        compare(file.items[0].action, { kind: "dbusMenu", service: ":1.42", path: "/menu", itemId: 11 });
+    }
+
+    function test_anAppExportingNothingShowsOnlyTheShellsMenus() {
+        const submenus = popoverFor(null).filter(item => item.kind === "submenu");
+
+        compare(submenus.map(item => item.label), ["Window"]);
     }
 
     // A 1920x1080 monitor to the right of another one; the cursor is in
