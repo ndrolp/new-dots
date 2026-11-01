@@ -65,6 +65,7 @@ pipewire
 pipewire-alsa
 pipewire-jack
 pipewire-pulse
+python-gobject
 playerctl
 polybar
 power-profiles-daemon
@@ -105,5 +106,6 @@ xdg-desktop-portal-hyprland
 xdg-user-dirs-gtk
 xdg-utils
 xorg-server
+xorg-xprop
 zellij
 zsh

@@ -4,11 +4,16 @@ import QtQuick
 import "AppMenuModel.js" as AppMenuModel
 
 // The app menu's live side: the focused app and its .desktop file, the menus
-// AppMenuModel builds for it, and running the actions those menus hand over.
-// Anything showing the app menu (its bar element and Popup, the popover)
-// keeps one; the menus themselves are AppMenuModel's.
+// it exports (through `bridge`), the menus AppMenuModel builds for it, and
+// running the actions those menus hand over. Anything showing the app menu
+// (its bar element and Popup, the popover) keeps one; the menus themselves
+// are AppMenuModel's.
 QtObject {
     id: root
+
+    // The shell's services/AppMenuBridge.qml; without one, only the shell's
+    // menus show.
+    property var bridge: null
 
     readonly property var focusedWindow: AppMenuModel.focusedWindow(Hyprland.activeToplevel,
         Hyprland.focusedWorkspace)
@@ -40,7 +45,12 @@ QtObject {
             pinned: ipc.pinned === true
         };
     }
-    readonly property var menus: AppMenuModel.menus({ app: app, window: window })
+    // What the focused app exports over D-Bus (see AppMenuModel.exportedMenus).
+    readonly property var exported: {
+        const pid = focusedWindow && focusedWindow.lastIpcObject ? focusedWindow.lastIpcObject.pid : undefined;
+        return bridge && pid !== undefined ? bridge.exportedFor(pid) : null;
+    }
+    readonly property var menus: AppMenuModel.menus({ app: app, window: window, exported: exported })
 
     // Hyprland's window state (floating, fullscreen, pinned) is only read on
     // a refresh, so one is asked for whenever it changes.
@@ -93,6 +103,9 @@ QtObject {
             const command = AppMenuModel.openPanelCommand(action.panel, Quickshell.shellDir);
             if (command.length > 0)
                 Quickshell.execDetached(command);
+        } else if (action.kind === "dbusMenu" || action.kind === "gtkAction") {
+            if (bridge)
+                bridge.activate(action);
         }
     }
 }

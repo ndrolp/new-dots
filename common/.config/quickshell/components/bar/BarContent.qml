@@ -17,6 +17,8 @@ Item {
     required property var notificationHistory
     required property var screenCapture
     required property var keepAwake
+    // The app menu's bridge to apps' own menus (services/AppMenuBridge.qml).
+    property var appMenuBridge: null
     // The screens other apps share (services/ScreenShares.qml).
     required property var screenShares
     required property var cava
@@ -275,6 +277,7 @@ Item {
         grouped: root.elementGrouped("appMenu")
         appearance: root.appearance
         monitorScreen: root.monitorScreen
+        bridge: root.appMenuBridge
         enabled: root.elementVisible("appMenu")
         popupOpen: root.activePopup === "appMenu"
         onPopupRequested: root.popupRequested("appMenu")

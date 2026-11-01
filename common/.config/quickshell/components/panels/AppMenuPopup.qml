@@ -1,20 +1,23 @@
 import QtQuick
 import ".." as Components
+import "../AppMenuModel.js" as AppMenuModel
 
 // The app menu's Popup: one of the focused window's menus from AppMenuModel
-// (the app-name menu, Window...), the one whose title was clicked.
+// (the app-name menu, the app's own, Window, the "»" overflow...), the one
+// whose title was clicked.
 // Choosing an item runs its action and closes the popup.
 BarPopup {
     id: root
 
-    // Which of AppMenuModel's menus to show; the first (the app-name menu)
-    // when none is named.
+    // Which of AppMenuModel's menus to show (AppMenuModel.findMenu); the
+    // first (the app-name menu) when none is named.
     property string menuId: ""
+    // The shell's services/AppMenuBridge.qml.
+    property var bridge: null
     // The menus as they were when it opened, so they hold still while it
     // has the keyboard.
     property var shownMenus: []
-    readonly property var menu: shownMenus.find(candidate => candidate.id === menuId)
-        || shownMenus[0] || null
+    readonly property var menu: AppMenuModel.findMenu(shownMenus, menuId)
 
     onOpenChanged: {
         if (open)
@@ -27,6 +30,8 @@ BarPopup {
 
     Components.AppMenuSource {
         id: source
+
+        bridge: root.bridge
     }
 
     Column {

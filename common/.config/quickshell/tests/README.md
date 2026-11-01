@@ -78,7 +78,10 @@ falling back to everforestdark's (`config/ColorschemeColors.js`), and which
 colorscheme preview the colorscheme selector runs, one at a time
 (`components/panels/ColorschemePreview.js`), and the app menu: the menus
 its model builds for the focused window, the app-name menu and how Quit
-closes every window of the app (`components/AppMenuModel.js`), and how a
+closes every window of the app, the app's own menus made from what it
+exports over DBusMenu or GTK's org.gtk.Menus, the "»" menu for the titles
+that don't fit and the shell's Window menu renamed Hyprland
+(`components/AppMenuModel.js`), and how a
 menu is drawn, with submenus opening in place
 (`components/panels/AppMenuList.qml`).
 They run with QtTest outside of `qs`:

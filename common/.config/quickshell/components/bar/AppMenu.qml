@@ -2,11 +2,14 @@ import Quickshell.Hyprland
 import QtQuick
 import "../../config" as Config
 import ".." as Components
+import "../AppMenuModel.js" as AppMenuModel
 
 // The app menu bar element: one title per menu of AppMenuModel, the focused
-// app's name in bold first (its .desktop Name, or its appId), then Window.
-// Clicking a title opens that menu as a Popup (`menuId` says which). It
-// follows the focused window like CurrentApp, shown only on the focused
+// app's name in bold first (its .desktop Name, or its appId), then the
+// app's own menus when it exports them (File, Edit...), then Window. The
+// app's titles that don't fit `menusMaximumWidth` go into a "»" menu before
+// Window. Clicking a title opens that menu as a Popup (`menuId` says which).
+// It follows the focused window like CurrentApp, shown only on the focused
 // monitor's bar. With no window focused there it shows "Desktop" and the
 // Desktop menu.
 Item {
@@ -16,6 +19,8 @@ Item {
     // Inside a group the shared background replaces this element's pill.
     property bool grouped: false
     required property var monitorScreen
+    // The shell's services/AppMenuBridge.qml, for the app's own menus.
+    property var bridge: null
     property bool enabled: true
     property bool popupOpen: false
     // The menu the Popup shows: the one whose title was clicked last.
@@ -23,17 +28,32 @@ Item {
     signal popupRequested()
 
     readonly property var monitor: Hyprland.monitorFor(monitorScreen)
-    readonly property var currentMenus: source.menus.map(menu => ({ id: menu.id, title: menu.title }))
+    readonly property var currentMenus: {
+        // Measured again when the font changes.
+        titleMetrics.font;
+        boldTitleMetrics.font;
+        const widths = source.menus.map((menu, index) => titleWidth(menu.title, index === 0));
+        return AppMenuModel.overflowSplit(source.menus, widths, menusMaximumWidth, titleWidth("»", false))
+            .map(menu => ({ id: menu.id, title: menu.title }));
+    }
     // Held while its Popup is open, so the titles don't move under it.
     property var menus: currentMenus
     readonly property real titleMaximumWidth: monitorScreen
         ? Math.max(120, Math.min(260, monitorScreen.width * 0.12)) : 260
+    // How wide all the titles may get together.
+    readonly property real menusMaximumWidth: monitorScreen ? Math.max(400, monitorScreen.width * 0.4) : 800
     // Where the open menu's title sits in this element, so the Popup opens
     // under it rather than under the whole element.
     readonly property var popupTriggerArea: {
         const index = menus.findIndex(menu => menu.id === menuId);
         const title = index >= 0 && titleRepeater.count > index ? titleRepeater.itemAt(index) : null;
         return title ? { x: background.x + titleRow.x + title.x, width: title.width } : null;
+    }
+
+    // How wide a title is drawn, as each title below draws it.
+    function titleWidth(text, bold) {
+        const metrics = bold ? boldTitleMetrics : titleMetrics;
+        return Math.min(titleMaximumWidth, Math.ceil(metrics.advanceWidth(text))) + 12;
     }
 
     // Opens the menu `id`; while the Popup is open on another menu it
@@ -62,6 +82,41 @@ Item {
 
     Components.AppMenuSource {
         id: source
+
+        bridge: root.bridge
+    }
+
+    // The app's own menus are only looked for while some app menu shows.
+    onEnabledChanged: {
+        if (bridge)
+            bridge.setUsing(root, enabled);
+    }
+    onBridgeChanged: {
+        if (bridge)
+            bridge.setUsing(root, enabled);
+    }
+    Component.onCompleted: {
+        if (bridge)
+            bridge.setUsing(root, enabled);
+    }
+    Component.onDestruction: {
+        if (bridge)
+            bridge.setUsing(root, false);
+    }
+
+    FontMetrics {
+        id: titleMetrics
+
+        font.family: theme.fontFamily
+        font.pixelSize: root.appearance.textSize
+    }
+
+    FontMetrics {
+        id: boldTitleMetrics
+
+        font.family: theme.fontFamily
+        font.pixelSize: root.appearance.textSize
+        font.bold: true
     }
 
     Config.Theme {

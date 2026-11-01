@@ -79,6 +79,10 @@ ShellRoot {
         id: keepAwake
     }
 
+    Services.AppMenuBridge {
+        id: appMenuBridge
+    }
+
     Services.ScreenShares {
         id: screenShares
     }
@@ -272,6 +276,7 @@ ShellRoot {
         notificationHistory: notificationHistory
         screenCapture: screenCapture
         keepAwake: keepAwake
+        appMenuBridge: appMenuBridge
         controlCenter: controlCenter
         screenShares: screenShares
         cava: cava

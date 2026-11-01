@@ -188,4 +188,198 @@ TestCase {
         compare(AppMenuModel.windowCommand({ kind: "window", operation: "moveToWorkspace", address: "0xa1", workspace: "1 }) evil" }), null);
         compare(AppMenuModel.windowCommand({ kind: "window", operation: "unknown", address: "0xa1" }), null);
     }
+
+    // A DBusMenu layout as the bridge hands it over: [id, properties, children].
+    readonly property var electronMenu: ({
+        kind: "dbusmenu",
+        service: ":1.42",
+        path: "/com/canonical/menu/1",
+        layout: [0, { "children-display": "submenu" }, [
+            [1, { label: "_File", "children-display": "submenu" }, [
+                [11, { label: "_Open…", "type": "standard" }, []],
+                [12, { type: "separator" }, []],
+                [13, { label: "Save", enabled: false }, []],
+                [14, { label: "Hidden", visible: false }, []]
+            ]],
+            [2, { label: "_View", "children-display": "submenu" }, [
+                [21, { label: "Show Sidebar", "toggle-type": "checkmark", "toggle-state": 1 }, []],
+                [22, { label: "Zoom", "children-display": "submenu" }, [
+                    [221, { label: "Zoom __In" }, []]
+                ]]
+            ]],
+            [3, { label: "Loose item" }, []]
+        ]]
+    })
+
+    function test_aDBusMenuGivesOneMenuPerTopLevelTitle() {
+        const menus = AppMenuModel.exportedMenus(electronMenu);
+
+        compare(menus.map(menu => menu.title), ["File", "View"]);
+        compare(labels(menus[0].items), ["Open…", "-", "Save"]);
+        compare(menus[0].items[2].enabled, false);
+    }
+
+    function test_dBusMenuItemsKeepTheirSubmenusChecksAndMnemonicUnderscores() {
+        const view = AppMenuModel.exportedMenus(electronMenu)[1];
+
+        compare(labels(view.items), ["✓ Show Sidebar", "Zoom"]);
+        compare(view.items[1].kind, "submenu");
+        compare(labels(view.items[1].items), ["Zoom _In"]);
+    }
+
+    function test_choosingADBusMenuItemClicksItInTheApp() {
+        const open = AppMenuModel.exportedMenus(electronMenu)[0].items[0];
+
+        compare(open.action, { kind: "dbusMenu", service: ":1.42", path: "/com/canonical/menu/1", itemId: 11 });
+    }
+
+    // A GTK menubar as appmenu-gtk-module exports it (taken from Nemo):
+    // sections and submenus point at other menus by [group, menu].
+    readonly property var nemoMenu: ({
+        kind: "gtk",
+        service: ":1.256",
+        menuPath: "/org/appmenu/gtk/window/0",
+        actionPaths: { unity: "/org/appmenu/gtk/window/0", app: "/org/Nemo", win: "/org/Nemo/window/1" },
+        menus: [
+            [0, 0, [{ ":section": [0, 1] }]],
+            [0, 1, [{ ":section": [0, 2] }]],
+            [0, 2, [
+                { action: "unity.-File", label: "_File", ":submenu": [1, 0] },
+                { action: "unity.-View", label: "_View", ":submenu": [2, 0] },
+                { action: "unity.-Go", label: "_Go", ":submenu": [3, 0] }
+            ]],
+            [1, 0, [{ ":section": [1, 1] }, { ":section": [1, 2] }, { ":section": [1, 3] }]],
+            [1, 1, [
+                { action: "unity.New--Tab", label: "New _Tab", accel: "<Primary>t" },
+                { action: "unity.Create-New--Document", label: "Create New _Document", ":submenu": [7, 0] }
+            ]],
+            [1, 2, []],
+            [1, 3, [{ action: "unity.-Close", label: "_Close" }]],
+            [7, 0, [{ action: "unity.-Empty-Document", label: "_Empty Document" }]],
+            [2, 0, [
+                { action: "unity.Show-Hidden", label: "Show _Hidden Files" },
+                { action: "unity.-Sort", label: "By _Name", target: "name" },
+                { action: "app.zoom", label: "Zoom In" }
+            ]]
+        ],
+        actions: {
+            "unity.-Close": [false, "", []],
+            "unity.Show-Hidden": [true, "", [true]],
+            "unity.-Sort": [true, "s", ["name"]],
+            "app.zoom": [true, "", []]
+        }
+    })
+
+    function test_aGtkMenubarGivesOneMenuPerTopLevelTitle() {
+        const menus = AppMenuModel.exportedMenus(nemoMenu);
+
+        compare(menus.map(menu => menu.title), ["File", "View", "Go"]);
+        compare(menus.map(menu => menu.id), ["global:0", "global:1", "global:2"]);
+    }
+
+    // Sections run on, with a separator between the ones that have items.
+    function test_gtkSectionsAreSeparatedAndSubmenusNest() {
+        const file = AppMenuModel.exportedMenus(nemoMenu)[0];
+
+        compare(labels(file.items), ["New Tab", "Create New Document", "-", "Close"]);
+        compare(labels(file.items[1].items), ["Empty Document"]);
+        compare(file.items[3].enabled, false);
+    }
+
+    function test_gtkStatefulActionsShowWhetherTheyAreOn() {
+        const view = AppMenuModel.exportedMenus(nemoMenu)[1];
+
+        compare(labels(view.items), ["✓ Show Hidden Files", "• By Name", "Zoom In"]);
+    }
+
+    function test_choosingAGtkItemActivatesItsActionWhereThePrefixLives() {
+        const view = AppMenuModel.exportedMenus(nemoMenu)[1];
+
+        compare(view.items[0].action, { kind: "gtkAction", service: ":1.256",
+            path: "/org/appmenu/gtk/window/0", name: "Show-Hidden" });
+        compare(view.items[1].action, { kind: "gtkAction", service: ":1.256",
+            path: "/org/appmenu/gtk/window/0", name: "-Sort", target: "name", targetType: "s" });
+        compare(view.items[2].action.path, "/org/Nemo");
+    }
+
+    // Blueman's Device menu labels its items with markup.
+    function test_markupInAGtkLabelIsLeftOut() {
+        const exported = { kind: "gtk", service: ":1.293", actionPaths: { unity: "/m" }, actions: {}, menus: [
+            [0, 0, [{ label: "_Device", ":submenu": [1, 0] }]],
+            [1, 0, [{ action: "unity.Connect", label: "<b>_Connect</b>" }]]
+        ] };
+
+        compare(labels(AppMenuModel.exportedMenus(exported)[0].items), ["Connect"]);
+    }
+
+    function test_aGtkMenuNotYetLoadedIsAnEmptyMenu() {
+        const go = AppMenuModel.exportedMenus(nemoMenu)[2];
+
+        compare(go.items, []);
+    }
+
+    function test_theAppsOwnTitlesSitBetweenTheAppNameAndWindow() {
+        const menus = AppMenuModel.menus({ app: firefox, window: tiledWindow, exported: nemoMenu });
+
+        compare(menus.map(menu => menu.title), ["Firefox", "File", "View", "Go", "Window"]);
+    }
+
+    function test_anAppWithItsOwnWindowMenuRenamesTheShellsToHyprland() {
+        const exported = { kind: "dbusmenu", service: ":1.9", path: "/menu", layout: [0, {}, [
+            [1, { label: "_Window", "children-display": "submenu" }, []]
+        ]] };
+        const menus = AppMenuModel.menus({ app: firefox, window: tiledWindow, exported: exported });
+
+        compare(menus.map(menu => menu.title), ["Firefox", "Window", "Hyprland"]);
+        compare(menus[2].id, "window");
+    }
+
+    // App name, File, View, Go, Window: each title 100 wide, "»" 30.
+    function nemoTitles() {
+        return AppMenuModel.menus({ app: firefox, window: tiledWindow, exported: nemoMenu });
+    }
+
+    function test_titlesThatFitAreAllShown() {
+        const shown = AppMenuModel.overflowSplit(nemoTitles(), [100, 100, 100, 100, 100], 500, 30);
+
+        compare(shown.map(menu => menu.title), ["Firefox", "File", "View", "Go", "Window"]);
+    }
+
+    // 100 + 100 + 100 + Window 100 + » 30 = 430 fits 450, Go doesn't.
+    function test_theAppsTitlesThatDontFitGoIntoATrailingOverflowMenu() {
+        const shown = AppMenuModel.overflowSplit(nemoTitles(), [100, 100, 100, 100, 100], 450, 30);
+
+        compare(shown.map(menu => menu.title), ["Firefox", "File", "View", "»", "Window"]);
+        const overflow = shown[3];
+        compare(overflow.items.map(item => [item.kind, item.label]), [["submenu", "Go"]]);
+    }
+
+    function test_theAppNameAndWindowStayEvenWhenNothingElseFits() {
+        const shown = AppMenuModel.overflowSplit(nemoTitles(), [100, 100, 100, 100, 100], 150, 30);
+
+        compare(shown.map(menu => menu.title), ["Firefox", "»", "Window"]);
+        compare(shown[1].items.map(item => item.label), ["File", "View", "Go"]);
+    }
+
+    // The Popup finds the overflow menu by the id the bar element gave it.
+    function test_theOverflowMenuCanBeFoundAgainByItsId() {
+        const shown = AppMenuModel.overflowSplit(nemoTitles(), [100, 100, 100, 100, 100], 450, 30);
+        const found = AppMenuModel.findMenu(nemoTitles(), shown[3].id);
+
+        compare(found.title, "»");
+        compare(found.items.map(item => item.label), ["Go"]);
+        compare(AppMenuModel.findMenu(nemoTitles(), "window").title, "Window");
+        compare(AppMenuModel.findMenu(nemoTitles(), "").title, "Firefox");
+        compare(AppMenuModel.findMenu([], "window"), null);
+    }
+
+    function test_theDesktopMenuIgnoresWhatIsExported() {
+        compare(AppMenuModel.menus({ app: null, window: null, exported: nemoMenu }).map(menu => menu.id),
+            ["desktop"]);
+    }
+
+    function test_nothingExportedGivesNoMenus() {
+        compare(AppMenuModel.exportedMenus(null), []);
+        compare(AppMenuModel.exportedMenus({ kind: "dbusmenu", layout: null }), []);
+    }
 }

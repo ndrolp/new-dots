@@ -81,17 +81,80 @@ function openPanelCommand(panel, shellDir) {
     return target ? ["quickshell", "ipc", "--path", shellDir, "call", target, "show"] : [];
 }
 
-// Every menu for the focused window, in order. `context` is { app, window },
-// `app` null when no window is focused, which gives the Desktop menu instead,
-// `window` the focused window as windowMenu takes it (or null, leaving the
-// Window menu out). Later menus (the app's own global menu) join this list.
+// Every menu for the focused window, in order. `context` is
+// { app, window, exported }, `app` null when no window is focused, which
+// gives the Desktop menu instead, `window` the focused window as windowMenu
+// takes it (or null, leaving the Window menu out) and `exported` the app's
+// own menus as the bridge hands them over (see exportedMenus), whose titles
+// go between the app-name menu and Window. When the app has a Window menu
+// of its own, the shell's is called Hyprland.
 function menus(context) {
     if (!context.app)
         return [desktopMenu()];
-    const list = [appNameMenu(context.app)];
-    if (context.window)
-        list.push(windowMenu(context.window));
+    const own = exportedMenus(context.exported);
+    const list = [appNameMenu(context.app)].concat(own);
+    if (context.window) {
+        const shellWindowMenu = windowMenu(context.window);
+        if (own.some(menu => menu.title.toLowerCase() === "window"))
+            shellWindowMenu.title = "Hyprland";
+        list.push(shellWindowMenu);
+    }
     return list;
+}
+
+function isExportedMenu(menu) {
+    return menu.id.startsWith("global:");
+}
+
+const overflowPrefix = "overflow:";
+
+// The "»" menu holding the app's own menus from `firstId` on, each as a
+// submenu. Its id names that first one, so findMenu can build it again.
+function overflowMenu(menuList, firstId) {
+    const first = menuList.findIndex(menu => menu.id === firstId);
+    const leftover = first < 0 ? [] : menuList.slice(first).filter(isExportedMenu);
+    return {
+        id: overflowPrefix + firstId,
+        title: "»",
+        items: leftover.map(menu => ({ kind: "submenu", label: menu.title, items: menu.items }))
+    };
+}
+
+// The menus whose titles the app menu bar element shows, within
+// `maximumWidth`: `widths` are their titles' widths in order and
+// `overflowWidth` the "»" title's. The shell's menus always show; the app's
+// own fill what's left in order, and once one doesn't fit, it and the rest
+// go into a "»" menu right after the last that did.
+function overflowSplit(menuList, widths, maximumWidth, overflowWidth) {
+    const fixedWidth = menuList.reduce((sum, menu, index) =>
+        isExportedMenu(menu) ? sum : sum + (widths[index] || 0), 0);
+    const allWidth = menuList.reduce((sum, menu, index) => sum + (widths[index] || 0), 0);
+    if (allWidth <= maximumWidth)
+        return menuList;
+
+    let room = maximumWidth - fixedWidth - overflowWidth;
+    let firstLeftover = -1;
+    menuList.forEach((menu, index) => {
+        if (isExportedMenu(menu) && firstLeftover < 0) {
+            if ((widths[index] || 0) <= room)
+                room -= widths[index] || 0;
+            else
+                firstLeftover = index;
+        }
+    });
+    return menuList
+        .map((menu, index) => !isExportedMenu(menu) || index < firstLeftover ? menu
+            : index === firstLeftover ? overflowMenu(menuList, menu.id) : null)
+        .filter(menu => menu !== null);
+}
+
+// The menu called `id` among `menuList`, including a "»" menu
+// overflowSplit made from it; the first menu when there's no such one, and
+// null when there are none.
+function findMenu(menuList, id) {
+    if (id && id.startsWith(overflowPrefix))
+        return overflowMenu(menuList, id.slice(overflowPrefix.length));
+    return menuList.find(menu => menu.id === id) || menuList[0] || null;
 }
 
 // The focused window, as CurrentApp follows it: Hyprland's active window
@@ -166,4 +229,136 @@ function windowCommand(windowAction) {
     else
         return null;
     return ["hyprctl", "dispatch", dispatch];
+}
+
+// ---- The app's own menus ----------------------------------------------
+//
+// An app exports its menus over D-Bus, and the bridge
+// (services/AppMenuBridge.qml) hands them over as they come ("exported"):
+//   { kind: "dbusmenu", service, path, layout }
+//       com.canonical.dbusmenu (Electron, Java, Qt on X11): `layout` is
+//       GetLayout's tree as [id, properties, children].
+//   { kind: "gtk", service, menuPath, actionPaths, menus, actions }
+//       org.gtk.Menus (GTK apps through appmenu-gtk-module): `menus` is
+//       Start's [group, menu, items] list, `actions` each action's
+//       Describe as { "prefix.name": [enabled, parameterType, state] } and
+//       `actionPaths` the object path of each action prefix.
+// Their items run through two more actions:
+//   { kind: "dbusMenu", service, path, itemId }  clicks a DBusMenu item
+//   { kind: "gtkAction", service, path, name, target?, targetType? }
+//                                                activates a GTK action
+
+// "_File" -> "File", "Zoom __In" -> "Zoom _In": GTK and DBusMenu mark the
+// mnemonic with an underscore, and double a literal one.
+function withoutMnemonic(label) {
+    return String(label || "").replace(/_(_?)/g, (match, literal) => literal);
+}
+
+// A check or radio item's label, marked when it's on.
+function toggleLabel(label, toggleType, on) {
+    if (!on)
+        return label;
+    return (toggleType === "radio" ? "• " : "✓ ") + label;
+}
+
+function dbusMenuItems(children, exported) {
+    const items = [];
+    for (const child of children || []) {
+        const id = child[0];
+        const properties = child[1] || {};
+        const grandchildren = child[2] || [];
+        if (properties.visible === false)
+            continue;
+        if (properties.type === "separator") {
+            items.push(separator);
+            continue;
+        }
+        const label = toggleLabel(withoutMnemonic(properties.label), properties["toggle-type"],
+            properties["toggle-state"] === 1);
+        let item;
+        if (properties["children-display"] === "submenu" || grandchildren.length > 0)
+            item = { kind: "submenu", label: label, items: dbusMenuItems(grandchildren, exported) };
+        else
+            item = action(label, { kind: "dbusMenu", service: exported.service, path: exported.path, itemId: id });
+        if (properties.enabled === false)
+            item.enabled = false;
+        items.push(item);
+    }
+    return items;
+}
+
+// "<b>Connect</b>" -> "Connect": some GTK apps put Pango markup in labels.
+function withoutMarkup(label) {
+    return String(label || "").replace(/<[^>]*>/g, "")
+        .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, "\"").replace(/&amp;/g, "&");
+}
+
+function gtkItem(attributes, exported) {
+    const fullName = attributes.action || "";
+    const dot = fullName.indexOf(".");
+    const description = exported.actions ? exported.actions[fullName] : undefined;
+    const enabled = !description || description[0] !== false;
+    if ((attributes["hidden-when"] === "action-missing" && !description)
+        || (attributes["hidden-when"] === "action-disabled" && !enabled))
+        return null;
+
+    const state = description && description[2] && description[2].length > 0 ? description[2][0] : undefined;
+    const hasTarget = attributes.target !== undefined;
+    let label = withoutMnemonic(withoutMarkup(attributes.label));
+    if (hasTarget && state !== undefined && state === attributes.target)
+        label = toggleLabel(label, "radio", true);
+    else if (!hasTarget && state === true)
+        label = toggleLabel(label, "checkmark", true);
+
+    let item;
+    if (attributes[":submenu"]) {
+        item = { kind: "submenu", label: label, items: gtkMenuItems(attributes[":submenu"], exported) };
+    } else {
+        const path = dot > 0 && exported.actionPaths ? exported.actionPaths[fullName.slice(0, dot)] : undefined;
+        if (!path)
+            return null;
+        const what = { kind: "gtkAction", service: exported.service, path: path, name: fullName.slice(dot + 1) };
+        if (hasTarget) {
+            what.target = attributes.target;
+            what.targetType = description && description[1] ? description[1] : "s";
+        }
+        item = action(label, what);
+    }
+    if (!enabled)
+        item.enabled = false;
+    return item;
+}
+
+// The items of the GTK menu at `link` ([group, menu]): its sections run on,
+// a separator between the ones with items. [] while that menu isn't loaded.
+function gtkMenuItems(link, exported) {
+    const found = (exported.menus || []).find(entry => entry[0] === link[0] && entry[1] === link[1]);
+    const groups = [[]];
+    for (const attributes of found ? found[2] : []) {
+        if (attributes[":section"]) {
+            groups.push(gtkMenuItems(attributes[":section"], exported));
+            groups.push([]);
+        } else {
+            const item = gtkItem(attributes, exported);
+            if (item)
+                groups[groups.length - 1].push(item);
+        }
+    }
+    return groups
+        .filter(group => group.length > 0)
+        .reduce((items, group) => items.length > 0 ? items.concat([separator], group) : group, []);
+}
+
+// The app's own menus, one per top-level title, from what the bridge
+// handed over (see above); [] for nothing or anything it doesn't know.
+// Each gets the id "global:<n>", n its place among them.
+function exportedMenus(exported) {
+    let submenus = [];
+    if (exported && exported.kind === "dbusmenu" && exported.layout)
+        submenus = dbusMenuItems(exported.layout[2], exported);
+    else if (exported && exported.kind === "gtk")
+        submenus = gtkMenuItems([0, 0], exported);
+    return submenus
+        .filter(item => item.kind === "submenu")
+        .map((item, index) => ({ id: "global:" + index, title: item.label, items: item.items }));
 }
