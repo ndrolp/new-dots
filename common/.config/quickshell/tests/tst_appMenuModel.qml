@@ -148,6 +148,15 @@ TestCase {
         compare(labels(menu.items).slice(0, 3), ["Tile", "Exit Fullscreen", "Unpin"]);
     }
 
+    // Hyprland only pins floating windows.
+    function test_pinIsDisabledWhileTheWindowIsTiled() {
+        const pin = item => labels([item])[0] === "Pin" || labels([item])[0] === "Unpin";
+
+        compare(AppMenuModel.windowMenu(tiledWindow).items.find(pin).enabled, false);
+        compare(AppMenuModel.windowMenu(Object.assign({}, tiledWindow, { floating: true })).items.find(pin).enabled,
+            undefined);
+    }
+
     function test_moveToWorkspaceIsASubmenuOfWorkspacesOneToTen() {
         const move = AppMenuModel.windowMenu(tiledWindow).items[4];
 
@@ -274,7 +283,7 @@ TestCase {
         const menus = AppMenuModel.exportedMenus(nemoMenu);
 
         compare(menus.map(menu => menu.title), ["File", "View", "Go"]);
-        compare(menus.map(menu => menu.id), ["global:0", "global:1", "global:2"]);
+        compare(menus.map(menu => menu.id), ["exported:0", "exported:1", "exported:2"]);
     }
 
     // Sections run on, with a separator between the ones that have items.

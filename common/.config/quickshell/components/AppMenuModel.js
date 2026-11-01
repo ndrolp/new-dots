@@ -11,7 +11,7 @@
 //   { kind: "action", label, action, enabled? }  runs `action` when chosen
 //   { kind: "separator" }
 //   { kind: "submenu", label, items }            opens `items`
-// An action is data saying what to do, run by AppMenuActions.qml:
+// An action is data saying what to do, run by AppMenuSource.run():
 //   { kind: "desktopAction", appId, actionId }   a .desktop action
 //   { kind: "newWindow", appId }                 runs the app again
 //   { kind: "quit", appId }                      closes every window of the app
@@ -102,8 +102,10 @@ function menus(context) {
     return list;
 }
 
+const exportedPrefix = "exported:";
+
 function isExportedMenu(menu) {
-    return menu.id.startsWith("global:");
+    return menu.id.startsWith(exportedPrefix);
 }
 
 const overflowPrefix = "overflow:";
@@ -183,7 +185,7 @@ function quitCommands(appId, windows) {
 // The Window menu: Float/Tile, Fullscreen, Pin, Move to Workspace 1-10 and
 // Close Window, each acting on `window`, which is the focused window as
 // { address, floating, fullscreen, pinned }. The labels say what choosing
-// them does to it now.
+// them does to it now. Pin is disabled while the window is tiled.
 function windowMenu(window) {
     function windowAction(label, operation, extra) {
         return action(label, Object.assign({ kind: "window", operation: operation, address: window.address }, extra));
@@ -193,13 +195,18 @@ function windowMenu(window) {
     for (let workspace = 1; workspace <= 10; workspace++)
         workspaces.push(windowAction("Workspace " + workspace, "moveToWorkspace", { workspace: workspace }));
 
+    // Hyprland only pins floating windows.
+    const pinItem = windowAction(window.pinned ? "Unpin" : "Pin", "togglePin");
+    if (!window.floating)
+        pinItem.enabled = false;
+
     return {
         id: "window",
         title: "Window",
         items: [
             windowAction(window.floating ? "Tile" : "Float", "toggleFloating"),
             windowAction(window.fullscreen ? "Exit Fullscreen" : "Fullscreen", "toggleFullscreen"),
-            windowAction(window.pinned ? "Unpin" : "Pin", "togglePin"),
+            pinItem,
             separator,
             { kind: "submenu", label: "Move to Workspace", items: workspaces },
             separator,
@@ -351,7 +358,7 @@ function gtkMenuItems(link, exported) {
 
 // The app's own menus, one per top-level title, from what the bridge
 // handed over (see above); [] for nothing or anything it doesn't know.
-// Each gets the id "global:<n>", n its place among them.
+// Each gets the id "exported:<n>", n its place among them.
 function exportedMenus(exported) {
     let submenus = [];
     if (exported && exported.kind === "dbusmenu" && exported.layout)
@@ -360,5 +367,5 @@ function exportedMenus(exported) {
         submenus = gtkMenuItems([0, 0], exported);
     return submenus
         .filter(item => item.kind === "submenu")
-        .map((item, index) => ({ id: "global:" + index, title: item.label, items: item.items }));
+        .map((item, index) => ({ id: exportedPrefix + index, title: item.label, items: item.items }));
 }
