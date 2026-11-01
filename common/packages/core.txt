@@ -65,10 +65,10 @@ pipewire
 pipewire-alsa
 pipewire-jack
 pipewire-pulse
-python-gobject
 playerctl
 polybar
 power-profiles-daemon
+python-gobject
 quickshell
 qutebrowser
 ranger

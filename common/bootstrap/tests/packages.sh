@@ -399,12 +399,17 @@ test_every_required_service_comes_from_a_core_package() {
 }
 
 # The app menu shows an app's own menus only when GTK apps export them (appmenu-gtk-module) and
-# something owns com.canonical.AppMenu.Registrar (the registrar), so even --minimal gets both.
+# something owns com.canonical.AppMenu.Registrar (the registrar), and its bridge needs python-gobject
+# and xprop to read them, so even --minimal gets all four.
 test_the_app_menu_dependencies_are_core_packages() {
     OUT=""
     CALLS=/dev/null
     grep -qx appmenu-gtk-module "$REPO/common/packages/core.txt" \
         || fail "appmenu-gtk-module is not in core"
+    grep -qx python-gobject "$REPO/common/packages/core.txt" \
+        || fail "python-gobject is not in core"
+    grep -qx xorg-xprop "$REPO/common/packages/core.txt" \
+        || fail "xorg-xprop is not in core"
     grep -qx vala-panel-appmenu-registrar-git "$REPO/common/packages/core-aur.txt" \
         || fail "vala-panel-appmenu-registrar-git is not in core-aur"
 }
