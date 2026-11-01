@@ -89,6 +89,10 @@ QtObject {
             const command = AppMenuModel.windowCommand(action);
             if (command)
                 Quickshell.execDetached(command);
+        } else if (action.kind === "openPanel") {
+            const command = AppMenuModel.openPanelCommand(action.panel, Quickshell.shellDir);
+            if (command.length > 0)
+                Quickshell.execDetached(command);
         }
     }
 }

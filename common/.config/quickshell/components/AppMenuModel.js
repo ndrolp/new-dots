@@ -17,6 +17,8 @@
 //   { kind: "quit", appId }                      closes every window of the app
 //   { kind: "window", operation, address, workspace? }
 //                                                acts on one window, see windowCommand
+//   { kind: "openPanel", panel }                 opens a shell panel
+//                                                (see openPanelCommand)
 
 const separator = Object.freeze({ kind: "separator" });
 
@@ -50,13 +52,42 @@ function appNameMenu(app) {
     };
 }
 
+// The Desktop menu, shown in place of an app when no window is focused:
+// the unified search, the settings panel and the wallpaper selector.
+function desktopMenu() {
+    return {
+        id: "desktop",
+        title: "Desktop",
+        items: [
+            action("Open Launcher", { kind: "openPanel", panel: "unifiedSearch" }),
+            action("Settings Panel", { kind: "openPanel", panel: "settings" }),
+            action("Change Wallpaper", { kind: "openPanel", panel: "wallpaperSelector" })
+        ]
+    };
+}
+
+// The IPC target of each panel an openPanel action names.
+const panelIpcTargets = Object.freeze({
+    unifiedSearch: "unified-search",
+    settings: "config",
+    wallpaperSelector: "wallpapers"
+});
+
+// openPanel: the command that opens `panel` through its IPC handler, as the
+// keybinds do, `shellDir` being this shell's config directory. [] for an
+// unknown panel.
+function openPanelCommand(panel, shellDir) {
+    const target = panelIpcTargets[panel];
+    return target ? ["quickshell", "ipc", "--path", shellDir, "call", target, "show"] : [];
+}
+
 // Every menu for the focused window, in order. `context` is { app, window },
-// `app` null when no window is focused, `window` the focused window as
-// windowMenu takes it (or null, leaving the Window menu out). Later menus (Window, Desktop, the app's
-// own global menu) are added to this list.
+// `app` null when no window is focused, which gives the Desktop menu instead,
+// `window` the focused window as windowMenu takes it (or null, leaving the
+// Window menu out). Later menus (the app's own global menu) join this list.
 function menus(context) {
     if (!context.app)
-        return [];
+        return [desktopMenu()];
     const list = [appNameMenu(context.app)];
     if (context.window)
         list.push(windowMenu(context.window));
