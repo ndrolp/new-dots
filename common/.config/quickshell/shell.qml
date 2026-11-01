@@ -191,6 +191,10 @@ ShellRoot {
         appearance: appearance
     }
 
+    Modules.AppMenuPopover {
+        appearance: appearance
+    }
+
     Modules.AudioOutputSelector {
         id: audioOutputSelector
 
