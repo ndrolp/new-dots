@@ -60,8 +60,32 @@ TestCase {
         compare(menus[0].title, "Firefox");
     }
 
-    function test_noFocusedAppHasNoAppNameMenu() {
-        compare(AppMenuModel.menus({ app: null }), []);
+    // An empty workspace: the app menu shows Desktop instead of an app.
+    function test_noFocusedAppGetsTheDesktopMenu() {
+        const menus = AppMenuModel.menus({ app: null });
+
+        compare(menus.map(menu => menu.id), ["desktop"]);
+        compare(menus[0].title, "Desktop");
+    }
+
+    function test_theDesktopMenuOpensTheShellsPanels() {
+        const items = AppMenuModel.desktopMenu().items;
+
+        compare(labels(items), ["Open Launcher", "Settings Panel", "Change Wallpaper"]);
+        compare(items.map(item => item.action), [
+            { kind: "openPanel", panel: "unifiedSearch" },
+            { kind: "openPanel", panel: "settings" },
+            { kind: "openPanel", panel: "wallpaperSelector" }
+        ]);
+    }
+
+    // Opening goes through each panel's IPC handler, as the keybinds do.
+    function test_aPanelOpensThroughItsIpcHandler() {
+        compare(AppMenuModel.openPanelCommand("unifiedSearch", "/home/me/.config/quickshell"),
+            ["quickshell", "ipc", "--path", "/home/me/.config/quickshell", "call", "unified-search", "show"]);
+        compare(AppMenuModel.openPanelCommand("settings", "/s")[5], "config");
+        compare(AppMenuModel.openPanelCommand("wallpaperSelector", "/s")[5], "wallpapers");
+        compare(AppMenuModel.openPanelCommand("nope", "/s"), []);
     }
 
     // Like CurrentApp: Hyprland's active window counts only while it is on

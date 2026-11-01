@@ -75,5 +75,10 @@ Feature {
         function toggle() {
             root.toggle();
         }
+
+        // Opens it, or leaves it open (the app menu's Desktop menu).
+        function show() {
+            root.show();
+        }
     }
 }

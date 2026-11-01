@@ -15,6 +15,8 @@
 //   { kind: "desktopAction", appId, actionId }   a .desktop action
 //   { kind: "newWindow", appId }                 runs the app again
 //   { kind: "quit", appId }                      closes every window of the app
+//   { kind: "openPanel", panel }                 opens a shell panel
+//                                                (see openPanelCommand)
 
 const separator = Object.freeze({ kind: "separator" });
 
@@ -48,11 +50,40 @@ function appNameMenu(app) {
     };
 }
 
+// The Desktop menu, shown in place of an app when no window is focused:
+// the unified search, the settings panel and the wallpaper selector.
+function desktopMenu() {
+    return {
+        id: "desktop",
+        title: "Desktop",
+        items: [
+            action("Open Launcher", { kind: "openPanel", panel: "unifiedSearch" }),
+            action("Settings Panel", { kind: "openPanel", panel: "settings" }),
+            action("Change Wallpaper", { kind: "openPanel", panel: "wallpaperSelector" })
+        ]
+    };
+}
+
+// The IPC target of each panel an openPanel action names.
+const panelIpcTargets = Object.freeze({
+    unifiedSearch: "unified-search",
+    settings: "config",
+    wallpaperSelector: "wallpapers"
+});
+
+// openPanel: the command that opens `panel` through its IPC handler, as the
+// keybinds do, `shellDir` being this shell's config directory. [] for an
+// unknown panel.
+function openPanelCommand(panel, shellDir) {
+    const target = panelIpcTargets[panel];
+    return target ? ["quickshell", "ipc", "--path", shellDir, "call", target, "show"] : [];
+}
+
 // Every menu for the focused window, in order. `context` is { app }, `app`
-// null when no window is focused. Later menus (Window, Desktop, the app's
-// own global menu) are added to this list.
+// null when no window is focused, which gives the Desktop menu instead.
+// Later menus (Window, the app's own global menu) are added to this list.
 function menus(context) {
-    return context.app ? [appNameMenu(context.app)] : [];
+    return context.app ? [appNameMenu(context.app)] : [desktopMenu()];
 }
 
 // The focused window, as CurrentApp follows it: Hyprland's active window

@@ -62,6 +62,10 @@ QtObject {
             }));
             for (const command of AppMenuModel.quitCommands(action.appId, windows))
                 Quickshell.execDetached(command);
+        } else if (action.kind === "openPanel") {
+            const command = AppMenuModel.openPanelCommand(action.panel, Quickshell.shellDir);
+            if (command.length > 0)
+                Quickshell.execDetached(command);
         }
     }
 }

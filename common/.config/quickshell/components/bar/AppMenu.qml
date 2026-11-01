@@ -5,8 +5,8 @@ import ".." as Components
 
 // The app menu bar element: the focused app's name in bold (its .desktop
 // Name, or its appId), opening the app-name menu as a Popup. It follows the
-// focused window like CurrentApp: shown only on the focused monitor's bar,
-// and only while a window there is focused.
+// focused window like CurrentApp, shown only on the focused monitor's bar.
+// With no window focused there it shows "Desktop" and the Desktop menu.
 Item {
     id: root
 
