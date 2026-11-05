@@ -57,7 +57,12 @@ needs Quickshell's services and isn't tested here), how workspaces and icon
 elements size and stack upright on a side bar and stay as they were on a top
 one (`BarLayout.size`, `Workspaces.qml`, `ArchButton.qml`,
 `KeepAwakeElement.qml`; `BarElementItems.qml` needs Quickshell's services, so
-its icons are covered through `BarLayout.size`), how long animations take
+its icons are covered through `BarLayout.size`), how the long text of the app
+menu, the current app and the media element turns on a side bar: how far, what
+its length is capped against and where an app menu title ends up for its popup,
+checked against a really rotated item (`BarLayout.turn`, `BarLayout.screenLength`,
+`BarLayout.turnedArea`; `AppMenu.qml` and `CurrentApp.qml` need Quickshell's
+Hyprland, so the elements themselves aren't tested here), how long animations take
 with and without reduce motion (`config/Motion.js`), night light's
 temperature bounds, the saved temperature, how hyprsunset is run and when
 night light turns on and off (`services/NightLightState.js`), when the lock screen

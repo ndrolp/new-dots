@@ -104,6 +104,33 @@ function size(bar, length, thickness) {
         : { width: length, height: thickness };
 }
 
+// How far long text turns: on either side bar it reads down the bar, so it
+// isn't mirrored and its start stays at the top. Turning a row of text centred
+// in its element keeps it centred there. Takes the bar profile.
+function turn(bar) {
+    return vertical(bar) ? 90 : 0;
+}
+
+// Where `area`, relative to a `box` that turns with the bar, ends up in the
+// box's parent. Both are { x, y, width, height } as laid out before turning.
+function turnedArea(bar, box, area) {
+    if (!vertical(bar))
+        return { x: box.x + area.x, y: box.y + area.y, width: area.width, height: area.height };
+
+    const centre = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+    return {
+        x: centre.x + box.height / 2 - area.y - area.height,
+        y: centre.y - box.width / 2 + area.x,
+        width: area.height,
+        height: area.width
+    };
+}
+
+// How much of the screen `screen` runs along the bar. Takes the bar profile.
+function screenLength(bar, screen) {
+    return vertical(bar) ? screen.height : screen.width;
+}
+
 // What opens a popup, { x, y, width, height } in the bar: the whole bar element,
 // or `area`, the part of it that did, relative to the element.
 function trigger(item, area) {

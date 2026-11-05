@@ -208,4 +208,87 @@ TestCase {
     function test_anElementNeverCollapsesOnAThinBar() {
         compare(BarLayout.elementThickness({ barTransparent: false, barHeight: 4, elementVerticalPadding: 3 }), 1);
     }
+
+    function test_longTextTurnsSidewaysOnlyOnASideBar_data() {
+        return [
+            { tag: "top", turn: 0 },
+            { tag: "bottom", turn: 0 },
+            { tag: "left", turn: 90 },
+            { tag: "right", turn: 90 }
+        ];
+    }
+
+    function test_longTextTurnsSidewaysOnlyOnASideBar(data) {
+        compare(BarLayout.turn({ barPosition: data.tag }), data.turn);
+    }
+
+    function test_withoutABarPositionTextStaysLevel() {
+        compare(BarLayout.turn({}), 0);
+    }
+
+    Component {
+        id: turnedRow
+
+        Item {
+            property alias box: box
+            property alias area: area
+
+            width: 34
+            height: 200
+
+            Item {
+                id: box
+
+                x: -33
+                y: 83
+                width: 100
+                height: 34
+                rotation: 90
+
+                Item {
+                    id: area
+
+                    x: 40
+                    y: 2
+                    width: 50
+                    height: 30
+                }
+            }
+        }
+    }
+
+    function geometry(item) {
+        return { x: item.x, y: item.y, width: item.width, height: item.height };
+    }
+
+    function test_partOfTurnedTextIsWhereItIsDrawn() {
+        const element = createTemporaryObject(turnedRow, this);
+        const drawn = element.area.mapToItem(element, 0, 0, element.area.width, element.area.height);
+
+        compare(BarLayout.turnedArea({ barPosition: "left" }, geometry(element.box), geometry(element.area)),
+            { x: drawn.x, y: drawn.y, width: drawn.width, height: drawn.height });
+    }
+
+    function test_partOfTurnedTextRunsAlongASideBar() {
+        compare(BarLayout.turnedArea({ barPosition: "right" }, { x: -33, y: 83, width: 100, height: 34 },
+            { x: 40, y: 2, width: 50, height: 30 }), { x: 2, y: 90, width: 30, height: 50 });
+    }
+
+    function test_partOfLevelTextIsWhereItsBoxPutsIt() {
+        compare(BarLayout.turnedArea({ barPosition: "top" }, { x: 4, y: 2, width: 100, height: 34 },
+            { x: 40, y: 2, width: 50, height: 30 }), { x: 44, y: 4, width: 50, height: 30 });
+    }
+
+    function test_theScreenIsMeasuredAlongTheBar_data() {
+        return [
+            { tag: "top", length: 1920 },
+            { tag: "bottom", length: 1920 },
+            { tag: "left", length: 1080 },
+            { tag: "right", length: 1080 }
+        ];
+    }
+
+    function test_theScreenIsMeasuredAlongTheBar(data) {
+        compare(BarLayout.screenLength({ barPosition: data.tag }, { width: 1920, height: 1080 }), data.length);
+    }
 }

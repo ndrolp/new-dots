@@ -4,7 +4,10 @@ import QtQuick
 import "../../config" as Config
 import "../IconSource.js" as IconSource
 import "../FocusedWindow.js" as FocusedWindow
+import "BarLayout.js" as BarLayout
 
+// On a side bar the text runs sideways with its ellipsis and the icon stays
+// upright, on top of it.
 Row {
     id: root
 
@@ -30,11 +33,16 @@ Row {
         ? IconSource.forName(iconName) : ""
     readonly property string terminalGlyph: terminal ? terminalIconGlyph(windowTitle) : ""
     readonly property real activeTitleMaximumWidth: monitorScreen
-        ? Math.max(120, Math.min(320, monitorScreen.width * 0.14)) : 320
+        ? Math.max(120, Math.min(320, BarLayout.screenLength(appearance, monitorScreen) * 0.14)) : 320
+    readonly property bool vertical: BarLayout.vertical(appearance)
+    readonly property real thickness: BarLayout.elementThickness(appearance)
+    readonly property real length: appContent.implicitWidth + 16
+    readonly property var size: BarLayout.size(appearance, visible ? length : 0, thickness)
 
     spacing: appearance.spacing
     visible: enabled && label !== "" && FocusedWindow.onFocusedMonitor(monitor, Hyprland.focusedWorkspace)
-    width: visible ? implicitWidth : 0
+    width: size.width
+    height: size.height
 
     Config.Theme {
         id: theme
@@ -87,7 +95,19 @@ Row {
         return "󰆍";
     }
 
+    // Only along the bar: across it, it follows the bar at once.
     Behavior on width {
+        enabled: !root.vertical
+
+        NumberAnimation {
+            duration: root.appearance.motion.medium
+            easing.type: root.appearance.motion.easing
+        }
+    }
+
+    Behavior on height {
+        enabled: root.vertical
+
         NumberAnimation {
             duration: root.appearance.motion.medium
             easing.type: root.appearance.motion.easing
@@ -95,10 +115,10 @@ Row {
     }
 
     Rectangle {
-        width: appContent.implicitWidth + 16
-        height: appearance.barTransparent
-            ? appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
-            : Math.max(1, appearance.barHeight - (appearance.elementVerticalPadding * 2))
+        readonly property var size: BarLayout.size(appearance, root.length, root.thickness)
+
+        width: size.width
+        height: size.height
         radius: appearance.radius
         color: appHover.hovered ? theme.surfaceHover
             : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
@@ -121,8 +141,9 @@ Row {
             id: appContent
 
             anchors.centerIn: parent
-            // As tall as the background, so its center is the background's.
-            height: parent.height
+            // As thick as the background, so its center is the background's.
+            height: root.thickness
+            rotation: BarLayout.turn(root.appearance)
             spacing: icon.displayedIconSource === ""
                 ? root.appearance.spacing + 2 : root.appearance.spacing
 
@@ -133,6 +154,7 @@ Row {
                 property string displayedTerminalGlyph: root.terminalGlyph
 
                 anchors.verticalCenter: parent.verticalCenter
+                rotation: -parent.rotation
                 visible: root.activeToplevel !== null
                 width: visible ? root.appearance.workspaceButtonSize - 8 : 0
                 height: width
