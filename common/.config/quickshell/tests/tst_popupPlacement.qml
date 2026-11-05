@@ -234,8 +234,8 @@ TestCase {
         return [
             { tag: "top", room: { top: 0, right: 6, bottom: 0, left: 6 } },
             { tag: "bottom", room: { top: 0, right: 6, bottom: 0, left: 6 } },
-            { tag: "left", room: { top: 6, right: 0, bottom: 6, left: 0 } },
-            { tag: "right", room: { top: 6, right: 0, bottom: 6, left: 0 } }
+            { tag: "left", room: { top: 6, right: 12, bottom: 6, left: 0 } },
+            { tag: "right", room: { top: 6, right: 0, bottom: 6, left: 12 } }
         ];
     }
 
@@ -316,6 +316,20 @@ TestCase {
         compare(placed.y, window.y);
         compare(placed.start, window.start);
         compare(placed.end, window.end);
+    }
+
+    // A popup's window is as wide on every Bar position, and so are its contents.
+    function test_anAttachedPopupIsAsWideOnEveryBarPosition_data() {
+        return [{ tag: "bottom" }, { tag: "left" }, { tag: "right" }];
+    }
+
+    function test_anAttachedPopupIsAsWideOnEveryBarPosition(data) {
+        const room = barPosition => PopupPlacement.room({
+            barPosition: barPosition, attached: true, inset: 12, joinRadius: 6
+        });
+        const across = fields => fields.left + fields.right;
+
+        compare(across(room(data.tag)), across(room("top")));
     }
 
     function test_aTriggerIsMeasuredAlongTheBar_data() {

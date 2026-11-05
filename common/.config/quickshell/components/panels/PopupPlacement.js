@@ -105,12 +105,17 @@ function position(placement) {
 // The room around the surface inside the popup window, { top, right, bottom,
 // left }. A floating popup keeps the inset all around; an attached one touches
 // the bar and leaves room only beside it, for the curved corners that join it
-// to the bar. Takes { barPosition, attached, inset, joinRadius }.
+// to the bar. The window's width counts that room on any Bar position, so a side
+// bar, whose joins are above and below it, leaves as much free on the far side
+// and the contents are as wide as on top. Takes { barPosition, attached, inset,
+// joinRadius }.
 function room(placement) {
     if (!placement.attached)
         return { top: placement.inset, right: placement.inset, bottom: placement.inset, left: placement.inset };
 
-    return BarPosition.sides(placement.barPosition, 0, 0, placement.joinRadius);
+    const join = placement.joinRadius;
+
+    return BarPosition.sides(placement.barPosition, 0, BarPosition.sideBar(placement.barPosition) ? join * 2 : 0, join);
 }
 
 // The stretch of the bar an element takes, { start, length } in bar window
