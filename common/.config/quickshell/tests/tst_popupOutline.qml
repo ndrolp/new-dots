@@ -203,4 +203,24 @@ TestCase {
         compare(PopupOutline.attachedCorners({ width: 300, height: 0, radius: 12, joinRadius: 6 }),
             { join: 0, bottom: 0 });
     }
+
+    function test_anAttachedOutlineNamesItsSegments() {
+        const path = PopupOutline.attachedPath({
+            barPosition: "top",
+            width: 400,
+            height: 300,
+            unfolded: 300,
+            radius: 8,
+            joinRadius: 6
+        });
+
+        compare(path.parts.barSide, { x: 412, y: 0 });
+        compare(path.parts.endJoin, { x: 406, y: 6, controlX: 406, controlY: 0 });
+        compare(path.parts.endSide, { x: 406, y: 292 });
+        compare(path.parts.endCorner, { x: 398, y: 300, controlX: 406, controlY: 300 });
+        compare(path.parts.farSide, { x: 14, y: 300 });
+        compare(path.parts.startCorner, { x: 6, y: 292, controlX: 6, controlY: 300 });
+        compare(path.parts.startSide, { x: 6, y: 6 });
+        compare(path.parts.startJoin, { x: 0, y: 0, controlX: 6, controlY: 0 });
+    }
 }

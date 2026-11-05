@@ -124,6 +124,16 @@ TestCase {
     }
 
     Component {
+        id: recordingContent
+
+        Bar.RecordingContent {
+            appearance: profile
+            maximumLength: 120
+            elapsed: "1:02:03"
+        }
+    }
+
+    Component {
         id: audioLevel
 
         Bar.AudioLevel {
@@ -354,6 +364,50 @@ TestCase {
         const stack = shown(iconValue, { valueVisible: false });
 
         compare(stack.implicitHeight, drawn(stack)[0].height);
+    }
+
+    readonly property string manyApps: "Firefox, Discord, OBS Studio, Google Chrome, Slack, Zoom Workplace"
+
+    function test_theRecordingTimeStandsUprightOnASideBar() {
+        const [value] = drawn(shown(recordingContent));
+        const [, slot] = drawn(value);
+
+        compare(slot.children[0].text, "1\n02\n03");
+    }
+
+    function test_theAppsSharingRunSidewaysOnASideBar() {
+        const element = shown(recordingContent, { sharing: "Firefox, Discord" });
+        const [row] = drawn(element);
+        const [icon, text] = drawn(row);
+
+        compare(row.rotation, 90);
+        compare(icon.rotation, -90);
+        compare(text.text, "Firefox, Discord");
+        compare(text.lineCount, 1);
+        compare(element.implicitHeight, row.implicitWidth);
+        compare(element.implicitWidth, row.implicitHeight);
+    }
+
+    function test_longAppsSharingEndInAnEllipsisOnASideBar() {
+        const element = shown(recordingContent, { sharing: manyApps });
+        const [row] = drawn(element);
+        const [, text] = drawn(row);
+
+        compare(text.width, 120);
+        compare(text.elide, Text.ElideRight);
+        verify(text.truncated, "the text is cut");
+    }
+
+    function test_theAppsSharingStayInLineOnATopBar() {
+        profile.barPosition = "top";
+
+        const element = shown(recordingContent, { sharing: manyApps });
+        const [value] = drawn(element);
+        const [, slot] = drawn(value);
+
+        compare(slot.children[0].text, manyApps);
+        verify(element.implicitWidth > 120, "nothing caps it");
+        compare(element.implicitWidth, value.implicitWidth);
     }
 
     function test_theVolumeMeterGoesUnderTheIconOnASideBar() {

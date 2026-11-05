@@ -109,8 +109,7 @@ function defaultBarElements(disabledIds, options) {
     return normalizeBarElements(barElements);
 }
 
-// The screen edges a bar can sit on, its Bar position. The settings panel only
-// offers the ones that work so far, in BarSizeStyleSettings.qml.
+// The screen edges a bar can sit on, its Bar position.
 const barPositions = ["top", "bottom", "left", "right"];
 
 // Every setting a bar profile stores, with the value a profile that lacks it

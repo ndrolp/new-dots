@@ -1,5 +1,5 @@
 .pragma library
-.import "PopupPlacement.js" as PopupPlacement
+.import "../BarPosition.js" as BarPosition
 
 // The outline of an attached popup: square corners against the bar, small
 // curved corners joining it to the bar, and rounded corners away from it. A
@@ -19,18 +19,14 @@ function attachedCorners(outline) {
 // What has unfolded of a surface: the part that starts at the bar. Takes
 // { barPosition, width, height, unfolded }; returns { x, y, width, height }.
 function unfoldedArea(surface) {
-    const unfolded = surface.unfolded;
+    const sideBar = BarPosition.sideBar(surface.barPosition);
 
-    switch (surface.barPosition) {
-    case "bottom":
-        return { x: 0, y: surface.height - unfolded, width: surface.width, height: unfolded };
-    case "left":
-        return { x: 0, y: 0, width: unfolded, height: surface.height };
-    case "right":
-        return { x: surface.width - unfolded, y: 0, width: unfolded, height: surface.height };
-    default:
-        return { x: 0, y: 0, width: surface.width, height: unfolded };
-    }
+    return BarPosition.area(surface.barPosition, {
+        along: 0,
+        away: 0,
+        length: sideBar ? surface.height : surface.width,
+        depth: surface.unfolded
+    }, sideBar ? surface.width : surface.height);
 }
 
 // The outline as a path, worked out for a bar on top, in `along` and `away` from
@@ -50,16 +46,7 @@ function laidPath(outline) {
     const far = end - join;
 
     function point(along, away) {
-        switch (outline.barPosition) {
-        case "bottom":
-            return { x: along, y: outline.boxDepth - away };
-        case "left":
-            return { x: away, y: along };
-        case "right":
-            return { x: outline.boxDepth - away, y: along };
-        default:
-            return { x: along, y: away };
-        }
+        return BarPosition.point(outline.barPosition, along, away, outline.boxDepth);
     }
 
     function curve(along, away, controlAlong, controlAway) {
@@ -87,16 +74,20 @@ function laidPath(outline) {
     };
 }
 
+// What laidPath's segments are when neither end stays straight, in its order.
+const attachedParts = ["barSide", "endJoin", "endSide", "endCorner", "farSide", "startCorner", "startSide",
+    "startJoin"];
+
 // An attached popup's outline. Takes { barPosition, width, height, unfolded,
 // radius, joinRadius }, the surface's size and how far it has unfolded from the
 // bar. Returns the box it fits in, relative to the surface,
-// { x, y, width, height }, and in that box the path, as laidPath does.
+// { x, y, width, height }, and in that box the path, as laidPath does, with its
+// segments also by name in `parts`.
 function attachedPath(surface) {
-    const side = PopupPlacement.vertical(surface.barPosition);
-    const length = side ? surface.height : surface.width;
+    const sideBar = BarPosition.sideBar(surface.barPosition);
+    const length = sideBar ? surface.height : surface.width;
     const depth = Math.max(0, surface.unfolded);
     const boxDepth = Math.ceil(depth);
-    const boxLength = length + surface.joinRadius * 2;
     const corners = attachedCorners({
         width: length,
         height: depth,
@@ -104,12 +95,12 @@ function attachedPath(surface) {
         joinRadius: surface.joinRadius
     });
     const near = surface.joinRadius;
-    const box = {
-        top: { x: -near, y: 0 },
-        bottom: { x: -near, y: surface.height - boxDepth },
-        left: { x: 0, y: -near },
-        right: { x: surface.width - boxDepth, y: -near }
-    }[surface.barPosition];
+    const box = BarPosition.area(surface.barPosition, {
+        along: -near,
+        away: 0,
+        length: length + near * 2,
+        depth: boxDepth
+    }, sideBar ? surface.width : surface.height);
     const path = laidPath({
         barPosition: surface.barPosition,
         depth: depth,
@@ -118,14 +109,18 @@ function attachedPath(surface) {
         end: near + length + corners.join,
         corners: corners
     });
+    const parts = {};
+
+    attachedParts.forEach((name, index) => parts[name] = path.segments[index]);
 
     return {
         x: box.x,
         y: box.y,
-        width: side ? boxDepth : boxLength,
-        height: side ? boxLength : boxDepth,
+        width: box.width,
+        height: box.height,
         start: path.start,
-        segments: path.segments
+        segments: path.segments,
+        parts: parts
     };
 }
 

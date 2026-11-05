@@ -49,7 +49,9 @@ Item {
     readonly property var battery: UPower.displayDevice
     readonly property bool hasBattery: battery && battery.isPresent
     readonly property var bluetoothAdapter: Bluetooth.defaultAdapter
-    readonly property real mediaTitleMaximumWidth: monitorScreen
+    // How long free text gets: the media title, and the apps sharing the screen
+    // on a side bar.
+    readonly property real longTextMaximumLength: monitorScreen
         ? Math.max(96, Math.min(260, BarLayout.screenLength(appearance, monitorScreen) * 0.12)) : 260
     property var player: null
     readonly property string playerLabel: player
@@ -220,18 +222,15 @@ Item {
             id: recordingHover
         }
 
-        IconValue {
+        RecordingContent {
             id: recordingContent
 
             anchors.centerIn: parent
             appearance: root.appearance
-            gap: 5
-            icon: "󰑋"
             iconColor: theme.red
-            iconSize: root.appearance.textSize
-            value: root.sharingShown !== "" ? root.sharingShown
-                : RecordingIndicator.elapsedSince(root.recordings, root.recordingNow)
-            valueSize: root.appearance.textSize - 2
+            elapsed: RecordingIndicator.elapsedSince(root.recordings, root.recordingNow)
+            sharing: root.sharingShown
+            maximumLength: root.longTextMaximumLength
         }
 
         // Ticks the elapsed time only while the indicator is shown.
@@ -277,7 +276,6 @@ Item {
     Rectangle {
         id: mediaButton
 
-        readonly property bool vertical: BarLayout.vertical(root.appearance)
         readonly property var size: root.elementSize(mediaContent.implicitWidth + 16)
 
         border.width: root.appearance.barTransparentBorder && !root.elementGrouped("media") ? 1 : 0
@@ -301,24 +299,8 @@ Item {
             id: mediaHover
         }
 
-        // Only along the bar: across it, it follows the bar at once.
-        Behavior on width {
-            enabled: !mediaButton.vertical
-
-            NumberAnimation {
-                duration: root.appearance.motion.medium
-                easing.type: root.appearance.motion.easing
-            }
-        }
-
-        Behavior on height {
-            enabled: mediaButton.vertical
-
-            NumberAnimation {
-                duration: root.appearance.motion.medium
-                easing.type: root.appearance.motion.easing
-            }
-        }
+        AlongBarBehavior on width { appearance: root.appearance }
+        AlongBarBehavior on height { appearance: root.appearance }
 
         Row {
             id: mediaContent
@@ -344,7 +326,7 @@ Item {
 
                 anchors.verticalCenter: parent.verticalCenter
                 visible: BarProfileModel.elementOption(root.appearance.barElements, "media", "titleVisible")
-                width: Math.min(root.mediaTitleMaximumWidth, implicitWidth)
+                width: Math.min(root.longTextMaximumLength, implicitWidth)
                 text: displayedLabel
                 color: theme.green
                 elide: Text.ElideRight
@@ -435,10 +417,10 @@ Item {
                 + cavaTextMetrics.ascent
 
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: vertical ? parent.verticalCenter : undefined
+            anchors.verticalCenter: sideBar ? parent.verticalCenter : undefined
             y: 2
-            width: vertical ? parent.width - 6 : implicitWidth
-            height: vertical ? implicitHeight : Math.max(1, textBaseline - y)
+            width: sideBar ? parent.width - 6 : implicitWidth
+            height: sideBar ? implicitHeight : Math.max(1, textBaseline - y)
             barPosition: root.appearance.barPosition
             frame: root.cava.heights
             barCount: cavaElement.barCount
@@ -685,7 +667,7 @@ Item {
 
             anchors.centerIn: parent
             appearance: root.appearance
-            spacing: vertical && !root.pomodoro.started ? 0 : 7
+            spacing: sideBar && !root.pomodoro.started ? 0 : 7
 
             // Opens along the bar when a pomodoro starts.
             Item {
@@ -695,34 +677,19 @@ Item {
                     root.pomodoro.started
                         ? BarLayout.itemLength(root.appearance, { width: pomodoroText.implicitWidth, height: pomodoroText.implicitHeight })
                         : 0,
-                    clockContent.vertical ? pomodoroText.width : pomodoroText.implicitHeight)
+                    clockContent.sideBar ? pomodoroText.width : pomodoroText.implicitHeight)
 
                 width: openSize.width
                 height: openSize.height
                 clip: true
 
-                Behavior on width {
-                    enabled: !clockContent.vertical
-
-                    NumberAnimation {
-                        duration: root.appearance.motion.medium
-                        easing.type: root.appearance.motion.easing
-                    }
-                }
-
-                Behavior on height {
-                    enabled: clockContent.vertical
-
-                    NumberAnimation {
-                        duration: root.appearance.motion.medium
-                        easing.type: root.appearance.motion.easing
-                    }
-                }
+                AlongBarBehavior on width { appearance: root.appearance }
+                AlongBarBehavior on height { appearance: root.appearance }
 
                 ElementText {
                     id: pomodoroText
 
-                    anchors.verticalCenter: clockContent.vertical ? undefined : parent.verticalCenter
+                    anchors.verticalCenter: clockContent.sideBar ? undefined : parent.verticalCenter
                     appearance: root.appearance
                     value: "󰔟  " + root.pomodoro.remainingLabel
                     color: root.pomodoro.running ? theme.green : theme.textMuted

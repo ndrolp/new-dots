@@ -1,4 +1,5 @@
 .pragma library
+.import "../BarPosition.js" as BarPosition
 
 // Where the bar sits on its screen, from its Bar position. Every function takes
 // the bar profile of its monitor, or as much of it as it reads.
@@ -32,11 +33,6 @@ function windowAnchors(barPosition) {
 function contentMargins(bar) {
     const docked = bar.barTransparent && bar.transparentBarSlanted;
     const padding = docked ? 0 : bar.horizontalPadding;
-    const vertical = bar.barPosition === "left" || bar.barPosition === "right";
-    const margins = vertical
-        ? { top: padding, right: 0, bottom: padding, left: 0 }
-        : { top: 0, right: padding, bottom: 0, left: padding };
 
-    margins[bar.barPosition] = margin(bar);
-    return margins;
+    return BarPosition.sides(bar.barPosition, margin(bar), 0, padding);
 }

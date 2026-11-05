@@ -82,7 +82,7 @@ El panel a pantalla completa que lista los colorschemes, hace un *colorscheme pr
 _Avoid_: Theme selector, theme picker, selector de temas
 
 **Control center** (centro de control):
-El popup del bar element *control center* (la campana con el contador de no leídas) que reúne, como la cortina de Android, los tiles y deslizadores y las notificaciones. Tiene dos etapas: **collapsed** y **expanded**. SUPER+N lo abre collapsed y SUPER+C expanded, en la barra del monitor enfocado; si esa barra no tiene el bar element, se abre en el borde derecho. Con el plugin *Control center* desactivado solo muestra las notificaciones.
+El popup del bar element *control center* (la campana con el contador de no leídas) que reúne, como la cortina de Android, los tiles y deslizadores y las notificaciones. Tiene dos etapas: **collapsed** y **expanded**. SUPER+N lo abre collapsed y SUPER+C expanded, en la barra del monitor enfocado; si esa barra no tiene el bar element, se abre en el extremo derecho de la barra, que en una barra lateral es el de abajo, donde queda la zona derecha. Con el plugin *Control center* desactivado solo muestra las notificaciones.
 _Avoid_: Notification center, notification panel, shade, cortina, control panel, quick settings, panel de control
 
 **Collapsed control center** (control center plegado):

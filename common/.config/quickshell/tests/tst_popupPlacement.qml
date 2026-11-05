@@ -5,7 +5,7 @@ import "../components/panels/PopupPlacement.js" as PopupPlacement
 // A popup opens away from the bar, towards the inside of the screen, centred on
 // the bar element that opened it, whatever zone it sits in, shifted along the
 // bar to stay on screen and clear of the bar's rounded ends. A popup whose
-// element isn't on the bar opens at the bar's edge.
+// element isn't on the bar opens at an end of the bar.
 TestCase {
     name: "PopupPlacement"
 
@@ -13,7 +13,7 @@ TestCase {
     readonly property var bar: ({
         barPosition: "top",
         window: { width: 1920, height: 40 },
-        barHeight: 40,
+        thickness: 40,
         padding: 12,
         spacing: 8
     })
@@ -234,8 +234,8 @@ TestCase {
         return [
             { tag: "top", room: { top: 0, right: 6, bottom: 0, left: 6 } },
             { tag: "bottom", room: { top: 0, right: 6, bottom: 0, left: 6 } },
-            { tag: "left", room: { top: 6, right: 0, bottom: 6, left: 0 } },
-            { tag: "right", room: { top: 6, right: 0, bottom: 6, left: 0 } }
+            { tag: "left", room: { top: 6, right: 12, bottom: 6, left: 0 } },
+            { tag: "right", room: { top: 6, right: 0, bottom: 6, left: 12 } }
         ];
     }
 
@@ -257,10 +257,98 @@ TestCase {
         compare(PopupPlacement.towardsBar(data.tag, 8), data.offset);
     }
 
-    function test_onlySideBarsRunVertically() {
-        verify(!PopupPlacement.vertical("top"));
-        verify(!PopupPlacement.vertical("bottom"));
-        verify(PopupPlacement.vertical("left"));
-        verify(PopupPlacement.vertical("right"));
+    // A control center on a side bar of 1080 px, switching stages between 300
+    // and 700 px long: the window is held 700 long and the popup resizes in it.
+    // Its element is in the middle of the bar, or near either end.
+    function test_aHeldPopupStaysSteadyOnASideBar_data() {
+        const cases = [
+            { tag: "bell in the middle", trigger: { start: 500, length: 30 } },
+            { tag: "bell near the top", trigger: { start: 16, length: 30 } },
+            { tag: "bell near the bottom", trigger: { start: 1040, length: 30 } },
+            { tag: "no bell", trigger: null }
+        ];
+
+        return ["left", "right"].reduce((all, position) => all.concat(cases.map(item =>
+            ({ tag: position + ", " + item.tag, position: position, trigger: item.trigger }))), []);
+    }
+
+    function test_aHeldPopupStaysSteadyOnASideBar(data) {
+        const fields = { trigger: data.trigger, popupHeight: 700 };
+        const held = placedOn(data.position, fields);
+
+        for (let length = 300; length <= 700; length += 10) {
+            const placed = placedOn(data.position, Object.assign({ restingHeight: length }, fields));
+            const resting = placedOn(data.position, { trigger: data.trigger, popupHeight: length });
+            const tag = "resting at " + length;
+
+            compare(placed.y, held.y, tag + ": the window holds still");
+            compare(placed.x, held.x, tag + ": the window holds still across the bar");
+            compare(placed.start, resting.y, tag + ": the popup is where it rests");
+            compare(placed.end, resting.y + length, tag + ": the popup ends where it rests");
+            compare(placed.y + placed.surfaceShift, resting.y, tag + ": the surface is where it rests");
+            verify(placed.surfaceShift >= 0, tag + ": the surface starts in the window");
+            verify(placed.surfaceShift + length <= 700, tag + ": the surface ends in the window");
+            verify(placed.start >= 12, tag + ": it stays on screen at the start");
+            verify(placed.end <= 1080 - 12, tag + ": it stays on screen at the end");
+        }
+    }
+
+    function test_aPopupNotHeldSitsAtTheStartOfItsWindow_data() {
+        return [{ tag: "top" }, { tag: "bottom" }, { tag: "left" }, { tag: "right" }];
+    }
+
+    function test_aPopupNotHeldSitsAtTheStartOfItsWindow(data) {
+        compare(placedOn(data.tag, {}).surfaceShift, 0);
+        compare(placedOn(data.tag, { restingHeight: 300 }).surfaceShift, 0);
+    }
+
+    // The hold runs away from a top or bottom bar, so nothing moves along it.
+    function test_aHoldDoesntMoveAPopupAlongATopOrBottomBar_data() {
+        return [{ tag: "top" }, { tag: "bottom" }];
+    }
+
+    function test_aHoldDoesntMoveAPopupAlongATopOrBottomBar(data) {
+        const placed = placedOn(data.tag, { popupHeight: 700, restingHeight: 300 });
+        const window = placedOn(data.tag, { popupHeight: 700 });
+
+        compare(placed.surfaceShift, 0);
+        compare(placed.x, window.x);
+        compare(placed.y, window.y);
+        compare(placed.start, window.start);
+        compare(placed.end, window.end);
+    }
+
+    // A popup's window is as wide on every Bar position, and so are its contents.
+    function test_anAttachedPopupIsAsWideOnEveryBarPosition_data() {
+        return [{ tag: "bottom" }, { tag: "left" }, { tag: "right" }];
+    }
+
+    function test_anAttachedPopupIsAsWideOnEveryBarPosition(data) {
+        const room = barPosition => PopupPlacement.room({
+            barPosition: barPosition, attached: true, inset: 12, joinRadius: 6
+        });
+        const across = fields => fields.left + fields.right;
+
+        compare(across(room(data.tag)), across(room("top")));
+    }
+
+    function test_aTriggerIsMeasuredAlongTheBar_data() {
+        return [
+            { tag: "top", span: { start: 130, length: 60 } },
+            { tag: "bottom", span: { start: 130, length: 60 } },
+            { tag: "left", span: { start: 56, length: 24 } },
+            { tag: "right", span: { start: 56, length: 24 } }
+        ];
+    }
+
+    function test_aTriggerIsMeasuredAlongTheBar(data) {
+        const content = { x: 10, y: 6 };
+        const element = { x: 120, y: 50, width: 60, height: 24 };
+
+        compare(PopupPlacement.triggerSpan(data.tag, content, element), data.span);
+    }
+
+    function test_nothingTriggersAPopupWhoseElementIsntOnTheBar() {
+        compare(PopupPlacement.triggerSpan("left", { x: 0, y: 0 }, null), null);
     }
 }

@@ -1,6 +1,7 @@
 import Quickshell
 import QtQuick
 import QtQuick.Effects
+import "../BarPosition.js" as BarPosition
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 import "BarElementItems.js" as BarElementItemsModel
@@ -54,7 +55,7 @@ Item {
         endPadding: dockedPadding
     })
     // Whether the bar runs from the top of the screen down.
-    readonly property bool vertical: BarLayout.vertical(layoutBar)
+    readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
 
     // The item of every bar element, by element id.
     readonly property var elementItems: Object.assign({
@@ -133,7 +134,7 @@ Item {
     }
 
     // Where the element a popup opens from sits in the bar; null when it isn't
-    // shown, so the popup opens at the bar edge.
+    // shown, so the popup opens at an end of the bar.
     function popupTrigger(popup) {
         const element = popupElement(popup);
         if (!elementShown(element))
@@ -147,7 +148,7 @@ Item {
     }
 
     // The open popup, when it hangs from this zone. A popup whose bar element
-    // isn't shown hangs from the zone at its edge.
+    // isn't shown hangs from the zone at its end of the bar.
     function zonePopup(zone) {
         if (!openPopup)
             return null;
@@ -165,27 +166,27 @@ Item {
     DockedSurface {
         id: leftSurface
 
-        spanLeft: 0
-        spanRight: root.zoneEnd("left") + leftSurface.sideWidth
+        spanStart: 0
+        spanEnd: root.zoneEnd("left") + leftSurface.endWidth
         popup: root.zonePopup("left")
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
-        thickness: root.vertical ? root.width : root.height
+        thickness: root.sideBar ? root.width : root.height
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
         fillColor: root.dockedColor
-        keepLeftEdge: true
+        keepStart: true
         z: -1
     }
 
     DockedSurface {
         id: centerSurface
 
-        spanLeft: root.zoneStart("center") - centerSurface.sideWidth
-        spanRight: root.zoneEnd("center") + centerSurface.sideWidth
+        spanStart: root.zoneStart("center") - centerSurface.endWidth
+        spanEnd: root.zoneEnd("center") + centerSurface.endWidth
         popup: root.zonePopup("center")
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
-        thickness: root.vertical ? root.width : root.height
+        thickness: root.sideBar ? root.width : root.height
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
         fillColor: root.dockedColor
         z: -1
@@ -194,15 +195,15 @@ Item {
     DockedSurface {
         id: rightSurface
 
-        spanLeft: root.zoneStart("right") - rightSurface.sideWidth
-        spanRight: BarLayout.barLength(root.layoutBar)
+        spanStart: root.zoneStart("right") - rightSurface.endWidth
+        spanEnd: BarLayout.barLength(root.layoutBar)
         popup: root.zonePopup("right")
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
-        thickness: root.vertical ? root.width : root.height
+        thickness: root.sideBar ? root.width : root.height
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
         fillColor: root.dockedColor
-        keepRightEdge: true
+        keepEnd: true
         z: -1
     }
 
@@ -239,42 +240,10 @@ Item {
                     border.width: root.appearance.barTransparentBorder ? 1 : 0
                     border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
-                    // Only along the bar: across it, it follows the bar at once.
-                    Behavior on x {
-                        enabled: !root.vertical
-
-                        NumberAnimation {
-                            duration: root.appearance.motion.medium
-                            easing.type: root.appearance.motion.easing
-                        }
-                    }
-
-                    Behavior on y {
-                        enabled: root.vertical
-
-                        NumberAnimation {
-                            duration: root.appearance.motion.medium
-                            easing.type: root.appearance.motion.easing
-                        }
-                    }
-
-                    Behavior on width {
-                        enabled: !root.vertical
-
-                        NumberAnimation {
-                            duration: root.appearance.motion.medium
-                            easing.type: root.appearance.motion.easing
-                        }
-                    }
-
-                    Behavior on height {
-                        enabled: root.vertical
-
-                        NumberAnimation {
-                            duration: root.appearance.motion.medium
-                            easing.type: root.appearance.motion.easing
-                        }
-                    }
+                    AlongBarBehavior on x { appearance: root.appearance }
+                    AlongBarBehavior on y { appearance: root.appearance }
+                    AlongBarBehavior on width { appearance: root.appearance }
+                    AlongBarBehavior on height { appearance: root.appearance }
                 }
             }
         }
@@ -287,22 +256,8 @@ Item {
         x: root.elementX("arch")
         y: root.elementY("arch")
         grouped: root.elementGrouped("arch")
-        Behavior on x {
-            enabled: !root.vertical
-
-            NumberAnimation {
-                duration: root.appearance.motion.long
-                easing.type: root.appearance.motion.easing
-            }
-        }
-        Behavior on y {
-            enabled: root.vertical
-
-            NumberAnimation {
-                duration: root.appearance.motion.long
-                easing.type: root.appearance.motion.easing
-            }
-        }
+        AlongBarBehavior on x { appearance: root.appearance; duration: root.appearance.motion.long }
+        AlongBarBehavior on y { appearance: root.appearance; duration: root.appearance.motion.long }
         appearance: root.appearance
         active: root.configOpen
         onClicked: root.configRequested(root.monitorScreen)
@@ -351,22 +306,8 @@ Item {
         x: root.elementX("workspaces")
         y: root.elementY("workspaces")
         grouped: root.elementGrouped("workspaces")
-        Behavior on x {
-            enabled: !root.vertical
-
-            NumberAnimation {
-                duration: root.appearance.motion.long
-                easing.type: root.appearance.motion.easing
-            }
-        }
-        Behavior on y {
-            enabled: root.vertical
-
-            NumberAnimation {
-                duration: root.appearance.motion.long
-                easing.type: root.appearance.motion.easing
-            }
-        }
+        AlongBarBehavior on x { appearance: root.appearance; duration: root.appearance.motion.long }
+        AlongBarBehavior on y { appearance: root.appearance; duration: root.appearance.motion.long }
         appearance: root.appearance
         monitorScreen: root.monitorScreen
         monitors: root.monitors

@@ -1,7 +1,7 @@
 import QtQuick
+import "../BarPosition.js" as BarPosition
 import "../../config" as Config
 import "../../services/CavaOutput.js" as CavaOutput
-import "BarLayout.js" as BarLayout
 
 // What the Cava bar element draws: `barCount` bars 1px apart, resampled from
 // the frame the shared cava prints. On a top or bottom bar they rise from the
@@ -26,11 +26,11 @@ Item {
     readonly property int gap: 1
     readonly property real flatHeight: 2
 
-    readonly property bool vertical: BarLayout.vertical({ barPosition: barPosition })
+    readonly property bool sideBar: BarPosition.sideBar(barPosition)
     readonly property int length: barCount > 0 ? barCount * (barWidth + gap) - gap : 0
 
-    implicitWidth: vertical ? 0 : length
-    implicitHeight: vertical ? length : 0
+    implicitWidth: sideBar ? 0 : length
+    implicitHeight: sideBar ? length : 0
 
     Config.Theme {
         id: theme
@@ -45,15 +45,15 @@ Item {
             readonly property real start: index * (root.barWidth + root.gap)
             readonly property real level: root.heights[index] || 0
 
-            x: !root.vertical ? start : root.barPosition === "right" ? root.width - width : 0
-            y: root.vertical ? start : root.height - height
-            width: root.vertical ? Math.max(root.flatHeight, root.width * level) : root.barWidth
-            height: root.vertical ? root.barWidth : Math.max(root.flatHeight, root.height * level)
+            x: !root.sideBar ? start : root.barPosition === "right" ? root.width - width : 0
+            y: root.sideBar ? start : root.height - height
+            width: root.sideBar ? Math.max(root.flatHeight, root.width * level) : root.barWidth
+            height: root.sideBar ? root.barWidth : Math.max(root.flatHeight, root.height * level)
             radius: 1
             color: root.color
 
             Behavior on width {
-                enabled: root.vertical
+                enabled: root.sideBar
 
                 NumberAnimation {
                     duration: root.smoothing
@@ -61,7 +61,7 @@ Item {
             }
 
             Behavior on height {
-                enabled: !root.vertical
+                enabled: !root.sideBar
 
                 NumberAnimation {
                     duration: root.smoothing

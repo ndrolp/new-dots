@@ -1,4 +1,5 @@
 import QtQuick
+import "../BarPosition.js" as BarPosition
 import "../StatusText.js" as StatusText
 import "BarLayout.js" as BarLayout
 
@@ -10,11 +11,11 @@ Text {
 
     required property var appearance
     property string value: ""
-    readonly property bool vertical: BarLayout.vertical(appearance)
+    readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
 
-    text: vertical ? StatusText.sideBarValue(value) : value
-    width: vertical ? BarLayout.elementThickness(appearance) - 2 : undefined
-    horizontalAlignment: vertical ? Text.AlignHCenter : Text.AlignLeft
-    fontSizeMode: vertical ? Text.HorizontalFit : Text.FixedSize
+    text: sideBar ? StatusText.sideBarValue(value) : value
+    width: sideBar ? BarLayout.elementThickness(appearance) - 2 : undefined
+    horizontalAlignment: sideBar ? Text.AlignHCenter : Text.AlignLeft
+    fontSizeMode: sideBar ? Text.HorizontalFit : Text.FixedSize
     minimumPixelSize: 8
 }

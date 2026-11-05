@@ -47,7 +47,6 @@ Item {
     // How wide all the titles may get together.
     readonly property real menusMaximumWidth: monitorScreen
         ? Math.max(400, BarLayout.screenLength(appearance, monitorScreen) * 0.4) : 800
-    readonly property bool vertical: BarLayout.vertical(appearance)
     readonly property real thickness: BarLayout.elementThickness(appearance)
     readonly property var size: BarLayout.size(appearance, visible ? titleRow.width + 8 : 0, thickness)
     // Where the open menu's title sits in this element, so the Popup opens
@@ -118,24 +117,8 @@ Item {
         id: theme
     }
 
-    // Only along the bar: across it, it follows the bar at once.
-    Behavior on width {
-        enabled: !root.vertical
-
-        NumberAnimation {
-            duration: root.appearance.motion.medium
-            easing.type: root.appearance.motion.easing
-        }
-    }
-
-    Behavior on height {
-        enabled: root.vertical
-
-        NumberAnimation {
-            duration: root.appearance.motion.medium
-            easing.type: root.appearance.motion.easing
-        }
-    }
+    AlongBarBehavior on width { appearance: root.appearance }
+    AlongBarBehavior on height { appearance: root.appearance }
 
     Rectangle {
         id: background

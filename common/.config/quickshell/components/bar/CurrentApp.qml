@@ -34,7 +34,6 @@ Row {
     readonly property string terminalGlyph: terminal ? terminalIconGlyph(windowTitle) : ""
     readonly property real activeTitleMaximumWidth: monitorScreen
         ? Math.max(120, Math.min(320, BarLayout.screenLength(appearance, monitorScreen) * 0.14)) : 320
-    readonly property bool vertical: BarLayout.vertical(appearance)
     readonly property real thickness: BarLayout.elementThickness(appearance)
     readonly property real length: appContent.implicitWidth + 16
     readonly property var size: BarLayout.size(appearance, visible ? length : 0, thickness)
@@ -95,24 +94,8 @@ Row {
         return "󰆍";
     }
 
-    // Only along the bar: across it, it follows the bar at once.
-    Behavior on width {
-        enabled: !root.vertical
-
-        NumberAnimation {
-            duration: root.appearance.motion.medium
-            easing.type: root.appearance.motion.easing
-        }
-    }
-
-    Behavior on height {
-        enabled: root.vertical
-
-        NumberAnimation {
-            duration: root.appearance.motion.medium
-            easing.type: root.appearance.motion.easing
-        }
-    }
+    AlongBarBehavior on width { appearance: root.appearance }
+    AlongBarBehavior on height { appearance: root.appearance }
 
     Rectangle {
         readonly property var size: BarLayout.size(appearance, root.length, root.thickness)

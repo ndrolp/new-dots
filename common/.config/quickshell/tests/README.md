@@ -11,8 +11,11 @@ the bar leaves free: their anchors and plain gaps from that area
 (`components/panels/NotificationPlacement.js`, `config/DesktopWidgetsModel.js`;
 that the compositor keeps their windows and the OSD inside it depends on
 `ExclusionMode.Normal` on those windows and isn't tested here). They also cover
-the popups: where a popup opens on each Bar position
-(`components/panels/PopupPlacement.js`), the outline of an attached popup
+the popups: what a Bar position means for what is laid out from the bar
+(`components/BarPosition.js`), where a popup opens on each Bar position, the
+stretch of the bar that opens it, how wide its contents are, and that a popup
+held through a control center stage change stays steady and on screen on a side
+bar (`components/panels/PopupPlacement.js`), the outline of an attached popup
 on each of them (`PopupOutline.js`), the surface every popup draws on, how
 it reveals away from the bar and that it ignores input while closing
 (`PopupSurface.qml`; `PopupFrame.qml` itself is a Quickshell window and isn't
@@ -51,7 +54,8 @@ reads cava and tries it again when it fails (`services/CavaOutput.js`) and
 what it draws, from the bottom or from the side (`components/bar/CavaBars.qml`), how a docked bar zone hangs
 from the screen edge the bar sits on and keeps its sides on the screen's edge
 straight, on each Bar position (`PopupOutline.js`), and how it is
-drawn, grows for an attached popup and meets its joins on every Bar position
+drawn, grows for an attached popup, keeps up with one that resizes and meets
+its joins on every Bar position
 (`components/bar/DockedSurface.qml`,
 `DockedZones.js`), where zones, bar elements, group backgrounds and popup
 triggers sit along either axis of the bar, to the pixel the anchors they
@@ -60,8 +64,10 @@ needs Quickshell's services and isn't tested here), how workspaces, icon
 and value elements size and stack upright on a side bar and stay as they were
 on a top one (`BarLayout.size`, `Workspaces.qml`, `ArchButton.qml`,
 `KeepAwakeElement.qml`, `ElementText.qml`, `IconValue.qml`, `AudioLevel.qml`,
-`SystemMonitor.qml`; `BarElementItems.qml` and `Clock.qml` need Quickshell's
-services, so their parts are covered through those), how the long text of the app
+`SystemMonitor.qml`, `RecordingContent.qml`; `BarElementItems.qml` and `Clock.qml`
+need Quickshell's services, so their parts are covered through those), that what
+runs along the bar animates and what runs across it doesn't, on every Bar position
+(`AlongBarBehavior.qml`), how the long text of the app
 menu, the current app and the media element turns on a side bar: how far, what
 its length is capped against and where an app menu title ends up for its popup,
 checked against a really rotated item (`BarLayout.turn`, `BarLayout.screenLength`,

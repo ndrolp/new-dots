@@ -1,4 +1,5 @@
 import QtQuick
+import "../BarPosition.js" as BarPosition
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 import "BarLayout.js" as BarLayout
@@ -16,12 +17,12 @@ Rectangle {
     readonly property bool ownPill: appearance.barTransparent && !grouped
     readonly property var options: BarProfileModel.elementOptions(appearance.barElements, "workspaces")
 
-    readonly property bool vertical: BarLayout.vertical(appearance)
+    readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
     // The element wraps its line of buttons, which runs along the bar.
     readonly property var size: BarLayout.size(appearance,
-        (vertical ? workspaceStack.implicitHeight : workspaceStack.implicitWidth) + (ownPill ? 16 : 0),
+        (sideBar ? workspaceStack.implicitHeight : workspaceStack.implicitWidth) + (ownPill ? 16 : 0),
         appearance.barTransparent
-            ? (vertical ? workspaceStack.implicitWidth : workspaceStack.implicitHeight) + (ownPill
+            ? (sideBar ? workspaceStack.implicitWidth : workspaceStack.implicitHeight) + (ownPill
                 ? (appearance.pillVerticalPadding + 2) * 2 : 0)
             : BarLayout.elementThickness(appearance))
 
@@ -41,32 +42,15 @@ Rectangle {
         }
     }
 
-    // Only along the bar: across it, it follows the bar at once.
-    Behavior on width {
-        enabled: !root.vertical
+    AlongBarBehavior on width { appearance: root.appearance }
+    AlongBarBehavior on height { appearance: root.appearance }
 
-        NumberAnimation {
-            duration: root.appearance.motion.medium
-            easing.type: root.appearance.motion.easing
-        }
-    }
-
-    Behavior on height {
-        enabled: root.vertical
-
-        NumberAnimation {
-            duration: root.appearance.motion.medium
-            easing.type: root.appearance.motion.easing
-        }
-    }
-
-    Grid {
+    ElementStack {
         id: workspaceStack
 
         anchors.centerIn: parent
-        rows: root.vertical ? -1 : 1
-        columns: root.vertical ? 1 : -1
-        spacing: appearance.spacing
+        appearance: root.appearance
+        spacing: root.appearance.spacing
 
         move: Transition {
             NumberAnimation {
@@ -116,41 +100,10 @@ Rectangle {
                 border.color: urgent ? theme.red : "transparent"
                 border.width: urgent ? 1 : 0
 
-                Behavior on width {
-                    enabled: !root.vertical
-
-                    NumberAnimation {
-                        duration: root.appearance.motion.medium
-                        easing.type: root.appearance.motion.easing
-                    }
-                }
-
-                Behavior on height {
-                    enabled: root.vertical
-
-                    NumberAnimation {
-                        duration: root.appearance.motion.medium
-                        easing.type: root.appearance.motion.easing
-                    }
-                }
-
-                Behavior on x {
-                    enabled: !root.vertical
-
-                    NumberAnimation {
-                        duration: root.appearance.motion.medium
-                        easing.type: root.appearance.motion.easing
-                    }
-                }
-
-                Behavior on y {
-                    enabled: root.vertical
-
-                    NumberAnimation {
-                        duration: root.appearance.motion.medium
-                        easing.type: root.appearance.motion.easing
-                    }
-                }
+                AlongBarBehavior on width { appearance: root.appearance }
+                AlongBarBehavior on height { appearance: root.appearance }
+                AlongBarBehavior on x { appearance: root.appearance }
+                AlongBarBehavior on y { appearance: root.appearance }
 
                 Behavior on color {
                     ColorAnimation {

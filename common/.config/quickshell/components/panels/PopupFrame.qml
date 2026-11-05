@@ -21,8 +21,8 @@ PopupWindow {
     // The bar content; places popups at the bar element that opened them.
     property var anchorProvider: null
     property bool open: false
-    // Where the popup opens when its element isn't on the bar: "left" or
-    // "right", which on a side bar mean its top and bottom.
+    // The end of the bar the popup opens at when its element isn't on the bar:
+    // "left" or "right", which on a side bar mean its top and bottom.
     property string edge: "right"
     // The screen edge the bar sits on.
     readonly property string barPosition: appearance.barPosition
@@ -37,13 +37,15 @@ PopupWindow {
         barPosition: barPosition,
         popupWidth: implicitWidth,
         popupHeight: implicitHeight,
+        restingHeight: restingHeight,
         window: { width: barWindow.width, height: barWindow.height },
-        barHeight: appearance.barHeight,
+        thickness: appearance.barHeight,
         padding: appearance.horizontalPadding,
         radius: appearance.radius,
         spacing: appearance.spacing,
         attached: attached,
-        trigger: trigger(),
+        trigger: anchorProvider ? PopupPlacement.triggerSpan(barPosition, anchorProvider,
+            anchorProvider.popupTrigger(popup)) : null,
         edge: edge,
         content: anchorProvider ? {
             x: anchorProvider.x,
@@ -67,20 +69,12 @@ PopupWindow {
     // enough for contents of this height (the larger end), so the window is
     // resized once instead of every frame; 0 lets it follow the surface.
     property real heldHeight: 0
+    // The window's height without that hold.
+    readonly property real restingHeight: surface.implicitHeight + room.top + room.bottom
     default property alias contents: surface.contents
     // Closed from outside while still open: a click outside it and its bar,
     // another grab taking over, or its bar hiding.
     signal dismissed()
-
-    function trigger() {
-        const element = anchorProvider ? anchorProvider.popupTrigger(popup) : null;
-        if (!element)
-            return null;
-
-        return PopupPlacement.vertical(barPosition)
-            ? { start: anchorProvider.y + element.y, length: element.height }
-            : { start: anchorProvider.x + element.x, length: element.width };
-    }
 
     visible: reveal > 0
     onVisibleChanged: {
@@ -92,7 +86,7 @@ PopupWindow {
     anchor.rect.y: placed.y
     color: "transparent"
 
-    implicitHeight: Math.max(surface.implicitHeight, heldHeight + surface.padding * 2) + room.top + room.bottom
+    implicitHeight: Math.max(restingHeight, heldHeight + surface.padding * 2 + room.top + room.bottom)
 
     HyprlandFocusGrab {
         id: focusGrab
@@ -107,14 +101,15 @@ PopupWindow {
     PopupSurface {
         id: surface
 
-        // A window held taller than the surface keeps it against the bar.
+        // A window held taller than the surface keeps it against the bar, or
+        // on a side bar where it would rest.
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: frame.barPosition === "bottom" ? undefined : parent.top
         anchors.bottom: frame.barPosition === "bottom" ? parent.bottom : undefined
         anchors.leftMargin: frame.room.left
         anchors.rightMargin: frame.room.right
-        anchors.topMargin: frame.room.top
+        anchors.topMargin: frame.room.top + frame.placed.surfaceShift
         anchors.bottomMargin: frame.room.bottom
         height: implicitHeight
         barPosition: frame.barPosition

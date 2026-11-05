@@ -18,14 +18,14 @@ PanelWindow {
     // not from the one being edited in the settings.
     readonly property string profileName: monitors.barProfileFor(
         workspaceService.monitorDescriptionForScreen(screen))
-    readonly property var profile: ({
+    readonly property var toastSizes: ({
         spacing: appearance.barProfileValue(profileName, "spacing"),
         horizontalPadding: appearance.barProfileValue(profileName, "horizontalPadding"),
         radius: appearance.barProfileValue(profileName, "radius"),
         textSize: appearance.barProfileValue(profileName, "textSize")
     })
     readonly property var placement: NotificationPlacement.place(
-        appearance.notificationPopupLocation, profile)
+        appearance.notificationPopupLocation, toastSizes)
 
     screen: Quickshell.screens.values.length > 0 ? Quickshell.screens.values[0] : null
     color: "transparent"
@@ -93,7 +93,7 @@ PanelWindow {
                 visible: toastShown
                 width: parent.width
                 height: content.implicitHeight + 28
-                radius: root.profile.radius
+                radius: root.toastSizes.radius
                 color: theme.surface
                 border.color: theme.border
                 border.width: 1
@@ -156,7 +156,7 @@ PanelWindow {
                     Rectangle {
                         width: 76
                         height: 76
-                        radius: root.profile.radius
+                        radius: root.toastSizes.radius
                         color: theme.accent
 
                         Image {
@@ -189,7 +189,7 @@ PanelWindow {
                             text: notificationCard.modelData.appName
                             color: theme.textMuted
                             elide: Text.ElideRight
-                            font.pixelSize: root.profile.textSize - 2
+                            font.pixelSize: root.toastSizes.textSize - 2
                             font.bold: true
                         }
 
@@ -198,7 +198,7 @@ PanelWindow {
                             text: notificationCard.modelData.summary
                             color: theme.text
                             elide: Text.ElideRight
-                            font.pixelSize: root.profile.textSize + 1
+                            font.pixelSize: root.toastSizes.textSize + 1
                             font.bold: true
                         }
 
@@ -211,7 +211,7 @@ PanelWindow {
                             wrapMode: Text.WordWrap
                             maximumLineCount: 3
                             elide: Text.ElideRight
-                            font.pixelSize: root.profile.textSize - 1
+                            font.pixelSize: root.toastSizes.textSize - 1
                             font.bold: true
                         }
                     }
@@ -223,7 +223,7 @@ PanelWindow {
                     anchors.margins: 10
                     width: 24
                     height: 24
-                    radius: root.profile.radius
+                    radius: root.toastSizes.radius
                     color: closeHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
 
                     Behavior on color {
@@ -256,7 +256,7 @@ PanelWindow {
                     anchors.bottom: parent.bottom
                     width: parent.width * notificationCard.lifetimeProgress
                     height: 3
-                    radius: root.profile.radius
+                    radius: root.toastSizes.radius
                     color: theme.accent
                 }
             }
