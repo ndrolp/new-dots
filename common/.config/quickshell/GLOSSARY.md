@@ -54,8 +54,12 @@ _Avoid_: Blue light filter, filtro de luz azul, modo noche, hyprsunset (para la 
 
 **Popup**:
 La ventana pequeña que se despliega desde un bar element al pulsarlo (Bluetooth, red, batería, audio, media, control center…). Pertenece a ese bar element y se cierra al perder el foco; solo hay uno abierto a la vez en todos los monitores.
-Con la barra opaca un popup va **anclado** (attached): sale de la barra como si fuera parte de ella. Con la barra transparente va **flotante** (floating), separado de la barra.
+Con la barra opaca o con la docked bar un popup va **anclado** (attached): sale de la barra como si fuera parte de ella. Con cualquier otra barra transparente va **flotante** (floating), separado de la barra.
 _Avoid_: Menu, dropdown, status popup
+
+**Docked bar** (barra acoplada):
+La barra transparente cuyas zonas cuelgan del borde superior de la pantalla, cada una con el contorno, el color y la opacidad de un popup anclado. Mientras un popup anclado está abierto, la zona de la que sale se ensancha para recibirlo.
+_Avoid_: Barra inclinada, slanted bar
 
 **Icon theme** (tema de iconos):
 El conjunto de iconos de aplicaciones y de la bandeja que usa el escritorio (hoy Papirus-Dark). Lo decide GTK y Quickshell lo sigue; es el mismo para todos los temas de color y no cambia al cambiar de tema.

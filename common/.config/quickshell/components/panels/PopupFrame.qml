@@ -5,8 +5,9 @@ import "PopupPlacement.js" as PopupPlacement
 // The frame every popup shares: the window placed next to the bar element
 // that opened it, hosting the popup surface. A popup only puts its contents
 // inside; the window is as tall as they are unless the popup says otherwise.
-// On an opaque bar the popup is attached: it hangs from the bar's bottom edge
-// in the bar's own color and opacity. On a transparent bar it floats below.
+// On an opaque or docked bar the popup is attached: it hangs from the bar's
+// bottom edge in the bar's own color and opacity. On any other transparent bar
+// it floats below.
 PopupWindow {
     id: frame
 
@@ -25,6 +26,15 @@ PopupWindow {
     readonly property real inset: 12
     // How far the curved corners joining an attached popup to the bar reach.
     readonly property real joinRadius: 6
+    // Where the window opens in the bar window.
+    readonly property real placedX: PopupPlacement.x({
+        popupWidth: implicitWidth,
+        barWidth: barWindow.width,
+        padding: appearance.horizontalPadding,
+        radius: appearance.radius,
+        trigger: trigger(),
+        edge: edge
+    })
     readonly property var room: PopupPlacement.room({
         attached: attached,
         inset: inset,
@@ -51,14 +61,7 @@ PopupWindow {
             dismissed();
     }
     anchor.window: barWindow
-    anchor.rect.x: PopupPlacement.x({
-        popupWidth: implicitWidth,
-        barWidth: barWindow.width,
-        padding: appearance.horizontalPadding,
-        radius: appearance.radius,
-        trigger: trigger(),
-        edge: edge
-    })
+    anchor.rect.x: placedX
     anchor.rect.y: PopupPlacement.y({
         barHeight: appearance.barHeight,
         spacing: appearance.spacing,

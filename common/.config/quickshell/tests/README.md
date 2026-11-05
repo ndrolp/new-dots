@@ -33,7 +33,9 @@ media position, audio outputs, Wi-Fi, the battery and the network
 (`components/StatusText.js`) and what the audio bar element shows and how
 wide it is (`components/bar/AudioLevel.qml`), how the Cava bar element
 reads cava and tries it again when it fails (`services/CavaOutput.js`) and
-what it draws (`components/bar/CavaBars.qml`), how long animations take
+what it draws (`components/bar/CavaBars.qml`), how a docked bar zone is
+drawn and grows for an attached popup (`components/bar/DockedSurface.qml`,
+`DockedZones.js`), how long animations take
 with and without reduce motion (`config/Motion.js`), night light's
 temperature bounds, the saved temperature, how hyprsunset is run and when
 night light turns on and off (`services/NightLightState.js`), when the lock screen
