@@ -34,3 +34,10 @@ var popupElements = Object.freeze({
 function popupElement(popup) {
     return popupElements[popup] || popup;
 }
+
+// The bar elements with no popup of their own.
+var elementsWithoutPopup = Object.freeze(["arch", "workspaces", "currentApp", "recording", "cava"]);
+
+function opensPopup(element) {
+    return !elementsWithoutPopup.includes(element);
+}

@@ -33,6 +33,8 @@ Item {
 
     signal configRequested(var screen)
     signal popupRequested(string popup)
+    // A bar element that opens no popup was pressed.
+    signal popupCloseRequested()
     readonly property var zoneNames: ["left", "center", "right"]
     // The docked bar's zones match an attached popup's color and opacity.
     readonly property color dockedColor: Qt.rgba(theme.background.r, theme.background.g,
@@ -354,5 +356,10 @@ Item {
         onPopupRequested: function(popup) {
             root.popupRequested(popup);
         }
+    }
+
+    BarPopupCloser {
+        elementItems: root.elementItems
+        onCloseRequested: root.popupCloseRequested()
     }
 }

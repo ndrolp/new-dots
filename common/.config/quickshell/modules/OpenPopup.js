@@ -15,8 +15,9 @@ function requested(open, popup, window) {
     return isOpen(open, popup, window) ? none : { popup: popup, window: window };
 }
 
-// A popup closed itself (it lost focus). Only the open one counts; one that
-// was already replaced changes nothing.
+// A popup closed itself: a click outside it and its bar, another grab taking
+// over, or its bar hiding. Only the open one counts; one that was already
+// replaced changes nothing.
 function closed(open, popup, window) {
     return isOpen(open, popup, window) ? none : open;
 }

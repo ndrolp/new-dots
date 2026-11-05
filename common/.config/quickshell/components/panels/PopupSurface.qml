@@ -9,7 +9,8 @@ import "PopupOutline.js" as PopupOutline
 // with no border: square top corners, small curved corners joining it to the
 // bar, round bottom corners, unfolding downward with its contents fading in
 // after. Any window can host it; hide the window while reveal is 0. It takes
-// no appearance, so the host passes in its motion settings.
+// no appearance, so the host passes in its motion settings. Closing, it ignores
+// input while the animation runs.
 Rectangle {
     id: surface
 
@@ -43,6 +44,8 @@ Rectangle {
     readonly property real contentsDelay: 0.4
     default property alias contents: content.data
 
+    // Off while closing, so a fast second click reaches nothing.
+    enabled: open
     implicitHeight: content.height + padding * 2
     color: attached ? "transparent" : fillColor
     border.color: borderColor

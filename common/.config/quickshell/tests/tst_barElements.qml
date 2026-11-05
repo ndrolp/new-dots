@@ -506,4 +506,15 @@ TestCase {
         compare(BarElementItems.popupElement("battery"), "battery");
         compare(BarElementItems.popupElement("pomodoro"), "clock");
     }
+
+    function test_someBarElementsOpenNoPopup() {
+        for (const element of ["arch", "workspaces", "currentApp", "recording", "cava"])
+            verify(!BarElementItems.opensPopup(element), element);
+    }
+
+    function test_everyOtherBarElementOpensAPopup() {
+        for (const element of ["systemMonitor", "appMenu", "notifications", "keepAwake", "media",
+            "audio", "bluetooth", "tray", "network", "battery", "clock"])
+            verify(BarElementItems.opensPopup(element), element);
+    }
 }

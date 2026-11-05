@@ -45,8 +45,8 @@ TestCase {
         compare(OpenPopup.closed(open, "battery", leftBar), OpenPopup.none);
     }
 
-    // A popup that closes after another one took its place (it lost focus
-    // to the click that opened the other) leaves the new one open.
+    // A popup that reports closing after another one took its place leaves
+    // the new one open.
     function test_aPopupThatIsNoLongerOpenClosingChangesNothing() {
         const open = OpenPopup.requested(OpenPopup.none, "network", leftBar);
         compare(OpenPopup.closed(open, "battery", leftBar), open);
@@ -59,6 +59,21 @@ TestCase {
         { window: leftBar, monitor: "Philips", visible: true },
         { window: rightBar, monitor: "AOC", visible: true }
     ]
+
+    // A popup's focus grab ends after its bar element already closed it.
+    function test_aPopupDismissedAfterItsBarElementClosedItChangesNothing() {
+        const closed = OpenPopup.requested(OpenPopup.requested(OpenPopup.none, "audio", leftBar), "audio", leftBar);
+
+        compare(OpenPopup.closed(closed, "audio", leftBar), OpenPopup.none);
+    }
+
+    // Dismissed by a click elsewhere, its bar element opens it again rather
+    // than toggling it shut.
+    function test_clickingTheBarElementOfADismissedPopupOpensItAgain() {
+        const dismissed = OpenPopup.closed(OpenPopup.requested(OpenPopup.none, "audio", leftBar), "audio", leftBar);
+
+        compare(OpenPopup.requested(dismissed, "audio", leftBar).popup, "audio");
+    }
 
     function test_ipcOpensThePopupOnTheFocusedMonitorsBar() {
         const open = OpenPopup.toggledOnFocusedBar(OpenPopup.none, "controlCenter", bars, "AOC");

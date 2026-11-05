@@ -88,6 +88,10 @@ Scope {
             root.openPopup = next;
         }
 
+        // A bar element that opens no popup was pressed. The settings button
+        // is one, so the focus grab is gone before the settings panel opens.
+        onPopupCloseRequested: root.closePopup()
+
         onPopupClosed: function(popup, panelWindow) {
             root.openPopup = OpenPopup.closed(root.openPopup, popup, panelWindow);
         }

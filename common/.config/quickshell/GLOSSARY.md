@@ -61,7 +61,7 @@ Mientras está activa, los colores de la pantalla se vuelven más cálidos (los 
 _Avoid_: Blue light filter, filtro de luz azul, modo noche, hyprsunset (para la función)
 
 **Popup**:
-La ventana pequeña que se despliega desde un bar element al pulsarlo (Bluetooth, red, batería, audio, media, control center…). Pertenece a ese bar element y se cierra al perder el foco; solo hay uno abierto a la vez en todos los monitores.
+La ventana pequeña que se despliega desde un bar element al pulsarlo (Bluetooth, red, batería, audio, media, control center…). Pertenece a ese bar element y se cierra al pulsarlo otra vez, al pulsar un bar element que no abre ningún popup o al pulsar fuera de él y de su barra; pulsar un hueco de la barra no lo cierra. Solo hay uno abierto a la vez en todos los monitores.
 Con la barra opaca o con la docked bar un popup va **anclado** (attached): sale de la barra como si fuera parte de ella. Con cualquier otra barra transparente va **flotante** (floating), separado de la barra.
 _Avoid_: Menu, dropdown, status popup
 
