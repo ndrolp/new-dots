@@ -134,7 +134,7 @@ Item {
     }
 
     // Where the element a popup opens from sits in the bar; null when it isn't
-    // shown, so the popup opens at the bar edge.
+    // shown, so the popup opens at an end of the bar.
     function popupTrigger(popup) {
         const element = popupElement(popup);
         if (!elementShown(element))
@@ -148,7 +148,7 @@ Item {
     }
 
     // The open popup, when it hangs from this zone. A popup whose bar element
-    // isn't shown hangs from the zone at its edge.
+    // isn't shown hangs from the zone at its end of the bar.
     function zonePopup(zone) {
         if (!openPopup)
             return null;

@@ -4,7 +4,7 @@
 // Where a popup opens in its bar window, from the Bar position: away from the
 // bar, towards the inside of the screen; along the bar, centred on the bar
 // element that opened it, whatever zone it sits in, shifted to stay on screen;
-// at the bar edge when its element isn't on the bar. Either way it keeps clear
+// at an end of the bar when its element isn't on the bar. Either way it keeps clear
 // of the bar's rounded ends. On an opaque or docked bar popups are attached:
 // they hang from the bar itself.
 
@@ -25,9 +25,9 @@ function margin(placement) {
     return Math.max(placement.padding, placement.radius || 0);
 }
 
-// Where along the bar a popup of this length starts. `edge` is the bar edge it
-// opens at without a trigger: "left" or "right", the zones' names, so on a side
-// bar left is the top and right the bottom.
+// Where along the bar a popup of this length starts. `edge` is the end of the
+// bar it opens at without a trigger: "left" or "right", the zones' names, so on
+// a side bar left is the top and right the bottom.
 function start(placement, popupLength, barLength) {
     const trigger = placement.trigger;
     const side = margin(placement);

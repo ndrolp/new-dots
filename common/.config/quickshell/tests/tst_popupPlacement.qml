@@ -5,7 +5,7 @@ import "../components/panels/PopupPlacement.js" as PopupPlacement
 // A popup opens away from the bar, towards the inside of the screen, centred on
 // the bar element that opened it, whatever zone it sits in, shifted along the
 // bar to stay on screen and clear of the bar's rounded ends. A popup whose
-// element isn't on the bar opens at the bar's edge.
+// element isn't on the bar opens at an end of the bar.
 TestCase {
     name: "PopupPlacement"
 

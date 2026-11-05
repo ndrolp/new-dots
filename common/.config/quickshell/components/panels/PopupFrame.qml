@@ -21,8 +21,8 @@ PopupWindow {
     // The bar content; places popups at the bar element that opened them.
     property var anchorProvider: null
     property bool open: false
-    // Where the popup opens when its element isn't on the bar: "left" or
-    // "right", which on a side bar mean its top and bottom.
+    // The end of the bar the popup opens at when its element isn't on the bar:
+    // "left" or "right", which on a side bar mean its top and bottom.
     property string edge: "right"
     // The screen edge the bar sits on.
     readonly property string barPosition: appearance.barPosition
