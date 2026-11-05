@@ -43,21 +43,22 @@ on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
 (`AudioOutputs.js`), how the volume is shown as text
 (`components/VolumeText.js`), what the popups and bar elements show for the
 media position, audio outputs, Wi-Fi, the battery and the network
-(`components/StatusText.js`) and what the audio bar element shows and how
+and how a value stands on a side bar (`components/StatusText.js`) and what the audio bar element shows and how
 wide it is (`components/bar/AudioLevel.qml`), how the Cava bar element
 reads cava and tries it again when it fails (`services/CavaOutput.js`) and
-what it draws (`components/bar/CavaBars.qml`), how a docked bar zone hangs
+what it draws, from the bottom or from the side (`components/bar/CavaBars.qml`), how a docked bar zone hangs
 from the screen edge the bar sits on and keeps its sides on the screen's edge
 straight, on each Bar position (`PopupOutline.js`), and how it is
 drawn and grows for an attached popup (`components/bar/DockedSurface.qml`,
 `DockedZones.js`), where zones, bar elements, group backgrounds and popup
 triggers sit along either axis of the bar, to the pixel the anchors they
 replaced put them at (`components/bar/BarLayout.js`; `BarContent.qml` itself
-needs Quickshell's services and isn't tested here), how workspaces and icon
-elements size and stack upright on a side bar and stay as they were on a top
-one (`BarLayout.size`, `Workspaces.qml`, `ArchButton.qml`,
-`KeepAwakeElement.qml`; `BarElementItems.qml` needs Quickshell's services, so
-its icons are covered through `BarLayout.size`), how long animations take
+needs Quickshell's services and isn't tested here), how workspaces, icon
+and value elements size and stack upright on a side bar and stay as they were
+on a top one (`BarLayout.size`, `Workspaces.qml`, `ArchButton.qml`,
+`KeepAwakeElement.qml`, `ElementText.qml`, `IconValue.qml`, `AudioLevel.qml`,
+`SystemMonitor.qml`; `BarElementItems.qml` and `Clock.qml` need Quickshell's
+services, so their parts are covered through those), how long animations take
 with and without reduce motion (`config/Motion.js`), night light's
 temperature bounds, the saved temperature, how hyprsunset is run and when
 night light turns on and off (`services/NightLightState.js`), when the lock screen

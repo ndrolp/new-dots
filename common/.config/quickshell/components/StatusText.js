@@ -94,3 +94,10 @@ function networkIcon(devices) {
 
     return "󰤭";
 }
+
+// A short value the way it stands on a side bar: one part per line, so "12:34"
+// is the hours above the minutes and "󰍛 12%" an icon above its value. The
+// percent sign is left out, as it wouldn't fit across the bar.
+function sideBarValue(value) {
+    return value.replace(/%/g, "").split(/[\s:]+/).filter(part => part !== "").join("\n");
+}

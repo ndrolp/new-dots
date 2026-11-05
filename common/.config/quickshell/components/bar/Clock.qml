@@ -1,12 +1,15 @@
 import Quickshell
 import QtQuick
 
-Row {
+// The time beside its icon, with the hours above the minutes on a side bar.
+IconValue {
     id: root
 
     property color color: "white"
 
-    spacing: 6
+    icon: "󰥔"
+    iconColor: color
+    value: Qt.formatTime(clock.date, "HH:mm")
 
     SystemClock {
         id: clock
@@ -14,21 +17,5 @@ Row {
         // so a minute tick would leave the old time up for as long as a minute after
         // resuming.
         precision: SystemClock.Seconds
-    }
-
-    Text {
-        anchors.verticalCenter: parent.verticalCenter
-        text: "󰥔"
-        color: root.color
-        font.pixelSize: 14
-        font.bold: true
-    }
-
-    Text {
-        anchors.verticalCenter: parent.verticalCenter
-        text: Qt.formatTime(clock.date, "HH:mm")
-        color: root.color
-        font.pixelSize: 14
-        font.bold: true
     }
 }

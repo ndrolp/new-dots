@@ -24,6 +24,14 @@ TestCase {
         }
     }
 
+    Component {
+        id: sideCavaBars
+
+        Bar.CavaBars {
+            width: 20
+        }
+    }
+
     function bars(properties) {
         return createTemporaryObject(cavaBars, this, properties);
     }
@@ -60,5 +68,45 @@ TestCase {
         compare(item.color, theme.red);
         compare(drawn(item)[0].color, theme.red);
         compare(bars({ barCount: 2 }).color, theme.blue);
+    }
+
+    function sideBars(properties) {
+        return createTemporaryObject(sideCavaBars, this, Object.assign({
+            barCount: 3, barWidth: 2, barPosition: "left", frame: [0.5, 1, 0]
+        }, properties));
+    }
+
+    function test_onATopOrBottomBarItsBarsRiseFromTheBottom() {
+        const item = bars({ barCount: 2, barWidth: 2, barPosition: "bottom", frame: [0.5, 1] });
+        const [first, second] = drawn(item);
+
+        compare([first.x, first.y, first.width, first.height], [0, 10, 2, 10]);
+        compare([second.x, second.y, second.width, second.height], [3, 0, 2, 20]);
+    }
+
+    function test_onASideBarItIsAsLongAsItsBarsOnePixelApart() {
+        const item = sideBars({ barCount: 12, barWidth: 3 });
+
+        compare(item.implicitHeight, 47);
+        compare(item.implicitWidth, 0);
+    }
+
+    function test_onALeftBarItsBarsGrowFromTheLeft() {
+        const [first, second, third] = drawn(sideBars());
+
+        compare([first.x, first.y, first.width, first.height], [0, 0, 10, 2]);
+        compare([second.x, second.y, second.width, second.height], [0, 3, 20, 2]);
+        compare(third.y, 6);
+    }
+
+    function test_onARightBarItsBarsGrowFromTheRight() {
+        const [first, second] = drawn(sideBars({ barPosition: "right" }));
+
+        compare([first.x, first.width], [10, 10]);
+        compare([second.x, second.width], [0, 20]);
+    }
+
+    function test_flatBarsLeaveAThinLineAcrossToo() {
+        compare(drawn(sideBars())[2].width, 2);
     }
 }
