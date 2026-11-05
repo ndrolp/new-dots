@@ -74,10 +74,15 @@ function laidPath(outline) {
     };
 }
 
+// What laidPath's segments are when neither end stays straight, in its order.
+const attachedParts = ["barSide", "endJoin", "endSide", "endCorner", "farSide", "startCorner", "startSide",
+    "startJoin"];
+
 // An attached popup's outline. Takes { barPosition, width, height, unfolded,
 // radius, joinRadius }, the surface's size and how far it has unfolded from the
 // bar. Returns the box it fits in, relative to the surface,
-// { x, y, width, height }, and in that box the path, as laidPath does.
+// { x, y, width, height }, and in that box the path, as laidPath does, with its
+// segments also by name in `parts`.
 function attachedPath(surface) {
     const sideBar = BarPosition.sideBar(surface.barPosition);
     const length = sideBar ? surface.height : surface.width;
@@ -104,6 +109,9 @@ function attachedPath(surface) {
         end: near + length + corners.join,
         corners: corners
     });
+    const parts = {};
+
+    attachedParts.forEach((name, index) => parts[name] = path.segments[index]);
 
     return {
         x: box.x,
@@ -111,7 +119,8 @@ function attachedPath(surface) {
         width: box.width,
         height: box.height,
         start: path.start,
-        segments: path.segments
+        segments: path.segments,
+        parts: parts
     };
 }
 

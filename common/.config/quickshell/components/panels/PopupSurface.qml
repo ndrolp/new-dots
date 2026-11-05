@@ -110,25 +110,25 @@ Rectangle {
             startX: outline.path.start.x
             startY: outline.path.start.y
 
-            PathLine { x: outline.path.segments[0].x; y: outline.path.segments[0].y }
+            PathLine { x: outline.path.parts.barSide.x; y: outline.path.parts.barSide.y }
             PathQuad {
-                x: outline.path.segments[1].x; y: outline.path.segments[1].y
-                controlX: outline.path.segments[1].controlX; controlY: outline.path.segments[1].controlY
+                x: outline.path.parts.endJoin.x; y: outline.path.parts.endJoin.y
+                controlX: outline.path.parts.endJoin.controlX; controlY: outline.path.parts.endJoin.controlY
             }
-            PathLine { x: outline.path.segments[2].x; y: outline.path.segments[2].y }
+            PathLine { x: outline.path.parts.endSide.x; y: outline.path.parts.endSide.y }
             PathQuad {
-                x: outline.path.segments[3].x; y: outline.path.segments[3].y
-                controlX: outline.path.segments[3].controlX; controlY: outline.path.segments[3].controlY
+                x: outline.path.parts.endCorner.x; y: outline.path.parts.endCorner.y
+                controlX: outline.path.parts.endCorner.controlX; controlY: outline.path.parts.endCorner.controlY
             }
-            PathLine { x: outline.path.segments[4].x; y: outline.path.segments[4].y }
+            PathLine { x: outline.path.parts.farSide.x; y: outline.path.parts.farSide.y }
             PathQuad {
-                x: outline.path.segments[5].x; y: outline.path.segments[5].y
-                controlX: outline.path.segments[5].controlX; controlY: outline.path.segments[5].controlY
+                x: outline.path.parts.startCorner.x; y: outline.path.parts.startCorner.y
+                controlX: outline.path.parts.startCorner.controlX; controlY: outline.path.parts.startCorner.controlY
             }
-            PathLine { x: outline.path.segments[6].x; y: outline.path.segments[6].y }
+            PathLine { x: outline.path.parts.startSide.x; y: outline.path.parts.startSide.y }
             PathQuad {
-                x: outline.path.segments[7].x; y: outline.path.segments[7].y
-                controlX: outline.path.segments[7].controlX; controlY: outline.path.segments[7].controlY
+                x: outline.path.parts.startJoin.x; y: outline.path.parts.startJoin.y
+                controlX: outline.path.parts.startJoin.controlX; controlY: outline.path.parts.startJoin.controlY
             }
         }
     }
