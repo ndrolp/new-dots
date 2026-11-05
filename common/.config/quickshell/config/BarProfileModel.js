@@ -19,16 +19,17 @@ const zoneNames = ["left", "center", "right"];
 // Every bar element, in its default order; the first ones default to the
 // zone in defaultElementZones, the rest to the right.
 const elementIds = [
-    "arch", "systemMonitor", "currentApp", "workspaces",
+    "arch", "systemMonitor", "currentApp", "appMenu", "workspaces",
     "notifications", "recording", "keepAwake", "media", "cava", "audio", "bluetooth", "tray",
     "network", "battery", "clock"
 ];
 const defaultElementZones = {
-    "arch": "left", "systemMonitor": "left", "currentApp": "left", "workspaces": "center"
+    "arch": "left", "systemMonitor": "left", "currentApp": "left", "appMenu": "left",
+    "workspaces": "center"
 };
 // Elements that start disabled: in every default profile and wherever a
 // profile does not list them yet.
-const disabledElementIds = ["cava"];
+const disabledElementIds = ["cava", "appMenu"];
 
 // The options of the elements that have any, with their defaults.
 const elementOptionDefaults = {

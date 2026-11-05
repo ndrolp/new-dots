@@ -10,11 +10,15 @@ Item {
     required property var pomodoro
     // The shell's keep-awake (services/KeepAwake.qml).
     required property var keepAwake
+    // The app menu module (modules/AppMenu.qml).
+    required property var appMenu
     required property var systemMonitor
     // The control center module (modules/ControlCenter.qml): its services,
     // stage and the panels its tiles open, handed to its popup as one.
     required property var controlCenter
     property string activePopup: ""
+    // Which of the app menu's menus its Popup shows (AppMenuPopup.menuId).
+    property string appMenuId: ""
     // Where the open popup sits, { popup, edge, left, right }, or null.
     property var openPopup: null
     // The bar content; places popups under the bar element that opened them.
@@ -48,6 +52,12 @@ Item {
     KeepAwakePopup {
         popups: root
         keepAwake: root.keepAwake
+    }
+
+    AppMenuPopup {
+        popups: root
+        menuId: root.appMenuId
+        appMenu: root.appMenu
     }
 
     MediaPopup {

@@ -161,7 +161,7 @@ TestCase {
 
         compare(zone(normalized, "left"), ["clock"]);
         compare(zone(normalized, "center"), []);
-        compare(zone(normalized, "right"), ["arch", "systemMonitor", "currentApp", "workspaces",
+        compare(zone(normalized, "right"), ["arch", "systemMonitor", "currentApp", "-appMenu", "workspaces",
             "notifications", "recording", "keepAwake", "media", "-cava", "audio", "bluetooth",
             "tray", "network", "battery"]);
         const once = BarProfileModel.normalizeBarElements(minimalElements());
@@ -266,6 +266,43 @@ TestCase {
             if (BarProfileModel.elementZone(barElements, "audio") === mediaZone)
                 compare(ids.indexOf("audio"), ids.indexOf("cava") + 1, name);
         }
+    }
+
+    function test_theAppMenuIsInEveryDefaultProfileDisabledAfterCurrentApp() {
+        const profiles = BarProfileModel.defaultBarProfiles();
+
+        for (const name in profiles) {
+            const barElements = profiles[name].barElements;
+            const zoneName = BarProfileModel.elementZone(barElements, "currentApp");
+            const ids = zone(barElements, zoneName).map(id => id.replace("-", ""));
+            compare(ids.indexOf("appMenu"), ids.indexOf("currentApp") + 1, name);
+            compare(BarProfileModel.elementEnabled(barElements, "appMenu"), false, name);
+        }
+    }
+
+    function test_aProfileSavedBeforeTheAppMenuExistedShowsItDisabled() {
+        const state = fixtures.startedBarState();
+
+        for (const name in state.barProfiles) {
+            const barElements = BarProfileModel.savedProfile(state, name).barElements;
+            const zoneName = BarProfileModel.elementZone(barElements, "currentApp");
+            const ids = zone(barElements, zoneName).map(id => id.replace("-", ""));
+            compare(ids.indexOf("appMenu"), ids.indexOf("currentApp") + 1, name);
+            compare(BarProfileModel.elementEnabled(barElements, "appMenu"), false, name);
+        }
+    }
+
+    function test_aProfileThatListsTheAppMenuKeepsItEnabled() {
+        const barElements = BarProfileModel.normalizeBarElements({
+            center: [{ id: "appMenu", enabled: true }]
+        });
+
+        compare(BarProfileModel.elementZone(barElements, "appMenu"), "center");
+        compare(BarProfileModel.elementEnabled(barElements, "appMenu"), true);
+    }
+
+    function test_theAppMenuOpensItsOwnPopup() {
+        compare(BarElementItems.popupElement("appMenu"), "appMenu");
     }
 
     function test_theRecordingIndicatorIsInEveryDefaultProfileEnabledAfterNotifications() {

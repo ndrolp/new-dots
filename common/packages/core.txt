@@ -1,6 +1,7 @@
 # Core desktop: always installed.
 # Official repo packages, installed with pacman.
 alacritty
+appmenu-gtk-module
 arandr
 autorandr
 awww
@@ -67,6 +68,7 @@ pipewire-pulse
 playerctl
 polybar
 power-profiles-daemon
+python-gobject
 quickshell
 qutebrowser
 ranger
@@ -104,5 +106,6 @@ xdg-desktop-portal-hyprland
 xdg-user-dirs-gtk
 xdg-utils
 xorg-server
+xorg-xprop
 zellij
 zsh

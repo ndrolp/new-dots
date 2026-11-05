@@ -18,6 +18,7 @@ Variants {
     // The control center module, handed to its popup.
     required property var controlCenter
     required property var keepAwake
+    required property var appMenu
     required property var screenShares
     required property var cava
     required property var systemMonitor
@@ -71,6 +72,7 @@ Variants {
             property var notificationHistory: bar.notificationHistory
             property var screenCapture: bar.screenCapture
             property var keepAwake: bar.keepAwake
+            property var appMenu: bar.appMenu
             property var screenShares: bar.screenShares
             property var cava: bar.cava
             property var systemMonitor: bar.systemMonitor
@@ -148,6 +150,7 @@ Variants {
                     notificationHistory: panel.notificationHistory
                     screenCapture: panel.screenCapture
                     keepAwake: panel.keepAwake
+                    appMenu: panel.appMenu
                     screenShares: panel.screenShares
                     cava: panel.cava
                     barVisible: panel.visible
@@ -170,9 +173,11 @@ Variants {
                 appearance: panel.barAppearance
                 barWindow: panel
                 popupAnchorProvider: barContent
+                appMenuId: barContent.appMenuId
                 activePopup: panel.activePopup
                 pomodoro: panel.pomodoro
                 keepAwake: panel.keepAwake
+                appMenu: panel.appMenu
                 systemMonitor: panel.systemMonitor
                 controlCenter: bar.controlCenter
 

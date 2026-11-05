@@ -53,6 +53,7 @@ hl.bind(
 	hl.dsp.exec_cmd(qs .. "keep-awake toggle"),
 	{ description = "Toggle keep-awake" }
 )
+hl.bind(win .. " + a", hl.dsp.exec_cmd(qs .. "app-menu toggle"), { description = "Toggle app menu" })
 hl.bind(win .. " + t", hl.dsp.exec_cmd(qs .. "themes toggle"), { description = "Toggle theme picker" })
 hl.bind(
 	mainMod .. " + SHIFT + r",

@@ -79,6 +79,10 @@ ShellRoot {
         id: keepAwake
     }
 
+    Services.AppMenuBridge {
+        id: appMenuBridge
+    }
+
     Services.ScreenShares {
         id: screenShares
     }
@@ -175,6 +179,8 @@ ShellRoot {
     }
 
     Modules.UnifiedSearch {
+        id: unifiedSearch
+
         appearance: appearance
         bookmarks: bookmarks
         clipboardHistory: clipboardHistory
@@ -189,6 +195,17 @@ ShellRoot {
         id: keybindCheatsheet
 
         appearance: appearance
+    }
+
+    Modules.AppMenu {
+        id: appMenu
+
+        appearance: appearance
+        bar: bar
+        bridge: appMenuBridge
+        unifiedSearch: unifiedSearch
+        settings: settings
+        wallpaperSelector: wallpaperSelector
     }
 
     Modules.AudioOutputSelector {
@@ -272,6 +289,7 @@ ShellRoot {
         notificationHistory: notificationHistory
         screenCapture: screenCapture
         keepAwake: keepAwake
+        appMenu: appMenu
         controlCenter: controlCenter
         screenShares: screenShares
         cava: cava

@@ -14,6 +14,7 @@ suites=(
     common/bootstrap/tests/colorscheme.sh
     scripts/test-sync-packages
     common/.config/hypr/tests/borders.sh
+    common/.config/hypr/tests/env.sh
     colorschemes/colorscheme_changer_tests.sh
     common/.config/quickshell/tests/state-files.sh
     common/.config/quickshell/tests/startup.sh

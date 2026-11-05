@@ -78,7 +78,17 @@ leave when their app closes them
 the active colorscheme's colours read from its colours file,
 falling back to everforestdark's (`config/ColorschemeColors.js`), and which
 colorscheme preview the colorscheme selector runs, one at a time
-(`components/panels/ColorschemePreview.js`).
+(`components/panels/ColorschemePreview.js`), and the app menu: the menus
+its model builds for the focused window, the app-name menu and how Quit
+closes every window of the app, the app's own menus made from what it
+exports over DBusMenu or GTK's org.gtk.Menus, the "»" menu for the titles
+that don't fit and the shell's Window menu renamed Hyprland
+(`components/AppMenuModel.js`), how a
+menu is drawn, with submenus opening in place
+(`components/panels/AppMenuList.qml`), what the app menu popover lists and
+where it opens at the cursor (`components/panels/AppMenuPopover.js`), and
+which window the bar elements that follow the focused window see and on
+which monitor's bar they show (`components/FocusedWindow.js`).
 They run with QtTest outside of `qs`:
 
 ```sh

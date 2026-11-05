@@ -3,6 +3,7 @@ import Quickshell.Hyprland
 import QtQuick
 import "../../config" as Config
 import "../IconSource.js" as IconSource
+import "../FocusedWindow.js" as FocusedWindow
 
 Row {
     id: root
@@ -13,13 +14,9 @@ Row {
     required property var monitorScreen
     property bool enabled: true
 
-    readonly property var rawActiveToplevel: Hyprland.activeToplevel
     readonly property var monitor: Hyprland.monitorFor(monitorScreen)
-    readonly property var activeToplevel: rawActiveToplevel
-        && rawActiveToplevel.workspace
-        && Hyprland.focusedWorkspace
-        && rawActiveToplevel.workspace.id === Hyprland.focusedWorkspace.id
-        ? rawActiveToplevel : null
+    readonly property var activeToplevel: FocusedWindow.focusedWindow(Hyprland.activeToplevel,
+        Hyprland.focusedWorkspace)
     readonly property string appId: activeToplevel && activeToplevel.wayland
         ? activeToplevel.wayland.appId : ""
     readonly property bool terminal: isTerminal(appId)
@@ -36,9 +33,7 @@ Row {
         ? Math.max(120, Math.min(320, monitorScreen.width * 0.14)) : 320
 
     spacing: appearance.spacing
-    visible: enabled && label !== "" && monitor !== null && Hyprland.focusedWorkspace
-        && Hyprland.focusedWorkspace.monitor !== null
-        && Hyprland.focusedWorkspace.monitor.name === monitor.name
+    visible: enabled && label !== "" && FocusedWindow.onFocusedMonitor(monitor, Hyprland.focusedWorkspace)
     width: visible ? implicitWidth : 0
 
     Config.Theme {

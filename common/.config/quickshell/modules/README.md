@@ -12,8 +12,8 @@ adding or editing one file here.
   way quick settings opens the settings panel; anything with `available`
   and `show()` can be switched to, the control center among them. The rule
   lives in `SwitchTo.js` (tested), which the control center's tiles use too.
-  A module that opens other parts gets them as properties (`ControlCenter`,
-  `QuickSettings`, `UnifiedSearch`).
+  A module that opens other parts gets them as properties (`AppMenu`,
+  `ControlCenter`, `QuickSettings`, `UnifiedSearch`).
 - One module per panel: `ApplicationLauncher`, `AudioOutputSelector`,
   `ClipboardSelector`, `CommandLauncher`, `KeybindCheatsheet`,
   `PowerMenu`, `QuickSearch`, `QuickSettings`, `ScreenCapture` (the chooser),
@@ -38,6 +38,11 @@ adding or editing one file here.
   both just open and close it. The bell always opens it collapsed and
   closes it at whatever stage. Switching it from inside (the handle, the
   audio output tile) updates `stage`, so the shortcuts know where it is.
+- `AppMenu.qml`: the app menu popover (SUPER+A, `app-menu` IPC), and what
+  every app menu shares, handed as one object through the bar to its bar
+  element and Popup: the bridge to apps' own menus (`bridge`) and
+  `openPanel(name)` (names in `AppMenuModel.panels`), which closes the app
+  menu and opens the Desktop menu's panel in its place.
 - `Notifications.qml`: the notification server, toasts and sound, and the
   `notifications` IPC call (SUPER+N, the control center's collapsed
   shortcut).

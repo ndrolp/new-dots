@@ -12,6 +12,7 @@ paru
 postman-bin
 pyprland-git
 qml-language-server-bin
+vala-panel-appmenu-registrar-git
 visual-studio-code-bin
 waypaper-git
 wlctl-git

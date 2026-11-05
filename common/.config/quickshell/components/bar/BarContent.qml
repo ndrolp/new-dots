@@ -17,6 +17,8 @@ Item {
     required property var notificationHistory
     required property var screenCapture
     required property var keepAwake
+    // The app menu module (modules/AppMenu.qml).
+    required property var appMenu
     // The screens other apps share (services/ScreenShares.qml).
     required property var screenShares
     required property var cava
@@ -25,6 +27,9 @@ Item {
     property var openPopup: null
     required property var systemMonitor
     required property var workspaceService
+
+    // The menu the app menu's Popup shows (AppMenuPopup.menuId).
+    readonly property string appMenuId: appMenuElement.menuId
 
     signal configRequested(var screen)
     signal popupRequested(string popup)
@@ -42,6 +47,7 @@ Item {
         "arch": archButton,
         "systemMonitor": systemMonitor,
         "currentApp": currentApp,
+        "appMenu": appMenuElement,
         "workspaces": workspaces
     }, barElementItems.items)
 
@@ -138,7 +144,11 @@ Item {
         const item = elementItem(element);
 
         const offset = item.parent === barElementItems ? barElementItems.x : 0;
-        return { x: offset + item.x, width: item.width };
+        // An element with several triggers (the app menu's titles) says
+        // which part opened the popup.
+        const area = item.popupTriggerArea || null;
+        return area ? { x: offset + item.x + area.x, width: area.width }
+            : { x: offset + item.x, width: item.width };
     }
 
     // The open popup, when it hangs from this zone. A popup whose bar element
@@ -276,6 +286,20 @@ Item {
         appearance: root.appearance
         monitorScreen: root.monitorScreen
         enabled: root.elementVisible("currentApp")
+    }
+
+    AppMenu {
+        id: appMenuElement
+
+        anchors.verticalCenter: parent.verticalCenter
+        x: root.elementX("appMenu")
+        grouped: root.elementGrouped("appMenu")
+        appearance: root.appearance
+        monitorScreen: root.monitorScreen
+        appMenu: root.appMenu
+        enabled: root.elementVisible("appMenu")
+        popupOpen: root.activePopup === "appMenu"
+        onPopupRequested: root.popupRequested("appMenu")
     }
 
     SystemMonitor {
