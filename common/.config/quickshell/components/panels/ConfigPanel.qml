@@ -202,55 +202,67 @@ Rectangle {
             height: parent.height - 46
             spacing: 16
 
-            Column {
+            Flickable {
+                objectName: "sectionSidebar"
                 width: 180
-                spacing: 6
+                height: parent.height
+                contentWidth: width
+                contentHeight: sectionList.implicitHeight
+                boundsBehavior: Flickable.StopAtBounds
+                clip: true
 
-                Repeater {
-                    model: root.filteredSections
+                Column {
+                    id: sectionList
 
-                    // The selected section shows in the accent text; only hover fills a row.
-                    delegate: SettingsRow {
-                        id: sectionRow
+                    width: parent.width
+                    spacing: 5
 
-                        required property var modelData
-                        readonly property bool selected: root.currentSection === sectionRow.modelData.section
+                    Repeater {
+                        model: root.filteredSections
 
-                        width: parent.width
-                        height: 44
-                        appearance: root.appearance
+                        // The selected section shows in the accent text; only hover fills a row.
+                        delegate: SettingsRow {
+                            id: sectionRow
 
-                        Row {
-                            anchors.fill: parent
-                            anchors.leftMargin: 12
-                            spacing: 10
+                            required property var modelData
+                            readonly property bool selected: root.currentSection === sectionRow.modelData.section
 
-                            Text {
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: sectionRow.modelData.icon
-                                color: sectionRow.selected ? theme.accent : theme.textMuted
-                                font.pixelSize: 16
+                            width: parent.width
+                            height: 38
+                            appearance: root.appearance
+
+                            Row {
+                                anchors.fill: parent
+                                anchors.leftMargin: 12
+                                spacing: 10
+
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: sectionRow.modelData.icon
+                                    color: sectionRow.selected ? theme.accent : theme.textMuted
+                                    font.pixelSize: 16
+                                }
+
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: sectionRow.modelData.label
+                                    color: sectionRow.selected ? theme.accent : theme.text
+                                    font.pixelSize: root.appearance.textSize
+                                }
                             }
 
-                            Text {
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: sectionRow.modelData.label
-                                color: sectionRow.selected ? theme.accent : theme.text
-                                font.pixelSize: root.appearance.textSize
+                            TapHandler {
+                                onTapped: root.selectSection(sectionRow.modelData.section)
                             }
-                        }
-
-                        TapHandler {
-                            onTapped: root.selectSection(sectionRow.modelData.section)
                         }
                     }
-                }
 
-                SettingsHint {
-                    width: parent.width
-                    visible: root.filteredSections.length === 0
-                    appearance: root.appearance
-                    text: "No settings match this search."
+                    SettingsHint {
+                        width: parent.width
+                        visible: root.filteredSections.length === 0
+                        appearance: root.appearance
+                        text: "No settings match this search."
+                    }
                 }
             }
 
