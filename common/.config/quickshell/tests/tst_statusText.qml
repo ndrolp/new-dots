@@ -105,4 +105,20 @@ TestCase {
         compare(StatusText.networkIcon([{ connected: false, wifi: true }]), "󰤭");
         compare(StatusText.networkIcon([]), "󰤭");
     }
+
+    function test_aSideBarValueBreaksAtEachPart() {
+        compare(StatusText.sideBarValue("12:34"), "12\n34");
+        compare(StatusText.sideBarValue("1:02:03"), "1\n02\n03");
+        compare(StatusText.sideBarValue("󰔟  25:00"), "󰔟\n25\n00");
+        compare(StatusText.sideBarValue("󰍛 12%"), "󰍛\n12");
+    }
+
+    function test_aSideBarValueLeavesOutThePercentSign() {
+        compare(StatusText.sideBarValue("100%"), "100");
+        compare(StatusText.sideBarValue("56°"), "56°");
+    }
+
+    function test_anEmptySideBarValueStaysEmpty() {
+        compare(StatusText.sideBarValue(""), "");
+    }
 }
