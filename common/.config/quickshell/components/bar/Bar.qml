@@ -141,6 +141,7 @@ Variants {
                     appearance: panel.barAppearance
                     configOpen: panel.configOpen
                     activePopup: panel.activePopup
+                    openPopup: barPopups.openPopup
                     monitorScreen: panel.screen
                     monitors: panel.monitors
                     pomodoro: panel.pomodoro
@@ -164,6 +165,8 @@ Variants {
             }
 
             Panels.BarPopups {
+                id: barPopups
+
                 appearance: panel.barAppearance
                 barWindow: panel
                 popupAnchorProvider: barContent
