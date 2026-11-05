@@ -48,7 +48,10 @@ wide it is (`components/bar/AudioLevel.qml`), how the Cava bar element
 reads cava and tries it again when it fails (`services/CavaOutput.js`) and
 what it draws (`components/bar/CavaBars.qml`), how a docked bar zone is
 drawn and grows for an attached popup (`components/bar/DockedSurface.qml`,
-`DockedZones.js`), how long animations take
+`DockedZones.js`), where zones, bar elements, group backgrounds and popup
+triggers sit along either axis of the bar, to the pixel the anchors they
+replaced put them at (`components/bar/BarLayout.js`; `BarContent.qml` itself
+needs Quickshell's services and isn't tested here), how long animations take
 with and without reduce motion (`config/Motion.js`), night light's
 temperature bounds, the saved temperature, how hyprsunset is run and when
 night light turns on and off (`services/NightLightState.js`), when the lock screen
