@@ -1,6 +1,7 @@
 import Quickshell
 import QtQuick
 import QtQuick.Effects
+import "../BarPosition.js" as BarPosition
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 import "BarElementItems.js" as BarElementItemsModel
@@ -54,7 +55,7 @@ Item {
         endPadding: dockedPadding
     })
     // Whether the bar runs from the top of the screen down.
-    readonly property bool vertical: BarLayout.vertical(layoutBar)
+    readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
 
     // The item of every bar element, by element id.
     readonly property var elementItems: Object.assign({
@@ -170,7 +171,7 @@ Item {
         popup: root.zonePopup("left")
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
-        thickness: root.vertical ? root.width : root.height
+        thickness: root.sideBar ? root.width : root.height
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
         fillColor: root.dockedColor
         keepLeftEdge: true
@@ -185,7 +186,7 @@ Item {
         popup: root.zonePopup("center")
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
-        thickness: root.vertical ? root.width : root.height
+        thickness: root.sideBar ? root.width : root.height
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
         fillColor: root.dockedColor
         z: -1
@@ -199,7 +200,7 @@ Item {
         popup: root.zonePopup("right")
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
-        thickness: root.vertical ? root.width : root.height
+        thickness: root.sideBar ? root.width : root.height
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
         fillColor: root.dockedColor
         keepRightEdge: true
@@ -241,7 +242,7 @@ Item {
 
                     // Only along the bar: across it, it follows the bar at once.
                     Behavior on x {
-                        enabled: !root.vertical
+                        enabled: !root.sideBar
 
                         NumberAnimation {
                             duration: root.appearance.motion.medium
@@ -250,7 +251,7 @@ Item {
                     }
 
                     Behavior on y {
-                        enabled: root.vertical
+                        enabled: root.sideBar
 
                         NumberAnimation {
                             duration: root.appearance.motion.medium
@@ -259,7 +260,7 @@ Item {
                     }
 
                     Behavior on width {
-                        enabled: !root.vertical
+                        enabled: !root.sideBar
 
                         NumberAnimation {
                             duration: root.appearance.motion.medium
@@ -268,7 +269,7 @@ Item {
                     }
 
                     Behavior on height {
-                        enabled: root.vertical
+                        enabled: root.sideBar
 
                         NumberAnimation {
                             duration: root.appearance.motion.medium
@@ -288,7 +289,7 @@ Item {
         y: root.elementY("arch")
         grouped: root.elementGrouped("arch")
         Behavior on x {
-            enabled: !root.vertical
+            enabled: !root.sideBar
 
             NumberAnimation {
                 duration: root.appearance.motion.long
@@ -296,7 +297,7 @@ Item {
             }
         }
         Behavior on y {
-            enabled: root.vertical
+            enabled: root.sideBar
 
             NumberAnimation {
                 duration: root.appearance.motion.long
@@ -352,7 +353,7 @@ Item {
         y: root.elementY("workspaces")
         grouped: root.elementGrouped("workspaces")
         Behavior on x {
-            enabled: !root.vertical
+            enabled: !root.sideBar
 
             NumberAnimation {
                 duration: root.appearance.motion.long
@@ -360,7 +361,7 @@ Item {
             }
         }
         Behavior on y {
-            enabled: root.vertical
+            enabled: root.sideBar
 
             NumberAnimation {
                 duration: root.appearance.motion.long

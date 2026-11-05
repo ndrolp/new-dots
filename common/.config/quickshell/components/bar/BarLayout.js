@@ -1,5 +1,5 @@
 .pragma library
-.import "../panels/PopupPlacement.js" as PopupPlacement
+.import "../BarPosition.js" as BarPosition
 
 // Where things sit in the bar, measured along it: from the left on a top or
 // bottom bar, from the top on a side bar. `bar` is { barPosition, width, height,
@@ -7,17 +7,13 @@
 // content, the room between groups and inside one, and the room kept at the
 // bar's ends. Without a Bar position it lays out like a top bar.
 
-function vertical(bar) {
-    return PopupPlacement.vertical(bar.barPosition);
-}
-
 function barLength(bar) {
-    return vertical(bar) ? bar.height : bar.width;
+    return BarPosition.sideBar(bar.barPosition) ? bar.height : bar.width;
 }
 
 // How much of the bar an item takes up.
 function itemLength(bar, item) {
-    return vertical(bar) ? item.height : item.width;
+    return BarPosition.sideBar(bar.barPosition) ? item.height : item.width;
 }
 
 // Takes the bar, a zone's groups of shown elements in order (see
@@ -75,7 +71,7 @@ function centred(outer, inner) {
 
 // Where an { width, height } item goes: `start` along the bar, centred across it.
 function place(bar, start, item) {
-    return vertical(bar)
+    return BarPosition.sideBar(bar.barPosition)
         ? { x: centred(bar.width, item.width), y: start }
         : { x: start, y: centred(bar.height, item.height) };
 }
@@ -83,7 +79,7 @@ function place(bar, start, item) {
 // Where a group's background goes: its stretch of the bar, across the whole
 // thickness.
 function groupBackground(bar, start, length) {
-    return vertical(bar)
+    return BarPosition.sideBar(bar.barPosition)
         ? { x: 0, y: start, width: bar.width, height: length }
         : { x: start, y: 0, width: length, height: bar.height };
 }
@@ -99,7 +95,7 @@ function elementThickness(profile) {
 // across it. Takes the bar profile, or anything else with the Bar position.
 // Whatever turns with the bar sizes itself through this.
 function size(bar, length, thickness) {
-    return vertical(bar)
+    return BarPosition.sideBar(bar.barPosition)
         ? { width: thickness, height: length }
         : { width: length, height: thickness };
 }
@@ -108,13 +104,13 @@ function size(bar, length, thickness) {
 // isn't mirrored and its start stays at the top. Turning a row of text centred
 // in its element keeps it centred there. Takes the bar profile.
 function turn(bar) {
-    return vertical(bar) ? 90 : 0;
+    return BarPosition.sideBar(bar.barPosition) ? 90 : 0;
 }
 
 // Where `area`, relative to a `box` that turns with the bar, ends up in the
 // box's parent. Both are { x, y, width, height } as laid out before turning.
 function turnedArea(bar, box, area) {
-    if (!vertical(bar))
+    if (!BarPosition.sideBar(bar.barPosition))
         return { x: box.x + area.x, y: box.y + area.y, width: area.width, height: area.height };
 
     const centre = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
@@ -128,7 +124,7 @@ function turnedArea(bar, box, area) {
 
 // How much of the screen `screen` runs along the bar. Takes the bar profile.
 function screenLength(bar, screen) {
-    return vertical(bar) ? screen.height : screen.width;
+    return BarPosition.sideBar(bar.barPosition) ? screen.height : screen.width;
 }
 
 // What opens a popup, { x, y, width, height } in the bar: the whole bar element,

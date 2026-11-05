@@ -1,7 +1,7 @@
 import QtQuick
+import "../BarPosition.js" as BarPosition
 import "." as Panels
 import "../../config" as Config
-import "../bar/BarLayout.js" as BarLayout
 import "../../config/BarProfileModel.js" as BarProfileModel
 
 // The Bar section's bar elements list: every bar element of the edited bar
@@ -16,7 +16,7 @@ Column {
     property string expandedElement: ""
     readonly property var barElements: BarProfileModel.normalizeBarElements(appearance.barElements)
     // The saved keys stay left and right on a side bar: only their names change.
-    readonly property bool sideBar: BarLayout.vertical(appearance)
+    readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
     readonly property var zones: [
         { label: sideBar ? "Top" : "Left", short: sideBar ? "T" : "L", value: "left" },
         { label: "Center", short: "C", value: "center" },

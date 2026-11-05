@@ -1,5 +1,4 @@
 import QtQuick
-import "BarLayout.js" as BarLayout
 
 // An icon and its value: side by side on a top or bottom bar, with the value
 // underneath on a side bar.
@@ -15,7 +14,7 @@ ElementStack {
     property int valueSize: iconSize
     property int gap: 6
 
-    spacing: vertical ? 0 : gap
+    spacing: sideBar ? 0 : gap
 
     Text {
         id: iconText
@@ -31,7 +30,7 @@ ElementStack {
     Item {
         visible: root.valueVisible
         width: valueText.width
-        height: root.vertical ? valueText.height : iconText.height
+        height: root.sideBar ? valueText.height : iconText.height
 
         ElementText {
             id: valueText

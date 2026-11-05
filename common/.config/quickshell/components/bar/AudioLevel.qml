@@ -13,7 +13,7 @@ ElementStack {
     property bool muted: true
     property bool meterVisible: true
 
-    spacing: vertical ? 3 : 7
+    spacing: sideBar ? 3 : 7
 
     Config.Theme {
         id: theme
@@ -50,8 +50,8 @@ ElementStack {
     // an anchor puts it on. Across a side bar it fits the bar element.
     Item {
         visible: root.meterVisible
-        width: root.vertical ? Math.min(34, BarLayout.elementThickness(root.appearance) - 6) : 34
-        height: root.vertical ? 4 : icon.height
+        width: root.sideBar ? Math.min(34, BarLayout.elementThickness(root.appearance) - 6) : 34
+        height: root.sideBar ? 4 : icon.height
 
         Rectangle {
             anchors.centerIn: parent

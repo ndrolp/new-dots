@@ -257,10 +257,23 @@ TestCase {
         compare(PopupPlacement.towardsBar(data.tag, 8), data.offset);
     }
 
-    function test_onlySideBarsRunVertically() {
-        verify(!PopupPlacement.vertical("top"));
-        verify(!PopupPlacement.vertical("bottom"));
-        verify(PopupPlacement.vertical("left"));
-        verify(PopupPlacement.vertical("right"));
+    function test_aTriggerIsMeasuredAlongTheBar_data() {
+        return [
+            { tag: "top", span: { start: 130, length: 60 } },
+            { tag: "bottom", span: { start: 130, length: 60 } },
+            { tag: "left", span: { start: 56, length: 24 } },
+            { tag: "right", span: { start: 56, length: 24 } }
+        ];
+    }
+
+    function test_aTriggerIsMeasuredAlongTheBar(data) {
+        const content = { x: 10, y: 6 };
+        const element = { x: 120, y: 50, width: 60, height: 24 };
+
+        compare(PopupPlacement.triggerSpan(data.tag, content, element), data.span);
+    }
+
+    function test_nothingTriggersAPopupWhoseElementIsntOnTheBar() {
+        compare(PopupPlacement.triggerSpan("left", { x: 0, y: 0 }, null), null);
     }
 }

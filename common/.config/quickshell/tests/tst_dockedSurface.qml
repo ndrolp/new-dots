@@ -1,6 +1,7 @@
 import QtQuick
 import QtTest
 import "../components/bar"
+import "../components/BarPosition.js" as BarPosition
 import "../components/panels/PopupOutline.js" as PopupOutline
 import "../components/panels/PopupPlacement.js" as PopupPlacement
 
@@ -202,15 +203,15 @@ TestCase {
     // Bar position. Returns where its joins start and end on the bar's inner
     // side, in the bar window.
     function attachedJoins(barPosition) {
-        const side = PopupPlacement.vertical(barPosition);
-        const windowWidth = side ? 320 : 212;
-        const windowHeight = side ? 212 : 320;
+        const sideBar = BarPosition.sideBar(barPosition);
+        const windowWidth = sideBar ? 320 : 212;
+        const windowHeight = sideBar ? 212 : 320;
         const room = PopupPlacement.room({ barPosition: barPosition, attached: true, inset: 12, joinRadius: 6 });
         const placed = PopupPlacement.position({
             barPosition: barPosition,
             popupWidth: windowWidth,
             popupHeight: windowHeight,
-            window: { width: side ? 30 : 800, height: side ? 800 : 30 },
+            window: { width: sideBar ? 30 : 800, height: sideBar ? 800 : 30 },
             barHeight: 30,
             padding: 10,
             radius: 8,
@@ -226,7 +227,7 @@ TestCase {
             barPosition: barPosition,
             width: surfaceWidth,
             height: surfaceHeight,
-            unfolded: side ? surfaceWidth : surfaceHeight,
+            unfolded: sideBar ? surfaceWidth : surfaceHeight,
             radius: 8,
             joinRadius: 6
         });

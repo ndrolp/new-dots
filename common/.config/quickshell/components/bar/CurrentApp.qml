@@ -1,6 +1,7 @@
 import Quickshell
 import Quickshell.Hyprland
 import QtQuick
+import "../BarPosition.js" as BarPosition
 import "../../config" as Config
 import "../IconSource.js" as IconSource
 import "../FocusedWindow.js" as FocusedWindow
@@ -34,7 +35,7 @@ Row {
     readonly property string terminalGlyph: terminal ? terminalIconGlyph(windowTitle) : ""
     readonly property real activeTitleMaximumWidth: monitorScreen
         ? Math.max(120, Math.min(320, BarLayout.screenLength(appearance, monitorScreen) * 0.14)) : 320
-    readonly property bool vertical: BarLayout.vertical(appearance)
+    readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
     readonly property real thickness: BarLayout.elementThickness(appearance)
     readonly property real length: appContent.implicitWidth + 16
     readonly property var size: BarLayout.size(appearance, visible ? length : 0, thickness)
@@ -97,7 +98,7 @@ Row {
 
     // Only along the bar: across it, it follows the bar at once.
     Behavior on width {
-        enabled: !root.vertical
+        enabled: !root.sideBar
 
         NumberAnimation {
             duration: root.appearance.motion.medium
@@ -106,7 +107,7 @@ Row {
     }
 
     Behavior on height {
-        enabled: root.vertical
+        enabled: root.sideBar
 
         NumberAnimation {
             duration: root.appearance.motion.medium

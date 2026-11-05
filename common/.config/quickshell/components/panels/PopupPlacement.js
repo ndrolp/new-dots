@@ -1,4 +1,5 @@
 .pragma library
+.import "../BarPosition.js" as BarPosition
 
 // Where a popup opens in its bar window, from the Bar position: away from the
 // bar, towards the inside of the screen; along the bar, centred on the bar
@@ -13,17 +14,9 @@ function attached(bar) {
     return !bar.barTransparent || !!bar.transparentBarSlanted;
 }
 
-// Whether a bar at this Bar position runs from the top of the screen down.
-function vertical(barPosition) {
-    return barPosition === "left" || barPosition === "right";
-}
-
 // A distance as an { x, y } offset pointing at the bar.
 function towardsBar(barPosition, distance) {
-    if (vertical(barPosition))
-        return { x: barPosition === "left" ? -distance : distance, y: 0 };
-
-    return { x: 0, y: barPosition === "top" ? -distance : distance };
+    return BarPosition.point(barPosition, 0, -distance, 0);
 }
 
 // How close to the bar's ends a popup may open: the padding, or the bar's
@@ -79,27 +72,18 @@ function reach(placement) {
 // Returns the popup window's { x, y } in the bar window, and the { start, end }
 // it spans along the bar.
 function position(placement) {
-    const away = reach(placement);
+    const barPosition = placement.barPosition;
+    const sideBar = BarPosition.sideBar(barPosition);
+    const length = sideBar ? placement.popupHeight : placement.popupWidth;
+    const along = start(placement, length, sideBar ? placement.window.height : placement.window.width);
+    const area = BarPosition.area(barPosition, {
+        along: along,
+        away: reach(placement),
+        length: length,
+        depth: sideBar ? placement.popupWidth : placement.popupHeight
+    }, sideBar ? placement.window.width : placement.window.height);
 
-    if (vertical(placement.barPosition)) {
-        const along = start(placement, placement.popupHeight, placement.window.height);
-
-        return {
-            x: placement.barPosition === "left" ? away : placement.window.width - away - placement.popupWidth,
-            y: along,
-            start: along,
-            end: along + placement.popupHeight
-        };
-    }
-
-    const along = start(placement, placement.popupWidth, placement.window.width);
-
-    return {
-        x: along,
-        y: placement.barPosition === "top" ? away : placement.window.height - away - placement.popupHeight,
-        start: along,
-        end: along + placement.popupWidth
-    };
+    return { x: area.x, y: area.y, start: along, end: along + length };
 }
 
 // The room around the surface inside the popup window, { top, right, bottom,
@@ -110,10 +94,17 @@ function room(placement) {
     if (!placement.attached)
         return { top: placement.inset, right: placement.inset, bottom: placement.inset, left: placement.inset };
 
-    const join = placement.joinRadius;
+    return BarPosition.sides(placement.barPosition, 0, 0, placement.joinRadius);
+}
 
-    if (vertical(placement.barPosition))
-        return { top: join, right: 0, bottom: join, left: 0 };
+// The stretch of the bar an element takes, { start, length } in bar window
+// coordinates. Takes the Bar position, the bar content the element sits in and
+// its { x, y, width, height } there, or null when it isn't on the bar.
+function triggerSpan(barPosition, content, element) {
+    if (!element)
+        return null;
 
-    return { top: 0, right: join, bottom: 0, left: join };
+    return BarPosition.sideBar(barPosition)
+        ? { start: content.y + element.y, length: element.height }
+        : { start: content.x + element.x, length: element.width };
 }

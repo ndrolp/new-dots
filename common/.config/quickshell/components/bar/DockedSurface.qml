@@ -1,7 +1,7 @@
 import QtQuick
 import "../../config" as Config
+import "../BarPosition.js" as BarPosition
 import "../panels/PopupOutline.js" as PopupOutline
-import "../panels/PopupPlacement.js" as PopupPlacement
 import "DockedZones.js" as DockedZones
 
 // What a zone of the docked bar draws on. It has the outline of an attached
@@ -35,7 +35,7 @@ Canvas {
     // Only the growth animates, so the zone still follows its contents at once.
     property real growLeft: keepLeftEdge ? 0 : growth.left
     property real growRight: keepRightEdge ? 0 : growth.right
-    readonly property bool side: PopupPlacement.vertical(barPosition)
+    readonly property bool sideBar: BarPosition.sideBar(barPosition)
     readonly property real zoneStart: spanLeft - growLeft
     readonly property real zoneLength: spanRight + growRight - zoneStart
     readonly property var path: PopupOutline.dockedPath({
@@ -48,10 +48,10 @@ Canvas {
         keepEnd: keepRightEdge
     })
 
-    x: side ? 0 : zoneStart
-    y: side ? zoneStart : 0
-    width: side ? thickness : zoneLength
-    height: side ? zoneLength : thickness
+    x: sideBar ? 0 : zoneStart
+    y: sideBar ? zoneStart : 0
+    width: sideBar ? thickness : zoneLength
+    height: sideBar ? zoneLength : thickness
 
     Behavior on growLeft {
         NumberAnimation {

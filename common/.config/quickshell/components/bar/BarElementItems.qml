@@ -6,6 +6,7 @@ import Quickshell.Services.Pipewire
 import Quickshell.Services.SystemTray
 import Quickshell.Services.UPower
 import QtQuick
+import "../BarPosition.js" as BarPosition
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 import "../StatusText.js" as StatusText
@@ -277,7 +278,7 @@ Item {
     Rectangle {
         id: mediaButton
 
-        readonly property bool vertical: BarLayout.vertical(root.appearance)
+        readonly property bool sideBar: BarPosition.sideBar(root.appearance.barPosition)
         readonly property var size: root.elementSize(mediaContent.implicitWidth + 16)
 
         border.width: root.appearance.barTransparentBorder && !root.elementGrouped("media") ? 1 : 0
@@ -303,7 +304,7 @@ Item {
 
         // Only along the bar: across it, it follows the bar at once.
         Behavior on width {
-            enabled: !mediaButton.vertical
+            enabled: !mediaButton.sideBar
 
             NumberAnimation {
                 duration: root.appearance.motion.medium
@@ -312,7 +313,7 @@ Item {
         }
 
         Behavior on height {
-            enabled: mediaButton.vertical
+            enabled: mediaButton.sideBar
 
             NumberAnimation {
                 duration: root.appearance.motion.medium
@@ -435,10 +436,10 @@ Item {
                 + cavaTextMetrics.ascent
 
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: vertical ? parent.verticalCenter : undefined
+            anchors.verticalCenter: sideBar ? parent.verticalCenter : undefined
             y: 2
-            width: vertical ? parent.width - 6 : implicitWidth
-            height: vertical ? implicitHeight : Math.max(1, textBaseline - y)
+            width: sideBar ? parent.width - 6 : implicitWidth
+            height: sideBar ? implicitHeight : Math.max(1, textBaseline - y)
             barPosition: root.appearance.barPosition
             frame: root.cava.heights
             barCount: cavaElement.barCount
@@ -685,7 +686,7 @@ Item {
 
             anchors.centerIn: parent
             appearance: root.appearance
-            spacing: vertical && !root.pomodoro.started ? 0 : 7
+            spacing: sideBar && !root.pomodoro.started ? 0 : 7
 
             // Opens along the bar when a pomodoro starts.
             Item {
@@ -695,14 +696,14 @@ Item {
                     root.pomodoro.started
                         ? BarLayout.itemLength(root.appearance, { width: pomodoroText.implicitWidth, height: pomodoroText.implicitHeight })
                         : 0,
-                    clockContent.vertical ? pomodoroText.width : pomodoroText.implicitHeight)
+                    clockContent.sideBar ? pomodoroText.width : pomodoroText.implicitHeight)
 
                 width: openSize.width
                 height: openSize.height
                 clip: true
 
                 Behavior on width {
-                    enabled: !clockContent.vertical
+                    enabled: !clockContent.sideBar
 
                     NumberAnimation {
                         duration: root.appearance.motion.medium
@@ -711,7 +712,7 @@ Item {
                 }
 
                 Behavior on height {
-                    enabled: clockContent.vertical
+                    enabled: clockContent.sideBar
 
                     NumberAnimation {
                         duration: root.appearance.motion.medium
@@ -722,7 +723,7 @@ Item {
                 ElementText {
                     id: pomodoroText
 
-                    anchors.verticalCenter: clockContent.vertical ? undefined : parent.verticalCenter
+                    anchors.verticalCenter: clockContent.sideBar ? undefined : parent.verticalCenter
                     appearance: root.appearance
                     value: "󰔟  " + root.pomodoro.remainingLabel
                     color: root.pomodoro.running ? theme.green : theme.textMuted

@@ -43,7 +43,8 @@ PopupWindow {
         radius: appearance.radius,
         spacing: appearance.spacing,
         attached: attached,
-        trigger: trigger(),
+        trigger: anchorProvider ? PopupPlacement.triggerSpan(barPosition, anchorProvider,
+            anchorProvider.popupTrigger(popup)) : null,
         edge: edge,
         content: anchorProvider ? {
             x: anchorProvider.x,
@@ -71,16 +72,6 @@ PopupWindow {
     // Closed from outside while still open: a click outside it and its bar,
     // another grab taking over, or its bar hiding.
     signal dismissed()
-
-    function trigger() {
-        const element = anchorProvider ? anchorProvider.popupTrigger(popup) : null;
-        if (!element)
-            return null;
-
-        return PopupPlacement.vertical(barPosition)
-            ? { start: anchorProvider.y + element.y, length: element.height }
-            : { start: anchorProvider.x + element.x, length: element.width };
-    }
 
     visible: reveal > 0
     onVisibleChanged: {

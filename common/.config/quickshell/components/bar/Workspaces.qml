@@ -1,4 +1,5 @@
 import QtQuick
+import "../BarPosition.js" as BarPosition
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 import "BarLayout.js" as BarLayout
@@ -16,12 +17,12 @@ Rectangle {
     readonly property bool ownPill: appearance.barTransparent && !grouped
     readonly property var options: BarProfileModel.elementOptions(appearance.barElements, "workspaces")
 
-    readonly property bool vertical: BarLayout.vertical(appearance)
+    readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
     // The element wraps its line of buttons, which runs along the bar.
     readonly property var size: BarLayout.size(appearance,
-        (vertical ? workspaceStack.implicitHeight : workspaceStack.implicitWidth) + (ownPill ? 16 : 0),
+        (sideBar ? workspaceStack.implicitHeight : workspaceStack.implicitWidth) + (ownPill ? 16 : 0),
         appearance.barTransparent
-            ? (vertical ? workspaceStack.implicitWidth : workspaceStack.implicitHeight) + (ownPill
+            ? (sideBar ? workspaceStack.implicitWidth : workspaceStack.implicitHeight) + (ownPill
                 ? (appearance.pillVerticalPadding + 2) * 2 : 0)
             : BarLayout.elementThickness(appearance))
 
@@ -43,7 +44,7 @@ Rectangle {
 
     // Only along the bar: across it, it follows the bar at once.
     Behavior on width {
-        enabled: !root.vertical
+        enabled: !root.sideBar
 
         NumberAnimation {
             duration: root.appearance.motion.medium
@@ -52,7 +53,7 @@ Rectangle {
     }
 
     Behavior on height {
-        enabled: root.vertical
+        enabled: root.sideBar
 
         NumberAnimation {
             duration: root.appearance.motion.medium
@@ -64,8 +65,8 @@ Rectangle {
         id: workspaceStack
 
         anchors.centerIn: parent
-        rows: root.vertical ? -1 : 1
-        columns: root.vertical ? 1 : -1
+        rows: root.sideBar ? -1 : 1
+        columns: root.sideBar ? 1 : -1
         spacing: appearance.spacing
 
         move: Transition {
@@ -117,7 +118,7 @@ Rectangle {
                 border.width: urgent ? 1 : 0
 
                 Behavior on width {
-                    enabled: !root.vertical
+                    enabled: !root.sideBar
 
                     NumberAnimation {
                         duration: root.appearance.motion.medium
@@ -126,7 +127,7 @@ Rectangle {
                 }
 
                 Behavior on height {
-                    enabled: root.vertical
+                    enabled: root.sideBar
 
                     NumberAnimation {
                         duration: root.appearance.motion.medium
@@ -135,7 +136,7 @@ Rectangle {
                 }
 
                 Behavior on x {
-                    enabled: !root.vertical
+                    enabled: !root.sideBar
 
                     NumberAnimation {
                         duration: root.appearance.motion.medium
@@ -144,7 +145,7 @@ Rectangle {
                 }
 
                 Behavior on y {
-                    enabled: root.vertical
+                    enabled: root.sideBar
 
                     NumberAnimation {
                         duration: root.appearance.motion.medium

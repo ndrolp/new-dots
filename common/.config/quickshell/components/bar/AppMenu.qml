@@ -1,5 +1,6 @@
 import Quickshell.Hyprland
 import QtQuick
+import "../BarPosition.js" as BarPosition
 import "../../config" as Config
 import ".." as Components
 import "../AppMenuModel.js" as AppMenuModel
@@ -47,7 +48,7 @@ Item {
     // How wide all the titles may get together.
     readonly property real menusMaximumWidth: monitorScreen
         ? Math.max(400, BarLayout.screenLength(appearance, monitorScreen) * 0.4) : 800
-    readonly property bool vertical: BarLayout.vertical(appearance)
+    readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
     readonly property real thickness: BarLayout.elementThickness(appearance)
     readonly property var size: BarLayout.size(appearance, visible ? titleRow.width + 8 : 0, thickness)
     // Where the open menu's title sits in this element, so the Popup opens
@@ -120,7 +121,7 @@ Item {
 
     // Only along the bar: across it, it follows the bar at once.
     Behavior on width {
-        enabled: !root.vertical
+        enabled: !root.sideBar
 
         NumberAnimation {
             duration: root.appearance.motion.medium
@@ -129,7 +130,7 @@ Item {
     }
 
     Behavior on height {
-        enabled: root.vertical
+        enabled: root.sideBar
 
         NumberAnimation {
             duration: root.appearance.motion.medium

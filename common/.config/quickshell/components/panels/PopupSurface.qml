@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Shapes
 import "../../config" as Config
+import "../BarPosition.js" as BarPosition
 import "PopupOutline.js" as PopupOutline
 import "PopupPlacement.js" as PopupPlacement
 
@@ -42,7 +43,7 @@ Rectangle {
     // How far towards the bar a floating surface starts sliding from.
     readonly property real revealOffset: 8
     // How far an attached surface has unfolded, measured from the bar.
-    readonly property real unfolded: (PopupPlacement.vertical(barPosition) ? width : height)
+    readonly property real unfolded: (BarPosition.sideBar(barPosition) ? width : height)
         * (attached ? reveal : 1)
     // The part of the surface that has unfolded.
     readonly property var unfoldedArea: PopupOutline.unfoldedArea({
