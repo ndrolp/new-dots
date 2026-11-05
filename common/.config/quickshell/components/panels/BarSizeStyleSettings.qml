@@ -84,7 +84,9 @@ Column {
             appearance: root.appearance
             options: [
                 { label: "Top", value: "top" },
-                { label: "Bottom", value: "bottom" }
+                { label: "Bottom", value: "bottom" },
+                { label: "Left", value: "left" },
+                { label: "Right", value: "right" }
             ]
             value: root.appearance.barPosition
             onChosen: position => root.appearance.setBarSetting("barPosition", position)

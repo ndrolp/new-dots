@@ -65,6 +65,7 @@ TestCase {
 
                 property int radius: 12
                 property int textSize: 13
+                property string barPosition: "top"
                 property var barElements: ({
                     left: [{ id: "arch", enabled: true }, { id: "workspaces", enabled: true }],
                     center: [{ id: "clock", enabled: true }],
@@ -361,6 +362,60 @@ TestCase {
         compare(left.font.capitalization, Font.AllUppercase);
         verify(left.mapToItem(built.item, 0, 0).y < arch.mapToItem(built.item, 0, 0).y);
         verify(arch.mapToItem(built.item, 0, 0).y < workspaces.mapToItem(built.item, 0, 0).y);
+    }
+
+    function zoneHeadings(item) {
+        const zones = ["Left", "Right", "Top", "Bottom", "Center"];
+
+        return all(item, child => child.font !== undefined && !(child instanceof TextInput)
+            && child.font.capitalization === Font.AllUppercase && child.visible)
+            .map(child => child.text).filter(text => zones.indexOf(text) !== -1);
+    }
+
+    function test_theZonesAreNamedByTheScreenSideTheySitOn_data() {
+        return [
+            { tag: "top", position: "top", names: ["Left", "Center", "Right"], shorts: ["L", "C", "R"] },
+            { tag: "bottom", position: "bottom", names: ["Left", "Center", "Right"], shorts: ["L", "C", "R"] },
+            { tag: "left", position: "left", names: ["Top", "Center", "Bottom"], shorts: ["T", "C", "B"] },
+            { tag: "right", position: "right", names: ["Top", "Center", "Bottom"], shorts: ["T", "C", "B"] }
+        ];
+    }
+
+    function test_theZonesAreNamedByTheScreenSideTheySitOn(data) {
+        const built = make();
+
+        built.appearance.barPosition = data.position;
+
+        compare(zoneHeadings(built.item), data.names);
+        compare(zoneChoice(elementRow(built.item, "Clock & pomodoro")).options.map(option => option.label),
+            data.shorts);
+    }
+
+    function test_theHintNamesTheZonesOfTheBarPosition() {
+        const built = make();
+
+        verify(textOf(built.item, hintFor("L/C/R")));
+        built.appearance.barPosition = "right";
+        verify(textOf(built.item, hintFor("T/C/B")));
+    }
+
+    function hintFor(zones) {
+        return "Every piece of the bar. Turn it on or off, pick its zone (" + zones
+            + ") and order it within the zone. Join joins an element with the one above it: "
+            + "joined elements form a group with one shared background.";
+    }
+
+    function test_theZoneChoiceSavesTheSameKeysOnASideBar() {
+        const built = make();
+
+        built.appearance.barPosition = "left";
+        const choice = zoneChoice(elementRow(built.item, "Clock & pomodoro"));
+
+        compare(choice.options.map(option => option.value), ["left", "center", "right"]);
+        compare(choice.value, "center");
+
+        choice.chosen("right");
+        compare(built.appearance.calls, [["zone", "clock", "right"]]);
     }
 
     function test_theSwitchTurnsABarElementOnOrOff() {
