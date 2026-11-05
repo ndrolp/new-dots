@@ -239,7 +239,8 @@ Item {
                     width: background.width
                     height: parent.height
                     radius: root.appearance.groupRadius
-                    color: theme.surface
+                    color: Qt.rgba(theme.surface.r, theme.surface.g, theme.surface.b,
+                        theme.surface.a * root.appearance.barOpacity / 100)
                     border.width: root.appearance.barTransparentBorder ? 1 : 0
                     border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
