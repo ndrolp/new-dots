@@ -25,7 +25,7 @@ PopupWindow {
     // "right", which on a side bar mean its top and bottom.
     property string edge: "right"
     // The screen edge the bar sits on.
-    readonly property string barPosition: appearance.barPosition || "top"
+    readonly property string barPosition: appearance.barPosition
     // Decided by the bar profile of this bar's monitor.
     readonly property bool attached: PopupPlacement.attached(appearance)
     // Room around a floating surface inside the window.
