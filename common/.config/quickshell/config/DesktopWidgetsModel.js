@@ -91,6 +91,32 @@ function placementOf(position) {
     return { vertical: parts[0], horizontal: parts[1] };
 }
 
+// Where something of `size` sits in `area`, keeping `gaps` from the area's
+// sides. `stack` is its place among what shares the position: its offset
+// from the edge and the height of them all (see DesktopWidgets.qml).
+function placedInArea(position, size, area, gaps, stack) {
+    const placement = placementOf(position);
+    const x = placement.horizontal === "left" ? gaps.side
+        : placement.horizontal === "right" ? area.width - size.width - gaps.side
+        : (area.width - size.width) / 2;
+    const y = placement.vertical === "top" ? gaps.top + stack.offset
+        : placement.vertical === "bottom" ? area.height - size.height - gaps.bottom - stack.offset
+        : (area.height - stack.height) / 2 + stack.offset;
+
+    return { x: x, y: y };
+}
+
+// The area is what the monitor's bar leaves free, the size of the windows of
+// the desktop widgets, so the gaps don't depend on the bar.
+function cardPosition(position, size, area, stack) {
+    return placedInArea(position, size, area, { top: 28, bottom: 36, side: 28 }, stack);
+}
+
+function clockPosition(position, size, area) {
+    return placedInArea(position, size, area, { top: 48, bottom: 56, side: 48 },
+        { offset: 0, height: size.height });
+}
+
 // The stored position of a row and column (see placementOf).
 function positionOf(vertical, horizontal) {
     return vertical === "center" && horizontal === "center" ? "center" : vertical + "-" + horizontal;
