@@ -49,7 +49,8 @@ reads cava and tries it again when it fails (`services/CavaOutput.js`) and
 what it draws (`components/bar/CavaBars.qml`), how a docked bar zone hangs
 from the screen edge the bar sits on and keeps its sides on the screen's edge
 straight, on each Bar position (`PopupOutline.js`), and how it is
-drawn and grows for an attached popup (`components/bar/DockedSurface.qml`,
+drawn, grows for an attached popup and meets its joins on every Bar position
+(`components/bar/DockedSurface.qml`,
 `DockedZones.js`), where zones, bar elements, group backgrounds and popup
 triggers sit along either axis of the bar, to the pixel the anchors they
 replaced put them at (`components/bar/BarLayout.js`; `BarContent.qml` itself
