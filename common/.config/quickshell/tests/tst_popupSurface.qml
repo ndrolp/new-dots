@@ -9,11 +9,14 @@ import "../config/Motion.js" as Motion
 // Attached to the bar it has no border and unfolds downward instead, its
 // contents fading in after. The host may paint it in its own colors. It
 // opens with the motion settings it is given, so reduce motion opens it at once.
+// It takes input while open or opening, and none while it closes.
 TestCase {
     name: "PopupSurface"
     width: 400
     height: 400
     when: windowShown
+    // Shown, so that clicks reach the contents.
+    visible: true
 
     Config.Theme {
         id: theme
@@ -37,8 +40,64 @@ TestCase {
         }
     }
 
+    // Contents to press, the way popups have them, on a surface that closes
+    // slowly enough for a test to act while the close animation runs.
+    Component {
+        id: surfaceWithInputs
+
+        Panels.PopupSurface {
+            id: inputs
+
+            property alias area: area
+            property alias field: field
+            property int tapped: 0
+            property int pressed: 0
+
+            width: 200
+            motion: ({ short: 60000, medium: 60000, easing: 6 })
+
+            Rectangle {
+                width: parent.width
+                height: 50
+
+                TapHandler {
+                    onTapped: inputs.tapped++
+                }
+            }
+
+            MouseArea {
+                id: area
+
+                width: parent.width
+                height: 50
+                y: 50
+                onPressed: inputs.pressed++
+            }
+
+            Panels.PopupTextField {
+                id: field
+
+                width: parent.width
+                height: 32
+                y: 100
+                appearance: ({ radius: 6, textSize: 13 })
+            }
+        }
+    }
+
     function makeSurface(properties) {
         return createTemporaryObject(surfaceWithBox, this, properties || {});
+    }
+
+    // A surface with inputs, already fully open.
+    function makeOpenInputs(properties) {
+        const surface = createTemporaryObject(surfaceWithInputs, this, properties || {});
+        const slow = surface.motion;
+        surface.motion = Motion.motion(true);
+        surface.open = true;
+        compare(surface.reveal, 1);
+        surface.motion = slow;
+        return surface;
     }
 
     // How opaque an item is drawn, with the opacity of every item above it up
@@ -165,6 +224,92 @@ TestCase {
         verify(halfway > 0 && halfway < 1);
         revealTo(surface, 1);
         compare(drawnOpacity(surface.box, surface), 1);
+    }
+
+    function test_anOpenSurfaceTakesClicksOnItsContents() {
+        const surface = makeOpenInputs();
+
+        mouseClick(surface, surface.width / 2, 30);
+        compare(surface.tapped, 1);
+    }
+
+    function test_aClosingSurfaceIgnoresClicksOnItsContents() {
+        const surface = makeOpenInputs();
+
+        surface.open = false;
+        verify(surface.reveal > 0);
+        mouseClick(surface, surface.width / 2, 30);
+        compare(surface.tapped, 0);
+    }
+
+    function test_anAttachedClosingSurfaceIgnoresClicksOnItsContents() {
+        const surface = makeOpenInputs({ attached: true });
+
+        surface.open = false;
+        verify(surface.reveal > 0);
+        mouseClick(surface, surface.width / 2, 30);
+        compare(surface.tapped, 0);
+    }
+
+    function test_aClosingSurfaceIgnoresMouseAreas() {
+        const surface = makeOpenInputs();
+
+        mouseClick(surface.area);
+        compare(surface.pressed, 1);
+        surface.open = false;
+        mouseClick(surface.area);
+        compare(surface.pressed, 1);
+    }
+
+    function test_aClosingSurfaceIgnoresTyping() {
+        const surface = makeOpenInputs();
+
+        surface.field.forceActiveFocus();
+        keyClick("a");
+        compare(surface.field.text, "a");
+        surface.open = false;
+        verify(surface.reveal > 0);
+        keyClick("b");
+        compare(surface.field.text, "a");
+    }
+
+    function test_reopeningLetsAFocusedFieldTakeTypingAgain() {
+        const surface = makeOpenInputs();
+
+        surface.field.forceActiveFocus();
+        surface.open = false;
+        surface.open = true;
+        keyClick("a");
+        compare(surface.field.text, "a");
+    }
+
+    function test_reopeningDuringTheCloseTakesClicksAgain() {
+        const surface = makeOpenInputs();
+
+        surface.open = false;
+        verify(surface.reveal > 0);
+        surface.open = true;
+        mouseClick(surface, surface.width / 2, 30);
+        compare(surface.tapped, 1);
+    }
+
+    function test_reopeningAfterClosingTakesClicksAgain() {
+        const surface = makeOpenInputs({ motion: Motion.motion(true) });
+
+        surface.open = false;
+        compare(surface.reveal, 0);
+        surface.open = true;
+        mouseClick(surface, surface.width / 2, 30);
+        compare(surface.tapped, 1);
+    }
+
+    function test_anOpeningSurfaceAlreadyTakesClicks() {
+        const surface = createTemporaryObject(surfaceWithInputs, this, { open: false });
+
+        surface.open = true;
+        verify(surface.reveal < 1);
+        mouseClick(surface, surface.width / 2, 30);
+        compare(surface.tapped, 1);
     }
 
     function test_aFloatingSurfaceDrawsItsContentsAsItFades() {

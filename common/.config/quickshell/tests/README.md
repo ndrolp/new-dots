@@ -5,7 +5,8 @@ Tests for the pure JS models behind the settings: bar profiles
 and schema migrations (`config/SchemaMigrations.js`). They also cover the
 popups: where a popup opens (`components/panels/PopupPlacement.js`), the
 outline of an attached popup (`PopupOutline.js`), the surface every popup
-draws on (`PopupSurface.qml`), what a popup's focus grab holds
+draws on and that it ignores input while closing (`PopupSurface.qml`), what
+a popup's focus grab holds
 (`PopupGrab.js`), the shared popup parts (`PopupTitle`,
 `PopupHeader`, `PopupRow`…), the control center's tiles and sliders,
 active, muted, disabled and icon-only (`ControlTile.qml`, `ControlSlider.qml`;
