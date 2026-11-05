@@ -5,9 +5,9 @@ import "../config" as Config
 import "../config/Motion.js" as Motion
 
 // The surface every popup draws on: a flat card with a hairline border, its
-// contents inset by the padding, opening with a short fade and slide down.
-// Attached to the bar it has no border and unfolds downward instead, its
-// contents fading in after. The host may paint it in its own colors. It
+// contents inset by the padding, opening with a short fade and a slide away from
+// the bar. Attached to the bar it has no border and unfolds away from it instead,
+// its contents fading in after. The host may paint it in its own colors. It
 // opens with the motion settings it is given, so reduce motion opens it at once.
 // It takes input while open or opening, and none while it closes.
 TestCase {
@@ -148,7 +148,7 @@ TestCase {
         verify(!surface.layer.enabled);
     }
 
-    function test_aClosedSurfaceIsTransparentAndRaised() {
+    function test_aClosedSurfaceIsTransparentAndRaisedUnderATopBar() {
         const surface = makeSurface({ open: false });
 
         compare(surface.opacity, 0);
@@ -178,7 +178,7 @@ TestCase {
         const surface = makeSurface({ attached: true, open: false, motion: Motion.motion(true) });
 
         surface.open = true;
-        compare(surface.unfoldedHeight, surface.implicitHeight);
+        compare(surface.unfolded, surface.implicitHeight);
     }
 
     function test_theSurfaceIsAsTallAsItsContentsPlusThePadding() {
@@ -220,14 +220,67 @@ TestCase {
         compare(surface.mapToItem(surface.parent, 0, 0).y, 0);
     }
 
-    function test_anAttachedSurfaceUnfoldsDownwardFromItsTopEdge() {
-        const surface = makeSurface({ attached: true, open: false, padding: 12 });
+    function test_aClosedSurfaceWaitsTowardsTheBar_data() {
+        return [
+            { tag: "top", x: 0, y: -8 },
+            { tag: "bottom", x: 0, y: 8 },
+            { tag: "left", x: -8, y: 0 },
+            { tag: "right", x: 8, y: 0 }
+        ];
+    }
 
-        compare(surface.unfoldedHeight, 0);
+    function test_aClosedSurfaceWaitsTowardsTheBar(data) {
+        const surface = makeSurface({ barPosition: data.tag, open: false });
+
+        const place = surface.mapToItem(surface.parent, 0, 0);
+        compare(place.x - surface.x, data.x);
+        compare(place.y - surface.y, data.y);
+    }
+
+    function test_openingSlidesAwayFromTheBarToRest_data() {
+        return [{ tag: "top" }, { tag: "bottom" }, { tag: "left" }, { tag: "right" }];
+    }
+
+    function test_openingSlidesAwayFromTheBarToRest(data) {
+        const surface = makeSurface({ barPosition: data.tag, open: false, motion: Motion.motion(true) });
+
+        surface.open = true;
+        const place = surface.mapToItem(surface.parent, 0, 0);
+        compare(place.x, surface.x);
+        compare(place.y, surface.y);
+    }
+
+    function test_anAttachedSurfaceUnfoldsAwayFromTheBar_data() {
+        return [
+            { tag: "top", half: { x: 0, y: 0, width: 200, height: 37 } },
+            { tag: "bottom", half: { x: 0, y: 37, width: 200, height: 37 } },
+            { tag: "left", half: { x: 0, y: 0, width: 100, height: 74 } },
+            { tag: "right", half: { x: 100, y: 0, width: 100, height: 74 } }
+        ];
+    }
+
+    function test_anAttachedSurfaceUnfoldsAwayFromTheBar(data) {
+        const surface = makeSurface({ barPosition: data.tag, attached: true, open: false, padding: 12 });
+
+        compare(surface.unfolded, 0);
         revealTo(surface, 0.5);
-        compare(surface.unfoldedHeight, 37);
+        compare(surface.unfoldedArea, data.half);
         revealTo(surface, 1);
-        compare(surface.unfoldedHeight, 74);
+        compare(surface.unfoldedArea, { x: 0, y: 0, width: 200, height: 74 });
+    }
+
+    function test_anAttachedSurfacesContentsStayPutWhileItUnfolds_data() {
+        return [{ tag: "top" }, { tag: "bottom" }, { tag: "left" }, { tag: "right" }];
+    }
+
+    function test_anAttachedSurfacesContentsStayPutWhileItUnfolds(data) {
+        const surface = makeSurface({ barPosition: data.tag, attached: true, open: false, padding: 12 });
+
+        revealTo(surface, 0.5);
+        const corner = surface.box.mapToItem(surface, 0, 0);
+        compare(corner.x, 12);
+        compare(corner.y, 12);
+        compare(surface.box.width, 176);
     }
 
     function test_anAttachedSurfacesContentsFadeInAfterItStartsUnfolding() {

@@ -19,9 +19,11 @@ Item {
     property string activePopup: ""
     // Which of the app menu's menus its Popup shows (AppMenuPopup.menuId).
     property string appMenuId: ""
-    // Where the open popup sits, { popup, edge, left, right }, or null.
+    // Where the open popup sits, { popup, edge, left, right }, or null. Left and
+    // right are the ends of its span along the bar, as with zones: on a side bar
+    // they are its top and bottom.
     property var openPopup: null
-    // The bar content; places popups under the bar element that opened them.
+    // The bar content; places popups at the bar element that opened them.
     property var popupAnchorProvider: null
     signal popupClosed(string popup)
     signal audioOutputSelected(var output)
