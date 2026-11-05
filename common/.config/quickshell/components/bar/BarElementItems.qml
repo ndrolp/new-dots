@@ -50,7 +50,9 @@ Item {
     readonly property var battery: UPower.displayDevice
     readonly property bool hasBattery: battery && battery.isPresent
     readonly property var bluetoothAdapter: Bluetooth.defaultAdapter
-    readonly property real mediaTitleMaximumWidth: monitorScreen
+    // How long free text gets: the media title, and the apps sharing the screen
+    // on a side bar.
+    readonly property real longTextMaximumLength: monitorScreen
         ? Math.max(96, Math.min(260, BarLayout.screenLength(appearance, monitorScreen) * 0.12)) : 260
     property var player: null
     readonly property string playerLabel: player
@@ -221,18 +223,15 @@ Item {
             id: recordingHover
         }
 
-        IconValue {
+        RecordingContent {
             id: recordingContent
 
             anchors.centerIn: parent
             appearance: root.appearance
-            gap: 5
-            icon: "󰑋"
             iconColor: theme.red
-            iconSize: root.appearance.textSize
-            value: root.sharingShown !== "" ? root.sharingShown
-                : RecordingIndicator.elapsedSince(root.recordings, root.recordingNow)
-            valueSize: root.appearance.textSize - 2
+            elapsed: RecordingIndicator.elapsedSince(root.recordings, root.recordingNow)
+            sharing: root.sharingShown
+            maximumLength: root.longTextMaximumLength
         }
 
         // Ticks the elapsed time only while the indicator is shown.
@@ -345,7 +344,7 @@ Item {
 
                 anchors.verticalCenter: parent.verticalCenter
                 visible: BarProfileModel.elementOption(root.appearance.barElements, "media", "titleVisible")
-                width: Math.min(root.mediaTitleMaximumWidth, implicitWidth)
+                width: Math.min(root.longTextMaximumLength, implicitWidth)
                 text: displayedLabel
                 color: theme.green
                 elide: Text.ElideRight
