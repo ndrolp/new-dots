@@ -61,7 +61,7 @@ TestCase {
     ]
 
     // A popup's focus grab ends after its bar element already closed it.
-    function test_aPopupDismissedAfterItsElementClosedItChangesNothing() {
+    function test_aPopupDismissedAfterItsBarElementClosedItChangesNothing() {
         const closed = OpenPopup.requested(OpenPopup.requested(OpenPopup.none, "audio", leftBar), "audio", leftBar);
 
         compare(OpenPopup.closed(closed, "audio", leftBar), OpenPopup.none);
@@ -69,7 +69,7 @@ TestCase {
 
     // Dismissed by a click elsewhere, its bar element opens it again rather
     // than toggling it shut.
-    function test_clickingTheElementOfADismissedPopupOpensItAgain() {
+    function test_clickingTheBarElementOfADismissedPopupOpensItAgain() {
         const dismissed = OpenPopup.closed(OpenPopup.requested(OpenPopup.none, "audio", leftBar), "audio", leftBar);
 
         compare(OpenPopup.requested(dismissed, "audio", leftBar).popup, "audio");

@@ -18,6 +18,10 @@ TestCase {
     // Shown, so that clicks reach the contents.
     visible: true
 
+    // Where to click, from the surface's top: on the contents' tap area, past
+    // the padding.
+    readonly property int tapAreaY: 30
+
     Config.Theme {
         id: theme
     }
@@ -46,7 +50,7 @@ TestCase {
         id: surfaceWithInputs
 
         Panels.PopupSurface {
-            id: inputs
+            id: surface
 
             property alias area: area
             property alias field: field
@@ -61,7 +65,7 @@ TestCase {
                 height: 50
 
                 TapHandler {
-                    onTapped: inputs.tapped++
+                    onTapped: surface.tapped++
                 }
             }
 
@@ -71,7 +75,7 @@ TestCase {
                 width: parent.width
                 height: 50
                 y: 50
-                onPressed: inputs.pressed++
+                onPressed: surface.pressed++
             }
 
             Panels.PopupTextField {
@@ -98,6 +102,18 @@ TestCase {
         compare(surface.reveal, 1);
         surface.motion = slow;
         return surface;
+    }
+
+    // Starts closing a surface, leaving it mid-animation.
+    function startClosing(surface) {
+        surface.open = false;
+        verify(surface.reveal > 0);
+    }
+
+    // Clicks the tap area, and returns how many taps it has taken in all.
+    function tapsAfterClicking(surface) {
+        mouseClick(surface, surface.width / 2, tapAreaY);
+        return surface.tapped;
     }
 
     // How opaque an item is drawn, with the opacity of every item above it up
@@ -229,26 +245,21 @@ TestCase {
     function test_anOpenSurfaceTakesClicksOnItsContents() {
         const surface = makeOpenInputs();
 
-        mouseClick(surface, surface.width / 2, 30);
-        compare(surface.tapped, 1);
+        compare(tapsAfterClicking(surface), 1);
     }
 
-    function test_aClosingSurfaceIgnoresClicksOnItsContents() {
-        const surface = makeOpenInputs();
-
-        surface.open = false;
-        verify(surface.reveal > 0);
-        mouseClick(surface, surface.width / 2, 30);
-        compare(surface.tapped, 0);
+    function test_aClosingSurfaceIgnoresClicksOnItsContents_data() {
+        return [
+            { tag: "floating", attached: false },
+            { tag: "attached", attached: true }
+        ];
     }
 
-    function test_anAttachedClosingSurfaceIgnoresClicksOnItsContents() {
-        const surface = makeOpenInputs({ attached: true });
+    function test_aClosingSurfaceIgnoresClicksOnItsContents(data) {
+        const surface = makeOpenInputs({ attached: data.attached });
 
-        surface.open = false;
-        verify(surface.reveal > 0);
-        mouseClick(surface, surface.width / 2, 30);
-        compare(surface.tapped, 0);
+        startClosing(surface);
+        compare(tapsAfterClicking(surface), 0);
     }
 
     function test_aClosingSurfaceIgnoresMouseAreas() {
@@ -256,7 +267,7 @@ TestCase {
 
         mouseClick(surface.area);
         compare(surface.pressed, 1);
-        surface.open = false;
+        startClosing(surface);
         mouseClick(surface.area);
         compare(surface.pressed, 1);
     }
@@ -267,8 +278,7 @@ TestCase {
         surface.field.forceActiveFocus();
         keyClick("a");
         compare(surface.field.text, "a");
-        surface.open = false;
-        verify(surface.reveal > 0);
+        startClosing(surface);
         keyClick("b");
         compare(surface.field.text, "a");
     }
@@ -277,7 +287,7 @@ TestCase {
         const surface = makeOpenInputs();
 
         surface.field.forceActiveFocus();
-        surface.open = false;
+        startClosing(surface);
         surface.open = true;
         keyClick("a");
         compare(surface.field.text, "a");
@@ -286,11 +296,9 @@ TestCase {
     function test_reopeningDuringTheCloseTakesClicksAgain() {
         const surface = makeOpenInputs();
 
-        surface.open = false;
-        verify(surface.reveal > 0);
+        startClosing(surface);
         surface.open = true;
-        mouseClick(surface, surface.width / 2, 30);
-        compare(surface.tapped, 1);
+        compare(tapsAfterClicking(surface), 1);
     }
 
     function test_reopeningAfterClosingTakesClicksAgain() {
@@ -299,8 +307,7 @@ TestCase {
         surface.open = false;
         compare(surface.reveal, 0);
         surface.open = true;
-        mouseClick(surface, surface.width / 2, 30);
-        compare(surface.tapped, 1);
+        compare(tapsAfterClicking(surface), 1);
     }
 
     function test_anOpeningSurfaceAlreadyTakesClicks() {
@@ -308,8 +315,7 @@ TestCase {
 
         surface.open = true;
         verify(surface.reveal < 1);
-        mouseClick(surface, surface.width / 2, 30);
-        compare(surface.tapped, 1);
+        compare(tapsAfterClicking(surface), 1);
     }
 
     function test_aFloatingSurfaceDrawsItsContentsAsItFades() {
