@@ -22,7 +22,7 @@ adding or editing one file here.
 - `Bar.qml`: a bar on every monitor, and which popup is open
   (`OpenPopup.js`, tested). Its settings button opens the settings panel on
   that bar, and a bar element opens its popup (`barElementOpening` tells
-  first). Other modules open and close popups through its `openPopup`,
+  first); one that opens none closes the open popup. Other modules open and close popups through its `openPopup`,
   `bars()`, `focusedMonitor()` and `closePopup()`.
 - `ControlCenter.qml`: not a `Feature`: the control center is the bell's
   popup. The module owns its state and is handed, as one object, through

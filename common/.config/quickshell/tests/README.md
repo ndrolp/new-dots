@@ -7,7 +7,8 @@ popups: where a popup opens (`components/panels/PopupPlacement.js`), the
 outline of an attached popup (`PopupOutline.js`), the surface every popup
 draws on and that it ignores input while closing (`PopupSurface.qml`), what
 a popup's focus grab holds
-(`PopupGrab.js`), the shared popup parts (`PopupTitle`,
+(`PopupGrab.js`), which bar elements close the open popup when pressed
+(`BarPopupCloser.qml`), the shared popup parts (`PopupTitle`,
 `PopupHeader`, `PopupRow`…), the control center's tiles and sliders,
 active, muted, disabled and icon-only (`ControlTile.qml`, `ControlSlider.qml`;
 `ControlCenterBody.qml` itself needs Quickshell's services and isn't tested

@@ -28,6 +28,7 @@ Variants {
     signal panelReady(var screen, var panelWindow)
     signal popupRequested(string popup, var panelWindow)
     signal popupClosed(string popup, var panelWindow)
+    signal popupCloseRequested()
     signal audioOutputSelected(var output)
 
     model: Quickshell.screens
@@ -164,6 +165,8 @@ Variants {
                     onPopupRequested: function(popup) {
                         bar.popupRequested(popup, panel);
                     }
+
+                    onPopupCloseRequested: bar.popupCloseRequested()
                 }
             }
 
