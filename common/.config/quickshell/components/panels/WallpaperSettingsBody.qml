@@ -185,6 +185,9 @@ Column {
 
                         anchors.fill: parent
                         source: "file://" + wallpaperTile.wallpaperPath
+                        // Twice the tile, sharp on a scaled monitor: the whole
+                        // file would stay in memory for each tile.
+                        sourceSize: Qt.size(width * 2, height * 2)
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
                     }
