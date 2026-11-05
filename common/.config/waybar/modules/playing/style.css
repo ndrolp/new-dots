@@ -1,8 +1,0 @@
-#custom-playing {
-  padding: 4px 10px;
-  border-radius: 5px;
-  font-size: 14px;
-  margin: 4px;
-  color: @sky;
-  background: shade(alpha(@base, 0.5), 1);
-}

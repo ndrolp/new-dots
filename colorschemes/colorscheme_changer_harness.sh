@@ -9,7 +9,6 @@ CHANGER_HARNESS_REPO="$(cd "$CHANGER_HARNESS_COLORSCHEMES/.." && pwd)"
 
 # The repo's colour links, as tracked under common/.config, and kitty's config, which includes one.
 CHANGER_HARNESS_COLOUR_LINKS=(
-    waybar/custom/colors.css
     hypr/custom/colors.conf
     hypr/custom/colors.lua
     hypr/custom/hyprlock-colors.conf
@@ -42,10 +41,10 @@ changer_home() {
     mkdir -p "$HOME_DIR/.dotfiles/common/.config/Code/User"
     cp "$CHANGER_HARNESS_REPO/common/.config/Code/User/settings.json" \
         "$HOME_DIR/.dotfiles/common/.config/Code/User/"
-    for app in hypr waybar rofi nvim quickshell kitty Code; do
+    for app in hypr rofi nvim quickshell kitty Code; do
         ln -s "../.dotfiles/common/.config/$app" "$HOME_DIR/.config/$app"
     done
-    for tool in hyprctl pkill ags quickshell gsettings rofi node notify-send; do
+    for tool in hyprctl pkill quickshell gsettings rofi node notify-send; do
         cat >"$bin/$tool" <<SHIM
 #!/bin/sh
 echo "$tool \$*" >>"\$HOME/calls"

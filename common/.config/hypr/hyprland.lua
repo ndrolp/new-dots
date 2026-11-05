@@ -209,7 +209,6 @@ hl.device({
 ---
 require("modules.keybinds.core")
 require("modules.keybinds.apps")
-require("modules.keybinds.ags")
 
 -- Scroll through existing workspaces with mainMod + scroll
 -- Move/resize windows with mainMod + LMB/RMB and dragging

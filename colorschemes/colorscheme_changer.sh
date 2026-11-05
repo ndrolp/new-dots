@@ -7,7 +7,7 @@ VSCODE_SETTINGS="$HOME/.config/Code/User/settings.json"
 COLORSCHEMES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # The active colorscheme is machine-local (docs/adr/0001-active-colorscheme-is-machine-local.md): the
-# gitignored link `active` names it, and the tracked colour links (waybar, hyprlock, nvim, rofi) point
+# gitignored link `active` names it, and the tracked colour links (hyprlock, nvim, rofi) point
 # through it, so applying moves only this link. default.txt, tracked, names the default colorscheme,
 # which `active` starts from whenever it is missing; an apply never writes it.
 ACTIVE_LINK="$COLORSCHEMES/active"
