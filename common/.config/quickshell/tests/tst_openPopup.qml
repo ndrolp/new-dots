@@ -45,8 +45,8 @@ TestCase {
         compare(OpenPopup.closed(open, "battery", leftBar), OpenPopup.none);
     }
 
-    // A popup that closes after another one took its place (it lost focus
-    // to the click that opened the other) leaves the new one open.
+    // A popup that reports closing after another one took its place leaves
+    // the new one open.
     function test_aPopupThatIsNoLongerOpenClosingChangesNothing() {
         const open = OpenPopup.requested(OpenPopup.none, "network", leftBar);
         compare(OpenPopup.closed(open, "battery", leftBar), open);
