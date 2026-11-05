@@ -50,7 +50,7 @@ Item {
     readonly property bool hasBattery: battery && battery.isPresent
     readonly property var bluetoothAdapter: Bluetooth.defaultAdapter
     readonly property real mediaTitleMaximumWidth: monitorScreen
-        ? Math.max(96, Math.min(260, monitorScreen.width * 0.12)) : 260
+        ? Math.max(96, Math.min(260, BarLayout.screenLength(appearance, monitorScreen) * 0.12)) : 260
     property var player: null
     readonly property string playerLabel: player
         ? (player.trackTitle !== "" ? player.trackTitle : player.identity) : ""
@@ -277,13 +277,16 @@ Item {
     Rectangle {
         id: mediaButton
 
+        readonly property bool vertical: BarLayout.vertical(root.appearance)
+        readonly property var size: root.elementSize(mediaContent.implicitWidth + 16)
+
         border.width: root.appearance.barTransparentBorder && !root.elementGrouped("media") ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
         visible: root.itemVisible("media")
         x: root.elementX("media")
         y: root.elementY("media")
-        width: mediaContent.implicitWidth + 16
-        height: root.itemHeight
+        width: size.width
+        height: size.height
         radius: root.appearance.radius
         color: mediaHover.hovered ? theme.surfaceHover
             : root.elementGrouped("media") || root.appearance.pillsTransparent
@@ -298,7 +301,19 @@ Item {
             id: mediaHover
         }
 
+        // Only along the bar: across it, it follows the bar at once.
         Behavior on width {
+            enabled: !mediaButton.vertical
+
+            NumberAnimation {
+                duration: root.appearance.motion.medium
+                easing.type: root.appearance.motion.easing
+            }
+        }
+
+        Behavior on height {
+            enabled: mediaButton.vertical
+
             NumberAnimation {
                 duration: root.appearance.motion.medium
                 easing.type: root.appearance.motion.easing
@@ -310,9 +325,12 @@ Item {
 
             anchors.centerIn: parent
             spacing: 7
+            // The title runs sideways on a side bar, the note stays upright.
+            rotation: BarLayout.turn(root.appearance)
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
+                rotation: -parent.rotation
                 text: "󰎈"
                 color: theme.green
                 font.pixelSize: root.appearance.textSize

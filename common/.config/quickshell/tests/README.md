@@ -49,7 +49,8 @@ reads cava and tries it again when it fails (`services/CavaOutput.js`) and
 what it draws, from the bottom or from the side (`components/bar/CavaBars.qml`), how a docked bar zone hangs
 from the screen edge the bar sits on and keeps its sides on the screen's edge
 straight, on each Bar position (`PopupOutline.js`), and how it is
-drawn and grows for an attached popup (`components/bar/DockedSurface.qml`,
+drawn, grows for an attached popup and meets its joins on every Bar position
+(`components/bar/DockedSurface.qml`,
 `DockedZones.js`), where zones, bar elements, group backgrounds and popup
 triggers sit along either axis of the bar, to the pixel the anchors they
 replaced put them at (`components/bar/BarLayout.js`; `BarContent.qml` itself
@@ -58,7 +59,12 @@ and value elements size and stack upright on a side bar and stay as they were
 on a top one (`BarLayout.size`, `Workspaces.qml`, `ArchButton.qml`,
 `KeepAwakeElement.qml`, `ElementText.qml`, `IconValue.qml`, `AudioLevel.qml`,
 `SystemMonitor.qml`; `BarElementItems.qml` and `Clock.qml` need Quickshell's
-services, so their parts are covered through those), how long animations take
+services, so their parts are covered through those), how the long text of the app
+menu, the current app and the media element turns on a side bar: how far, what
+its length is capped against and where an app menu title ends up for its popup,
+checked against a really rotated item (`BarLayout.turn`, `BarLayout.screenLength`,
+`BarLayout.turnedArea`; `AppMenu.qml` and `CurrentApp.qml` need Quickshell's
+Hyprland, so the elements themselves aren't tested here), how long animations take
 with and without reduce motion (`config/Motion.js`), night light's
 temperature bounds, the saved temperature, how hyprsunset is run and when
 night light turns on and off (`services/NightLightState.js`), when the lock screen
