@@ -2,7 +2,8 @@
 .import "PopupPlacement.js" as PopupPlacement
 
 // The outline of an attached popup: square corners against the bar, small
-// curved corners joining it to the bar, and rounded corners away from it.
+// curved corners joining it to the bar, and rounded corners away from it. A
+// zone of the docked bar has the same outline.
 
 // How round its corners are at its current size, so they never cross while it
 // unfolds. `height` is how far it reaches from the bar and `width` how long it
@@ -32,13 +33,64 @@ function unfoldedArea(surface) {
     }
 }
 
-// The outline as a path. It is worked out for a bar on top, in `along` and
-// `away` from the bar, then laid on the Bar position. Takes { barPosition,
-// width, height, unfolded, radius, joinRadius }, the surface's size and how far
-// it has unfolded from the bar. Returns the box it fits in, relative to the
-// surface, { x, y, width, height }, and in that box the path's start { x, y }
-// and its segments, in order: { x, y } lines and
-// { x, y, controlX, controlY } curves.
+// The outline as a path, worked out for a bar on top, in `along` and `away` from
+// the bar, then laid on the Bar position. Takes { barPosition, depth, boxDepth,
+// start, end, corners, keepStart, keepEnd }: how far it reaches from the bar,
+// the depth of the box it is laid in, where along the bar its joins start and
+// end, its attachedCorners, and which ends stay straight instead of curving.
+// Returns the path's start { x, y } and its segments, in order: { x, y } lines
+// and { x, y, controlX, controlY } curves.
+function laidPath(outline) {
+    const depth = outline.depth;
+    const start = outline.start;
+    const end = outline.end;
+    const join = outline.corners.join;
+    const bottom = outline.corners.bottom;
+    const near = start + join;
+    const far = end - join;
+
+    function point(along, away) {
+        switch (outline.barPosition) {
+        case "bottom":
+            return { x: along, y: outline.boxDepth - away };
+        case "left":
+            return { x: away, y: along };
+        case "right":
+            return { x: outline.boxDepth - away, y: along };
+        default:
+            return { x: along, y: away };
+        }
+    }
+
+    function curve(along, away, controlAlong, controlAway) {
+        const to = point(along, away);
+        const control = point(controlAlong, controlAway);
+
+        return { x: to.x, y: to.y, controlX: control.x, controlY: control.y };
+    }
+
+    const endSide = outline.keepEnd ? [point(end, depth)] : [
+        curve(far, join, far, 0),
+        point(far, depth - bottom),
+        curve(far - bottom, depth, far, depth)
+    ];
+    const startSide = outline.keepStart ? [point(start, depth)] : [
+        point(near + bottom, depth),
+        curve(near, depth - bottom, near, depth),
+        point(near, join),
+        curve(start, 0, near, 0)
+    ];
+
+    return {
+        start: point(start, 0),
+        segments: [point(end, 0)].concat(endSide, startSide)
+    };
+}
+
+// An attached popup's outline. Takes { barPosition, width, height, unfolded,
+// radius, joinRadius }, the surface's size and how far it has unfolded from the
+// bar. Returns the box it fits in, relative to the surface,
+// { x, y, width, height }, and in that box the path, as laidPath does.
 function attachedPath(surface) {
     const side = PopupPlacement.vertical(surface.barPosition);
     const length = side ? surface.height : surface.width;
@@ -52,50 +104,49 @@ function attachedPath(surface) {
         joinRadius: surface.joinRadius
     });
     const near = surface.joinRadius;
-    const far = near + length;
-
-    function point(along, away) {
-        switch (surface.barPosition) {
-        case "bottom":
-            return { x: along, y: boxDepth - away };
-        case "left":
-            return { x: away, y: along };
-        case "right":
-            return { x: boxDepth - away, y: along };
-        default:
-            return { x: along, y: away };
-        }
-    }
-
-    function curve(along, away, controlAlong, controlAway) {
-        const end = point(along, away);
-        const control = point(controlAlong, controlAway);
-
-        return { x: end.x, y: end.y, controlX: control.x, controlY: control.y };
-    }
-
     const box = {
         top: { x: -near, y: 0 },
         bottom: { x: -near, y: surface.height - boxDepth },
         left: { x: 0, y: -near },
         right: { x: surface.width - boxDepth, y: -near }
     }[surface.barPosition];
+    const path = laidPath({
+        barPosition: surface.barPosition,
+        depth: depth,
+        boxDepth: boxDepth,
+        start: near - corners.join,
+        end: near + length + corners.join,
+        corners: corners
+    });
 
     return {
         x: box.x,
         y: box.y,
         width: side ? boxDepth : boxLength,
         height: side ? boxLength : boxDepth,
-        start: point(near - corners.join, 0),
-        segments: [
-            point(far + corners.join, 0),
-            curve(far, corners.join, far, 0),
-            point(far, depth - corners.bottom),
-            curve(far - corners.bottom, depth, far, depth),
-            point(near + corners.bottom, depth),
-            curve(near, depth - corners.bottom, near, depth),
-            point(near, corners.join),
-            curve(near - corners.join, 0, near, 0)
-        ]
+        start: path.start,
+        segments: path.segments
     };
+}
+
+// A docked zone's outline, its joins inside it. Takes { barPosition, length,
+// depth, radius, joinRadius, keepStart, keepEnd }: its size along and away from
+// the bar, and which of its ends along the bar sit on the screen's edge and stay
+// straight. Returns the path in the zone, as laidPath does.
+function dockedPath(zone) {
+    return laidPath({
+        barPosition: zone.barPosition,
+        depth: zone.depth,
+        boxDepth: zone.depth,
+        start: 0,
+        end: zone.length,
+        corners: attachedCorners({
+            width: zone.length,
+            height: zone.depth,
+            radius: zone.radius,
+            joinRadius: zone.joinRadius
+        }),
+        keepStart: zone.keepStart,
+        keepEnd: zone.keepEnd
+    });
 }

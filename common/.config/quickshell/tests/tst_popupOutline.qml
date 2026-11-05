@@ -97,6 +97,86 @@ TestCase {
             data.area);
     }
 
+    // A docked zone 200 long and 30 deep, as [x, y] lines and
+    // [x, y, controlX, controlY] curves in the zone, from the start.
+    function zoneOutline(barPosition, options) {
+        const path = PopupOutline.dockedPath(Object.assign({
+            barPosition: barPosition,
+            length: 200,
+            depth: 30,
+            radius: 8,
+            joinRadius: 6
+        }, options));
+        const points = [[path.start.x, path.start.y]];
+
+        for (const segment of path.segments) {
+            points.push(segment.controlX === undefined
+                ? [segment.x, segment.y]
+                : [segment.x, segment.y, segment.controlX, segment.controlY]);
+        }
+        return points;
+    }
+
+    function test_aDockedZoneFollowsTheBarOnEveryEdge_data() {
+        return [
+            { tag: "top", points: [
+                [0, 0], [200, 0], [194, 6, 194, 0], [194, 22], [186, 30, 194, 30],
+                [14, 30], [6, 22, 6, 30], [6, 6], [0, 0, 6, 0]
+            ] },
+            { tag: "bottom", points: [
+                [0, 30], [200, 30], [194, 24, 194, 30], [194, 8], [186, 0, 194, 0],
+                [14, 0], [6, 8, 6, 0], [6, 24], [0, 30, 6, 30]
+            ] },
+            { tag: "left", points: [
+                [0, 0], [0, 200], [6, 194, 0, 194], [22, 194], [30, 186, 30, 194],
+                [30, 14], [22, 6, 30, 6], [6, 6], [0, 0, 0, 6]
+            ] },
+            { tag: "right", points: [
+                [30, 0], [30, 200], [24, 194, 30, 194], [8, 194], [0, 186, 0, 194],
+                [0, 14], [8, 6, 0, 6], [24, 6], [30, 0, 30, 6]
+            ] }
+        ];
+    }
+
+    function test_aDockedZoneFollowsTheBarOnEveryEdge(data) {
+        compare(zoneOutline(data.tag), data.points);
+    }
+
+    function test_aDockedZoneKeepsItsSideOnTheScreensEdgeStraight_data() {
+        return [
+            { tag: "start on top", barPosition: "top", keepStart: true, points: [
+                [0, 0], [200, 0], [194, 6, 194, 0], [194, 22], [186, 30, 194, 30], [0, 30]
+            ] },
+            { tag: "end on top", barPosition: "top", keepEnd: true, points: [
+                [0, 0], [200, 0], [200, 30], [14, 30], [6, 22, 6, 30], [6, 6], [0, 0, 6, 0]
+            ] },
+            { tag: "start on the bottom", barPosition: "bottom", keepStart: true, points: [
+                [0, 30], [200, 30], [194, 24, 194, 30], [194, 8], [186, 0, 194, 0], [0, 0]
+            ] },
+            { tag: "end on the bottom", barPosition: "bottom", keepEnd: true, points: [
+                [0, 30], [200, 30], [200, 0], [14, 0], [6, 8, 6, 0], [6, 24], [0, 30, 6, 30]
+            ] },
+            { tag: "start on the left", barPosition: "left", keepStart: true, points: [
+                [0, 0], [0, 200], [6, 194, 0, 194], [22, 194], [30, 186, 30, 194], [30, 0]
+            ] },
+            { tag: "end on the right", barPosition: "right", keepEnd: true, points: [
+                [30, 0], [30, 200], [0, 200], [0, 14], [8, 6, 0, 6], [24, 6], [30, 0, 30, 6]
+            ] }
+        ];
+    }
+
+    function test_aDockedZoneKeepsItsSideOnTheScreensEdgeStraight(data) {
+        compare(zoneOutline(data.barPosition, { keepStart: data.keepStart, keepEnd: data.keepEnd }),
+            data.points);
+    }
+
+    function test_aThinDockedZoneShrinksItsCornersAsAPopupDoes() {
+        compare(zoneOutline("top", { depth: 10 }), [
+            [0, 0], [200, 0], [195, 5, 195, 0], [195, 5], [190, 10, 195, 10],
+            [10, 10], [5, 5, 5, 10], [5, 5], [0, 0, 5, 0]
+        ]);
+    }
+
     function test_anOpenPopupHasItsFullJoinsAndBottomCorners() {
         compare(PopupOutline.attachedCorners({ width: 300, height: 200, radius: 12, joinRadius: 6 }),
             { join: 6, bottom: 12 });

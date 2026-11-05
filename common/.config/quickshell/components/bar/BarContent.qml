@@ -176,8 +176,8 @@ Item {
         spanRight: root.zoneEnd("left") + leftSurface.sideWidth
         popup: root.zonePopup("left")
         motion: root.appearance.motion
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
+        barPosition: root.appearance.barPosition
+        thickness: leftSurface.side ? root.width : root.height
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
         fillColor: root.dockedColor
         keepLeftEdge: true
@@ -191,8 +191,8 @@ Item {
         spanRight: root.zoneEnd("center") + centerSurface.sideWidth
         popup: root.zonePopup("center")
         motion: root.appearance.motion
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
+        barPosition: root.appearance.barPosition
+        thickness: centerSurface.side ? root.width : root.height
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
         fillColor: root.dockedColor
         z: -1
@@ -205,8 +205,8 @@ Item {
         spanRight: root.width
         popup: root.zonePopup("right")
         motion: root.appearance.motion
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
+        barPosition: root.appearance.barPosition
+        thickness: rightSurface.side ? root.width : root.height
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
         fillColor: root.dockedColor
         keepRightEdge: true
