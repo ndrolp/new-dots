@@ -109,9 +109,14 @@ function defaultBarElements(disabledIds, options) {
     return normalizeBarElements(barElements);
 }
 
+// The screen edges a bar can sit on, its Bar position. The settings panel only
+// offers the ones that work so far, in BarSizeStyleSettings.qml.
+const barPositions = ["top", "bottom", "left", "right"];
+
 // Every setting a bar profile stores, with the value a profile that lacks it
 // gets.
 const defaultProfile = {
+    barPosition: "top",
     barHeight: 32,
     horizontalPadding: 12,
     spacing: 8,
@@ -179,14 +184,16 @@ function sameValue(left, right) {
 }
 
 // `profile` with every profile setting, as a fresh object: missing settings
-// take their default and the bar elements are normalized. Other keys are
-// dropped.
+// take their default, an unknown Bar position too, and the bar elements are
+// normalized. Other keys are dropped.
 function completeProfile(profile) {
     const source = profile || {};
     const complete = {};
 
     for (const key of profileKeys)
         complete[key] = cloneValue(source[key] !== undefined ? source[key] : defaultProfile[key]);
+    if (barPositions.indexOf(complete.barPosition) === -1)
+        complete.barPosition = defaultProfile.barPosition;
     complete.barElements = normalizeBarElements(complete.barElements);
     return complete;
 }

@@ -2,7 +2,11 @@
 
 Tests for the pure JS models behind the settings: bar profiles
 (`config/BarProfileModel.js`), desktop widgets (`config/DesktopWidgetsModel.js`)
-and schema migrations (`config/SchemaMigrations.js`). They also cover the
+and schema migrations (`config/SchemaMigrations.js`). They also cover where
+the bar sits on its screen: the edges its window is anchored to, the space it
+reserves and where the margin goes on each Bar position
+(`components/bar/BarPlacement.js`; `Bar.qml` itself is a Quickshell window and
+isn't tested here). They also cover the
 popups: where a popup opens on each Bar position
 (`components/panels/PopupPlacement.js`), the outline of an attached popup
 on each of them (`PopupOutline.js`), the surface every popup draws on, how

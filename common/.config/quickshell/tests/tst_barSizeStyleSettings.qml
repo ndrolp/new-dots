@@ -5,7 +5,7 @@ import "../config" as Config
 
 // The Bar section's Size & spacing and Style groups, built from the settings
 // parts: number settings and switches two per line, paired by meaning, and
-// the density presets as a segmented choice.
+// the density presets and the Bar position as segmented choices.
 TestCase {
     name: "BarSizeStyleSettings"
     width: 800
@@ -54,6 +54,7 @@ TestCase {
 
                 property int radius: 12
                 property int textSize: 13
+                property string barPosition: "top"
                 property int barHeight: 32
                 property int barOpacity: 90
                 property int horizontalPadding: 12
@@ -68,6 +69,7 @@ TestCase {
                 property bool transparentBarSlanted: false
                 property bool pillsTransparent: false
                 property string matchingDensityPreset: "balanced"
+                property var motion: ({ short: 0 })
                 property var saved: []
                 property var appliedPresets: []
 
@@ -102,7 +104,7 @@ TestCase {
     function test_numberSettingsSitTwoPerLinePairedByMeaning() {
         const built = make();
         const pairs = [
-            ["Bar height", "Bar opacity"],
+            ["Bar thickness", "Bar opacity"],
             ["Corner radius", "Group radius"],
             ["Horizontal padding", "Component spacing"]
         ];
@@ -118,7 +120,7 @@ TestCase {
 
     function test_typingABarSizeStillSavesIt() {
         const built = make();
-        const cell = numberCell(built.item, "Bar height");
+        const cell = numberCell(built.item, "Bar thickness");
 
         cell.field.forceActiveFocus();
         cell.field.selectAll();
@@ -163,6 +165,44 @@ TestCase {
 
         choice.chosen("spacious");
         compare(built.appearance.appliedPresets, ["spacious"]);
+    }
+
+    function positionChoice(item) {
+        const field = all(item, child => child.label === "Bar position" && child.small !== undefined)[0];
+        return field ? all(field, child => child.options !== undefined && child.chosen !== undefined)[0] : null;
+    }
+
+    function test_theBarPositionOffersTopAndBottom() {
+        const choice = positionChoice(make().item);
+
+        verify(choice);
+        compare(choice.options.map(option => option.value), ["top", "bottom"]);
+        compare(choice.options.map(option => option.label), ["Top", "Bottom"]);
+    }
+
+    function test_theCurrentBarPositionIsMarkedAndChoosingOneSavesIt() {
+        const built = make();
+        const choice = positionChoice(built.item);
+
+        compare(choice.value, "top");
+        compare(textOf(choice, "Top").color, theme.accent);
+
+        built.appearance.barPosition = "bottom";
+        compare(textOf(choice, "Bottom").color, theme.accent);
+
+        choice.chosen("top");
+        compare(built.appearance.saved, [["barPosition", "top"]]);
+    }
+
+    // Both keep their saved keys: thickness and the gap from the screen edge
+    // read the same on every Bar position.
+    function test_theBarSizesAreNamedForEveryBarPosition() {
+        const built = make();
+        const margin = numberCell(built.item, "Transparent bar margin");
+
+        verify(numberCell(built.item, "Bar thickness"));
+        verify(margin);
+        compare(margin.value, 8);
     }
 
     function test_nothingInTheseGroupsIsBold() {

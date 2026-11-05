@@ -3,6 +3,7 @@ import Quickshell.Wayland
 import QtQuick
 import "../../config" as Config
 import "../panels" as Panels
+import "BarPlacement.js" as BarPlacement
 
 Variants {
     id: bar
@@ -41,6 +42,7 @@ Variants {
             readonly property string monitorDescription: bar.workspaceService.monitorDescriptionForScreen(modelData)
             readonly property string profileName: bar.monitors.barProfileFor(monitorDescription)
             property var barAppearance: QtObject {
+                property string barPosition: bar.appearance.barProfileValue(panel.profileName, "barPosition")
                 property int barHeight: bar.appearance.barProfileValue(panel.profileName, "barHeight")
                 property int horizontalPadding: bar.appearance.barProfileValue(panel.profileName, "horizontalPadding")
                 property int spacing: bar.appearance.barProfileValue(panel.profileName, "spacing")
@@ -94,18 +96,18 @@ Variants {
                 width: panel.width
                 height: panel.height
             }
-            readonly property int totalBarHeight: panel.barAppearance.barHeight
-                + (panel.barAppearance.barTransparent
-                    && !panel.barAppearance.transparentBarSlanted
-                    ? panel.barAppearance.transparentBarTopMargin : 0)
+            readonly property int totalBarHeight: BarPlacement.thickness(panel.barAppearance)
+            readonly property var windowAnchors: BarPlacement.windowAnchors(panel.barAppearance.barPosition)
+            readonly property var contentMargins: BarPlacement.contentMargins(panel.barAppearance)
 
             exclusiveZone: totalBarHeight
             implicitHeight: totalBarHeight
 
             anchors {
-                top: true
-                left: true
-                right: true
+                top: panel.windowAnchors.top
+                bottom: panel.windowAnchors.bottom
+                left: panel.windowAnchors.left
+                right: panel.windowAnchors.right
             }
 
             Config.Theme {
@@ -134,13 +136,10 @@ Variants {
                     id: barContent
 
                     anchors.fill: parent
-                    anchors.leftMargin: panel.barAppearance.barTransparent
-                        && panel.barAppearance.transparentBarSlanted ? 0 : panel.barAppearance.horizontalPadding
-                    anchors.rightMargin: panel.barAppearance.barTransparent
-                        && panel.barAppearance.transparentBarSlanted ? 0 : panel.barAppearance.horizontalPadding
-                    anchors.topMargin: panel.barAppearance.barTransparent
-                        && !panel.barAppearance.transparentBarSlanted
-                        ? panel.barAppearance.transparentBarTopMargin : 0
+                    anchors.leftMargin: panel.contentMargins.left
+                    anchors.rightMargin: panel.contentMargins.right
+                    anchors.topMargin: panel.contentMargins.top
+                    anchors.bottomMargin: panel.contentMargins.bottom
                     appearance: panel.barAppearance
                     configOpen: panel.configOpen
                     activePopup: panel.activePopup
