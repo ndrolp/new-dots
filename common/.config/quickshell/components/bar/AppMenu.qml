@@ -4,6 +4,7 @@ import "../../config" as Config
 import ".." as Components
 import "../AppMenuModel.js" as AppMenuModel
 import "../FocusedWindow.js" as FocusedWindow
+import "BarLayout.js" as BarLayout
 
 // The app menu bar element: one title per menu of AppMenuModel, the focused
 // app's name in bold first (its .desktop Name, or its appId), then the
@@ -12,7 +13,8 @@ import "../FocusedWindow.js" as FocusedWindow
 // Window. Clicking a title opens that menu as a Popup (`menuId` says which).
 // It follows the focused window like CurrentApp, shown only on the focused
 // monitor's bar. With no window focused there it shows "Desktop" and the
-// Desktop menu.
+// Desktop menu. On a side bar the titles run sideways, one after the other
+// down the bar.
 Item {
     id: root
 
@@ -41,15 +43,23 @@ Item {
     // Held while its Popup is open, so the titles don't move under it.
     property var menus: currentMenus
     readonly property real titleMaximumWidth: monitorScreen
-        ? Math.max(120, Math.min(260, monitorScreen.width * 0.12)) : 260
+        ? Math.max(120, Math.min(260, BarLayout.screenLength(appearance, monitorScreen) * 0.12)) : 260
     // How wide all the titles may get together.
-    readonly property real menusMaximumWidth: monitorScreen ? Math.max(400, monitorScreen.width * 0.4) : 800
+    readonly property real menusMaximumWidth: monitorScreen
+        ? Math.max(400, BarLayout.screenLength(appearance, monitorScreen) * 0.4) : 800
+    readonly property real thickness: BarLayout.elementThickness(appearance)
+    readonly property var size: BarLayout.size(appearance, visible ? titleRow.width + 8 : 0, thickness)
     // Where the open menu's title sits in this element, so the Popup opens
     // under it rather than under the whole element.
     readonly property var popupTriggerArea: {
         const index = menus.findIndex(menu => menu.id === menuId);
         const title = index >= 0 && titleRepeater.count > index ? titleRepeater.itemAt(index) : null;
-        return title ? { x: background.x + titleRow.x + title.x, width: title.width } : null;
+        return title ? BarLayout.turnedArea(appearance, {
+            x: background.x + titleRow.x,
+            y: background.y + titleRow.y,
+            width: titleRow.width,
+            height: titleRow.height
+        }, { x: title.x, y: title.y, width: title.width, height: title.height }) : null;
     }
 
     // How wide a title is drawn, as each title below draws it.
@@ -68,8 +78,8 @@ Item {
     }
 
     visible: enabled && menus.length > 0 && FocusedWindow.onFocusedMonitor(monitor, Hyprland.focusedWorkspace)
-    width: visible ? background.width : 0
-    height: background.height
+    width: size.width
+    height: size.height
 
     onCurrentMenusChanged: {
         if (!popupOpen)
@@ -107,20 +117,16 @@ Item {
         id: theme
     }
 
-    Behavior on width {
-        NumberAnimation {
-            duration: root.appearance.motion.medium
-            easing.type: root.appearance.motion.easing
-        }
-    }
+    AlongBarBehavior on width { appearance: root.appearance }
+    AlongBarBehavior on height { appearance: root.appearance }
 
     Rectangle {
         id: background
 
-        width: titleRow.width + 8
-        height: root.appearance.barTransparent
-            ? root.appearance.workspaceButtonSize + (root.appearance.pillVerticalPadding * 2)
-            : Math.max(1, root.appearance.barHeight - (root.appearance.elementVerticalPadding * 2))
+        readonly property var size: BarLayout.size(root.appearance, titleRow.width + 8, root.thickness)
+
+        width: size.width
+        height: size.height
         radius: root.appearance.radius
         color: root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
             || root.grouped ? "transparent" : theme.surface
@@ -131,6 +137,7 @@ Item {
             id: titleRow
 
             anchors.centerIn: parent
+            rotation: BarLayout.turn(root.appearance)
 
             Repeater {
                 id: titleRepeater
@@ -145,7 +152,7 @@ Item {
                     readonly property bool open: root.popupOpen && root.menuId === modelData.id
 
                     width: name.width + 12
-                    height: Math.max(1, background.height - 4)
+                    height: Math.max(1, root.thickness - 4)
                     radius: Math.max(0, root.appearance.radius - 2)
                     color: hover.hovered || open ? theme.surfaceHover : "transparent"
 

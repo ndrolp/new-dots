@@ -1,4 +1,5 @@
 import QtQuick
+import "../BarPosition.js" as BarPosition
 import "." as Panels
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
@@ -14,10 +15,12 @@ Column {
     required property var appearance
     property string expandedElement: ""
     readonly property var barElements: BarProfileModel.normalizeBarElements(appearance.barElements)
+    // The saved keys stay left and right on a side bar: only their names change.
+    readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
     readonly property var zones: [
-        { label: "Left", short: "L", value: "left" },
+        { label: sideBar ? "Top" : "Left", short: sideBar ? "T" : "L", value: "left" },
         { label: "Center", short: "C", value: "center" },
-        { label: "Right", short: "R", value: "right" }
+        { label: sideBar ? "Bottom" : "Right", short: sideBar ? "B" : "R", value: "right" }
     ]
 
     function labelFor(element) {
@@ -95,7 +98,7 @@ Column {
     Panels.SettingsHint {
         width: root.width
         appearance: root.appearance
-        text: "Every piece of the bar. Turn it on or off, pick its zone (L/C/R) and order it within the zone. Join joins an element with the one above it: joined elements form a group with one shared background."
+        text: "Every piece of the bar. Turn it on or off, pick its zone (" + root.zones.map(zone => zone.short).join("/") + ") and order it within the zone. Join joins an element with the one above it: joined elements form a group with one shared background."
     }
 
     Repeater {

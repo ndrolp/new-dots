@@ -2,8 +2,8 @@ import QtQuick
 import "." as Panels
 
 // The Bar section's sizes and style for the edited bar profile: a density
-// preset, the sizes as number settings and the style as switch rows, two
-// per line.
+// preset, the sizes as number settings, the Bar position and the style as
+// switch rows, two per line.
 Column {
     id: root
 
@@ -42,7 +42,7 @@ Column {
     Panels.SettingsGrid {
         Repeater {
             model: [
-                { label: "Bar height", from: 24, to: 56, propertyName: "barHeight" },
+                { label: "Bar thickness", from: 24, to: 56, propertyName: "barHeight" },
                 { label: "Bar opacity", from: 20, to: 100, propertyName: "barOpacity" },
                 { label: "Corner radius", from: 0, to: 24, propertyName: "radius" },
                 { label: "Group radius", from: 0, to: 32, propertyName: "groupRadius" },
@@ -51,7 +51,7 @@ Column {
                 { label: "Bar vertical padding", from: 0, to: 16, propertyName: "elementVerticalPadding" },
                 { label: "Pill vertical padding", from: 0, to: 8, propertyName: "pillVerticalPadding" },
                 { label: "Workspace bar padding", from: 0, to: 10, propertyName: "workspacePadding" },
-                { label: "Transparent bar top margin", from: 0, to: 32, propertyName: "transparentBarTopMargin" }
+                { label: "Transparent bar margin", from: 0, to: 32, propertyName: "transparentBarTopMargin" }
             ]
 
             delegate: Panels.SettingsNumber {
@@ -72,6 +72,25 @@ Column {
         appearance: root.appearance
         text: "Style"
         topPadding: 8
+    }
+
+    Panels.SettingsField {
+        width: parent.width
+        appearance: root.appearance
+        label: "Bar position"
+
+        Panels.SettingsChoice {
+            width: Math.min(parent.width, 360)
+            appearance: root.appearance
+            options: [
+                { label: "Top", value: "top" },
+                { label: "Bottom", value: "bottom" },
+                { label: "Left", value: "left" },
+                { label: "Right", value: "right" }
+            ]
+            value: root.appearance.barPosition
+            onChosen: position => root.appearance.setBarSetting("barPosition", position)
+        }
     }
 
     Panels.SettingsGrid {

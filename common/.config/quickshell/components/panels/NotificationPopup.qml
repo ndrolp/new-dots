@@ -4,20 +4,35 @@ import QtQuick
 import QtQuick.Effects
 import "../../config" as Config
 import "../IconSource.js" as IconSource
+import "NotificationPlacement.js" as NotificationPlacement
 
 PanelWindow {
     id: root
 
     required property var notificationServer
     required property var appearance
+    required property var monitors
+    required property var workspaceService
+
+    // What the toasts take from a bar profile comes from this monitor's own,
+    // not from the one being edited in the settings.
+    readonly property string profileName: monitors.barProfileFor(
+        workspaceService.monitorDescriptionForScreen(screen))
+    readonly property var toastSizes: ({
+        spacing: appearance.barProfileValue(profileName, "spacing"),
+        horizontalPadding: appearance.barProfileValue(profileName, "horizontalPadding"),
+        radius: appearance.barProfileValue(profileName, "radius"),
+        textSize: appearance.barProfileValue(profileName, "textSize")
+    })
+    readonly property var placement: NotificationPlacement.place(
+        appearance.notificationPopupLocation, toastSizes)
 
     screen: Quickshell.screens.values.length > 0 ? Quickshell.screens.values[0] : null
     color: "transparent"
-    exclusionMode: ExclusionMode.Ignore
+    // Normal: the compositor keeps it inside what the monitor's bar leaves free.
+    exclusionMode: ExclusionMode.Normal
     implicitWidth: 404
     implicitHeight: notificationList.implicitHeight + 24
-    readonly property bool bottomAligned: root.appearance.notificationPopupLocation.indexOf("bottom") === 0
-    readonly property bool rightAligned: root.appearance.notificationPopupLocation.indexOf("right") !== -1
 
     WlrLayershell.namespace: "ndro-shell-notifications"
     mask: Region {
@@ -25,19 +40,17 @@ PanelWindow {
     }
 
     anchors {
-        top: !root.bottomAligned
-        bottom: root.bottomAligned
-        left: true
+        top: root.placement.anchors.top
+        right: root.placement.anchors.right
+        bottom: root.placement.anchors.bottom
+        left: root.placement.anchors.left
     }
 
     margins {
-        top: root.bottomAligned ? 0 : root.appearance.barHeight + root.appearance.spacing
-        bottom: root.bottomAligned ? root.appearance.spacing : 0
-        left: !screen ? 0 : root.rightAligned
-            ? screen.width - root.implicitWidth - root.appearance.horizontalPadding
-            : root.appearance.notificationPopupLocation.indexOf("left") !== -1
-                ? root.appearance.horizontalPadding
-                : (screen.width - root.implicitWidth) / 2
+        top: root.placement.margins.top
+        right: root.placement.margins.right
+        bottom: root.placement.margins.bottom
+        left: root.placement.margins.left
     }
 
     Config.Theme {
@@ -80,7 +93,7 @@ PanelWindow {
                 visible: toastShown
                 width: parent.width
                 height: content.implicitHeight + 28
-                radius: root.appearance.radius
+                radius: root.toastSizes.radius
                 color: theme.surface
                 border.color: theme.border
                 border.width: 1
@@ -143,7 +156,7 @@ PanelWindow {
                     Rectangle {
                         width: 76
                         height: 76
-                        radius: root.appearance.radius
+                        radius: root.toastSizes.radius
                         color: theme.accent
 
                         Image {
@@ -176,7 +189,7 @@ PanelWindow {
                             text: notificationCard.modelData.appName
                             color: theme.textMuted
                             elide: Text.ElideRight
-                            font.pixelSize: root.appearance.textSize - 2
+                            font.pixelSize: root.toastSizes.textSize - 2
                             font.bold: true
                         }
 
@@ -185,7 +198,7 @@ PanelWindow {
                             text: notificationCard.modelData.summary
                             color: theme.text
                             elide: Text.ElideRight
-                            font.pixelSize: root.appearance.textSize + 1
+                            font.pixelSize: root.toastSizes.textSize + 1
                             font.bold: true
                         }
 
@@ -198,7 +211,7 @@ PanelWindow {
                             wrapMode: Text.WordWrap
                             maximumLineCount: 3
                             elide: Text.ElideRight
-                            font.pixelSize: root.appearance.textSize - 1
+                            font.pixelSize: root.toastSizes.textSize - 1
                             font.bold: true
                         }
                     }
@@ -210,7 +223,7 @@ PanelWindow {
                     anchors.margins: 10
                     width: 24
                     height: 24
-                    radius: root.appearance.radius
+                    radius: root.toastSizes.radius
                     color: closeHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
 
                     Behavior on color {
@@ -243,7 +256,7 @@ PanelWindow {
                     anchors.bottom: parent.bottom
                     width: parent.width * notificationCard.lifetimeProgress
                     height: 3
-                    radius: root.appearance.radius
+                    radius: root.toastSizes.radius
                     color: theme.accent
                 }
             }

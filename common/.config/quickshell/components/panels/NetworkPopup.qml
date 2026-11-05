@@ -38,7 +38,7 @@ BarPopup {
 
     popup: "network"
     implicitWidth: Math.min(420, Math.max(300,
-        root.barWindow.width - root.appearance.horizontalPadding * 2))
+        root.barWindow.screen.width - root.appearance.horizontalPadding * 2))
 
     onRevealChanged: {
         if (reveal > 0 && wifi)

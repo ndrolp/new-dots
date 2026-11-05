@@ -1,9 +1,11 @@
 import QtQuick
+import "../BarPosition.js" as BarPosition
 import "../../config" as Config
 import "../../services/CavaOutput.js" as CavaOutput
 
-// What the Cava bar element draws: `barCount` vertical bars rising from the
-// bottom, 1px apart, resampled from the frame the shared cava prints. Flat
+// What the Cava bar element draws: `barCount` bars 1px apart, resampled from
+// the frame the shared cava prints. On a top or bottom bar they rise from the
+// bottom; on a side bar they run down it and grow from the screen's edge. Flat
 // heights leave a thin line, so the element never looks empty.
 Item {
     id: root
@@ -13,6 +15,8 @@ Item {
     property var frame: []
     property int barCount: 12
     property int barWidth: 3
+    // The Bar position.
+    property string barPosition: "top"
     // One of the theme's named colors, so it follows the theme.
     property string colorName: "blue"
     // How long a bar takes to reach its next height (appearance.motion.frame).
@@ -22,7 +26,11 @@ Item {
     readonly property int gap: 1
     readonly property real flatHeight: 2
 
-    implicitWidth: barCount > 0 ? barCount * (barWidth + gap) - gap : 0
+    readonly property bool sideBar: BarPosition.sideBar(barPosition)
+    readonly property int length: barCount > 0 ? barCount * (barWidth + gap) - gap : 0
+
+    implicitWidth: sideBar ? 0 : length
+    implicitHeight: sideBar ? length : 0
 
     Config.Theme {
         id: theme
@@ -34,14 +42,27 @@ Item {
         delegate: Rectangle {
             required property int index
 
-            x: index * (root.barWidth + root.gap)
-            width: root.barWidth
-            height: Math.max(root.flatHeight, root.height * (root.heights[index] || 0))
-            anchors.bottom: parent.bottom
+            readonly property real start: index * (root.barWidth + root.gap)
+            readonly property real level: root.heights[index] || 0
+
+            x: !root.sideBar ? start : root.barPosition === "right" ? root.width - width : 0
+            y: root.sideBar ? start : root.height - height
+            width: root.sideBar ? Math.max(root.flatHeight, root.width * level) : root.barWidth
+            height: root.sideBar ? root.barWidth : Math.max(root.flatHeight, root.height * level)
             radius: 1
             color: root.color
 
+            Behavior on width {
+                enabled: root.sideBar
+
+                NumberAnimation {
+                    duration: root.smoothing
+                }
+            }
+
             Behavior on height {
+                enabled: !root.sideBar
+
                 NumberAnimation {
                     duration: root.smoothing
                 }

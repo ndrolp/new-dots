@@ -2,11 +2,24 @@
 
 Tests for the pure JS models behind the settings: bar profiles
 (`config/BarProfileModel.js`), desktop widgets (`config/DesktopWidgetsModel.js`)
-and schema migrations (`config/SchemaMigrations.js`). They also cover the
-popups: where a popup opens (`components/panels/PopupPlacement.js`), the
-outline of an attached popup (`PopupOutline.js`), the surface every popup
-draws on and that it ignores input while closing (`PopupSurface.qml`), what
-a popup's focus grab holds
+and schema migrations (`config/SchemaMigrations.js`). They also cover where
+the bar sits on its screen: the edges its window is anchored to, the space it
+reserves and where the margin goes, for every bar style on each Bar position
+(`components/bar/BarPlacement.js`; `Bar.qml` itself is a Quickshell window and
+isn't tested here), and where the toasts and desktop widgets sit in the area
+the bar leaves free: their anchors and plain gaps from that area
+(`components/panels/NotificationPlacement.js`, `config/DesktopWidgetsModel.js`;
+that the compositor keeps their windows and the OSD inside it depends on
+`ExclusionMode.Normal` on those windows and isn't tested here). They also cover
+the popups: what a Bar position means for what is laid out from the bar
+(`components/BarPosition.js`), where a popup opens on each Bar position, the
+stretch of the bar that opens it, how wide its contents are, and that a popup
+held through a control center stage change stays steady and on screen on a side
+bar (`components/panels/PopupPlacement.js`), the outline of an attached popup
+on each of them (`PopupOutline.js`), the surface every popup draws on, how
+it reveals away from the bar and that it ignores input while closing
+(`PopupSurface.qml`; `PopupFrame.qml` itself is a Quickshell window and isn't
+tested here), what a popup's focus grab holds
 (`PopupGrab.js`), which bar elements close the open popup when pressed
 (`BarPopupCloser.qml`), the shared popup parts (`PopupTitle`,
 `PopupHeader`, `PopupRow`…), the control center's tiles and sliders,
@@ -28,17 +41,38 @@ migration that seeds it (`config/ControlCenterTiles.js`), and the settings
 panel's Control center section that edits it (`ControlCenterSettings.qml`),
 the settings panel's own parts (`SettingsNumber`,
 `SettingsSwitchRow`, `SettingsChoice`, `SettingsGrid`…), its frame
-(`ConfigPanel.qml`) and the settings panel sections built from them, the Bluetooth device list and turning Bluetooth
+(`ConfigPanel.qml`) and the settings panel sections built from them, among
+them the four Bar positions and the zone names of a side bar, which keep their
+saved keys (`BarSizeStyleSettings.qml`, `BarElementsSettings.qml`), the Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
 (`AudioOutputs.js`), how the volume is shown as text
 (`components/VolumeText.js`), what the popups and bar elements show for the
 media position, audio outputs, Wi-Fi, the battery and the network
-(`components/StatusText.js`) and what the audio bar element shows and how
+and how a value stands on a side bar (`components/StatusText.js`) and what the audio bar element shows and how
 wide it is (`components/bar/AudioLevel.qml`), how the Cava bar element
 reads cava and tries it again when it fails (`services/CavaOutput.js`) and
-what it draws (`components/bar/CavaBars.qml`), how a docked bar zone is
-drawn and grows for an attached popup (`components/bar/DockedSurface.qml`,
-`DockedZones.js`), how long animations take
+what it draws, from the bottom or from the side (`components/bar/CavaBars.qml`), how a docked bar zone hangs
+from the screen edge the bar sits on and keeps its sides on the screen's edge
+straight, on each Bar position (`PopupOutline.js`), and how it is
+drawn, grows for an attached popup, keeps up with one that resizes and meets
+its joins on every Bar position
+(`components/bar/DockedSurface.qml`,
+`DockedZones.js`), where zones, bar elements, group backgrounds and popup
+triggers sit along either axis of the bar, to the pixel the anchors they
+replaced put them at (`components/bar/BarLayout.js`; `BarContent.qml` itself
+needs Quickshell's services and isn't tested here), how workspaces, icon
+and value elements size and stack upright on a side bar and stay as they were
+on a top one (`BarLayout.size`, `Workspaces.qml`, `ArchButton.qml`,
+`KeepAwakeElement.qml`, `ElementText.qml`, `IconValue.qml`, `AudioLevel.qml`,
+`SystemMonitor.qml`, `RecordingContent.qml`; `BarElementItems.qml` and `Clock.qml`
+need Quickshell's services, so their parts are covered through those), that what
+runs along the bar animates and what runs across it doesn't, on every Bar position
+(`AlongBarBehavior.qml`), how the long text of the app
+menu, the current app and the media element turns on a side bar: how far, what
+its length is capped against and where an app menu title ends up for its popup,
+checked against a really rotated item (`BarLayout.turn`, `BarLayout.screenLength`,
+`BarLayout.turnedArea`; `AppMenu.qml` and `CurrentApp.qml` need Quickshell's
+Hyprland, so the elements themselves aren't tested here), how long animations take
 with and without reduce motion (`config/Motion.js`), night light's
 temperature bounds, the saved temperature, how hyprsunset is run and when
 night light turns on and off (`services/NightLightState.js`), when the lock screen

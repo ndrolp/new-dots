@@ -10,6 +10,7 @@ import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 import "../StatusText.js" as StatusText
 import "BarElementItems.js" as BarElementItems
+import "BarLayout.js" as BarLayout
 import "../panels/ControlCenterNames.js" as Names
 import "RecordingIndicator.js" as RecordingIndicator
 
@@ -36,6 +37,7 @@ Item {
     property string activePopup: ""
     // Where each element goes, provided by the bar's single walk per zone.
     property var elementX: element => 0
+    property var elementY: element => 0
     // Whether an element sits in a group, provided by the bar's walk.
     property var elementGrouped: element => false
     signal popupRequested(string popup)
@@ -47,8 +49,10 @@ Item {
     readonly property var battery: UPower.displayDevice
     readonly property bool hasBattery: battery && battery.isPresent
     readonly property var bluetoothAdapter: Bluetooth.defaultAdapter
-    readonly property real mediaTitleMaximumWidth: monitorScreen
-        ? Math.max(96, Math.min(260, monitorScreen.width * 0.12)) : 260
+    // How long free text gets: the media title, and the apps sharing the screen
+    // on a side bar.
+    readonly property real longTextMaximumLength: monitorScreen
+        ? Math.max(96, Math.min(260, BarLayout.screenLength(appearance, monitorScreen) * 0.12)) : 260
     property var player: null
     readonly property string playerLabel: player
         ? (player.trackTitle !== "" ? player.trackTitle : player.identity) : ""
@@ -59,15 +63,24 @@ Item {
     // Which apps share the screen, shown for a moment after a click that
     // can't stop anything.
     property string sharingShown: ""
-    readonly property real itemHeight: appearance.barTransparent
-        ? appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
-        : Math.max(1, appearance.barHeight - (appearance.elementVerticalPadding * 2))
-
-    height: itemHeight
-    implicitHeight: itemHeight
+    readonly property real itemHeight: BarLayout.elementThickness(appearance)
 
     Config.Theme {
         id: theme
+    }
+
+    // The size of an element this long along the bar. On a side bar it runs
+    // down, and is as thick across the bar as on any other.
+    function elementSize(length) {
+        return BarLayout.size(appearance, length, itemHeight);
+    }
+
+    // The size of an element around its content, with the padding along the bar.
+    function sizeAround(content) {
+        return elementSize(BarLayout.itemLength(appearance, {
+            width: content.implicitWidth,
+            height: content.implicitHeight
+        }) + 16);
     }
 
     PwObjectTracker {
@@ -136,10 +149,13 @@ Item {
     Rectangle {
         id: notificationButton
 
+        readonly property var size: root.sizeAround(notificationContent)
+
         visible: root.itemVisible("notifications")
         x: root.elementX("notifications")
-        width: notificationContent.implicitWidth + 16
-        height: root.itemHeight
+        y: root.elementY("notifications")
+        width: size.width
+        height: size.height
         radius: root.appearance.radius
         color: notificationHover.hovered ? theme.surfaceHover
             : root.elementGrouped("notifications") || root.appearance.pillsTransparent
@@ -156,31 +172,22 @@ Item {
             id: notificationHover
         }
 
-        Row {
+        IconValue {
             id: notificationContent
 
             anchors.centerIn: parent
-            spacing: 5
-
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                text: root.appearance.doNotDisturb ? "󰂛" : "󰂚"
-                color: root.appearance.doNotDisturb ? theme.yellow
-                    : root.notificationHistory.unreadCount > 0 ? theme.accent : theme.textMuted
-                font.pixelSize: root.appearance.textSize
-                font.bold: true
-            }
-
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                visible: BarProfileModel.elementOption(root.appearance.barElements, "notifications", "badgeVisible")
-                    && root.notificationHistory.unreadCount > 0
-                text: root.notificationHistory.unreadCount > 99 ? "99+"
-                    : root.notificationHistory.unreadCount
-                color: root.appearance.doNotDisturb ? theme.yellow : theme.accent
-                font.pixelSize: root.appearance.textSize - 2
-                font.bold: true
-            }
+            appearance: root.appearance
+            gap: 5
+            icon: root.appearance.doNotDisturb ? "󰂛" : "󰂚"
+            iconColor: root.appearance.doNotDisturb ? theme.yellow
+                : root.notificationHistory.unreadCount > 0 ? theme.accent : theme.textMuted
+            iconSize: root.appearance.textSize
+            value: root.notificationHistory.unreadCount > 99 ? "99+"
+                : root.notificationHistory.unreadCount
+            valueVisible: BarProfileModel.elementOption(root.appearance.barElements, "notifications", "badgeVisible")
+                && root.notificationHistory.unreadCount > 0
+            valueColor: root.appearance.doNotDisturb ? theme.yellow : theme.accent
+            valueSize: root.appearance.textSize - 2
         }
 
         MouseArea {
@@ -192,10 +199,13 @@ Item {
     Rectangle {
         id: recordingButton
 
+        readonly property var size: root.sizeAround(recordingContent)
+
         visible: root.itemVisible("recording")
         x: root.elementX("recording")
-        width: recordingContent.implicitWidth + 16
-        height: root.itemHeight
+        y: root.elementY("recording")
+        width: size.width
+        height: size.height
         radius: root.appearance.radius
         color: recordingHover.hovered ? theme.surfaceHover
             : root.elementGrouped("recording") || root.appearance.pillsTransparent
@@ -212,28 +222,15 @@ Item {
             id: recordingHover
         }
 
-        Row {
+        RecordingContent {
             id: recordingContent
 
             anchors.centerIn: parent
-            spacing: 5
-
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                text: "󰑋"
-                color: theme.red
-                font.pixelSize: root.appearance.textSize
-                font.bold: true
-            }
-
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                text: root.sharingShown !== "" ? root.sharingShown
-                    : RecordingIndicator.elapsedSince(root.recordings, root.recordingNow)
-                color: theme.red
-                font.pixelSize: root.appearance.textSize - 2
-                font.bold: true
-            }
+            appearance: root.appearance
+            iconColor: theme.red
+            elapsed: RecordingIndicator.elapsedSince(root.recordings, root.recordingNow)
+            sharing: root.sharingShown
+            maximumLength: root.longTextMaximumLength
         }
 
         // Ticks the elapsed time only while the indicator is shown.
@@ -272,19 +269,22 @@ Item {
         grouped: root.elementGrouped("keepAwake")
         visible: root.itemVisible("keepAwake")
         x: root.elementX("keepAwake")
-        height: root.itemHeight
+        y: root.elementY("keepAwake")
         onPopupRequested: root.popupRequested("keepAwake")
     }
 
     Rectangle {
         id: mediaButton
 
+        readonly property var size: root.elementSize(mediaContent.implicitWidth + 16)
+
         border.width: root.appearance.barTransparentBorder && !root.elementGrouped("media") ? 1 : 0
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
         visible: root.itemVisible("media")
         x: root.elementX("media")
-        width: mediaContent.implicitWidth + 16
-        height: root.itemHeight
+        y: root.elementY("media")
+        width: size.width
+        height: size.height
         radius: root.appearance.radius
         color: mediaHover.hovered ? theme.surfaceHover
             : root.elementGrouped("media") || root.appearance.pillsTransparent
@@ -299,21 +299,20 @@ Item {
             id: mediaHover
         }
 
-        Behavior on width {
-            NumberAnimation {
-                duration: root.appearance.motion.medium
-                easing.type: root.appearance.motion.easing
-            }
-        }
+        AlongBarBehavior on width { appearance: root.appearance }
+        AlongBarBehavior on height { appearance: root.appearance }
 
         Row {
             id: mediaContent
 
             anchors.centerIn: parent
             spacing: 7
+            // The title runs sideways on a side bar, the note stays upright.
+            rotation: BarLayout.turn(root.appearance)
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
+                rotation: -parent.rotation
                 text: "󰎈"
                 color: theme.green
                 font.pixelSize: root.appearance.textSize
@@ -327,7 +326,7 @@ Item {
 
                 anchors.verticalCenter: parent.verticalCenter
                 visible: BarProfileModel.elementOption(root.appearance.barElements, "media", "titleVisible")
-                width: Math.min(root.mediaTitleMaximumWidth, implicitWidth)
+                width: Math.min(root.longTextMaximumLength, implicitWidth)
                 text: displayedLabel
                 color: theme.green
                 elide: Text.ElideRight
@@ -376,6 +375,8 @@ Item {
     Rectangle {
         id: cavaElement
 
+        readonly property var size: root.sizeAround(cavaBars)
+
         // While drawn, it keeps the shared cava process running, computing
         // at least its bar count. Hidden in silence still counts as drawn, so
         // cava hears the sound that shows it again.
@@ -386,8 +387,9 @@ Item {
 
         visible: root.itemVisible("cava")
         x: root.elementX("cava")
-        width: cavaBars.implicitWidth + 16
-        height: root.itemHeight
+        y: root.elementY("cava")
+        width: size.width
+        height: size.height
         radius: root.appearance.radius
         color: root.elementGrouped("cava") || root.appearance.pillsTransparent
             || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
@@ -415,8 +417,11 @@ Item {
                 + cavaTextMetrics.ascent
 
             anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: sideBar ? parent.verticalCenter : undefined
             y: 2
-            height: Math.max(1, textBaseline - y)
+            width: sideBar ? parent.width - 6 : implicitWidth
+            height: sideBar ? implicitHeight : Math.max(1, textBaseline - y)
+            barPosition: root.appearance.barPosition
             frame: root.cava.heights
             barCount: cavaElement.barCount
             barWidth: cavaElement.options.barWidth
@@ -428,10 +433,13 @@ Item {
     Rectangle {
         id: audioButton
 
+        readonly property var size: root.sizeAround(audioContent)
+
         visible: root.itemVisible("audio")
         x: root.elementX("audio")
-        width: audioContent.implicitWidth + 16
-        height: root.itemHeight
+        y: root.elementY("audio")
+        width: size.width
+        height: size.height
         radius: root.appearance.radius
         color: audioHover.hovered ? theme.surfaceHover
             : root.elementGrouped("audio") || root.appearance.pillsTransparent
@@ -467,10 +475,13 @@ Item {
     Rectangle {
         id: bluetoothButton
 
+        readonly property var size: root.elementSize(root.appearance.workspaceButtonSize)
+
         visible: root.itemVisible("bluetooth")
         x: root.elementX("bluetooth")
-        width: root.appearance.workspaceButtonSize
-        height: root.itemHeight
+        y: root.elementY("bluetooth")
+        width: size.width
+        height: size.height
         radius: root.appearance.radius
         color: bluetoothHover.hovered ? theme.surfaceHover
             : root.elementGrouped("bluetooth") || root.appearance.pillsTransparent
@@ -504,10 +515,13 @@ Item {
     Rectangle {
         id: trayButton
 
+        readonly property var size: root.elementSize(root.appearance.workspaceButtonSize)
+
         visible: root.itemVisible("tray")
         x: root.elementX("tray")
-        width: root.appearance.workspaceButtonSize
-        height: root.itemHeight
+        y: root.elementY("tray")
+        width: size.width
+        height: size.height
         radius: root.appearance.radius
         color: trayHover.hovered ? theme.surfaceHover
             : root.elementGrouped("tray") || root.appearance.pillsTransparent
@@ -541,10 +555,13 @@ Item {
     Rectangle {
         id: networkButton
 
+        readonly property var size: root.elementSize(root.appearance.workspaceButtonSize)
+
         visible: root.itemVisible("network")
         x: root.elementX("network")
-        width: root.appearance.workspaceButtonSize
-        height: root.itemHeight
+        y: root.elementY("network")
+        width: size.width
+        height: size.height
         radius: root.appearance.radius
         color: networkHover.hovered ? theme.surfaceHover
             : root.elementGrouped("network") || root.appearance.pillsTransparent
@@ -578,10 +595,13 @@ Item {
     Rectangle {
         id: batteryButton
 
+        readonly property var size: root.sizeAround(batteryContent)
+
         visible: root.itemVisible("battery")
         x: root.elementX("battery")
-        width: batteryContent.implicitWidth + 16
-        height: root.itemHeight
+        y: root.elementY("battery")
+        width: size.width
+        height: size.height
         radius: root.appearance.radius
         color: batteryHover.hovered ? theme.surfaceHover
             : root.elementGrouped("battery") || root.appearance.pillsTransparent
@@ -598,28 +618,16 @@ Item {
             id: batteryHover
         }
 
-        Row {
+        IconValue {
             id: batteryContent
 
             anchors.centerIn: parent
-            spacing: 6
-
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                text: StatusText.batteryIcon(root.battery, UPowerDeviceState)
-                color: theme.yellow
-                font.pixelSize: root.appearance.textSize
-                font.bold: true
-            }
-
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                visible: BarProfileModel.elementOption(root.appearance.barElements, "battery", "percentageVisible")
-                text: Math.round(root.battery.percentage * 100) + "%"
-                color: theme.yellow
-                font.pixelSize: root.appearance.textSize
-                font.bold: true
-            }
+            appearance: root.appearance
+            icon: StatusText.batteryIcon(root.battery, UPowerDeviceState)
+            iconColor: theme.yellow
+            iconSize: root.appearance.textSize
+            value: Math.round(root.battery.percentage * 100) + "%"
+            valueVisible: BarProfileModel.elementOption(root.appearance.barElements, "battery", "percentageVisible")
         }
 
         MouseArea {
@@ -631,10 +639,13 @@ Item {
     Rectangle {
         id: pomodoroButton
 
+        readonly property var size: root.sizeAround(clockContent)
+
         visible: root.itemVisible("clock")
         x: root.elementX("clock")
-        width: clockContent.implicitWidth + 16
-        height: root.itemHeight
+        y: root.elementY("clock")
+        width: size.width
+        height: size.height
         radius: root.appearance.radius
         color: clockHover.hovered ? theme.surfaceHover
             : root.elementGrouped("clock") || root.appearance.pillsTransparent
@@ -651,31 +662,36 @@ Item {
             id: clockHover
         }
 
-        Row {
+        ElementStack {
             id: clockContent
 
             anchors.centerIn: parent
-            spacing: 7
+            appearance: root.appearance
+            spacing: sideBar && !root.pomodoro.started ? 0 : 7
 
+            // Opens along the bar when a pomodoro starts.
             Item {
                 id: pomodoroIndicator
 
-                width: root.pomodoro.started ? pomodoroText.implicitWidth : 0
-                height: pomodoroText.implicitHeight
+                readonly property var openSize: BarLayout.size(root.appearance,
+                    root.pomodoro.started
+                        ? BarLayout.itemLength(root.appearance, { width: pomodoroText.implicitWidth, height: pomodoroText.implicitHeight })
+                        : 0,
+                    clockContent.sideBar ? pomodoroText.width : pomodoroText.implicitHeight)
+
+                width: openSize.width
+                height: openSize.height
                 clip: true
 
-                Behavior on width {
-                    NumberAnimation {
-                        duration: root.appearance.motion.medium
-                        easing.type: root.appearance.motion.easing
-                    }
-                }
+                AlongBarBehavior on width { appearance: root.appearance }
+                AlongBarBehavior on height { appearance: root.appearance }
 
-                Text {
+                ElementText {
                     id: pomodoroText
 
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "󰔟  " + root.pomodoro.remainingLabel
+                    anchors.verticalCenter: clockContent.sideBar ? undefined : parent.verticalCenter
+                    appearance: root.appearance
+                    value: "󰔟  " + root.pomodoro.remainingLabel
                     color: root.pomodoro.running ? theme.green : theme.textMuted
                     opacity: root.pomodoro.started ? 1 : 0
                     font.pixelSize: root.appearance.textSize
@@ -691,6 +707,7 @@ Item {
             }
 
             Clock {
+                appearance: root.appearance
                 color: theme.orange
             }
         }

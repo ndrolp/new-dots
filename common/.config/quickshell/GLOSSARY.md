@@ -8,6 +8,10 @@ La shell de escritorio sobre Hyprland: la barra, los paneles y lo que se dibuja 
 Una configuración con nombre de la barra (tamaños, estilo y qué contiene) que se asigna a un monitor. Describe solo la barra; lo que se dibuja en el escritorio y el tema quedan fuera.
 _Avoid_: Perfil (a secas), layout, preset
 
+**Bar position** (posición de la barra):
+El borde de la pantalla en el que está la barra: arriba, abajo, izquierda o derecha. Forma parte del bar profile. En una barra lateral la zona izquierda es la de arriba y la derecha la de abajo, sea cual sea el lado. Los popups se abren siempre hacia el interior de la pantalla.
+_Avoid_: Bar edge (los extremos de la barra son otra cosa), esquina, dock side
+
 **Bar element** (elemento de barra):
 Cualquier pieza que se coloca en la barra: Arch, workspaces, app actual, audio, batería, reloj, bandeja… Todos son del mismo tipo; no hay elementos "estructurales" frente a "de estado".
 _Avoid_: Bar widget, status module, módulo
@@ -66,7 +70,7 @@ Con la barra opaca o con la docked bar un popup va **anclado** (attached): sale 
 _Avoid_: Menu, dropdown, status popup
 
 **Docked bar** (barra acoplada):
-La barra transparente cuyas zonas cuelgan del borde superior de la pantalla, cada una con el contorno, el color y la opacidad de un popup anclado. Mientras un popup anclado está abierto, la zona de la que sale se ensancha para recibirlo.
+La barra transparente cuyas zonas cuelgan del borde de la pantalla en el que está la barra, cada una con el contorno, el color y la opacidad de un popup anclado. Mientras un popup anclado está abierto, la zona de la que sale se ensancha para recibirlo.
 _Avoid_: Barra inclinada, slanted bar
 
 **Icon theme** (tema de iconos):
@@ -78,7 +82,7 @@ El panel a pantalla completa que lista los colorschemes, hace un *colorscheme pr
 _Avoid_: Theme selector, theme picker, selector de temas
 
 **Control center** (centro de control):
-El popup del bar element *control center* (la campana con el contador de no leídas) que reúne, como la cortina de Android, los tiles y deslizadores y las notificaciones. Tiene dos etapas: **collapsed** y **expanded**. SUPER+N lo abre collapsed y SUPER+C expanded, en la barra del monitor enfocado; si esa barra no tiene el bar element, se abre en el borde derecho. Con el plugin *Control center* desactivado solo muestra las notificaciones.
+El popup del bar element *control center* (la campana con el contador de no leídas) que reúne, como la cortina de Android, los tiles y deslizadores y las notificaciones. Tiene dos etapas: **collapsed** y **expanded**. SUPER+N lo abre collapsed y SUPER+C expanded, en la barra del monitor enfocado; si esa barra no tiene el bar element, se abre en el extremo derecho de la barra, que en una barra lateral es el de abajo, donde queda la zona derecha. Con el plugin *Control center* desactivado solo muestra las notificaciones.
 _Avoid_: Notification center, notification panel, shade, cortina, control panel, quick settings, panel de control
 
 **Collapsed control center** (control center plegado):

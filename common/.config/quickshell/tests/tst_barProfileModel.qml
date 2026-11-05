@@ -10,6 +10,23 @@ TestCase {
     }
 
     // A bar profile is shown by its name with a capital first letter.
+    // Switching needs no migration: nothing but the position changes, and an
+    // element stays in the zone it was saved in.
+    function test_switchingPositionMovesNoElementBetweenZones_data() {
+        return ["bottom", "left", "right", "top"].map(position => ({ tag: position, position: position }));
+    }
+
+    function test_switchingPositionMovesNoElementBetweenZones(data) {
+        const started = fixtures.startedBarState();
+        const before = BarProfileModel.editedProfile(started);
+        const after = BarProfileModel.editedProfile(fixtures.edited(started, { barPosition: data.position }));
+
+        compare(after.barPosition, data.position);
+        compare(JSON.stringify(after.barElements), JSON.stringify(before.barElements));
+        compare(JSON.stringify(Object.assign({}, after, { barPosition: before.barPosition })),
+            JSON.stringify(before));
+    }
+
     function test_aProfileIsShownCapitalised() {
         compare(BarProfileModel.profileDisplayName("presentation"), "Presentation");
         compare(BarProfileModel.profileDisplayName(""), "");
@@ -84,6 +101,56 @@ TestCase {
 
         compare(BarProfileModel.profileValue(state, "missing", "barHeight"),
             BarProfileModel.defaultProfile.barHeight);
+    }
+
+    // A profile saved before Bar position existed has no such key.
+    function test_aProfileSavedWithoutABarPositionIsATopBar() {
+        const state = fixtures.startedBarState();
+        delete state.barProfiles.presentation.barPosition;
+
+        compare(BarProfileModel.savedProfile(state, "presentation").barPosition, "top");
+        compare(BarProfileModel.profileValue(state, "presentation", "barPosition"), "top");
+    }
+
+    function test_everyDefaultProfileIsATopBar() {
+        const profiles = BarProfileModel.defaultBarProfiles();
+
+        for (const name in profiles)
+            compare(profiles[name].barPosition, "top", name);
+    }
+
+    function test_anUnknownBarPositionLoadsAsTop() {
+        compare(BarProfileModel.completeProfile({ barPosition: "middle" }).barPosition, "top");
+    }
+
+    function test_everyBarPositionIsKeptAsSaved_data() {
+        return ["top", "bottom", "left", "right"].map(position => ({ tag: position, position: position }));
+    }
+
+    function test_everyBarPositionIsKeptAsSaved(data) {
+        compare(BarProfileModel.completeProfile({ barPosition: data.position }).barPosition, data.position);
+    }
+
+    function test_choosingABarPositionIsAPendingChangeUntilSaved() {
+        const state = fixtures.edited(fixtures.startedBarState(), { barPosition: "bottom" });
+
+        verify(BarProfileModel.isModified(state));
+        compare(BarProfileModel.editedProfile(state).barPosition, "bottom");
+        compare(BarProfileModel.savedProfile(state, "minimal").barPosition, "top");
+
+        const discarded = fixtures.withChanges(state, BarProfileModel.discardChanges(state));
+        compare(BarProfileModel.editedProfile(discarded).barPosition, "top");
+
+        const saved = fixtures.withChanges(state, BarProfileModel.saveProfile(state));
+        compare(BarProfileModel.savedProfile(saved, "minimal").barPosition, "bottom");
+    }
+
+    // Each monitor's bar window reads its own profile, so two monitors can differ.
+    function test_twoProfilesCanHaveDifferentBarPositions() {
+        const state = fixtures.edited(fixtures.startedBarState(), { barPosition: "bottom" });
+
+        compare(BarProfileModel.profileValue(state, "minimal", "barPosition"), "bottom");
+        compare(BarProfileModel.profileValue(state, "presentation", "barPosition"), "top");
     }
 
     function test_theDefaultProfilesAreInTheCurrentSchema() {
