@@ -49,6 +49,7 @@ QtObject {
     // the bar settings below from it and changes them with setBarSetting.
     readonly property var editedBarProfile: BarProfileModel.editedProfile(barProfileState)
 
+    readonly property string barPosition: editedBarProfile.barPosition
     readonly property int barHeight: editedBarProfile.barHeight
     readonly property int horizontalPadding: editedBarProfile.horizontalPadding
     readonly property int spacing: editedBarProfile.spacing
