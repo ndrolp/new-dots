@@ -166,23 +166,23 @@ Item {
     DockedSurface {
         id: leftSurface
 
-        spanLeft: 0
-        spanRight: root.zoneEnd("left") + leftSurface.sideWidth
+        spanStart: 0
+        spanEnd: root.zoneEnd("left") + leftSurface.endWidth
         popup: root.zonePopup("left")
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
         thickness: root.sideBar ? root.width : root.height
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
         fillColor: root.dockedColor
-        keepLeftEdge: true
+        keepStart: true
         z: -1
     }
 
     DockedSurface {
         id: centerSurface
 
-        spanLeft: root.zoneStart("center") - centerSurface.sideWidth
-        spanRight: root.zoneEnd("center") + centerSurface.sideWidth
+        spanStart: root.zoneStart("center") - centerSurface.endWidth
+        spanEnd: root.zoneEnd("center") + centerSurface.endWidth
         popup: root.zonePopup("center")
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
@@ -195,15 +195,15 @@ Item {
     DockedSurface {
         id: rightSurface
 
-        spanLeft: root.zoneStart("right") - rightSurface.sideWidth
-        spanRight: BarLayout.barLength(root.layoutBar)
+        spanStart: root.zoneStart("right") - rightSurface.endWidth
+        spanEnd: BarLayout.barLength(root.layoutBar)
         popup: root.zonePopup("right")
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
         thickness: root.sideBar ? root.width : root.height
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
         fillColor: root.dockedColor
-        keepRightEdge: true
+        keepEnd: true
         z: -1
     }
 

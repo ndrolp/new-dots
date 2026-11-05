@@ -6,7 +6,7 @@ import QtQuick
 PopupFrame {
     required property var popups
     readonly property var placement: open
-        ? { popup: popup, edge: edge, left: placedStart, right: placedEnd, resizing: heldHeight > 0 } : null
+        ? { popup: popup, edge: edge, start: placedStart, end: placedEnd, resizing: heldHeight > 0 } : null
 
     appearance: popups.appearance
     barWindow: popups.barWindow

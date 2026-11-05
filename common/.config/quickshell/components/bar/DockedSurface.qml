@@ -8,8 +8,8 @@ import "DockedZones.js" as DockedZones
 // popup: hanging from the screen edge the bar sits on, with small curved corners
 // joining it to that edge and rounded corners away from it. A side on the
 // screen's edge stays straight. While an attached popup hangs from the zone, it
-// grows to receive it. Spans run along the bar, as with zones: left and right
-// are the top and the bottom on a side bar.
+// grows to receive it. Spans run along the bar: they start at its left, or at
+// its top on a side bar.
 Canvas {
     id: root
 
@@ -20,34 +20,34 @@ Canvas {
     // How deep the bar is, from its screen edge inwards.
     required property real thickness
     // Where the zone sits while no popup is open.
-    required property real spanLeft
-    required property real spanRight
-    // The attached popup hanging from this zone, { left, right, resizing }, or
+    required property real spanStart
+    required property real spanEnd
+    // The attached popup hanging from this zone, { start, end, resizing }, or
     // null. While it resizes the zone keeps up with it frame by frame.
     property var popup: null
     property color fillColor: "#313244"
-    // The room beyond a zone's contents for the curves on that side.
-    readonly property int sideWidth: 15
+    // The room beyond a zone's contents for the curves at that end.
+    readonly property int endWidth: 15
     readonly property real joinRadius: 6
-    property bool keepLeftEdge: false
-    property bool keepRightEdge: false
-    readonly property var growth: DockedZones.growth({ left: spanLeft, right: spanRight },
+    property bool keepStart: false
+    property bool keepEnd: false
+    readonly property var growth: DockedZones.growth({ start: spanStart, end: spanEnd },
         popup, joinRadius + theme.radius)
     // Only the growth animates, so the zone still follows its contents at once.
+    property real growStart: keepStart ? 0 : growth.start
+    property real growEnd: keepEnd ? 0 : growth.end
     readonly property bool growthAnimated: !(popup && popup.resizing)
-    property real growLeft: keepLeftEdge ? 0 : growth.left
-    property real growRight: keepRightEdge ? 0 : growth.right
     readonly property bool sideBar: BarPosition.sideBar(barPosition)
-    readonly property real zoneStart: spanLeft - growLeft
-    readonly property real zoneLength: spanRight + growRight - zoneStart
+    readonly property real zoneStart: spanStart - growStart
+    readonly property real zoneLength: spanEnd + growEnd - zoneStart
     readonly property var path: PopupOutline.dockedPath({
         barPosition: barPosition,
         length: zoneLength,
         depth: thickness,
         radius: theme.radius,
         joinRadius: joinRadius,
-        keepStart: keepLeftEdge,
-        keepEnd: keepRightEdge
+        keepStart: keepStart,
+        keepEnd: keepEnd
     })
 
     x: sideBar ? 0 : zoneStart
@@ -55,7 +55,7 @@ Canvas {
     width: sideBar ? thickness : zoneLength
     height: sideBar ? zoneLength : thickness
 
-    Behavior on growLeft {
+    Behavior on growStart {
         enabled: root.growthAnimated
 
         NumberAnimation {
@@ -64,7 +64,7 @@ Canvas {
         }
     }
 
-    Behavior on growRight {
+    Behavior on growEnd {
         enabled: root.growthAnimated
 
         NumberAnimation {

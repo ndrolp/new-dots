@@ -39,7 +39,7 @@ PopupWindow {
         popupHeight: implicitHeight,
         restingHeight: restingHeight,
         window: { width: barWindow.width, height: barWindow.height },
-        barHeight: appearance.barHeight,
+        thickness: appearance.barHeight,
         padding: appearance.horizontalPadding,
         radius: appearance.radius,
         spacing: appearance.spacing,

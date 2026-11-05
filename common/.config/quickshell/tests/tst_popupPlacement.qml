@@ -13,7 +13,7 @@ TestCase {
     readonly property var bar: ({
         barPosition: "top",
         window: { width: 1920, height: 40 },
-        barHeight: 40,
+        thickness: 40,
         padding: 12,
         spacing: 8
     })

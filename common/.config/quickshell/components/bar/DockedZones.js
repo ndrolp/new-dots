@@ -4,14 +4,14 @@
 // it. The popup needs bar beside it all the way out to the end of its curved
 // joins, plus clearance so they don't run into the zone's rounded corners.
 
-// Takes the zone's { left, right }, the popup window's { left, right } or null,
-// and the clearance. Returns how far each side grows, { left, right }.
+// Takes the zone's { start, end } along the bar, the popup window's { start, end }
+// or null, and the clearance. Returns how far each end grows, { start, end }.
 function growth(zone, popup, clearance) {
     if (!popup)
-        return { left: 0, right: 0 };
+        return { start: 0, end: 0 };
 
     return {
-        left: Math.max(0, zone.left - (popup.left - clearance)),
-        right: Math.max(0, popup.right + clearance - zone.right)
+        start: Math.max(0, zone.start - (popup.start - clearance)),
+        end: Math.max(0, popup.end + clearance - zone.end)
     };
 }

@@ -30,14 +30,14 @@ function margin(placement) {
 // a side bar left is the top and right the bottom.
 function start(placement, popupLength, barLength) {
     const trigger = placement.trigger;
-    const side = margin(placement);
-    const far = Math.max(side, barLength - popupLength - side);
+    const clear = margin(placement);
+    const far = Math.max(clear, barLength - popupLength - clear);
 
     if (!trigger)
-        return placement.edge === "left" ? side : far;
+        return placement.edge === "left" ? clear : far;
 
-    return Math.max(side, Math.min(
-        barLength - popupLength - side,
+    return Math.max(clear, Math.min(
+        barLength - popupLength - clear,
         trigger.start + (trigger.length - popupLength) / 2
     ));
 }
@@ -48,10 +48,10 @@ function reach(placement) {
     const content = placement.content;
 
     if (placement.attached)
-        return placement.barHeight;
+        return placement.thickness;
 
     if (!content)
-        return placement.barHeight + placement.spacing;
+        return placement.thickness + placement.spacing;
 
     const contentEnd = {
         top: content.y + content.height,
@@ -64,7 +64,7 @@ function reach(placement) {
 }
 
 // Takes { barPosition, popupWidth, popupHeight, restingHeight, edge, attached,
-// window: { width, height } (the bar window), barHeight (the bar's thickness),
+// window: { width, height } (the bar window), thickness (the bar's),
 // padding, radius, spacing,
 // trigger: { start, length } | null (the bar element, along the bar in bar
 // window coordinates; null when it isn't on the bar),

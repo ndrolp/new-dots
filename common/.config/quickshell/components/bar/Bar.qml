@@ -96,15 +96,15 @@ Variants {
                 width: panel.width
                 height: panel.height
             }
-            readonly property int totalBarHeight: BarPlacement.thickness(panel.barAppearance)
+            readonly property int barThickness: BarPlacement.thickness(panel.barAppearance)
             readonly property var windowAnchors: BarPlacement.windowAnchors(panel.barAppearance.barPosition)
             readonly property var contentMargins: BarPlacement.contentMargins(panel.barAppearance)
 
-            exclusiveZone: totalBarHeight
+            exclusiveZone: barThickness
             // Only the size across the bar counts: the compositor stretches the
             // window between the two anchors it has along the bar.
-            implicitWidth: totalBarHeight
-            implicitHeight: totalBarHeight
+            implicitWidth: barThickness
+            implicitHeight: barThickness
 
             anchors {
                 top: panel.windowAnchors.top
