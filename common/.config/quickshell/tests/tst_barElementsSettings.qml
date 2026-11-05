@@ -455,7 +455,7 @@ TestCase {
         const built = make();
         mouseClick(textOf(elementRow(built.item, "Workspaces"), "Workspaces"));
         const filled = all(built.item, child => child.border !== undefined && child.radius !== undefined
-            && child.color.a > 0 && child.width > 200 && child.visible);
+            && child.color.a > 0 && child.width > 200 && child.height > 20 && child.visible);
 
         compare(filled.length, 0);
     }

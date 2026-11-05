@@ -517,4 +517,30 @@ TestCase {
             "audio", "bluetooth", "tray", "network", "battery", "clock"])
             verify(BarElementItems.opensPopup(element), element);
     }
+
+    function test_workspacesHaveARadiusOption() {
+        compare(BarProfileModel.elementOptionField("workspaces", "radius"),
+            { kind: "number", from: 0, to: 24 });
+    }
+
+    function test_migratingGivesWorkspacesTheRadiusTheyFollowed() {
+        const barElements = BarProfileModel.defaultBarElements([]);
+        const version10 = { schemaVersion: 10, barProfiles: {
+            work: { radius: 6, barElements: barElements },
+            media: { radius: 14, barElements: barElements }
+        } };
+        const profiles = SchemaMigrations.migrate(version10, {}).appearance.barProfiles;
+
+        compare(BarProfileModel.elementOption(profiles.work.barElements, "workspaces", "radius"), 6);
+        compare(BarProfileModel.elementOption(profiles.media.barElements, "workspaces", "radius"), 14);
+    }
+
+    function test_aNewProfilesWorkspacesFollowItsRadius() {
+        const profiles = BarProfileModel.defaultBarProfiles();
+
+        for (const name in profiles) {
+            compare(BarProfileModel.elementOption(profiles[name].barElements, "workspaces", "radius"),
+                profiles[name].radius, name);
+        }
+    }
 }

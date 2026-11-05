@@ -467,10 +467,26 @@ function seedControlCenterTiles(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
+// Step 11: the workspaces element gets a radius of its own, starting as the
+// one it followed.
+function seedWorkspaceRadius(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+    for (const profileName in migrated.barProfiles || {}) {
+        const profile = migrated.barProfiles[profileName];
+        if (profile.barElements === undefined || profile.radius === undefined)
+            continue;
+        profile.barElements = BarProfileModel.setElementOption(profile.barElements, "workspaces",
+            "radius", profile.radius);
+    }
+
+    return { appearance: migrated, monitors: monitors };
+}
+
 const migrationSteps = [
     migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
     migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles, explicitMonitorEntries,
-    moveOptionsOntoElements, renameElementVerticalPadding, seedControlCenterTiles
+    moveOptionsOntoElements, renameElementVerticalPadding, seedControlCenterTiles,
+    seedWorkspaceRadius
 ];
 const schemaVersion = migrationSteps.length;
 

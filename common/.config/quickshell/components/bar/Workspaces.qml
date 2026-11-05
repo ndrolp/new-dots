@@ -85,7 +85,7 @@ Rectangle {
                     ? appearance.workspaceButtonSize - 2
                     : Math.max(1, appearance.barHeight
                         - (appearance.elementVerticalPadding * 2))
-                radius: appearance.radius
+                radius: root.options.radius
                 color: active ? theme.accent : urgent
                     ? Qt.rgba(theme.red.r, theme.red.g, theme.red.b, 0.22)
                     : occupied && !appearance.pillsTransparent && !appearance.transparentBarSlanted
@@ -162,7 +162,7 @@ Rectangle {
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: appearance.radius
+                    radius: root.options.radius
                     color: theme.surfaceHover
                     opacity: hover.hovered && !workspaceButton.active ? 1 : 0
 

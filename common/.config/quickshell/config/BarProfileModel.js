@@ -38,7 +38,8 @@ const elementOptionDefaults = {
         glyphs: ["", "", "", "", "", "", "", "", "", "",
             "", "", "", "", "", "", "", "", "", ""],
         hideEmpty: false,
-        appCountVisible: true
+        appCountVisible: true,
+        radius: 8
     },
     "notifications": { badgeVisible: true },
     "media": { titleVisible: true },
@@ -53,6 +54,9 @@ const elementOptionDefaults = {
 // choices }). A value outside them is clamped, or falls back. Every other
 // option is a switch.
 const elementOptionLimits = {
+    "workspaces": {
+        radius: { kind: "number", from: 0, to: 24 }
+    },
     "cava": {
         barCount: { kind: "number", from: 6, to: 32 },
         barWidth: { kind: "number", from: 1, to: 8 },
@@ -146,7 +150,7 @@ function defaultBarProfiles() {
         workspaceButtonSize: 18, textSize: 13, archButtonHorizontalPadding: 5,
         activeWorkspaceHorizontalPadding: 5, pillVerticalPadding: 2, workspacePadding: 3
     };
-    const compactOptions = { "workspaces": { hideEmpty: true, appCountVisible: false } };
+    const compactOptions = { "workspaces": { hideEmpty: true, appCountVisible: false, radius: 6 } };
 
     return {
         "minimal": profile(Object.assign({}, compact, {
