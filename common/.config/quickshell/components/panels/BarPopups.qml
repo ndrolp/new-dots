@@ -19,10 +19,20 @@ Item {
     property string activePopup: ""
     // Which of the app menu's menus its Popup shows (AppMenuPopup.menuId).
     property string appMenuId: ""
+    // Where the open popup sits, { popup, edge, left, right }, or null.
+    property var openPopup: null
     // The bar content; places popups under the bar element that opened them.
     property var popupAnchorProvider: null
     signal popupClosed(string popup)
     signal audioOutputSelected(var output)
+
+    // A closing popup clears only itself: the next one may have opened already.
+    function popupPlaced(popup, placement) {
+        if (placement)
+            openPopup = placement;
+        else if (openPopup && openPopup.popup === popup)
+            openPopup = null;
+    }
 
     ControlCenterPopup {
         popups: root

@@ -10,7 +10,10 @@ Row {
 
     SystemClock {
         id: clock
-        precision: SystemClock.Minutes
+        // Seconds even though it shows minutes: timers stand still during suspend,
+        // so a minute tick would leave the old time up for as long as a minute after
+        // resuming.
+        precision: SystemClock.Seconds
     }
 
     Text {

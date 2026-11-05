@@ -3,12 +3,13 @@
 // Where a popup opens in its bar window: under the bar element that opened
 // it, whatever zone it sits in, shifted sideways to stay on screen; at the bar
 // edge when its element isn't on the bar. Either way it keeps clear of the
-// bar's rounded ends. On an opaque bar popups are attached: they hang from the
-// bar's bottom edge.
+// bar's rounded ends. On an opaque or docked bar popups are attached: they hang
+// from the bar's bottom edge.
 
-// Takes the bar profile of the popup's monitor, { barTransparent }.
+// Takes the bar profile of the popup's monitor,
+// { barTransparent, transparentBarSlanted }.
 function attached(bar) {
-    return !bar.barTransparent;
+    return !bar.barTransparent || !!bar.transparentBarSlanted;
 }
 
 // How close to the bar's ends a popup may open: the padding, or the bar's

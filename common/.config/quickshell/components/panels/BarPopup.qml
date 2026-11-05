@@ -5,10 +5,13 @@ import QtQuick
 // popup is open.
 PopupFrame {
     required property var popups
+    readonly property var placement: open
+        ? { popup: popup, edge: edge, left: placedX, right: placedX + implicitWidth } : null
 
     appearance: popups.appearance
     barWindow: popups.barWindow
     anchorProvider: popups.popupAnchorProvider
     open: popups.activePopup === popup
     onDismissed: popups.popupClosed(popup)
+    onPlacementChanged: popups.popupPlaced(popup, placement)
 }

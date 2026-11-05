@@ -77,6 +77,10 @@ TestCase {
         verify(!PopupPlacement.attached({ barTransparent: true }));
     }
 
+    function test_popupsAreAttachedOnADockedBar() {
+        verify(PopupPlacement.attached({ barTransparent: true, transparentBarSlanted: true }));
+    }
+
     function test_anAttachedPopupOpensRightAtTheBarsBottomEdge() {
         compare(PopupPlacement.y(placement({ attached: true, content: { y: 6, height: 32 } })), 40);
         compare(PopupPlacement.y(placement({ attached: true, content: null })), 40);

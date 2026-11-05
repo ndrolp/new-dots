@@ -23,6 +23,8 @@ Item {
     required property var screenShares
     required property var cava
     property bool barVisible: true
+    // Where the open popup sits in the bar, as BarPopups reports it, or null.
+    property var openPopup: null
     required property var systemMonitor
     required property var workspaceService
 
@@ -32,7 +34,10 @@ Item {
     signal configRequested(var screen)
     signal popupRequested(string popup)
     readonly property var zoneNames: ["left", "center", "right"]
-    readonly property real slantedPadding: appearance.barTransparent && appearance.transparentBarSlanted
+    // The docked bar's zones match an attached popup's color and opacity.
+    readonly property color dockedColor: Qt.rgba(theme.background.r, theme.background.g,
+        theme.background.b, appearance.barOpacity / 100)
+    readonly property real dockedPadding: appearance.barTransparent && appearance.transparentBarSlanted
         ? appearance.horizontalPadding : 0
     // Room between a group's shared background and its first and last element.
     readonly property real groupPadding: appearance.spacing
@@ -102,9 +107,9 @@ Item {
 
     function zoneStart(zone) {
         if (zone === "left")
-            return slantedPadding;
+            return dockedPadding;
         if (zone === "right")
-            return root.width - zoneWidth("right") - slantedPadding;
+            return root.width - zoneWidth("right") - dockedPadding;
         return Math.round((root.width - zoneWidth("center")) / 2);
     }
 
@@ -146,48 +151,62 @@ Item {
             : { x: offset + item.x, width: item.width };
     }
 
+    // The open popup, when it hangs from this zone. A popup whose bar element
+    // isn't shown hangs from the zone at its edge.
+    function zonePopup(zone) {
+        if (!openPopup)
+            return null;
+
+        const element = popupElement(openPopup.popup);
+        const popupZone = elementShown(element)
+            ? BarProfileModel.elementZone(appearance.barElements, element) : openPopup.edge;
+        return popupZone === zone ? openPopup : null;
+    }
+
     Config.Theme {
         id: theme
     }
 
-    SlantedSurface {
+    DockedSurface {
         id: leftSurface
 
-        x: 0
-        width: root.zoneEnd("left") + leftSurface.slant
+        spanLeft: 0
+        spanRight: root.zoneEnd("left") + leftSurface.sideWidth
+        popup: root.zonePopup("left")
+        motion: root.appearance.motion
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
-        appearance: root.appearance
-        fillColor: theme.surface
+        fillColor: root.dockedColor
         keepLeftEdge: true
         z: -1
     }
 
-    SlantedSurface {
+    DockedSurface {
         id: centerSurface
 
-        x: root.zoneStart("center") - centerSurface.slant
-        width: root.zoneWidth("center") + centerSurface.slant * 2
+        spanLeft: root.zoneStart("center") - centerSurface.sideWidth
+        spanRight: root.zoneEnd("center") + centerSurface.sideWidth
+        popup: root.zonePopup("center")
+        motion: root.appearance.motion
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
-        appearance: root.appearance
-        fillColor: theme.surface
-        slantBothSides: true
+        fillColor: root.dockedColor
         z: -1
     }
 
-    SlantedSurface {
+    DockedSurface {
         id: rightSurface
 
-        x: root.zoneStart("right") - rightSurface.slant
-        width: root.width - x
+        spanLeft: root.zoneStart("right") - rightSurface.sideWidth
+        spanRight: root.width
+        popup: root.zonePopup("right")
+        motion: root.appearance.motion
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
-        appearance: root.appearance
-        fillColor: theme.surface
+        fillColor: root.dockedColor
         keepRightEdge: true
         z: -1
     }
