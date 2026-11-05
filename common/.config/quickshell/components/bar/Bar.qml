@@ -101,6 +101,9 @@ Variants {
             readonly property var contentMargins: BarPlacement.contentMargins(panel.barAppearance)
 
             exclusiveZone: totalBarHeight
+            // Only the size across the bar counts: the compositor stretches the
+            // window between the two anchors it has along the bar.
+            implicitWidth: totalBarHeight
             implicitHeight: totalBarHeight
 
             anchors {
@@ -117,10 +120,7 @@ Variants {
             Rectangle {
                 id: barBackground
 
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                height: panel.totalBarHeight
+                anchors.fill: parent
                 color: panel.barAppearance.barTransparent
                     ? "transparent" : Qt.rgba(theme.background.r, theme.background.g,
                         theme.background.b, panel.barAppearance.barOpacity / 100)

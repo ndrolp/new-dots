@@ -1,5 +1,6 @@
 import QtQuick
 import "../../config" as Config
+import "BarLayout.js" as BarLayout
 
 Rectangle {
     id: root
@@ -11,10 +12,12 @@ Rectangle {
 
     signal clicked()
 
-    width: appearance.workspaceButtonSize + (appearance.archButtonHorizontalPadding * 2)
-    height: appearance.barTransparent
-        ? appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
-        : Math.max(1, appearance.barHeight - (appearance.elementVerticalPadding * 2))
+    readonly property var size: BarLayout.size(appearance,
+        appearance.workspaceButtonSize + (appearance.archButtonHorizontalPadding * 2),
+        BarLayout.elementThickness(appearance))
+
+    width: size.width
+    height: size.height
     radius: appearance.radius
     color: hover.hovered ? theme.surfaceHover
         : appearance.pillsTransparent || appearance.transparentBarSlanted || root.grouped

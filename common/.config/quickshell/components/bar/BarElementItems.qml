@@ -10,6 +10,7 @@ import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 import "../StatusText.js" as StatusText
 import "BarElementItems.js" as BarElementItems
+import "BarLayout.js" as BarLayout
 import "../panels/ControlCenterNames.js" as Names
 import "RecordingIndicator.js" as RecordingIndicator
 
@@ -60,12 +61,16 @@ Item {
     // Which apps share the screen, shown for a moment after a click that
     // can't stop anything.
     property string sharingShown: ""
-    readonly property real itemHeight: appearance.barTransparent
-        ? appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
-        : Math.max(1, appearance.barHeight - (appearance.elementVerticalPadding * 2))
+    readonly property real itemHeight: BarLayout.elementThickness(appearance)
 
     Config.Theme {
         id: theme
+    }
+
+    // The size of an element this long along the bar. On a side bar it runs
+    // down, and is as thick across the bar as on any other.
+    function elementSize(length) {
+        return BarLayout.size(appearance, length, itemHeight);
     }
 
     PwObjectTracker {
@@ -134,11 +139,13 @@ Item {
     Rectangle {
         id: notificationButton
 
+        readonly property var size: root.elementSize(notificationContent.implicitWidth + 16)
+
         visible: root.itemVisible("notifications")
         x: root.elementX("notifications")
         y: root.elementY("notifications")
-        width: notificationContent.implicitWidth + 16
-        height: root.itemHeight
+        width: size.width
+        height: size.height
         radius: root.appearance.radius
         color: notificationHover.hovered ? theme.surfaceHover
             : root.elementGrouped("notifications") || root.appearance.pillsTransparent
@@ -273,7 +280,6 @@ Item {
         visible: root.itemVisible("keepAwake")
         x: root.elementX("keepAwake")
         y: root.elementY("keepAwake")
-        height: root.itemHeight
         onPopupRequested: root.popupRequested("keepAwake")
     }
 
@@ -471,11 +477,13 @@ Item {
     Rectangle {
         id: bluetoothButton
 
+        readonly property var size: root.elementSize(root.appearance.workspaceButtonSize)
+
         visible: root.itemVisible("bluetooth")
         x: root.elementX("bluetooth")
         y: root.elementY("bluetooth")
-        width: root.appearance.workspaceButtonSize
-        height: root.itemHeight
+        width: size.width
+        height: size.height
         radius: root.appearance.radius
         color: bluetoothHover.hovered ? theme.surfaceHover
             : root.elementGrouped("bluetooth") || root.appearance.pillsTransparent
@@ -509,11 +517,13 @@ Item {
     Rectangle {
         id: trayButton
 
+        readonly property var size: root.elementSize(root.appearance.workspaceButtonSize)
+
         visible: root.itemVisible("tray")
         x: root.elementX("tray")
         y: root.elementY("tray")
-        width: root.appearance.workspaceButtonSize
-        height: root.itemHeight
+        width: size.width
+        height: size.height
         radius: root.appearance.radius
         color: trayHover.hovered ? theme.surfaceHover
             : root.elementGrouped("tray") || root.appearance.pillsTransparent
@@ -547,11 +557,13 @@ Item {
     Rectangle {
         id: networkButton
 
+        readonly property var size: root.elementSize(root.appearance.workspaceButtonSize)
+
         visible: root.itemVisible("network")
         x: root.elementX("network")
         y: root.elementY("network")
-        width: root.appearance.workspaceButtonSize
-        height: root.itemHeight
+        width: size.width
+        height: size.height
         radius: root.appearance.radius
         color: networkHover.hovered ? theme.surfaceHover
             : root.elementGrouped("network") || root.appearance.pillsTransparent
