@@ -1,3 +1,0 @@
-{
-  "include": ["~/.config/waybar/custom/layouts/bar-cell/layout.jsonc"],
-}

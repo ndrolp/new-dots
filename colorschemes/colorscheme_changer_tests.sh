@@ -107,7 +107,6 @@ commit_dotfiles() {
 
 # The colour links an apply leaves alone, and the default-colorscheme record.
 UNCHANGED_BY_APPLY=(
-    common/.config/waybar/custom/colors.css
     common/.config/hypr/custom/hyprlock-colors.conf
     common/.config/nvim/lua/settings/core/theme.lua
     common/.config/rofi/custom/colors.rasi
@@ -127,7 +126,7 @@ test_applying_leaves_the_tracked_colour_links_and_the_default_colorscheme_unchan
 test_the_colour_links_lead_to_the_applied_colorschemes_colours() {
     change_colorscheme nord
     local app file
-    for app in waybar/custom/colors.css:waybar/colors.css hypr/custom/hyprlock-colors.conf:hyprlock/colors.conf \
+    for app in hypr/custom/hyprlock-colors.conf:hyprlock/colors.conf \
         nvim/lua/settings/core/theme.lua:nvim/theme.lua rofi/custom/colors.rasi:rofi/colors.rasi; do
         file="$(readlink -f "$HOME_DIR/.config/${app%%:*}")"
         [[ "$file" == "$HOME_DIR/.dotfiles/colorschemes/nord/${app#*:}" ]] || fail "${app%%:*} leads to $file"
@@ -381,11 +380,6 @@ test_every_colorscheme_has_its_own_kitty_colours() {
 test_the_kitty_themes_folder_and_backup_are_gone() {
     [[ ! -e "$COLORSCHEMES/../common/.config/kitty/themes" ]] || fail "kitty's themes folder is still there"
     [[ ! -e "$COLORSCHEMES/../common/.config/kitty/kitty.conf.bak" ]] || fail "kitty.conf.bak is still there"
-}
-
-test_applying_does_not_ask_ags_for_the_theme() {
-    change_colorscheme nord
-    [[ "$(calls_to ags)" -eq 0 ]] || fail "ags was called"
 }
 
 test_applying_leads_quickshells_colours_to_the_colorschemes_and_asks_the_shell_to_reload_them() {

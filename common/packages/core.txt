@@ -60,13 +60,11 @@ nwg-look
 papirus-icon-theme
 pciutils
 pavucontrol
-picom
 pipewire
 pipewire-alsa
 pipewire-jack
 pipewire-pulse
 playerctl
-polybar
 power-profiles-daemon
 python-gobject
 quickshell
@@ -94,7 +92,6 @@ vala
 vlc
 vlc-plugin-ffmpeg
 w3m
-waybar
 wget
 wireless_tools
 wireplumber
