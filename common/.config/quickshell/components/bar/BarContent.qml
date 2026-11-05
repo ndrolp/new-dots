@@ -170,7 +170,7 @@ Item {
         popup: root.zonePopup("left")
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
-        thickness: leftSurface.side ? root.width : root.height
+        thickness: root.vertical ? root.width : root.height
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
         fillColor: root.dockedColor
         keepLeftEdge: true
@@ -185,7 +185,7 @@ Item {
         popup: root.zonePopup("center")
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
-        thickness: centerSurface.side ? root.width : root.height
+        thickness: root.vertical ? root.width : root.height
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
         fillColor: root.dockedColor
         z: -1
@@ -195,11 +195,11 @@ Item {
         id: rightSurface
 
         spanLeft: root.zoneStart("right") - rightSurface.sideWidth
-        spanRight: root.width
+        spanRight: BarLayout.barLength(root.layoutBar)
         popup: root.zonePopup("right")
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
-        thickness: rightSurface.side ? root.width : root.height
+        thickness: root.vertical ? root.width : root.height
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
         fillColor: root.dockedColor
         keepRightEdge: true
