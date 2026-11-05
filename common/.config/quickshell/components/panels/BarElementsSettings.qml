@@ -47,7 +47,8 @@ Column {
     property var elementOptions: ({
         "workspaces": [
             { label: "Hide empty workspaces", option: "hideEmpty" },
-            { label: "Show workspace app counts", option: "appCountVisible" }
+            { label: "Show workspace app counts", option: "appCountVisible" },
+            { label: "Workspace radius", option: "radius" }
         ],
         "notifications": [{ label: "Show unread badge", option: "badgeVisible" }],
         "media": [{ label: "Show track title", option: "titleVisible" }],
