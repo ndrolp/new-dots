@@ -25,7 +25,10 @@ BarPopup {
         trayActionClose.restart();
     }
 
-    onDismissed: {
+    // Once hidden, so an open menu doesn't fold away during the close animation.
+    onVisibleChanged: {
+        if (visible)
+            return;
         selectedTrayItem = null;
         menuStack = [];
     }

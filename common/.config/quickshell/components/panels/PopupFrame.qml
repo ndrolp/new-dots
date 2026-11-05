@@ -1,5 +1,7 @@
 import Quickshell
+import Quickshell.Hyprland
 import QtQuick
+import "PopupGrab.js" as PopupGrab
 import "PopupPlacement.js" as PopupPlacement
 
 // The frame every popup shares: the window placed next to the bar element
@@ -7,7 +9,8 @@ import "PopupPlacement.js" as PopupPlacement
 // inside; the window is as tall as they are unless the popup says otherwise.
 // On an opaque or docked bar the popup is attached: it hangs from the bar's
 // bottom edge in the bar's own color and opacity. On any other transparent bar
-// it floats below.
+// it floats below. A focus grab, not the compositor's popup grab, closes it on a
+// click outside it and its bar, so the window stays up for the close animation.
 PopupWindow {
     id: frame
 
@@ -46,7 +49,8 @@ PopupWindow {
     // resized once instead of every frame; 0 lets it follow the surface.
     property real heldHeight: 0
     default property alias contents: surface.contents
-    // Hidden while still open, e.g. after losing focus.
+    // Closed from outside while still open: a click outside it and its bar,
+    // another grab taking over, or its bar hiding.
     signal dismissed()
 
     function trigger() {
@@ -54,7 +58,6 @@ PopupWindow {
         return element ? { x: anchorProvider.x + element.x, width: element.width } : null;
     }
 
-    grabFocus: true
     visible: reveal > 0
     onVisibleChanged: {
         if (!visible && open)
@@ -71,6 +74,14 @@ PopupWindow {
     color: "transparent"
 
     implicitHeight: Math.max(surface.implicitHeight, heldHeight + surface.padding * 2) + room.top + room.bottom
+
+    HyprlandFocusGrab {
+        id: focusGrab
+
+        windows: PopupGrab.windows(frame, frame.barWindow, focusGrab.active)
+        active: frame.open && frame.visible
+        onCleared: frame.dismissed()
+    }
 
     PopupSurface {
         id: surface

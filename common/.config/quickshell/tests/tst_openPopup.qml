@@ -60,6 +60,21 @@ TestCase {
         { window: rightBar, monitor: "AOC", visible: true }
     ]
 
+    // A popup's focus grab ends after its bar element already closed it.
+    function test_aPopupDismissedAfterItsElementClosedItChangesNothing() {
+        const closed = OpenPopup.requested(OpenPopup.requested(OpenPopup.none, "audio", leftBar), "audio", leftBar);
+
+        compare(OpenPopup.closed(closed, "audio", leftBar), OpenPopup.none);
+    }
+
+    // Dismissed by a click elsewhere, its bar element opens it again rather
+    // than toggling it shut.
+    function test_clickingTheElementOfADismissedPopupOpensItAgain() {
+        const dismissed = OpenPopup.closed(OpenPopup.requested(OpenPopup.none, "audio", leftBar), "audio", leftBar);
+
+        compare(OpenPopup.requested(dismissed, "audio", leftBar).popup, "audio");
+    }
+
     function test_ipcOpensThePopupOnTheFocusedMonitorsBar() {
         const open = OpenPopup.toggledOnFocusedBar(OpenPopup.none, "controlCenter", bars, "AOC");
         compare(open.popup, "controlCenter");
