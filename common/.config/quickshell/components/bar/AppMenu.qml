@@ -49,7 +49,12 @@ Item {
     readonly property var popupTriggerArea: {
         const index = menus.findIndex(menu => menu.id === menuId);
         const title = index >= 0 && titleRepeater.count > index ? titleRepeater.itemAt(index) : null;
-        return title ? { x: background.x + titleRow.x + title.x, width: title.width } : null;
+        return title ? {
+            x: background.x + titleRow.x + title.x,
+            y: background.y + titleRow.y + title.y,
+            width: title.width,
+            height: title.height
+        } : null;
     }
 
     // How wide a title is drawn, as each title below draws it.
