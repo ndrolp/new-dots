@@ -10,8 +10,7 @@ stdin and reads one per line from stdout:
   out  {"pid": 1234, "exported": <exported>}    the focused app's menus, or null
        {"log": "..."}                           one line for the Quickshell log
 
-It finds the focused window's menus two ways, both only for XWayland windows
-since only they export menus here:
+It finds an XWayland window's menus two ways:
   - com.canonical.AppMenu.Registrar: menus registered as DBusMenu
     (Electron, Java, Qt on X11), keyed by X11 window id;
   - the _GTK_* properties GTK apps set on their X11 windows when
@@ -19,15 +18,25 @@ since only they export menus here:
 Hyprland doesn't tell X11 window ids, so a menu belongs to the focused window
 when the D-Bus connection that exports it has the window's pid
 (GetConnectionUnixProcessID); among several, the one whose X11 window has the
-same title wins. What it hands over is raw; AppMenuModel.exportedMenus turns it
-into menus.
+same title wins.
+
+A native Wayland window has neither, so its menus are looked for in the objects
+its process exports: GTK3 windows' menubars, published by appmenu-gtk-module,
+and GtkApplication menubars. Nothing there tells a process's windows apart, so
+a process with several windows that could own the menu shows none rather than
+risk acting on the wrong one. Empty menubars don't count: that's how a hidden
+one is exported.
+
+What it hands over is raw; AppMenuModel.exportedMenus turns it into menus.
 """
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
+import xml.etree.ElementTree
 
 try:
     from gi.repository import Gio, GLib
@@ -43,6 +52,12 @@ GTK_ACTIONS = "org.gtk.Actions"
 DBUSMENU_PROPERTIES = ["type", "label", "enabled", "visible", "children-display",
                        "toggle-type", "toggle-state"]
 TIMEOUT = 2000
+# Asking for objects has to be quick: GTK apps keep a connection that never
+# answers, and the focus moves on while this waits.
+INTROSPECT_TIMEOUT = 250
+MAX_OBJECTS = 200
+MODULE_MENUBAR = re.compile(r"/org/appmenu/gtk/window/menus/menubar/\d+")
+APP_MENUBAR_SUFFIX = "/menus/menubar"
 
 try:
     bus = Gio.bus_get_sync(Gio.BusType.SESSION)
@@ -56,6 +71,7 @@ subscriptions = []
 gtk_groups = []
 logged = set()
 pending = {}
+silent = set()          # connections that didn't answer: their names are never reused
 
 
 def send(message):
@@ -81,6 +97,15 @@ def connection_pid(name):
                     "GetConnectionUnixProcessID", GLib.Variant("(s)", (name,)), "(u)")[0]
     except GLib.Error:
         return None
+
+
+def process_connections(pid):
+    try:
+        names = call("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus",
+                     "ListNames", None, "(as)")[0]
+    except GLib.Error:
+        return []
+    return [name for name in names if name.startswith(":") and connection_pid(name) == pid]
 
 
 def later(key, milliseconds, function):
@@ -173,6 +198,57 @@ def candidates(pid):
     return found
 
 
+def object_paths(service):
+    """The object paths the connection exports, as far as it answers."""
+    paths = []
+    waiting = ["/"]
+    while waiting and len(paths) < MAX_OBJECTS:
+        path = waiting.pop(0)
+        try:
+            reply = bus.call_sync(service, path, "org.freedesktop.DBus.Introspectable", "Introspect", None,
+                                  GLib.VariantType("(s)"), Gio.DBusCallFlags.NONE, INTROSPECT_TIMEOUT, None)
+            nodes = xml.etree.ElementTree.fromstring(reply.unpack()[0]).findall("node")
+        except GLib.Error as error:
+            if error.matches(Gio.io_error_quark(), Gio.IOErrorEnum.TIMED_OUT):
+                silent.add(service)
+            break
+        except xml.etree.ElementTree.ParseError:
+            continue
+        paths.append(path)
+        waiting += [path.rstrip("/") + "/" + node.get("name") for node in nodes]
+    return paths
+
+
+def connection_menubars(service):
+    """The menubars the connection exports, as candidates(pid) has them."""
+    paths = object_paths(service)
+    found = []
+    for path in paths:
+        if MODULE_MENUBAR.fullmatch(path):
+            found.append({"kind": "gtk", "service": service, "menuPath": path, "actionPaths": {"unity": path}})
+        elif path.endswith(APP_MENUBAR_SUFFIX) and not path.startswith("/org/appmenu/"):
+            application = path[:-len(APP_MENUBAR_SUFFIX)]
+            windows = [other for other in paths if re.fullmatch(re.escape(application) + r"/window/\d+", other)]
+            # One menubar but each window's own win.* actions: which ones
+            # to run can't be told.
+            if len(windows) > 1:
+                continue
+            action_paths = {"app": application}
+            if windows:
+                action_paths["win"] = windows[0]
+            found.append({"kind": "gtk", "service": service, "menuPath": path, "actionPaths": action_paths})
+    return found
+
+
+def wayland_menu(pid):
+    """The native Wayland process's one menubar with something in it, if it has just one."""
+    found = []
+    for service in process_connections(pid):
+        if service not in silent:
+            found += [menu for menu in connection_menubars(service) if gtk_has_items(menu)]
+    return found[0] if len(found) == 1 else None
+
+
 def window_title(candidate):
     if "title" not in candidate:
         candidate["title"] = window_properties(candidate["window"]).get("_NET_WM_NAME")
@@ -206,8 +282,8 @@ def dbusmenu_exported(menu):
     return {"kind": "dbusmenu", "service": menu["service"], "path": menu["path"], "layout": layout}
 
 
-def gtk_exported(menu):
-    global gtk_groups
+def gtk_read_menus(menu):
+    """The menu's groups, started, and the numbers of those groups."""
     menus = []
     started = []
     wanted = [0]
@@ -224,7 +300,28 @@ def gtk_exported(menu):
                 for link in (":section", ":submenu"):
                     if link in item and item[link][0] not in started and item[link][0] not in wanted:
                         wanted.append(item[link][0])
-    gtk_groups = started
+    return menus, started
+
+
+def gtk_end(menu, groups):
+    try:
+        call(menu["service"], menu["menuPath"], GTK_MENUS, "End", GLib.Variant("(au)", (groups,)), None)
+    except GLib.Error:
+        pass
+
+
+def gtk_has_items(menu):
+    try:
+        menus, started = gtk_read_menus(menu)
+    except GLib.Error:
+        return False
+    gtk_end(menu, started)
+    return any("label" in item for _group, _number, items in menus for item in items)
+
+
+def gtk_exported(menu):
+    global gtk_groups
+    menus, gtk_groups = gtk_read_menus(menu)
     actions = {}
     for prefix, path in menu["actionPaths"].items():
         try:
@@ -243,11 +340,7 @@ def unfollow():
         bus.signal_unsubscribe(subscription)
     subscriptions.clear()
     if current and current["kind"] == "gtk" and gtk_groups:
-        try:
-            call(current["service"], current["menuPath"], GTK_MENUS, "End",
-                 GLib.Variant("(au)", (gtk_groups,)), None)
-        except GLib.Error:
-            pass
+        gtk_end(current, gtk_groups)
     gtk_groups = []
     current = None
 
@@ -287,10 +380,10 @@ def resolve(retry=True):
     unfollow()
     if focus is None:
         return
-    if not focus.get("xwayland"):
-        send({"pid": focus["pid"], "exported": None})
-        return
-    menu = choose(candidates(focus["pid"]), focus.get("title"))
+    if focus.get("xwayland"):
+        menu = choose(candidates(focus["pid"]), focus.get("title"))
+    else:
+        menu = wayland_menu(focus["pid"])
     if menu is not None:
         follow(menu)
     elif retry:

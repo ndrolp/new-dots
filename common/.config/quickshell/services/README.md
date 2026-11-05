@@ -95,14 +95,20 @@ app menu (`setUsing`): an enabled app menu bar element, or the app menu
 popover, which can open at any time and so keeps it running. It tells the
 script the focused window (pid, title, whether it runs under XWayland) and
 keeps what it answers as `exported`, for `exportedPid`.
-The script finds the window's menu two ways, both only for XWayland windows:
+For an XWayland window the script finds the menu two ways:
 DBusMenu menus registered with `com.canonical.AppMenu.Registrar` (Electron,
 Java, Qt on X11), and the `org.gtk.Menus` menubar GTK apps export through
 `appmenu-gtk-module`, found from the `_GTK_*` properties of their X11 windows
 (read with `xprop`). Hyprland doesn't tell X11 window ids, so a menu is the
 focused window's when the D-Bus connection exporting it has the window's pid
 (`GetConnectionUnixProcessID`); among several, the one whose X11 window has the
-same title wins. It follows the menu's change signals and hands it over again
+same title wins. A native Wayland window has neither, so the script looks
+through the objects its process exports for a window's menubar published by
+`appmenu-gtk-module` (`/org/appmenu/gtk/window/menus/menubar/<n>`) or a
+`GtkApplication`'s (`<app>/menus/menubar`). Empty ones don't count, which is how
+a hidden menubar is exported, and a process with several windows that could own
+the menu shows none: nothing tells them apart, and an item could act on the
+wrong one. It follows the menu's change signals and hands it over again
 when it changes, and runs the items chosen (`activate`). What it hands over is
 raw; `components/AppMenuModel.js` (`exportedMenus`) makes menus of it, tested
 without D-Bus. With no registrar, no `xprop`, no python-gobject or an app that

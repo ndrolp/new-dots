@@ -18,6 +18,7 @@ suites=(
     colorschemes/colorscheme_changer_tests.sh
     common/.config/quickshell/tests/state-files.sh
     common/.config/quickshell/tests/startup.sh
+    common/.config/quickshell/tests/app-menu-bridge.sh
 )
 
 case "${1:-}" in

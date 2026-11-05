@@ -125,6 +125,16 @@ the launcher history and wallpaper services create those files when missing:
 common/.config/quickshell/tests/state-files.sh
 ```
 
+`app-menu-bridge.sh` runs the real `services/app-menu-bridge.py` against a fake
+app (`fixtures/fake-menu-app.py`) on a private session bus, with no display: it
+finds a native Wayland window's menubar, a `GtkApplication`'s and its actions,
+runs a chosen item, shows nothing for hidden menubars or several windows, and
+isn't held up by a connection that never answers:
+
+```sh
+common/.config/quickshell/tests/app-menu-bridge.sh
+```
+
 `startup.sh` checks that `start.sh` creates the machine-local colorscheme links
 (`colorschemes/active` and `shown`) before Quickshell starts, through the
 colorscheme changer's harness, so no live session is touched:
