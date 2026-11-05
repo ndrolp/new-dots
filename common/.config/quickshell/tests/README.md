@@ -3,10 +3,12 @@
 Tests for the pure JS models behind the settings: bar profiles
 (`config/BarProfileModel.js`), desktop widgets (`config/DesktopWidgetsModel.js`)
 and schema migrations (`config/SchemaMigrations.js`). They also cover the
-popups: where a popup opens (`components/panels/PopupPlacement.js`), the
-outline of an attached popup (`PopupOutline.js`), the surface every popup
-draws on and that it ignores input while closing (`PopupSurface.qml`), what
-a popup's focus grab holds
+popups: where a popup opens on each Bar position
+(`components/panels/PopupPlacement.js`), the outline of an attached popup
+on each of them (`PopupOutline.js`), the surface every popup draws on, how
+it reveals away from the bar and that it ignores input while closing
+(`PopupSurface.qml`; `PopupFrame.qml` itself is a Quickshell window and isn't
+tested here), what a popup's focus grab holds
 (`PopupGrab.js`), which bar elements close the open popup when pressed
 (`BarPopupCloser.qml`), the shared popup parts (`PopupTitle`,
 `PopupHeader`, `PopupRow`…), the control center's tiles and sliders,

@@ -7,10 +7,10 @@ import "PopupPlacement.js" as PopupPlacement
 // The frame every popup shares: the window placed next to the bar element
 // that opened it, hosting the popup surface. A popup only puts its contents
 // inside; the window is as tall as they are unless the popup says otherwise.
-// On an opaque or docked bar the popup is attached: it hangs from the bar's
-// bottom edge in the bar's own color and opacity. On any other transparent bar
-// it floats below. A focus grab, not the compositor's popup grab, closes it on a
-// click outside it and its bar, so the window stays up for the close animation.
+// On an opaque or docked bar the popup is attached: it hangs from the bar in the
+// bar's own color and opacity. On any other transparent bar it floats clear of
+// it. A focus grab, not the compositor's popup grab, closes it on a click
+// outside it and its bar, so the window stays up for the close animation.
 PopupWindow {
     id: frame
 
@@ -18,11 +18,14 @@ PopupWindow {
     required property string popup
     required property var appearance
     required property var barWindow
-    // The bar content; places popups under the bar element that opened them.
+    // The bar content; places popups at the bar element that opened them.
     property var anchorProvider: null
     property bool open: false
-    // Where the popup opens when its element isn't on the bar: "left" or "right".
+    // Where the popup opens when its element isn't on the bar: "left" or
+    // "right", which on a side bar mean its top and bottom.
     property string edge: "right"
+    // The screen edge the bar sits on.
+    readonly property string barPosition: appearance.barPosition || "top"
     // Decided by the bar profile of this bar's monitor.
     readonly property bool attached: PopupPlacement.attached(appearance)
     // Room around a floating surface inside the window.
@@ -30,15 +33,31 @@ PopupWindow {
     // How far the curved corners joining an attached popup to the bar reach.
     readonly property real joinRadius: 6
     // Where the window opens in the bar window.
-    readonly property real placedX: PopupPlacement.x({
+    readonly property var placed: PopupPlacement.position({
+        barPosition: barPosition,
         popupWidth: implicitWidth,
-        barWidth: barWindow.width,
+        popupHeight: implicitHeight,
+        window: { width: barWindow.width, height: barWindow.height },
+        barHeight: appearance.barHeight,
         padding: appearance.horizontalPadding,
         radius: appearance.radius,
+        spacing: appearance.spacing,
+        attached: attached,
         trigger: trigger(),
-        edge: edge
+        edge: edge,
+        content: anchorProvider ? {
+            x: anchorProvider.x,
+            y: anchorProvider.y,
+            width: anchorProvider.width,
+            height: anchorProvider.height
+        } : null
     })
+    // The stretch of the bar the window spans, as plain numbers so that only a
+    // real move is news to the bar.
+    readonly property real placedStart: placed.start
+    readonly property real placedEnd: placed.end
     readonly property var room: PopupPlacement.room({
+        barPosition: barPosition,
         attached: attached,
         inset: inset,
         joinRadius: joinRadius
@@ -55,7 +74,12 @@ PopupWindow {
 
     function trigger() {
         const element = anchorProvider ? anchorProvider.popupTrigger(popup) : null;
-        return element ? { x: anchorProvider.x + element.x, width: element.width } : null;
+        if (!element)
+            return null;
+
+        return PopupPlacement.vertical(barPosition)
+            ? { start: anchorProvider.y + element.y, length: element.height }
+            : { start: anchorProvider.x + element.x, length: element.width };
     }
 
     visible: reveal > 0
@@ -64,13 +88,8 @@ PopupWindow {
             dismissed();
     }
     anchor.window: barWindow
-    anchor.rect.x: placedX
-    anchor.rect.y: PopupPlacement.y({
-        barHeight: appearance.barHeight,
-        spacing: appearance.spacing,
-        attached: attached,
-        content: anchorProvider ? { y: anchorProvider.y, height: anchorProvider.height } : null
-    })
+    anchor.rect.x: placed.x
+    anchor.rect.y: placed.y
     color: "transparent"
 
     implicitHeight: Math.max(surface.implicitHeight, heldHeight + surface.padding * 2) + room.top + room.bottom
@@ -88,13 +107,17 @@ PopupWindow {
     PopupSurface {
         id: surface
 
+        // A window held taller than the surface keeps it against the bar.
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.leftMargin: frame.room.side
-        anchors.rightMargin: frame.room.side
+        anchors.top: frame.barPosition === "bottom" ? undefined : parent.top
+        anchors.bottom: frame.barPosition === "bottom" ? parent.bottom : undefined
+        anchors.leftMargin: frame.room.left
+        anchors.rightMargin: frame.room.right
         anchors.topMargin: frame.room.top
+        anchors.bottomMargin: frame.room.bottom
         height: implicitHeight
+        barPosition: frame.barPosition
         open: frame.open
         attached: frame.attached
         joinRadius: frame.joinRadius
