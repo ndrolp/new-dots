@@ -36,6 +36,7 @@ Item {
     property string activePopup: ""
     // Where each element goes, provided by the bar's single walk per zone.
     property var elementX: element => 0
+    property var elementY: element => 0
     // Whether an element sits in a group, provided by the bar's walk.
     property var elementGrouped: element => false
     signal popupRequested(string popup)
@@ -62,9 +63,6 @@ Item {
     readonly property real itemHeight: appearance.barTransparent
         ? appearance.workspaceButtonSize + (appearance.pillVerticalPadding * 2)
         : Math.max(1, appearance.barHeight - (appearance.elementVerticalPadding * 2))
-
-    height: itemHeight
-    implicitHeight: itemHeight
 
     Config.Theme {
         id: theme
@@ -138,6 +136,7 @@ Item {
 
         visible: root.itemVisible("notifications")
         x: root.elementX("notifications")
+        y: root.elementY("notifications")
         width: notificationContent.implicitWidth + 16
         height: root.itemHeight
         radius: root.appearance.radius
@@ -194,6 +193,7 @@ Item {
 
         visible: root.itemVisible("recording")
         x: root.elementX("recording")
+        y: root.elementY("recording")
         width: recordingContent.implicitWidth + 16
         height: root.itemHeight
         radius: root.appearance.radius
@@ -272,6 +272,7 @@ Item {
         grouped: root.elementGrouped("keepAwake")
         visible: root.itemVisible("keepAwake")
         x: root.elementX("keepAwake")
+        y: root.elementY("keepAwake")
         height: root.itemHeight
         onPopupRequested: root.popupRequested("keepAwake")
     }
@@ -283,6 +284,7 @@ Item {
         border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
         visible: root.itemVisible("media")
         x: root.elementX("media")
+        y: root.elementY("media")
         width: mediaContent.implicitWidth + 16
         height: root.itemHeight
         radius: root.appearance.radius
@@ -386,6 +388,7 @@ Item {
 
         visible: root.itemVisible("cava")
         x: root.elementX("cava")
+        y: root.elementY("cava")
         width: cavaBars.implicitWidth + 16
         height: root.itemHeight
         radius: root.appearance.radius
@@ -430,6 +433,7 @@ Item {
 
         visible: root.itemVisible("audio")
         x: root.elementX("audio")
+        y: root.elementY("audio")
         width: audioContent.implicitWidth + 16
         height: root.itemHeight
         radius: root.appearance.radius
@@ -469,6 +473,7 @@ Item {
 
         visible: root.itemVisible("bluetooth")
         x: root.elementX("bluetooth")
+        y: root.elementY("bluetooth")
         width: root.appearance.workspaceButtonSize
         height: root.itemHeight
         radius: root.appearance.radius
@@ -506,6 +511,7 @@ Item {
 
         visible: root.itemVisible("tray")
         x: root.elementX("tray")
+        y: root.elementY("tray")
         width: root.appearance.workspaceButtonSize
         height: root.itemHeight
         radius: root.appearance.radius
@@ -543,6 +549,7 @@ Item {
 
         visible: root.itemVisible("network")
         x: root.elementX("network")
+        y: root.elementY("network")
         width: root.appearance.workspaceButtonSize
         height: root.itemHeight
         radius: root.appearance.radius
@@ -580,6 +587,7 @@ Item {
 
         visible: root.itemVisible("battery")
         x: root.elementX("battery")
+        y: root.elementY("battery")
         width: batteryContent.implicitWidth + 16
         height: root.itemHeight
         radius: root.appearance.radius
@@ -633,6 +641,7 @@ Item {
 
         visible: root.itemVisible("clock")
         x: root.elementX("clock")
+        y: root.elementY("clock")
         width: clockContent.implicitWidth + 16
         height: root.itemHeight
         radius: root.appearance.radius

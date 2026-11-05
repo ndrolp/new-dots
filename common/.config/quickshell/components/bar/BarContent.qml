@@ -4,6 +4,7 @@ import QtQuick.Effects
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 import "BarElementItems.js" as BarElementItemsModel
+import "BarLayout.js" as BarLayout
 
 Item {
     id: root
@@ -43,6 +44,17 @@ Item {
         ? appearance.horizontalPadding : 0
     // Room between a group's shared background and its first and last element.
     readonly property real groupPadding: appearance.spacing
+    // The bar as BarLayout measures it.
+    readonly property var layoutBar: ({
+        barPosition: appearance.barPosition,
+        width: root.width,
+        height: root.height,
+        spacing: appearance.spacing,
+        groupPadding: groupPadding,
+        endPadding: dockedPadding
+    })
+    // Whether the bar runs from the top of the screen down.
+    readonly property bool vertical: BarLayout.vertical(layoutBar)
 
     // The item of every bar element, by element id.
     readonly property var elementItems: Object.assign({
@@ -69,7 +81,7 @@ Item {
 
     function elementShown(element) {
         const item = elementItem(element);
-        return item !== null && item.visible && item.width > 0;
+        return item !== null && item.visible && BarLayout.itemLength(layoutBar, item) > 0;
     }
 
     // Positions within a zone, relative to its start, and one background per
@@ -77,46 +89,19 @@ Item {
     function zoneLayout(zone) {
         const groups = BarProfileModel.zoneGroups(appearance.barElements, zone,
             element => root.elementShown(element));
-        const positions = {};
-        const backgrounds = [];
-        let x = 0;
-
-        for (let groupIndex = 0; groupIndex < groups.length; groupIndex++) {
-            const group = groups[groupIndex];
-            const grouped = group.length > 1;
-            const start = groupIndex > 0 ? x + appearance.spacing : 0;
-
-            x = start + (grouped ? groupPadding : 0);
-            for (let index = 0; index < group.length; index++) {
-                if (index > 0)
-                    x += appearance.spacing;
-                positions[group[index]] = { x: x, grouped: grouped };
-                x += elementItem(group[index]).width;
-            }
-
-            if (grouped) {
-                x += groupPadding;
-                backgrounds.push({ x: start, width: x - start });
-            }
-        }
-
-        return { positions: positions, backgrounds: backgrounds, width: x };
+        return BarLayout.zone(layoutBar, groups, element => BarLayout.itemLength(layoutBar, elementItem(element)));
     }
 
-    function zoneWidth(zone) {
-        return zoneLayout(zone).width;
+    function zoneLength(zone) {
+        return zoneLayout(zone).length;
     }
 
     function zoneStart(zone) {
-        if (zone === "left")
-            return dockedPadding;
-        if (zone === "right")
-            return root.width - zoneWidth("right") - dockedPadding;
-        return Math.round((root.width - zoneWidth("center")) / 2);
+        return BarLayout.zoneStart(layoutBar, zone, zoneLength(zone));
     }
 
     function zoneEnd(zone) {
-        return zoneStart(zone) + zoneWidth(zone);
+        return zoneStart(zone) + zoneLength(zone);
     }
 
     function elementPosition(element) {
@@ -124,10 +109,21 @@ Item {
         return zone === "" ? null : zoneLayout(zone).positions[element] || null;
     }
 
-    function elementX(element) {
+    // Where an element goes, { x, y }: at its place along the bar, centred
+    // across it.
+    function elementPlace(element) {
         const zone = BarProfileModel.elementZone(appearance.barElements, element);
         const position = elementPosition(element);
-        return zoneStart(zone) + (position ? position.x : 0);
+        return BarLayout.place(layoutBar, zoneStart(zone) + (position ? position.start : 0),
+            elementItem(element) || { width: 0, height: 0 });
+    }
+
+    function elementX(element) {
+        return elementPlace(element).x;
+    }
+
+    function elementY(element) {
+        return elementPlace(element).y;
     }
 
     // Grouped elements drop their own pill: the group draws one background.
@@ -145,12 +141,9 @@ Item {
 
         const item = elementItem(element);
 
-        const offset = item.parent === barElementItems ? barElementItems.x : 0;
         // An element with several triggers (the app menu's titles) says
         // which part opened the popup.
-        const area = item.popupTriggerArea || null;
-        return area ? { x: offset + item.x + area.x, width: area.width }
-            : { x: offset + item.x, width: item.width };
+        return BarLayout.trigger(item, item.popupTriggerArea || null);
     }
 
     // The open popup, when it hangs from this zone. A popup whose bar element
@@ -232,19 +225,33 @@ Item {
                 delegate: Rectangle {
                     required property int index
                     readonly property var background: zoneBackgrounds.backgrounds[index]
-                        || { x: 0, width: 0 }
+                        || { start: 0, length: 0 }
+                    readonly property var rect: BarLayout.groupBackground(root.layoutBar,
+                        root.zoneStart(zoneBackgrounds.modelData) + background.start, background.length)
 
-                    x: root.zoneStart(zoneBackgrounds.modelData) + background.x
-                    y: 0
-                    width: background.width
-                    height: parent.height
+                    x: rect.x
+                    y: rect.y
+                    width: rect.width
+                    height: rect.height
                     radius: root.appearance.groupRadius
                     color: Qt.rgba(theme.surface.r, theme.surface.g, theme.surface.b,
                         theme.surface.a * root.appearance.barOpacity / 100)
                     border.width: root.appearance.barTransparentBorder ? 1 : 0
                     border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
+                    // Only along the bar: across it, it follows the bar at once.
                     Behavior on x {
+                        enabled: !root.vertical
+
+                        NumberAnimation {
+                            duration: root.appearance.motion.medium
+                            easing.type: root.appearance.motion.easing
+                        }
+                    }
+
+                    Behavior on y {
+                        enabled: root.vertical
+
                         NumberAnimation {
                             duration: root.appearance.motion.medium
                             easing.type: root.appearance.motion.easing
@@ -252,6 +259,17 @@ Item {
                     }
 
                     Behavior on width {
+                        enabled: !root.vertical
+
+                        NumberAnimation {
+                            duration: root.appearance.motion.medium
+                            easing.type: root.appearance.motion.easing
+                        }
+                    }
+
+                    Behavior on height {
+                        enabled: root.vertical
+
                         NumberAnimation {
                             duration: root.appearance.motion.medium
                             easing.type: root.appearance.motion.easing
@@ -265,11 +283,21 @@ Item {
     ArchButton {
         id: archButton
 
-        anchors.verticalCenter: parent.verticalCenter
         visible: root.elementVisible("arch")
         x: root.elementX("arch")
+        y: root.elementY("arch")
         grouped: root.elementGrouped("arch")
         Behavior on x {
+            enabled: !root.vertical
+
+            NumberAnimation {
+                duration: root.appearance.motion.long
+                easing.type: root.appearance.motion.easing
+            }
+        }
+        Behavior on y {
+            enabled: root.vertical
+
             NumberAnimation {
                 duration: root.appearance.motion.long
                 easing.type: root.appearance.motion.easing
@@ -283,8 +311,8 @@ Item {
     CurrentApp {
         id: currentApp
 
-        anchors.verticalCenter: parent.verticalCenter
         x: root.elementX("currentApp")
+        y: root.elementY("currentApp")
         grouped: root.elementGrouped("currentApp")
         appearance: root.appearance
         monitorScreen: root.monitorScreen
@@ -294,8 +322,8 @@ Item {
     AppMenu {
         id: appMenuElement
 
-        anchors.verticalCenter: parent.verticalCenter
         x: root.elementX("appMenu")
+        y: root.elementY("appMenu")
         grouped: root.elementGrouped("appMenu")
         appearance: root.appearance
         monitorScreen: root.monitorScreen
@@ -308,9 +336,9 @@ Item {
     SystemMonitor {
         id: systemMonitor
 
-        anchors.verticalCenter: parent.verticalCenter
         visible: root.elementVisible("systemMonitor")
         x: root.elementX("systemMonitor")
+        y: root.elementY("systemMonitor")
         grouped: root.elementGrouped("systemMonitor")
         appearance: root.appearance
         systemMonitor: root.systemMonitor
@@ -319,11 +347,21 @@ Item {
 
     Workspaces {
         id: workspaces
-        anchors.verticalCenter: parent.verticalCenter
         visible: root.elementVisible("workspaces")
         x: root.elementX("workspaces")
+        y: root.elementY("workspaces")
         grouped: root.elementGrouped("workspaces")
         Behavior on x {
+            enabled: !root.vertical
+
+            NumberAnimation {
+                duration: root.appearance.motion.long
+                easing.type: root.appearance.motion.easing
+            }
+        }
+        Behavior on y {
+            enabled: root.vertical
+
             NumberAnimation {
                 duration: root.appearance.motion.long
                 easing.type: root.appearance.motion.easing
@@ -338,9 +376,7 @@ Item {
     BarElementItems {
         id: barElementItems
 
-        x: 0
-        width: root.width
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.fill: parent
         appearance: root.appearance
         activePopup: root.activePopup
         monitorScreen: root.monitorScreen
@@ -352,6 +388,7 @@ Item {
         cava: root.cava
         barVisible: root.barVisible
         elementX: element => root.elementX(element)
+        elementY: element => root.elementY(element)
         elementGrouped: element => root.elementGrouped(element)
 
         onPopupRequested: function(popup) {

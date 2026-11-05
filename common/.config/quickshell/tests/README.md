@@ -6,8 +6,12 @@ and schema migrations (`config/SchemaMigrations.js`). They also cover where
 the bar sits on its screen: the edges its window is anchored to, the space it
 reserves and where the margin goes on each Bar position
 (`components/bar/BarPlacement.js`; `Bar.qml` itself is a Quickshell window and
-isn't tested here). They also cover the
-popups: where a popup opens on each Bar position
+isn't tested here), and where the toasts and desktop widgets sit in the area
+the bar leaves free: their anchors and plain gaps from that area
+(`components/panels/NotificationPlacement.js`, `config/DesktopWidgetsModel.js`;
+that the compositor keeps their windows and the OSD inside it depends on
+`ExclusionMode.Normal` on those windows and isn't tested here). They also cover
+the popups: where a popup opens on each Bar position
 (`components/panels/PopupPlacement.js`), the outline of an attached popup
 on each of them (`PopupOutline.js`), the surface every popup draws on, how
 it reveals away from the bar and that it ignores input while closing
@@ -46,7 +50,10 @@ what it draws (`components/bar/CavaBars.qml`), how a docked bar zone hangs
 from the screen edge the bar sits on and keeps its sides on the screen's edge
 straight, on each Bar position (`PopupOutline.js`), and how it is
 drawn and grows for an attached popup (`components/bar/DockedSurface.qml`,
-`DockedZones.js`), how long animations take
+`DockedZones.js`), where zones, bar elements, group backgrounds and popup
+triggers sit along either axis of the bar, to the pixel the anchors they
+replaced put them at (`components/bar/BarLayout.js`; `BarContent.qml` itself
+needs Quickshell's services and isn't tested here), how long animations take
 with and without reduce motion (`config/Motion.js`), night light's
 temperature bounds, the saved temperature, how hyprsunset is run and when
 night light turns on and off (`services/NightLightState.js`), when the lock screen

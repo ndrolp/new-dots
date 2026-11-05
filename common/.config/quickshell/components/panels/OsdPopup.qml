@@ -32,7 +32,8 @@ PanelWindow {
 
     screen: Quickshell.screens.values.length > 0 ? Quickshell.screens.values[0] : null
     color: "transparent"
-    exclusionMode: ExclusionMode.Ignore
+    // Normal: it stays inside what the monitor's bar leaves free.
+    exclusionMode: ExclusionMode.Normal
     implicitWidth: compact ? osdContent.implicitWidth + 32
         : mode === "sink" ? Math.min(460, Math.max(292, osdLabel.implicitWidth + 86)) : 292
     implicitHeight: compact ? 74 : 92
@@ -40,14 +41,13 @@ PanelWindow {
 
     mask: Region {}
 
+    // Anchored to neither left nor right, it centers in that area.
     anchors {
         bottom: true
-        left: true
     }
 
     margins {
         bottom: 36
-        left: screen ? (screen.width - root.implicitWidth) / 2 : 0
     }
 
     Config.Theme {
