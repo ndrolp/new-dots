@@ -1,6 +1,7 @@
 import QtQuick
 import QtTest
 import "../components/bar/BarPlacement.js" as BarPlacement
+import "../components/panels/PopupPlacement.js" as PopupPlacement
 
 // Where the bar sits on its screen: the edges its window is anchored to, the
 // space it reserves and where its content sits in that space.
@@ -70,5 +71,48 @@ TestCase {
     function test_aDockedBarHasNoMarginOrPadding() {
         compare(BarPlacement.contentMargins(bar({ barPosition: "bottom", barTransparent: true,
             transparentBarSlanted: true })), { top: 0, right: 0, bottom: 0, left: 0 });
+    }
+
+    // No bar style is tied to a Bar position: all twelve are a working bar with
+    // the room it reserves, its margins and how its popups open.
+    function test_everyBarStyleWorksOnEveryBarPosition_data() {
+        const opaque = { barTransparent: false, transparentBarSlanted: false };
+        const floating = { barTransparent: true, transparentBarSlanted: false };
+        const docked = { barTransparent: true, transparentBarSlanted: true };
+
+        return [
+            { tag: "opaque top", style: opaque, barPosition: "top", thickness: 30, attached: true,
+                margins: { top: 0, right: 12, bottom: 0, left: 12 } },
+            { tag: "opaque bottom", style: opaque, barPosition: "bottom", thickness: 30, attached: true,
+                margins: { top: 0, right: 12, bottom: 0, left: 12 } },
+            { tag: "opaque left", style: opaque, barPosition: "left", thickness: 30, attached: true,
+                margins: { top: 12, right: 0, bottom: 12, left: 0 } },
+            { tag: "opaque right", style: opaque, barPosition: "right", thickness: 30, attached: true,
+                margins: { top: 12, right: 0, bottom: 12, left: 0 } },
+            { tag: "floating top", style: floating, barPosition: "top", thickness: 36, attached: false,
+                margins: { top: 6, right: 12, bottom: 0, left: 12 } },
+            { tag: "floating bottom", style: floating, barPosition: "bottom", thickness: 36, attached: false,
+                margins: { top: 0, right: 12, bottom: 6, left: 12 } },
+            { tag: "floating left", style: floating, barPosition: "left", thickness: 36, attached: false,
+                margins: { top: 12, right: 0, bottom: 12, left: 6 } },
+            { tag: "floating right", style: floating, barPosition: "right", thickness: 36, attached: false,
+                margins: { top: 12, right: 6, bottom: 12, left: 0 } },
+            { tag: "docked top", style: docked, barPosition: "top", thickness: 30, attached: true,
+                margins: { top: 0, right: 0, bottom: 0, left: 0 } },
+            { tag: "docked bottom", style: docked, barPosition: "bottom", thickness: 30, attached: true,
+                margins: { top: 0, right: 0, bottom: 0, left: 0 } },
+            { tag: "docked left", style: docked, barPosition: "left", thickness: 30, attached: true,
+                margins: { top: 0, right: 0, bottom: 0, left: 0 } },
+            { tag: "docked right", style: docked, barPosition: "right", thickness: 30, attached: true,
+                margins: { top: 0, right: 0, bottom: 0, left: 0 } }
+        ];
+    }
+
+    function test_everyBarStyleWorksOnEveryBarPosition(data) {
+        const styled = bar(Object.assign({ barPosition: data.barPosition }, data.style));
+
+        compare(BarPlacement.thickness(styled), data.thickness);
+        compare(BarPlacement.contentMargins(styled), data.margins);
+        compare(PopupPlacement.attached(styled), data.attached);
     }
 }
