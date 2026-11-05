@@ -10,6 +10,23 @@ TestCase {
     }
 
     // A bar profile is shown by its name with a capital first letter.
+    // Switching needs no migration: nothing but the position changes, and an
+    // element stays in the zone it was saved in.
+    function test_switchingPositionMovesNoElementBetweenZones_data() {
+        return ["bottom", "left", "right", "top"].map(position => ({ tag: position, position: position }));
+    }
+
+    function test_switchingPositionMovesNoElementBetweenZones(data) {
+        const started = fixtures.startedBarState();
+        const before = BarProfileModel.editedProfile(started);
+        const after = BarProfileModel.editedProfile(fixtures.edited(started, { barPosition: data.position }));
+
+        compare(after.barPosition, data.position);
+        compare(JSON.stringify(after.barElements), JSON.stringify(before.barElements));
+        compare(JSON.stringify(Object.assign({}, after, { barPosition: before.barPosition })),
+            JSON.stringify(before));
+    }
+
     function test_aProfileIsShownCapitalised() {
         compare(BarProfileModel.profileDisplayName("presentation"), "Presentation");
         compare(BarProfileModel.profileDisplayName(""), "");

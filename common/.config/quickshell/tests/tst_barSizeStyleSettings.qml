@@ -172,12 +172,30 @@ TestCase {
         return field ? all(field, child => child.options !== undefined && child.chosen !== undefined)[0] : null;
     }
 
-    function test_theBarPositionOffersTopAndBottom() {
+    function test_theBarPositionOffersAllFourPositions() {
         const choice = positionChoice(make().item);
 
         verify(choice);
-        compare(choice.options.map(option => option.value), ["top", "bottom"]);
-        compare(choice.options.map(option => option.label), ["Top", "Bottom"]);
+        compare(choice.options.map(option => option.value), ["top", "bottom", "left", "right"]);
+        compare(choice.options.map(option => option.label), ["Top", "Bottom", "Left", "Right"]);
+    }
+
+    function test_aSideBarPositionIsMarkedAndSaved_data() {
+        return [
+            { tag: "left", position: "left", label: "Left" },
+            { tag: "right", position: "right", label: "Right" }
+        ];
+    }
+
+    function test_aSideBarPositionIsMarkedAndSaved(data) {
+        const built = make();
+        const choice = positionChoice(built.item);
+
+        built.appearance.barPosition = data.position;
+        compare(textOf(choice, data.label).color, theme.accent);
+
+        choice.chosen(data.position);
+        compare(built.appearance.saved, [["barPosition", data.position]]);
     }
 
     function test_theCurrentBarPositionIsMarkedAndChoosingOneSavesIt() {
