@@ -79,7 +79,9 @@ PopupWindow {
         id: focusGrab
 
         windows: PopupGrab.windows(frame, frame.barWindow, focusGrab.active)
-        active: frame.open && frame.visible
+        // Not `visible`, which turns true before the popup has a surface: the
+        // grab would start with nothing to hold, and never activate.
+        active: frame.open && frame.backingWindowVisible
         onCleared: frame.dismissed()
     }
 
