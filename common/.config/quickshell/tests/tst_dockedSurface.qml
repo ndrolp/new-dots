@@ -1,6 +1,8 @@
 import QtQuick
 import QtTest
 import "../components/bar"
+import "../components/panels/PopupOutline.js" as PopupOutline
+import "../components/panels/PopupPlacement.js" as PopupPlacement
 
 // A zone of the docked bar hangs from the bar's screen edge with the outline of
 // an attached popup, except that a side on the screen's edge stays straight.
@@ -154,6 +156,116 @@ TestCase {
         verify(!painted(item, data.round[0], data.round[1]), "the inner side is round");
     }
 
+    function test_aSideZoneIsStraightWhereItMeetsTheEndOfTheScreen_data() {
+        return [
+            { tag: "left bar, top end", barPosition: "left", keep: { keepLeftEdge: true },
+                straight: [[1, 1], [28, 1]], round: [[1, 198], [28, 198]] },
+            { tag: "left bar, bottom end", barPosition: "left", keep: { keepRightEdge: true },
+                straight: [[1, 198], [28, 198]], round: [[1, 1], [28, 1]] },
+            { tag: "right bar, top end", barPosition: "right", keep: { keepLeftEdge: true },
+                straight: [[28, 1], [1, 1]], round: [[28, 198], [1, 198]] },
+            { tag: "right bar, bottom end", barPosition: "right", keep: { keepRightEdge: true },
+                straight: [[28, 198], [1, 198]], round: [[28, 1], [1, 1]] }
+        ];
+    }
+
+    function test_aSideZoneIsStraightWhereItMeetsTheEndOfTheScreen(data) {
+        const item = createTemporaryObject(surface, this,
+            Object.assign({ barPosition: data.barPosition }, data.keep));
+
+        tryVerify(() => painted(item, 15, 100));
+        for (const point of data.straight)
+            verify(painted(item, point[0], point[1]), "the end of the screen stays straight");
+        for (const point of data.round)
+            verify(!painted(item, point[0], point[1]), "the other end curves");
+    }
+
+    function test_aSideZoneWidensBesideThePopupThatOpensFromIt_data() {
+        return [
+            { tag: "left", inner: 28 },
+            { tag: "right", inner: 1 }
+        ];
+    }
+
+    function test_aSideZoneWidensBesideThePopupThatOpensFromIt(data) {
+        const item = createTemporaryObject(surface, this,
+            { barPosition: data.tag, popup: { left: 50, right: 350 } });
+
+        tryCompare(item, "y", 36);
+        tryCompare(item, "height", 328);
+        tryVerify(() => painted(item, data.inner, 15));
+        verify(painted(item, data.inner, 312), "its inner side reaches past the popup's far join");
+    }
+
+    // An attached popup in a bar window 30 thick and 800 long, opened by an
+    // element 40 long at 300: 212 long and 320 deep, as its window is on every
+    // Bar position. Returns where its joins start and end on the bar's inner
+    // side, in the bar window.
+    function attachedJoins(barPosition) {
+        const side = PopupPlacement.vertical(barPosition);
+        const windowWidth = side ? 320 : 212;
+        const windowHeight = side ? 212 : 320;
+        const room = PopupPlacement.room({ barPosition: barPosition, attached: true, inset: 12, joinRadius: 6 });
+        const placed = PopupPlacement.position({
+            barPosition: barPosition,
+            popupWidth: windowWidth,
+            popupHeight: windowHeight,
+            window: { width: side ? 30 : 800, height: side ? 800 : 30 },
+            barHeight: 30,
+            padding: 10,
+            radius: 8,
+            spacing: 5,
+            attached: true,
+            trigger: { start: 300, length: 40 },
+            edge: "right",
+            content: null
+        });
+        const surfaceWidth = windowWidth - room.left - room.right;
+        const surfaceHeight = windowHeight - room.top - room.bottom;
+        const outline = PopupOutline.attachedPath({
+            barPosition: barPosition,
+            width: surfaceWidth,
+            height: surfaceHeight,
+            unfolded: side ? surfaceWidth : surfaceHeight,
+            radius: 8,
+            joinRadius: 6
+        });
+        const left = placed.x + room.left + outline.x;
+        const top = placed.y + room.top + outline.y;
+
+        return {
+            span: { left: placed.start, right: placed.end },
+            start: { x: left + outline.start.x, y: top + outline.start.y },
+            end: { x: left + outline.segments[0].x, y: top + outline.segments[0].y }
+        };
+    }
+
+    function test_anAttachedPopupsJoinsMeetTheZoneItHangsFrom_data() {
+        return [
+            { tag: "top", start: { x: 214, y: 30 }, end: { x: 426, y: 30 } },
+            { tag: "bottom", start: { x: 214, y: 0 }, end: { x: 426, y: 0 } },
+            { tag: "left", start: { x: 30, y: 214 }, end: { x: 30, y: 426 } },
+            { tag: "right", start: { x: 0, y: 214 }, end: { x: 0, y: 426 } }
+        ];
+    }
+
+    function test_anAttachedPopupsJoinsMeetTheZoneItHangsFrom(data) {
+        const joins = attachedJoins(data.tag);
+        const item = createTemporaryObject(surface, this,
+            { barPosition: data.tag, spanLeft: 300, spanRight: 340, popup: joins.span });
+
+        tryCompare(item, "zoneLength", 240);
+
+        // The straight stretch of the zone's inner side, between its corners.
+        const flatEnd = item.path.segments[3];
+        const flatStart = item.path.segments[4];
+
+        compare(joins.start, data.start);
+        compare(joins.end, data.end);
+        compare({ x: item.x + flatStart.x, y: item.y + flatStart.y }, data.start);
+        compare({ x: item.x + flatEnd.x, y: item.y + flatEnd.y }, data.end);
+    }
+
     function test_movingTheBarRepaintsTheZone() {
         const item = createTemporaryObject(surface, this);
 
@@ -161,5 +273,15 @@ TestCase {
         item.barPosition = "bottom";
         tryVerify(() => painted(item, 5, 28));
         tryVerify(() => !painted(item, 5, 1));
+    }
+
+    function test_movingTheBarToTheSideRepaintsTheZone() {
+        const item = createTemporaryObject(surface, this);
+
+        tryVerify(() => painted(item, 5, 1));
+        item.barPosition = "right";
+        tryVerify(() => item.height === 200 && painted(item, 15, 100));
+        verify(painted(item, 28, 5), "its join meets the bar");
+        verify(!painted(item, 1, 5), "its corner is round");
     }
 }

@@ -159,6 +159,12 @@ TestCase {
             { tag: "start on the left", barPosition: "left", keepStart: true, points: [
                 [0, 0], [0, 200], [6, 194, 0, 194], [22, 194], [30, 186, 30, 194], [30, 0]
             ] },
+            { tag: "end on the left", barPosition: "left", keepEnd: true, points: [
+                [0, 0], [0, 200], [30, 200], [30, 14], [22, 6, 30, 6], [6, 6], [0, 0, 0, 6]
+            ] },
+            { tag: "start on the right", barPosition: "right", keepStart: true, points: [
+                [30, 0], [30, 200], [24, 194, 30, 194], [8, 194], [0, 186, 0, 194], [0, 0]
+            ] },
             { tag: "end on the right", barPosition: "right", keepEnd: true, points: [
                 [30, 0], [30, 200], [0, 200], [0, 14], [8, 6, 0, 6], [24, 6], [30, 0, 30, 6]
             ] }
