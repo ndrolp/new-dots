@@ -1,6 +1,7 @@
 import QtQuick
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
+import "BarLayout.js" as BarLayout
 
 Rectangle {
     id: root
@@ -15,11 +16,17 @@ Rectangle {
     readonly property bool ownPill: appearance.barTransparent && !grouped
     readonly property var options: BarProfileModel.elementOptions(appearance.barElements, "workspaces")
 
-    implicitWidth: workspaceRow.implicitWidth + (ownPill ? 16 : 0)
-    implicitHeight: appearance.barTransparent
-        ? workspaceRow.implicitHeight + (ownPill
-            ? (appearance.pillVerticalPadding + 2) * 2 : 0)
-        : Math.max(1, appearance.barHeight - (appearance.elementVerticalPadding * 2))
+    readonly property bool vertical: BarLayout.vertical(appearance)
+    // The element wraps its line of buttons, which runs along the bar.
+    readonly property var size: BarLayout.size(appearance,
+        (vertical ? workspaceStack.implicitHeight : workspaceStack.implicitWidth) + (ownPill ? 16 : 0),
+        appearance.barTransparent
+            ? (vertical ? workspaceStack.implicitWidth : workspaceStack.implicitHeight) + (ownPill
+                ? (appearance.pillVerticalPadding + 2) * 2 : 0)
+            : BarLayout.elementThickness(appearance))
+
+    implicitWidth: size.width
+    implicitHeight: size.height
     width: implicitWidth
     height: implicitHeight
     radius: appearance.radius
@@ -34,22 +41,36 @@ Rectangle {
         }
     }
 
+    // Only along the bar: across it, it follows the bar at once.
     Behavior on width {
+        enabled: !root.vertical
+
         NumberAnimation {
             duration: root.appearance.motion.medium
             easing.type: root.appearance.motion.easing
         }
     }
 
-    Row {
-        id: workspaceRow
+    Behavior on height {
+        enabled: root.vertical
+
+        NumberAnimation {
+            duration: root.appearance.motion.medium
+            easing.type: root.appearance.motion.easing
+        }
+    }
+
+    Grid {
+        id: workspaceStack
 
         anchors.centerIn: parent
+        rows: root.vertical ? -1 : 1
+        columns: root.vertical ? 1 : -1
         spacing: appearance.spacing
 
         move: Transition {
             NumberAnimation {
-                properties: "x"
+                properties: "x,y"
                 duration: root.appearance.motion.medium
                 easing.type: root.appearance.motion.easing
             }
@@ -78,13 +99,14 @@ Rectangle {
                     && root.options.glyphs.length >= workspaceId
                     ? String(root.options.glyphs[workspaceId - 1]).trim() : ""
 
-                width: active
+                readonly property var size: BarLayout.size(appearance, active
                     ? appearance.workspaceButtonSize + (appearance.activeWorkspaceHorizontalPadding * 2)
-                    : appearance.workspaceButtonSize
-                height: appearance.barTransparent
+                    : appearance.workspaceButtonSize, appearance.barTransparent
                     ? appearance.workspaceButtonSize - 2
-                    : Math.max(1, appearance.barHeight
-                        - (appearance.elementVerticalPadding * 2))
+                    : BarLayout.elementThickness(appearance))
+
+                width: size.width
+                height: size.height
                 radius: root.options.radius
                 color: active ? theme.accent : urgent
                     ? Qt.rgba(theme.red.r, theme.red.g, theme.red.b, 0.22)
@@ -95,6 +117,17 @@ Rectangle {
                 border.width: urgent ? 1 : 0
 
                 Behavior on width {
+                    enabled: !root.vertical
+
+                    NumberAnimation {
+                        duration: root.appearance.motion.medium
+                        easing.type: root.appearance.motion.easing
+                    }
+                }
+
+                Behavior on height {
+                    enabled: root.vertical
+
                     NumberAnimation {
                         duration: root.appearance.motion.medium
                         easing.type: root.appearance.motion.easing
@@ -102,6 +135,17 @@ Rectangle {
                 }
 
                 Behavior on x {
+                    enabled: !root.vertical
+
+                    NumberAnimation {
+                        duration: root.appearance.motion.medium
+                        easing.type: root.appearance.motion.easing
+                    }
+                }
+
+                Behavior on y {
+                    enabled: root.vertical
+
                     NumberAnimation {
                         duration: root.appearance.motion.medium
                         easing.type: root.appearance.motion.easing

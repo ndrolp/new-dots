@@ -88,6 +88,22 @@ function groupBackground(bar, start, length) {
         : { x: start, y: 0, width: length, height: bar.height };
 }
 
+// How thick a bar element is across the bar. Takes the bar profile.
+function elementThickness(profile) {
+    return profile.barTransparent
+        ? profile.workspaceButtonSize + profile.pillVerticalPadding * 2
+        : Math.max(1, profile.barHeight - profile.elementVerticalPadding * 2);
+}
+
+// The { width, height } of something `length` long along the bar and `thickness`
+// across it. Takes the bar profile, or anything else with the Bar position.
+// Whatever turns with the bar sizes itself through this.
+function size(bar, length, thickness) {
+    return vertical(bar)
+        ? { width: thickness, height: length }
+        : { width: length, height: thickness };
+}
+
 // What opens a popup, { x, y, width, height } in the bar: the whole bar element,
 // or `area`, the part of it that did, relative to the element.
 function trigger(item, area) {

@@ -1,6 +1,7 @@
 import QtQuick
 import "../../config" as Config
 import "../../services/KeepAwakeState.js" as KeepAwakeState
+import "BarLayout.js" as BarLayout
 
 // The keep-awake bar element: a cup, filled and green while keep-awake is on,
 // an outline in the subtext color while it is off. A click asks for the
@@ -15,7 +16,11 @@ Rectangle {
     property bool grouped: false
     signal popupRequested()
 
-    width: keepAwakeIcon.width + 16
+    readonly property var size: BarLayout.size(appearance, keepAwakeIcon.width + 16,
+        BarLayout.elementThickness(appearance))
+
+    width: size.width
+    height: size.height
     radius: appearance.radius
     color: keepAwakeHover.hovered ? theme.surfaceHover
         : grouped || appearance.pillsTransparent || appearance.transparentBarSlanted

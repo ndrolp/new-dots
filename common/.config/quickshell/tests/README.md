@@ -53,7 +53,11 @@ drawn and grows for an attached popup (`components/bar/DockedSurface.qml`,
 `DockedZones.js`), where zones, bar elements, group backgrounds and popup
 triggers sit along either axis of the bar, to the pixel the anchors they
 replaced put them at (`components/bar/BarLayout.js`; `BarContent.qml` itself
-needs Quickshell's services and isn't tested here), how long animations take
+needs Quickshell's services and isn't tested here), how workspaces and icon
+elements size and stack upright on a side bar and stay as they were on a top
+one (`BarLayout.size`, `Workspaces.qml`, `ArchButton.qml`,
+`KeepAwakeElement.qml`; `BarElementItems.qml` needs Quickshell's services, so
+its icons are covered through `BarLayout.size`), how long animations take
 with and without reduce motion (`config/Motion.js`), night light's
 temperature bounds, the saved temperature, how hyprsunset is run and when
 night light turns on and off (`services/NightLightState.js`), when the lock screen

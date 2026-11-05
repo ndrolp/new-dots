@@ -177,4 +177,35 @@ TestCase {
         compare(BarLayout.trigger({ x: 100, y: 6, width: 200, height: 28 }, { x: 40, y: 2, width: 60, height: 24 }),
             { x: 140, y: 8, width: 60, height: 24 });
     }
+
+    function test_anElementRunsItsLengthAlongTheBar_data() {
+        return [
+            { tag: "top", size: { width: 30, height: 24 } },
+            { tag: "bottom", size: { width: 30, height: 24 } },
+            { tag: "left", size: { width: 24, height: 30 } },
+            { tag: "right", size: { width: 24, height: 30 } }
+        ];
+    }
+
+    function test_anElementRunsItsLengthAlongTheBar(data) {
+        compare(BarLayout.size({ barPosition: data.tag }, 30, 24), data.size);
+    }
+
+    function test_withoutABarPositionAnElementLaysOutLikeOnATopBar() {
+        compare(BarLayout.size({}, 30, 24), { width: 30, height: 24 });
+    }
+
+    function test_onAnOpaqueBarAnElementFillsTheBarLessItsPadding() {
+        compare(BarLayout.elementThickness({ barTransparent: false, barHeight: 40, elementVerticalPadding: 3,
+            workspaceButtonSize: 22, pillVerticalPadding: 4 }), 34);
+    }
+
+    function test_onATransparentBarAnElementIsAButtonAndItsPadding() {
+        compare(BarLayout.elementThickness({ barTransparent: true, barHeight: 40, elementVerticalPadding: 3,
+            workspaceButtonSize: 22, pillVerticalPadding: 4 }), 30);
+    }
+
+    function test_anElementNeverCollapsesOnAThinBar() {
+        compare(BarLayout.elementThickness({ barTransparent: false, barHeight: 4, elementVerticalPadding: 3 }), 1);
+    }
 }
