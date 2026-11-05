@@ -63,19 +63,29 @@ function reach(placement) {
     return contentEnd + placement.spacing;
 }
 
-// Takes { barPosition, popupWidth, popupHeight, edge, attached,
+// Takes { barPosition, popupWidth, popupHeight, restingHeight, edge, attached,
 // window: { width, height } (the bar window), barHeight (the bar's thickness),
 // padding, radius, spacing,
 // trigger: { start, length } | null (the bar element, along the bar in bar
 // window coordinates; null when it isn't on the bar),
 // content: { x, y, width, height } | null (the bar content the elements sit in) }.
-// Returns the popup window's { x, y } in the bar window, and the { start, end }
-// it spans along the bar.
+// `popupHeight` is the window's height and `restingHeight` what it would be
+// without a hold (see PopupFrame.heldHeight), the same when left out.
+// Returns the popup window's { x, y } in the bar window, the { start, end } the
+// popup spans along the bar and `surfaceShift`, how far along the bar its surface
+// sits from the start of the window. On a side bar a hold runs along the bar: a
+// popup's place along it follows its resting length, and the window is placed
+// for the held one, so it holds still around that whole stretch. No longer than
+// that, a resting popup always fits inside it.
 function position(placement) {
     const barPosition = placement.barPosition;
     const sideBar = BarPosition.sideBar(barPosition);
+    const barLength = sideBar ? placement.window.height : placement.window.width;
     const length = sideBar ? placement.popupHeight : placement.popupWidth;
-    const along = start(placement, length, sideBar ? placement.window.height : placement.window.width);
+    const resting = !sideBar ? length
+        : placement.restingHeight === undefined ? placement.popupHeight : placement.restingHeight;
+    const along = start(placement, length, barLength);
+    const restingStart = start(placement, resting, barLength);
     const area = BarPosition.area(barPosition, {
         along: along,
         away: reach(placement),
@@ -83,7 +93,13 @@ function position(placement) {
         depth: sideBar ? placement.popupWidth : placement.popupHeight
     }, sideBar ? placement.window.width : placement.window.height);
 
-    return { x: area.x, y: area.y, start: along, end: along + length };
+    return {
+        x: area.x,
+        y: area.y,
+        start: restingStart,
+        end: restingStart + resting,
+        surfaceShift: restingStart - along
+    };
 }
 
 // The room around the surface inside the popup window, { top, right, bottom,

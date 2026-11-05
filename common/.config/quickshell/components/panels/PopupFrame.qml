@@ -37,6 +37,7 @@ PopupWindow {
         barPosition: barPosition,
         popupWidth: implicitWidth,
         popupHeight: implicitHeight,
+        restingHeight: restingHeight,
         window: { width: barWindow.width, height: barWindow.height },
         barHeight: appearance.barHeight,
         padding: appearance.horizontalPadding,
@@ -68,6 +69,8 @@ PopupWindow {
     // enough for contents of this height (the larger end), so the window is
     // resized once instead of every frame; 0 lets it follow the surface.
     property real heldHeight: 0
+    // The window's height without that hold.
+    readonly property real restingHeight: surface.implicitHeight + room.top + room.bottom
     default property alias contents: surface.contents
     // Closed from outside while still open: a click outside it and its bar,
     // another grab taking over, or its bar hiding.
@@ -83,7 +86,7 @@ PopupWindow {
     anchor.rect.y: placed.y
     color: "transparent"
 
-    implicitHeight: Math.max(surface.implicitHeight, heldHeight + surface.padding * 2) + room.top + room.bottom
+    implicitHeight: Math.max(restingHeight, heldHeight + surface.padding * 2 + room.top + room.bottom)
 
     HyprlandFocusGrab {
         id: focusGrab
@@ -98,14 +101,15 @@ PopupWindow {
     PopupSurface {
         id: surface
 
-        // A window held taller than the surface keeps it against the bar.
+        // A window held taller than the surface keeps it against the bar, or
+        // on a side bar where it would rest.
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: frame.barPosition === "bottom" ? undefined : parent.top
         anchors.bottom: frame.barPosition === "bottom" ? parent.bottom : undefined
         anchors.leftMargin: frame.room.left
         anchors.rightMargin: frame.room.right
-        anchors.topMargin: frame.room.top
+        anchors.topMargin: frame.room.top + frame.placed.surfaceShift
         anchors.bottomMargin: frame.room.bottom
         height: implicitHeight
         barPosition: frame.barPosition

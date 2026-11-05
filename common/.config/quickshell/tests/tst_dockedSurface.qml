@@ -198,6 +198,31 @@ TestCase {
         verify(painted(item, data.inner, 312), "its inner side reaches past the popup's far join");
     }
 
+    function test_aZoneGrowsSlowlyForAPopupThatOpens() {
+        const item = createTemporaryObject(surface, this, {
+            motion: { medium: 100000, easing: 0 }
+        });
+
+        item.popup = { left: 50, right: 200, resizing: false };
+        verify(item.growLeft < 1, "the growth animates");
+    }
+
+    // A popup resizing along a side bar (the control center changing stage): its
+    // own animation is the zone's, or the zone would lag behind it.
+    function test_aZoneKeepsUpWithAResizingPopup() {
+        const item = createTemporaryObject(surface, this, {
+            motion: { medium: 100000, easing: 0 },
+            barPosition: "left"
+        });
+
+        item.popup = { left: 150, right: 250, resizing: true };
+        item.popup = { left: 50, right: 200, resizing: true };
+        verify(item.growth.left > 0);
+        compare(item.growLeft, item.growth.left);
+        item.popup = { left: 40, right: 200, resizing: true };
+        compare(item.growLeft, item.growth.left);
+    }
+
     // An attached popup in a bar window 30 thick and 800 long, opened by an
     // element 40 long at 300: 212 long and 320 deep, as its window is on every
     // Bar position. Returns where its joins start and end on the bar's inner

@@ -22,7 +22,8 @@ Canvas {
     // Where the zone sits while no popup is open.
     required property real spanLeft
     required property real spanRight
-    // The attached popup hanging from this zone, { left, right }, or null.
+    // The attached popup hanging from this zone, { left, right, resizing }, or
+    // null. While it resizes the zone keeps up with it frame by frame.
     property var popup: null
     property color fillColor: "#313244"
     // The room beyond a zone's contents for the curves on that side.
@@ -33,6 +34,7 @@ Canvas {
     readonly property var growth: DockedZones.growth({ left: spanLeft, right: spanRight },
         popup, joinRadius + theme.radius)
     // Only the growth animates, so the zone still follows its contents at once.
+    readonly property bool growthAnimated: !(popup && popup.resizing)
     property real growLeft: keepLeftEdge ? 0 : growth.left
     property real growRight: keepRightEdge ? 0 : growth.right
     readonly property bool sideBar: BarPosition.sideBar(barPosition)
@@ -54,6 +56,8 @@ Canvas {
     height: sideBar ? zoneLength : thickness
 
     Behavior on growLeft {
+        enabled: root.growthAnimated
+
         NumberAnimation {
             duration: root.motion.medium
             easing.type: root.motion.easing
@@ -61,6 +65,8 @@ Canvas {
     }
 
     Behavior on growRight {
+        enabled: root.growthAnimated
+
         NumberAnimation {
             duration: root.motion.medium
             easing.type: root.motion.easing

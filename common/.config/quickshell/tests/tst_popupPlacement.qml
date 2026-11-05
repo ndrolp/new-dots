@@ -257,6 +257,67 @@ TestCase {
         compare(PopupPlacement.towardsBar(data.tag, 8), data.offset);
     }
 
+    // A control center on a side bar of 1080 px, switching stages between 300
+    // and 700 px long: the window is held 700 long and the popup resizes in it.
+    // Its element is in the middle of the bar, or near either end.
+    function test_aHeldPopupStaysSteadyOnASideBar_data() {
+        const cases = [
+            { tag: "bell in the middle", trigger: { start: 500, length: 30 } },
+            { tag: "bell near the top", trigger: { start: 16, length: 30 } },
+            { tag: "bell near the bottom", trigger: { start: 1040, length: 30 } },
+            { tag: "no bell", trigger: null }
+        ];
+
+        return ["left", "right"].reduce((all, position) => all.concat(cases.map(item =>
+            ({ tag: position + ", " + item.tag, position: position, trigger: item.trigger }))), []);
+    }
+
+    function test_aHeldPopupStaysSteadyOnASideBar(data) {
+        const fields = { trigger: data.trigger, popupHeight: 700 };
+        const held = placedOn(data.position, fields);
+
+        for (let length = 300; length <= 700; length += 10) {
+            const placed = placedOn(data.position, Object.assign({ restingHeight: length }, fields));
+            const resting = placedOn(data.position, { trigger: data.trigger, popupHeight: length });
+            const tag = "resting at " + length;
+
+            compare(placed.y, held.y, tag + ": the window holds still");
+            compare(placed.x, held.x, tag + ": the window holds still across the bar");
+            compare(placed.start, resting.y, tag + ": the popup is where it rests");
+            compare(placed.end, resting.y + length, tag + ": the popup ends where it rests");
+            compare(placed.y + placed.surfaceShift, resting.y, tag + ": the surface is where it rests");
+            verify(placed.surfaceShift >= 0, tag + ": the surface starts in the window");
+            verify(placed.surfaceShift + length <= 700, tag + ": the surface ends in the window");
+            verify(placed.start >= 12, tag + ": it stays on screen at the start");
+            verify(placed.end <= 1080 - 12, tag + ": it stays on screen at the end");
+        }
+    }
+
+    function test_aPopupNotHeldSitsAtTheStartOfItsWindow_data() {
+        return [{ tag: "top" }, { tag: "bottom" }, { tag: "left" }, { tag: "right" }];
+    }
+
+    function test_aPopupNotHeldSitsAtTheStartOfItsWindow(data) {
+        compare(placedOn(data.tag, {}).surfaceShift, 0);
+        compare(placedOn(data.tag, { restingHeight: 300 }).surfaceShift, 0);
+    }
+
+    // The hold runs away from a top or bottom bar, so nothing moves along it.
+    function test_aHoldDoesntMoveAPopupAlongATopOrBottomBar_data() {
+        return [{ tag: "top" }, { tag: "bottom" }];
+    }
+
+    function test_aHoldDoesntMoveAPopupAlongATopOrBottomBar(data) {
+        const placed = placedOn(data.tag, { popupHeight: 700, restingHeight: 300 });
+        const window = placedOn(data.tag, { popupHeight: 700 });
+
+        compare(placed.surfaceShift, 0);
+        compare(placed.x, window.x);
+        compare(placed.y, window.y);
+        compare(placed.start, window.start);
+        compare(placed.end, window.end);
+    }
+
     function test_aTriggerIsMeasuredAlongTheBar_data() {
         return [
             { tag: "top", span: { start: 130, length: 60 } },
