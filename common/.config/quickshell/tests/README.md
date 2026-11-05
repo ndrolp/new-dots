@@ -6,8 +6,12 @@ and schema migrations (`config/SchemaMigrations.js`). They also cover where
 the bar sits on its screen: the edges its window is anchored to, the space it
 reserves and where the margin goes on each Bar position
 (`components/bar/BarPlacement.js`; `Bar.qml` itself is a Quickshell window and
-isn't tested here). They also cover the
-popups: where a popup opens on each Bar position
+isn't tested here), and where the toasts and desktop widgets sit in the area
+the bar leaves free: their anchors and plain gaps from that area
+(`components/panels/NotificationPlacement.js`, `config/DesktopWidgetsModel.js`;
+that the compositor keeps their windows and the OSD inside it depends on
+`ExclusionMode.Normal` on those windows and isn't tested here). They also cover
+the popups: where a popup opens on each Bar position
 (`components/panels/PopupPlacement.js`), the outline of an attached popup
 on each of them (`PopupOutline.js`), the surface every popup draws on, how
 it reveals away from the bar and that it ignores input while closing

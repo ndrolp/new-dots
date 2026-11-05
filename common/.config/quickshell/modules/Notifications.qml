@@ -15,6 +15,8 @@ Scope {
     id: root
 
     required property var appearance
+    required property var monitors
+    required property var workspaceService
     required property var notificationHistory
     // The control center module, which opens it on the focused bar.
     required property var controlCenter
@@ -54,6 +56,8 @@ Scope {
 
     Panels.NotificationPopup {
         appearance: root.appearance
+        monitors: root.monitors
+        workspaceService: root.workspaceService
         notificationServer: notificationServer
     }
 

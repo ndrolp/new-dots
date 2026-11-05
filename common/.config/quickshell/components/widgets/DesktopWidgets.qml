@@ -83,14 +83,14 @@ Variants {
         color: Qt.rgba(cardTheme.surface.r, cardTheme.surface.g, cardTheme.surface.b, 0.70)
         border.color: cardTheme.border
         border.width: 1
-        x: position.endsWith("left") ? 28
-            : position.endsWith("right") ? parent.width - width - 28
-            : (parent.width - width) / 2
-        y: position.startsWith("top") ? 62 + root.stackOffset(desktop, position, widget)
-            : position.startsWith("bottom")
-                ? parent.height - height - 36 - root.stackOffset(desktop, position, widget)
-                : (parent.height - root.stackHeight(desktop, position)) / 2
-                    + root.stackOffset(desktop, position, widget)
+        readonly property var placed: DesktopWidgetsModel.cardPosition(position,
+            { width: width, height: height },
+            { width: parent.width, height: parent.height },
+            { offset: root.stackOffset(desktop, position, widget),
+                height: root.stackHeight(desktop, position) })
+
+        x: placed.x
+        y: placed.y
 
         Config.Theme {
             id: cardTheme
@@ -131,7 +131,8 @@ Variants {
 
         screen: modelData
         color: "transparent"
-        exclusionMode: ExclusionMode.Ignore
+        // Normal: the window fills what the monitor's bar leaves free.
+        exclusionMode: ExclusionMode.Normal
         WlrLayershell.namespace: "ndro-shell-desktop-widgets"
         WlrLayershell.layer: WlrLayer.Bottom
 
