@@ -62,6 +62,27 @@ TestCase {
         verify(textOf(item, "Settings"));
     }
 
+    function test_everySectionFitsInTheSidebarWithoutScrolling() {
+        const item = createTemporaryObject(panel, this);
+        const sections = item.sections.map(section => section.label);
+        verify(sections.includes("Wallpapers"));
+        for (const label of sections) {
+            const row = textOf(item, label);
+            const bottom = row.mapToItem(item, 0, row.height).y;
+            verify(bottom <= item.height - 20, label + " ends at " + bottom + ", past the panel");
+        }
+    }
+
+    // A longer list scrolls inside the panel instead of drawing past its edge.
+    function test_theSidebarKeepsItsRowsInsideThePanel() {
+        const item = createTemporaryObject(panel, this);
+        const sidebar = all(item, child => child.objectName === "sectionSidebar")[0];
+        verify(sidebar !== undefined, "the sidebar doesn't scroll");
+        verify(sidebar.clip, "the sidebar draws past its edge");
+        compare(sidebar.width, 180);
+        verify(sidebar.mapToItem(item, 0, sidebar.height).y <= item.height - 20);
+    }
+
     function test_searchingForAnimationsFindsTheMotionSection() {
         const item = createTemporaryObject(panel, this, { sectionQuery: "animation" });
 
