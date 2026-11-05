@@ -233,6 +233,18 @@ TestCase {
         compare(list.width, built.item.width);
     }
 
+    // A tile decoding the whole file keeps tens of MB per tile in memory.
+    function test_tilesDecodeTheirWallpaperAtTileSize() {
+        const previews = all(make().item, child => child.source !== undefined && child.fillMode !== undefined);
+        verify(previews.length > 0);
+        for (const preview of previews) {
+            verify(preview.sourceSize.width > 0 && preview.sourceSize.width <= preview.width * 3,
+                "decoded " + preview.sourceSize.width + " wide for a " + preview.width + " tile");
+            verify(preview.sourceSize.height > 0 && preview.sourceSize.height <= preview.height * 3,
+                "decoded " + preview.sourceSize.height + " high for a " + preview.height + " tile");
+        }
+    }
+
     function test_choosingAWallpaperAppliesItToTheChosenMonitor() {
         const built = make();
         monitorChoice(built.item).chosen("Philips");
