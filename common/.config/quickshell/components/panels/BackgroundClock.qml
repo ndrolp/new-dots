@@ -4,6 +4,7 @@ import Quickshell.Wayland
 import QtQuick
 import QtQuick.Effects
 import "../../config" as Config
+import "../../config/DesktopWidgetsModel.js" as DesktopWidgetsModel
 
 Variants {
     id: root
@@ -23,7 +24,8 @@ Variants {
         readonly property string monitorDescription: hyprlandMonitor !== null
             && hyprlandMonitor.description !== "" ? hyprlandMonitor.description : modelData.name
         color: "transparent"
-        exclusionMode: ExclusionMode.Ignore
+        // Normal: the window fills what the monitor's bar leaves free.
+        exclusionMode: ExclusionMode.Normal
         WlrLayershell.namespace: "ndro-shell-background-clock"
         WlrLayershell.layer: WlrLayer.Bottom
 
@@ -63,22 +65,13 @@ Variants {
         Column {
             id: clockContent
 
-            x: {
-                const position = clockWindow.clock ? clockWindow.clock.position : "center";
-                if (position.endsWith("left"))
-                    return 48;
-                if (position.endsWith("right"))
-                    return parent.width - width - 48;
-                return (parent.width - width) / 2;
-            }
-            y: {
-                const position = clockWindow.clock ? clockWindow.clock.position : "center";
-                if (position.startsWith("top"))
-                    return 82;
-                if (position.startsWith("bottom"))
-                    return parent.height - height - 56;
-                return (parent.height - height) / 2;
-            }
+            readonly property var placed: DesktopWidgetsModel.clockPosition(
+                clockWindow.clock ? clockWindow.clock.position : "center",
+                { width: width, height: height },
+                { width: parent.width, height: parent.height })
+
+            x: placed.x
+            y: placed.y
             spacing: clockWindow.clock.calendarEnabled ? 10 : 4
             opacity: clockWindow.clock.opacity / 100
 

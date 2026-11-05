@@ -124,6 +124,8 @@ ShellRoot {
         id: notifications
 
         appearance: appearance
+        monitors: monitors
+        workspaceService: workspaceService
         notificationHistory: notificationHistory
         controlCenter: controlCenter
     }
