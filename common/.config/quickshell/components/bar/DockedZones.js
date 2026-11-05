@@ -1,7 +1,7 @@
 .pragma library
 
 // How far a zone of the docked bar grows for the attached popup hanging from
-// it. The popup needs bar above it all the way out to the end of its curved
+// it. The popup needs bar beside it all the way out to the end of its curved
 // joins, plus clearance so they don't run into the zone's rounded corners.
 
 // Takes the zone's { left, right }, the popup window's { left, right } or null,

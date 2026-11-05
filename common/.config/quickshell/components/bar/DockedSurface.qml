@@ -1,17 +1,24 @@
 import QtQuick
 import "../../config" as Config
 import "../panels/PopupOutline.js" as PopupOutline
+import "../panels/PopupPlacement.js" as PopupPlacement
 import "DockedZones.js" as DockedZones
 
 // What a zone of the docked bar draws on. It has the outline of an attached
-// popup: hanging from the top of the screen, with small curved corners joining
-// it to that edge and rounded bottom corners. A side on the screen's edge stays
-// straight. While an attached popup hangs from the zone, it grows to receive it.
+// popup: hanging from the screen edge the bar sits on, with small curved corners
+// joining it to that edge and rounded corners away from it. A side on the
+// screen's edge stays straight. While an attached popup hangs from the zone, it
+// grows to receive it. Spans run along the bar, as with zones: left and right
+// are the top and the bottom on a side bar.
 Canvas {
     id: root
 
     // Appearance.motion (durations and easing), as the host has it.
     required property var motion
+    // The screen edge the bar sits on.
+    property string barPosition: "top"
+    // How deep the bar is, from its screen edge inwards.
+    required property real thickness
     // Where the zone sits while no popup is open.
     required property real spanLeft
     required property real spanRight
@@ -28,17 +35,23 @@ Canvas {
     // Only the growth animates, so the zone still follows its contents at once.
     property real growLeft: keepLeftEdge ? 0 : growth.left
     property real growRight: keepRightEdge ? 0 : growth.right
-    readonly property var corners: PopupOutline.attachedCorners({
-        width: width,
-        height: height,
+    readonly property bool side: PopupPlacement.vertical(barPosition)
+    readonly property real zoneStart: spanLeft - growLeft
+    readonly property real zoneLength: spanRight + growRight - zoneStart
+    readonly property var path: PopupOutline.dockedPath({
+        barPosition: barPosition,
+        length: zoneLength,
+        depth: thickness,
         radius: theme.radius,
-        joinRadius: joinRadius
+        joinRadius: joinRadius,
+        keepStart: keepLeftEdge,
+        keepEnd: keepRightEdge
     })
-    readonly property real edgeLeft: keepLeftEdge ? 0 : corners.join
-    readonly property real edgeRight: keepRightEdge ? width : width - corners.join
 
-    x: spanLeft - growLeft
-    width: spanRight + growRight - x
+    x: side ? 0 : zoneStart
+    y: side ? zoneStart : 0
+    width: side ? thickness : zoneLength
+    height: side ? zoneLength : thickness
 
     Behavior on growLeft {
         NumberAnimation {
@@ -54,8 +67,7 @@ Canvas {
         }
     }
 
-    onWidthChanged: requestPaint()
-    onHeightChanged: requestPaint()
+    onPathChanged: requestPaint()
     onFillColorChanged: requestPaint()
 
     Config.Theme {
@@ -64,28 +76,16 @@ Canvas {
 
     onPaint: {
         const context = getContext("2d");
-        const join = corners.join;
-        const bottom = corners.bottom;
 
         context.reset();
         context.fillStyle = fillColor;
         context.beginPath();
-        context.moveTo(0, 0);
-        context.lineTo(width, 0);
-        if (keepRightEdge) {
-            context.lineTo(width, height);
-        } else {
-            context.quadraticCurveTo(edgeRight, 0, edgeRight, join);
-            context.lineTo(edgeRight, height - bottom);
-            context.quadraticCurveTo(edgeRight, height, edgeRight - bottom, height);
-        }
-        if (keepLeftEdge) {
-            context.lineTo(0, height);
-        } else {
-            context.lineTo(edgeLeft + bottom, height);
-            context.quadraticCurveTo(edgeLeft, height, edgeLeft, height - bottom);
-            context.lineTo(edgeLeft, join);
-            context.quadraticCurveTo(edgeLeft, 0, 0, 0);
+        context.moveTo(path.start.x, path.start.y);
+        for (const segment of path.segments) {
+            if (segment.controlX === undefined)
+                context.lineTo(segment.x, segment.y);
+            else
+                context.quadraticCurveTo(segment.controlX, segment.controlY, segment.x, segment.y);
         }
 
         context.closePath();
