@@ -6,7 +6,6 @@ import Quickshell.Services.Pipewire
 import Quickshell.Services.SystemTray
 import Quickshell.Services.UPower
 import QtQuick
-import "../BarPosition.js" as BarPosition
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 import "../StatusText.js" as StatusText
@@ -277,7 +276,6 @@ Item {
     Rectangle {
         id: mediaButton
 
-        readonly property bool sideBar: BarPosition.sideBar(root.appearance.barPosition)
         readonly property var size: root.elementSize(mediaContent.implicitWidth + 16)
 
         border.width: root.appearance.barTransparentBorder && !root.elementGrouped("media") ? 1 : 0
@@ -301,24 +299,8 @@ Item {
             id: mediaHover
         }
 
-        // Only along the bar: across it, it follows the bar at once.
-        Behavior on width {
-            enabled: !mediaButton.sideBar
-
-            NumberAnimation {
-                duration: root.appearance.motion.medium
-                easing.type: root.appearance.motion.easing
-            }
-        }
-
-        Behavior on height {
-            enabled: mediaButton.sideBar
-
-            NumberAnimation {
-                duration: root.appearance.motion.medium
-                easing.type: root.appearance.motion.easing
-            }
-        }
+        AlongBarBehavior on width { appearance: root.appearance }
+        AlongBarBehavior on height { appearance: root.appearance }
 
         Row {
             id: mediaContent
@@ -701,23 +683,8 @@ Item {
                 height: openSize.height
                 clip: true
 
-                Behavior on width {
-                    enabled: !clockContent.sideBar
-
-                    NumberAnimation {
-                        duration: root.appearance.motion.medium
-                        easing.type: root.appearance.motion.easing
-                    }
-                }
-
-                Behavior on height {
-                    enabled: clockContent.sideBar
-
-                    NumberAnimation {
-                        duration: root.appearance.motion.medium
-                        easing.type: root.appearance.motion.easing
-                    }
-                }
+                AlongBarBehavior on width { appearance: root.appearance }
+                AlongBarBehavior on height { appearance: root.appearance }
 
                 ElementText {
                     id: pomodoroText

@@ -240,42 +240,10 @@ Item {
                     border.width: root.appearance.barTransparentBorder ? 1 : 0
                     border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
 
-                    // Only along the bar: across it, it follows the bar at once.
-                    Behavior on x {
-                        enabled: !root.sideBar
-
-                        NumberAnimation {
-                            duration: root.appearance.motion.medium
-                            easing.type: root.appearance.motion.easing
-                        }
-                    }
-
-                    Behavior on y {
-                        enabled: root.sideBar
-
-                        NumberAnimation {
-                            duration: root.appearance.motion.medium
-                            easing.type: root.appearance.motion.easing
-                        }
-                    }
-
-                    Behavior on width {
-                        enabled: !root.sideBar
-
-                        NumberAnimation {
-                            duration: root.appearance.motion.medium
-                            easing.type: root.appearance.motion.easing
-                        }
-                    }
-
-                    Behavior on height {
-                        enabled: root.sideBar
-
-                        NumberAnimation {
-                            duration: root.appearance.motion.medium
-                            easing.type: root.appearance.motion.easing
-                        }
-                    }
+                    AlongBarBehavior on x { appearance: root.appearance }
+                    AlongBarBehavior on y { appearance: root.appearance }
+                    AlongBarBehavior on width { appearance: root.appearance }
+                    AlongBarBehavior on height { appearance: root.appearance }
                 }
             }
         }
@@ -288,22 +256,8 @@ Item {
         x: root.elementX("arch")
         y: root.elementY("arch")
         grouped: root.elementGrouped("arch")
-        Behavior on x {
-            enabled: !root.sideBar
-
-            NumberAnimation {
-                duration: root.appearance.motion.long
-                easing.type: root.appearance.motion.easing
-            }
-        }
-        Behavior on y {
-            enabled: root.sideBar
-
-            NumberAnimation {
-                duration: root.appearance.motion.long
-                easing.type: root.appearance.motion.easing
-            }
-        }
+        AlongBarBehavior on x { appearance: root.appearance; duration: root.appearance.motion.long }
+        AlongBarBehavior on y { appearance: root.appearance; duration: root.appearance.motion.long }
         appearance: root.appearance
         active: root.configOpen
         onClicked: root.configRequested(root.monitorScreen)
@@ -352,22 +306,8 @@ Item {
         x: root.elementX("workspaces")
         y: root.elementY("workspaces")
         grouped: root.elementGrouped("workspaces")
-        Behavior on x {
-            enabled: !root.sideBar
-
-            NumberAnimation {
-                duration: root.appearance.motion.long
-                easing.type: root.appearance.motion.easing
-            }
-        }
-        Behavior on y {
-            enabled: root.sideBar
-
-            NumberAnimation {
-                duration: root.appearance.motion.long
-                easing.type: root.appearance.motion.easing
-            }
-        }
+        AlongBarBehavior on x { appearance: root.appearance; duration: root.appearance.motion.long }
+        AlongBarBehavior on y { appearance: root.appearance; duration: root.appearance.motion.long }
         appearance: root.appearance
         monitorScreen: root.monitorScreen
         monitors: root.monitors

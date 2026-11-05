@@ -42,32 +42,15 @@ Rectangle {
         }
     }
 
-    // Only along the bar: across it, it follows the bar at once.
-    Behavior on width {
-        enabled: !root.sideBar
+    AlongBarBehavior on width { appearance: root.appearance }
+    AlongBarBehavior on height { appearance: root.appearance }
 
-        NumberAnimation {
-            duration: root.appearance.motion.medium
-            easing.type: root.appearance.motion.easing
-        }
-    }
-
-    Behavior on height {
-        enabled: root.sideBar
-
-        NumberAnimation {
-            duration: root.appearance.motion.medium
-            easing.type: root.appearance.motion.easing
-        }
-    }
-
-    Grid {
+    ElementStack {
         id: workspaceStack
 
         anchors.centerIn: parent
-        rows: root.sideBar ? -1 : 1
-        columns: root.sideBar ? 1 : -1
-        spacing: appearance.spacing
+        appearance: root.appearance
+        spacing: root.appearance.spacing
 
         move: Transition {
             NumberAnimation {
@@ -117,41 +100,10 @@ Rectangle {
                 border.color: urgent ? theme.red : "transparent"
                 border.width: urgent ? 1 : 0
 
-                Behavior on width {
-                    enabled: !root.sideBar
-
-                    NumberAnimation {
-                        duration: root.appearance.motion.medium
-                        easing.type: root.appearance.motion.easing
-                    }
-                }
-
-                Behavior on height {
-                    enabled: root.sideBar
-
-                    NumberAnimation {
-                        duration: root.appearance.motion.medium
-                        easing.type: root.appearance.motion.easing
-                    }
-                }
-
-                Behavior on x {
-                    enabled: !root.sideBar
-
-                    NumberAnimation {
-                        duration: root.appearance.motion.medium
-                        easing.type: root.appearance.motion.easing
-                    }
-                }
-
-                Behavior on y {
-                    enabled: root.sideBar
-
-                    NumberAnimation {
-                        duration: root.appearance.motion.medium
-                        easing.type: root.appearance.motion.easing
-                    }
-                }
+                AlongBarBehavior on width { appearance: root.appearance }
+                AlongBarBehavior on height { appearance: root.appearance }
+                AlongBarBehavior on x { appearance: root.appearance }
+                AlongBarBehavior on y { appearance: root.appearance }
 
                 Behavior on color {
                     ColorAnimation {
