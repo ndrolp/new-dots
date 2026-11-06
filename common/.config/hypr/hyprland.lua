@@ -18,7 +18,11 @@ require("modules.rules.apps")
 ------------------
 
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
-require("modules.monitors.monitors")
+-- hyprdynamicmonitors writes this file, so it's missing until its first profile.
+local monitorsLoaded, monitorsError = pcall(require, "modules.monitors.monitors")
+if not monitorsLoaded and not tostring(monitorsError):find("not found", 1, true) then
+	error(monitorsError)
+end
 ---------------------
 ---- MY PROGRAMS ----
 ---------------------
