@@ -268,3 +268,13 @@ hl.window_rule({
 	move = "20 monitor_h-120",
 	float = true,
 })
+
+-----------------------
+---- MONITOR SETUP ----
+-----------------------
+
+-- Applies the saved monitor setup. It comes last so it wins over the rules in monitors.lua, and so an
+-- error here can't stop the keybinds from registering, which would trip Hyprland's emergency mode.
+-- hyprdynamicmonitors still owns the monitors of a machine with no saved file, so with none this
+-- stands aside. Removing hyprdynamicmonitors removes stand_aside too, and the automatic setup takes over.
+require("modules.monitors.apply").install({ stand_aside = true })
