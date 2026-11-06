@@ -75,7 +75,7 @@ function groups(monitors, existing, rules) {
     }));
 
     return listed.map(group => Object.assign({}, group, {
-        newWorkspace: nextWorkspace(listed, group.name)
+        newWorkspace: nextWorkspace(listed, group.name, ruled)
     }));
 }
 
@@ -247,14 +247,16 @@ function stepped(ids, selected, offset) {
 }
 
 // The number a new workspace on a monitor takes: the next one after the
-// monitor's last, skipping numbers another monitor has. Null when none is left.
-function nextWorkspace(groups, monitorName) {
+// monitor's last, skipping numbers another monitor has and numbers `ruled`
+// (from ruledMonitors) binds to another monitor, where Hyprland would put it.
+// Null when none is left.
+function nextWorkspace(groups, monitorName, ruled) {
     const group = groups.find(candidate => candidate.name === monitorName);
     const taken = workspaceIds(groups);
     const last = group && group.workspaces.length > 0 ? Math.max(...group.workspaces) : 0;
 
     for (let id = last + 1; id <= lastWorkspace; id++) {
-        if (taken.indexOf(id) === -1)
+        if (taken.indexOf(id) === -1 && (!ruled[id] || ruled[id].name === monitorName))
             return id;
     }
 

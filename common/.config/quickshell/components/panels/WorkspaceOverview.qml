@@ -88,7 +88,8 @@ Variants {
     }
 
     function createWorkspace() {
-        const id = WorkspaceOverview.nextWorkspace(groups, shownOn);
+        const monitor = groups.find(group => group.name === shownOn);
+        const id = monitor === undefined ? null : monitor.newWorkspace;
 
         if (id === null)
             return;

@@ -256,26 +256,26 @@ TestCase {
     function test_aNewWorkspaceTakesTheNextNumberOnItsMonitor() {
         const groups = [{ name: "eDP-1", workspaces: [1, 2] }, { name: "DP-1", workspaces: [] }];
 
-        compare(WorkspaceOverview.nextWorkspace(groups, "eDP-1"), 3);
+        compare(WorkspaceOverview.nextWorkspace(groups, "eDP-1", {}), 3);
     }
 
     function test_aNewWorkspaceSkipsNumbersAnotherMonitorHas() {
         const groups = [{ name: "eDP-1", workspaces: [1, 2] }, { name: "DP-1", workspaces: [3, 4] }];
 
-        compare(WorkspaceOverview.nextWorkspace(groups, "eDP-1"), 5);
+        compare(WorkspaceOverview.nextWorkspace(groups, "eDP-1", {}), 5);
     }
 
     function test_aNewWorkspaceOnAnEmptyMonitorStartsFromTheFirstFreeNumber() {
         const groups = [{ name: "eDP-1", workspaces: [1, 2] }, { name: "DP-1", workspaces: [] }];
 
-        compare(WorkspaceOverview.nextWorkspace(groups, "DP-1"), 3);
+        compare(WorkspaceOverview.nextWorkspace(groups, "DP-1", {}), 3);
     }
 
     function test_noNewWorkspaceIsLeftAfter21() {
         const groups = [{ name: "eDP-1", workspaces: [19] }, { name: "DP-1", workspaces: [20, 21] }];
 
-        compare(WorkspaceOverview.nextWorkspace(groups, "eDP-1"), null);
-        compare(WorkspaceOverview.nextWorkspace(groups, "DP-1"), null);
+        compare(WorkspaceOverview.nextWorkspace(groups, "eDP-1", {}), null);
+        compare(WorkspaceOverview.nextWorkspace(groups, "DP-1", {}), null);
     }
 
     function newTiles(groups) {
@@ -302,6 +302,48 @@ TestCase {
 
         compare(newTiles(WorkspaceOverview.groups([left, right], [], [])),
             [["eDP-1", 3], ["DP-1", null]]);
+    }
+
+    function ruledRange(first, last, monitor) {
+        const rules = [];
+
+        for (let id = first; id <= last; id++)
+            rules.push(rule(id, monitor));
+
+        return rules;
+    }
+
+    // The real rules on the real monitors: 1-10 on the AOC, 11-20 on the Philips.
+    function test_aNumberTheRulesBindToAnotherMonitorIsNotOffered() {
+        const full = Object.assign({}, aoc, { workspaces: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] });
+        const rules = ruledRange(1, 10, "desc:AOC Q27G42XE")
+            .concat(ruledRange(11, 20, "desc:Philips PHL"));
+
+        compare(newTiles(WorkspaceOverview.groups([full, philips], [], rules)),
+            [["DP-1", 21], ["HDMI-A-1", 14]]);
+    }
+
+    function test_aNumberTheRulesBindToThisMonitorIsStillOffered() {
+        const rules = ruledRange(11, 20, "desc:Philips PHL");
+
+        compare(newTiles(WorkspaceOverview.groups([philips], [], rules)), [["HDMI-A-1", 14]]);
+    }
+
+    function test_aRuleForADisconnectedMonitorDoesNotHoldANumberBack() {
+        const rules = ruledRange(11, 20, "desc:Philips PHL");
+        const full = Object.assign({}, aoc, { workspaces: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] });
+
+        compare(newTiles(WorkspaceOverview.groups([full], [], rules)), [["DP-1", 11]]);
+    }
+
+    function test_aMonitorIsOfferedNothingWhenTheRulesHoldEveryNumberLeft() {
+        const empty = Object.assign({}, laptop, { workspaces: [] });
+        const emptyPhilips = Object.assign({}, philips, { workspaces: [] });
+        const last = Object.assign({}, aoc, { workspaces: [20, 21] });
+        const rules = ruledRange(1, 19, "desc:Philips PHL");
+
+        compare(newTiles(WorkspaceOverview.groups([empty, last, emptyPhilips], [], rules)),
+            [["eDP-1", null], ["DP-1", null], ["HDMI-A-1", 1]]);
     }
 
     // A window from a real `hyprctl clients -j` on the laptop at scale 1.6: its
