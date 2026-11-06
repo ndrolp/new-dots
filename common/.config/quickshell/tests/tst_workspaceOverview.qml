@@ -248,4 +248,80 @@ TestCase {
         compare(WorkspaceOverview.nextWorkspace(groups, "eDP-1"), null);
         compare(WorkspaceOverview.nextWorkspace(groups, "DP-1"), null);
     }
+
+    // A window from a real `hyprctl clients -j` on the laptop at scale 1.6: its
+    // mode is 2880x1800, but Hyprland gives window geometry in logical pixels.
+    function test_aWindowKeepsItsPlaceOnAScaledMonitor() {
+        const window = { at: [17, 52], size: [1766, 1061] };
+
+        compare(WorkspaceOverview.miniature(window, laptop, { width: 900, height: 562.5 }),
+            { x: 8.5, y: 26, width: 883, height: 530.5 });
+    }
+
+    function test_aWindowIsPlacedFromItsOwnMonitorsCorner() {
+        const window = { at: [2020, 40], size: [1280, 720] };
+
+        compare(WorkspaceOverview.miniature(window, aoc, { width: 256, height: 144 }),
+            { x: 10, y: 4, width: 128, height: 72 });
+    }
+
+    function test_aWindowOnARotatedMonitorKeepsItsPlaceInThePortraitMiniature() {
+        const window = { at: [4490, 10], size: [1060, 950] };
+
+        compare(WorkspaceOverview.miniature(window, philips, { width: 135, height: 240 }),
+            { x: 1.25, y: 1.25, width: 132.5, height: 118.75 });
+    }
+
+    function windowOn(workspace, details) {
+        return Object.assign({
+            workspace: { id: workspace }, floating: false, fullscreen: 0,
+            pinned: false, hidden: false, grouped: []
+        }, details);
+    }
+
+    function test_aWindowShowsOnItsOwnWorkspaceOnly() {
+        const window = windowOn(2);
+
+        verify(WorkspaceOverview.isShownOn(window, 2, 1));
+        verify(!WorkspaceOverview.isShownOn(window, 3, 1));
+    }
+
+    function test_floatingAndFullscreenWindowsShowNormally() {
+        verify(WorkspaceOverview.isShownOn(windowOn(2, { floating: true }), 2, 1));
+        verify(WorkspaceOverview.isShownOn(windowOn(2, { fullscreen: 2 }), 2, 1));
+    }
+
+    function test_aPinnedWindowShowsOnlyOnTheWorkspaceYouAreOn() {
+        const pinned = windowOn(4, { floating: true, pinned: true });
+
+        verify(WorkspaceOverview.isShownOn(pinned, 4, 4));
+        verify(!WorkspaceOverview.isShownOn(pinned, 4, 1));
+    }
+
+    function test_aScratchpadWindowIsOnNoWorkspaceTheOverviewLists() {
+        const scratchpad = windowOn(-98, { workspace: { id: -98, name: "special:scratchpad" } });
+
+        for (let id = 1; id <= 21; id++)
+            verify(!WorkspaceOverview.isShownOn(scratchpad, id, id));
+    }
+
+    function test_aGroupShowsOnlyItsActiveWindow() {
+        const members = ["0x1", "0x2"];
+
+        verify(WorkspaceOverview.isShownOn(windowOn(2, { grouped: members }), 2, 1));
+        verify(!WorkspaceOverview.isShownOn(windowOn(2, { grouped: members, hidden: true }), 2, 1));
+    }
+
+    function test_aWindowHyprlandHasNotDescribedYetIsNotShown() {
+        verify(!WorkspaceOverview.isShownOn({}, 2, 2));
+    }
+
+    function test_floatingWindowsDrawOverTiledOnesAndFullscreenOverBoth() {
+        const tiled = WorkspaceOverview.stacking(windowOn(1));
+        const floating = WorkspaceOverview.stacking(windowOn(1, { floating: true }));
+        const fullscreen = WorkspaceOverview.stacking(windowOn(1, { fullscreen: 2, floating: true }));
+
+        verify(tiled < floating);
+        verify(floating < fullscreen);
+    }
 }

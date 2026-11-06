@@ -129,6 +129,39 @@ function layout(monitors, width, height, spacing) {
     };
 }
 
+// Where a window sits in its workspace's tile. `window` is { at, size } as
+// Hyprland reports them, in logical pixels of the whole desktop; `monitor` is
+// { x, y, width, height } in the same pixels, so already scaled and rotated;
+// `tile` is { width, height }. A window past the monitor's edge stays past the
+// tile's.
+function miniature(window, monitor, tile) {
+    const scaleX = tile.width / monitor.width;
+    const scaleY = tile.height / monitor.height;
+
+    return {
+        x: (window.at[0] - monitor.x) * scaleX,
+        y: (window.at[1] - monitor.y) * scaleY,
+        width: window.size[0] * scaleX,
+        height: window.size[1] * scaleY
+    };
+}
+
+// Whether a window appears on a workspace's tile. `window` is what Hyprland
+// reports for it, so nothing until it's been described; `focused` is the
+// workspace you're on. A scratchpad window's workspace has a negative id, which
+// is never a tile's. Of a window group, only the active window isn't hidden.
+function isShownOn(window, workspace, focused) {
+    return window.workspace?.id === workspace
+        && !window.hidden
+        && (!window.pinned || workspace === focused);
+}
+
+// Which windows draw over which in a tile. Hyprland's window list says nothing
+// of it, so this is only the layers that always hold.
+function stacking(window) {
+    return window.fullscreen ? 2 : window.floating ? 1 : 0;
+}
+
 // Every workspace listed, reading across the monitors.
 function workspaceIds(groups) {
     return groups.reduce((ids, group) => ids.concat(group.workspaces), []);

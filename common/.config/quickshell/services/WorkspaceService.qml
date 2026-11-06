@@ -119,12 +119,6 @@ QtObject {
         return false;
     }
 
-    function toplevelsForWorkspace(id) {
-        return Hyprland.toplevels.values.filter(toplevel =>
-            toplevel.workspace !== null && toplevel.workspace.id === id
-                && toplevel.address !== "");
-    }
-
     function switcherToplevels() {
         return Hyprland.toplevels.values.filter(toplevel =>
             toplevel.workspace !== null && toplevel.workspace.id > 0

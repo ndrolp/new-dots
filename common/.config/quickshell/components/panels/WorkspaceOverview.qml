@@ -44,6 +44,15 @@ Variants {
         });
     }
 
+    // The windows a workspace's tile shows. These are the toplevels themselves
+    // rather than copies, so a refresh leaves each window's item in place.
+    function windowsOn(id) {
+        const focused = Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : -1;
+
+        return Hyprland.toplevels.values.filter(toplevel => toplevel.address !== ""
+            && WorkspaceOverview.isShownOn(toplevel.lastIpcObject, id, focused));
+    }
+
     function resetSelection() {
         selectedWorkspaceId = Hyprland.focusedWorkspace
             ? Hyprland.focusedWorkspace.id : -1;
@@ -158,6 +167,24 @@ Variants {
                 keyboardFocus.forceActiveFocus();
         }
 
+        // A window's place comes from lastIpcObject, which Hyprland only fills
+        // in when asked: any event while this is up asks again, a burst once.
+        Connections {
+            target: Hyprland
+            enabled: overview.shown
+
+            function onRawEvent() {
+                windowRefresh.start();
+            }
+        }
+
+        Timer {
+            id: windowRefresh
+
+            interval: 30
+            onTriggered: Hyprland.refreshToplevels()
+        }
+
         Item {
             anchors.fill: parent
             opacity: overview.reveal
@@ -223,7 +250,10 @@ Variants {
                         id: monitorGroup
 
                         required property var modelData
+                        required property int index
                         readonly property var group: modelData
+                        // The real monitor behind this group of tiles.
+                        readonly property var area: root.groups[index]
 
                         width: group.width
 
@@ -288,13 +318,6 @@ Variants {
                                     readonly property int workspaceId: modelData
                                     readonly property bool active: root.workspaceService.isActive(workspaceId)
                                     readonly property bool selected: root.selectedWorkspaceId === workspaceId
-                                    readonly property var windows: root.workspaceService
-                                        .toplevelsForWorkspace(workspaceId)
-                                    // The window entries that fit below the title,
-                                    // leaving one for the "+N more" if some don't.
-                                    readonly property int entryRoom: Math.max(0, Math.floor((height - 46) / 30))
-                                    readonly property int entries: windows.length > entryRoom
-                                        ? Math.max(0, entryRoom - 1) : windows.length
 
                                     width: monitorGroup.group.tileWidth
                                     height: overview.fit.tileHeight
@@ -319,102 +342,112 @@ Variants {
                                         }
                                     }
 
-                                    Column {
+                                    Item {
                                         anchors.fill: parent
-                                        anchors.margins: 10
-                                        spacing: 6
-
-                                        Item {
-                                            width: parent.width
-                                            height: 20
-
-                                            Text {
-                                                anchors.left: parent.left
-                                                anchors.verticalCenter: parent.verticalCenter
-                                                text: "󰍹  " + workspaceTile.workspaceId
-                                                color: workspaceTile.selected ? theme.accent : theme.text
-                                                font.pixelSize: root.appearance.textSize
-                                                font.bold: true
-                                            }
-
-                                            Text {
-                                                anchors.right: parent.right
-                                                anchors.verticalCenter: parent.verticalCenter
-                                                text: "ACTIVE"
-                                                visible: workspaceTile.active
-                                                color: theme.accent
-                                                font.pixelSize: root.appearance.textSize - 4
-                                                font.bold: true
-                                            }
-                                        }
 
                                         Repeater {
-                                            model: workspaceTile.windows.slice(0, workspaceTile.entries)
+                                            id: windowItems
+
+                                            model: ScriptModel {
+                                                values: root.windowsOn(workspaceTile.workspaceId)
+                                            }
 
                                             delegate: Rectangle {
-                                                id: windowEntry
+                                                id: windowItem
 
                                                 required property var modelData
                                                 readonly property var toplevel: modelData
+                                                readonly property var details: toplevel.lastIpcObject
+                                                readonly property var box: WorkspaceOverview.miniature(
+                                                    details, monitorGroup.area, workspaceTile)
                                                 readonly property string appClass: String(
-                                                    toplevel.lastIpcObject?.class
-                                                        || toplevel.lastIpcObject?.initialClass
-                                                        || "application"
+                                                    details.class || details.initialClass || "application"
                                                 ).toLowerCase()
 
-                                                width: parent.width
-                                                height: 24
-                                                radius: root.appearance.radius
+                                                x: box.x
+                                                y: box.y
+                                                z: WorkspaceOverview.stacking(details)
+                                                width: box.width
+                                                height: box.height
+                                                clip: true
+                                                radius: root.appearance.radius / 2
                                                 color: windowHover.hovered ? theme.surfaceHover : theme.surface
+                                                border.color: theme.border
+                                                border.width: 1
 
                                                 HoverHandler {
                                                     id: windowHover
                                                 }
 
                                                 IconImage {
-                                                    anchors.left: parent.left
-                                                    anchors.leftMargin: 6
-                                                    anchors.verticalCenter: parent.verticalCenter
-                                                    width: 16
-                                                    height: 16
-                                                    source: IconSource.forName(windowEntry.appClass)
+                                                    id: windowIcon
+
+                                                    anchors.centerIn: parent
+                                                    anchors.verticalCenterOffset: windowTitle.visible ? -10 : 0
+                                                    width: Math.max(0, Math.min(24, parent.width - 4, parent.height - 4))
+                                                    height: width
+                                                    source: IconSource.forName(windowItem.appClass)
                                                 }
 
                                                 Text {
+                                                    id: windowTitle
+
+                                                    anchors.top: windowIcon.bottom
+                                                    anchors.topMargin: 2
                                                     anchors.left: parent.left
-                                                    anchors.leftMargin: 28
                                                     anchors.right: parent.right
-                                                    anchors.rightMargin: 6
-                                                    anchors.verticalCenter: parent.verticalCenter
-                                                    text: windowEntry.toplevel.title || windowEntry.appClass
+                                                    anchors.margins: 4
+                                                    visible: parent.height > 48
+                                                    text: windowItem.toplevel.title || windowItem.appClass
                                                     color: theme.text
                                                     elide: Text.ElideRight
+                                                    horizontalAlignment: Text.AlignHCenter
                                                     font.pixelSize: root.appearance.textSize - 4
                                                 }
 
+                                                // A MouseArea so a click here doesn't reach the tile below.
                                                 MouseArea {
                                                     anchors.fill: parent
                                                     onClicked: {
-                                                        root.workspaceService.focusToplevel(windowEntry.toplevel);
+                                                        root.workspaceService.focusToplevel(windowItem.toplevel);
                                                         root.close();
                                                     }
                                                 }
                                             }
                                         }
+                                    }
 
-                                        Text {
-                                            visible: workspaceTile.windows.length > workspaceTile.entries
-                                            text: "+" + (workspaceTile.windows.length - workspaceTile.entries) + " more"
-                                            color: theme.textMuted
-                                            font.pixelSize: root.appearance.textSize - 4
-                                        }
+                                    Text {
+                                        anchors.left: parent.left
+                                        anchors.top: parent.top
+                                        anchors.margins: 6
+                                        text: "󰍹  " + workspaceTile.workspaceId
+                                        color: workspaceTile.selected ? theme.accent : theme.text
+                                        style: Text.Outline
+                                        styleColor: theme.surface
+                                        font.pixelSize: root.appearance.textSize
+                                        font.bold: true
+                                    }
 
-                                        Text {
-                                            visible: workspaceTile.windows.length === 0
-                                            text: "Empty workspace"
-                                            color: theme.textDisabled
-                                            font.pixelSize: root.appearance.textSize - 3
-                                        }
+                                    Text {
+                                        anchors.right: parent.right
+                                        anchors.top: parent.top
+                                        anchors.margins: 6
+                                        text: "ACTIVE"
+                                        visible: workspaceTile.active
+                                        color: theme.accent
+                                        style: Text.Outline
+                                        styleColor: theme.surface
+                                        font.pixelSize: root.appearance.textSize - 4
+                                        font.bold: true
+                                    }
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        visible: windowItems.count === 0
+                                        text: "Empty workspace"
+                                        color: theme.textDisabled
+                                        font.pixelSize: root.appearance.textSize - 3
                                     }
                                 }
                             }
