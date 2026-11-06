@@ -2,7 +2,8 @@ import QtQuick
 import "WorkspaceOverview.js" as WorkspaceOverview
 
 // The empty tile after a monitor's last workspace. A window dropped here goes to
-// a new workspace, following the same rules as any other drop.
+// a new workspace, following the same rules as any other drop. It isn't a
+// workspace, so a click on it passes through as one outside any workspace.
 Rectangle {
     id: root
 
@@ -21,12 +22,6 @@ Rectangle {
 
     Behavior on color {
         ColorAnimation { duration: root.appearance.motion.short }
-    }
-
-    // Nothing happens on a click, which would otherwise count as one outside
-    // any workspace and close the overview.
-    MouseArea {
-        anchors.fill: parent
     }
 
     WindowDropTarget {

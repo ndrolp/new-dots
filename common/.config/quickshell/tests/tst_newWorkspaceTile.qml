@@ -114,12 +114,12 @@ Item {
             compare(scene.drops.length, 0);
         }
 
-        function test_aClickOnTheTileLeavesTheOverviewOpen() {
-            drag.enabled = false;
+        // It isn't a workspace, so it counts as a click outside any workspace,
+        // which closes the workspace overview.
+        function test_aClickOnTheTileGoesThroughToWhatIsBehindIt() {
             mouseClick(scene, onTile.x, onTile.y);
-            drag.enabled = true;
 
-            compare(scene.backgroundClicks, 0);
+            compare(scene.backgroundClicks, 1);
         }
     }
 }

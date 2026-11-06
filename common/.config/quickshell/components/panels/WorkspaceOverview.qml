@@ -150,7 +150,8 @@ Variants {
         WindowFrames {
             id: windowFrames
 
-            windows: overview.shown ? Hyprland.toplevels.values : []
+            // Until it has faded out, so its thumbnails last through the fade.
+            windows: overview.visible ? Hyprland.toplevels.values : []
         }
 
         Behavior on reveal {
