@@ -37,6 +37,10 @@
                         "joinPrevious": true
                     },
                     {
+                        "enabled": false,
+                        "id": "appMenu"
+                    },
+                    {
                         "enabled": true,
                         "id": "workspaces",
                         "joinPrevious": true,
@@ -65,7 +69,8 @@
                                 ""
                             ],
                             "glyphsEnabled": false,
-                            "hideEmpty": false
+                            "hideEmpty": false,
+                            "radius": 20
                         }
                     },
                     {
@@ -129,9 +134,9 @@
                 ]
             },
             "barHeight": 30,
-            "barOpacity": 90,
+            "barOpacity": 55,
             "barTransparent": true,
-            "barTransparentBorder": false,
+            "barTransparentBorder": true,
             "elementVerticalPadding": 8,
             "groupRadius": 31,
             "horizontalPadding": 13,
@@ -178,7 +183,8 @@
                                 ""
                             ],
                             "glyphsEnabled": false,
-                            "hideEmpty": false
+                            "hideEmpty": false,
+                            "radius": 3
                         }
                     }
                 ],
@@ -192,8 +198,12 @@
                         "id": "systemMonitor"
                     },
                     {
-                        "enabled": true,
+                        "enabled": false,
                         "id": "currentApp"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "appMenu"
                     }
                 ],
                 "right": [
@@ -260,15 +270,16 @@
                     }
                 ]
             },
-            "barHeight": 30,
+            "barHeight": 36,
             "barOpacity": 80,
+            "barPosition": "top",
             "barTransparent": false,
             "barTransparentBorder": false,
             "elementVerticalPadding": 8,
             "groupRadius": 3,
             "horizontalPadding": 8,
             "pillVerticalPadding": 2,
-            "pillsTransparent": true,
+            "pillsTransparent": false,
             "radius": 3,
             "spacing": 4,
             "textSize": 13,
@@ -331,7 +342,8 @@
                                 ""
                             ],
                             "glyphsEnabled": false,
-                            "hideEmpty": false
+                            "hideEmpty": false,
+                            "radius": 8
                         }
                     }
                 ],
@@ -434,16 +446,14 @@
                                 ""
                             ],
                             "glyphsEnabled": false,
-                            "hideEmpty": false
+                            "hideEmpty": false,
+                            "radius": 3
                         }
                     },
                     {
                         "enabled": true,
-                        "id": "notifications",
-                        "joinPrevious": true,
-                        "options": {
-                            "badgeVisible": true
-                        }
+                        "id": "tray",
+                        "joinPrevious": true
                     }
                 ],
                 "left": [
@@ -455,6 +465,10 @@
                         "enabled": true,
                         "id": "currentApp",
                         "joinPrevious": true
+                    },
+                    {
+                        "enabled": false,
+                        "id": "appMenu"
                     }
                 ],
                 "right": [
@@ -472,7 +486,7 @@
                         "options": {
                             "barCount": 12,
                             "barWidth": 3,
-                            "color": "blue"
+                            "color": "green"
                         }
                     },
                     {
@@ -503,7 +517,8 @@
                     },
                     {
                         "enabled": true,
-                        "id": "keepAwake"
+                        "id": "keepAwake",
+                        "joinPrevious": true
                     },
                     {
                         "enabled": true,
@@ -517,21 +532,25 @@
                     },
                     {
                         "enabled": true,
-                        "id": "tray",
-                        "joinPrevious": true
+                        "id": "notifications",
+                        "joinPrevious": true,
+                        "options": {
+                            "badgeVisible": true
+                        }
                     }
                 ]
             },
             "barHeight": 30,
-            "barOpacity": 90,
+            "barOpacity": 78,
+            "barPosition": "top",
             "barTransparent": true,
             "barTransparentBorder": true,
             "elementVerticalPadding": 5,
-            "groupRadius": 26,
+            "groupRadius": 5,
             "horizontalPadding": 8,
             "pillVerticalPadding": 2,
-            "pillsTransparent": true,
-            "radius": 24,
+            "pillsTransparent": false,
+            "radius": 5,
             "spacing": 4,
             "textSize": 13,
             "transparentBarSlanted": false,
@@ -602,5 +621,5 @@
     "nightLightTemperature": 3800,
     "notificationPopupLocation": "top-right",
     "reduceMotion": false,
-    "schemaVersion": 10
+    "schemaVersion": 11
 }
