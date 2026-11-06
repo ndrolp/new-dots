@@ -129,6 +129,14 @@ _Avoid_: Lockscreen, hyprlock (para la de la shell), pantalla de login
 El panel a pantalla completa con un solo campo de texto que busca a la vez en aplicaciones, marcadores, portapapeles y ventanas, y ofrece acciones (buscar en la web, ejecutar en Kitty, ir a un workspace). No es un popup: no pertenece a ningún bar element.
 _Avoid_: Launcher, quick search (que es otro panel)
 
+**Monitor setup** (configuración de monitores):
+Cómo se colocan los monitores de una combinación concreta de monitores conectados: cuáles están encendidos y, en cada uno, su posición, resolución, frecuencia de refresco, escala, rotación y si replica a otro. Una combinación se reconoce por qué monitores hay, no por el puerto en el que están, y con la tapa cerrada la pantalla del portátil no cuenta. Describe solo los monitores: el bar profile, los workspaces y los desktop widgets siguen siendo de cada monitor. Pertenece a la máquina, no al repo. Solo se recuerda cuando se elige o se cambia algo.
+_Avoid_: Perfil (a secas), monitor profile, display profile, layout
+
+**Quick switch** (cambio rápido):
+El panel pequeño que abre SUPER+P para elegir entre *Extend*, *Mirror* y *<monitor> only*. Lo que se elige se recuerda como la monitor setup de esa combinación. No es un popup ni el settings panel.
+_Avoid_: Display menu, projector menu
+
 **Workspace overview** (vista de workspaces):
 La vista a pantalla completa que se abre con SUPER+TAB sobre el monitor enfocado, atenuando el escritorio, y muestra los workspaces de todos los monitores, agrupados por monitor y sin repetir ninguno, cada uno como una miniatura con sus ventanas en su sitio. Arrastrar una ventana a otro workspace la mueve allí sin seguirla y la vista sigue abierta; soltarla en la casilla vacía tras el último workspace de un monitor crea uno nuevo. Pulsar una ventana la enfoca y pulsar un workspace cambia a él, y las dos cosas cierran la vista. No es un popup. No es el *window switcher*.
 _Avoid_: Expose, overview (a secas), desktop overview, escritorio (para un workspace), app (para una ventana)
