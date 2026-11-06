@@ -19,6 +19,9 @@ adding or editing one file here.
   `PowerMenu`, `QuickSearch`, `QuickSettings`, `ScreenCapture` (the chooser),
   `Settings`, `ThemeSelector`, `UnifiedSearch`, `WallpaperSelector`,
   `WindowSwitcher` and `WorkspaceOverview`.
+- `MonitorChange.qml`: not a `Feature`, it follows `services/MonitorSetups.qml`:
+  the *Keep* / *Revert* card on every screen that still works, and each monitor's
+  number for *Identify*.
 - `Bar.qml`: a bar on every monitor, and which popup is open
   (`OpenPopup.js`, tested). Its settings button opens the settings panel on
   that bar, and a bar element opens its popup (`barElementOpening` tells

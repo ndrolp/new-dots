@@ -79,7 +79,7 @@ TestCase {
         compare(MonitorChange.restoring(done.state), false);
     }
 
-    // No file is what tells Hyprland to stand aside, so an empty one wouldn't do.
+    // Revert leaves no trace: not even an empty file.
     function test_afterRevertAFileThatWasntThereIsGone() {
         const step = started(null);
         const back = MonitorChange.reverted(step.state);

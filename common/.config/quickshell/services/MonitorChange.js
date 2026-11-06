@@ -12,6 +12,14 @@
 
 const countdownSeconds = 15;
 
+// How Hyprland is asked to read the saved file. See hypr/modules/monitors/apply.lua.
+const applyCommand = ["hyprctl", "eval", 'require("modules.monitors.apply").apply_now()'];
+
+// Whether Hyprland took it: anything else hyprctl prints is why not.
+function answeredOk(output) {
+    return output.trim() === "ok";
+}
+
 // - before: the saved file's text when the change began, null when there was no file.
 // - previous: the entries the monitors were in then.
 // - trying: the entries being tried out.
@@ -68,8 +76,8 @@ function reverted(state) {
     return step(next, fileWith(state.before, state.previous, state.previous), true);
 }
 
-// Revert, second half, once Hyprland has read that: the file goes back to exactly what it was. No
-// file means Hyprland stands aside, which an empty one wouldn't.
+// Revert, second half, once Hyprland has read that: the file goes back to exactly what it was, and
+// a file that wasn't there goes again, so a change nobody kept leaves no trace.
 function restored(state) {
     return { state: idle, text: state.before, remove: state.before === null, apply: false };
 }

@@ -3,8 +3,8 @@ import "." as Panels
 import "../../config/BarProfileModel.js" as BarProfileModel
 
 // One monitor's settings in the Displays section: the workspaces it shows and
-// what the shell draws on it. Kept apart from WorkspaceSettings, which lists
-// the monitors through Quickshell.
+// what the shell draws on it, for the monitor MonitorArrangeSettings has
+// selected.
 Column {
     id: root
 

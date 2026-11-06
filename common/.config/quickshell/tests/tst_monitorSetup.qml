@@ -131,6 +131,44 @@ TestCase {
         compare(rects[0].height, 1125);
     }
 
+    // scripts/import-monitor-setups keeps what the old config said, which isn't always a number.
+    function imported(fields) {
+        return Object.assign({ description: "Imported", port: "DP-3", mode: "1000x800@60.00", position: "auto-left",
+            scale: 1, transform: 0, disabled: false, mirror: "" }, fields);
+    }
+
+    function test_aPositionThatIsNoNumberSitsPastTheOthersOnTheCanvas() {
+        const rects = MonitorSetup.rectangles(entries().concat([imported({})]));
+        const rect = rects.filter(item => item.id === "DP-3")[0];
+        compare([rect.x, rect.y], [4360, 0]);
+    }
+
+    function test_severalPositionsThatAreNoNumberDontStack() {
+        const rects = MonitorSetup.rectangles([imported({ position: "auto" }),
+            imported({ port: "DP-4", position: "auto-right" })]);
+        compare(rects.map(rect => rect.x), [0, 1000]);
+    }
+
+    function test_aScaleThatIsNoNumberCountsAsOne() {
+        const rect = MonitorSetup.rectangles([imported({ scale: "auto" })])[0];
+        compare([rect.width, rect.height], [1000, 800]);
+    }
+
+    function test_anyChangeGivesAPositionThatIsNoNumberARealOne() {
+        const list = entries().concat([imported({})]);
+        compare(entry(MonitorSetup.moved(list, "eDP-1", 0, 0), "DP-3").position, "4360x0");
+    }
+
+    function test_turningOnAMonitorSavedOnlyAsPreferredTakesItsHighest() {
+        const list = entries();
+        Object.assign(entry(list, "eDP-1"), { disabled: true, mode: "preferred", position: "auto-left",
+            scale: "auto" });
+        const on = entry(MonitorSetup.turnedOn(list, "eDP-1", modes("eDP-1")), "eDP-1");
+        compare(on.mode, "2880x1800@120.00");
+        compare(on.position, "2560x0");
+        compare(on.scale, 1);
+    }
+
     function test_aTurnedMonitorSwapsItsSides() {
         const turned = MonitorSetup.withRotation(entries(), "DP-2", 1);
         const rect = MonitorSetup.rectangles(turned).filter(item => item.id === "DP-2")[0];

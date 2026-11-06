@@ -507,11 +507,11 @@ end)
 -- The shell writes the file, then asks over `hyprctl eval` for it to be read. No event fires for that.
 apply_test("apply_now applies the file as it is now", function(path)
 	local session = new_session({ monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
-	install({ path = path, stand_aside = true })
-	equal(#session.applied, 0, "rules before there's a file")
+	install({ path = path })
 	local file = assert(io.open(path, "w"))
 	file:write(SAVED_DOCKED)
 	file:close()
+	session.applied = {}
 	require("modules.monitors.apply").apply_now()
 	equal(rule_for(session.applied, "DP-2").position, "1600x0", "position")
 end)

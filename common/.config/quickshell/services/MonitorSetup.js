@@ -34,6 +34,11 @@ function parsedReading(text) {
     }
 }
 
+// The monitors can have changed after one of these Hyprland events.
+function changesMonitors(eventName) {
+    return /^(monitoradded|monitorremoved|configreloaded)/.test(eventName);
+}
+
 function savedEntryFor(monitor, saved) {
     return saved.filter(entry => entry.description === monitor.description && entry.port === monitor.name)[0]
         || saved.filter(entry => entry.description === monitor.description)[0]
@@ -94,25 +99,42 @@ function sameEntries(a, b) {
     return JSON.stringify(a) === JSON.stringify(b);
 }
 
-function rectangle(entry) {
+// An imported setup can say "auto" for a scale.
+function scaleOf(entry) {
+    const scale = Number(entry.scale);
+    return scale > 0 ? scale : 1;
+}
+
+// Null for what isn't a place, like the "auto" and "auto-left" of an imported setup.
+function positionOf(entry) {
+    const found = /^(-?\d+)x(-?\d+)$/.exec(entry.position || "");
+    return found !== null ? { x: Number(found[1]), y: Number(found[2]) } : null;
+}
+
+function rectangle(entry, position) {
     const mode = MonitorModes.parsedMode(entry.mode);
-    const position = /^(-?\d+)x(-?\d+)$/.exec(entry.position || "");
     const sideways = (entry.transform || 0) % 2 === 1;
-    const scale = entry.scale || 1;
-    const width = Math.round((mode !== null ? mode.width : 1920) / scale);
-    const height = Math.round((mode !== null ? mode.height : 1080) / scale);
+    const width = Math.round((mode !== null ? mode.width : 1920) / scaleOf(entry));
+    const height = Math.round((mode !== null ? mode.height : 1080) / scaleOf(entry));
     return {
         id: entry.port,
-        x: position !== null ? Number(position[1]) : 0,
-        y: position !== null ? Number(position[2]) : 0,
+        x: position.x,
+        y: position.y,
         width: sideways ? height : width,
         height: sideways ? width : height
     };
 }
 
-// The monitors with a place of their own, as MonitorArrangement's rectangles in logical pixels.
+// The monitors with a place of their own, as MonitorArrangement's rectangles in logical pixels. One
+// with no place yet goes past the others, which is also where the first change writes it.
 function rectangles(entries) {
-    return entries.filter(hasOwnPicture).map(rectangle);
+    const own = entries.filter(hasOwnPicture);
+    const rects = own.filter(entry => positionOf(entry) !== null)
+        .map(entry => rectangle(entry, positionOf(entry)));
+    own.filter(entry => positionOf(entry) === null).forEach(entry => {
+        rects.push(rectangle(entry, MonitorArrangement.nextSlot(rects)));
+    });
+    return own.map(entry => rects.filter(rect => rect.id === entry.port)[0]);
 }
 
 function withEntry(entries, port, fields) {
@@ -154,7 +176,7 @@ function withResolution(entries, port, modes, width, height) {
     const mode = MonitorModes.afterResolution(modes, width, height, current !== null ? current.refresh : 0);
     return rearranged(withEntry(entries, port, {
         mode: MonitorModes.modeText(mode.width, mode.height, mode.refresh),
-        scale: cleanScale(width, height, entry.scale || 1)
+        scale: cleanScale(width, height, scaleOf(entry))
     }), port);
 }
 
@@ -213,9 +235,10 @@ function turnedOff(entries, port) {
 function turnedOn(entries, port, modes) {
     const entry = find(entries, port);
     const highest = MonitorModes.highest(modes);
-    const mode = entry.mode || (highest !== null
-        ? MonitorModes.modeText(highest.width, highest.height, highest.refresh) : "preferred");
-    const list = withEntry(entries, port, { disabled: false, mode: mode, scale: entry.scale || 1,
+    const mode = MonitorModes.parsedMode(entry.mode) !== null || highest === null
+        ? entry.mode || "preferred"
+        : MonitorModes.modeText(highest.width, highest.height, highest.refresh);
+    const list = withEntry(entries, port, { disabled: false, mode: mode, scale: scaleOf(entry),
         transform: entry.transform || 0 });
     return closedUp(atTheEnd(list, port));
 }

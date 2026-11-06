@@ -34,6 +34,32 @@ a new workspace that doesn't exist yet takes a second step, sending the workspac
 to the monitor it was meant for, because Hyprland makes it on the focused monitor
 or the one a rule names.
 
+## Monitor setups
+
+`MonitorSetups.qml` is the shell's one way to change the monitors. Displays and
+the quick switch work out the entries they want with the plain functions in
+`MonitorSetup.js` (`moved`, `withResolution`, `turnedOff`…) and hand them to
+`apply(entries)`, which starts the 15-second countdown; `keep()` and `revert()`
+answer it, and an unanswered one reverts. `entries`, `modesOf(port)` and
+`savedSetups` are what there is to show, and `modules/MonitorChange.qml` shows
+the countdown card and *Identify* on the screens. Hyprland owns the setups
+(`docs/adr/0002-hyprland-owns-monitor-setups.md`): the shell writes
+`~/.config/hypr/monitor-setups.json` atomically, then runs `hyprctl eval` on
+`apply_now` in `hypr/modules/monitors/apply.lua`, which reads it without the
+full config reload `hyprctl reload` would do.
+
+A change has to be in the file for Hyprland to apply it, so it's in there before
+it's kept, with what to go back to under `unkept` in the same write. Revert
+applies the previous arrangement through the file, then puts the file back
+exactly as it was, or removes it if there was none; if the shell stops during a
+countdown it finds `unkept` when it starts and reverts. `apply` refuses a setup
+that leaves every screen dark. The steps are `MonitorChange.js`, snapping is
+`MonitorArrangement.js` and mode and scale choices are `MonitorModes.js`, whose
+`nearestScale` is the search Hyprland does, so a preset it won't take snaps
+before it's written. All are tested without Quickshell. With a closed lid and an
+external monitor the laptop screen is no part of a setup, by the same rule as
+`split_by_lid` in `hypr/modules/monitors/setups.lua`: the two must stay in step.
+
 ## Keep-awake
 
 `KeepAwake.qml` is the shell's one keep-awake. Its `on` and selected `duration`

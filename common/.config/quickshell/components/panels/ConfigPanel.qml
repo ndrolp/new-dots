@@ -12,6 +12,7 @@ Rectangle {
     required property var plugins
     // The shell's cava, so the Bar section can say when it can't run.
     property var cava
+    property var monitorSetups
 
     property string currentSection: "Bar"
     property string pendingSection: ""
@@ -88,8 +89,9 @@ Rectangle {
         } else if (currentSection === "Motion") {
             source = "MotionSettings.qml";
         } else if (currentSection === "Monitors") {
-            source = "WorkspaceSettings.qml";
+            source = "MonitorArrangeSettings.qml";
             properties.monitors = root.monitors;
+            properties.setups = root.monitorSetups;
         } else if (currentSection === "Labels") {
             source = "WorkspaceLabelsSettings.qml";
         } else if (currentSection === "Bookmarks") {

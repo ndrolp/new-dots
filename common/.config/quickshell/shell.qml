@@ -87,10 +87,19 @@ ShellRoot {
         id: screenShares
     }
 
+    Services.MonitorSetups {
+        id: monitorSetups
+    }
+
     Services.NightLight {
         id: nightLight
 
         appearance: appearance
+    }
+
+    Modules.MonitorChange {
+        appearance: appearance
+        monitorSetups: monitorSetups
     }
 
     Modules.Lock {
@@ -276,6 +285,7 @@ ShellRoot {
 
         appearance: appearance
         monitors: monitors
+        monitorSetups: monitorSetups
         wallpapers: wallpapers
         bookmarks: bookmarks
         plugins: plugins

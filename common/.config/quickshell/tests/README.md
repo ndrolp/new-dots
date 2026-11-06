@@ -143,6 +143,15 @@ menu is drawn, with submenus opening in place
 where it opens at the cursor (`components/panels/AppMenuPopover.js`), and
 which window the bar elements that follow the focused window see and on
 which monitor's bar they show (`components/FocusedWindow.js`).
+Monitor setups are covered too: where monitors snap, edge to edge with no gaps
+(`services/MonitorArrangement.js`), resolution, refresh and scale choices
+(`services/MonitorModes.js`), what a setup holds, how it changes, values an
+imported setup leaves that aren't numbers, and the saved file
+(`services/MonitorSetup.js`), the *Keep* / *Revert* countdown
+(`services/MonitorChange.js`), and the Displays section and its card
+(`components/panels/MonitorArrangeSettings.qml`, `MonitorArrangeCanvas.qml`,
+`MonitorControls.qml`, `MonitorChangeCard.qml`; `services/MonitorSetups.qml` and
+`modules/MonitorChange.qml` need Quickshell and aren't tested here).
 They run with QtTest outside of `qs`:
 
 ```sh
