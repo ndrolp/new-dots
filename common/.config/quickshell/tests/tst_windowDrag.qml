@@ -12,15 +12,20 @@ Item {
 
     property var clicks: []
     property var drops: []
+    property int ghosts: 0
 
     QtObject {
         id: kitty
+
+        readonly property var lastIpcObject: ({ workspace: { id: 2 } })
     }
 
     Component {
         id: closingWindow
 
-        QtObject {}
+        QtObject {
+            readonly property var lastIpcObject: ({ workspace: { id: 2 } })
+        }
     }
 
     // A window's item, which goes away with its miniature while it's being dragged.
@@ -58,6 +63,7 @@ Item {
         y: 10
         width: 60
         height: 60
+        workspace: 3
         onWindowDropped: window => scene.drops.push({ window: window, on: "elsewhere" })
     }
 
@@ -68,7 +74,7 @@ Item {
         y: 10
         width: 60
         height: 60
-        accepts: window => false
+        workspace: 2
         onWindowDropped: window => scene.drops.push({ window: window, on: "ownWorkspace" })
     }
 
@@ -78,7 +84,10 @@ Item {
         anchors.fill: parent
         z: 1
         ghost: Component {
-            Item {}
+            Item {
+                Component.onCompleted: scene.ghosts++
+                Component.onDestruction: scene.ghosts--
+            }
         }
         onClicked: window => scene.clicks.push(window)
     }
@@ -277,13 +286,13 @@ Item {
         }
 
         function test_theGhostExistsOnlyDuringADrag() {
-            verify(drag.ghostItem === null);
+            compare(scene.ghosts, 0);
 
             dragTo(120, 40);
-            verify(drag.ghostItem !== null);
+            compare(scene.ghosts, 1);
 
             mouseRelease(scene, 120, 40);
-            tryVerify(() => drag.ghostItem === null);
+            tryVerify(() => scene.ghosts === 0);
         }
     }
 }

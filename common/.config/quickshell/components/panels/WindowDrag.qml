@@ -11,9 +11,6 @@ Item {
 
     // Built to follow the pointer during a drag, centred on it.
     property Component ghost: null
-    readonly property Item ghostItem: ghostLoader.item
-    // How far a press travels before it stops being a click, in pixels.
-    property int threshold: 8
     // The window pressed. Null once the press is over, cancelled or the window
     // has closed.
     property QtObject window: null
@@ -35,20 +32,22 @@ Item {
 
     function follow() {
         const point = pointer.point;
+        // How far a press travels before it stops being a click, in pixels.
+        const clickTravel = 8;
 
         if (window === null)
             return;
 
-        // Before the drag starts: it's dropped from where the carrier is.
-        carrier.x = point.position.x;
-        carrier.y = point.position.y;
+        // Before the drag starts: it's dropped from where the drag source is.
+        dragSource.x = point.position.x;
+        dragSource.y = point.position.y;
         travelled = travelled || Math.hypot(point.position.x - point.pressPosition.x,
-            point.position.y - point.pressPosition.y) >= threshold;
+            point.position.y - point.pressPosition.y) >= clickTravel;
     }
 
     function release() {
         if (dragging)
-            carrier.Drag.drop();
+            dragSource.Drag.drop();
         else if (window !== null && !travelled)
             clicked(window);
 
@@ -71,7 +70,7 @@ Item {
     }
 
     Item {
-        id: carrier
+        id: dragSource
 
         readonly property QtObject window: root.window
 
@@ -79,8 +78,6 @@ Item {
         Drag.keys: ["window"]
 
         Loader {
-            id: ghostLoader
-
             anchors.centerIn: parent
             active: root.dragging
             sourceComponent: root.ghost

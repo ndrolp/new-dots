@@ -4,6 +4,9 @@
 // The workspace overview's model: what it lists and how that fits on one
 // screen. Pure logic, no Quickshell.
 
+// The gaps between miniatures and between monitors, and a monitor's header.
+const spacing = { miniature: 10, monitor: 32, header: 30 };
+
 function physicalOrder(left, right) {
     return left.x - right.x || left.y - right.y;
 }
@@ -89,19 +92,17 @@ function slotCount(monitor) {
 // of rows, and each miniature keeps its monitor's proportions, so every row count
 // is tried for the one that leaves the miniatures largest.
 //
-// `monitors` are { name, width, height, workspaces, newWorkspace }; `spacing` is
-// { miniature, monitor, header, maxMiniatureHeight }: the gap between miniatures,
-// the gap between monitors, the height of a monitor's header and an optional limit for a few
-// workspaces.
-// Returns { rows, miniatureHeight, width, height, monitors: [{ name, workspaces,
-// newWorkspace, columns, miniatureWidth, width }] }, in the order given.
-function layout(monitors, width, height, spacing) {
+// `monitors` are { width, height, workspaces, newWorkspace, … }; `spacing` is
+// { miniature, monitor, header }, as in `spacing` above; a few workspaces stop
+// growing at `maxMiniatureHeight`.
+// Returns { rows, miniatureHeight, width, height, monitors: [{ monitor, columns,
+// miniatureWidth, width }] }, in the order given, each `monitor` as it was given.
+function layout(monitors, width, height, spacing, maxMiniatureHeight) {
     if (monitors.length === 0)
         return { rows: 0, miniatureHeight: 0, width: 0, height: 0, monitors: [] };
 
     const counts = monitors.map(slotCount);
     const aspects = monitors.map(monitor => monitor.width / monitor.height);
-    const limit = spacing.maxMiniatureHeight === undefined ? Infinity : spacing.maxMiniatureHeight;
     const freeWidth = columns => width - (monitors.length - 1) * spacing.monitor
         - columns.reduce((gaps, count) => gaps + Math.max(0, count - 1) * spacing.miniature, 0);
     let best = null;
@@ -111,7 +112,7 @@ function layout(monitors, width, height, spacing) {
         const miniatureWidths = columns.reduce((sum, count, index) => sum + count * aspects[index], 0);
         const fromWidth = miniatureWidths > 0 ? freeWidth(columns) / miniatureWidths : Infinity;
         const fromHeight = (height - spacing.header - (rows - 1) * spacing.miniature) / rows;
-        const miniatureHeight = Math.max(0, Math.floor(Math.min(fromWidth, fromHeight, limit)));
+        const miniatureHeight = Math.max(0, Math.floor(Math.min(fromWidth, fromHeight, maxMiniatureHeight)));
 
         if (best === null || miniatureHeight > best.miniatureHeight)
             best = { rows: rows, columns: columns, miniatureHeight: miniatureHeight };
@@ -122,9 +123,7 @@ function layout(monitors, width, height, spacing) {
         const columns = best.columns[index];
 
         return {
-            name: monitor.name,
-            workspaces: monitor.workspaces,
-            newWorkspace: monitor.newWorkspace,
+            monitor: monitor,
             columns: columns,
             miniatureWidth: miniatureWidth,
             width: columns * miniatureWidth + Math.max(0, columns - 1) * spacing.miniature
@@ -227,6 +226,25 @@ function stepped(ids, selected, offset) {
 
     const index = Math.max(0, ids.indexOf(selected));
     return ids[((index + offset) % ids.length + ids.length) % ids.length];
+}
+
+// The workspace selected after a keyAction of moving the selection, from
+// `selected`. `placed` is `monitors` from layout. -1 is no selection.
+function selectionAfter(action, placed, selected) {
+    const monitors = placed.map(entry => entry.monitor);
+    const ids = workspaceIds(monitors);
+
+    if (action === "next" || action === "previous")
+        return stepped(ids, selected, action === "next" ? 1 : -1);
+
+    if (action === "first" || action === "last")
+        return ids.length > 0 ? ids[action === "first" ? 0 : ids.length - 1] : -1;
+
+    if (placed.length === 0)
+        return selected;
+
+    const row = placed[monitorHolding(monitors, selected)];
+    return stepped(row.monitor.workspaces, selected, (action === "rowDown" ? 1 : -1) * row.columns);
 }
 
 // The number a new workspace on a monitor takes: the next one after the

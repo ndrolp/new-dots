@@ -1,5 +1,6 @@
 import Quickshell.Widgets
 import QtQuick
+import "../../config" as Config
 import "../IconSource.js" as IconSource
 import "WorkspaceOverview.js" as WorkspaceOverview
 
@@ -9,26 +10,29 @@ Rectangle {
     id: root
 
     required property var appearance
-    required property var colors
     required property Item frames
     required property QtObject window
 
-    readonly property var details: window ? window.lastIpcObject : ({})
-    readonly property var size: WorkspaceOverview.ghostSize(details, 160)
+    readonly property var windowInfo: window ? window.lastIpcObject : ({})
+    readonly property var size: WorkspaceOverview.ghostSize(windowInfo, 160)
 
     width: size.width
     height: size.height
     clip: true
     radius: appearance.radius / 2
-    color: colors.surface
-    border.color: colors.accent
+    color: theme.surface
+    border.color: theme.accent
     border.width: 1
+
+    Config.Theme {
+        id: theme
+    }
 
     IconImage {
         anchors.centerIn: parent
         width: Math.min(40, parent.width - 4, parent.height - 4)
         height: width
-        source: IconSource.forName(WorkspaceOverview.appClass(root.details))
+        source: IconSource.forName(WorkspaceOverview.appClass(root.windowInfo))
     }
 
     WindowThumbnail {

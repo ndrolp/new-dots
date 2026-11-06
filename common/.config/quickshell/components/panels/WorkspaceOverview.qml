@@ -1,10 +1,8 @@
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
-import Quickshell.Widgets
 import QtQuick
 import "../../config" as Config
-import "../IconSource.js" as IconSource
 import "WorkspaceOverview.js" as WorkspaceOverview
 
 Variants {
@@ -49,66 +47,34 @@ Variants {
             ? Hyprland.focusedWorkspace.id : -1;
     }
 
-    function selectRelative(offset) {
-        selectedWorkspaceId = WorkspaceOverview.stepped(
-            WorkspaceOverview.workspaceIds(listedMonitors), selectedWorkspaceId, offset);
-    }
-
-    // Moves a row up or down within the monitor holding the selection.
-    function selectRow(direction, fit) {
-        const monitor = fit.monitors[WorkspaceOverview.monitorHolding(listedMonitors, selectedWorkspaceId)];
-
-        if (monitor !== undefined) {
-            selectedWorkspaceId = WorkspaceOverview.stepped(
-                monitor.workspaces, selectedWorkspaceId, direction * monitor.columns);
-        }
-    }
-
-    function selectEnd(last) {
-        const ids = WorkspaceOverview.workspaceIds(listedMonitors);
-
-        selectedWorkspaceId = ids.length > 0 ? ids[last ? ids.length - 1 : 0] : -1;
-    }
-
-    function activateSelected() {
-        if (selectedWorkspaceId < 1)
-            return;
-
-        workspaceService.switchTo(selectedWorkspaceId);
+    function goTo(id) {
+        selectedWorkspaceId = id;
+        workspaceService.switchTo(id);
         close();
     }
 
-    // Does what keyAction named.
-    function act(action, fit) {
-        if (action === "next")
-            selectRelative(1);
-        else if (action === "previous")
-            selectRelative(-1);
-        else if (action === "rowDown")
-            selectRow(1, fit);
-        else if (action === "rowUp")
-            selectRow(-1, fit);
-        else if (action === "first")
-            selectEnd(false);
-        else if (action === "last")
-            selectEnd(true);
-        else if (action === "create")
+    // Does what keyAction named. `placed` is the layout's monitors.
+    function act(action, placed) {
+        if (action === "create") {
             createWorkspace();
-        else if (action === "activate")
-            activateSelected();
-        else if (action === "close")
+        } else if (action === "close") {
             close();
+        } else if (action === "activate") {
+            if (selectedWorkspaceId >= 1)
+                goTo(selectedWorkspaceId);
+        } else {
+            selectedWorkspaceId = WorkspaceOverview.selectionAfter(action, placed, selectedWorkspaceId);
+        }
     }
 
     function createWorkspace() {
         const monitor = listedMonitors.find(listed => listed.name === shownOn);
-        const id = monitor === undefined ? null : monitor.newWorkspace;
 
-        if (id === null)
+        if (monitor === undefined || !WorkspaceOverview.hasSlot(monitor))
             return;
 
-        selectedWorkspaceId = id;
-        workspaceService.createWorkspace(id, shownOn);
+        selectedWorkspaceId = monitor.newWorkspace;
+        workspaceService.createWorkspace(monitor.newWorkspace, shownOn);
         close();
     }
 
@@ -130,7 +96,7 @@ Variants {
     }
 
     delegate: PanelWindow {
-        id: overview
+        id: screenWindow
 
         required property var modelData
         readonly property bool shown: root.shownOn === modelData.name
@@ -138,16 +104,12 @@ Variants {
 
         readonly property int padding: 40
         readonly property int hintHeight: 24
-        readonly property var fit: WorkspaceOverview.layout(
+        readonly property var arrangement: WorkspaceOverview.layout(
             root.listedMonitors,
             width - padding * 2,
             height - padding * 2 - hintHeight,
-            {
-                miniature: 10,
-                monitor: 32,
-                header: 30,
-                maxMiniatureHeight: height / 3
-            }
+            WorkspaceOverview.spacing,
+            height / 3
         )
 
         screen: modelData
@@ -173,7 +135,7 @@ Variants {
             id: windowFrames
 
             // Until it has faded out, so its thumbnails last through the fade.
-            windows: overview.visible ? Hyprland.toplevels.values : []
+            windows: screenWindow.visible ? Hyprland.toplevels.values : []
         }
 
         Behavior on reveal {
@@ -192,7 +154,7 @@ Variants {
         // in when asked: any event while this is up asks again, a burst once.
         Connections {
             target: Hyprland
-            enabled: overview.shown
+            enabled: screenWindow.shown
 
             function onRawEvent() {
                 windowRefresh.start();
@@ -225,11 +187,11 @@ Variants {
 
         Item {
             anchors.fill: parent
-            opacity: overview.reveal
+            opacity: screenWindow.reveal
 
             Rectangle {
                 anchors.fill: parent
-                enabled: overview.shown
+                enabled: screenWindow.shown
                 color: Qt.rgba(theme.surface.r, theme.surface.g, theme.surface.b, 0.85)
 
                 MouseArea {
@@ -242,10 +204,10 @@ Variants {
                 id: keyboardFocus
 
                 anchors.fill: parent
-                focus: overview.visible
+                focus: screenWindow.visible
 
                 Keys.onPressed: event => {
-                    const action = overview.shown
+                    const action = screenWindow.shown
                         ? WorkspaceOverview.keyAction(event.key, windowDrag.dragging) : null;
 
                     event.accepted = action !== null;
@@ -253,213 +215,76 @@ Variants {
                     if (action === "cancelDrag")
                         windowDrag.cancel();
                     else if (action !== null)
-                        root.act(action, overview.fit);
+                        root.act(action, screenWindow.arrangement.monitors);
                 }
             }
 
             Row {
                 anchors.centerIn: parent
-                anchors.verticalCenterOffset: -overview.hintHeight / 2
-                enabled: overview.shown
-                spacing: 32
+                anchors.verticalCenterOffset: -screenWindow.hintHeight / 2
+                enabled: screenWindow.shown
+                spacing: WorkspaceOverview.spacing.monitor
 
                 Repeater {
                     // Only the screen it's on builds its miniatures.
-                    model: overview.visible ? overview.fit.monitors : []
+                    model: screenWindow.visible ? screenWindow.arrangement.monitors : []
 
                     delegate: Column {
                         id: monitorColumn
 
                         required property var modelData
-                        required property int index
-                        readonly property var placed: modelData
-                        // The real monitor behind these miniatures.
-                        readonly property var area: root.listedMonitors[index]
+                        readonly property var monitor: modelData.monitor
 
-                        width: placed.width
+                        width: modelData.width
 
                         WorkspaceMonitorHeader {
                             width: parent.width
                             appearance: root.appearance
-                            monitorName: monitorColumn.placed.name
-                            canAddWorkspace: monitorColumn.placed.name === root.shownOn
-                                && WorkspaceOverview.hasSlot(monitorColumn.placed)
+                            monitorName: monitorColumn.monitor.name
+                            canAddWorkspace: monitorColumn.monitor.name === root.shownOn
+                                && WorkspaceOverview.hasSlot(monitorColumn.monitor)
                             onAddWorkspaceRequested: root.createWorkspace()
                         }
 
                         Grid {
-                            columns: monitorColumn.placed.columns
-                            spacing: 10
+                            columns: monitorColumn.modelData.columns
+                            spacing: WorkspaceOverview.spacing.miniature
 
                             Repeater {
-                                model: monitorColumn.placed.workspaces
+                                model: monitorColumn.monitor.workspaces
 
-                                delegate: Rectangle {
-                                    id: workspaceMiniature
-
+                                delegate: WorkspaceMiniature {
                                     required property var modelData
-                                    readonly property int workspaceId: modelData
-                                    readonly property bool active: root.workspaceService.isActive(workspaceId)
-                                    readonly property bool selected: root.selectedWorkspaceId === workspaceId
 
-                                    width: monitorColumn.placed.miniatureWidth
-                                    height: overview.fit.miniatureHeight
-                                    clip: true
-                                    radius: root.appearance.radius
-                                    color: windowDrop.containsDrag ? Qt.rgba(theme.accent.r, theme.accent.g,
-                                        theme.accent.b, 0.4) : selected ? Qt.rgba(theme.accent.r, theme.accent.g,
-                                        theme.accent.b, 0.2) : active ? theme.surfaceHover
-                                            : theme.backgroundSecondary
-                                    border.color: windowDrop.containsDrag || selected ? theme.accent
-                                        : active ? theme.border : "transparent"
-                                    border.width: windowDrop.containsDrag ? 2 : selected || active ? 1 : 0
-
-                                    Behavior on color {
-                                        ColorAnimation { duration: root.appearance.motion.short }
-                                    }
-
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        onClicked: {
-                                            root.selectedWorkspaceId = workspaceMiniature.workspaceId;
-                                            root.workspaceService.switchTo(workspaceMiniature.workspaceId);
-                                            root.close();
-                                        }
-                                    }
-
-                                    WindowDropTarget {
-                                        id: windowDrop
-
-                                        anchors.fill: parent
-                                        accepts: window => WorkspaceOverview.movesTo(
-                                            window.lastIpcObject, workspaceMiniature.workspaceId)
-                                        onWindowDropped: window => root.workspaceService.moveToWorkspace(
-                                            window, workspaceMiniature.workspaceId, monitorColumn.placed.name)
-                                    }
-
-                                    Item {
-                                        anchors.fill: parent
-
-                                        Repeater {
-                                            id: windowItems
-
-                                            model: ScriptModel {
-                                                values: root.workspaceService.windowsOn(workspaceMiniature.workspaceId)
-                                            }
-
-                                            delegate: Rectangle {
-                                                id: windowItem
-
-                                                required property var modelData
-                                                readonly property var toplevel: modelData
-                                                readonly property var details: toplevel.lastIpcObject
-                                                readonly property var box: WorkspaceOverview.windowBox(
-                                                    details, monitorColumn.area, workspaceMiniature)
-                                                readonly property string appClass: WorkspaceOverview.appClass(details)
-
-                                                x: box.x
-                                                y: box.y
-                                                z: WorkspaceOverview.stacking(details)
-                                                width: box.width
-                                                height: box.height
-                                                clip: true
-                                                radius: root.appearance.radius / 2
-                                                color: windowHover.hovered ? theme.surfaceHover : theme.surface
-                                                border.color: theme.border
-                                                border.width: 1
-
-                                                HoverHandler {
-                                                    id: windowHover
-                                                }
-
-                                                IconImage {
-                                                    id: windowIcon
-
-                                                    anchors.centerIn: parent
-                                                    anchors.verticalCenterOffset: windowTitle.visible ? -10 : 0
-                                                    width: Math.max(0, Math.min(24, parent.width - 4, parent.height - 4))
-                                                    height: width
-                                                    source: IconSource.forName(windowItem.appClass)
-                                                }
-
-                                                Text {
-                                                    id: windowTitle
-
-                                                    anchors.top: windowIcon.bottom
-                                                    anchors.topMargin: 2
-                                                    anchors.left: parent.left
-                                                    anchors.right: parent.right
-                                                    anchors.margins: 4
-                                                    visible: parent.height > 48
-                                                    text: windowItem.toplevel.title || windowItem.appClass
-                                                    color: theme.text
-                                                    elide: Text.ElideRight
-                                                    horizontalAlignment: Text.AlignHCenter
-                                                    font.pixelSize: root.appearance.textSize - 4
-                                                }
-
-                                                WindowThumbnail {
-                                                    anchors.fill: parent
-                                                    anchors.margins: parent.border.width
-                                                    frame: windowFrames.frameOf(windowItem.toplevel)
-                                                    // The hover colour shows through.
-                                                    opacity: windowHover.hovered ? 0.85 : 1
-                                                }
-
-                                                // A MouseArea so a click here doesn't reach the miniature below.
-                                                MouseArea {
-                                                    anchors.fill: parent
-                                                    onPressed: windowDrag.press(windowItem.toplevel,
-                                                        WorkspaceOverview.canDrag(windowItem.details))
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    Text {
-                                        anchors.left: parent.left
-                                        anchors.top: parent.top
-                                        anchors.margins: 6
-                                        text: "󰍹  " + workspaceMiniature.workspaceId
-                                        color: workspaceMiniature.selected ? theme.accent : theme.text
-                                        style: Text.Outline
-                                        styleColor: theme.surface
-                                        font.pixelSize: root.appearance.textSize
-                                        font.bold: true
-                                    }
-
-                                    Text {
-                                        anchors.right: parent.right
-                                        anchors.top: parent.top
-                                        anchors.margins: 6
-                                        text: "ACTIVE"
-                                        visible: workspaceMiniature.active
-                                        color: theme.accent
-                                        style: Text.Outline
-                                        styleColor: theme.surface
-                                        font.pixelSize: root.appearance.textSize - 4
-                                        font.bold: true
-                                    }
-
-                                    Text {
-                                        anchors.centerIn: parent
-                                        visible: windowItems.count === 0
-                                        text: "Empty workspace"
-                                        color: theme.textDisabled
-                                        font.pixelSize: root.appearance.textSize - 3
-                                    }
+                                    workspace: modelData
+                                    width: monitorColumn.modelData.miniatureWidth
+                                    height: screenWindow.arrangement.miniatureHeight
+                                    appearance: root.appearance
+                                    workspaceService: root.workspaceService
+                                    monitor: monitorColumn.monitor
+                                    frames: windowFrames
+                                    drag: windowDrag
+                                    selected: root.selectedWorkspaceId === workspace
+                                    onClicked: root.goTo(workspace)
+                                    onWindowDropped: window => root.workspaceService.moveToWorkspace(
+                                        window, workspace, monitorColumn.monitor.name)
                                 }
                             }
 
-                            NewWorkspaceSlot {
-                                visible: WorkspaceOverview.hasSlot(monitorColumn.placed)
-                                width: monitorColumn.placed.miniatureWidth
-                                height: overview.fit.miniatureHeight
-                                appearance: root.appearance
-                                colors: theme
-                                workspace: monitorColumn.placed.newWorkspace ?? -1
-                                onWindowDropped: window => root.workspaceService.moveToWorkspace(
-                                    window, workspace, monitorColumn.placed.name)
+                            Repeater {
+                                model: WorkspaceOverview.hasSlot(monitorColumn.monitor)
+                                    ? [monitorColumn.monitor.newWorkspace] : []
+
+                                delegate: NewWorkspaceSlot {
+                                    required property var modelData
+
+                                    workspace: modelData
+                                    width: monitorColumn.modelData.miniatureWidth
+                                    height: screenWindow.arrangement.miniatureHeight
+                                    appearance: root.appearance
+                                    onWindowDropped: window => root.workspaceService.moveToWorkspace(
+                                        window, workspace, monitorColumn.monitor.name)
+                                }
                             }
                         }
                     }
@@ -470,12 +295,11 @@ Variants {
                 id: windowDrag
 
                 anchors.fill: parent
-                enabled: overview.shown
+                enabled: screenWindow.shown
                 ghost: Component {
                     WindowDragGhost {
                         appearance: root.appearance
                         frames: windowFrames
-                        colors: theme
                         window: windowDrag.window
                     }
                 }
@@ -488,7 +312,7 @@ Variants {
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottom: parent.bottom
-                anchors.bottomMargin: overview.padding / 2
+                anchors.bottomMargin: screenWindow.padding / 2
                 text: "Arrows select · Enter focus · N new"
                 color: theme.textMuted
                 font.pixelSize: root.appearance.textSize - 3

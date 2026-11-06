@@ -1,5 +1,6 @@
 import QtQuick
 import "../../config" as Config
+import "WorkspaceOverview.js" as WorkspaceOverview
 
 // The heading over a monitor's workspaces: its name, and the button that adds a
 // workspace while it can.
@@ -12,7 +13,7 @@ Item {
 
     signal addWorkspaceRequested()
 
-    height: 30
+    height: WorkspaceOverview.spacing.header
 
     Config.Theme {
         id: theme

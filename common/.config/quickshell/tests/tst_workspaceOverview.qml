@@ -127,37 +127,37 @@ TestCase {
     }
 
     function test_miniaturesKeepTheirMonitorsProportions() {
-        const fit = WorkspaceOverview.layout([monitorWith(200, 100, 1), monitorWith(100, 200, 1)],
-            300, 100, noSpacing);
+        const arrangement = WorkspaceOverview.layout([monitorWith(200, 100, 1), monitorWith(100, 200, 1)],
+            300, 100, noSpacing, Infinity);
 
-        compare(fit.miniatureHeight, 100);
-        compare(fit.monitors.map(monitor => monitor.miniatureWidth), [200, 50]);
+        compare(arrangement.miniatureHeight, 100);
+        compare(arrangement.monitors.map(monitor => monitor.miniatureWidth), [200, 50]);
     }
 
     function test_workspacesWrapIntoTheRowsThatMakeThemLargest() {
-        const fit = WorkspaceOverview.layout([monitorWith(200, 100, 4)], 1000, 1000, noSpacing);
+        const arrangement = WorkspaceOverview.layout([monitorWith(200, 100, 4)], 1000, 1000, noSpacing, Infinity);
 
-        compare(fit.rows, 2);
-        compare(fit.miniatureHeight, 250);
-        compare(fit.monitors[0].columns, 2);
-        compare(fit.monitors[0].miniatureWidth, 500);
+        compare(arrangement.rows, 2);
+        compare(arrangement.miniatureHeight, 250);
+        compare(arrangement.monitors[0].columns, 2);
+        compare(arrangement.monitors[0].miniatureWidth, 500);
     }
 
     function test_theGapsAndHeadersComeOutOfTheSpace() {
-        const fit = WorkspaceOverview.layout([monitorWith(100, 100, 2)], 210, 240, spacing);
+        const arrangement = WorkspaceOverview.layout([monitorWith(100, 100, 2)], 210, 240, spacing, Infinity);
 
-        compare(fit.rows, 1);
-        compare(fit.miniatureHeight, 100);
-        compare(fit.monitors[0].width, 210);
-        compare(fit.height, 130);
+        compare(arrangement.rows, 1);
+        compare(arrangement.miniatureHeight, 100);
+        compare(arrangement.monitors[0].width, 210);
+        compare(arrangement.height, 130);
     }
 
     function test_aFewWorkspacesStopGrowingAtTheLimit() {
-        const fit = WorkspaceOverview.layout([monitorWith(100, 100, 1)], 1000, 1000,
-            Object.assign({}, noSpacing, { maxMiniatureHeight: 300 }));
+        const arrangement = WorkspaceOverview.layout([monitorWith(100, 100, 1)], 1000, 1000,
+            noSpacing, 300);
 
-        compare(fit.miniatureHeight, 300);
-        compare(fit.monitors[0].miniatureWidth, 300);
+        compare(arrangement.miniatureHeight, 300);
+        compare(arrangement.monitors[0].miniatureWidth, 300);
     }
 
     function offering(count, newWorkspace) {
@@ -166,31 +166,38 @@ TestCase {
 
     // Laid out like the four workspaces in the test above, not like three.
     function test_theNewWorkspaceSlotTakesItsPlaceLikeAMiniature() {
-        const fit = WorkspaceOverview.layout([offering(3, 4)], 1000, 1000, noSpacing);
+        const arrangement = WorkspaceOverview.layout([offering(3, 4)], 1000, 1000, noSpacing, Infinity);
 
-        compare(fit.rows, 2);
-        compare(fit.miniatureHeight, 250);
-        compare(fit.monitors[0].columns, 2);
-        compare(fit.monitors[0].newWorkspace, 4);
+        compare(arrangement.rows, 2);
+        compare(arrangement.miniatureHeight, 250);
+        compare(arrangement.monitors[0].columns, 2);
+        compare(arrangement.monitors[0].monitor.newWorkspace, 4);
     }
 
     function test_noSlotIsMadeRoomForWithNoNumberLeft() {
-        const fit = WorkspaceOverview.layout([offering(1, null)], 1000, 1000, noSpacing);
+        const arrangement = WorkspaceOverview.layout([offering(1, null)], 1000, 1000, noSpacing, Infinity);
 
-        compare(fit.rows, 1);
-        compare(fit.monitors[0].columns, 1);
-        compare(fit.monitors[0].miniatureWidth, 1000);
+        compare(arrangement.rows, 1);
+        compare(arrangement.monitors[0].columns, 1);
+        compare(arrangement.monitors[0].miniatureWidth, 1000);
     }
 
     function test_aMonitorWithNoWorkspacesStillHasRoomForTheSlot() {
-        const fit = WorkspaceOverview.layout([offering(0, 1)], 400, 100, noSpacing);
+        const arrangement = WorkspaceOverview.layout([offering(0, 1)], 400, 100, noSpacing, Infinity);
 
-        compare(fit.monitors[0].columns, 1);
-        compare(fit.monitors[0].width, 200);
+        compare(arrangement.monitors[0].columns, 1);
+        compare(arrangement.monitors[0].width, 200);
+    }
+
+    function test_aPlacedMonitorIsTheOneGiven() {
+        const monitor = offering(1, 2);
+
+        compare(WorkspaceOverview.layout([monitor], 400, 100, noSpacing, Infinity).monitors[0].monitor,
+            monitor);
     }
 
     function test_noMonitorsFitInNothing() {
-        compare(WorkspaceOverview.layout([], 1000, 1000, spacing).miniatureHeight, 0);
+        compare(WorkspaceOverview.layout([], 1000, 1000, spacing, Infinity).miniatureHeight, 0);
     }
 
     function test_theMostWorkspacesFitWithoutScrolling_data() {
@@ -211,13 +218,13 @@ TestCase {
     }
 
     function test_theMostWorkspacesFitWithoutScrolling(data) {
-        const fit = WorkspaceOverview.layout(data.monitors, data.area[0], data.area[1], spacing);
+        const arrangement = WorkspaceOverview.layout(data.monitors, data.area[0], data.area[1], spacing, Infinity);
 
-        verify(fit.miniatureHeight >= 60, "miniatures stay usable, got " + fit.miniatureHeight);
-        verify(fit.width <= data.area[0], "width " + fit.width);
-        verify(fit.height <= data.area[1], "height " + fit.height);
-        fit.monitors.forEach((monitor, index) => verify(
-            monitor.columns * fit.rows >= data.monitors[index].workspaces.length));
+        verify(arrangement.miniatureHeight >= 60, "miniatures stay usable, got " + arrangement.miniatureHeight);
+        verify(arrangement.width <= data.area[0], "width " + arrangement.width);
+        verify(arrangement.height <= data.area[1], "height " + arrangement.height);
+        arrangement.monitors.forEach((monitor, index) => verify(
+            monitor.columns * arrangement.rows >= data.monitors[index].workspaces.length));
     }
 
     function test_selectionWalksAlongTheListAndWrapsAround_data() {
@@ -238,6 +245,35 @@ TestCase {
 
     function test_selectionStaysPutWithNothingListed() {
         compare(WorkspaceOverview.stepped([], 4, 1), 4);
+    }
+
+    readonly property var placed: [
+        { monitor: { workspaces: [1, 2, 3, 4] }, columns: 2 },
+        { monitor: { workspaces: [] }, columns: 1 },
+        { monitor: { workspaces: [11] }, columns: 1 }
+    ]
+
+    function test_keysMoveTheSelection_data() {
+        return [
+            { tag: "next crosses monitors", action: "next", selected: 4, expected: 11 },
+            { tag: "previous wraps around", action: "previous", selected: 1, expected: 11 },
+            { tag: "a row down stays on the monitor", action: "rowDown", selected: 1, expected: 3 },
+            { tag: "a row up wraps on the monitor", action: "rowUp", selected: 1, expected: 3 },
+            { tag: "a row on a lone workspace", action: "rowDown", selected: 11, expected: 11 },
+            { tag: "first", action: "first", selected: 3, expected: 1 },
+            { tag: "last", action: "last", selected: 3, expected: 11 }
+        ];
+    }
+
+    function test_keysMoveTheSelection(data) {
+        compare(WorkspaceOverview.selectionAfter(data.action, placed, data.selected), data.expected);
+    }
+
+    function test_withNothingListedThereIsNoSelectionToMove() {
+        compare(WorkspaceOverview.selectionAfter("first", [], 4), -1);
+        compare(WorkspaceOverview.selectionAfter("last", [], 4), -1);
+        compare(WorkspaceOverview.selectionAfter("next", [], 4), 4);
+        compare(WorkspaceOverview.selectionAfter("rowDown", [], 4), 4);
     }
 
     function test_theWorkspacesReadAcrossTheMonitors() {

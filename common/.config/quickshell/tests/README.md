@@ -69,12 +69,17 @@ need Quickshell's services, so their parts are covered through those), that what
 runs along the bar animates and what runs across it doesn't, on every Bar position
 (`AlongBarBehavior.qml`), what the workspace overview lists: every monitor's
 workspaces in physical order, each one once, how they fit up to 21 with no
-scrolling, how the keyboard walks them, the number a new one takes and what
-moving a window to it dispatches, where a
-window sits in its miniature at any monitor scale or rotation and which windows
-a miniature shows (`components/panels/WorkspaceOverview.js`; `WorkspaceOverview.qml` itself is a
-Quickshell window and isn't tested here), what dropping a window on the new
-workspace tile does (`components/panels/NewWorkspaceTile.qml`), when a window's thumbnail lies over its
+scrolling, what each key does, during a drag too, how the keyboard walks them,
+the number a new one takes, skipping numbers another monitor has or the rules
+bind to it, and where a window sits in its miniature at any monitor scale or
+rotation (`components/panels/WorkspaceOverview.js`; `WorkspaceOverview.qml`,
+`WorkspaceMiniature.qml` and `MiniatureWindow.qml` need Quickshell and aren't
+tested here), which windows a miniature shows and what focusing, moving a window
+and creating a workspace dispatch (`services/WorkspaceState.js`;
+`WorkspaceService.qml` needs Quickshell and isn't tested here), a monitor's
+heading and when its + shows (`components/panels/WorkspaceMonitorHeader.qml`),
+what dropping a window on the new workspace slot and clicking it do
+(`components/panels/NewWorkspaceSlot.qml`, `WorkspaceDropSurface.qml`), when a window's thumbnail lies over its
 icon and title (`components/panels/WindowThumbnail.qml`; `WindowFrames.qml`, which
 captures the frames, needs Quickshell and isn't tested here), what a press on a
 window ends as and what ends a drag early (`components/panels/WindowDrag.qml` and

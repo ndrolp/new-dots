@@ -1,6 +1,7 @@
 import QtQuick
 import QtTest
 import "../components/panels"
+import "../config" as Config
 
 // Dropping a window on the empty slot after a monitor's last workspace, driven
 // with a real pointer through the same drag every workspace gets.
@@ -12,6 +13,10 @@ Item {
 
     property var drops: []
     property int backgroundClicks: 0
+
+    Config.Theme {
+        id: theme
+    }
 
     QtObject {
         id: kitty
@@ -46,11 +51,6 @@ Item {
         width: 100
         height: 60
         appearance: ({ radius: 8, textSize: 14, motion: { short: 0 } })
-        colors: QtObject {
-            readonly property color accent: "#ff0000"
-            readonly property color border: "#444444"
-            readonly property color textDisabled: "#888888"
-        }
         workspace: 3
         onWindowDropped: window => scene.drops.push({ window: window, workspace: workspace })
     }
@@ -95,12 +95,13 @@ Item {
         }
 
         function test_theSlotLightsUpWhileAWindowIsOverIt() {
-            verify(!slot.lit);
-            verify(Qt.colorEqual(slot.border.color, "#444444"));
+            verify(!slot.highlighted);
+            verify(Qt.colorEqual(slot.border.color, theme.border));
             carryOver();
-            verify(slot.lit);
-            verify(Qt.colorEqual(slot.border.color, "#ff0000"));
-            tryVerify(() => Qt.colorEqual(slot.color, Qt.rgba(1, 0, 0, 0.4)));
+            verify(slot.highlighted);
+            verify(Qt.colorEqual(slot.border.color, theme.accent));
+            const lit = Qt.rgba(theme.accent.r, theme.accent.g, theme.accent.b, 0.4);
+            tryVerify(() => Qt.colorEqual(slot.color, lit));
             drag.cancel();
             mouseRelease(scene, onSlot.x, onSlot.y);
         }
@@ -108,7 +109,7 @@ Item {
         function test_aWindowAlreadyOnThatNumberIsNotTaken() {
             slot.workspace = 2;
             carryOver();
-            verify(!slot.lit);
+            verify(!slot.highlighted);
             mouseRelease(scene, onSlot.x, onSlot.y);
 
             compare(scene.drops.length, 0);
