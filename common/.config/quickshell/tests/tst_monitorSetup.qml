@@ -297,6 +297,62 @@ TestCase {
         compare(MonitorSetup.listedSetups(data)[0].combination, "AOC\nSamsung");
     }
 
+    function test_aSavedSetupGoesByTheMakersOfItsMonitors() {
+        const data = { setups: [{ monitors: [{ description: "Philips Consumer Electronics Company 27M2N5500" },
+            { description: aoc }] }] };
+        compare(MonitorSetup.listedSetups(data)[0].name, "AOC + Philips");
+    }
+
+    function test_setupsThatWouldShareANameKeepTheirFullDescriptions() {
+        const data = { setups: [
+            { monitors: [{ description: "AOC Q27" }, { description: "Samsung A" }] },
+            { monitors: [{ description: "AOC 24B" }, { description: "Samsung A" }] },
+            { monitors: [{ description: "AOC Q27" }] }
+        ] };
+        const names = MonitorSetup.listedSetups(data).map(setup => setup.name);
+        compare(names, ["AOC Q27 + Samsung A", "AOC 24B + Samsung A", "AOC"]);
+    }
+
+    function test_aChangeStillBeingTriedOutIsNotListedAsSaved() {
+        const kept = { setups: [{ monitors: [{ description: "AOC" }] }] };
+        const trying = { setups: [{ monitors: [{ description: "AOC", mode: "1920x1080@60.00" }] },
+            { monitors: [{ description: "Samsung" }] }],
+            unkept: { before: JSON.stringify(kept), monitors: [] } };
+        compare(MonitorSetup.listedSetups(trying).map(setup => setup.name), ["AOC"]);
+    }
+
+    function test_nothingIsListedWhenATriedOutChangeHadNoFileBefore() {
+        const trying = { setups: [{ monitors: [{ description: "AOC" }] }], unkept: { before: null, monitors: [] } };
+        compare(MonitorSetup.listedSetups(trying), []);
+    }
+
+    function test_forgettingRemovesOnlyThatCombinationsSetup() {
+        const data = { version: 1, setups: [
+            { monitors: [{ description: "AOC", port: "DP-1" }, { description: "Samsung", port: "eDP-1" }] },
+            { monitors: [{ description: "AOC", port: "DP-1" }] }
+        ] };
+        const left = MonitorSetup.withoutSetup(data, "AOC\nSamsung");
+        compare(left.setups.map(setup => setup.monitors.length), [1]);
+        compare(left.setups[0].monitors[0].description, "AOC");
+        compare(left.version, 1);
+    }
+
+    // Hyprland takes the first match, so a second copy would come back to life.
+    function test_forgettingRemovesEveryCopyOfTheCombination() {
+        const data = { setups: [{ monitors: [{ description: "AOC", port: "DP-1" }] },
+            { monitors: [{ description: "AOC", port: "DP-2" }] }] };
+        compare(MonitorSetup.withoutSetup(data, "AOC").setups, []);
+    }
+
+    // After Forget the monitors stay as they are, with no saved entries behind them.
+    function test_aMonitorOffWithItsSetupForgottenCanStillBeTurnedOn() {
+        const monitors = [live("eDP-1", laptop), live("DP-2", aoc, { disabled: true, width: 0, height: 0 })];
+        const current = MonitorSetup.entriesFrom(monitors, [], false);
+        const on = MonitorSetup.turnedOn(current, "DP-2", [{ width: 2560, height: 1440, refresh: 143.91 }]);
+        compare(on[1].mode, "2560x1440@143.91");
+        compare(on[1].disabled, false);
+    }
+
     function test_entriesThatMatchAreTheSameArrangement() {
         compare(MonitorSetup.sameEntries(entries(), entries()), true);
         compare(MonitorSetup.sameEntries(entries(), MonitorSetup.withRefresh(entries(), "DP-2", 59.95)), false);

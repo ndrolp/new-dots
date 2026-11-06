@@ -68,6 +68,18 @@ Item {
                 property var applied: []
                 property int identified: 0
                 property bool refuses: false
+                property bool counting: false
+                property var forgot: []
+                property var savedSetups: [
+                    { combination: "AOC\nPhilips", name: "AOC + Philips", monitors: [] },
+                    { combination: "Samsung", name: "Samsung", monitors: [] }
+                ]
+
+                function forget(combination) {
+                    forgot = forgot.concat([combination]);
+                    savedSetups = savedSetups.filter(setup => setup.combination !== combination);
+                    return true;
+                }
 
                 function modesOf(port) {
                     return port === "DP-2"
@@ -242,6 +254,46 @@ Item {
             const item = section();
             mouseClick(shown(item, "Identify"));
             compare(item.setups.identified, 1);
+        }
+
+        // The list is below the monitor's settings, so the section moves up to bring a button into the window.
+        function forgetButton(item, setupName) {
+            const row = all(item, child => child.setupName === setupName)[0];
+            const button = all(row, child => child.label === "Forget")[0];
+            item.y = -button.mapToItem(item, 0, 0).y;
+            waitForRendering(item);
+            return button;
+        }
+
+        function test_eachSavedSetupIsListedByName() {
+            const item = section();
+            verify(shown(item, "AOC + Philips") !== null);
+            verify(shown(item, "Samsung") !== null);
+        }
+
+        function test_forgetAsksTheServiceForThatSetupAndChangesNoMonitor() {
+            const item = section();
+            mouseClick(forgetButton(item, "AOC + Philips"));
+            compare(item.setups.forgot, ["AOC\nPhilips"]);
+            compare(item.setups.applied.length, 0);
+            compare(shown(item, "AOC + Philips"), null);
+            verify(shown(item, "Samsung") !== null);
+        }
+
+        function test_nothingCanBeForgottenDuringACountdown() {
+            const item = section();
+            item.setups.counting = true;
+            const button = forgetButton(item, "Samsung");
+            compare(button.enabled, false);
+            mouseClick(button);
+            compare(item.setups.forgot.length, 0);
+        }
+
+        function test_withNothingSavedTheListIsNotShown() {
+            const item = section();
+            verify(shown(item, "Saved setups") !== null);
+            item.setups.savedSetups = [];
+            compare(shown(item, "Saved setups"), null);
         }
 
         Component {

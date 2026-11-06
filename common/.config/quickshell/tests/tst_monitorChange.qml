@@ -102,6 +102,24 @@ TestCase {
         compare(MonitorChange.interrupted("{ not json"), null);
     }
 
+    function test_forgettingWritesTheFileWithoutAskingHyprland() {
+        const text = '{ "setups": [{ "monitors": [{ "description": "Other" }] }, { "monitors": [{ "description": "AOC" }] }] }';
+        const step = MonitorChange.forgotten(text, "Other");
+        compare(setupsIn(step.text).length, 1);
+        compare(setupsIn(step.text)[0].monitors[0].description, "AOC");
+        compare(step.apply, false);
+        compare(step.remove, false);
+        compare(MonitorChange.counting(step.state), false);
+    }
+
+    function test_forgettingTheLastSetupLeavesAFileHyprlandCanRead() {
+        compare(MonitorChange.forgotten(savedText, "Other").text, '{\n  "setups": []\n}\n');
+    }
+
+    function test_nothingIsForgottenFromAFileThatCantBeRead() {
+        compare(MonitorChange.forgotten("{ not json", "Other"), null);
+    }
+
     function test_nothingIsDueWhileIdle() {
         compare(MonitorChange.expired(MonitorChange.idle, 99999), false);
         compare(MonitorChange.secondsLeft(MonitorChange.idle, 0), 0);

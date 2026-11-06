@@ -82,6 +82,14 @@ function restored(state) {
     return { state: idle, text: state.before, remove: state.before === null, apply: false };
 }
 
+// Forget: the combination's setup leaves the file and Hyprland isn't asked, so the monitors stay as
+// they are until the next time it detects them. Null, with nothing to write, if the file can't be
+// read. Not for use during a countdown: Revert would put the file back as it was.
+function forgotten(fileText, combination) {
+    const data = MonitorSetup.parsedFile(fileText);
+    return data !== null ? step(idle, MonitorSetup.serialized(MonitorSetup.withoutSetup(data, combination)), false) : null;
+}
+
 // The countdown a shell that stopped left in the file, as a state to revert, or null.
 function interrupted(fileText) {
     const data = MonitorSetup.parsedFile(fileText);
