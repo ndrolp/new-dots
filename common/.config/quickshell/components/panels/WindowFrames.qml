@@ -45,6 +45,9 @@ Item {
             required property var modelData
             readonly property var toplevel: modelData
 
+            // A WindowThumbnail draws nothing from an item with no size.
+            width: sourceSize.width
+            height: sourceSize.height
             live: false
             paintCursor: false
             captureSource: toplevel.wayland

@@ -21,6 +21,9 @@ Rectangle {
     readonly property var windowInfo: toplevel.lastIpcObject
     readonly property var box: WorkspaceOverview.windowBox(windowInfo, monitor, miniature)
     readonly property string appClass: WorkspaceOverview.appClass(windowInfo)
+    readonly property var frame: frames.frameOf(toplevel)
+    // A translucent window would show the icon and title through its frame.
+    readonly property bool framed: frame !== null && frame.hasContent
 
     x: box.x
     y: box.y
@@ -48,6 +51,7 @@ Rectangle {
         anchors.verticalCenterOffset: windowTitle.visible ? -10 : 0
         width: Math.max(0, Math.min(24, parent.width - 4, parent.height - 4))
         height: width
+        visible: !root.framed
         source: IconSource.forName(root.appClass)
     }
 
@@ -59,7 +63,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: 4
-        visible: parent.height > 48
+        visible: parent.height > 48 && !root.framed
         text: root.toplevel.title || root.appClass
         color: theme.text
         elide: Text.ElideRight
@@ -70,7 +74,7 @@ Rectangle {
     WindowThumbnail {
         anchors.fill: parent
         anchors.margins: parent.border.width
-        frame: root.frames.frameOf(root.toplevel)
+        frame: root.frame
         // The hover colour shows through.
         opacity: windowHover.hovered ? 0.85 : 1
     }
