@@ -253,8 +253,64 @@ test("a keyword mode always exists", function()
 end)
 
 test("a disabled monitor keeps its setup whatever modes it has", function()
-	local off = { monitors = { { description = AOC, port = "DP-2", mode = "640x480@60", disabled = true } } }
-	equal(setups.rules_for({ off }, { monitor("DP-2", AOC) })[1].disabled, true, "disabled")
+	local off = {
+		monitors = {
+			{ description = LAPTOP, port = "eDP-1" },
+			{ description = AOC, port = "DP-2", mode = "640x480@60", disabled = true },
+		},
+	}
+	local rules = setups.rules_for({ off }, { monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	equal(rule_for(rules, "DP-2").disabled, true, "disabled")
+end)
+
+test("a setup with every monitor off gives the automatic setup", function()
+	local dark = {
+		monitors = {
+			{ description = LAPTOP, port = "eDP-1", disabled = true },
+			{ description = AOC, port = "DP-2", disabled = true },
+		},
+	}
+	local rules = setups.rules_for({ dark }, { monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	equal(rule_for(rules, "eDP-1").disabled, false, "the laptop")
+	equal(rule_for(rules, "DP-2").disabled, false, "the AOC")
+	equal(rule_for(rules, "DP-2").mode, "highres", "mode")
+end)
+
+test("monitors that only copy each other show nothing either", function()
+	local loop = {
+		monitors = {
+			{ description = LAPTOP, port = "eDP-1", mirror = AOC },
+			{ description = AOC, port = "DP-2", mirror = LAPTOP },
+		},
+	}
+	local rules = setups.rules_for({ loop }, { monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	equal(rule_for(rules, "DP-2").mirror, "", "mirror")
+end)
+
+-- Modes read from Hyprland are { width, height, refresh_rate, preferred }, disabled monitors included
+-- (src/config/lua/objects/LuaMonitor.cpp, v0.57.0). A headless output lists none.
+test("what isn't a list of modes never counts as a fallback", function()
+	local saved = { monitors = { { description = AOC, port = "DP-2", mode = "2560x1440@143.91" } } }
+	for what, modes in pairs({
+		["no list"] = false,
+		["an empty list"] = {},
+		["not a table"] = 7,
+		["entries that aren't tables"] = { "2560x1440" },
+		["entries with no refresh rate"] = { { width = 1920, height = 1080 } },
+	}) do
+		local connected = monitor("DP-2", AOC)
+		connected.available_modes = modes or nil
+		local rules, fell_back = setups.rules_for({ saved }, { connected })
+		equal(rules[1].mode, "2560x1440@143.91", what)
+		equal(#fell_back, 0, what)
+	end
+end)
+
+test("a real list without the saved mode is still a fallback", function()
+	local saved = { monitors = { { description = AOC, port = "DP-2", mode = "2560x1440@143.91" } } }
+	local connected = monitor("DP-2", AOC, { "junk", { width = 1920, height = 1080, refresh_rate = 60, preferred = true } })
+	local _, fell_back = setups.rules_for({ saved }, { connected })
+	equal(#fell_back, 1, "monitors that fell back")
 end)
 
 local SAVED_DOCKED = [[

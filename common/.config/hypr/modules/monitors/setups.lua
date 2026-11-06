@@ -87,23 +87,36 @@ local function pair(setup, connected)
 	return pairs_by_port
 end
 
+local function is_mode(candidate)
+	return type(candidate) == "table"
+		and type(candidate.width) == "number"
+		and type(candidate.height) == "number"
+		and type(candidate.refresh_rate) == "number"
+end
+
+-- Hyprland lists { width, height, refresh_rate, preferred } from the output, so a disabled monitor has
+-- its modes too. Saying a mode is gone takes a list that shows it: a headless output lists none, and
+-- anything else here is a shape Hyprland doesn't have yet.
 local function mode_exists(mode, available)
 	local width, height, refresh = mode:match("^(%d+)x(%d+)@?(.*)$")
 	if not width then
 		return true -- preferred, highres and the like
 	end
 	local hz = tonumber(refresh)
-	for i = 1, #available do
-		local candidate = available[i]
-		if
-			candidate.width == tonumber(width)
-			and candidate.height == tonumber(height)
-			and (not hz or math.abs(candidate.refresh_rate - hz) < 1)
-		then
-			return true
+	local listed = false
+	for _, candidate in ipairs(type(available) == "table" and available or {}) do
+		if is_mode(candidate) then
+			listed = true
+			if
+				candidate.width == tonumber(width)
+				and candidate.height == tonumber(height)
+				and (not hz or math.abs(candidate.refresh_rate - hz) < 1)
+			then
+				return true
+			end
 		end
 	end
-	return false
+	return not listed
 end
 
 -- A mirror names the monitor it copies by description, or by port between identical monitors. Rules
@@ -195,12 +208,25 @@ local function split_by_lid(connected, lid_closed)
 	return present, closed
 end
 
+-- Monitors copying each other copy nothing, so a setup of those is as dark as one with all of them off.
+local function shows_something(setup)
+	for _, entry in ipairs(setup.monitors) do
+		if not entry.disabled and (entry.mirror or "") == "" then
+			return true
+		end
+	end
+	return false
+end
+
 -- The rules for the connected monitors, always one per monitor and always by port, so a rule can't
 -- reach a second identical monitor (Hyprland's desc: selector is a prefix match). Second comes the
 -- description of each monitor that fell back to automatic because its saved mode is gone.
 function M.rules_for(saved, connected, lid_closed)
 	local present, closed = split_by_lid(connected, lid_closed)
 	local setup = find_setup(saved, present)
+	if setup and not shows_something(setup) then
+		setup = nil
+	end
 	local entries = setup and pair(setup, present) or {}
 	local rules, fell_back = {}, {}
 	for i = 1, #present do
