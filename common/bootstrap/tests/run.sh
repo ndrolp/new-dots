@@ -57,10 +57,10 @@ test_stow_only_links_common_from_outside_the_repo() {
 }
 
 test_stow_only_links_the_host_dir_when_it_exists() {
-    run_bootstrap --stow-only --host omelas
-    [[ $STATUS -eq 0 ]] || fail "--stow-only --host omelas exited $STATUS"
-    [[ "$(readlink -f "$TEST_HOME/.config/hyprdynamicmonitors/config.toml")" == "$REPO/host-omelas/.config/hyprdynamicmonitors/config.toml" ]] \
-        || fail "host-omelas was not stowed"
+    run_bootstrap --stow-only --host sodoma
+    [[ $STATUS -eq 0 ]] || fail "--stow-only --host sodoma exited $STATUS"
+    [[ "$(readlink -f "$TEST_HOME/.config/kanshi/config")" == "$REPO/host-sodoma/.config/kanshi/config" ]] \
+        || fail "host-sodoma was not stowed"
 }
 
 test_each_run_writes_a_log_and_prints_a_summary() {
@@ -117,12 +117,12 @@ test_a_pre_existing_symlink_stow_does_not_own_is_backed_up_and_replaced() {
 test_a_second_run_backs_up_nothing() {
     TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
     echo "mine" >"$TEST_HOME/.zshrc"
-    rerun_bootstrap --stow-only --host omelas
+    rerun_bootstrap --stow-only --host sodoma
     [[ $STATUS -eq 0 ]] || fail "first run exited $STATUS"
     local before
     before="$(find "$TEST_HOME/.dotfiles-backup" | sort)"
     sleep 1
-    rerun_bootstrap --stow-only --host omelas
+    rerun_bootstrap --stow-only --host sodoma
     [[ $STATUS -eq 0 ]] || fail "second run exited $STATUS"
     ! grep -q "Backed up:" <<<"$OUT" || fail "second run backed something up"
     [[ "$(find "$TEST_HOME/.dotfiles-backup" | sort)" == "$before" ]] || fail "second run changed ~/.dotfiles-backup"
@@ -130,22 +130,22 @@ test_a_second_run_backs_up_nothing() {
 
 test_a_second_stow_run_reports_the_links_as_already_there() {
     TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
-    rerun_bootstrap --stow-only --host omelas
-    rerun_bootstrap --stow-only --host omelas
+    rerun_bootstrap --stow-only --host sodoma
+    rerun_bootstrap --stow-only --host sodoma
     [[ $STATUS -eq 0 ]] || fail "second run exited $STATUS"
     ! grep -q "^Installed:" <<<"$OUT" || fail "second run reports installs"
     grep -q -- "- stow: common (already linked)" <<<"$OUT" || fail "common not reported as already linked"
-    grep -q -- "- stow: host-omelas (already linked)" <<<"$OUT" || fail "host-omelas not reported as already linked"
+    grep -q -- "- stow: host-sodoma (already linked)" <<<"$OUT" || fail "host-sodoma not reported as already linked"
 }
 
 test_a_file_in_the_way_of_a_host_link_is_backed_up_keeping_its_path() {
     TEST_HOME="$(mktemp -d "$SCRATCH/home.XXXX")"
-    local rel=.config/hyprdynamicmonitors/config.toml
+    local rel=.config/kanshi/config
     mkdir -p "$TEST_HOME/$(dirname "$rel")"
     echo "mine" >"$TEST_HOME/$rel"
-    rerun_bootstrap --stow-only --host omelas
+    rerun_bootstrap --stow-only --host sodoma
     [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
-    [[ "$(readlink -f "$TEST_HOME/$rel")" == "$REPO/host-omelas/$rel" ]] || fail "$rel is not linked into host-omelas"
+    [[ "$(readlink -f "$TEST_HOME/$rel")" == "$REPO/host-sodoma/$rel" ]] || fail "$rel is not linked into host-sodoma"
     local backups=("$TEST_HOME"/.dotfiles-backup/*/"$rel")
     [[ "$(cat "${backups[0]}")" == mine ]] || fail "no backup of $rel at its relative path"
 }
@@ -154,7 +154,7 @@ test_an_unknown_host_stows_common_only_with_a_note() {
     run_bootstrap --stow-only --host no-such-host
     [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
     grep -qi "no host-no-such-host dir.*common only" <<<"$OUT" || fail "no note about stowing common only"
-    [[ ! -e "$TEST_HOME/.config/hyprdynamicmonitors" ]] || fail "stowed a host dir"
+    [[ ! -e "$TEST_HOME/.config/kanshi" ]] || fail "stowed a host dir"
 }
 
 test_host_sodoma_stows_sodoma() {

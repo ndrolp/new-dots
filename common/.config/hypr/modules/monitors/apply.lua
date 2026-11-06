@@ -69,7 +69,6 @@ local function fingerprint(rules)
 end
 
 -- options.path: the saved file, by default ~/.config/hypr/monitor-setups.json
--- options.stand_aside: with no saved file, leave the monitors alone instead of extending automatically
 -- options.lid_states: where to read the lid from, a glob
 function M.install(options)
 	local path = options.path or default_path()
@@ -83,11 +82,7 @@ function M.install(options)
 		if #connected == 0 then
 			return
 		end
-		local saved = load_saved(path)
-		if not saved and options.stand_aside then
-			return
-		end
-		local rules = setups.rules_for(saved or {}, connected, lid_closed(lid_states))
+		local rules = setups.rules_for(load_saved(path) or {}, connected, lid_closed(lid_states))
 		-- A setup turning a monitor off fires monitor.removed, which lands back here.
 		local applying = fingerprint(rules)
 		if applying == last_applied then

@@ -1,0 +1,235 @@
+#!/usr/bin/env python3
+"""Imports this machine's old per-host monitor profiles into the saved monitor setups, once.
+
+Reads config.toml and its templates and adds one setup per combination of monitors to
+~/.config/hypr/monitor-setups.json, leaving alone what's already there. They're read from
+~/.config/hyprdynamicmonitors, or from the repo's history once that's gone.
+See docs/adr/0002-hyprland-owns-monitor-setups.md.
+
+  scripts/import-monitor-setups [--from DIR] [--host NAME] [--output FILE]
+"""
+
+import argparse
+import atexit
+import io
+import json
+import os
+import re
+import shutil
+import socket
+import subprocess
+import sys
+import tarfile
+import tempfile
+import tomllib
+from pathlib import Path
+
+TOOL = "hyprdynamicmonitors"
+REPO = Path(__file__).resolve().parent.parent
+
+
+def fail(message):
+    print(f"import-monitor-setups: {message}", file=sys.stderr)
+    sys.exit(1)
+
+
+def config_home():
+    return Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
+
+
+def number(text):
+    """text as a whole number where that loses nothing, a float if not, unchanged if it's no number."""
+    try:
+        value = float(text)
+    except ValueError:
+        return text
+    return int(value) if value.is_integer() else value
+
+
+def lua_value(text):
+    if text.startswith('"'):
+        return text.strip('"')
+    if text in ("true", "false"):
+        return text == "true"
+    return number(text)
+
+
+def read_lua_rule(body):
+    fields = re.findall(r'(\w+)\s*=\s*("[^"]*"|[^,\s]+)', body)
+    return {key: lua_value(value) for key, value in fields}
+
+
+def read_old_rule(line):
+    output, *rest = line.split(",")
+    if rest == ["disable"]:
+        return {"output": output, "disabled": True}
+    mode, position, scale, *extras = rest
+    rule = {"output": output, "mode": mode, "position": position, "scale": scale}
+    rule.update(zip(extras[::2], map(number, extras[1::2])))
+    return rule
+
+
+def tidy(rule):
+    """Modes and scales as the saved file has them. Some templates wrote `@74.97Hz` and `@74.97.00000`."""
+    if "mode" in rule:
+        rule["mode"] = re.sub(r"^(\d+x\d+@\d+(?:\.\d+)?).*$", r"\1", rule["mode"])
+    if "scale" in rule:
+        rule["scale"] = number(rule["scale"])
+    return rule
+
+
+def read_template(path):
+    """The monitor rules of a template, as a list of {output, field: value}."""
+    text = re.sub(r"^\s*(#|--).*$", "", path.read_text(), flags=re.MULTILINE)
+    lua = re.compile(r"hl\.monitor\(\{(.*?)\}\)", re.DOTALL)
+    old = re.compile(r"^monitor=(.*)$", re.MULTILINE)
+    rules = [read_lua_rule(body) for body in lua.findall(text)]
+    rules += [read_old_rule(line) for line in old.findall(text)]
+    rest = old.sub("", lua.sub("", text)).strip()
+    if rest or not rules:
+        fail(f"can't read {path}: {rest[:60] or 'no monitors in it'}")
+    return [tidy(rule) for rule in rules]
+
+
+def hyprland_ports():
+    try:
+        out = subprocess.run(
+            ["hyprctl", "monitors", "all", "-j"], capture_output=True, text=True, check=True
+        ).stdout
+        return {monitor["name"]: monitor["description"] for monitor in json.loads(out)}
+    except (OSError, subprocess.CalledProcessError, ValueError):
+        return {}
+
+
+def required_descriptions(profile):
+    required = profile.get("conditions", {}).get("required_monitors", [])
+    return [monitor["description"] for monitor in required if "description" in monitor]
+
+
+def setup_of(name, profile, rules):
+    """The setup of a profile. Combinations go by description, but some rules only name a port: that's
+    the required monitor no other rule claims, or failing that whatever Hyprland has on that port."""
+    outputs = [rule["output"] for rule in rules]
+    unclaimed = [d for d in required_descriptions(profile) if f"desc:{d}" not in outputs]
+    monitors = []
+    for rule in rules:
+        entry = {key: value for key, value in rule.items() if key != "output"}
+        output = rule["output"]
+        if output.startswith("desc:"):
+            entry["description"] = output.removeprefix("desc:")
+        else:
+            entry["port"] = output
+            if len(unclaimed) == 1:
+                entry["description"] = unclaimed.pop()
+            elif output in hyprland_ports():
+                entry["description"] = hyprland_ports()[output]
+            else:
+                fail(f"profile {name} sets {output}, and Hyprland can't say which monitor that is")
+        monitors.append(entry)
+    monitors += [{"description": description} for description in unclaimed]
+    return {"monitors": monitors}
+
+
+def combination(setup):
+    return tuple(sorted(monitor["description"] for monitor in setup["monitors"]))
+
+
+def is_laptop_port(port):
+    """The same ports setups.lua counts as the laptop screen."""
+    return port.startswith(("eDP-", "LVDS-", "DSI-"))
+
+
+def add_closed_lid_setups(chosen):
+    """With the lid closed Hyprland looks for the combination without the laptop screen. So a setup that
+    turns that screen off is also saved without it, unless a profile already covers those monitors."""
+    laptops = {
+        monitor["description"]
+        for setup in chosen.values()
+        for monitor in setup["monitors"]
+        if is_laptop_port(monitor.get("port", ""))
+    }
+    for setup in list(chosen.values()):
+        kept = [m for m in setup["monitors"] if not (m["description"] in laptops and m.get("disabled"))]
+        closed = {"monitors": kept}
+        if kept and len(kept) < len(setup["monitors"]):
+            chosen.setdefault(combination(closed), closed)
+
+
+def read_profiles(source):
+    """One setup per combination. Like the old tool, the last profile that fits a combination wins."""
+    config = tomllib.loads((source / "config.toml").read_text())
+    chosen, names = {}, {}
+    for name, profile in config["profiles"].items():
+        template = source / "hyprconfigs" / Path(profile["config_file"]).name
+        setup = setup_of(name, profile, read_template(template))
+        key = combination(setup)
+        if key in chosen:
+            print(f"Skipped {names[key]}: {name} is for the same monitors and came later, so it was the one in use.")
+        chosen[key], names[key] = setup, name
+    add_closed_lid_setups(chosen)
+    return chosen
+
+
+def read_saved(path):
+    try:
+        saved = json.loads(path.read_text())
+        for setup in saved["setups"]:
+            combination(setup)
+    except FileNotFoundError:
+        return {"setups": []}
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        fail(f"can't read {path}, so it was left alone: {error!r}")
+    return saved
+
+
+def write_atomically(path, text):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_text(text)
+    temporary.replace(path)
+
+
+def from_history(host):
+    """The old folder as it was before the repo removed it, unpacked into a temporary folder."""
+    folder = f"host-{host}/.config/{TOOL}"
+    git = ["git", "-C", str(REPO)]
+    log = [*git, "log", "-1", "--format=%H", "--diff-filter=D", "--", f"{folder}/config.toml"]
+    removed_in = subprocess.run(log, capture_output=True, text=True).stdout.strip()
+    if not removed_in:
+        fail(f"no {TOOL} folder for {host}, here or in the history of {REPO}")
+    archive = subprocess.run([*git, "archive", f"{removed_in}^", folder], capture_output=True, check=True)
+    unpacked = tempfile.mkdtemp(prefix="import-monitor-setups.")
+    atexit.register(shutil.rmtree, unpacked)
+    with tarfile.open(fileobj=io.BytesIO(archive.stdout)) as tar:
+        tar.extractall(unpacked, filter="data")
+    return Path(unpacked) / folder
+
+
+def find_source(args):
+    if args.source:
+        return args.source
+    here = config_home() / TOOL
+    return here if (here / "config.toml").exists() else from_history(args.host)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--from", dest="source", type=Path)
+    parser.add_argument("--host", default=socket.gethostname())
+    parser.add_argument("--output", type=Path, default=config_home() / "hypr/monitor-setups.json")
+    args = parser.parse_args()
+
+    imported = read_profiles(find_source(args))
+    saved = read_saved(args.output)
+    known = {combination(setup) for setup in saved["setups"]}
+    added = [setup for key, setup in imported.items() if key not in known]
+    if not added:
+        print("Nothing to add: every setup is already saved.")
+        return
+    saved["setups"] += added
+    write_atomically(args.output, json.dumps(saved, indent=2) + "\n")
+    print(f"Added {len(added)} setups to {args.output}.")
+
+
+if __name__ == "__main__":
+    main()
