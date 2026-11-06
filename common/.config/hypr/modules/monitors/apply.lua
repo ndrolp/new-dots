@@ -92,6 +92,10 @@ function M.install(options)
 		end, { timeout = SETTLE_MS, type = "oneshot" })
 	end
 
+	-- The shell calls this over `hyprctl eval` after writing the file. A reload would do too, but that
+	-- rebuilds the whole config, binds included, for what's only a change of monitors.
+	M.apply_now = apply
+
 	hl.on("hyprland.start", apply_once_settled)
 	hl.on("monitor.added", apply_once_settled)
 	hl.on("monitor.removed", apply_once_settled)

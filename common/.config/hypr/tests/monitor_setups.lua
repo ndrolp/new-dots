@@ -482,6 +482,32 @@ apply_test("a path that can't be opened as a file gives the automatic setup", fu
 	assert(os.execute("rmdir " .. path .. ".bad"))
 end)
 
+-- The shell writes the file, then asks over `hyprctl eval` for it to be read. No event fires for that.
+apply_test("apply_now applies the file as it is now", function(path)
+	local session = new_session({ monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	install({ path = path, stand_aside = true })
+	equal(#session.applied, 0, "rules before there's a file")
+	local file = assert(io.open(path, "w"))
+	file:write(SAVED_DOCKED)
+	file:close()
+	require("modules.monitors.apply").apply_now()
+	equal(rule_for(session.applied, "DP-2").position, "1600x0", "position")
+end)
+
+-- The shell keeps what to go back to in the file while a change waits for Keep or Revert.
+apply_test("a setup the shell is still trying out applies like any other", function(path)
+	local session = new_session({ monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	install({ path = path })
+	local trying = SAVED_DOCKED:gsub("^%s*{", '{ "unkept": { "before": "{\\"setups\\": []}\\n", "monitors": [] },', 1)
+	local file = assert(io.open(path, "w"))
+	file:write(trying)
+	file:close()
+	session.applied = {}
+	require("modules.monitors.apply").apply_now()
+	equal(rule_for(session.applied, "DP-2").position, "1600x0", "position")
+	equal(read_file(path .. ".bad"), nil, "the backup")
+end)
+
 -- Until hyprdynamicmonitors is removed, merging this must not touch anyone's monitors. monitor-setups.sh
 -- points HOME at an empty folder, so there's no saved file here.
 test("the config installs setups but leaves monitors alone with no saved file", function()
