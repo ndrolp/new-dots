@@ -151,7 +151,11 @@ imported setup leaves that aren't numbers, and the saved file
 (`services/MonitorChange.js`), and the Displays section and its card
 (`components/panels/MonitorArrangeSettings.qml`, `MonitorArrangeCanvas.qml`,
 `MonitorControls.qml`, `MonitorChangeCard.qml`; `services/MonitorSetups.qml` and
-`modules/MonitorChange.qml` need Quickshell and aren't tested here).
+`modules/MonitorChange.qml` need Quickshell and aren't tested here), and the quick
+switch: its choices and the setup each builds, what *Extend* brings back and how a
+kept choice is saved (`services/QuickSwitch.js`), and its keys
+(`components/panels/QuickSwitchList.qml`; `QuickSwitch.qml` and
+`modules/QuickSwitch.qml` need Quickshell and aren't tested here).
 They run with QtTest outside of `qs`:
 
 ```sh

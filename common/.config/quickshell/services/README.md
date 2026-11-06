@@ -60,6 +60,16 @@ before it's written. All are tested without Quickshell. With a closed lid and an
 external monitor the laptop screen is no part of a setup, by the same rule as
 `split_by_lid` in `hypr/modules/monitors/setups.lua`: the two must stay in step.
 
+`QuickSwitch.js` holds the quick switch's choices and the entries each one builds,
+for the panel on SUPER+P and anything else that offers them: show
+`quickSwitchChoices` and hand one to `quickSwitch(choice)`, which goes through
+`apply`, so it gets the countdown and only *Keep* saves it. *Mirror* copies the
+focused monitor. A mirror's own mode and position say what it's copying, so what
+it was before goes in its entry's `arrangement` for *Extend* to bring back;
+`setups.lua` ignores that field. *<monitor> only* leaves everything where it was
+for the same reason. A monitor mirroring another stays one of Quickshell's
+screens, so `isMirroring(port)` is what hides its bar.
+
 ## Keep-awake
 
 `KeepAwake.qml` is the shell's one keep-awake. Its `on` and selected `duration`

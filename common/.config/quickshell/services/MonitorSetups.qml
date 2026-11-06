@@ -5,6 +5,7 @@ import QtQuick
 import "MonitorChange.js" as MonitorChange
 import "MonitorSetup.js" as MonitorSetup
 import "MonitorModes.js" as MonitorModes
+import "QuickSwitch.js" as QuickSwitch
 
 // The shell's one way to change the monitors: Displays and the quick switch both hand `apply` the
 // entries they want. It writes the saved file, asks Hyprland to apply it and runs the Keep or Revert
@@ -21,6 +22,8 @@ Scope {
     readonly property int secondsLeft: internal.secondsLeft
     // Each saved setup as { combination, name, monitors }.
     readonly property var savedSetups: internal.savedSetups
+    // What the quick switch offers, as QuickSwitch.choices gives it. Hand one to `quickSwitch`.
+    readonly property var quickSwitchChoices: QuickSwitch.choices(internal.entries)
     // Whether every monitor is flashing its number, and that number.
     readonly property bool identifying: identifyTimer.running
 
@@ -51,6 +54,17 @@ Scope {
         internal.entries = next;
         carryOut(MonitorChange.changed(internal.change, text, current, next, Date.now()));
         return true;
+    }
+
+    // Tries out one of `quickSwitchChoices`, the way `apply` does. Mirror copies the focused monitor.
+    function quickSwitch(choice) {
+        const focused = Hyprland.focusedMonitor ? Hyprland.focusedMonitor.name : "";
+        return apply(QuickSwitch.entriesFor(choice, internal.entries, focused, modesOf));
+    }
+
+    // Whether a monitor is copying another, so has no bar.
+    function isMirroring(port) {
+        return QuickSwitch.mirroring(internal.entries, port);
     }
 
     function keep() {

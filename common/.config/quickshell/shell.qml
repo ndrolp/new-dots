@@ -102,6 +102,11 @@ ShellRoot {
         monitorSetups: monitorSetups
     }
 
+    Modules.QuickSwitch {
+        appearance: appearance
+        monitorSetups: monitorSetups
+    }
+
     Modules.Lock {
         wallpapers: wallpapers
         appearance: appearance
@@ -307,6 +312,7 @@ ShellRoot {
         cava: cava
         systemMonitor: systemMonitor
         workspaceService: workspaceService
+        monitorSetups: monitorSetups
         settings: settings
         osd: osd
     }

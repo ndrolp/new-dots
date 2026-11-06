@@ -16,7 +16,8 @@ adding or editing one file here.
   `ControlCenter`, `QuickSettings`, `UnifiedSearch`).
 - One module per panel: `ApplicationLauncher`, `AudioOutputSelector`,
   `ClipboardSelector`, `CommandLauncher`, `KeybindCheatsheet`,
-  `PowerMenu`, `QuickSearch`, `QuickSettings`, `ScreenCapture` (the chooser),
+  `PowerMenu`, `QuickSearch`, `QuickSettings`, `QuickSwitch` (SUPER+P,
+  `quick-switch press`, which moves down when it's open), `ScreenCapture` (the chooser),
   `Settings`, `ThemeSelector`, `UnifiedSearch`, `WallpaperSelector`,
   `WindowSwitcher` and `WorkspaceOverview`.
 - `MonitorChange.qml`: not a `Feature`, it follows `services/MonitorSetups.qml`:

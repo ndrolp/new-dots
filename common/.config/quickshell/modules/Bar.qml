@@ -24,6 +24,7 @@ Scope {
     required property var cava
     required property var systemMonitor
     required property var workspaceService
+    required property var monitorSetups
     required property var settings
     required property var osd
     // The control center module (modules/ControlCenter.qml).
@@ -71,6 +72,7 @@ Scope {
         cava: root.cava
         systemMonitor: root.systemMonitor
         workspaceService: root.workspaceService
+        monitorSetups: root.monitorSetups
 
         onConfigRequested: function(screen, panelWindow) {
             root.settings.toggleOn(screen, panelWindow);

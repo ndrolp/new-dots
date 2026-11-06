@@ -167,6 +167,26 @@ test("a mirror names a monitor by description and is applied by port", function(
 	equal(rule_for(rules, "DP-9").mirror, "", "the mirrored monitor copies nothing")
 end)
 
+test("what the quick switch keeps for a mirror stays out of its rule", function()
+	local mirrored = {
+		monitors = {
+			{
+				description = AOC,
+				port = "DP-2",
+				mirror = LAPTOP,
+				mode = "preferred",
+				scale = 1,
+				arrangement = { mode = "2560x1440@143.91", position = "1800x0", scale = 1 },
+			},
+			{ description = LAPTOP, port = "eDP-1", mode = "preferred", position = "0x0", scale = 1 },
+		},
+	}
+	local rules = setups.rules_for({ mirrored }, { monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	equal(rule_for(rules, "DP-2").arrangement, nil, "arrangement")
+	equal(rule_for(rules, "DP-2").mode, "preferred", "mode")
+	equal(rule_for(rules, "DP-2").mirror, "eDP-1", "mirror target")
+end)
+
 test("a mirror of one of two identical monitors names it by port", function()
 	local mirrored = {
 		monitors = {
