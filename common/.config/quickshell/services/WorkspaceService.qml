@@ -1,6 +1,7 @@
 import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick
+import "../components/panels/WorkspaceOverview.js" as WorkspaceOverview
 
 QtObject {
     id: root
@@ -159,6 +160,17 @@ QtObject {
         toplevelDispatcher.running = true;
     }
 
+    // Sends a window to a workspace and stays where you are.
+    function moveToWorkspace(toplevel, id) {
+        const dispatch = toplevel === null ? null : WorkspaceOverview.moveDispatch(toplevel.address, id);
+
+        if (dispatch === null)
+            return;
+
+        moveDispatcher.command = ["hyprctl", "dispatch", dispatch];
+        moveDispatcher.running = true;
+    }
+
     property var workspaceRulesReader: Process {
         id: workspaceRulesReader
 
@@ -182,5 +194,9 @@ QtObject {
 
     property var toplevelDispatcher: Process {
         id: toplevelDispatcher
+    }
+
+    property var moveDispatcher: Process {
+        id: moveDispatcher
     }
 }

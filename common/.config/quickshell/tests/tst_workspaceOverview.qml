@@ -316,6 +316,43 @@ TestCase {
         verify(!WorkspaceOverview.isShownOn({}, 2, 2));
     }
 
+    function test_aPinnedWindowCantBeDragged() {
+        verify(WorkspaceOverview.canDrag(windowOn(2)));
+        verify(WorkspaceOverview.canDrag(windowOn(2, { floating: true })));
+        verify(!WorkspaceOverview.canDrag(windowOn(2, { floating: true, pinned: true })));
+    }
+
+    function test_aWindowMovesToAnotherWorkspaceButNotItsOwn() {
+        verify(WorkspaceOverview.movesTo(windowOn(2), 3));
+        verify(!WorkspaceOverview.movesTo(windowOn(2), 2));
+    }
+
+    function test_aWindowDoesNotMoveOutsideTheWorkspacesListed() {
+        verify(WorkspaceOverview.movesTo(windowOn(2), 21));
+        verify(!WorkspaceOverview.movesTo(windowOn(2), 22));
+        verify(!WorkspaceOverview.movesTo(windowOn(2), 0));
+    }
+
+    function test_aMoveNamesTheWindowAndDoesNotFollowIt() {
+        compare(WorkspaceOverview.moveDispatch("0x55ab10", 7),
+            'hl.dsp.window.move({ workspace = 7, follow = false, window = "address:0x55ab10" })');
+    }
+
+    function test_aMoveAddsThePrefixHyprlandExpectsOnAnAddress() {
+        compare(WorkspaceOverview.moveDispatch("55ab10", 7),
+            'hl.dsp.window.move({ workspace = 7, follow = false, window = "address:0x55ab10" })');
+    }
+
+    function test_aMoveIsNeverBuiltFromSomethingThatIsNotAnAddress() {
+        compare(WorkspaceOverview.moveDispatch('0x1" }) hl.exec_cmd("x', 7), null);
+    }
+
+    function test_aWindowIsNamedByItsClassInLowerCase() {
+        compare(WorkspaceOverview.appClass({ class: "Google-Chrome" }), "google-chrome");
+        compare(WorkspaceOverview.appClass({ class: "", initialClass: "Kitty" }), "kitty");
+        compare(WorkspaceOverview.appClass({}), "application");
+    }
+
     function test_floatingWindowsDrawOverTiledOnesAndFullscreenOverBoth() {
         const tiled = WorkspaceOverview.stacking(windowOn(1));
         const floating = WorkspaceOverview.stacking(windowOn(1, { floating: true }));

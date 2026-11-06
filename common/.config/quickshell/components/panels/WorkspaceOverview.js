@@ -162,6 +162,32 @@ function stacking(window) {
     return window.fullscreen ? 2 : window.floating ? 1 : 0;
 }
 
+// The name a window's icon goes by.
+function appClass(window) {
+    return String(window.class || window.initialClass || "application").toLowerCase();
+}
+
+// Whether a window can be picked up. A pinned one is on every workspace already.
+function canDrag(window) {
+    return !window.pinned;
+}
+
+// Whether dropping a window on a workspace would move it.
+function movesTo(window, workspace) {
+    return isListed(workspace) && window.workspace?.id !== workspace;
+}
+
+// The Hyprland dispatch moving a window to a workspace without following it,
+// wherever the window or the workspace are. Null for anything but an address.
+function moveDispatch(address, workspace) {
+    if (!/^(?:0x)?[0-9a-f]+$/i.test(address))
+        return null;
+
+    const prefixed = address.startsWith("0x") ? address : "0x" + address;
+    return "hl.dsp.window.move({ workspace = " + workspace
+        + ", follow = false, window = \"address:" + prefixed + "\" })";
+}
+
 // Every workspace listed, reading across the monitors.
 function workspaceIds(groups) {
     return groups.reduce((ids, group) => ids.concat(group.workspaces), []);
