@@ -86,7 +86,7 @@ Variants {
             return;
 
         selectedWorkspaceId = id;
-        workspaceService.switchTo(id);
+        workspaceService.createWorkspace(id, shownOn);
         close();
     }
 
@@ -367,7 +367,7 @@ Variants {
                                         accepts: window => WorkspaceOverview.movesTo(
                                             window.lastIpcObject, workspaceTile.workspaceId)
                                         onWindowDropped: window => root.workspaceService.moveToWorkspace(
-                                            window, workspaceTile.workspaceId)
+                                            window, workspaceTile.workspaceId, monitorGroup.group.name)
                                     }
 
                                     Item {
@@ -491,7 +491,7 @@ Variants {
                                 appearance: root.appearance
                                 colors: theme
                                 workspace: monitorGroup.group.newWorkspace ?? -1
-                                onWindowDropped: window => root.workspaceService.moveToNewWorkspace(
+                                onWindowDropped: window => root.workspaceService.moveToWorkspace(
                                     window, workspace, monitorGroup.group.name)
                             }
                         }

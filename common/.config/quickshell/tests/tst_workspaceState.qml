@@ -52,34 +52,34 @@ TestCase {
         verify(!WorkspaceState.isShownOn({}, 2, 2));
     }
 
-    function test_aMoveNamesTheWindowAndDoesNotFollowIt() {
-        compare(WorkspaceState.moveDispatch("0x55ab10", 7),
-            'hl.dsp.window.move({ workspace = 7, follow = false, window = "address:0x55ab10" })');
+    readonly property string moveTo7:
+        'hl.dsp.window.move({ workspace = 7, follow = false, window = "address:0x55ab10" })'
+    readonly property string send7ToDp1: 'hl.dsp.workspace.move({ workspace = 7, monitor = "DP-1" })'
+
+    function test_aMoveToAWorkspaceThatExistsNamesTheWindowAndDoesNotFollowIt() {
+        compare(WorkspaceState.moveCommand("0x55ab10", 7, "DP-1", true),
+            ["hyprctl", "dispatch", moveTo7]);
     }
 
     function test_aMoveAddsThePrefixHyprlandExpectsOnAnAddress() {
-        compare(WorkspaceState.moveDispatch("55ab10", 7),
-            'hl.dsp.window.move({ workspace = 7, follow = false, window = "address:0x55ab10" })');
-    }
-
-    function test_aMoveIsNeverBuiltFromSomethingThatIsNotAnAddress() {
-        compare(WorkspaceState.moveDispatch('0x1" }) hl.exec_cmd("x', 7), null);
+        compare(WorkspaceState.moveCommand("55ab10", 7, "DP-1", true),
+            ["hyprctl", "dispatch", moveTo7]);
     }
 
     // Hyprland makes a missing workspace on the focused monitor or the one a
-    // rule names, so it's sent to the tile's monitor once the window is in it.
-    function test_aMoveToANewWorkspaceCreatesItThenSendsItToTheMonitor() {
-        compare(WorkspaceState.newWorkspaceBatch("0x55ab10", 7, "DP-1"),
-            'dispatch hl.dsp.window.move({ workspace = 7, follow = false, window = "address:0x55ab10" })'
-            + ' ; dispatch hl.dsp.workspace.move({ workspace = 7, monitor = "DP-1" })');
+    // rule names, so it's sent to its monitor once the window is in it.
+    function test_aMoveToAWorkspaceThatDoesNotExistThenSendsItToItsMonitor() {
+        compare(WorkspaceState.moveCommand("0x55ab10", 7, "DP-1", false),
+            ["hyprctl", "--batch", "dispatch " + moveTo7 + " ; dispatch " + send7ToDp1]);
     }
 
-    function test_aMoveToANewWorkspaceIsNeverBuiltFromSomethingThatIsNotAnAddress() {
-        compare(WorkspaceState.newWorkspaceBatch('0x1" })', 7, "DP-1"), null);
+    function test_aMoveIsNeverBuiltFromSomethingThatIsNotAnAddress() {
+        compare(WorkspaceState.moveCommand('0x1" }) hl.exec_cmd("x', 7, "DP-1", true), null);
+        compare(WorkspaceState.moveCommand('0x1" })', 7, "DP-1", false), null);
     }
 
-    function test_aMoveToANewWorkspaceIsNeverBuiltFromSomethingThatIsNotAMonitor() {
-        compare(WorkspaceState.newWorkspaceBatch("0x55ab10", 7, 'DP-1" }) ; reload'), null);
+    function test_aMoveIsNeverBuiltFromSomethingThatIsNotAMonitor() {
+        compare(WorkspaceState.moveCommand("0x55ab10", 7, 'DP-1" }) ; reload', false), null);
     }
 
     function test_monitorNamesHyprlandGivesAreKept_data() {
@@ -91,6 +91,17 @@ TestCase {
     }
 
     function test_monitorNamesHyprlandGivesAreKept(data) {
-        verify(WorkspaceState.newWorkspaceBatch("0x55ab10", 7, data.monitor) !== null);
+        verify(WorkspaceState.moveCommand("0x55ab10", 7, data.monitor, false) !== null);
+    }
+
+    // Focusing a missing workspace makes it on the focused monitor, which the
+    // pointer may have left, so it's sent to its monitor too.
+    function test_creatingAWorkspaceFocusesItThenSendsItToItsMonitor() {
+        compare(WorkspaceState.createCommand(7, "DP-1"), ["hyprctl", "--batch",
+            "dispatch hl.dsp.focus({ workspace = 7 }) ; dispatch " + send7ToDp1]);
+    }
+
+    function test_aWorkspaceIsNeverCreatedFromSomethingThatIsNotAMonitor() {
+        compare(WorkspaceState.createCommand(7, 'DP-1" }) ; reload'), null);
     }
 }

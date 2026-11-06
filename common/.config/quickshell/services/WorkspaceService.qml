@@ -163,28 +163,28 @@ QtObject {
         toplevelDispatcher.running = true;
     }
 
-    // Sends a window to a workspace and stays where you are.
-    function moveToWorkspace(toplevel, id) {
-        const dispatch = toplevel === null ? null : WorkspaceState.moveDispatch(toplevel.address, id);
+    // Sends a window to a workspace and stays where you are. A workspace that
+    // doesn't exist yet ends up on the monitor named.
+    function moveToWorkspace(toplevel, id, monitor) {
+        const command = toplevel === null
+            ? null : WorkspaceState.moveCommand(toplevel.address, id, monitor, workspaceFor(id) !== null);
 
-        if (dispatch === null)
+        if (command === null)
             return;
 
-        moveDispatcher.command = ["hyprctl", "dispatch", dispatch];
+        moveDispatcher.command = command;
         moveDispatcher.running = true;
     }
 
-    // Moves a window to a workspace that doesn't exist yet, which ends up on
-    // the monitor named.
-    function moveToNewWorkspace(toplevel, id, monitor) {
-        const batch = toplevel === null
-            ? null : WorkspaceState.newWorkspaceBatch(toplevel.address, id, monitor);
+    // Makes a new workspace on the monitor named and goes to it.
+    function createWorkspace(id, monitor) {
+        const command = WorkspaceState.createCommand(id, monitor);
 
-        if (batch === null)
+        if (command === null)
             return;
 
-        moveDispatcher.command = ["hyprctl", "--batch", batch];
-        moveDispatcher.running = true;
+        workspaceDispatcher.command = command;
+        workspaceDispatcher.running = true;
     }
 
     property var workspaceRulesReader: Process {
