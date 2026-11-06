@@ -22,6 +22,22 @@ TestCase {
         return MonitorSetup.parsedFile(text).setups;
     }
 
+    function test_rememberingSavesTheSetupWithoutAskingHyprland() {
+        const step = MonitorChange.remembered(savedText, setup("0x0"));
+        compare(step.apply, false);
+        compare(MonitorChange.counting(step.state), false);
+        compare(setupsIn(step.text).length, 2);
+        compare(setupsIn(step.text)[1].monitors[0].position, "0x0");
+    }
+
+    function test_rememberingLeavesASavedCombinationAlone() {
+        compare(MonitorChange.remembered(MonitorChange.kept(started(null).state).text, setup("0x0")), null);
+    }
+
+    function test_nothingIsRememberedInAFileThatCantBeRead() {
+        compare(MonitorChange.remembered("{ not json", setup("0x0")), null);
+    }
+
     function test_aChangeWritesTheFileAndAsksHyprlandToApplyIt() {
         const step = started(savedText);
         compare(setupsIn(step.text).length, 2);

@@ -155,7 +155,12 @@ imported setup leaves that aren't numbers, and the saved file
 switch: its choices and the setup each builds, what *Extend* brings back and how a
 kept choice is saved (`services/QuickSwitch.js`), and its keys
 (`components/panels/QuickSwitchList.qml`; `QuickSwitch.qml` and
-`modules/QuickSwitch.qml` need Quickshell and aren't tested here).
+`modules/QuickSwitch.qml` need Quickshell and aren't tested here), and the
+toasts about monitors: when an unknown combination is offered, waiting for
+unlock, and telling a fallback or an unreadable file once
+(`services/MonitorToast.js`), and the toast's card
+(`components/panels/MonitorToastCard.qml`; `modules/MonitorToast.qml` needs
+Quickshell and isn't tested here).
 They run with QtTest outside of `qs`:
 
 ```sh

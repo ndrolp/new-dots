@@ -125,11 +125,12 @@ local function mirror_port(mirror, entries)
 	return ""
 end
 
+local function mode_gone(monitor, entry)
+	return entry.mode and not entry.disabled and not mode_exists(entry.mode, monitor.available_modes)
+end
+
 local function saved_rule(monitor, entry, entries)
 	local rule = automatic(monitor)
-	if entry.mode and not entry.disabled and not mode_exists(entry.mode, monitor.available_modes) then
-		return rule
-	end
 	for field in pairs(UNSET) do
 		if entry[field] ~= nil then
 			rule[field] = entry[field]
@@ -195,15 +196,20 @@ local function split_by_lid(connected, lid_closed)
 end
 
 -- The rules for the connected monitors, always one per monitor and always by port, so a rule can't
--- reach a second identical monitor (Hyprland's desc: selector is a prefix match).
+-- reach a second identical monitor (Hyprland's desc: selector is a prefix match). Second comes the
+-- description of each monitor that fell back to automatic because its saved mode is gone.
 function M.rules_for(saved, connected, lid_closed)
 	local present, closed = split_by_lid(connected, lid_closed)
 	local setup = find_setup(saved, present)
 	local entries = setup and pair(setup, present) or {}
-	local rules = {}
+	local rules, fell_back = {}, {}
 	for i = 1, #present do
 		local monitor = present[i]
 		local entry = entries[monitor.name]
+		if entry and mode_gone(monitor, entry) then
+			fell_back[#fell_back + 1] = monitor.description
+			entry = nil
+		end
 		rules[i] = entry and saved_rule(monitor, entry, entries) or automatic(monitor)
 	end
 	for i = 1, #closed do
@@ -211,7 +217,7 @@ function M.rules_for(saved, connected, lid_closed)
 		rule.disabled = true
 		rules[#rules + 1] = rule
 	end
-	return rules
+	return rules, fell_back
 end
 
 return M

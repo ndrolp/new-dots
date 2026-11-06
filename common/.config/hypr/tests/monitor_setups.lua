@@ -324,6 +324,37 @@ test("anything else can't be read", function()
 	end
 end)
 
+local SAVED_MODE_GONE = [[
+{
+  "setups": [
+    {
+      "monitors": [
+        { "description": "Samsung Display Corp. ATNA40HQ01-0", "port": "eDP-1", "mode": "2880x1800@120.00", "position": "0x0" },
+        { "description": "AOC Q27G42XE 2S6S1HA031479", "port": "DP-2", "mode": "5120x2880@60.00", "position": "1800x0" }
+      ]
+    }
+  ]
+}
+]]
+
+local function laptop_at_120()
+	return monitor("eDP-1", LAPTOP, { { width = 2880, height = 1800, refresh_rate = 120 } })
+end
+
+test("a monitor whose saved mode is gone is named as having fallen back", function()
+	local saved = setups.parse(SAVED_MODE_GONE)
+	local _, fell_back = setups.rules_for(saved, { laptop_at_120(), monitor("DP-2", AOC) })
+	equal(#fell_back, 1, "monitors that fell back")
+	equal(fell_back[1], AOC, "the monitor")
+end)
+
+test("nothing falls back when every saved mode exists, or with no setup to fall back from", function()
+	local _, fell_back = setups.rules_for({ DOCKED }, { monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	equal(#fell_back, 0, "with the setup")
+	_, fell_back = setups.rules_for({}, { monitor("DP-2", AOC) })
+	equal(#fell_back, 0, "unknown combination")
+end)
+
 -- The part that talks to Hyprland, against a stubbed `hl`. `session` plays Hyprland: its list of
 -- monitors can change between events, and timers only run when settle() says so.
 local function new_session(monitors)
@@ -404,6 +435,7 @@ local function apply_test(name, body)
 		body(path)
 		os.remove(path)
 		os.remove(path .. ".bad")
+		os.remove(path .. ".fallback")
 	end)
 end
 
@@ -690,6 +722,24 @@ test("the config applies setups by itself, at startup and on hotplug", function(
 	session.fire("monitor.added")
 	session.settle()
 	equal(rule_for(session.applied, "DP-2").mode, "highres", "the new monitor")
+end)
+
+apply_test("a fallback leaves the monitors' names for the shell, and the saved file as it was", function(path)
+	write_saved(path, SAVED_MODE_GONE)
+	new_session({ laptop_at_120(), monitor("DP-2", AOC) })
+	install({ path = path })
+	equal(read_file(path .. ".fallback"), AOC .. "\n", "the signal")
+	equal(read_file(path), SAVED_MODE_GONE, "the saved file")
+end)
+
+apply_test("the signal goes once nothing has fallen back", function(path)
+	write_saved(path, SAVED_MODE_GONE)
+	local session = new_session({ laptop_at_120(), monitor("DP-2", AOC) })
+	install({ path = path })
+	session.monitors = { laptop_at_120() }
+	session.fire("monitor.removed")
+	session.settle()
+	equal(read_file(path .. ".fallback"), nil, "the signal")
 end)
 
 local failed = 0

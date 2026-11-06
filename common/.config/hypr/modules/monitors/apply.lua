@@ -45,6 +45,21 @@ local function load_saved(path)
 	return saved or {}
 end
 
+-- Says which monitors fell back, one description per line, for the shell's toast. The file stays while
+-- they're fallen back, so applying again doesn't look like news, and goes once none are.
+local function leave_fallbacks(path, fell_back)
+	if #fell_back == 0 then
+		os.remove(path)
+		return
+	end
+	local file = io.open(path .. ".tmp", "w")
+	if file then
+		file:write(table.concat(fell_back, "\n"), "\n")
+		file:close()
+		os.rename(path .. ".tmp", path)
+	end
+end
+
 -- A lid that can't be read counts as open, which leaves every screen on.
 local function lid_closed(states)
 	local cat = io.popen("cat " .. states .. " 2>/dev/null")
@@ -82,7 +97,8 @@ function M.install(options)
 		if #connected == 0 then
 			return
 		end
-		local rules = setups.rules_for(load_saved(path) or {}, connected, lid_closed(lid_states))
+		local rules, fell_back = setups.rules_for(load_saved(path) or {}, connected, lid_closed(lid_states))
+		leave_fallbacks(path .. ".fallback", fell_back)
 		-- A setup turning a monitor off fires monitor.removed, which lands back here.
 		local applying = fingerprint(rules)
 		if applying == last_applied then

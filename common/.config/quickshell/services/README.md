@@ -74,7 +74,18 @@ focused monitor. A mirror's own mode and position say what it's copying, so what
 it was before goes in its entry's `arrangement` for *Extend* to bring back;
 `setups.lua` ignores that field. *<monitor> only* leaves everything where it was
 for the same reason. A monitor mirroring another stays one of Quickshell's
-screens, so `isMirroring(port)` is what hides its bar.
+screens, so `isMirroring(port)` is what hides its bar. A choice that changes nothing,
+like *Extend* on monitors already extended, is saved straight away with no countdown.
+
+`MonitorToast.js` decides the toasts. After each reading of the monitors, an
+unknown combination sets `offeringChoices`, once for each time it appears; only
+choosing or changing something saves it. Failures are toasts through the
+notifications, from what Hyprland leaves beside the saved file: `.bad` for a file
+it couldn't read, which the shell moves to `.bad.told` as it reads it so that it's
+told once, and `.fallback`, the monitors whose saved mode is gone, one per line,
+there for as long as that lasts. What's been told survives a reload of the shell;
+a shell that restarts, rather than reloads, tells a fallback again. Nothing
+is read or told while `locked`, so what happened meanwhile comes up after unlock.
 
 ## Keep-awake
 

@@ -90,6 +90,16 @@ function forgotten(fileText, combination) {
     return data !== null ? step(idle, MonitorSetup.serialized(MonitorSetup.withoutSetup(data, combination)), false) : null;
 }
 
+// Remembers what the monitors are already in, for a choice that changes nothing: there's nothing to
+// try out, so no countdown. Null, with nothing to write, if the combination has a setup or the file
+// can't be read.
+function remembered(fileText, entries) {
+    const data = MonitorSetup.parsedFile(fileText);
+    if (data === null || MonitorSetup.savedEntries(data, entries).length > 0)
+        return null;
+    return step(idle, fileWith(fileText, entries), false);
+}
+
 // The countdown a shell that stopped left in the file, as a state to revert, or null.
 function interrupted(fileText) {
     const data = MonitorSetup.parsedFile(fileText);

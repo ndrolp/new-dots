@@ -89,6 +89,8 @@ ShellRoot {
 
     Services.MonitorSetups {
         id: monitorSetups
+
+        locked: lockModule.locked
     }
 
     Services.NightLight {
@@ -107,7 +109,16 @@ ShellRoot {
         monitorSetups: monitorSetups
     }
 
+    Modules.MonitorToast {
+        appearance: appearance
+        monitorSetups: monitorSetups
+        settings: settings
+        bar: bar
+    }
+
     Modules.Lock {
+        id: lockModule
+
         wallpapers: wallpapers
         appearance: appearance
     }

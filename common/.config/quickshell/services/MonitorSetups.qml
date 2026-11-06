@@ -5,6 +5,7 @@ import QtQuick
 import "MonitorChange.js" as MonitorChange
 import "MonitorSetup.js" as MonitorSetup
 import "MonitorModes.js" as MonitorModes
+import "MonitorToast.js" as MonitorToast
 import "QuickSwitch.js" as QuickSwitch
 
 // The shell's one way to change the monitors: Displays and the quick switch both hand `apply` the
@@ -26,6 +27,10 @@ Scope {
     readonly property var quickSwitchChoices: QuickSwitch.choices(internal.entries)
     // Whether every monitor is flashing its number, and that number.
     readonly property bool identifying: identifyTimer.running
+    // Whether to hold the toasts: the shell's lock screen is up.
+    property bool locked: false
+    // Whether the toast for an unknown combination is up. `dismissToast` takes it down.
+    readonly property bool offeringChoices: internal.toast.offering
 
     function numberOf(port) {
         return internal.entries.findIndex(entry => entry.port === port) + 1;
@@ -45,8 +50,8 @@ Scope {
 
         const text = fileText();
         if (MonitorSetup.parsedFile(text) === null) {
-            // Asking Hyprland to read it moves it aside as .bad, so the next try starts clean.
-            warn("The saved monitor setups can't be read, so they were set aside. Try again.");
+            // Asking Hyprland to read it moves it aside as .bad, so the next try starts clean, and
+            // that's what brings up the toast saying so.
             askHyprland();
             return false;
         }
@@ -57,9 +62,25 @@ Scope {
     }
 
     // Tries out one of `quickSwitchChoices`, the way `apply` does. Mirror copies the focused monitor.
+    // A choice is remembered even if the monitors are already like that, as Extend is for a new one.
     function quickSwitch(choice) {
         const focused = Hyprland.focusedMonitor ? Hyprland.focusedMonitor.name : "";
-        return apply(QuickSwitch.entriesFor(choice, internal.entries, focused, modesOf));
+        const next = QuickSwitch.entriesFor(choice, internal.entries, focused, modesOf);
+        return apply(next) || remember(next);
+    }
+
+    function remember(next) {
+        if (internal.busy || counting || next.length === 0 || !MonitorSetup.sameEntries(next, internal.entries))
+            return false;
+        const step = MonitorChange.remembered(fileText(), next);
+        if (step === null)
+            return false;
+        carryOut(step);
+        return true;
+    }
+
+    function dismissToast() {
+        internal.toast = MonitorToast.dismissed(internal.toast);
     }
 
     // Whether a monitor is copying another, so has no bar.
@@ -171,6 +192,24 @@ Scope {
         internal.entries = MonitorSetup.entriesFrom(reading.monitors, MonitorSetup.savedEntries(data, present),
             reading.lidClosed);
         internal.savedSetups = MonitorSetup.listedSetups(data);
+        internal.toast = MonitorToast.afterReading(internal.toast, MonitorSetup.combination(present),
+            MonitorSetup.savedEntries(data, present).length > 0, root.locked);
+        kept.combination = internal.toast.combination;
+        if (!root.locked)
+            notices.running = true;
+    }
+
+    function tell(text) {
+        const notice = MonitorToast.noticed(text, kept.toldFallbacks);
+        kept.toldFallbacks = notice.told;
+        if (notice.message !== "")
+            warn(notice.message);
+    }
+
+    // What waited for the unlock is whatever the first reading after it finds.
+    onLockedChanged: {
+        if (!locked)
+            refresh();
     }
 
     Component.onCompleted: {
@@ -179,6 +218,18 @@ Scope {
         const cutShort = MonitorChange.interrupted(fileText());
         if (cutShort !== null)
             carryOut(MonitorChange.reverted(cutShort));
+    }
+
+    // What the toasts have already said, so that a reload of the shell doesn't say it again.
+    PersistentProperties {
+        id: kept
+
+        reloadableId: "monitorSetups"
+
+        property string combination: ""
+        property string toldFallbacks: ""
+
+        onLoaded: internal.toast = MonitorToast.restored(combination)
     }
 
     QtObject {
@@ -193,6 +244,7 @@ Scope {
         property bool askAfterWrite: false
         property bool fileMissing: false
         property bool readAgain: false
+        property var toast: MonitorToast.idle
     }
 
     FileView {
@@ -244,6 +296,16 @@ Scope {
                 internal.readAgain = false;
                 reader.running = true;
             }
+        }
+    }
+
+    // What Hyprland left for the shell beside the saved file: see MonitorToast.noticesCommand.
+    Process {
+        id: notices
+
+        command: MonitorToast.noticesCommand(file.path)
+        stdout: StdioCollector {
+            onStreamFinished: root.tell(text)
         }
     }
 

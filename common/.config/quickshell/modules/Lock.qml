@@ -9,6 +9,8 @@ Scope {
 
     required property var wallpapers
     required property var appearance
+    // Stays true until the lock screen has faded away and the session unlocks.
+    readonly property bool locked: lockScreen.lockState.locked
 
     LockScreen.Lock {
         id: lockScreen

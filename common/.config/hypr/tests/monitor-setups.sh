@@ -9,7 +9,7 @@ HYPR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SCRATCH="$(mktemp -d)"
 trap 'rm -rf "$SCRATCH"' EXIT
 
-for saved in monitor-setups.json monitor-setups.json.bad; do
+for saved in monitor-setups.json monitor-setups.json.bad monitor-setups.json.bad.told monitor-setups.json.fallback; do
     if ! git -C "$HYPR" check-ignore -q "$saved"; then
         echo "FAIL  $saved is not gitignored"
         exit 1
