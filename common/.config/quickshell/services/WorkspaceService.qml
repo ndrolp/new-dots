@@ -5,6 +5,10 @@ import QtQuick
 QtObject {
     id: root
 
+    // The rules from `hyprctl workspacerules -j`, read once at start and again
+    // through refreshWorkspaceRules.
+    property var workspaceRules: []
+
     function monitorDescriptionForScreen(screen) {
         if (screen === null || screen === undefined)
             return "default";
@@ -20,6 +24,18 @@ QtObject {
             return "default";
 
         return monitor.description !== "" ? monitor.description : monitor.name;
+    }
+
+    // The workspaces Hyprland has, as { id, monitor } with the monitor's name.
+    function existingWorkspaces() {
+        return Hyprland.workspaces.values
+            .filter(workspace => workspace.monitor !== null)
+            .map(workspace => ({ id: workspace.id, monitor: workspace.monitor.name }));
+    }
+
+    // Reads Hyprland's workspace rules into workspaceRules.
+    function refreshWorkspaceRules() {
+        workspaceRulesReader.running = true;
     }
 
     function workspacesForScreen(screen, configuredWorkspaces) {
@@ -147,6 +163,23 @@ QtObject {
             "hl.dsp.focus({ window = \"address:" + address + "\" })"
         ];
         toplevelDispatcher.running = true;
+    }
+
+    property var workspaceRulesReader: Process {
+        id: workspaceRulesReader
+
+        command: ["hyprctl", "workspacerules", "-j"]
+        running: true
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    root.workspaceRules = JSON.parse(text);
+                } catch (error) {
+                    console.warn("WorkspaceService: unreadable workspace rules:", error);
+                }
+            }
+        }
     }
 
     property var workspaceDispatcher: Process {

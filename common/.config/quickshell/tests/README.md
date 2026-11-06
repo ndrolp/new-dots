@@ -67,7 +67,11 @@ on a top one (`BarLayout.size`, `Workspaces.qml`, `ArchButton.qml`,
 `SystemMonitor.qml`, `RecordingContent.qml`; `BarElementItems.qml` and `Clock.qml`
 need Quickshell's services, so their parts are covered through those), that what
 runs along the bar animates and what runs across it doesn't, on every Bar position
-(`AlongBarBehavior.qml`), how the long text of the app
+(`AlongBarBehavior.qml`), what the workspace overview lists: every monitor's
+workspaces in physical order, each one once, how they fit up to 21 with no
+scrolling, how the keyboard walks them and the number a new one takes
+(`components/panels/WorkspaceOverview.js`; `WorkspaceOverview.qml` itself is a
+Quickshell window and isn't tested here), how the long text of the app
 menu, the current app and the media element turns on a side bar: how far, what
 its length is capped against and where an app menu title ends up for its popup,
 checked against a really rotated item (`BarLayout.turn`, `BarLayout.screenLength`,

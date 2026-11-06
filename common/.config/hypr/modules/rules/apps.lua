@@ -75,11 +75,20 @@ hl.layer_rule({
 
 hl.layer_rule({
 	name = "ndro-shell-switcher-overlays",
-	match = { namespace = "ndro-shell-window-switcher|ndro-shell-workspace-overview" },
+	match = { namespace = "ndro-shell-window-switcher" },
 	ignore_alpha = 0.0,
 	blur = true,
 	dim_around = false,
 	animation = "popin",
+})
+
+-- The shell fades the overview itself, so that Reduce motion reaches it.
+hl.layer_rule({
+	name = "ndro-shell-workspace-overview",
+	match = { namespace = "ndro-shell-workspace-overview" },
+	blur = false,
+	dim_around = false,
+	no_anim = true,
 })
 
 hl.layer_rule({
