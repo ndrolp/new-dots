@@ -13,8 +13,10 @@ suites=(
     common/bootstrap/tests/gtk-themes.sh
     common/bootstrap/tests/colorscheme.sh
     scripts/test-sync-packages
+    scripts/test-import-monitor-setups
     common/.config/hypr/tests/borders.sh
     common/.config/hypr/tests/env.sh
+    common/.config/hypr/tests/monitor-setups.sh
     colorschemes/colorscheme_changer_tests.sh
     common/.config/quickshell/tests/state-files.sh
     common/.config/quickshell/tests/startup.sh

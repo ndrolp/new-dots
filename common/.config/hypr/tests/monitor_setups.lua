@@ -352,19 +352,6 @@ local function apply_test(name, body)
 	end)
 end
 
-apply_test("standing aside, no file means no rule at all, ever", function(path)
-	local session = new_session({ monitor("eDP-1", LAPTOP) })
-	install({ path = path, stand_aside = true })
-	session.fire("hyprland.start")
-	session.monitors[2] = monitor("DP-2", AOC)
-	session.fire("monitor.added")
-	session.settle()
-	session.monitors[2] = nil
-	session.fire("monitor.removed")
-	session.settle()
-	equal(#session.applied, 0, "rules written")
-end)
-
 apply_test("with no file every connected monitor gets the automatic rule", function(path)
 	local session = new_session({ monitor("eDP-1", LAPTOP) })
 	install({ path = path })
@@ -378,7 +365,7 @@ apply_test("a setup applies when the config loads", function(path)
 	local file = assert(io.open(path, "w"))
 	file:write(SAVED_DOCKED)
 	file:close()
-	install({ path = path, stand_aside = true })
+	install({ path = path })
 	equal(rule_for(session.applied, "DP-2").position, "1600x0", "position")
 	equal(rule_for(session.applied, "eDP-1").disabled, true, "disabled")
 end)
@@ -467,7 +454,7 @@ apply_test("a file that can't be read gives the automatic setup and is kept", fu
 	bad:write("{ not json")
 	bad:close()
 	local session = new_session({ monitor("eDP-1", LAPTOP) })
-	install({ path = path, stand_aside = true })
+	install({ path = path })
 	equal(#session.applied, 1, "rules")
 	equal(session.applied[1].mode, "highres", "mode")
 	equal(read_file(path .. ".bad"), "{ not json", "the backup")
@@ -477,14 +464,13 @@ end)
 apply_test("a path that can't be opened as a file gives the automatic setup", function(path)
 	assert(os.execute("mkdir " .. path))
 	local session = new_session({ monitor("eDP-1", LAPTOP) })
-	install({ path = path, stand_aside = true })
+	install({ path = path })
 	equal(session.applied[1].mode, "highres", "mode")
 	assert(os.execute("rmdir " .. path .. ".bad"))
 end)
 
--- Until hyprdynamicmonitors is removed, merging this must not touch anyone's monitors. monitor-setups.sh
--- points HOME at an empty folder, so there's no saved file here.
-test("the config installs setups but leaves monitors alone with no saved file", function()
+-- monitor-setups.sh points HOME at an empty folder, so there's no saved file here.
+test("the config applies setups by itself, at startup and on hotplug", function()
 	local session = new_session({ monitor("eDP-1", LAPTOP) })
 	local anything = setmetatable({}, {})
 	getmetatable(anything).__index = function()
@@ -495,12 +481,11 @@ test("the config installs setups but leaves monitors alone with no saved file", 
 	end
 	setmetatable(hl, { __index = anything })
 	dofile(hypr .. "/hyprland.lua")
-	equal(session.handlers["monitor.removed"] ~= nil, true, "installed")
+	equal(rule_for(session.applied, "eDP-1").mode, "highres", "the laptop at startup")
+	session.monitors[2] = monitor("DP-2", AOC)
 	session.fire("monitor.added")
 	session.settle()
-	for _, rule in ipairs(session.applied) do
-		equal(rule.mode ~= "highres", true, "an automatic rule for " .. rule.output)
-	end
+	equal(rule_for(session.applied, "DP-2").mode, "highres", "the new monitor")
 end)
 
 local failed = 0

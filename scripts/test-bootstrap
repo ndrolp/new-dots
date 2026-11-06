@@ -2,7 +2,7 @@
 # Runs bootstrap.sh in a throwaway archlinux container, as a non-root user with
 # passwordless sudo, always with --no-system. Extra args go to bootstrap.sh:
 #   scripts/test-bootstrap --stow-only
-#   scripts/test-bootstrap --minimal --host omelas
+#   scripts/test-bootstrap --minimal --host sodoma
 # The repo's working tree (uncommitted changes included, .git left out) is copied
 # to ~/.dotfiles in the container; the host repo is mounted read-only and never changed.
 # --rm removes the container afterwards, also on failure or Ctrl-C (docker forwards the signal).

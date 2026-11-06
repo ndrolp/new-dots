@@ -13,16 +13,6 @@ require("modules.rules.workspaces")
 require("modules.rules.windows")
 require("modules.rules.apps")
 
-------------------
----- MONITORS ----
-------------------
-
--- See https://wiki.hypr.land/Configuring/Basics/Monitors/
--- hyprdynamicmonitors writes this file, so it's missing until its first profile.
-local monitorsLoaded, monitorsError = pcall(require, "modules.monitors.monitors")
-if not monitorsLoaded and not tostring(monitorsError):find("not found", 1, true) then
-	error(monitorsError)
-end
 ---------------------
 ---- MY PROGRAMS ----
 ---------------------
@@ -47,7 +37,6 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("bash -c 'playerctl metadata artist && playerctl metadata title'")
 	hl.exec_cmd("udiskie --tray --notify")
 	hl.exec_cmd("awww-daemon")
-	hl.exec_cmd("hyprdynamicmonitors --disable-power-events")
 	hl.exec_cmd("~/.config/quickshell/start.sh")
 end)
 
@@ -273,8 +262,6 @@ hl.window_rule({
 ---- MONITOR SETUP ----
 -----------------------
 
--- Applies the saved monitor setup. It comes last so it wins over the rules in monitors.lua, and so an
--- error here can't stop the keybinds from registering, which would trip Hyprland's emergency mode.
--- hyprdynamicmonitors still owns the monitors of a machine with no saved file, so with none this
--- stands aside. Removing hyprdynamicmonitors removes stand_aside too, and the automatic setup takes over.
-require("modules.monitors.apply").install({ stand_aside = true })
+-- Applies the saved monitor setup. It comes last so an error here can't stop the keybinds from
+-- registering, which would trip Hyprland's emergency mode.
+require("modules.monitors.apply").install({})
