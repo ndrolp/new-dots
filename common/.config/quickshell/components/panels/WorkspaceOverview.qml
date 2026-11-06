@@ -1,10 +1,9 @@
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
-import Quickshell.Widgets
 import QtQuick
 import "../../config" as Config
-import "../IconSource.js" as IconSource
+import "WorkspaceOverview.js" as WorkspaceOverview
 
 Variants {
     id: root
@@ -14,16 +13,33 @@ Variants {
     required property var workspaceService
     property bool open: false
     property int selectedWorkspaceId: -1
+    // The screen it opened on, which it stays on until it closes. Empty while
+    // closed, and kept apart from `open` so no other screen shows it meanwhile.
+    property string shownOn: ""
+    readonly property var listedMonitors: WorkspaceOverview.monitorsWithWorkspaces(
+        connectedMonitors(),
+        workspaceService.existingWorkspaces(),
+        workspaceService.workspaceRules
+    )
 
     signal closeRequested()
 
     model: Quickshell.screens
 
-    function workspaceIds(screen) {
-        return workspaceService.workspacesForScreen(
-            screen,
-            monitors.workspacesFor(workspaceService.monitorDescriptionForScreen(screen))
-        );
+    function connectedMonitors() {
+        return Quickshell.screens.map(screen => {
+            const description = workspaceService.monitorDescriptionForScreen(screen);
+
+            return {
+                name: screen.name,
+                description: description,
+                x: screen.x,
+                y: screen.y,
+                width: screen.width,
+                height: screen.height,
+                workspaces: monitors.workspacesFor(description)
+            };
+        });
     }
 
     function resetSelection() {
@@ -31,35 +47,34 @@ Variants {
             ? Hyprland.focusedWorkspace.id : -1;
     }
 
-    function selectRelative(offset, screen) {
-        const ids = workspaceIds(screen);
-
-        if (ids.length === 0)
-            return;
-
-        let index = ids.indexOf(selectedWorkspaceId);
-        if (index < 0)
-            index = 0;
-        selectedWorkspaceId = ids[(index + offset + ids.length) % ids.length];
-    }
-
-    function activateSelected() {
-        if (selectedWorkspaceId < 1)
-            return;
-
-        workspaceService.switchTo(selectedWorkspaceId);
+    function goTo(id) {
+        selectedWorkspaceId = id;
+        workspaceService.switchTo(id);
         close();
     }
 
-    function createWorkspace(screen) {
-        const ids = workspaceIds(screen);
-        const nextId = ids.length > 0 ? Math.min(21, Math.max(...ids) + 1) : 1;
+    // Does what keyAction named. `placed` is the layout's monitors.
+    function act(action, placed) {
+        if (action === "create") {
+            createWorkspace();
+        } else if (action === "close") {
+            close();
+        } else if (action === "activate") {
+            if (selectedWorkspaceId >= 1)
+                goTo(selectedWorkspaceId);
+        } else {
+            selectedWorkspaceId = WorkspaceOverview.selectionAfter(action, placed, selectedWorkspaceId);
+        }
+    }
 
-        if (ids.indexOf(nextId) !== -1)
+    function createWorkspace() {
+        const monitor = listedMonitors.find(listed => listed.name === shownOn);
+
+        if (monitor === undefined || !WorkspaceOverview.hasSlot(monitor))
             return;
 
-        selectedWorkspaceId = nextId;
-        workspaceService.switchTo(nextId);
+        selectedWorkspaceId = monitor.newWorkspace;
+        workspaceService.createWorkspace(monitor.newWorkspace, shownOn);
         close();
     }
 
@@ -71,22 +86,34 @@ Variants {
     }
 
     onOpenChanged: {
-        if (open)
+        if (open) {
+            Hyprland.refreshToplevels();
+            workspaceService.refreshWorkspaceRules();
             resetSelection();
+        }
+
+        shownOn = open && Hyprland.focusedMonitor ? Hyprland.focusedMonitor.name : "";
     }
 
     delegate: PanelWindow {
-        id: overview
+        id: screenWindow
 
         required property var modelData
-        readonly property var monitor: Hyprland.monitorFor(modelData)
-        readonly property bool focusedMonitor: Hyprland.focusedWorkspace
-            && Hyprland.focusedWorkspace.monitor && monitor
-            && Hyprland.focusedWorkspace.monitor.name === monitor.name
-        readonly property int columns: width >= 1300 ? 4 : width >= 900 ? 3 : 2
+        readonly property bool shown: root.shownOn === modelData.name
+        property real reveal: shown ? 1 : 0
+
+        readonly property int padding: 40
+        readonly property int hintHeight: 24
+        readonly property var arrangement: WorkspaceOverview.layout(
+            root.listedMonitors,
+            width - padding * 2,
+            height - padding * 2 - hintHeight,
+            WorkspaceOverview.spacing,
+            height / 3
+        )
 
         screen: modelData
-        visible: root.open && focusedMonitor
+        visible: reveal > 0
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         focusable: true
@@ -104,309 +131,191 @@ Variants {
             id: theme
         }
 
+        WindowFrames {
+            id: windowFrames
+
+            // Until it has faded out, so its thumbnails last through the fade.
+            windows: screenWindow.visible ? Hyprland.toplevels.values : []
+        }
+
+        Behavior on reveal {
+            NumberAnimation {
+                duration: root.appearance.motion.short
+                easing.type: root.appearance.motion.easing
+            }
+        }
+
         onVisibleChanged: {
             if (visible)
                 keyboardFocus.forceActiveFocus();
         }
 
-        Rectangle {
-            anchors.fill: parent
-            color: "transparent"
+        // A window's place comes from lastIpcObject, which Hyprland only fills
+        // in when asked: any event while this is up asks again, a burst once.
+        Connections {
+            target: Hyprland
+            enabled: screenWindow.shown
 
-            TapHandler {
-                onTapped: root.close()
+            function onRawEvent() {
+                windowRefresh.start();
             }
         }
 
-        FocusScope {
-            id: keyboardFocus
+        // A drag doesn't go on over a window that closed, nor after the workspace
+        // overview did.
+        Connections {
+            target: Hyprland.toplevels
+            enabled: windowDrag.window !== null
 
-            anchors.fill: parent
-            focus: overview.visible
-
-            Keys.onPressed: event => {
-                if (event.key === Qt.Key_Right) {
-                    root.selectRelative(1, modelData);
-                    event.accepted = true;
-                } else if (event.key === Qt.Key_Left) {
-                    root.selectRelative(-1, modelData);
-                    event.accepted = true;
-                } else if (event.key === Qt.Key_Down) {
-                    root.selectRelative(columns, modelData);
-                    event.accepted = true;
-                } else if (event.key === Qt.Key_Up) {
-                    root.selectRelative(-columns, modelData);
-                    event.accepted = true;
-                } else if (event.key === Qt.Key_Home) {
-                    const ids = root.workspaceIds(modelData);
-                    root.selectedWorkspaceId = ids.length > 0 ? ids[0] : -1;
-                    event.accepted = true;
-                } else if (event.key === Qt.Key_End) {
-                    const ids = root.workspaceIds(modelData);
-                    root.selectedWorkspaceId = ids.length > 0 ? ids[ids.length - 1] : -1;
-                    event.accepted = true;
-                } else if (event.key === Qt.Key_N) {
-                    root.createWorkspace(modelData);
-                    event.accepted = true;
-                } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter
-                        || event.key === Qt.Key_Space) {
-                    root.activateSelected();
-                    event.accepted = true;
-                } else if (event.key === Qt.Key_Escape) {
-                    root.close();
-                    event.accepted = true;
-                }
+            function onValuesChanged() {
+                if (Hyprland.toplevels.values.indexOf(windowDrag.window) === -1)
+                    windowDrag.cancel();
             }
         }
 
-        Rectangle {
-            id: overviewCard
+        onShownChanged: {
+            if (!shown)
+                windowDrag.cancel();
+        }
 
-            anchors.centerIn: parent
-            width: Math.min(parent.width - 64, 1160)
-            height: Math.min(parent.height - 96, 720)
-            radius: root.appearance.radius
-            color: Qt.rgba(theme.surface.r, theme.surface.g, theme.surface.b, 0.92)
-            border.color: theme.border
-            border.width: 1
+        Timer {
+            id: windowRefresh
 
-            Column {
+            interval: 30
+            onTriggered: Hyprland.refreshToplevels()
+        }
+
+        Item {
+            anchors.fill: parent
+            opacity: screenWindow.reveal
+
+            Rectangle {
                 anchors.fill: parent
-                anchors.margins: 16
-                spacing: 10
+                enabled: screenWindow.shown
+                color: Qt.rgba(theme.surface.r, theme.surface.g, theme.surface.b, 0.85)
 
-                Item {
-                    width: parent.width
-                    height: 28
-
-                    Text {
-                        anchors.left: parent.left
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: "WORKSPACE OVERVIEW"
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize + 1
-                        font.bold: true
-                    }
-
-                    Text {
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.rightMargin: newWorkspaceButton.width + 10
-                        text: "Arrows select · Enter focus · N new"
-                        color: theme.textMuted
-                        font.pixelSize: root.appearance.textSize - 3
-                    }
-
-                    Rectangle {
-                        id: newWorkspaceButton
-
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: 30
-                        height: 26
-                        radius: root.appearance.radius
-                        color: newWorkspaceHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-
-                        HoverHandler {
-                            id: newWorkspaceHover
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "+"
-                            color: theme.accent
-                            font.pixelSize: root.appearance.textSize + 2
-                            font.bold: true
-                        }
-
-                        TapHandler {
-                            onTapped: root.createWorkspace(overview.modelData)
-                        }
-                    }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: root.close()
                 }
+            }
 
-                GridView {
-                    id: workspaceGrid
+            FocusScope {
+                id: keyboardFocus
 
-                    width: parent.width
-                    height: parent.height - 42
-                    clip: true
-                    cellWidth: width / overview.columns
-                    cellHeight: 156
-                    model: root.workspaceIds(overview.modelData)
-                    boundsBehavior: Flickable.StopAtBounds
+                anchors.fill: parent
+                focus: screenWindow.visible
 
-                    delegate: Rectangle {
-                        id: workspaceTile
+                Keys.onPressed: event => {
+                    const action = screenWindow.shown
+                        ? WorkspaceOverview.keyAction(event.key, windowDrag.dragging) : null;
+
+                    event.accepted = action !== null;
+
+                    if (action === "cancelDrag")
+                        windowDrag.cancel();
+                    else if (action !== null)
+                        root.act(action, screenWindow.arrangement.monitors);
+                }
+            }
+
+            Row {
+                anchors.centerIn: parent
+                anchors.verticalCenterOffset: -screenWindow.hintHeight / 2
+                enabled: screenWindow.shown
+                spacing: WorkspaceOverview.spacing.monitor
+
+                Repeater {
+                    // Only the screen it's on builds its miniatures.
+                    model: screenWindow.visible ? screenWindow.arrangement.monitors : []
+
+                    delegate: Column {
+                        id: monitorColumn
 
                         required property var modelData
-                        readonly property int workspaceId: modelData
-                        readonly property bool active: root.workspaceService.isActive(workspaceId)
-                        readonly property bool selected: root.selectedWorkspaceId === workspaceId
-                        readonly property var windows: root.workspaceService
-                            .toplevelsForWorkspace(workspaceId)
+                        readonly property var monitor: modelData.monitor
 
-                        width: workspaceGrid.cellWidth - 8
-                        height: workspaceGrid.cellHeight - 8
-                        radius: root.appearance.radius
-                        color: selected ? Qt.rgba(theme.accent.r, theme.accent.g,
-                            theme.accent.b, 0.2) : active ? theme.surfaceHover
-                                : theme.backgroundSecondary
-                        border.color: selected ? theme.accent : active ? theme.border : "transparent"
-                        border.width: selected || active ? 1 : 0
+                        width: modelData.width
 
-                        Behavior on color {
-                            ColorAnimation { duration: root.appearance.motion.short }
+                        WorkspaceMonitorHeader {
+                            width: parent.width
+                            appearance: root.appearance
+                            monitorName: monitorColumn.monitor.name
+                            canAddWorkspace: monitorColumn.monitor.name === root.shownOn
+                                && WorkspaceOverview.hasSlot(monitorColumn.monitor)
+                            onAddWorkspaceRequested: root.createWorkspace()
                         }
 
-                        Column {
-                            anchors.fill: parent
-                            anchors.margins: 10
-                            spacing: 6
+                        Grid {
+                            columns: monitorColumn.modelData.columns
+                            spacing: WorkspaceOverview.spacing.miniature
 
-                            Item {
-                                width: parent.width
-                                height: 20
+                            Repeater {
+                                model: monitorColumn.monitor.workspaces
 
-                                Text {
-                                    anchors.left: parent.left
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: "󰍹  " + workspaceTile.workspaceId
-                                    color: workspaceTile.selected ? theme.accent : theme.text
-                                    font.pixelSize: root.appearance.textSize
-                                    font.bold: true
-                                }
+                                delegate: WorkspaceMiniature {
+                                    required property var modelData
 
-                                Text {
-                                    anchors.right: parent.right
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: workspaceTile.active ? "ACTIVE" : workspaceTile.windows.length
-                                        + (workspaceTile.windows.length === 1 ? " window" : " windows")
-                                    color: workspaceTile.active ? theme.accent : theme.textMuted
-                                    font.pixelSize: root.appearance.textSize - 4
-                                    font.bold: workspaceTile.active
-                                }
-                            }
-
-                            Row {
-                                width: parent.width
-                                height: 18
-                                spacing: 4
-                                visible: workspaceTile.windows.length > 0
-
-                                Repeater {
-                                    model: workspaceTile.windows.slice(0, 6)
-
-                                    delegate: Rectangle {
-                                        required property var modelData
-                                        readonly property string appClass: String(
-                                            modelData.lastIpcObject?.class
-                                                || modelData.lastIpcObject?.initialClass
-                                                || "application"
-                                        ).toLowerCase()
-
-                                        width: 18
-                                        height: 18
-                                        radius: root.appearance.radius
-                                        color: theme.surface
-
-                                        IconImage {
-                                            anchors.centerIn: parent
-                                            width: 13
-                                            height: 13
-                                            source: IconSource.forName(parent.appClass)
-                                        }
-                                    }
-                                }
-
-                                Text {
-                                    visible: workspaceTile.windows.length > 6
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: "+" + (workspaceTile.windows.length - 6)
-                                    color: theme.textMuted
-                                    font.pixelSize: root.appearance.textSize - 4
-                                    font.bold: true
+                                    workspace: modelData
+                                    width: monitorColumn.modelData.miniatureWidth
+                                    height: screenWindow.arrangement.miniatureHeight
+                                    appearance: root.appearance
+                                    workspaceService: root.workspaceService
+                                    monitor: monitorColumn.monitor
+                                    frames: windowFrames
+                                    drag: windowDrag
+                                    selected: root.selectedWorkspaceId === workspace
+                                    onClicked: root.goTo(workspace)
+                                    onWindowDropped: window => root.workspaceService.moveToWorkspace(
+                                        window, workspace, monitorColumn.monitor.name)
                                 }
                             }
 
                             Repeater {
-                                model: workspaceTile.windows.slice(0, 3)
+                                model: WorkspaceOverview.hasSlot(monitorColumn.monitor)
+                                    ? [monitorColumn.monitor.newWorkspace] : []
 
-                                delegate: Rectangle {
-                                    id: windowEntry
-
+                                delegate: NewWorkspaceSlot {
                                     required property var modelData
-                                    readonly property var toplevel: modelData
-                                    readonly property string appClass: String(
-                                        toplevel.lastIpcObject?.class
-                                            || toplevel.lastIpcObject?.initialClass
-                                            || "application"
-                                    ).toLowerCase()
 
-                                    width: parent.width
-                                    height: 27
-                                    radius: root.appearance.radius
-                                    color: windowHover.hovered ? theme.surfaceHover : theme.surface
-
-                                    HoverHandler {
-                                        id: windowHover
-                                    }
-
-                                    IconImage {
-                                        anchors.left: parent.left
-                                        anchors.leftMargin: 6
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        width: 16
-                                        height: 16
-                                        source: IconSource.forName(windowEntry.appClass)
-                                    }
-
-                                    Text {
-                                        anchors.left: parent.left
-                                        anchors.leftMargin: 28
-                                        anchors.right: parent.right
-                                        anchors.rightMargin: 6
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        text: windowEntry.toplevel.title || windowEntry.appClass
-                                        color: theme.text
-                                        elide: Text.ElideRight
-                                        font.pixelSize: root.appearance.textSize - 4
-                                    }
-
-                                    TapHandler {
-                                        onTapped: {
-                                            root.workspaceService.focusToplevel(windowEntry.toplevel);
-                                            root.close();
-                                        }
-                                    }
+                                    workspace: modelData
+                                    width: monitorColumn.modelData.miniatureWidth
+                                    height: screenWindow.arrangement.miniatureHeight
+                                    appearance: root.appearance
+                                    onWindowDropped: window => root.workspaceService.moveToWorkspace(
+                                        window, workspace, monitorColumn.monitor.name)
                                 }
-                            }
-
-                            Text {
-                                visible: workspaceTile.windows.length > 3
-                                text: "+" + (workspaceTile.windows.length - 3) + " more"
-                                color: theme.textMuted
-                                font.pixelSize: root.appearance.textSize - 4
-                            }
-
-                            Text {
-                                visible: workspaceTile.windows.length === 0
-                                text: "Empty workspace"
-                                color: theme.textDisabled
-                                font.pixelSize: root.appearance.textSize - 3
-                            }
-                        }
-
-                        TapHandler {
-                            acceptedButtons: Qt.LeftButton
-                            onTapped: {
-                                root.selectedWorkspaceId = workspaceTile.workspaceId;
-                                root.workspaceService.switchTo(workspaceTile.workspaceId);
-                                root.close();
                             }
                         }
                     }
                 }
+            }
+
+            WindowDrag {
+                id: windowDrag
+
+                anchors.fill: parent
+                enabled: screenWindow.shown
+                ghost: Component {
+                    WindowDragGhost {
+                        appearance: root.appearance
+                        frames: windowFrames
+                        window: windowDrag.window
+                    }
+                }
+                onClicked: window => {
+                    root.workspaceService.focusToplevel(window);
+                    root.close();
+                }
+            }
+
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: screenWindow.padding / 2
+                text: "Arrows select · Enter focus · N new"
+                color: theme.textMuted
+                font.pixelSize: root.appearance.textSize - 3
             }
         }
     }

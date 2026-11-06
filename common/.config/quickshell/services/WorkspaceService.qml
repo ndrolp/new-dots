@@ -1,9 +1,14 @@
 import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick
+import "WorkspaceState.js" as WorkspaceState
 
 QtObject {
     id: root
+
+    // The rules from `hyprctl workspacerules -j`, read once at start and again
+    // through refreshWorkspaceRules.
+    property var workspaceRules: []
 
     function monitorDescriptionForScreen(screen) {
         if (screen === null || screen === undefined)
@@ -22,15 +27,27 @@ QtObject {
         return monitor.description !== "" ? monitor.description : monitor.name;
     }
 
+    // The workspaces Hyprland has, as { id, monitor } with the monitor's name.
+    function existingWorkspaces() {
+        return Hyprland.workspaces.values
+            .filter(workspace => workspace.monitor !== null)
+            .map(workspace => ({ id: workspace.id, monitor: workspace.monitor.name }));
+    }
+
+    // Reads Hyprland's workspace rules into workspaceRules.
+    function refreshWorkspaceRules() {
+        workspaceRulesReader.running = true;
+    }
+
     function workspacesForScreen(screen, configuredWorkspaces) {
         const monitor = Hyprland.monitorFor(screen);
-        const workspaceIds = (configuredWorkspaces || []).filter(id => id >= 1 && id <= 21);
+        const workspaceIds = (configuredWorkspaces || []).filter(WorkspaceState.isListed);
         const workspaces = Hyprland.workspaces.values;
 
         for (let index = 0; index < workspaces.length; index++) {
             const workspace = workspaces[index];
 
-            if (workspace.id >= 1 && workspace.id <= 21
+            if (WorkspaceState.isListed(workspace.id)
                     && workspace.active && monitor !== null && workspace.monitor !== null
                     && workspace.monitor.name === monitor.name
                     && workspaceIds.indexOf(workspace.id) === -1) {
@@ -43,7 +60,7 @@ QtObject {
         for (let index = 0; index < toplevels.length; index++) {
             const workspace = toplevels[index].workspace;
 
-            if (workspace !== null && workspace.id >= 1 && workspace.id <= 21
+            if (workspace !== null && WorkspaceState.isListed(workspace.id)
                     && monitor !== null && workspace.monitor !== null
                     && workspace.monitor.name === monitor.name
                     && workspaceIds.indexOf(workspace.id) === -1) {
@@ -103,10 +120,13 @@ QtObject {
         return false;
     }
 
-    function toplevelsForWorkspace(id) {
-        return Hyprland.toplevels.values.filter(toplevel =>
-            toplevel.workspace !== null && toplevel.workspace.id === id
-                && toplevel.address !== "");
+    // The windows a workspace shows. These are the toplevels themselves rather
+    // than copies, so a refresh leaves each window's item in place.
+    function windowsOn(id) {
+        const focused = Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : -1;
+
+        return Hyprland.toplevels.values.filter(toplevel => toplevel.address !== ""
+            && WorkspaceState.isShownOn(toplevel.lastIpcObject, id, focused));
     }
 
     function switcherToplevels() {
@@ -126,27 +146,62 @@ QtObject {
     }
 
     function switchTo(id) {
-        if (id < 1 || id > 21)
+        if (!WorkspaceState.isListed(id))
             return;
 
-        workspaceDispatcher.command = [
-            "hyprctl", "dispatch",
-            "hl.dsp.focus({ workspace = " + id + " })"
-        ];
+        workspaceDispatcher.command = ["hyprctl", "dispatch", WorkspaceState.focusWorkspaceDispatch(id)];
         workspaceDispatcher.running = true;
     }
 
     function focusToplevel(toplevel) {
-        if (toplevel === null || !/^(?:0x)?[0-9a-f]+$/i.test(toplevel.address))
+        const dispatch = toplevel === null ? null : WorkspaceState.focusWindowDispatch(toplevel.address);
+
+        if (dispatch === null)
             return;
 
-        const address = toplevel.address.startsWith("0x")
-            ? toplevel.address : "0x" + toplevel.address;
-        toplevelDispatcher.command = [
-            "hyprctl", "dispatch",
-            "hl.dsp.focus({ window = \"address:" + address + "\" })"
-        ];
+        toplevelDispatcher.command = ["hyprctl", "dispatch", dispatch];
         toplevelDispatcher.running = true;
+    }
+
+    // Sends a window to a workspace and stays where you are. A workspace that
+    // doesn't exist yet ends up on the monitor named.
+    function moveToWorkspace(toplevel, id, monitor) {
+        const command = toplevel === null
+            ? null : WorkspaceState.moveCommand(toplevel.address, id, monitor, workspaceFor(id) !== null);
+
+        if (command === null)
+            return;
+
+        moveDispatcher.command = command;
+        moveDispatcher.running = true;
+    }
+
+    // Makes a new workspace on the monitor named and goes to it.
+    function createWorkspace(id, monitor) {
+        const command = WorkspaceState.createCommand(id, monitor);
+
+        if (command === null)
+            return;
+
+        workspaceDispatcher.command = command;
+        workspaceDispatcher.running = true;
+    }
+
+    property var workspaceRulesReader: Process {
+        id: workspaceRulesReader
+
+        command: ["hyprctl", "workspacerules", "-j"]
+        running: true
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    root.workspaceRules = JSON.parse(text);
+                } catch (error) {
+                    console.warn("WorkspaceService: unreadable workspace rules:", error);
+                }
+            }
+        }
     }
 
     property var workspaceDispatcher: Process {
@@ -155,5 +210,9 @@ QtObject {
 
     property var toplevelDispatcher: Process {
         id: toplevelDispatcher
+    }
+
+    property var moveDispatcher: Process {
+        id: moveDispatcher
     }
 }

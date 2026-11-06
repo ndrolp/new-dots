@@ -129,6 +129,10 @@ _Avoid_: Lockscreen, hyprlock (para la de la shell), pantalla de login
 El panel a pantalla completa con un solo campo de texto que busca a la vez en aplicaciones, marcadores, portapapeles y ventanas, y ofrece acciones (buscar en la web, ejecutar en Kitty, ir a un workspace). No es un popup: no pertenece a ningún bar element.
 _Avoid_: Launcher, quick search (que es otro panel)
 
+**Workspace overview** (vista de workspaces):
+La vista a pantalla completa que se abre con SUPER+TAB sobre el monitor enfocado, atenuando el escritorio, y muestra los workspaces de todos los monitores, agrupados por monitor y sin repetir ninguno, cada uno como una miniatura con sus ventanas en su sitio. Arrastrar una ventana a otro workspace la mueve allí sin seguirla y la vista sigue abierta; soltarla en la casilla vacía tras el último workspace de un monitor crea uno nuevo. Pulsar una ventana la enfoca y pulsar un workspace cambia a él, y las dos cosas cierran la vista. No es un popup. No es el *window switcher*.
+_Avoid_: Expose, overview (a secas), desktop overview, escritorio (para un workspace), app (para una ventana)
+
 **Query mode** (modo de búsqueda):
 Lo que pide el carácter con el que empieza la búsqueda en la unified search: `>` comandos, `?` web, `@` ventanas, `=` calculadora, `:` emoji. Sin prefijo se busca en todo.
 _Avoid_: Prefijo (para el modo en sí), filtro

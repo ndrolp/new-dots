@@ -67,7 +67,24 @@ on a top one (`BarLayout.size`, `Workspaces.qml`, `ArchButton.qml`,
 `SystemMonitor.qml`, `RecordingContent.qml`; `BarElementItems.qml` and `Clock.qml`
 need Quickshell's services, so their parts are covered through those), that what
 runs along the bar animates and what runs across it doesn't, on every Bar position
-(`AlongBarBehavior.qml`), how the long text of the app
+(`AlongBarBehavior.qml`), what the workspace overview lists: every monitor's
+workspaces in physical order, each one once, how they fit up to 21 with no
+scrolling, what each key does, during a drag too, how the keyboard walks them,
+the number a new one takes, skipping numbers another monitor has or the rules
+bind to it, and where a window sits in its miniature at any monitor scale or
+rotation (`components/panels/WorkspaceOverview.js`; `WorkspaceOverview.qml`,
+`WorkspaceMiniature.qml` and `MiniatureWindow.qml` need Quickshell and aren't
+tested here), which windows a miniature shows and what focusing, moving a window
+and creating a workspace dispatch (`services/WorkspaceState.js`;
+`WorkspaceService.qml` needs Quickshell and isn't tested here), a monitor's
+heading and when its + shows (`components/panels/WorkspaceMonitorHeader.qml`),
+what dropping a window on the new workspace slot and clicking it do
+(`components/panels/NewWorkspaceSlot.qml`, `WorkspaceDropSurface.qml`), when a window's thumbnail lies over its
+icon and title (`components/panels/WindowThumbnail.qml`; `WindowFrames.qml`, which
+captures the frames, needs Quickshell and isn't tested here), what a press on a
+window ends as and what ends a drag early (`components/panels/WindowDrag.qml` and
+`WindowDropTarget.qml`; `WindowDragGhost.qml` needs Quickshell and isn't tested
+here), how the long text of the app
 menu, the current app and the media element turns on a side bar: how far, what
 its length is capped against and where an app menu title ends up for its popup,
 checked against a really rotated item (`BarLayout.turn`, `BarLayout.screenLength`,

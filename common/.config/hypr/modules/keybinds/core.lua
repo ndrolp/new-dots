@@ -104,7 +104,7 @@ hl.bind(
 	{ description = "Toggle screen capture" }
 )
 hl.bind(
-	win .. " + b",
+	win .. " + TAB",
 	hl.dsp.exec_cmd(qs .. "workspace-overview toggle"),
 	{ description = "Toggle workspace overview" }
 )
