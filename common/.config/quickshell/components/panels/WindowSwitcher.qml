@@ -13,7 +13,6 @@ Variants {
     required property var workspaceService
     property bool open: false
     property string selectedAddress: ""
-    property int iconRefreshStep: 0
     readonly property var switcherWindows: workspaceService.switcherToplevels()
 
     signal openRequested()
@@ -73,30 +72,6 @@ Variants {
             return;
 
         closeRequested();
-    }
-
-    onOpenChanged: {
-        if (open) {
-            iconRefreshStep = 0;
-            iconRefreshTimer.restart();
-        }
-    }
-
-    onSwitcherWindowsChanged: {
-        if (open) {
-            iconRefreshStep = 0;
-            iconRefreshTimer.restart();
-        }
-    }
-
-    property var iconRefreshTimer: Timer {
-        interval: 250
-        onTriggered: {
-            root.iconRefreshStep++;
-
-            if (root.iconRefreshStep < 4)
-                restart();
-        }
     }
 
     delegate: PanelWindow {
@@ -247,7 +222,7 @@ Variants {
                         id: cardHover
                     }
 
-                    Loader {
+                    IconImage {
                         id: applicationIcon
 
                         anchors.left: parent.left
@@ -255,14 +230,7 @@ Variants {
                         anchors.margins: 10
                         width: 20
                         height: 20
-                        active: root.iconRefreshStep % 2 === 0
-                        sourceComponent: Component {
-                            Image {
-                                anchors.fill: parent
-                                cache: false
-                                source: IconSource.forName(windowCard.appClass)
-                            }
-                        }
+                        source: IconSource.forName(windowCard.appClass)
                     }
 
                     Text {
@@ -293,20 +261,13 @@ Variants {
                         anchors.bottom: parent.bottom
                         anchors.margins: 10
 
-                        Loader {
+                        IconImage {
                             anchors.centerIn: parent
                             width: 64
                             height: 64
                             // A translucent window would show it through its frame.
                             visible: !windowCard.frame || !windowCard.frame.hasContent
-                            active: root.iconRefreshStep % 2 === 0
-                            sourceComponent: Component {
-                                Image {
-                                    anchors.fill: parent
-                                    cache: false
-                                    source: IconSource.forName(windowCard.appClass)
-                                }
-                            }
+                            source: IconSource.forName(windowCard.appClass)
                         }
 
                         WindowThumbnail {
