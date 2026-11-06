@@ -73,10 +73,15 @@ function groups(monitors, existing, rules) {
     }));
 }
 
+// Whether a monitor shows the new workspace tile: only with a number left for it.
+function hasSlot(monitor) {
+    return Number.isInteger(monitor.newWorkspace);
+}
+
 // How many tiles a monitor shows: its workspaces, and the new workspace tile
 // while there's a number for it.
 function tileCount(monitor) {
-    return monitor.workspaces.length + (Number.isInteger(monitor.newWorkspace) ? 1 : 0);
+    return monitor.workspaces.length + (hasSlot(monitor) ? 1 : 0);
 }
 
 // The largest tiles that show every monitor side by side on `width` × `height`
@@ -181,6 +186,27 @@ function canDrag(window) {
 // Whether dropping a window on a workspace would move it.
 function movesTo(window, workspace) {
     return WorkspaceState.isListed(workspace) && window.workspace?.id !== workspace;
+}
+
+// What a key does, by the name WorkspaceOverview.qml acts on, or null for nothing.
+// During a drag the keys that would go somewhere wait for it to end, and Esc
+// cancels only the drag.
+function keyAction(key, dragging) {
+    switch (key) {
+    case Qt.Key_Right: return "next";
+    case Qt.Key_Left: return "previous";
+    case Qt.Key_Down: return "rowDown";
+    case Qt.Key_Up: return "rowUp";
+    case Qt.Key_Home: return "first";
+    case Qt.Key_End: return "last";
+    case Qt.Key_Escape: return dragging ? "cancelDrag" : "close";
+    case Qt.Key_N:
+    case Qt.Key_Plus: return dragging ? null : "create";
+    case Qt.Key_Return:
+    case Qt.Key_Enter:
+    case Qt.Key_Space: return dragging ? null : "activate";
+    default: return null;
+    }
 }
 
 // Every workspace listed, reading across the monitors.

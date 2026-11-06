@@ -78,6 +78,28 @@ Variants {
         close();
     }
 
+    // Does what keyAction named.
+    function act(action, fit) {
+        if (action === "next")
+            selectRelative(1);
+        else if (action === "previous")
+            selectRelative(-1);
+        else if (action === "rowDown")
+            selectRow(1, fit);
+        else if (action === "rowUp")
+            selectRow(-1, fit);
+        else if (action === "first")
+            selectEnd(false);
+        else if (action === "last")
+            selectEnd(true);
+        else if (action === "create")
+            createWorkspace();
+        else if (action === "activate")
+            activateSelected();
+        else if (action === "close")
+            close();
+    }
+
     function createWorkspace() {
         const monitor = groups.find(group => group.name === shownOn);
         const id = monitor === undefined ? null : monitor.newWorkspace;
@@ -222,34 +244,15 @@ Variants {
                 focus: overview.visible
 
                 Keys.onPressed: event => {
-                    event.accepted = overview.shown;
+                    const action = overview.shown
+                        ? WorkspaceOverview.keyAction(event.key, windowDrag.dragging) : null;
 
-                    if (!overview.shown)
-                        return;
+                    event.accepted = action !== null;
 
-                    if (event.key === Qt.Key_Right)
-                        root.selectRelative(1);
-                    else if (event.key === Qt.Key_Left)
-                        root.selectRelative(-1);
-                    else if (event.key === Qt.Key_Down)
-                        root.selectRow(1, overview.fit);
-                    else if (event.key === Qt.Key_Up)
-                        root.selectRow(-1, overview.fit);
-                    else if (event.key === Qt.Key_Home)
-                        root.selectEnd(false);
-                    else if (event.key === Qt.Key_End)
-                        root.selectEnd(true);
-                    else if (event.key === Qt.Key_N || event.key === Qt.Key_Plus)
-                        root.createWorkspace();
-                    else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter
-                            || event.key === Qt.Key_Space)
-                        root.activateSelected();
-                    else if (event.key === Qt.Key_Escape && windowDrag.dragging)
+                    if (action === "cancelDrag")
                         windowDrag.cancel();
-                    else if (event.key === Qt.Key_Escape)
-                        root.close();
-                    else
-                        event.accepted = false;
+                    else if (action !== null)
+                        root.act(action, overview.fit);
                 }
             }
 
@@ -274,51 +277,13 @@ Variants {
 
                         width: group.width
 
-                        Item {
+                        WorkspaceMonitorHeader {
                             width: parent.width
-                            height: 30
-
-                            Text {
-                                anchors.left: parent.left
-                                anchors.right: newWorkspaceButton.visible
-                                    ? newWorkspaceButton.left : parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: monitorGroup.group.name
-                                color: theme.text
-                                elide: Text.ElideRight
-                                font.pixelSize: root.appearance.textSize
-                                font.bold: true
-                            }
-
-                            Rectangle {
-                                id: newWorkspaceButton
-
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                visible: monitorGroup.group.name === root.shownOn
-                                width: 30
-                                height: 24
-                                radius: root.appearance.radius
-                                color: newWorkspaceHover.hovered
-                                    ? theme.surfaceHover : theme.backgroundSecondary
-
-                                HoverHandler {
-                                    id: newWorkspaceHover
-                                }
-
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "+"
-                                    color: theme.accent
-                                    font.pixelSize: root.appearance.textSize + 2
-                                    font.bold: true
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    onClicked: root.createWorkspace()
-                                }
-                            }
+                            appearance: root.appearance
+                            monitorName: monitorGroup.group.name
+                            canAddWorkspace: monitorGroup.group.name === root.shownOn
+                                && WorkspaceOverview.hasSlot(monitorGroup.group)
+                            onAddWorkspaceRequested: root.createWorkspace()
                         }
 
                         Grid {
@@ -486,7 +451,7 @@ Variants {
                             }
 
                             NewWorkspaceTile {
-                                visible: monitorGroup.group.newWorkspace !== null
+                                visible: WorkspaceOverview.hasSlot(monitorGroup.group)
                                 width: monitorGroup.group.tileWidth
                                 height: overview.fit.tileHeight
                                 appearance: root.appearance

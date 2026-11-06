@@ -402,6 +402,51 @@ TestCase {
         verify(!WorkspaceOverview.movesTo(windowOn(2), 0));
     }
 
+    function test_keysKeepTheirMeaningOutsideADrag_data() {
+        return [
+            { tag: "right", key: Qt.Key_Right, action: "next" },
+            { tag: "left", key: Qt.Key_Left, action: "previous" },
+            { tag: "down", key: Qt.Key_Down, action: "rowDown" },
+            { tag: "up", key: Qt.Key_Up, action: "rowUp" },
+            { tag: "home", key: Qt.Key_Home, action: "first" },
+            { tag: "end", key: Qt.Key_End, action: "last" },
+            { tag: "n", key: Qt.Key_N, action: "create" },
+            { tag: "plus", key: Qt.Key_Plus, action: "create" },
+            { tag: "return", key: Qt.Key_Return, action: "activate" },
+            { tag: "enter", key: Qt.Key_Enter, action: "activate" },
+            { tag: "space", key: Qt.Key_Space, action: "activate" },
+            { tag: "escape", key: Qt.Key_Escape, action: "close" },
+            { tag: "any other", key: Qt.Key_A, action: null }
+        ];
+    }
+
+    function test_keysKeepTheirMeaningOutsideADrag(data) {
+        compare(WorkspaceOverview.keyAction(data.key, false), data.action);
+    }
+
+    function test_keysThatWouldEndTheViewWaitForTheDragToEnd_data() {
+        return [
+            { tag: "n", key: Qt.Key_N },
+            { tag: "plus", key: Qt.Key_Plus },
+            { tag: "return", key: Qt.Key_Return },
+            { tag: "enter", key: Qt.Key_Enter },
+            { tag: "space", key: Qt.Key_Space }
+        ];
+    }
+
+    function test_keysThatWouldEndTheViewWaitForTheDragToEnd(data) {
+        compare(WorkspaceOverview.keyAction(data.key, true), null);
+    }
+
+    function test_escapeDuringADragCancelsOnlyTheDrag() {
+        compare(WorkspaceOverview.keyAction(Qt.Key_Escape, true), "cancelDrag");
+    }
+
+    function test_aMonitorHasASlotOnlyWhileANumberIsLeft() {
+        verify(WorkspaceOverview.hasSlot({ newWorkspace: 6 }));
+        verify(!WorkspaceOverview.hasSlot({ newWorkspace: null }));
+    }
+
     function test_aWindowIsNamedByItsClassInLowerCase() {
         compare(WorkspaceOverview.appClass({ class: "Google-Chrome" }), "google-chrome");
         compare(WorkspaceOverview.appClass({ class: "", initialClass: "Kitty" }), "kitty");
