@@ -177,16 +177,39 @@ function M.parse(text)
 	return nil, tostring(data)
 end
 
--- The rules for the connected monitors, always one per monitor and always by port, so a rule can't
--- reach a second identical monitor (Hyprland's desc: selector is a prefix match).
-function M.rules_for(saved, connected)
-	local setup = find_setup(saved, connected)
-	local entries = setup and pair(setup, connected) or {}
-	local rules = {}
+-- With a closed lid and an external monitor, the laptop screen isn't part of the combination. With no
+-- external monitor the lid means nothing here: what happens then is logind's. Internal ports are
+-- listed rather than external ones, so that a port nobody thought of can't lose its picture.
+local function split_by_lid(connected, lid_closed)
+	local present, closed = {}, {}
 	for i = 1, #connected do
 		local monitor = connected[i]
+		local internal = monitor.name:match("^eDP%-") or monitor.name:match("^LVDS%-") or monitor.name:match("^DSI%-")
+		local list = (lid_closed and internal) and closed or present
+		list[#list + 1] = monitor
+	end
+	if #present == 0 then
+		return closed, {}
+	end
+	return present, closed
+end
+
+-- The rules for the connected monitors, always one per monitor and always by port, so a rule can't
+-- reach a second identical monitor (Hyprland's desc: selector is a prefix match).
+function M.rules_for(saved, connected, lid_closed)
+	local present, closed = split_by_lid(connected, lid_closed)
+	local setup = find_setup(saved, present)
+	local entries = setup and pair(setup, present) or {}
+	local rules = {}
+	for i = 1, #present do
+		local monitor = present[i]
 		local entry = entries[monitor.name]
 		rules[i] = entry and saved_rule(monitor, entry, entries) or automatic(monitor)
+	end
+	for i = 1, #closed do
+		local rule = automatic(closed[i])
+		rule.disabled = true
+		rules[#rules + 1] = rule
 	end
 	return rules
 end
