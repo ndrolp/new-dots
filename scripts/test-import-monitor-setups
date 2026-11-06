@@ -1,0 +1,285 @@
+#!/usr/bin/env bash
+# Tests for scripts/import-monitor-setups, on fixtures only: the saved file is always a scratch path,
+# HOME is a scratch folder, and `hyprctl` is a stub. Run: scripts/test-import-monitor-setups
+set -uo pipefail
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+IMPORT="$HERE/import-monitor-setups"
+FIXTURES="$HERE/import-monitor-setups-fixtures"
+WORK="$(mktemp -d)"
+trap 'rm -rf "$WORK"' EXIT
+
+export HOME="$WORK/home"
+unset XDG_CONFIG_HOME
+mkdir -p "$WORK/bin"
+export PATH="$WORK/bin:$PATH"
+
+failures=0
+current=""
+SAVED="$WORK/saved.json"
+
+setup() {
+  current="$1"
+  rm -rf "$SAVED" "$HOME" "$WORK/old" "$WORK/bin/hyprctl"
+  mkdir -p "$HOME" "$WORK/old/hyprconfigs"
+}
+
+# Adds a profile to config.toml: profile <name> <description or name=port>...
+profile() {
+  local name="$1" monitor
+  shift
+  printf '[profiles.%s]\nconfig_file = "/elsewhere/hyprconfigs/%s.go.tmpl"\n' "$name" "$name" >>"$WORK/old/config.toml"
+  for monitor in "$@"; do
+    printf '[[profiles.%s.conditions.required_monitors]]\n' "$name" >>"$WORK/old/config.toml"
+    case "$monitor" in
+      name=*) printf 'name = "%s"\n' "${monitor#name=}" ;;
+      *) printf 'description = "%s"\n' "$monitor" ;;
+    esac >>"$WORK/old/config.toml"
+  done
+}
+
+template() { cat >"$WORK/old/hyprconfigs/$1.go.tmpl"; }
+
+import_old() { "$IMPORT" --from "$WORK/old" --output "$SAVED" "$@" 2>&1; }
+
+# The saved file's JSON with sorted keys, to compare with a literal.
+saved_json() { python3 -c 'import json,sys; print(json.dumps(json.load(open(sys.argv[1])), sort_keys=True))' "$SAVED"; }
+
+expect_eq() {
+  if [[ "$1" != "$2" ]]; then
+    printf 'FAIL %s\n  expected: %s\n  actual:   %s\n' "$current" "$2" "$1"
+    failures=$((failures + 1))
+  fi
+}
+
+expect_contains() {
+  if [[ "$1" != *"$2"* ]]; then
+    printf 'FAIL %s\n  expected to contain: %s\n  actual: %s\n' "$current" "$2" "$1"
+    failures=$((failures + 1))
+  fi
+}
+
+setup "a Lua template becomes a setup, keeping every field"
+profile home "Panel A"
+template home <<'TMPL'
+hl.monitor({
+	output = "desc:Panel A",
+	mode = "1920x1080@74.97300",
+	position = "auto-left",
+	scale = 1,
+	transform = 1,
+	bitdepth = 10,
+})
+TMPL
+import_old >/dev/null
+expect_eq "$(saved_json)" '{"setups": [{"monitors": [{"bitdepth": 10, "description": "Panel A", "mode": "1920x1080@74.97300", "position": "auto-left", "scale": 1, "transform": 1}]}]}'
+
+setup "an old-format template keeps vrr and transform, and tidies the mode"
+profile docked "Panel A" "Panel B" "Panel C"
+template docked <<'TMPL'
+# a comment
+# <<<<< TUI AUTO START
+monitor=desc:Panel A,disable
+monitor=desc:Panel B,1920x1080@100.00000,2280x-300,1.00000000,transform,1,vrr,0
+monitor=desc:Panel C,1920x1080@74.97.00000,3360x0,1.00000000,transform,0,vrr,1
+# <<<<< TUI AUTO END
+TMPL
+import_old >/dev/null
+expect_eq "$(saved_json)" '{"setups": [{"monitors": [{"description": "Panel A", "disabled": true}, {"description": "Panel B", "mode": "1920x1080@100.00000", "position": "2280x-300", "scale": 1, "transform": 1, "vrr": 0}, {"description": "Panel C", "mode": "1920x1080@74.97", "position": "3360x0", "scale": 1, "transform": 0, "vrr": 1}]}]}'
+
+setup "a mode ending in Hz loses it and a scale in quotes is a number"
+profile home "Panel A"
+template home <<'TMPL'
+hl.monitor({
+	output = "desc:Panel A",
+	mode = "1920x1080@74.97Hz",
+	position = "auto",
+	scale = "1.6",
+})
+TMPL
+import_old >/dev/null
+expect_eq "$(saved_json)" '{"setups": [{"monitors": [{"description": "Panel A", "mode": "1920x1080@74.97", "position": "auto", "scale": 1.6}]}]}'
+
+setup "a template it doesn't fully understand stops the import before writing"
+profile home "Panel A"
+template home <<'TMPL'
+hl.monitor({ output = "desc:Panel A", mode = "preferred" })
+{{ if .PowerState }}
+TMPL
+output="$(import_old)"
+expect_eq "$?" 1
+expect_contains "$output" "home.go.tmpl"
+expect_eq "$(ls "$SAVED" 2>/dev/null)" ""
+
+setup "a rule by port takes the description of the one required monitor left"
+profile laptop "Panel A"
+template laptop <<'TMPL'
+hl.monitor({ output = "eDP-1", mode = "preferred", position = "auto", scale = "1.6" })
+TMPL
+import_old >/dev/null
+expect_eq "$(saved_json)" '{"setups": [{"monitors": [{"description": "Panel A", "mode": "preferred", "port": "eDP-1", "position": "auto", "scale": 1.6}]}]}'
+
+setup "a port no profile describes is looked up in Hyprland"
+profile laptop_only name=eDP-1
+template laptop_only <<'TMPL'
+hl.monitor({ output = "eDP-1", mode = "preferred", position = "auto", scale = 1 })
+TMPL
+cat >"$WORK/bin/hyprctl" <<'STUB'
+#!/bin/sh
+[ "$*" = "monitors all -j" ] || { echo "unexpected hyprctl $*" >&2; exit 1; }
+echo '[{"name": "eDP-1", "description": "Panel A"}]'
+STUB
+chmod +x "$WORK/bin/hyprctl"
+import_old >/dev/null
+expect_eq "$(saved_json)" '{"setups": [{"monitors": [{"description": "Panel A", "mode": "preferred", "port": "eDP-1", "position": "auto", "scale": 1}]}]}'
+
+setup "a port nothing describes stops the import before writing"
+profile laptop_only name=eDP-1
+template laptop_only <<'TMPL'
+hl.monitor({ output = "eDP-1", mode = "preferred" })
+TMPL
+cat >"$WORK/bin/hyprctl" <<'STUB'
+#!/bin/sh
+exit 1
+STUB
+chmod +x "$WORK/bin/hyprctl"
+output="$(import_old)"
+expect_eq "$?" 1
+expect_contains "$output" "laptop_only"
+expect_contains "$output" "eDP-1"
+expect_eq "$(ls "$SAVED" 2>/dev/null)" ""
+
+# The old tool used the last profile in the file when several fit the same monitors.
+setup "of two profiles for one combination the last is the one kept, and the other is named"
+profile first "Panel A" "Panel B"
+profile last "Panel B" "Panel A"
+template first <<'TMPL'
+hl.monitor({ output = "desc:Panel A", position = "0x0" })
+hl.monitor({ output = "desc:Panel B", position = "1x0" })
+TMPL
+template last <<'TMPL'
+hl.monitor({ output = "desc:Panel A", position = "2x0" })
+hl.monitor({ output = "desc:Panel B", position = "3x0" })
+TMPL
+output="$(import_old)"
+expect_eq "$(saved_json)" '{"setups": [{"monitors": [{"description": "Panel A", "position": "2x0"}, {"description": "Panel B", "position": "3x0"}]}]}'
+expect_contains "$output" "first"
+
+one_profile() {
+  profile home "Panel A"
+  template home <<'TMPL'
+hl.monitor({ output = "desc:Panel A", position = "0x0" })
+TMPL
+}
+
+setup "running the import twice changes nothing"
+one_profile
+import_old >/dev/null
+before="$(stat -c '%i %Y' "$SAVED") $(sha256sum <"$SAVED")"
+output="$(import_old)"
+expect_eq "$(stat -c '%i %Y' "$SAVED") $(sha256sum <"$SAVED")" "$before"
+expect_contains "$output" "Nothing to add"
+
+setup "what's already saved stays as it is, and only new combinations are added"
+one_profile
+profile other "Panel B"
+template other <<'TMPL'
+hl.monitor({ output = "desc:Panel B", position = "0x0" })
+TMPL
+echo '{"future": 1, "setups": [{"monitors": [{"description": "Panel A", "position": "9x9", "icc": "x.icc"}]}]}' >"$SAVED"
+import_old >/dev/null
+expect_eq "$(saved_json)" '{"future": 1, "setups": [{"monitors": [{"description": "Panel A", "icc": "x.icc", "position": "9x9"}]}, {"monitors": [{"description": "Panel B", "position": "0x0"}]}]}'
+
+setup "a saved file that can't be read stops the import and stays as it is"
+one_profile
+echo '{ not json' >"$SAVED"
+output="$(import_old)"
+expect_eq "$?" 1
+expect_contains "$output" "$SAVED"
+expect_eq "$(cat "$SAVED")" '{ not json'
+
+setup "by default the saved file is the one Hyprland reads"
+one_profile
+mkdir -p "$HOME/.config/hypr"
+"$IMPORT" --from "$WORK/old" >/dev/null 2>&1
+expect_contains "$(cat "$HOME/.config/hypr/monitor-setups.json" 2>/dev/null)" "Panel A"
+
+setup "with the old folder gone the import finds it in the repo's history"
+repo="$WORK/repo"
+rm -rf "$repo"
+mkdir -p "$repo/scripts" "$repo/host-laptop/.config"
+cp "$IMPORT" "$repo/scripts/"
+one_profile
+cp -r "$WORK/old" "$repo/host-laptop/.config/hyprdynamicmonitors"
+git -C "$repo" init -q
+git -C "$repo" add .
+git -C "$repo" -c user.name=t -c user.email=t@t commit -qm old
+git -C "$repo" rm -rq host-laptop
+git -C "$repo" -c user.name=t -c user.email=t@t commit -qm removed
+"$repo/scripts/import-monitor-setups" --host laptop --output "$SAVED" >/dev/null 2>&1
+expect_eq "$(saved_json)" '{"setups": [{"monitors": [{"description": "Panel A", "position": "0x0"}]}]}'
+
+# Written out by hand from the templates: all of a machine's setups, with every field.
+SAMSUNG="Samsung Display Corp. ATNA40HQ01-0"
+HKC="HKC OVERSEAS LIMITED E2212F 0000000000001"
+PHL271="Philips Consumer Electronics Company PHL 271V8 0x0000A8BE"
+PHL243="Philips Consumer Electronics Company PHL 243V7 0x00009A4C"
+AOC="AOC Q27G42XE 2S6S1HA031479"
+BOE="BOE 0x08D5"
+
+setup "all of omelas's setups come through"
+"$IMPORT" --from "$FIXTURES/omelas" --output "$SAVED" >/dev/null 2>&1
+expect_eq "$(saved_json)" "{\"setups\": [\
+{\"monitors\": [{\"description\": \"$SAMSUNG\", \"mode\": \"preferred\", \"port\": \"eDP-1\", \"position\": \"auto\", \"scale\": 1.6}]}, \
+{\"monitors\": [{\"description\": \"$SAMSUNG\", \"disabled\": true}, \
+{\"description\": \"$HKC\", \"mode\": \"1920x1080@100.00000\", \"position\": \"2280x-300\", \"scale\": 1, \"transform\": 1, \"vrr\": 0}, \
+{\"description\": \"$PHL271\", \"mode\": \"1920x1080@74.97\", \"position\": \"3360x0\", \"scale\": 1, \"transform\": 0, \"vrr\": 0}]}, \
+{\"monitors\": [{\"description\": \"$SAMSUNG\", \"disabled\": true, \"port\": \"eDP-1\"}, \
+{\"description\": \"$AOC\", \"mode\": \"2560x1440@144.00101\", \"position\": \"0x0\", \"scale\": 1}, \
+{\"description\": \"$PHL243\", \"mode\": \"1920x1080@74.97\", \"position\": \"-1080x-240\", \"scale\": 1, \"transform\": 1}]}]}"
+
+# Hyprland reads the import's file: the Lua side matches it and writes the fields out as rules.
+setup "Hyprland applies an imported setup with its fields"
+"$IMPORT" --from "$FIXTURES/omelas" --output "$SAVED" >/dev/null 2>&1
+rules="$(HYPR="$HERE/../common/.config/hypr" lua - "$SAVED" "$HKC" "$PHL271" "$SAMSUNG" <<'LUA'
+package.path = os.getenv("HYPR") .. "/?.lua"
+local setups = require("modules.monitors.setups")
+local file = assert(io.open(arg[1]))
+local saved = assert(setups.parse(file:read("*a")))
+local modes = { { width = 1920, height = 1080, refresh_rate = 74.97 }, { width = 1920, height = 1080, refresh_rate = 100 } }
+local rules = setups.rules_for(saved, {
+	{ name = "eDP-1", description = arg[4], available_modes = {} },
+	{ name = "DP-1", description = arg[2], available_modes = modes },
+	{ name = "DP-2", description = arg[3], available_modes = modes },
+})
+for _, rule in ipairs(rules) do
+	print(rule.output, rule.disabled, rule.mode, rule.position, rule.scale, rule.transform, rule.vrr)
+end
+LUA
+)"
+expect_eq "$rules" "$(printf 'eDP-1\ttrue\thighres\tauto\tauto\t0\t-1\nDP-1\tfalse\t1920x1080@100.00000\t2280x-300\t1\t1\t0\nDP-2\tfalse\t1920x1080@74.97\t3360x0\t1\t0\t0')"
+
+setup "all of sodoma's setups come through, with two-monitors standing in for desktop"
+cat >"$WORK/bin/hyprctl" <<STUB
+#!/bin/sh
+echo '[{"name": "eDP-1", "description": "$BOE"}]'
+STUB
+chmod +x "$WORK/bin/hyprctl"
+output="$("$IMPORT" --from "$FIXTURES/sodoma" --output "$SAVED" 2>&1)"
+expect_contains "$output" "Skipped desktop: two-monitors"
+expect_eq "$(saved_json)" "{\"setups\": [\
+{\"monitors\": [{\"description\": \"$BOE\", \"mode\": \"preferred\", \"port\": \"eDP-1\", \"position\": \"auto\", \"scale\": 1}]}, \
+{\"monitors\": [{\"description\": \"$BOE\", \"disabled\": true}, \
+{\"bitdepth\": 10, \"description\": \"$PHL271\", \"mode\": \"1920x1080@74.97300\", \"position\": \"0x0\", \"scale\": 1}, \
+{\"bitdepth\": 10, \"description\": \"$PHL243\", \"mode\": \"1920x1080@74.97300\", \"position\": \"auto-left\", \"scale\": 1, \"transform\": 1}]}, \
+{\"monitors\": [{\"description\": \"$BOE\", \"disabled\": true}, \
+{\"description\": \"$HKC\", \"mode\": \"1920x1080@60.00000\", \"position\": \"1920x0\", \"scale\": 1}]}, \
+{\"monitors\": [{\"description\": \"$BOE\", \"disabled\": true}, \
+{\"description\": \"$HKC\", \"mode\": \"1920x1080@60.00000\", \"position\": \"2760x-420\", \"scale\": 1, \"transform\": 1}, \
+{\"description\": \"$PHL271\", \"mode\": \"1920x1080@60.00000\", \"position\": \"3840x0\", \"scale\": 1}]}]}"
+
+if ((failures)); then
+  printf '%d failure(s)\n' "$failures"
+  exit 1
+fi
+echo "all import-monitor-setups tests passed"
