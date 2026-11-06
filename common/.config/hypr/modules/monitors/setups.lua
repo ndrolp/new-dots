@@ -176,19 +176,45 @@ local function check(data)
 	end
 end
 
--- The saved setups in the file's text, or nil and why it can't be read.
+local function check_unkept(unkept)
+	assert(type(unkept) == "table" and type(unkept.monitors) == "table", "unkept has no monitors")
+	for _, entry in ipairs(unkept.monitors) do
+		check_monitor(entry)
+	end
+	if unkept.before ~= nil then
+		assert(type(unkept.before) == "string", "unkept has no text to go back to")
+		check(json.decode(unkept.before))
+	end
+end
+
+-- The saved setups in the file's text, or nil and why it can't be read. Third comes the file's
+-- `unkept`, there while the shell tries a change out: { before, monitors }, the file's text before the
+-- change, nil if there was no file, and the monitors' entries then.
 function M.parse(text)
 	local ok, data = pcall(json.decode, text)
 	if ok then
 		ok, data = pcall(function()
 			check(data)
-			return data.setups
+			if data.unkept ~= nil then
+				check_unkept(data.unkept)
+			end
+			return data
 		end)
 	end
 	if ok then
-		return data
+		return data.setups, nil, data.unkept
 	end
 	return nil, tostring(data)
+end
+
+-- The setups that put the monitors back as `unkept` says: the arrangement they were in comes first, as
+-- it may never have been saved, then what was saved. For another combination that's just what's saved.
+function M.going_back(unkept)
+	local saved = { { monitors = unkept.monitors } }
+	for _, setup in ipairs(unkept.before and M.parse(unkept.before) or {}) do
+		saved[#saved + 1] = setup
+	end
+	return saved
 end
 
 -- With a closed lid and an external monitor, the laptop screen isn't part of the combination. With no

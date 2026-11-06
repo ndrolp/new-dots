@@ -414,7 +414,7 @@ end)
 -- The part that talks to Hyprland, against a stubbed `hl`. `session` plays Hyprland: its list of
 -- monitors can change between events, and timers only run when settle() says so.
 local function new_session(monitors)
-	local session = { monitors = monitors, applied = {}, handlers = {}, timers = {}, binds = {} }
+	local session = { monitors = monitors, applied = {}, handlers = {}, timers = {}, deadlines = {}, binds = {} }
 	hl = {
 		get_monitors = function(options)
 			local listed = {}
@@ -437,7 +437,8 @@ local function new_session(monitors)
 		timer = function(callback, options)
 			equal(options.type, "oneshot", "timer type")
 			equal(options.timeout > 0, true, "Hyprland refuses a timeout of 0")
-			session.timers[#session.timers + 1] = callback
+			local timers = options.timeout > 1000 and session.deadlines or session.timers
+			timers[#timers + 1] = { callback = callback, timeout = options.timeout }
 		end,
 	}
 	function session.fire(event)
@@ -450,8 +451,16 @@ local function new_session(monitors)
 	function session.settle()
 		local timers = session.timers
 		session.timers = {}
-		for _, callback in ipairs(timers) do
-			callback()
+		for _, timer in ipairs(timers) do
+			timer.callback()
+		end
+	end
+	-- Every deadline so far runs out, oldest first, while settle() leaves them waiting.
+	function session.pass_deadlines()
+		local deadlines = session.deadlines
+		session.deadlines = {}
+		for _, timer in ipairs(deadlines) do
+			timer.callback()
 		end
 	end
 	return session
@@ -478,6 +487,18 @@ local function read_file(path)
 	return contents
 end
 
+local function write_saved(path, contents)
+	local file = assert(io.open(path, "w"))
+	file:write(contents)
+	file:close()
+end
+
+local LID_SETUPS = [[{"setups": [
+	{"monitors": [{"description": "Samsung Display Corp. ATNA40HQ01-0", "port": "eDP-1", "position": "0x0"},
+	              {"description": "AOC Q27G42XE 2S6S1HA031479", "port": "DP-2", "position": "1600x0"}]},
+	{"monitors": [{"description": "AOC Q27G42XE 2S6S1HA031479", "port": "DP-2", "position": "0x0"}]}
+]}]]
+
 -- Tests have no lid unless they ask for one, whatever this machine's lid is doing.
 local function install(options)
 	options.lid_states = options.lid_states or "/nonexistent/lid/*/state"
@@ -491,6 +512,8 @@ local function apply_test(name, body)
 		body(path)
 		os.remove(path)
 		os.remove(path .. ".bad")
+		os.remove(path .. ".bad.1")
+		os.remove(path .. ".bad.2")
 		os.remove(path .. ".fallback")
 	end)
 end
@@ -638,6 +661,186 @@ apply_test("a setup the shell is still trying out applies like any other", funct
 	equal(read_file(path .. ".bad"), nil, "the backup")
 end)
 
+apply_test("a bad file never replaces an earlier backup", function(path)
+	local session = new_session({ monitor("eDP-1", LAPTOP) })
+	for _, contents in ipairs({ "first", "second", "third" }) do
+		local bad = assert(io.open(path, "w"))
+		bad:write(contents)
+		bad:close()
+		if contents == "first" then
+			install({ path = path })
+		else
+			require("modules.monitors.apply").apply_now()
+		end
+	end
+	equal(read_file(path .. ".bad"), "first", "the first backup")
+	equal(read_file(path .. ".bad.1"), "second", "the second backup")
+	equal(read_file(path .. ".bad.2"), "third", "the third backup")
+	equal(#session.applied > 0, true, "rules")
+end)
+
+-- A rule that fails leaves the monitors part way, so applying the same thing again has to do it.
+apply_test("after a rule fails nothing counts as already applied", function(path)
+	local session = new_session({ monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	write_saved(path, SAVED_DOCKED)
+	install({ path = path })
+	local apply = require("modules.monitors.apply")
+	local working = hl.monitor
+	write_saved(path, LID_SETUPS)
+	hl.monitor = function(rule)
+		if rule.output == "DP-2" then
+			error("no such rule")
+		end
+		working(rule)
+	end
+	equal(pcall(apply.apply_now), false, "the failure reaches hyprctl")
+	hl.monitor = working
+	session.applied = {}
+	apply.apply_now()
+	equal(rule_for(session.applied, "DP-2").position, "1600x0", "the same setup again")
+	equal(#session.applied, 2, "rules")
+
+	write_saved(path, SAVED_DOCKED)
+	hl.monitor = function()
+		error("no such rule")
+	end
+	equal(pcall(apply.apply_now), false, "the failure reaches hyprctl")
+	hl.monitor = working
+	write_saved(path, LID_SETUPS)
+	session.applied = {}
+	apply.apply_now()
+	equal(#session.applied, 2, "the setup from before the failure")
+end)
+
+-- The shell tries a change out by writing it with `unkept`, then calling apply_now. These are the
+-- file's text at each end of that, and what the shell does with it is services/MonitorChange.js.
+local function trial_of(before)
+	local escaped = before and ('"' .. before:gsub("\\", "\\\\"):gsub('"', '\\"'):gsub("\n", "\\n") .. '"') or "null"
+	return SAVED_DOCKED:gsub("^%s*{", function()
+		return '{ "unkept": { "before": ' .. escaped .. [[, "monitors": [
+			{ "description": "Samsung Display Corp. ATNA40HQ01-0", "port": "eDP-1", "position": "0x0" },
+			{ "description": "AOC Q27G42XE 2S6S1HA031479", "port": "DP-2", "position": "2880x0" }
+		] },]]
+	end, 1)
+end
+
+local NOTHING_SAVED = '{"setups": []}\n'
+
+apply_test("on load a trial goes back to what unkept says, and the file to what it was", function(path)
+	write_saved(path, trial_of(NOTHING_SAVED))
+	local session = new_session({ monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	install({ path = path })
+	equal(rule_for(session.applied, "DP-2").position, "2880x0", "the arrangement before the trial")
+	equal(rule_for(session.applied, "eDP-1").disabled, false, "the screen the trial turned off")
+	equal(read_file(path), NOTHING_SAVED, "the file")
+end)
+
+apply_test("on load a trial with no file before it leaves no file", function(path)
+	write_saved(path, trial_of(nil))
+	new_session({ monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	install({ path = path })
+	equal(read_file(path), nil, "the file")
+end)
+
+-- At startup the config loads before there are monitors, and the first event is what applies.
+apply_test("a trial goes back when the monitors appear after the config", function(path)
+	write_saved(path, trial_of(NOTHING_SAVED))
+	local session = new_session({})
+	install({ path = path })
+	session.monitors = { monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) }
+	session.fire("monitor.added")
+	session.settle()
+	equal(rule_for(session.applied, "eDP-1").disabled, false, "the screen the trial turned off")
+	equal(read_file(path), NOTHING_SAVED, "the file")
+end)
+
+apply_test("what unkept goes back to doesn't reach a different combination", function(path)
+	write_saved(path, trial_of(NOTHING_SAVED))
+	local session = new_session({ monitor("eDP-1", LAPTOP) })
+	install({ path = path })
+	equal(session.applied[1].position, "auto", "automatic")
+end)
+
+apply_test("a shell that says nothing is out of time a few seconds after its countdown", function(path)
+	local session = new_session({ monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	install({ path = path })
+	write_saved(path, trial_of(NOTHING_SAVED))
+	session.applied = {}
+	require("modules.monitors.apply").apply_now()
+	equal(rule_for(session.applied, "eDP-1").disabled, true, "the trial is applied")
+	equal(#session.deadlines, 1, "deadlines")
+	equal(session.deadlines[1].timeout > 15000 and session.deadlines[1].timeout <= 20000, true, "how long")
+	session.applied = {}
+	session.pass_deadlines()
+	equal(rule_for(session.applied, "eDP-1").disabled, false, "the screen is back")
+	equal(read_file(path), NOTHING_SAVED, "the file")
+end)
+
+apply_test("a hotplug during a trial doesn't end it", function(path)
+	local session = new_session({ monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	install({ path = path })
+	local trial = trial_of(NOTHING_SAVED)
+	write_saved(path, trial)
+	require("modules.monitors.apply").apply_now()
+	session.fire("monitor.added")
+	session.settle()
+	equal(read_file(path), trial, "the file")
+end)
+
+apply_test("a second change starts the time again", function(path)
+	local session = new_session({ monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	install({ path = path })
+	local apply = require("modules.monitors.apply")
+	write_saved(path, trial_of(NOTHING_SAVED))
+	apply.apply_now()
+	local first = session.deadlines[1]
+	apply.apply_now()
+	session.applied = {}
+	first.callback()
+	equal(#session.applied, 0, "the first deadline no longer counts")
+	session.deadlines = { session.deadlines[2] }
+	session.pass_deadlines()
+	equal(rule_for(session.applied, "eDP-1").disabled, false, "the second one does")
+end)
+
+-- The shell's Keep and Revert both end with a file with no `unkept`, and Revert's can differ from what
+-- it last applied, so the deadline must leave it all alone.
+apply_test("after the shell answers the deadline does nothing", function(path)
+	local session = new_session({ monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	install({ path = path })
+	write_saved(path, trial_of(NOTHING_SAVED))
+	require("modules.monitors.apply").apply_now()
+	write_saved(path, NOTHING_SAVED)
+	session.applied = {}
+	session.pass_deadlines()
+	equal(#session.applied, 0, "rules written")
+	equal(read_file(path), NOTHING_SAVED, "the file")
+end)
+
+-- The shell starting up can find the same `unkept` before the deadline, and revert through apply_now.
+apply_test("the shell's own recovery and the deadline can both happen", function(path)
+	local session = new_session({ monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	install({ path = path })
+	local apply = require("modules.monitors.apply")
+	write_saved(path, trial_of(NOTHING_SAVED))
+	apply.apply_now()
+	apply.apply_now() -- the shell's revert, a setup that's still in the file with `unkept`
+	session.pass_deadlines()
+	equal(read_file(path), NOTHING_SAVED, "the file")
+	session.applied = {}
+	write_saved(path, NOTHING_SAVED)
+	apply.apply_now()
+	session.pass_deadlines()
+	equal(read_file(path), NOTHING_SAVED, "the file after both")
+end)
+
+apply_test("an unkept that makes no sense is a file that can't be read", function(path)
+	write_saved(path, '{"setups": [], "unkept": {"monitors": 3}}')
+	new_session({ monitor("eDP-1", LAPTOP) })
+	install({ path = path })
+	equal(read_file(path .. ".bad"), '{"setups": [], "unkept": {"monitors": 3}}', "the backup")
+end)
+
 -- A folder laid out like /proc/acpi/button/lid, whose state a test can change.
 local function fake_lid(state)
 	local folder = temp_path()
@@ -654,18 +857,6 @@ local function fake_lid(state)
 	lid.set(state)
 	return lid
 end
-
-local function write_saved(path, contents)
-	local file = assert(io.open(path, "w"))
-	file:write(contents)
-	file:close()
-end
-
-local LID_SETUPS = [[{"setups": [
-	{"monitors": [{"description": "Samsung Display Corp. ATNA40HQ01-0", "port": "eDP-1", "position": "0x0"},
-	              {"description": "AOC Q27G42XE 2S6S1HA031479", "port": "DP-2", "position": "1600x0"}]},
-	{"monitors": [{"description": "AOC Q27G42XE 2S6S1HA031479", "port": "DP-2", "position": "0x0"}]}
-]}]]
 
 apply_test("closing and opening the lid applies the matching setup", function(path)
 	write_saved(path, LID_SETUPS)
