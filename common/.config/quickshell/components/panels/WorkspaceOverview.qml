@@ -44,15 +44,6 @@ Variants {
         });
     }
 
-    // The windows a workspace's tile shows. These are the toplevels themselves
-    // rather than copies, so a refresh leaves each window's item in place.
-    function windowsOn(id) {
-        const focused = Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : -1;
-
-        return Hyprland.toplevels.values.filter(toplevel => toplevel.address !== ""
-            && WorkspaceOverview.isShownOn(toplevel.lastIpcObject, id, focused));
-    }
-
     function resetSelection() {
         selectedWorkspaceId = Hyprland.focusedWorkspace
             ? Hyprland.focusedWorkspace.id : -1;
@@ -386,7 +377,7 @@ Variants {
                                             id: windowItems
 
                                             model: ScriptModel {
-                                                values: root.windowsOn(workspaceTile.workspaceId)
+                                                values: root.workspaceService.windowsOn(workspaceTile.workspaceId)
                                             }
 
                                             delegate: Rectangle {

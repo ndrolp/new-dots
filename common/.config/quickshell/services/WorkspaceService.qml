@@ -1,7 +1,7 @@
 import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick
-import "../components/panels/WorkspaceOverview.js" as WorkspaceOverview
+import "WorkspaceState.js" as WorkspaceState
 
 QtObject {
     id: root
@@ -41,13 +41,13 @@ QtObject {
 
     function workspacesForScreen(screen, configuredWorkspaces) {
         const monitor = Hyprland.monitorFor(screen);
-        const workspaceIds = (configuredWorkspaces || []).filter(id => id >= 1 && id <= 21);
+        const workspaceIds = (configuredWorkspaces || []).filter(WorkspaceState.isListed);
         const workspaces = Hyprland.workspaces.values;
 
         for (let index = 0; index < workspaces.length; index++) {
             const workspace = workspaces[index];
 
-            if (workspace.id >= 1 && workspace.id <= 21
+            if (WorkspaceState.isListed(workspace.id)
                     && workspace.active && monitor !== null && workspace.monitor !== null
                     && workspace.monitor.name === monitor.name
                     && workspaceIds.indexOf(workspace.id) === -1) {
@@ -60,7 +60,7 @@ QtObject {
         for (let index = 0; index < toplevels.length; index++) {
             const workspace = toplevels[index].workspace;
 
-            if (workspace !== null && workspace.id >= 1 && workspace.id <= 21
+            if (workspace !== null && WorkspaceState.isListed(workspace.id)
                     && monitor !== null && workspace.monitor !== null
                     && workspace.monitor.name === monitor.name
                     && workspaceIds.indexOf(workspace.id) === -1) {
@@ -120,6 +120,15 @@ QtObject {
         return false;
     }
 
+    // The windows a workspace shows. These are the toplevels themselves rather
+    // than copies, so a refresh leaves each window's item in place.
+    function windowsOn(id) {
+        const focused = Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : -1;
+
+        return Hyprland.toplevels.values.filter(toplevel => toplevel.address !== ""
+            && WorkspaceState.isShownOn(toplevel.lastIpcObject, id, focused));
+    }
+
     function switcherToplevels() {
         return Hyprland.toplevels.values.filter(toplevel =>
             toplevel.workspace !== null && toplevel.workspace.id > 0
@@ -137,32 +146,26 @@ QtObject {
     }
 
     function switchTo(id) {
-        if (id < 1 || id > 21)
+        if (!WorkspaceState.isListed(id))
             return;
 
-        workspaceDispatcher.command = [
-            "hyprctl", "dispatch",
-            "hl.dsp.focus({ workspace = " + id + " })"
-        ];
+        workspaceDispatcher.command = ["hyprctl", "dispatch", WorkspaceState.focusWorkspaceDispatch(id)];
         workspaceDispatcher.running = true;
     }
 
     function focusToplevel(toplevel) {
-        if (toplevel === null || !/^(?:0x)?[0-9a-f]+$/i.test(toplevel.address))
+        const dispatch = toplevel === null ? null : WorkspaceState.focusWindowDispatch(toplevel.address);
+
+        if (dispatch === null)
             return;
 
-        const address = toplevel.address.startsWith("0x")
-            ? toplevel.address : "0x" + toplevel.address;
-        toplevelDispatcher.command = [
-            "hyprctl", "dispatch",
-            "hl.dsp.focus({ window = \"address:" + address + "\" })"
-        ];
+        toplevelDispatcher.command = ["hyprctl", "dispatch", dispatch];
         toplevelDispatcher.running = true;
     }
 
     // Sends a window to a workspace and stays where you are.
     function moveToWorkspace(toplevel, id) {
-        const dispatch = toplevel === null ? null : WorkspaceOverview.moveDispatch(toplevel.address, id);
+        const dispatch = toplevel === null ? null : WorkspaceState.moveDispatch(toplevel.address, id);
 
         if (dispatch === null)
             return;
@@ -175,7 +178,7 @@ QtObject {
     // the monitor named.
     function moveToNewWorkspace(toplevel, id, monitor) {
         const batch = toplevel === null
-            ? null : WorkspaceOverview.newWorkspaceBatch(toplevel.address, id, monitor);
+            ? null : WorkspaceState.newWorkspaceBatch(toplevel.address, id, monitor);
 
         if (batch === null)
             return;

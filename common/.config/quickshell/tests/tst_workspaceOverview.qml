@@ -376,43 +376,6 @@ TestCase {
         }, details);
     }
 
-    function test_aWindowShowsOnItsOwnWorkspaceOnly() {
-        const window = windowOn(2);
-
-        verify(WorkspaceOverview.isShownOn(window, 2, 1));
-        verify(!WorkspaceOverview.isShownOn(window, 3, 1));
-    }
-
-    function test_floatingAndFullscreenWindowsShowNormally() {
-        verify(WorkspaceOverview.isShownOn(windowOn(2, { floating: true }), 2, 1));
-        verify(WorkspaceOverview.isShownOn(windowOn(2, { fullscreen: 2 }), 2, 1));
-    }
-
-    function test_aPinnedWindowShowsOnlyOnTheWorkspaceYouAreOn() {
-        const pinned = windowOn(4, { floating: true, pinned: true });
-
-        verify(WorkspaceOverview.isShownOn(pinned, 4, 4));
-        verify(!WorkspaceOverview.isShownOn(pinned, 4, 1));
-    }
-
-    function test_aScratchpadWindowIsOnNoWorkspaceTheOverviewLists() {
-        const scratchpad = windowOn(-98, { workspace: { id: -98, name: "special:scratchpad" } });
-
-        for (let id = 1; id <= 21; id++)
-            verify(!WorkspaceOverview.isShownOn(scratchpad, id, id));
-    }
-
-    function test_aGroupShowsOnlyItsActiveWindow() {
-        const members = ["0x1", "0x2"];
-
-        verify(WorkspaceOverview.isShownOn(windowOn(2, { grouped: members }), 2, 1));
-        verify(!WorkspaceOverview.isShownOn(windowOn(2, { grouped: members, hidden: true }), 2, 1));
-    }
-
-    function test_aWindowHyprlandHasNotDescribedYetIsNotShown() {
-        verify(!WorkspaceOverview.isShownOn({}, 2, 2));
-    }
-
     function test_aDraggedWindowKeepsItsProportions() {
         compare(WorkspaceOverview.ghostSize({ size: [1600, 900] }, 160), { width: 160, height: 90 });
         compare(WorkspaceOverview.ghostSize({ size: [900, 1800] }, 160), { width: 80, height: 160 });
@@ -437,48 +400,6 @@ TestCase {
         verify(WorkspaceOverview.movesTo(windowOn(2), 21));
         verify(!WorkspaceOverview.movesTo(windowOn(2), 22));
         verify(!WorkspaceOverview.movesTo(windowOn(2), 0));
-    }
-
-    function test_aMoveNamesTheWindowAndDoesNotFollowIt() {
-        compare(WorkspaceOverview.moveDispatch("0x55ab10", 7),
-            'hl.dsp.window.move({ workspace = 7, follow = false, window = "address:0x55ab10" })');
-    }
-
-    function test_aMoveAddsThePrefixHyprlandExpectsOnAnAddress() {
-        compare(WorkspaceOverview.moveDispatch("55ab10", 7),
-            'hl.dsp.window.move({ workspace = 7, follow = false, window = "address:0x55ab10" })');
-    }
-
-    function test_aMoveIsNeverBuiltFromSomethingThatIsNotAnAddress() {
-        compare(WorkspaceOverview.moveDispatch('0x1" }) hl.exec_cmd("x', 7), null);
-    }
-
-    // Hyprland makes a missing workspace on the focused monitor or the one a
-    // rule names, so it's sent to the tile's monitor once the window is in it.
-    function test_aMoveToANewWorkspaceCreatesItThenSendsItToTheMonitor() {
-        compare(WorkspaceOverview.newWorkspaceBatch("0x55ab10", 7, "DP-1"),
-            'dispatch hl.dsp.window.move({ workspace = 7, follow = false, window = "address:0x55ab10" })'
-            + ' ; dispatch hl.dsp.workspace.move({ workspace = 7, monitor = "DP-1" })');
-    }
-
-    function test_aMoveToANewWorkspaceIsNeverBuiltFromSomethingThatIsNotAnAddress() {
-        compare(WorkspaceOverview.newWorkspaceBatch('0x1" })', 7, "DP-1"), null);
-    }
-
-    function test_aMoveToANewWorkspaceIsNeverBuiltFromSomethingThatIsNotAMonitor() {
-        compare(WorkspaceOverview.newWorkspaceBatch("0x55ab10", 7, 'DP-1" }) ; reload'), null);
-    }
-
-    function test_monitorNamesHyprlandGivesAreKept_data() {
-        return [
-            { tag: "connector", monitor: "HDMI-A-1" },
-            { tag: "laptop", monitor: "eDP-1" },
-            { tag: "virtual", monitor: "HEADLESS-2" }
-        ];
-    }
-
-    function test_monitorNamesHyprlandGivesAreKept(data) {
-        verify(WorkspaceOverview.newWorkspaceBatch("0x55ab10", 7, data.monitor) !== null);
     }
 
     function test_aWindowIsNamedByItsClassInLowerCase() {
