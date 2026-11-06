@@ -79,9 +79,19 @@ Scope {
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
             mask: Region {}
 
+            // Hyprland only looks at an inhibitor when it is created, and
+            // ignores one whose surface isn't on screen yet, so it waits for
+            // the window to appear.
+            Timer {
+                id: surfaceShown
+
+                interval: 500
+                running: true
+            }
+
             IdleInhibitor {
                 window: inhibitorWindow
-                enabled: true
+                enabled: !surfaceShown.running
             }
         }
     }
