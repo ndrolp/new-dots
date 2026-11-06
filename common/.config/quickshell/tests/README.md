@@ -72,7 +72,9 @@ workspaces in physical order, each one once, how they fit up to 21 with no
 scrolling, how the keyboard walks them, the number a new one takes, where a
 window sits in its miniature at any monitor scale or rotation and which windows
 a miniature shows (`components/panels/WorkspaceOverview.js`; `WorkspaceOverview.qml` itself is a
-Quickshell window and isn't tested here), how the long text of the app
+Quickshell window and isn't tested here), when a window's thumbnail lies over its
+icon and title (`components/panels/WindowThumbnail.qml`; `WindowFrames.qml`, which
+captures the frames, needs Quickshell and isn't tested here), how the long text of the app
 menu, the current app and the media element turns on a side bar: how far, what
 its length is capped against and where an app menu title ends up for its popup,
 checked against a really rotated item (`BarLayout.turn`, `BarLayout.screenLength`,
