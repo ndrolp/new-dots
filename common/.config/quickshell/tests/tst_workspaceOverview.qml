@@ -25,139 +25,139 @@ TestCase {
         return { workspaceString: String(id), enabled: true, monitor: monitor };
     }
 
-    function listed(groups) {
-        return groups.map(group => [group.name, group.workspaces]);
+    function listed(monitors) {
+        return monitors.map(monitor => [monitor.name, monitor.workspaces]);
     }
 
     function test_monitorsGoInPhysicalOrderLeftToRight() {
-        const groups = WorkspaceOverview.groups([philips, aoc, laptop], [], []);
+        const monitors = WorkspaceOverview.monitorsWithWorkspaces([philips, aoc, laptop], [], []);
 
-        compare(groups.map(group => group.name), ["eDP-1", "DP-1", "HDMI-A-1"]);
+        compare(monitors.map(monitor => monitor.name), ["eDP-1", "DP-1", "HDMI-A-1"]);
     }
 
     function test_stackedMonitorsGoTopToBottom() {
         const lower = Object.assign({}, aoc, { x: 0, y: 1125 });
 
-        compare(WorkspaceOverview.groups([lower, laptop], [], []).map(group => group.name),
+        compare(WorkspaceOverview.monitorsWithWorkspaces([lower, laptop], [], []).map(monitor => monitor.name),
             ["eDP-1", "DP-1"]);
     }
 
     function test_anExistingWorkspaceGoesUnderTheMonitorItIsOn() {
-        const groups = WorkspaceOverview.groups([laptop, aoc], [{ id: 3, monitor: "DP-1" }], []);
+        const monitors = WorkspaceOverview.monitorsWithWorkspaces([laptop, aoc], [{ id: 3, monitor: "DP-1" }], []);
 
-        compare(listed(groups), [["eDP-1", [1, 2, 4, 5]], ["DP-1", [3]]]);
+        compare(listed(monitors), [["eDP-1", [1, 2, 4, 5]], ["DP-1", [3]]]);
     }
 
     function test_anExistingWorkspaceBeatsTheRuleForIt() {
-        const groups = WorkspaceOverview.groups([laptop, aoc], [{ id: 2, monitor: "eDP-1" }],
+        const monitors = WorkspaceOverview.monitorsWithWorkspaces([laptop, aoc], [{ id: 2, monitor: "eDP-1" }],
             [rule(2, "desc:AOC Q27G42XE")]);
 
-        compare(listed(groups), [["eDP-1", [1, 2, 3, 4, 5]], ["DP-1", []]]);
+        compare(listed(monitors), [["eDP-1", [1, 2, 3, 4, 5]], ["DP-1", []]]);
     }
 
     function test_aWorkspaceThatDoesNotExistGoesWhereTheRulesSendIt() {
-        const groups = WorkspaceOverview.groups([laptop, aoc], [],
+        const monitors = WorkspaceOverview.monitorsWithWorkspaces([laptop, aoc], [],
             [1, 2, 3, 4, 5].map(id => rule(id, "desc:AOC Q27G42XE")));
 
-        compare(listed(groups), [["eDP-1", []], ["DP-1", [1, 2, 3, 4, 5]]]);
+        compare(listed(monitors), [["eDP-1", []], ["DP-1", [1, 2, 3, 4, 5]]]);
     }
 
     function test_aRuleCanNameAMonitorByItsConnector() {
-        const groups = WorkspaceOverview.groups([laptop, aoc], [], [rule(4, "DP-1")]);
+        const monitors = WorkspaceOverview.monitorsWithWorkspaces([laptop, aoc], [], [rule(4, "DP-1")]);
 
-        compare(listed(groups), [["eDP-1", [1, 2, 3, 5]], ["DP-1", [4]]]);
+        compare(listed(monitors), [["eDP-1", [1, 2, 3, 5]], ["DP-1", [4]]]);
     }
 
     function test_withoutARuleTheFirstMonitorClaimingAWorkspaceGetsIt() {
-        const groups = WorkspaceOverview.groups([aoc, laptop], [], []);
+        const monitors = WorkspaceOverview.monitorsWithWorkspaces([aoc, laptop], [], []);
 
-        compare(listed(groups), [["eDP-1", [1, 2, 3, 4, 5]], ["DP-1", []]]);
+        compare(listed(monitors), [["eDP-1", [1, 2, 3, 4, 5]], ["DP-1", []]]);
     }
 
     function test_aRuleForADisconnectedMonitorDoesNotApply() {
-        const groups = WorkspaceOverview.groups([laptop], [],
+        const monitors = WorkspaceOverview.monitorsWithWorkspaces([laptop], [],
             [1, 2, 3, 4, 5].map(id => rule(id, "desc:AOC Q27G42XE")));
 
-        compare(listed(groups), [["eDP-1", [1, 2, 3, 4, 5]]]);
+        compare(listed(monitors), [["eDP-1", [1, 2, 3, 4, 5]]]);
     }
 
     function test_rulesWithoutAMonitorOrForASpecialWorkspaceAreIgnored() {
-        const groups = WorkspaceOverview.groups([laptop], [], [
+        const monitors = WorkspaceOverview.monitorsWithWorkspaces([laptop], [], [
             { workspaceString: "special:scratchpad", enabled: true },
             { workspaceString: "1", enabled: true }
         ]);
 
-        compare(listed(groups), [["eDP-1", [1, 2, 3, 4, 5]]]);
+        compare(listed(monitors), [["eDP-1", [1, 2, 3, 4, 5]]]);
     }
 
     function test_theAocAndTheLaptopScreenShowEachOfTheirWorkspacesOnce() {
-        const groups = WorkspaceOverview.groups([laptop, aoc],
+        const monitors = WorkspaceOverview.monitorsWithWorkspaces([laptop, aoc],
             [{ id: 1, monitor: "eDP-1" }, { id: 2, monitor: "DP-1" }],
             [1, 2, 3, 4, 5].map(id => rule(id, "desc:AOC Q27G42XE")));
-        const shown = groups.reduce((ids, group) => ids.concat(group.workspaces), []);
+        const shown = monitors.reduce((ids, monitor) => ids.concat(monitor.workspaces), []);
 
         compare(shown.slice().sort(), [1, 2, 3, 4, 5]);
     }
 
     function test_anExistingWorkspaceNoMonitorClaimsStillAppearsInOrder() {
-        const groups = WorkspaceOverview.groups([laptop], [{ id: 8, monitor: "eDP-1" }], []);
+        const monitors = WorkspaceOverview.monitorsWithWorkspaces([laptop], [{ id: 8, monitor: "eDP-1" }], []);
 
-        compare(listed(groups), [["eDP-1", [1, 2, 3, 4, 5, 8]]]);
+        compare(listed(monitors), [["eDP-1", [1, 2, 3, 4, 5, 8]]]);
     }
 
     function test_workspacesOutside1To21DoNotAppear() {
         const wide = Object.assign({}, laptop, { workspaces: [0, 21, 22] });
-        const groups = WorkspaceOverview.groups([wide],
+        const monitors = WorkspaceOverview.monitorsWithWorkspaces([wide],
             [{ id: -98, monitor: "eDP-1" }, { id: 30, monitor: "eDP-1" }], []);
 
-        compare(listed(groups), [["eDP-1", [21]]]);
+        compare(listed(monitors), [["eDP-1", [21]]]);
     }
 
     function test_anExistingWorkspaceOnAnUnknownMonitorFallsBackToTheOneClaimingIt() {
-        const groups = WorkspaceOverview.groups([laptop], [{ id: 1, monitor: "DP-9" }], []);
+        const monitors = WorkspaceOverview.monitorsWithWorkspaces([laptop], [{ id: 1, monitor: "DP-9" }], []);
 
-        compare(listed(groups), [["eDP-1", [1, 2, 3, 4, 5]]]);
+        compare(listed(monitors), [["eDP-1", [1, 2, 3, 4, 5]]]);
     }
 
-    readonly property var noSpacing: ({ tile: 0, monitor: 0, header: 0 })
-    readonly property var spacing: ({ tile: 10, monitor: 32, header: 30 })
+    readonly property var noSpacing: ({ miniature: 0, monitor: 0, header: 0 })
+    readonly property var spacing: ({ miniature: 10, monitor: 32, header: 30 })
 
     function monitorWith(width, height, count) {
         return { width: width, height: height, workspaces: new Array(count).fill(0) };
     }
 
-    function test_tilesKeepTheirMonitorsProportions() {
+    function test_miniaturesKeepTheirMonitorsProportions() {
         const fit = WorkspaceOverview.layout([monitorWith(200, 100, 1), monitorWith(100, 200, 1)],
             300, 100, noSpacing);
 
-        compare(fit.tileHeight, 100);
-        compare(fit.monitors.map(monitor => monitor.tileWidth), [200, 50]);
+        compare(fit.miniatureHeight, 100);
+        compare(fit.monitors.map(monitor => monitor.miniatureWidth), [200, 50]);
     }
 
     function test_workspacesWrapIntoTheRowsThatMakeThemLargest() {
         const fit = WorkspaceOverview.layout([monitorWith(200, 100, 4)], 1000, 1000, noSpacing);
 
         compare(fit.rows, 2);
-        compare(fit.tileHeight, 250);
+        compare(fit.miniatureHeight, 250);
         compare(fit.monitors[0].columns, 2);
-        compare(fit.monitors[0].tileWidth, 500);
+        compare(fit.monitors[0].miniatureWidth, 500);
     }
 
     function test_theGapsAndHeadersComeOutOfTheSpace() {
         const fit = WorkspaceOverview.layout([monitorWith(100, 100, 2)], 210, 240, spacing);
 
         compare(fit.rows, 1);
-        compare(fit.tileHeight, 100);
+        compare(fit.miniatureHeight, 100);
         compare(fit.monitors[0].width, 210);
         compare(fit.height, 130);
     }
 
-    function test_aFewWorkspacesStopGrowingAtTheTileLimit() {
+    function test_aFewWorkspacesStopGrowingAtTheLimit() {
         const fit = WorkspaceOverview.layout([monitorWith(100, 100, 1)], 1000, 1000,
-            Object.assign({}, noSpacing, { maxTileHeight: 300 }));
+            Object.assign({}, noSpacing, { maxMiniatureHeight: 300 }));
 
-        compare(fit.tileHeight, 300);
-        compare(fit.monitors[0].tileWidth, 300);
+        compare(fit.miniatureHeight, 300);
+        compare(fit.monitors[0].miniatureWidth, 300);
     }
 
     function offering(count, newWorkspace) {
@@ -165,24 +165,24 @@ TestCase {
     }
 
     // Laid out like the four workspaces in the test above, not like three.
-    function test_theNewWorkspaceTileTakesItsPlaceLikeAnyOtherTile() {
+    function test_theNewWorkspaceSlotTakesItsPlaceLikeAMiniature() {
         const fit = WorkspaceOverview.layout([offering(3, 4)], 1000, 1000, noSpacing);
 
         compare(fit.rows, 2);
-        compare(fit.tileHeight, 250);
+        compare(fit.miniatureHeight, 250);
         compare(fit.monitors[0].columns, 2);
         compare(fit.monitors[0].newWorkspace, 4);
     }
 
-    function test_noTileIsMadeRoomForWithNoNumberLeft() {
+    function test_noSlotIsMadeRoomForWithNoNumberLeft() {
         const fit = WorkspaceOverview.layout([offering(1, null)], 1000, 1000, noSpacing);
 
         compare(fit.rows, 1);
         compare(fit.monitors[0].columns, 1);
-        compare(fit.monitors[0].tileWidth, 1000);
+        compare(fit.monitors[0].miniatureWidth, 1000);
     }
 
-    function test_aMonitorWithNoWorkspacesStillHasRoomForTheTile() {
+    function test_aMonitorWithNoWorkspacesStillHasRoomForTheSlot() {
         const fit = WorkspaceOverview.layout([offering(0, 1)], 400, 100, noSpacing);
 
         compare(fit.monitors[0].columns, 1);
@@ -190,7 +190,7 @@ TestCase {
     }
 
     function test_noMonitorsFitInNothing() {
-        compare(WorkspaceOverview.layout([], 1000, 1000, spacing).tileHeight, 0);
+        compare(WorkspaceOverview.layout([], 1000, 1000, spacing).miniatureHeight, 0);
     }
 
     function test_theMostWorkspacesFitWithoutScrolling_data() {
@@ -213,7 +213,7 @@ TestCase {
     function test_theMostWorkspacesFitWithoutScrolling(data) {
         const fit = WorkspaceOverview.layout(data.monitors, data.area[0], data.area[1], spacing);
 
-        verify(fit.tileHeight >= 60, "tiles stay usable, got " + fit.tileHeight);
+        verify(fit.miniatureHeight >= 60, "miniatures stay usable, got " + fit.miniatureHeight);
         verify(fit.width <= data.area[0], "width " + fit.width);
         verify(fit.height <= data.area[1], "height " + fit.height);
         fit.monitors.forEach((monitor, index) => verify(
@@ -241,58 +241,58 @@ TestCase {
     }
 
     function test_theWorkspacesReadAcrossTheMonitors() {
-        const groups = [{ workspaces: [1, 2] }, { workspaces: [] }, { workspaces: [11] }];
+        const monitors = [{ workspaces: [1, 2] }, { workspaces: [] }, { workspaces: [11] }];
 
-        compare(WorkspaceOverview.workspaceIds(groups), [1, 2, 11]);
+        compare(WorkspaceOverview.workspaceIds(monitors), [1, 2, 11]);
     }
 
     function test_aRowCoversTheMonitorHoldingTheSelection() {
-        const groups = [{ name: "eDP-1", workspaces: [1, 2] }, { name: "DP-1", workspaces: [3] }];
+        const monitors = [{ name: "eDP-1", workspaces: [1, 2] }, { name: "DP-1", workspaces: [3] }];
 
-        compare(WorkspaceOverview.monitorHolding(groups, 3), 1);
-        compare(WorkspaceOverview.monitorHolding(groups, 9), 0);
+        compare(WorkspaceOverview.monitorHolding(monitors, 3), 1);
+        compare(WorkspaceOverview.monitorHolding(monitors, 9), 0);
     }
 
     function test_aNewWorkspaceTakesTheNextNumberOnItsMonitor() {
-        const groups = [{ name: "eDP-1", workspaces: [1, 2] }, { name: "DP-1", workspaces: [] }];
+        const monitors = [{ name: "eDP-1", workspaces: [1, 2] }, { name: "DP-1", workspaces: [] }];
 
-        compare(WorkspaceOverview.nextWorkspace(groups, "eDP-1", {}), 3);
+        compare(WorkspaceOverview.nextWorkspace(monitors, "eDP-1", {}), 3);
     }
 
     function test_aNewWorkspaceSkipsNumbersAnotherMonitorHas() {
-        const groups = [{ name: "eDP-1", workspaces: [1, 2] }, { name: "DP-1", workspaces: [3, 4] }];
+        const monitors = [{ name: "eDP-1", workspaces: [1, 2] }, { name: "DP-1", workspaces: [3, 4] }];
 
-        compare(WorkspaceOverview.nextWorkspace(groups, "eDP-1", {}), 5);
+        compare(WorkspaceOverview.nextWorkspace(monitors, "eDP-1", {}), 5);
     }
 
     function test_aNewWorkspaceOnAnEmptyMonitorStartsFromTheFirstFreeNumber() {
-        const groups = [{ name: "eDP-1", workspaces: [1, 2] }, { name: "DP-1", workspaces: [] }];
+        const monitors = [{ name: "eDP-1", workspaces: [1, 2] }, { name: "DP-1", workspaces: [] }];
 
-        compare(WorkspaceOverview.nextWorkspace(groups, "DP-1", {}), 3);
+        compare(WorkspaceOverview.nextWorkspace(monitors, "DP-1", {}), 3);
     }
 
     function test_noNewWorkspaceIsLeftAfter21() {
-        const groups = [{ name: "eDP-1", workspaces: [19] }, { name: "DP-1", workspaces: [20, 21] }];
+        const monitors = [{ name: "eDP-1", workspaces: [19] }, { name: "DP-1", workspaces: [20, 21] }];
 
-        compare(WorkspaceOverview.nextWorkspace(groups, "eDP-1", {}), null);
-        compare(WorkspaceOverview.nextWorkspace(groups, "DP-1", {}), null);
+        compare(WorkspaceOverview.nextWorkspace(monitors, "eDP-1", {}), null);
+        compare(WorkspaceOverview.nextWorkspace(monitors, "DP-1", {}), null);
     }
 
-    function newTiles(groups) {
-        return groups.map(group => [group.name, group.newWorkspace]);
+    function newNumbers(monitors) {
+        return monitors.map(monitor => [monitor.name, monitor.newWorkspace]);
     }
 
     function test_eachMonitorIsOfferedTheNextNumberAfterItsLast() {
-        const groups = WorkspaceOverview.groups([laptop, aoc, philips], [], []);
+        const monitors = WorkspaceOverview.monitorsWithWorkspaces([laptop, aoc, philips], [], []);
 
-        compare(newTiles(groups), [["eDP-1", 6], ["DP-1", 6], ["HDMI-A-1", 14]]);
+        compare(newNumbers(monitors), [["eDP-1", 6], ["DP-1", 6], ["HDMI-A-1", 14]]);
     }
 
     function test_aNumberAnotherMonitorHasIsNotOffered() {
         const left = Object.assign({}, laptop, { workspaces: [1, 2] });
         const right = Object.assign({}, aoc, { workspaces: [3, 4] });
 
-        compare(newTiles(WorkspaceOverview.groups([left, right], [], [])),
+        compare(newNumbers(WorkspaceOverview.monitorsWithWorkspaces([left, right], [], [])),
             [["eDP-1", 5], ["DP-1", 5]]);
     }
 
@@ -300,7 +300,7 @@ TestCase {
         const left = Object.assign({}, laptop, { workspaces: [1, 2] });
         const right = Object.assign({}, aoc, { workspaces: [20, 21] });
 
-        compare(newTiles(WorkspaceOverview.groups([left, right], [], [])),
+        compare(newNumbers(WorkspaceOverview.monitorsWithWorkspaces([left, right], [], [])),
             [["eDP-1", 3], ["DP-1", null]]);
     }
 
@@ -319,21 +319,21 @@ TestCase {
         const rules = ruledRange(1, 10, "desc:AOC Q27G42XE")
             .concat(ruledRange(11, 20, "desc:Philips PHL"));
 
-        compare(newTiles(WorkspaceOverview.groups([full, philips], [], rules)),
+        compare(newNumbers(WorkspaceOverview.monitorsWithWorkspaces([full, philips], [], rules)),
             [["DP-1", 21], ["HDMI-A-1", 14]]);
     }
 
     function test_aNumberTheRulesBindToThisMonitorIsStillOffered() {
         const rules = ruledRange(11, 20, "desc:Philips PHL");
 
-        compare(newTiles(WorkspaceOverview.groups([philips], [], rules)), [["HDMI-A-1", 14]]);
+        compare(newNumbers(WorkspaceOverview.monitorsWithWorkspaces([philips], [], rules)), [["HDMI-A-1", 14]]);
     }
 
     function test_aRuleForADisconnectedMonitorDoesNotHoldANumberBack() {
         const rules = ruledRange(11, 20, "desc:Philips PHL");
         const full = Object.assign({}, aoc, { workspaces: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] });
 
-        compare(newTiles(WorkspaceOverview.groups([full], [], rules)), [["DP-1", 11]]);
+        compare(newNumbers(WorkspaceOverview.monitorsWithWorkspaces([full], [], rules)), [["DP-1", 11]]);
     }
 
     function test_aMonitorIsOfferedNothingWhenTheRulesHoldEveryNumberLeft() {
@@ -342,7 +342,7 @@ TestCase {
         const last = Object.assign({}, aoc, { workspaces: [20, 21] });
         const rules = ruledRange(1, 19, "desc:Philips PHL");
 
-        compare(newTiles(WorkspaceOverview.groups([empty, last, emptyPhilips], [], rules)),
+        compare(newNumbers(WorkspaceOverview.monitorsWithWorkspaces([empty, last, emptyPhilips], [], rules)),
             [["eDP-1", null], ["DP-1", null], ["HDMI-A-1", 1]]);
     }
 
@@ -351,21 +351,21 @@ TestCase {
     function test_aWindowKeepsItsPlaceOnAScaledMonitor() {
         const window = { at: [17, 52], size: [1766, 1061] };
 
-        compare(WorkspaceOverview.miniature(window, laptop, { width: 900, height: 562.5 }),
+        compare(WorkspaceOverview.windowBox(window, laptop, { width: 900, height: 562.5 }),
             { x: 8.5, y: 26, width: 883, height: 530.5 });
     }
 
     function test_aWindowIsPlacedFromItsOwnMonitorsCorner() {
         const window = { at: [2020, 40], size: [1280, 720] };
 
-        compare(WorkspaceOverview.miniature(window, aoc, { width: 256, height: 144 }),
+        compare(WorkspaceOverview.windowBox(window, aoc, { width: 256, height: 144 }),
             { x: 10, y: 4, width: 128, height: 72 });
     }
 
     function test_aWindowOnARotatedMonitorKeepsItsPlaceInThePortraitMiniature() {
         const window = { at: [4490, 10], size: [1060, 950] };
 
-        compare(WorkspaceOverview.miniature(window, philips, { width: 135, height: 240 }),
+        compare(WorkspaceOverview.windowBox(window, philips, { width: 135, height: 240 }),
             { x: 1.25, y: 1.25, width: 132.5, height: 118.75 });
     }
 

@@ -18,7 +18,7 @@ Variants {
     // The screen it opened on, which it stays on until it closes. Empty while
     // closed, and kept apart from `open` so no other screen shows it meanwhile.
     property string shownOn: ""
-    readonly property var groups: WorkspaceOverview.groups(
+    readonly property var listedMonitors: WorkspaceOverview.monitorsWithWorkspaces(
         connectedMonitors(),
         workspaceService.existingWorkspaces(),
         workspaceService.workspaceRules
@@ -51,12 +51,12 @@ Variants {
 
     function selectRelative(offset) {
         selectedWorkspaceId = WorkspaceOverview.stepped(
-            WorkspaceOverview.workspaceIds(groups), selectedWorkspaceId, offset);
+            WorkspaceOverview.workspaceIds(listedMonitors), selectedWorkspaceId, offset);
     }
 
     // Moves a row up or down within the monitor holding the selection.
     function selectRow(direction, fit) {
-        const monitor = fit.monitors[WorkspaceOverview.monitorHolding(groups, selectedWorkspaceId)];
+        const monitor = fit.monitors[WorkspaceOverview.monitorHolding(listedMonitors, selectedWorkspaceId)];
 
         if (monitor !== undefined) {
             selectedWorkspaceId = WorkspaceOverview.stepped(
@@ -65,7 +65,7 @@ Variants {
     }
 
     function selectEnd(last) {
-        const ids = WorkspaceOverview.workspaceIds(groups);
+        const ids = WorkspaceOverview.workspaceIds(listedMonitors);
 
         selectedWorkspaceId = ids.length > 0 ? ids[last ? ids.length - 1 : 0] : -1;
     }
@@ -101,7 +101,7 @@ Variants {
     }
 
     function createWorkspace() {
-        const monitor = groups.find(group => group.name === shownOn);
+        const monitor = listedMonitors.find(listed => listed.name === shownOn);
         const id = monitor === undefined ? null : monitor.newWorkspace;
 
         if (id === null)
@@ -139,14 +139,14 @@ Variants {
         readonly property int padding: 40
         readonly property int hintHeight: 24
         readonly property var fit: WorkspaceOverview.layout(
-            root.groups,
+            root.listedMonitors,
             width - padding * 2,
             height - padding * 2 - hintHeight,
             {
-                tile: 10,
+                miniature: 10,
                 monitor: 32,
                 header: 30,
-                maxTileHeight: height / 3
+                maxMiniatureHeight: height / 3
             }
         )
 
@@ -199,7 +199,8 @@ Variants {
             }
         }
 
-        // A drag doesn't go on over a window that closed, nor after the overview did.
+        // A drag doesn't go on over a window that closed, nor after the workspace
+        // overview did.
         Connections {
             target: Hyprland.toplevels
             enabled: windowDrag.window !== null
@@ -263,46 +264,46 @@ Variants {
                 spacing: 32
 
                 Repeater {
-                    // Only the screen it's on builds its tiles.
+                    // Only the screen it's on builds its miniatures.
                     model: overview.visible ? overview.fit.monitors : []
 
                     delegate: Column {
-                        id: monitorGroup
+                        id: monitorColumn
 
                         required property var modelData
                         required property int index
-                        readonly property var group: modelData
-                        // The real monitor behind this group of tiles.
-                        readonly property var area: root.groups[index]
+                        readonly property var placed: modelData
+                        // The real monitor behind these miniatures.
+                        readonly property var area: root.listedMonitors[index]
 
-                        width: group.width
+                        width: placed.width
 
                         WorkspaceMonitorHeader {
                             width: parent.width
                             appearance: root.appearance
-                            monitorName: monitorGroup.group.name
-                            canAddWorkspace: monitorGroup.group.name === root.shownOn
-                                && WorkspaceOverview.hasSlot(monitorGroup.group)
+                            monitorName: monitorColumn.placed.name
+                            canAddWorkspace: monitorColumn.placed.name === root.shownOn
+                                && WorkspaceOverview.hasSlot(monitorColumn.placed)
                             onAddWorkspaceRequested: root.createWorkspace()
                         }
 
                         Grid {
-                            columns: monitorGroup.group.columns
+                            columns: monitorColumn.placed.columns
                             spacing: 10
 
                             Repeater {
-                                model: monitorGroup.group.workspaces
+                                model: monitorColumn.placed.workspaces
 
                                 delegate: Rectangle {
-                                    id: workspaceTile
+                                    id: workspaceMiniature
 
                                     required property var modelData
                                     readonly property int workspaceId: modelData
                                     readonly property bool active: root.workspaceService.isActive(workspaceId)
                                     readonly property bool selected: root.selectedWorkspaceId === workspaceId
 
-                                    width: monitorGroup.group.tileWidth
-                                    height: overview.fit.tileHeight
+                                    width: monitorColumn.placed.miniatureWidth
+                                    height: overview.fit.miniatureHeight
                                     clip: true
                                     radius: root.appearance.radius
                                     color: windowDrop.containsDrag ? Qt.rgba(theme.accent.r, theme.accent.g,
@@ -320,8 +321,8 @@ Variants {
                                     MouseArea {
                                         anchors.fill: parent
                                         onClicked: {
-                                            root.selectedWorkspaceId = workspaceTile.workspaceId;
-                                            root.workspaceService.switchTo(workspaceTile.workspaceId);
+                                            root.selectedWorkspaceId = workspaceMiniature.workspaceId;
+                                            root.workspaceService.switchTo(workspaceMiniature.workspaceId);
                                             root.close();
                                         }
                                     }
@@ -331,9 +332,9 @@ Variants {
 
                                         anchors.fill: parent
                                         accepts: window => WorkspaceOverview.movesTo(
-                                            window.lastIpcObject, workspaceTile.workspaceId)
+                                            window.lastIpcObject, workspaceMiniature.workspaceId)
                                         onWindowDropped: window => root.workspaceService.moveToWorkspace(
-                                            window, workspaceTile.workspaceId, monitorGroup.group.name)
+                                            window, workspaceMiniature.workspaceId, monitorColumn.placed.name)
                                     }
 
                                     Item {
@@ -343,7 +344,7 @@ Variants {
                                             id: windowItems
 
                                             model: ScriptModel {
-                                                values: root.workspaceService.windowsOn(workspaceTile.workspaceId)
+                                                values: root.workspaceService.windowsOn(workspaceMiniature.workspaceId)
                                             }
 
                                             delegate: Rectangle {
@@ -352,8 +353,8 @@ Variants {
                                                 required property var modelData
                                                 readonly property var toplevel: modelData
                                                 readonly property var details: toplevel.lastIpcObject
-                                                readonly property var box: WorkspaceOverview.miniature(
-                                                    details, monitorGroup.area, workspaceTile)
+                                                readonly property var box: WorkspaceOverview.windowBox(
+                                                    details, monitorColumn.area, workspaceMiniature)
                                                 readonly property string appClass: WorkspaceOverview.appClass(details)
 
                                                 x: box.x
@@ -405,7 +406,7 @@ Variants {
                                                     opacity: windowHover.hovered ? 0.85 : 1
                                                 }
 
-                                                // A MouseArea so a click here doesn't reach the tile below.
+                                                // A MouseArea so a click here doesn't reach the miniature below.
                                                 MouseArea {
                                                     anchors.fill: parent
                                                     onPressed: windowDrag.press(windowItem.toplevel,
@@ -419,8 +420,8 @@ Variants {
                                         anchors.left: parent.left
                                         anchors.top: parent.top
                                         anchors.margins: 6
-                                        text: "󰍹  " + workspaceTile.workspaceId
-                                        color: workspaceTile.selected ? theme.accent : theme.text
+                                        text: "󰍹  " + workspaceMiniature.workspaceId
+                                        color: workspaceMiniature.selected ? theme.accent : theme.text
                                         style: Text.Outline
                                         styleColor: theme.surface
                                         font.pixelSize: root.appearance.textSize
@@ -432,7 +433,7 @@ Variants {
                                         anchors.top: parent.top
                                         anchors.margins: 6
                                         text: "ACTIVE"
-                                        visible: workspaceTile.active
+                                        visible: workspaceMiniature.active
                                         color: theme.accent
                                         style: Text.Outline
                                         styleColor: theme.surface
@@ -450,15 +451,15 @@ Variants {
                                 }
                             }
 
-                            NewWorkspaceTile {
-                                visible: WorkspaceOverview.hasSlot(monitorGroup.group)
-                                width: monitorGroup.group.tileWidth
-                                height: overview.fit.tileHeight
+                            NewWorkspaceSlot {
+                                visible: WorkspaceOverview.hasSlot(monitorColumn.placed)
+                                width: monitorColumn.placed.miniatureWidth
+                                height: overview.fit.miniatureHeight
                                 appearance: root.appearance
                                 colors: theme
-                                workspace: monitorGroup.group.newWorkspace ?? -1
+                                workspace: monitorColumn.placed.newWorkspace ?? -1
                                 onWindowDropped: window => root.workspaceService.moveToWorkspace(
-                                    window, workspace, monitorGroup.group.name)
+                                    window, workspace, monitorColumn.placed.name)
                             }
                         }
                     }

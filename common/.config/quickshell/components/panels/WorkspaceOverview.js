@@ -44,7 +44,7 @@ function ruledMonitors(rules, monitors) {
 // yet goes under the monitor the rules send it to, or the first monitor
 // claiming it. Returns the monitors in order, with `workspaces` sorted and
 // `newWorkspace` the number a new one there would take, or null.
-function groups(monitors, existing, rules) {
+function monitorsWithWorkspaces(monitors, existing, rules) {
     const ordered = monitors.slice().sort(physicalOrder);
     const ruled = ruledMonitors(rules, ordered);
     const owners = {};
@@ -68,57 +68,57 @@ function groups(monitors, existing, rules) {
             .sort((left, right) => left - right)
     }));
 
-    return listed.map(group => Object.assign({}, group, {
-        newWorkspace: nextWorkspace(listed, group.name, ruled)
+    return listed.map(monitor => Object.assign({}, monitor, {
+        newWorkspace: nextWorkspace(listed, monitor.name, ruled)
     }));
 }
 
-// Whether a monitor shows the new workspace tile: only with a number left for it.
+// Whether a monitor shows the new workspace slot: only with a number left for it.
 function hasSlot(monitor) {
     return Number.isInteger(monitor.newWorkspace);
 }
 
-// How many tiles a monitor shows: its workspaces, and the new workspace tile
-// while there's a number for it.
-function tileCount(monitor) {
+// How many places a monitor's workspaces take: a miniature for each, and the
+// new workspace slot while there's a number for it.
+function slotCount(monitor) {
     return monitor.workspaces.length + (hasSlot(monitor) ? 1 : 0);
 }
 
-// The largest tiles that show every monitor side by side on `width` × `height`
-// with no scrolling. All monitors share one tile height and number of rows, and
-// each tile keeps its monitor's proportions, so every row count is tried for
-// the one that leaves the tiles largest.
+// The largest miniatures that show every monitor side by side on `width` ×
+// `height` with no scrolling. All monitors share one miniature height and number
+// of rows, and each miniature keeps its monitor's proportions, so every row count
+// is tried for the one that leaves the miniatures largest.
 //
 // `monitors` are { name, width, height, workspaces, newWorkspace }; `spacing` is
-// { tile, monitor, header, maxTileHeight }: the gap between tiles, the gap between
-// monitors, the height of a monitor's header and an optional limit for a few
+// { miniature, monitor, header, maxMiniatureHeight }: the gap between miniatures,
+// the gap between monitors, the height of a monitor's header and an optional limit for a few
 // workspaces.
-// Returns { rows, tileHeight, width, height, monitors: [{ name, workspaces,
-// newWorkspace, columns, tileWidth, width }] }, in the order given.
+// Returns { rows, miniatureHeight, width, height, monitors: [{ name, workspaces,
+// newWorkspace, columns, miniatureWidth, width }] }, in the order given.
 function layout(monitors, width, height, spacing) {
     if (monitors.length === 0)
-        return { rows: 0, tileHeight: 0, width: 0, height: 0, monitors: [] };
+        return { rows: 0, miniatureHeight: 0, width: 0, height: 0, monitors: [] };
 
-    const counts = monitors.map(tileCount);
+    const counts = monitors.map(slotCount);
     const aspects = monitors.map(monitor => monitor.width / monitor.height);
-    const limit = spacing.maxTileHeight === undefined ? Infinity : spacing.maxTileHeight;
+    const limit = spacing.maxMiniatureHeight === undefined ? Infinity : spacing.maxMiniatureHeight;
     const freeWidth = columns => width - (monitors.length - 1) * spacing.monitor
-        - columns.reduce((gaps, count) => gaps + Math.max(0, count - 1) * spacing.tile, 0);
+        - columns.reduce((gaps, count) => gaps + Math.max(0, count - 1) * spacing.miniature, 0);
     let best = null;
 
     for (let rows = 1; rows <= Math.max(1, ...counts); rows++) {
         const columns = counts.map(count => Math.ceil(count / rows));
-        const tileWidths = columns.reduce((sum, count, index) => sum + count * aspects[index], 0);
-        const fromWidth = tileWidths > 0 ? freeWidth(columns) / tileWidths : Infinity;
-        const fromHeight = (height - spacing.header - (rows - 1) * spacing.tile) / rows;
-        const tileHeight = Math.max(0, Math.floor(Math.min(fromWidth, fromHeight, limit)));
+        const miniatureWidths = columns.reduce((sum, count, index) => sum + count * aspects[index], 0);
+        const fromWidth = miniatureWidths > 0 ? freeWidth(columns) / miniatureWidths : Infinity;
+        const fromHeight = (height - spacing.header - (rows - 1) * spacing.miniature) / rows;
+        const miniatureHeight = Math.max(0, Math.floor(Math.min(fromWidth, fromHeight, limit)));
 
-        if (best === null || tileHeight > best.tileHeight)
-            best = { rows: rows, columns: columns, tileHeight: tileHeight };
+        if (best === null || miniatureHeight > best.miniatureHeight)
+            best = { rows: rows, columns: columns, miniatureHeight: miniatureHeight };
     }
 
     const placed = monitors.map((monitor, index) => {
-        const tileWidth = best.tileHeight * aspects[index];
+        const miniatureWidth = best.miniatureHeight * aspects[index];
         const columns = best.columns[index];
 
         return {
@@ -126,29 +126,29 @@ function layout(monitors, width, height, spacing) {
             workspaces: monitor.workspaces,
             newWorkspace: monitor.newWorkspace,
             columns: columns,
-            tileWidth: tileWidth,
-            width: columns * tileWidth + Math.max(0, columns - 1) * spacing.tile
+            miniatureWidth: miniatureWidth,
+            width: columns * miniatureWidth + Math.max(0, columns - 1) * spacing.miniature
         };
     });
 
     return {
         rows: best.rows,
-        tileHeight: best.tileHeight,
+        miniatureHeight: best.miniatureHeight,
         width: placed.reduce((sum, monitor) => sum + monitor.width, 0)
             + (monitors.length - 1) * spacing.monitor,
-        height: spacing.header + best.rows * best.tileHeight + (best.rows - 1) * spacing.tile,
+        height: spacing.header + best.rows * best.miniatureHeight + (best.rows - 1) * spacing.miniature,
         monitors: placed
     };
 }
 
-// Where a window sits in its workspace's tile. `window` is { at, size } as
+// Where a window sits in its workspace's miniature. `window` is { at, size } as
 // Hyprland reports them, in logical pixels of the whole desktop; `monitor` is
 // { x, y, width, height } in the same pixels, so already scaled and rotated;
-// `tile` is { width, height }. A window past the monitor's edge stays past the
-// tile's.
-function miniature(window, monitor, tile) {
-    const scaleX = tile.width / monitor.width;
-    const scaleY = tile.height / monitor.height;
+// `miniature` is { width, height }. A window past the monitor's edge stays past
+// the miniature's.
+function windowBox(window, monitor, miniature) {
+    const scaleX = miniature.width / monitor.width;
+    const scaleY = miniature.height / monitor.height;
 
     return {
         x: (window.at[0] - monitor.x) * scaleX,
@@ -158,7 +158,7 @@ function miniature(window, monitor, tile) {
     };
 }
 
-// Which windows draw over which in a tile. Hyprland's window list says nothing
+// Which windows draw over which in a miniature. Hyprland's window list says nothing
 // of it, so this is only the layers that always hold.
 function stacking(window) {
     return window.fullscreen ? 2 : window.floating ? 1 : 0;
@@ -210,13 +210,13 @@ function keyAction(key, dragging) {
 }
 
 // Every workspace listed, reading across the monitors.
-function workspaceIds(groups) {
-    return groups.reduce((ids, group) => ids.concat(group.workspaces), []);
+function workspaceIds(monitors) {
+    return monitors.reduce((ids, monitor) => ids.concat(monitor.workspaces), []);
 }
 
 // The index of the monitor holding a workspace, or the first one.
-function monitorHolding(groups, id) {
-    return Math.max(0, groups.findIndex(group => group.workspaces.indexOf(id) !== -1));
+function monitorHolding(monitors, id) {
+    return Math.max(0, monitors.findIndex(monitor => monitor.workspaces.indexOf(id) !== -1));
 }
 
 // The workspace `offset` places from `selected` in `ids`, wrapping around at
@@ -233,10 +233,10 @@ function stepped(ids, selected, offset) {
 // monitor's last, skipping numbers another monitor has and numbers `ruled`
 // (from ruledMonitors) binds to another monitor, where Hyprland would put it.
 // Null when none is left.
-function nextWorkspace(groups, monitorName, ruled) {
-    const group = groups.find(candidate => candidate.name === monitorName);
-    const taken = workspaceIds(groups);
-    const last = group && group.workspaces.length > 0 ? Math.max(...group.workspaces) : 0;
+function nextWorkspace(monitors, monitorName, ruled) {
+    const monitor = monitors.find(candidate => candidate.name === monitorName);
+    const taken = workspaceIds(monitors);
+    const last = monitor && monitor.workspaces.length > 0 ? Math.max(...monitor.workspaces) : 0;
 
     for (let id = last + 1; id <= WorkspaceState.lastWorkspace; id++) {
         if (taken.indexOf(id) === -1 && (!ruled[id] || ruled[id].name === monitorName))

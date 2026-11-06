@@ -2,7 +2,7 @@ import QtQuick
 import QtTest
 import "../components/panels"
 
-// Dropping a window on the empty tile after a monitor's last workspace, driven
+// Dropping a window on the empty slot after a monitor's last workspace, driven
 // with a real pointer through the same drag every workspace gets.
 Item {
     id: scene
@@ -38,8 +38,8 @@ Item {
         }
     }
 
-    NewWorkspaceTile {
-        id: tile
+    NewWorkspaceSlot {
+        id: slot
 
         x: 200
         y: 10
@@ -66,58 +66,58 @@ Item {
     }
 
     TestCase {
-        name: "NewWorkspaceTile"
+        name: "NewWorkspaceSlot"
         when: windowShown
 
         readonly property point onWindow: Qt.point(40, 40)
-        readonly property point onTile: Qt.point(250, 40)
+        readonly property point onSlot: Qt.point(250, 40)
 
         function init() {
             scene.drops = [];
             scene.backgroundClicks = 0;
-            tile.workspace = 3;
+            slot.workspace = 3;
         }
 
         function carryOver() {
             mousePress(scene, onWindow.x, onWindow.y);
             mouseMove(scene, onWindow.x + 20, onWindow.y);
-            mouseMove(scene, onTile.x, onTile.y);
+            mouseMove(scene, onSlot.x, onSlot.y);
             waitForRendering(scene);
         }
 
-        function test_droppingOnTheTileHandsOverTheWindowAndItsNumber() {
+        function test_droppingOnTheSlotHandsOverTheWindowAndItsNumber() {
             carryOver();
-            mouseRelease(scene, onTile.x, onTile.y);
+            mouseRelease(scene, onSlot.x, onSlot.y);
 
             compare(scene.drops.length, 1);
             compare(scene.drops[0].window, kitty);
             compare(scene.drops[0].workspace, 3);
         }
 
-        function test_theTileLightsUpWhileAWindowIsOverIt() {
-            verify(!tile.lit);
-            verify(Qt.colorEqual(tile.border.color, "#444444"));
+        function test_theSlotLightsUpWhileAWindowIsOverIt() {
+            verify(!slot.lit);
+            verify(Qt.colorEqual(slot.border.color, "#444444"));
             carryOver();
-            verify(tile.lit);
-            verify(Qt.colorEqual(tile.border.color, "#ff0000"));
-            tryVerify(() => Qt.colorEqual(tile.color, Qt.rgba(1, 0, 0, 0.4)));
+            verify(slot.lit);
+            verify(Qt.colorEqual(slot.border.color, "#ff0000"));
+            tryVerify(() => Qt.colorEqual(slot.color, Qt.rgba(1, 0, 0, 0.4)));
             drag.cancel();
-            mouseRelease(scene, onTile.x, onTile.y);
+            mouseRelease(scene, onSlot.x, onSlot.y);
         }
 
         function test_aWindowAlreadyOnThatNumberIsNotTaken() {
-            tile.workspace = 2;
+            slot.workspace = 2;
             carryOver();
-            verify(!tile.lit);
-            mouseRelease(scene, onTile.x, onTile.y);
+            verify(!slot.lit);
+            mouseRelease(scene, onSlot.x, onSlot.y);
 
             compare(scene.drops.length, 0);
         }
 
         // It isn't a workspace, so it counts as a click outside any workspace,
         // which closes the workspace overview.
-        function test_aClickOnTheTileGoesThroughToWhatIsBehindIt() {
-            mouseClick(scene, onTile.x, onTile.y);
+        function test_aClickOnTheSlotGoesThroughToWhatIsBehindIt() {
+            mouseClick(scene, onSlot.x, onSlot.y);
 
             compare(scene.backgroundClicks, 1);
         }

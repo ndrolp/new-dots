@@ -1,7 +1,7 @@
 import QtQuick
 import "WorkspaceOverview.js" as WorkspaceOverview
 
-// The empty tile after a monitor's last workspace. A window dropped here goes to
+// The empty slot after a monitor's last workspace. A window dropped here goes to
 // a new workspace, following the same rules as any other drop. It isn't a
 // workspace, so a click on it passes through as one outside any workspace.
 Rectangle {

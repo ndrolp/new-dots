@@ -2,9 +2,9 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 
-// One captured frame per window, held here rather than in a workspace's tile so a
-// window keeps its frame when it moves to another tile: a new capture there could
-// land on a hidden workspace, where Hyprland never answers.
+// One captured frame per window, held here rather than in a workspace's miniature
+// so a window keeps its frame when it moves to another one: a new capture there
+// could land on a hidden workspace, where Hyprland never answers.
 //
 // A ScreencopyView that isn't live captures once by itself when it gets its
 // source, so a window gets its frame when it's first listed in `windows`, and

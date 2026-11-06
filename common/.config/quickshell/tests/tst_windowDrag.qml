@@ -23,7 +23,7 @@ Item {
         QtObject {}
     }
 
-    // A window's item, which goes away with its tile while it's being dragged.
+    // A window's item, which goes away with its miniature while it's being dragged.
     Component {
         id: windowItem
 

@@ -10,10 +10,10 @@ function isListed(id) {
     return id >= firstWorkspace && id <= lastWorkspace;
 }
 
-// Whether a window appears on a workspace's tile. `window` is what Hyprland
+// Whether a window appears on a workspace's miniature. `window` is what Hyprland
 // reports for it, so nothing until it's been described; `focused` is the
 // workspace you're on. A scratchpad window's workspace has a negative id, which
-// is never a tile's. Of a window group, only the active window isn't hidden.
+// is never one listed. Of a window group, only the active window isn't hidden.
 function isShownOn(window, workspace, focused) {
     return window.workspace?.id === workspace
         && !window.hidden

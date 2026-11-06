@@ -34,14 +34,14 @@ TestCase {
         verify(!WorkspaceState.isShownOn(pinned, 4, 1));
     }
 
-    function test_aScratchpadWindowIsOnNoWorkspaceTheOverviewLists() {
+    function test_aScratchpadWindowIsOnNoWorkspaceListed() {
         const scratchpad = windowOn(-98, { workspace: { id: -98, name: "special:scratchpad" } });
 
         for (let id = 1; id <= 21; id++)
             verify(!WorkspaceState.isShownOn(scratchpad, id, id));
     }
 
-    function test_aGroupShowsOnlyItsActiveWindow() {
+    function test_aWindowGroupShowsOnlyItsActiveWindow() {
         const members = ["0x1", "0x2"];
 
         verify(WorkspaceState.isShownOn(windowOn(2, { grouped: members }), 2, 1));

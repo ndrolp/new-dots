@@ -3,7 +3,7 @@ import QtQuick
 // A press on a window, which ends as a click or as a drag onto a
 // WindowDropTarget. Goes over everything it can be dragged across.
 //
-// A window's item only reports the press. Its tile can be rebuilt at any moment
+// A window's item only reports the press. Its miniature can be rebuilt at any moment
 // while the workspaces change, and an item that's gone takes its mouse grab with
 // it, so the pointer is followed from here, where it outlives them.
 Item {

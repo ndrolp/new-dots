@@ -82,7 +82,7 @@ hl.layer_rule({
 	animation = "popin",
 })
 
--- The shell fades the overview itself, so that Reduce motion reaches it.
+-- The shell fades the workspace overview itself, so that Reduce motion reaches it.
 hl.layer_rule({
 	name = "ndro-shell-workspace-overview",
 	match = { namespace = "ndro-shell-workspace-overview" },
