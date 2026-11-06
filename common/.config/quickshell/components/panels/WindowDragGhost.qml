@@ -3,27 +3,37 @@ import QtQuick
 import "../IconSource.js" as IconSource
 import "WorkspaceOverview.js" as WorkspaceOverview
 
-// What follows the pointer while a window is dragged: its icon for now. A
-// thumbnail goes here, in place of the IconImage.
+// What follows the pointer while a window is dragged: its thumbnail, over its
+// icon for a window with no captured frame.
 Rectangle {
     id: root
 
     required property var appearance
-    required property var theme
+    required property var colors
+    required property Item frames
     required property QtObject window
 
-    width: 72
-    height: 72
-    radius: appearance.radius
-    color: theme.surface
-    border.color: theme.accent
+    readonly property var details: window ? window.lastIpcObject : ({})
+    readonly property var size: WorkspaceOverview.ghostSize(details, 160)
+
+    width: size.width
+    height: size.height
+    clip: true
+    radius: appearance.radius / 2
+    color: colors.surface
+    border.color: colors.accent
     border.width: 1
 
     IconImage {
         anchors.centerIn: parent
-        width: 40
+        width: Math.min(40, parent.width - 4, parent.height - 4)
         height: width
-        source: root.window
-            ? IconSource.forName(WorkspaceOverview.appClass(root.window.lastIpcObject)) : ""
+        source: IconSource.forName(WorkspaceOverview.appClass(root.details))
+    }
+
+    WindowThumbnail {
+        anchors.fill: parent
+        anchors.margins: parent.border.width
+        frame: root.window ? root.frames.frameOf(root.window) : null
     }
 }

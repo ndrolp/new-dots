@@ -316,6 +316,15 @@ TestCase {
         verify(!WorkspaceOverview.isShownOn({}, 2, 2));
     }
 
+    function test_aDraggedWindowKeepsItsProportions() {
+        compare(WorkspaceOverview.ghostSize({ size: [1600, 900] }, 160), { width: 160, height: 90 });
+        compare(WorkspaceOverview.ghostSize({ size: [900, 1800] }, 160), { width: 80, height: 160 });
+    }
+
+    function test_aWindowWithNoSizeYetDragsSquare() {
+        compare(WorkspaceOverview.ghostSize({}, 160), { width: 160, height: 160 });
+    }
+
     function test_aPinnedWindowCantBeDragged() {
         verify(WorkspaceOverview.canDrag(windowOn(2)));
         verify(WorkspaceOverview.canDrag(windowOn(2, { floating: true })));

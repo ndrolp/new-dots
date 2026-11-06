@@ -184,6 +184,22 @@ Variants {
             }
         }
 
+        // A drag doesn't go on over a window that closed, nor after the overview did.
+        Connections {
+            target: Hyprland.toplevels
+            enabled: windowDrag.window !== null
+
+            function onValuesChanged() {
+                if (Hyprland.toplevels.values.indexOf(windowDrag.window) === -1)
+                    windowDrag.cancel();
+            }
+        }
+
+        onShownChanged: {
+            if (!shown)
+                windowDrag.cancel();
+        }
+
         Timer {
             id: windowRefresh
 
@@ -235,6 +251,8 @@ Variants {
                     else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter
                             || event.key === Qt.Key_Space)
                         root.activateSelected();
+                    else if (event.key === Qt.Key_Escape && windowDrag.dragging)
+                        windowDrag.cancel();
                     else if (event.key === Qt.Key_Escape)
                         root.close();
                     else
@@ -329,11 +347,13 @@ Variants {
                                     height: overview.fit.tileHeight
                                     clip: true
                                     radius: root.appearance.radius
-                                    color: selected ? Qt.rgba(theme.accent.r, theme.accent.g,
+                                    color: windowDrop.containsDrag ? Qt.rgba(theme.accent.r, theme.accent.g,
+                                        theme.accent.b, 0.4) : selected ? Qt.rgba(theme.accent.r, theme.accent.g,
                                         theme.accent.b, 0.2) : active ? theme.surfaceHover
                                             : theme.backgroundSecondary
-                                    border.color: selected ? theme.accent : active ? theme.border : "transparent"
-                                    border.width: selected || active ? 1 : 0
+                                    border.color: windowDrop.containsDrag || selected ? theme.accent
+                                        : active ? theme.border : "transparent"
+                                    border.width: windowDrop.containsDrag ? 2 : selected || active ? 1 : 0
 
                                     Behavior on color {
                                         ColorAnimation { duration: root.appearance.motion.short }
@@ -346,6 +366,16 @@ Variants {
                                             root.workspaceService.switchTo(workspaceTile.workspaceId);
                                             root.close();
                                         }
+                                    }
+
+                                    WindowDropTarget {
+                                        id: windowDrop
+
+                                        anchors.fill: parent
+                                        accepts: window => WorkspaceOverview.movesTo(
+                                            window.lastIpcObject, workspaceTile.workspaceId)
+                                        onWindowDropped: window => root.workspaceService.moveToWorkspace(
+                                            window, workspaceTile.workspaceId)
                                     }
 
                                     Item {
@@ -366,9 +396,7 @@ Variants {
                                                 readonly property var details: toplevel.lastIpcObject
                                                 readonly property var box: WorkspaceOverview.miniature(
                                                     details, monitorGroup.area, workspaceTile)
-                                                readonly property string appClass: String(
-                                                    details.class || details.initialClass || "application"
-                                                ).toLowerCase()
+                                                readonly property string appClass: WorkspaceOverview.appClass(details)
 
                                                 x: box.x
                                                 y: box.y
@@ -422,10 +450,8 @@ Variants {
                                                 // A MouseArea so a click here doesn't reach the tile below.
                                                 MouseArea {
                                                     anchors.fill: parent
-                                                    onClicked: {
-                                                        root.workspaceService.focusToplevel(windowItem.toplevel);
-                                                        root.close();
-                                                    }
+                                                    onPressed: windowDrag.press(windowItem.toplevel,
+                                                        WorkspaceOverview.canDrag(windowItem.details))
                                                 }
                                             }
                                         }
@@ -467,6 +493,25 @@ Variants {
                             }
                         }
                     }
+                }
+            }
+
+            WindowDrag {
+                id: windowDrag
+
+                anchors.fill: parent
+                enabled: overview.shown
+                ghost: Component {
+                    WindowDragGhost {
+                        appearance: root.appearance
+                        frames: windowFrames
+                        colors: theme
+                        window: windowDrag.window
+                    }
+                }
+                onClicked: window => {
+                    root.workspaceService.focusToplevel(window);
+                    root.close();
                 }
             }
 

@@ -167,6 +167,15 @@ function appClass(window) {
     return String(window.class || window.initialClass || "application").toLowerCase();
 }
 
+// The size a window is drawn at while dragged: its own proportions, `longest`
+// pixels along its longer side. Square until Hyprland has reported a size.
+function ghostSize(window, longest) {
+    const size = window.size || [1, 1];
+    const scale = longest / Math.max(size[0], size[1], 1);
+
+    return { width: size[0] * scale, height: size[1] * scale };
+}
+
 // Whether a window can be picked up. A pinned one is on every workspace already.
 function canDrag(window) {
     return !window.pinned;

@@ -74,7 +74,10 @@ window sits in its miniature at any monitor scale or rotation and which windows
 a miniature shows (`components/panels/WorkspaceOverview.js`; `WorkspaceOverview.qml` itself is a
 Quickshell window and isn't tested here), when a window's thumbnail lies over its
 icon and title (`components/panels/WindowThumbnail.qml`; `WindowFrames.qml`, which
-captures the frames, needs Quickshell and isn't tested here), how the long text of the app
+captures the frames, needs Quickshell and isn't tested here), what a press on a
+window ends as and what ends a drag early (`components/panels/WindowDrag.qml` and
+`WindowDropTarget.qml`; `WindowDragGhost.qml` needs Quickshell and isn't tested
+here), how the long text of the app
 menu, the current app and the media element turns on a side bar: how far, what
 its length is capped against and where an app menu title ends up for its popup,
 checked against a really rotated item (`BarLayout.turn`, `BarLayout.screenLength`,
