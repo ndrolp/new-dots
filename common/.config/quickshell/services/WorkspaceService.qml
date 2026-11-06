@@ -171,6 +171,19 @@ QtObject {
         moveDispatcher.running = true;
     }
 
+    // Moves a window to a workspace that doesn't exist yet, which ends up on
+    // the monitor named.
+    function moveToNewWorkspace(toplevel, id, monitor) {
+        const batch = toplevel === null
+            ? null : WorkspaceOverview.newWorkspaceBatch(toplevel.address, id, monitor);
+
+        if (batch === null)
+            return;
+
+        moveDispatcher.command = ["hyprctl", "--batch", batch];
+        moveDispatcher.running = true;
+    }
+
     property var workspaceRulesReader: Process {
         id: workspaceRulesReader
 

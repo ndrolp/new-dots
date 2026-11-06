@@ -160,6 +160,35 @@ TestCase {
         compare(fit.monitors[0].tileWidth, 300);
     }
 
+    function offering(count, newWorkspace) {
+        return Object.assign(monitorWith(200, 100, count), { newWorkspace: newWorkspace });
+    }
+
+    // Laid out like the four workspaces in the test above, not like three.
+    function test_theNewWorkspaceTileTakesItsPlaceLikeAnyOtherTile() {
+        const fit = WorkspaceOverview.layout([offering(3, 4)], 1000, 1000, noSpacing);
+
+        compare(fit.rows, 2);
+        compare(fit.tileHeight, 250);
+        compare(fit.monitors[0].columns, 2);
+        compare(fit.monitors[0].newWorkspace, 4);
+    }
+
+    function test_noTileIsMadeRoomForWithNoNumberLeft() {
+        const fit = WorkspaceOverview.layout([offering(1, null)], 1000, 1000, noSpacing);
+
+        compare(fit.rows, 1);
+        compare(fit.monitors[0].columns, 1);
+        compare(fit.monitors[0].tileWidth, 1000);
+    }
+
+    function test_aMonitorWithNoWorkspacesStillHasRoomForTheTile() {
+        const fit = WorkspaceOverview.layout([offering(0, 1)], 400, 100, noSpacing);
+
+        compare(fit.monitors[0].columns, 1);
+        compare(fit.monitors[0].width, 200);
+    }
+
     function test_noMonitorsFitInNothing() {
         compare(WorkspaceOverview.layout([], 1000, 1000, spacing).tileHeight, 0);
     }
@@ -247,6 +276,32 @@ TestCase {
 
         compare(WorkspaceOverview.nextWorkspace(groups, "eDP-1"), null);
         compare(WorkspaceOverview.nextWorkspace(groups, "DP-1"), null);
+    }
+
+    function newTiles(groups) {
+        return groups.map(group => [group.name, group.newWorkspace]);
+    }
+
+    function test_eachMonitorIsOfferedTheNextNumberAfterItsLast() {
+        const groups = WorkspaceOverview.groups([laptop, aoc, philips], [], []);
+
+        compare(newTiles(groups), [["eDP-1", 6], ["DP-1", 6], ["HDMI-A-1", 14]]);
+    }
+
+    function test_aNumberAnotherMonitorHasIsNotOffered() {
+        const left = Object.assign({}, laptop, { workspaces: [1, 2] });
+        const right = Object.assign({}, aoc, { workspaces: [3, 4] });
+
+        compare(newTiles(WorkspaceOverview.groups([left, right], [], [])),
+            [["eDP-1", 5], ["DP-1", 5]]);
+    }
+
+    function test_aMonitorIsOfferedNothingOnceNoNumberIsLeft() {
+        const left = Object.assign({}, laptop, { workspaces: [1, 2] });
+        const right = Object.assign({}, aoc, { workspaces: [20, 21] });
+
+        compare(newTiles(WorkspaceOverview.groups([left, right], [], [])),
+            [["eDP-1", 3], ["DP-1", null]]);
     }
 
     // A window from a real `hyprctl clients -j` on the laptop at scale 1.6: its
@@ -354,6 +409,34 @@ TestCase {
 
     function test_aMoveIsNeverBuiltFromSomethingThatIsNotAnAddress() {
         compare(WorkspaceOverview.moveDispatch('0x1" }) hl.exec_cmd("x', 7), null);
+    }
+
+    // Hyprland makes a missing workspace on the focused monitor or the one a
+    // rule names, so it's sent to the tile's monitor once the window is in it.
+    function test_aMoveToANewWorkspaceCreatesItThenSendsItToTheMonitor() {
+        compare(WorkspaceOverview.newWorkspaceBatch("0x55ab10", 7, "DP-1"),
+            'dispatch hl.dsp.window.move({ workspace = 7, follow = false, window = "address:0x55ab10" })'
+            + ' ; dispatch hl.dsp.workspace.move({ workspace = 7, monitor = "DP-1" })');
+    }
+
+    function test_aMoveToANewWorkspaceIsNeverBuiltFromSomethingThatIsNotAnAddress() {
+        compare(WorkspaceOverview.newWorkspaceBatch('0x1" })', 7, "DP-1"), null);
+    }
+
+    function test_aMoveToANewWorkspaceIsNeverBuiltFromSomethingThatIsNotAMonitor() {
+        compare(WorkspaceOverview.newWorkspaceBatch("0x55ab10", 7, 'DP-1" }) ; reload'), null);
+    }
+
+    function test_monitorNamesHyprlandGivesAreKept_data() {
+        return [
+            { tag: "connector", monitor: "HDMI-A-1" },
+            { tag: "laptop", monitor: "eDP-1" },
+            { tag: "virtual", monitor: "HEADLESS-2" }
+        ];
+    }
+
+    function test_monitorNamesHyprlandGivesAreKept(data) {
+        verify(WorkspaceOverview.newWorkspaceBatch("0x55ab10", 7, data.monitor) !== null);
     }
 
     function test_aWindowIsNamedByItsClassInLowerCase() {

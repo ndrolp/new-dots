@@ -491,6 +491,17 @@ Variants {
                                     }
                                 }
                             }
+
+                            NewWorkspaceTile {
+                                visible: monitorGroup.group.newWorkspace !== null
+                                width: monitorGroup.group.tileWidth
+                                height: overview.fit.tileHeight
+                                appearance: root.appearance
+                                colors: theme
+                                workspace: monitorGroup.group.newWorkspace ?? -1
+                                onWindowDropped: window => root.workspaceService.moveToNewWorkspace(
+                                    window, workspace, monitorGroup.group.name)
+                            }
                         }
                     }
                 }

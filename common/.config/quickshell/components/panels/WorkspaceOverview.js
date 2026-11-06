@@ -48,7 +48,8 @@ function ruledMonitors(rules, monitors) {
 //
 // An existing workspace goes under the monitor it's on. One that doesn't exist
 // yet goes under the monitor the rules send it to, or the first monitor
-// claiming it. Returns the monitors in order, with `workspaces` sorted.
+// claiming it. Returns the monitors in order, with `workspaces` sorted and
+// `newWorkspace` the number a new one there would take, or null.
 function groups(monitors, existing, rules) {
     const ordered = monitors.slice().sort(physicalOrder);
     const ruled = ruledMonitors(rules, ordered);
@@ -66,12 +67,22 @@ function groups(monitors, existing, rules) {
         }
     }
 
-    return ordered.map(monitor => Object.assign({}, monitor, {
+    const listed = ordered.map(monitor => Object.assign({}, monitor, {
         workspaces: Object.keys(owners)
             .filter(id => owners[id] === monitor.name)
             .map(Number)
             .sort((left, right) => left - right)
     }));
+
+    return listed.map(group => Object.assign({}, group, {
+        newWorkspace: nextWorkspace(listed, group.name)
+    }));
+}
+
+// How many tiles a monitor shows: its workspaces, and the new workspace tile
+// while there's a number for it.
+function tileCount(monitor) {
+    return monitor.workspaces.length + (Number.isInteger(monitor.newWorkspace) ? 1 : 0);
 }
 
 // The largest tiles that show every monitor side by side on `width` × `height`
@@ -79,16 +90,17 @@ function groups(monitors, existing, rules) {
 // each tile keeps its monitor's proportions, so every row count is tried for
 // the one that leaves the tiles largest.
 //
-// `monitors` are { name, width, height, workspaces }; `spacing` is { tile, monitor,
-// header, maxTileHeight }: the gap between tiles, the gap between monitors, the
-// height of a monitor's header and an optional limit for a few workspaces.
+// `monitors` are { name, width, height, workspaces, newWorkspace }; `spacing` is
+// { tile, monitor, header, maxTileHeight }: the gap between tiles, the gap between
+// monitors, the height of a monitor's header and an optional limit for a few
+// workspaces.
 // Returns { rows, tileHeight, width, height, monitors: [{ name, workspaces,
-// columns, tileWidth, width }] }, in the order given.
+// newWorkspace, columns, tileWidth, width }] }, in the order given.
 function layout(monitors, width, height, spacing) {
     if (monitors.length === 0)
         return { rows: 0, tileHeight: 0, width: 0, height: 0, monitors: [] };
 
-    const counts = monitors.map(monitor => monitor.workspaces.length);
+    const counts = monitors.map(tileCount);
     const aspects = monitors.map(monitor => monitor.width / monitor.height);
     const limit = spacing.maxTileHeight === undefined ? Infinity : spacing.maxTileHeight;
     const freeWidth = columns => width - (monitors.length - 1) * spacing.monitor
@@ -113,6 +125,7 @@ function layout(monitors, width, height, spacing) {
         return {
             name: monitor.name,
             workspaces: monitor.workspaces,
+            newWorkspace: monitor.newWorkspace,
             columns: columns,
             tileWidth: tileWidth,
             width: columns * tileWidth + Math.max(0, columns - 1) * spacing.tile
@@ -195,6 +208,22 @@ function moveDispatch(address, workspace) {
     const prefixed = address.startsWith("0x") ? address : "0x" + address;
     return "hl.dsp.window.move({ workspace = " + workspace
         + ", follow = false, window = \"address:" + prefixed + "\" })";
+}
+
+// The `hyprctl --batch` moving a window to a workspace that doesn't exist yet and
+// leaving that workspace on `monitor`, without following it. Hyprland only makes
+// a workspace for the window, on the focused monitor or the one a rule names,
+// and one with nothing in it can't be sent anywhere, so it takes both steps. The
+// new workspace isn't active, so sending it on changes no focus. Null for
+// anything but an address and a monitor's name.
+function newWorkspaceBatch(address, workspace, monitor) {
+    const move = moveDispatch(address, workspace);
+
+    if (move === null || !/^[\w.-]+$/.test(monitor))
+        return null;
+
+    return "dispatch " + move + " ; dispatch hl.dsp.workspace.move({ workspace = "
+        + workspace + ", monitor = \"" + monitor + "\" })";
 }
 
 // Every workspace listed, reading across the monitors.
