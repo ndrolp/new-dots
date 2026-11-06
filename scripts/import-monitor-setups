@@ -134,6 +134,27 @@ def combination(setup):
     return tuple(sorted(monitor["description"] for monitor in setup["monitors"]))
 
 
+def is_laptop_port(port):
+    """The same ports setups.lua counts as the laptop screen."""
+    return port.startswith(("eDP-", "LVDS-", "DSI-"))
+
+
+def add_closed_lid_setups(chosen):
+    """With the lid closed Hyprland looks for the combination without the laptop screen. So a setup that
+    turns that screen off is also saved without it, unless a profile already covers those monitors."""
+    laptops = {
+        monitor["description"]
+        for setup in chosen.values()
+        for monitor in setup["monitors"]
+        if is_laptop_port(monitor.get("port", ""))
+    }
+    for setup in list(chosen.values()):
+        kept = [m for m in setup["monitors"] if not (m["description"] in laptops and m.get("disabled"))]
+        closed = {"monitors": kept}
+        if kept and len(kept) < len(setup["monitors"]):
+            chosen.setdefault(combination(closed), closed)
+
+
 def read_profiles(source):
     """One setup per combination. Like the old tool, the last profile that fits a combination wins."""
     config = tomllib.loads((source / "config.toml").read_text())
@@ -145,6 +166,7 @@ def read_profiles(source):
         if key in chosen:
             print(f"Skipped {names[key]}: {name} is for the same monitors and came later, so it was the one in use.")
         chosen[key], names[key] = setup, name
+    add_closed_lid_setups(chosen)
     return chosen
 
 

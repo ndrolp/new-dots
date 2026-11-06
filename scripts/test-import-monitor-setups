@@ -172,6 +172,62 @@ hl.monitor({ output = "desc:Panel A", position = "0x0" })
 TMPL
 }
 
+# With the lid closed Hyprland looks for the combination without the laptop screen.
+setup "a setup with the laptop screen off is also saved without it, for a closed lid"
+profile desk "Panel L" "Panel A"
+template desk <<'TMPL'
+hl.monitor({ output = "eDP-1", disabled = true })
+hl.monitor({ output = "desc:Panel A", position = "0x0", vrr = 1 })
+TMPL
+import_old >/dev/null
+expect_eq "$(saved_json)" '{"setups": [{"monitors": [{"description": "Panel L", "disabled": true, "port": "eDP-1"}, {"description": "Panel A", "position": "0x0", "vrr": 1}]}, {"monitors": [{"description": "Panel A", "position": "0x0", "vrr": 1}]}]}'
+
+setup "a setup with only an external screen off isn't saved twice"
+profile desk "Panel A" "Panel B"
+template desk <<'TMPL'
+hl.monitor({ output = "DP-1", disabled = true })
+hl.monitor({ output = "desc:Panel B", position = "0x0" })
+TMPL
+import_old >/dev/null
+expect_eq "$(saved_json)" '{"setups": [{"monitors": [{"description": "Panel A", "disabled": true, "port": "DP-1"}, {"description": "Panel B", "position": "0x0"}]}]}'
+
+# omelas's docked and all of sodoma's name the laptop screen only by description.
+setup "a laptop screen a setup names by description is known from another profile's port"
+profile laptop "Panel L"
+template laptop <<'TMPL'
+hl.monitor({ output = "eDP-1", mode = "preferred" })
+TMPL
+profile desk "Panel L" "Panel A"
+template desk <<'TMPL'
+hl.monitor({ output = "desc:Panel L", disabled = true })
+hl.monitor({ output = "desc:Panel A", position = "0x0" })
+TMPL
+import_old >/dev/null
+expect_eq "$(saved_json)" '{"setups": [{"monitors": [{"description": "Panel L", "mode": "preferred", "port": "eDP-1"}]}, {"monitors": [{"description": "Panel L", "disabled": true}, {"description": "Panel A", "position": "0x0"}]}, {"monitors": [{"description": "Panel A", "position": "0x0"}]}]}'
+
+setup "a profile of its own for those monitors wins over the copy without the laptop screen"
+profile desk "Panel L" "Panel A"
+template desk <<'TMPL'
+hl.monitor({ output = "eDP-1", disabled = true })
+hl.monitor({ output = "desc:Panel A", position = "0x0" })
+TMPL
+profile alone "Panel A"
+template alone <<'TMPL'
+hl.monitor({ output = "desc:Panel A", position = "5x5" })
+TMPL
+import_old >/dev/null
+expect_eq "$(saved_json)" '{"setups": [{"monitors": [{"description": "Panel L", "disabled": true, "port": "eDP-1"}, {"description": "Panel A", "position": "0x0"}]}, {"monitors": [{"description": "Panel A", "position": "5x5"}]}]}'
+
+setup "a setup already saved for a closed lid stays as it is"
+profile desk "Panel L" "Panel A"
+template desk <<'TMPL'
+hl.monitor({ output = "eDP-1", disabled = true })
+hl.monitor({ output = "desc:Panel A", position = "0x0" })
+TMPL
+echo '{"setups": [{"monitors": [{"description": "Panel A", "position": "7x7"}]}]}' >"$SAVED"
+import_old >/dev/null
+expect_eq "$(saved_json)" '{"setups": [{"monitors": [{"description": "Panel A", "position": "7x7"}]}, {"monitors": [{"description": "Panel L", "disabled": true, "port": "eDP-1"}, {"description": "Panel A", "position": "0x0"}]}]}'
+
 setup "running the import twice changes nothing"
 one_profile
 import_old >/dev/null
@@ -236,6 +292,10 @@ expect_eq "$(saved_json)" "{\"setups\": [\
 {\"description\": \"$PHL271\", \"mode\": \"1920x1080@74.97\", \"position\": \"3360x0\", \"scale\": 1, \"transform\": 0, \"vrr\": 0}]}, \
 {\"monitors\": [{\"description\": \"$SAMSUNG\", \"disabled\": true, \"port\": \"eDP-1\"}, \
 {\"description\": \"$AOC\", \"mode\": \"2560x1440@144.00101\", \"position\": \"0x0\", \"scale\": 1}, \
+{\"description\": \"$PHL243\", \"mode\": \"1920x1080@74.97\", \"position\": \"-1080x-240\", \"scale\": 1, \"transform\": 1}]}, \
+{\"monitors\": [{\"description\": \"$HKC\", \"mode\": \"1920x1080@100.00000\", \"position\": \"2280x-300\", \"scale\": 1, \"transform\": 1, \"vrr\": 0}, \
+{\"description\": \"$PHL271\", \"mode\": \"1920x1080@74.97\", \"position\": \"3360x0\", \"scale\": 1, \"transform\": 0, \"vrr\": 0}]}, \
+{\"monitors\": [{\"description\": \"$AOC\", \"mode\": \"2560x1440@144.00101\", \"position\": \"0x0\", \"scale\": 1}, \
 {\"description\": \"$PHL243\", \"mode\": \"1920x1080@74.97\", \"position\": \"-1080x-240\", \"scale\": 1, \"transform\": 1}]}]}"
 
 # Hyprland reads the import's file: the Lua side matches it and writes the fields out as rules.
@@ -247,17 +307,19 @@ local setups = require("modules.monitors.setups")
 local file = assert(io.open(arg[1]))
 local saved = assert(setups.parse(file:read("*a")))
 local modes = { { width = 1920, height = 1080, refresh_rate = 74.97 }, { width = 1920, height = 1080, refresh_rate = 100 } }
-local rules = setups.rules_for(saved, {
+local connected = {
 	{ name = "eDP-1", description = arg[4], available_modes = {} },
 	{ name = "DP-1", description = arg[2], available_modes = modes },
 	{ name = "DP-2", description = arg[3], available_modes = modes },
-})
-for _, rule in ipairs(rules) do
-	print(rule.output, rule.disabled, rule.mode, rule.position, rule.scale, rule.transform, rule.vrr)
+}
+for _, lid_closed in ipairs({ false, true }) do
+	for _, rule in ipairs(setups.rules_for(saved, connected, lid_closed)) do
+		print(rule.output, rule.disabled, rule.mode, rule.position, rule.scale, rule.transform, rule.vrr)
+	end
 end
 LUA
 )"
-expect_eq "$rules" "$(printf 'eDP-1\ttrue\thighres\tauto\tauto\t0\t-1\nDP-1\tfalse\t1920x1080@100.00000\t2280x-300\t1\t1\t0\nDP-2\tfalse\t1920x1080@74.97\t3360x0\t1\t0\t0')"
+expect_eq "$rules" "$(printf 'eDP-1\ttrue\thighres\tauto\tauto\t0\t-1\nDP-1\tfalse\t1920x1080@100.00000\t2280x-300\t1\t1\t0\nDP-2\tfalse\t1920x1080@74.97\t3360x0\t1\t0\t0\nDP-1\tfalse\t1920x1080@100.00000\t2280x-300\t1\t1\t0\nDP-2\tfalse\t1920x1080@74.97\t3360x0\t1\t0\t0\neDP-1\ttrue\thighres\tauto\tauto\t0\t-1')"
 
 setup "all of sodoma's setups come through, with two-monitors standing in for desktop"
 cat >"$WORK/bin/hyprctl" <<STUB
@@ -276,6 +338,11 @@ expect_eq "$(saved_json)" "{\"setups\": [\
 {\"description\": \"$HKC\", \"mode\": \"1920x1080@60.00000\", \"position\": \"1920x0\", \"scale\": 1}]}, \
 {\"monitors\": [{\"description\": \"$BOE\", \"disabled\": true}, \
 {\"description\": \"$HKC\", \"mode\": \"1920x1080@60.00000\", \"position\": \"2760x-420\", \"scale\": 1, \"transform\": 1}, \
+{\"description\": \"$PHL271\", \"mode\": \"1920x1080@60.00000\", \"position\": \"3840x0\", \"scale\": 1}]}, \
+{\"monitors\": [{\"bitdepth\": 10, \"description\": \"$PHL271\", \"mode\": \"1920x1080@74.97300\", \"position\": \"0x0\", \"scale\": 1}, \
+{\"bitdepth\": 10, \"description\": \"$PHL243\", \"mode\": \"1920x1080@74.97300\", \"position\": \"auto-left\", \"scale\": 1, \"transform\": 1}]}, \
+{\"monitors\": [{\"description\": \"$HKC\", \"mode\": \"1920x1080@60.00000\", \"position\": \"1920x0\", \"scale\": 1}]}, \
+{\"monitors\": [{\"description\": \"$HKC\", \"mode\": \"1920x1080@60.00000\", \"position\": \"2760x-420\", \"scale\": 1, \"transform\": 1}, \
 {\"description\": \"$PHL271\", \"mode\": \"1920x1080@60.00000\", \"position\": \"3840x0\", \"scale\": 1}]}]}"
 
 if ((failures)); then
