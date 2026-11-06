@@ -178,6 +178,32 @@ test("a mirror of one of two identical monitors names it by port", function()
 	equal(rule_for(rules, "DP-1").mirror, "DP-2", "mirror target")
 end)
 
+local EXTERNAL_ONLY = {
+	monitors = {
+		{ description = AOC, port = "DP-2", mode = "2560x1440@143.91", position = "0x0", scale = 1.5 },
+	},
+}
+
+test("a closed lid with an external monitor is the combination without the laptop screen", function()
+	local rules = setups.rules_for({ DOCKED, EXTERNAL_ONLY }, { monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) }, true)
+	equal(#rules, 2, "rules")
+	equal(rule_for(rules, "DP-2").scale, 1.5, "the setup of the external monitor alone")
+	equal(rule_for(rules, "eDP-1").disabled, true, "the laptop screen goes off")
+end)
+
+test("a closed lid with no external monitor changes nothing", function()
+	local laptop = { monitor("eDP-1", LAPTOP) }
+	local rules = setups.rules_for({}, laptop, true)
+	equal(#rules, 1, "rules")
+	equal(rules[1].disabled, false, "the laptop screen stays on")
+end)
+
+test("the laptop screen off for a closed lid still writes every field", function()
+	local rules = setups.rules_for({}, { monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) }, true)
+	equal(rule_for(rules, "eDP-1").transform, 0, "transform")
+	equal(rule_for(rules, "eDP-1").mirror, "", "mirror")
+end)
+
 test("a saved mode that no longer exists makes only that monitor automatic", function()
 	local rules = setups.rules_for({ DOCKED }, {
 		monitor("eDP-1", LAPTOP),
@@ -281,7 +307,7 @@ end)
 -- The part that talks to Hyprland, against a stubbed `hl`. `session` plays Hyprland: its list of
 -- monitors can change between events, and timers only run when settle() says so.
 local function new_session(monitors)
-	local session = { monitors = monitors, applied = {}, handlers = {}, timers = {} }
+	local session = { monitors = monitors, applied = {}, handlers = {}, timers = {}, binds = {} }
 	hl = {
 		get_monitors = function(options)
 			local listed = {}
@@ -298,6 +324,9 @@ local function new_session(monitors)
 		on = function(event, handler)
 			session.handlers[event] = handler
 		end,
+		bind = function(keys, handler, options)
+			session.binds[keys] = { handler = handler, options = options }
+		end,
 		timer = function(callback, options)
 			equal(options.type, "oneshot", "timer type")
 			equal(options.timeout > 0, true, "Hyprland refuses a timeout of 0")
@@ -306,6 +335,10 @@ local function new_session(monitors)
 	}
 	function session.fire(event)
 		session.handlers[event]()
+	end
+	-- Hyprland only says the lid moved. The state is in the files install() was told to read.
+	function session.flip_lid()
+		session.binds["switch:Lid Switch"].handler()
 	end
 	function session.settle()
 		local timers = session.timers
@@ -338,7 +371,9 @@ local function read_file(path)
 	return contents
 end
 
+-- Tests have no lid unless they ask for one, whatever this machine's lid is doing.
 local function install(options)
+	options.lid_states = options.lid_states or "/nonexistent/lid/*/state"
 	package.loaded["modules.monitors.apply"] = nil
 	require("modules.monitors.apply").install(options)
 end
@@ -480,6 +515,129 @@ apply_test("a path that can't be opened as a file gives the automatic setup", fu
 	install({ path = path, stand_aside = true })
 	equal(session.applied[1].mode, "highres", "mode")
 	assert(os.execute("rmdir " .. path .. ".bad"))
+end)
+
+-- A folder laid out like /proc/acpi/button/lid, whose state a test can change.
+local function fake_lid(state)
+	local folder = temp_path()
+	assert(os.execute("mkdir -p " .. folder .. "/LID0"))
+	local lid = { states = folder .. "/*/state" }
+	function lid.set(new_state)
+		local file = assert(io.open(folder .. "/LID0/state", "w"))
+		file:write("state:      " .. new_state .. "\n")
+		file:close()
+	end
+	function lid.remove()
+		assert(os.execute("rm -r " .. folder))
+	end
+	lid.set(state)
+	return lid
+end
+
+local function write_saved(path, contents)
+	local file = assert(io.open(path, "w"))
+	file:write(contents)
+	file:close()
+end
+
+local LID_SETUPS = [[{"setups": [
+	{"monitors": [{"description": "Samsung Display Corp. ATNA40HQ01-0", "port": "eDP-1", "position": "0x0"},
+	              {"description": "AOC Q27G42XE 2S6S1HA031479", "port": "DP-2", "position": "1600x0"}]},
+	{"monitors": [{"description": "AOC Q27G42XE 2S6S1HA031479", "port": "DP-2", "position": "0x0"}]}
+]}]]
+
+apply_test("closing and opening the lid applies the matching setup", function(path)
+	write_saved(path, LID_SETUPS)
+	local lid = fake_lid("open")
+	local session = new_session({ monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	install({ path = path, lid_states = lid.states })
+	equal(rule_for(session.applied, "DP-2").position, "1600x0", "open, beside the laptop")
+
+	session.applied = {}
+	lid.set("closed")
+	session.flip_lid()
+	session.settle()
+	equal(rule_for(session.applied, "eDP-1").disabled, true, "closed, the laptop screen goes off")
+	equal(rule_for(session.applied, "DP-2").position, "0x0", "closed, the external monitor alone")
+
+	session.applied = {}
+	lid.set("open")
+	session.flip_lid()
+	session.settle()
+	equal(rule_for(session.applied, "eDP-1").disabled, false, "open again, the laptop screen is back")
+	equal(rule_for(session.applied, "DP-2").position, "1600x0", "open again, beside the laptop")
+	lid.remove()
+end)
+
+apply_test("with no external monitor the lid writes no rule", function(path)
+	write_saved(path, LID_SETUPS)
+	local lid = fake_lid("open")
+	local session = new_session({ monitor("eDP-1", LAPTOP) })
+	install({ path = path, lid_states = lid.states })
+	session.applied = {}
+	lid.set("closed")
+	session.flip_lid()
+	session.settle()
+	lid.set("open")
+	session.flip_lid()
+	session.settle()
+	equal(#session.applied, 0, "rules written")
+	lid.remove()
+end)
+
+-- A reload runs the config again, and no switch event comes with it.
+apply_test("a config load with the lid already closed keeps the laptop screen off", function(path)
+	write_saved(path, LID_SETUPS)
+	local lid = fake_lid("closed")
+	local session = new_session({ monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	install({ path = path, lid_states = lid.states })
+	equal(rule_for(session.applied, "eDP-1").disabled, true, "laptop screen")
+	lid.remove()
+end)
+
+apply_test("plugging a monitor into a closed laptop turns the laptop screen off", function(path)
+	write_saved(path, LID_SETUPS)
+	local lid = fake_lid("closed")
+	local session = new_session({ monitor("eDP-1", LAPTOP) })
+	install({ path = path, lid_states = lid.states })
+	session.applied = {}
+	session.monitors[2] = monitor("DP-2", AOC)
+	session.fire("monitor.added")
+	session.settle()
+	equal(rule_for(session.applied, "eDP-1").disabled, true, "laptop screen")
+	lid.remove()
+end)
+
+apply_test("unplugging the last external monitor from a closed laptop brings its screen back", function(path)
+	write_saved(path, LID_SETUPS)
+	local lid = fake_lid("closed")
+	local session = new_session({ monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	install({ path = path, lid_states = lid.states })
+	session.applied = {}
+	session.monitors[2] = nil
+	session.fire("monitor.removed")
+	session.settle()
+	equal(rule_for(session.applied, "eDP-1").disabled, false, "laptop screen")
+	lid.remove()
+end)
+
+apply_test("a machine with no lid counts as open", function(path)
+	write_saved(path, LID_SETUPS)
+	local session = new_session({ monitor("eDP-1", LAPTOP), monitor("DP-2", AOC) })
+	install({ path = path })
+	equal(rule_for(session.applied, "eDP-1").disabled, false, "laptop screen")
+end)
+
+-- Closing the lid has to count while locked, under a fullscreen game inhibiting shortcuts, in a submap
+-- and with a key held down.
+apply_test("the lid counts whatever else is going on", function(path)
+	local session = new_session({ monitor("eDP-1", LAPTOP) })
+	install({ path = path })
+	local options = session.binds["switch:Lid Switch"].options
+	equal(options.locked, true, "locked")
+	equal(options.dont_inhibit, true, "dont_inhibit")
+	equal(options.ignore_mods, true, "ignore_mods")
+	equal(options.submap_universal, true, "submap_universal")
 end)
 
 -- Until hyprdynamicmonitors is removed, merging this must not touch anyone's monitors. monitor-setups.sh

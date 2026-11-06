@@ -11,6 +11,11 @@ local M = {}
 -- takes several monitors appearing together as one change.
 local SETTLE_MS = 100
 
+-- Hyprland says when the lid moves but not where it is, and a config reload says nothing at all, so
+-- the state is read from the kernel each time. The folder's name varies by machine, hence the glob.
+local LID_SWITCH = "Lid Switch"
+local LID_STATES = "/proc/acpi/button/lid/*/state"
+
 local function default_path()
 	local config = os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")
 	return config .. "/hypr/monitor-setups.json"
@@ -40,6 +45,17 @@ local function load_saved(path)
 	return saved or {}
 end
 
+-- A lid that can't be read counts as open, which leaves every screen on.
+local function lid_closed(states)
+	local cat = io.popen("cat " .. states .. " 2>/dev/null")
+	if not cat then
+		return false
+	end
+	local text = cat:read("*a")
+	cat:close()
+	return text ~= nil and text:find("closed", 1, true) ~= nil
+end
+
 -- One line per setting, in a fixed order, to tell whether anything changed.
 local function fingerprint(rules)
 	local lines = {}
@@ -54,8 +70,10 @@ end
 
 -- options.path: the saved file, by default ~/.config/hypr/monitor-setups.json
 -- options.stand_aside: with no saved file, leave the monitors alone instead of extending automatically
+-- options.lid_states: where to read the lid from, a glob
 function M.install(options)
 	local path = options.path or default_path()
+	local lid_states = options.lid_states or LID_STATES
 	local last_applied
 	local waiting = false
 
@@ -69,7 +87,7 @@ function M.install(options)
 		if not saved and options.stand_aside then
 			return
 		end
-		local rules = setups.rules_for(saved or {}, connected)
+		local rules = setups.rules_for(saved or {}, connected, lid_closed(lid_states))
 		-- A setup turning a monitor off fires monitor.removed, which lands back here.
 		local applying = fingerprint(rules)
 		if applying == last_applied then
@@ -95,6 +113,13 @@ function M.install(options)
 	hl.on("hyprland.start", apply_once_settled)
 	hl.on("monitor.added", apply_once_settled)
 	hl.on("monitor.removed", apply_once_settled)
+	hl.bind("switch:" .. LID_SWITCH, apply_once_settled, {
+		locked = true,
+		dont_inhibit = true,
+		ignore_mods = true,
+		submap_universal = true,
+		description = "Apply the monitor setup when the lid moves",
+	})
 	apply()
 end
 
