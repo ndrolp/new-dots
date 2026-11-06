@@ -150,7 +150,7 @@ imported setup leaves that aren't numbers, and the saved file
 (`services/MonitorSetup.js`), the *Keep* / *Revert* countdown
 (`services/MonitorChange.js`), and the Displays section and its card
 (`components/panels/MonitorArrangeSettings.qml`, `MonitorArrangeCanvas.qml`,
-`MonitorControls.qml`, `MonitorChangeCard.qml`; `services/MonitorSetups.qml` and
+`MonitorControls.qml`, `MonitorSavedSetups.qml`, `MonitorChangeCard.qml`; `services/MonitorSetups.qml` and
 `modules/MonitorChange.qml` need Quickshell and aren't tested here).
 They run with QtTest outside of `qs`:
 

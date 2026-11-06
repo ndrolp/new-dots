@@ -98,4 +98,12 @@ Column {
         monitors: root.monitors
         monitorDescription: root.selected !== null ? root.selected.description : ""
     }
+
+    Panels.MonitorSavedSetups {
+        width: parent.width
+        appearance: root.appearance
+        setups: root.setups ? root.setups.savedSetups : []
+        canForget: root.setups ? !root.setups.counting : false
+        onForgetAsked: combination => root.setups.forget(combination)
+    }
 }

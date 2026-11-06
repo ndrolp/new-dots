@@ -63,6 +63,21 @@ Scope {
             carryOut(MonitorChange.reverted(internal.change));
     }
 
+    // Removes a saved setup, by its `combination`, without touching the monitors: Hyprland only
+    // notices the next time it detects them. False, with nothing changed, during a countdown or
+    // another step, or if the file can't be read.
+    function forget(combination) {
+        if (internal.busy || counting)
+            return false;
+        const step = MonitorChange.forgotten(fileText(), combination);
+        if (step === null) {
+            warn("The saved monitor setups can't be read, so nothing was forgotten.");
+            return false;
+        }
+        carryOut(step);
+        return true;
+    }
+
     function identify() {
         identifyTimer.restart();
     }

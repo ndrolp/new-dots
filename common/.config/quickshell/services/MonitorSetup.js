@@ -283,11 +283,34 @@ function savedEntries(data, monitors) {
     return setup !== undefined ? setup.monitors : [];
 }
 
-// The saved setups as a list to show: { combination, name, monitors }, named after their monitors.
+// `data` with the setups of `key`, a combination, gone. Every copy, as Hyprland takes the first match.
+function withoutSetup(data, key) {
+    return Object.assign({}, data, { setups: data.setups.filter(setup => combination(setup.monitors) !== key) });
+}
+
+function setupName(setup, label) {
+    return setup.monitors.map(label).sort().join(" + ");
+}
+
+function maker(entry) {
+    return entry.description.split(" ")[0];
+}
+
+// What's really saved: a change being tried out is in the file, but isn't saved until Keep.
+function keptData(data) {
+    return data.unkept !== undefined ? parsedFile(data.unkept.before) || { setups: [] } : data;
+}
+
+// The saved setups as a list to show: { combination, name, monitors }, named after their monitors'
+// makers, like "AOC + Philips". Setups that would share a name go by their full descriptions.
 function listedSetups(data) {
-    return data.setups.map(setup => ({
+    const setups = keptData(data).setups;
+    const names = setups.map(setup => setupName(setup, maker));
+    return setups.map((setup, index) => ({
         combination: combination(setup.monitors),
-        name: setup.monitors.map(entry => entry.description).sort().join(" + "),
+        name: names.filter(name => name === names[index]).length > 1
+            ? setupName(setup, entry => entry.description)
+            : names[index],
         monitors: setup.monitors
     }));
 }

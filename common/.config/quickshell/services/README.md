@@ -48,6 +48,12 @@ the countdown card and *Identify* on the screens. Hyprland owns the setups
 `apply_now` in `hypr/modules/monitors/apply.lua`, which reads it without the
 full config reload `hyprctl reload` would do.
 
+`forget(combination)` removes a saved setup from the file and doesn't ask
+Hyprland, so the monitors stay as they are until the next time it detects them.
+Hyprland doesn't watch that file: only the config and the modules it requires.
+It's refused during a countdown, when Revert would put the file back, and
+`savedSetups` leaves out a change being tried out, which isn't saved yet.
+
 A change has to be in the file for Hyprland to apply it, so it's in there before
 it's kept, with what to go back to under `unkept` in the same write. Revert
 applies the previous arrangement through the file, then puts the file back
