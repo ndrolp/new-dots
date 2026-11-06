@@ -547,7 +547,7 @@
             "barTransparentBorder": true,
             "elementVerticalPadding": 5,
             "groupRadius": 5,
-            "horizontalPadding": 8,
+            "horizontalPadding": 14,
             "pillVerticalPadding": 2,
             "pillsTransparent": false,
             "radius": 5,
