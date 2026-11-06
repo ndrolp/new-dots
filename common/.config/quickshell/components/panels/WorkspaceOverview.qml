@@ -155,6 +155,12 @@ Variants {
             id: theme
         }
 
+        WindowFrames {
+            id: windowFrames
+
+            windows: overview.shown ? Hyprland.toplevels.values : []
+        }
+
         Behavior on reveal {
             NumberAnimation {
                 duration: root.appearance.motion.short
@@ -403,6 +409,14 @@ Variants {
                                                     elide: Text.ElideRight
                                                     horizontalAlignment: Text.AlignHCenter
                                                     font.pixelSize: root.appearance.textSize - 4
+                                                }
+
+                                                WindowThumbnail {
+                                                    anchors.fill: parent
+                                                    anchors.margins: parent.border.width
+                                                    frame: windowFrames.frameOf(windowItem.toplevel)
+                                                    // The hover colour shows through.
+                                                    opacity: windowHover.hovered ? 0.85 : 1
                                                 }
 
                                                 // A MouseArea so a click here doesn't reach the tile below.
