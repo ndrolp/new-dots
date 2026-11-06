@@ -357,4 +357,30 @@ TestCase {
         compare(MonitorSetup.sameEntries(entries(), entries()), true);
         compare(MonitorSetup.sameEntries(entries(), MonitorSetup.withRefresh(entries(), "DP-2", 59.95)), false);
     }
+
+    // The same pairing as `pair` in setups.lua: an entry goes to one monitor only.
+    function test_identicalMonitorsThatMovedPortsGetAnEntryEach() {
+        const saved = [
+            { description: aoc, port: "DP-2", vrr: 2 },
+            { description: aoc, port: "DP-1", vrr: 1 }
+        ];
+        const entries = MonitorSetup.entriesFrom(
+            [live("DP-5", aoc, { id: 5 }), live("DP-2", aoc, { id: 2 })], saved, false);
+        compare(entries[0].vrr, 1);
+        compare(entries[1].vrr, 2);
+    }
+
+    function test_identicalMonitorsMoreThanSavedGetNothingTwice() {
+        const saved = [{ description: aoc, port: "DP-1", vrr: 1 }];
+        const entries = MonitorSetup.entriesFrom(
+            [live("DP-1", aoc, { id: 1 }), live("DP-2", aoc, { id: 2 })], saved, false);
+        compare(entries[0].vrr, 1);
+        compare(entries[1].vrr, undefined);
+    }
+
+    function test_aMonitorsNumberIsItsPlaceAmongTheEntries() {
+        const entries = [{ port: "eDP-1" }, { port: "DP-2" }];
+        compare(MonitorSetup.numberOf(entries, "DP-2"), 2);
+        compare(MonitorSetup.numberOf(entries, "DP-9"), 0);
+    }
 }

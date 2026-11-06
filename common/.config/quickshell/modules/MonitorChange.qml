@@ -6,7 +6,8 @@ import "../config" as Config
 
 // What a change of monitors puts on the screens themselves: the Keep or Revert card, on every screen
 // that still works so it can't end up only on a black one, and each monitor's number for Identify.
-// Quickshell only has screens that are on, so a monitor just turned off gets neither.
+// Quickshell only has screens that are on, so a monitor just turned off gets neither. Every card takes
+// the keyboard, however Hyprland settles which: Enter and Esc reach one of them even from a black screen.
 Scope {
     id: root
 
@@ -33,6 +34,12 @@ Scope {
             exclusionMode: ExclusionMode.Ignore
             WlrLayershell.namespace: "ndro-shell-monitor-change"
             WlrLayershell.layer: WlrLayer.Overlay
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+
+            onVisibleChanged: {
+                if (visible)
+                    card.forceActiveFocus();
+            }
 
             Panels.MonitorChangeCard {
                 id: card

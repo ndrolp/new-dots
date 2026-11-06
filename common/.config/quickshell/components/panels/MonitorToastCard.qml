@@ -4,10 +4,9 @@ import "." as Panels
 
 // The toast for an unknown combination: what the quick switch offers, and Arrange… for Displays.
 // Answering only asks: modules/MonitorToast.qml does it. Ignoring it saves nothing.
-Rectangle {
+Panels.MonitorCard {
     id: card
 
-    required property var appearance
     // What QuickSwitch.choices gives.
     property var choices: []
     signal chosen(var choice)
@@ -15,69 +14,43 @@ Rectangle {
     signal dismissAsked()
 
     implicitWidth: 380
-    implicitHeight: content.implicitHeight + 32
-    width: implicitWidth
-    height: implicitHeight
-    radius: appearance.radius
-    color: theme.surface
-    border.color: theme.border
-    border.width: 1
+    title: "New monitors connected"
+    hint: "They're extended for now. Nothing is remembered unless you choose or change something."
 
     Config.Theme {
         id: theme
     }
 
-    Column {
-        id: content
+    Flow {
+        width: parent.width
+        spacing: 4
 
-        anchors.centerIn: parent
-        width: parent.width - 32
-        spacing: 10
+        Repeater {
+            model: card.choices
 
-        Panels.Text {
-            width: parent.width
-            text: "New monitors connected"
-            color: theme.text
-            font.pixelSize: card.appearance.textSize + 1
+            delegate: Panels.SettingsButton {
+                required property var modelData
+
+                objectName: "toast " + modelData.label
+                appearance: card.appearance
+                label: modelData.label
+                onActivated: card.chosen(modelData)
+            }
         }
 
-        Panels.SettingsHint {
-            width: parent.width
+        Panels.SettingsButton {
+            objectName: "toast Arrange…"
             appearance: card.appearance
-            text: "They're extended for now. Nothing is remembered unless you choose or change something."
+            label: "Arrange…"
+            labelColor: theme.accent
+            onActivated: card.arrangeAsked()
         }
 
-        Flow {
-            width: parent.width
-            spacing: 4
-
-            Repeater {
-                model: card.choices
-
-                delegate: Panels.SettingsButton {
-                    required property var modelData
-
-                    objectName: "toast " + modelData.label
-                    appearance: card.appearance
-                    label: modelData.label
-                    onActivated: card.chosen(modelData)
-                }
-            }
-
-            Panels.SettingsButton {
-                objectName: "toast Arrange…"
-                appearance: card.appearance
-                label: "Arrange…"
-                labelColor: theme.accent
-                onActivated: card.arrangeAsked()
-            }
-
-            Panels.SettingsButton {
-                objectName: "toast Dismiss"
-                appearance: card.appearance
-                label: "Dismiss"
-                onActivated: card.dismissAsked()
-            }
+        Panels.SettingsButton {
+            objectName: "toast Dismiss"
+            appearance: card.appearance
+            label: "Dismiss"
+            onActivated: card.dismissAsked()
         }
     }
 }

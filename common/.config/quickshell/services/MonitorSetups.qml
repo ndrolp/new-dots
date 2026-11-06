@@ -4,7 +4,6 @@ import Quickshell.Io
 import QtQuick
 import "MonitorChange.js" as MonitorChange
 import "MonitorSetup.js" as MonitorSetup
-import "MonitorModes.js" as MonitorModes
 import "MonitorToast.js" as MonitorToast
 import "QuickSwitch.js" as QuickSwitch
 
@@ -29,11 +28,14 @@ Scope {
     readonly property bool identifying: identifyTimer.running
     // Whether to hold the toasts: the shell's lock screen is up.
     property bool locked: false
+    readonly property string unreadMessage: "The saved monitor setups can't be read, so nothing was changed."
     // Whether the toast for an unknown combination is up. `dismissToast` takes it down.
     readonly property bool offeringChoices: internal.toast.offering
+    // What's being told about a failure, "" for nothing. `dismissNotice` takes it down.
+    readonly property string notice: internal.toast.notice
 
     function numberOf(port) {
-        return internal.entries.findIndex(entry => entry.port === port) + 1;
+        return MonitorSetup.numberOf(internal.entries, port);
     }
 
     // A monitor's modes, as MonitorModes.parsedModes gives them.
@@ -42,13 +44,16 @@ Scope {
     }
 
     // Tries out `entries`. False, with nothing changed, if they would leave every screen dark, are
-    // what's already there, or another step is still running.
+    // what's already there, another step is still running, or the saved file can't be read.
     function apply(next) {
-        if (internal.busy || next.length === 0 || !MonitorSetup.showsSomething(next)
-            || MonitorSetup.sameEntries(next, internal.entries))
+        if (!MonitorChange.canTry(next, internal.entries, internal.busy))
             return false;
 
         const text = fileText();
+        if (text === undefined) {
+            warn(unreadMessage);
+            return false;
+        }
         if (MonitorSetup.parsedFile(text) === null) {
             // Asking Hyprland to read it moves it aside as .bad, so the next try starts clean, and
             // that's what brings up the toast saying so.
@@ -70,9 +75,12 @@ Scope {
     }
 
     function remember(next) {
-        if (internal.busy || counting || next.length === 0 || !MonitorSetup.sameEntries(next, internal.entries))
+        if (!MonitorChange.canRemember(next, internal.entries, internal.busy, counting))
             return false;
-        const step = MonitorChange.remembered(fileText(), next);
+        const text = fileText();
+        const step = MonitorChange.remembered(text, next);
+        if (text === undefined)
+            warn(unreadMessage);
         if (step === null)
             return false;
         carryOut(step);
@@ -83,19 +91,43 @@ Scope {
         internal.toast = MonitorToast.dismissed(internal.toast);
     }
 
+    function dismissNotice() {
+        internal.toast = MonitorToast.noticeDismissed(internal.toast);
+    }
+
     // Whether a monitor is copying another, so has no bar.
     function isMirroring(port) {
         return QuickSwitch.mirroring(internal.entries, port);
     }
 
     function keep() {
-        if (counting && !internal.busy)
+        if (!counting || internal.busy)
+            return;
+        if (overtaken())
+            warn("Hyprland had already gone back, so nothing was kept.");
+        else
             carryOut(MonitorChange.kept(internal.change));
     }
 
+    // Doesn't wait for Hyprland to answer, as that may be what's wrong.
     function revert() {
-        if (counting && !internal.busy)
+        if (!counting)
+            return;
+        if (internal.asking)
+            stopAsking();
+        else if (internal.busy)
+            return;
+        if (!overtaken())
             carryOut(MonitorChange.reverted(internal.change));
+    }
+
+    // Whether Hyprland went back by itself, which leaves nothing to answer. Ends the countdown if so.
+    function overtaken() {
+        if (!MonitorChange.overtaken(internal.change, fileText()))
+            return false;
+        internal.change = MonitorChange.idle;
+        finished();
+        return true;
     }
 
     // Removes a saved setup, by its `combination`, without touching the monitors: Hyprland only
@@ -106,7 +138,7 @@ Scope {
             return false;
         const step = MonitorChange.forgotten(fileText(), combination);
         if (step === null) {
-            warn("The saved monitor setups can't be read, so nothing was forgotten.");
+            warn(unreadMessage);
             return false;
         }
         carryOut(step);
@@ -125,15 +157,17 @@ Scope {
             reader.running = true;
     }
 
+    // The saved file as it is now: its text, null if it isn't there, undefined if it couldn't be
+    // loaded. Unless a signal says otherwise, it couldn't.
     function fileText() {
+        internal.fileLoad = "failed";
         file.reload();
         file.waitForJob();
-        const text = file.text();
-        return internal.fileMissing || text === "" ? null : text;
+        return MonitorSetup.loadedText(internal.fileLoad, file.text());
     }
 
     function warn(message) {
-        warning.exec(["notify-send", "-u", "critical", "Displays", message]);
+        internal.toast = MonitorToast.withNotice(internal.toast, message);
     }
 
     // One step from MonitorChange.js: writes or removes the file, then asks Hyprland if it says to.
@@ -149,7 +183,6 @@ Scope {
     }
 
     function written() {
-        internal.fileMissing = false;
         if (internal.askAfterWrite)
             askHyprland();
         else
@@ -157,21 +190,37 @@ Scope {
     }
 
     function askHyprland() {
+        internal.asking = true;
         applier.running = true;
+        applierTimeout.restart();
+    }
+
+    // Gives up on the hyprctl running. It may yet print something, which counts for nothing.
+    function stopAsking() {
+        internal.asking = false;
+        internal.staleAnswers++;
+        applierTimeout.stop();
+        applier.running = false;
     }
 
     function hyprlandAnswered(output) {
-        if (!MonitorChange.answeredOk(output)) {
-            warn("Hyprland didn't apply the monitor setup: " + output.trim());
-            if (counting || MonitorChange.restoring(internal.change))
-                carryOut(MonitorChange.restored(internal.change));
-            else
-                finished();
-        } else if (MonitorChange.restoring(internal.change)) {
-            carryOut(MonitorChange.restored(internal.change));
-        } else {
-            finished();
+        if (internal.staleAnswers > 0) {
+            internal.staleAnswers--;
+            return;
         }
+        internal.asking = false;
+        applierTimeout.stop();
+        takeAnswer(output);
+    }
+
+    function takeAnswer(output) {
+        const answer = MonitorChange.afterAnswer(internal.change, output);
+        if (answer.warning !== "")
+            warn(answer.warning);
+        if (answer.step !== null)
+            carryOut(answer.step);
+        else
+            finished();
     }
 
     function finished() {
@@ -186,7 +235,10 @@ Scope {
         const reading = MonitorSetup.parsedReading(text);
         if (reading === null)
             return;
-        const data = MonitorSetup.parsedFile(fileText()) || { setups: [] };
+        const saved = fileText();
+        if (MonitorChange.overtaken(internal.change, saved))
+            internal.change = MonitorChange.idle;
+        const data = MonitorSetup.parsedFile(saved) || { setups: [] };
         const present = MonitorSetup.presentMonitors(reading.monitors, reading.lidClosed);
         internal.monitors = reading.monitors;
         internal.entries = MonitorSetup.entriesFrom(reading.monitors, MonitorSetup.savedEntries(data, present),
@@ -194,14 +246,14 @@ Scope {
         internal.savedSetups = MonitorSetup.listedSetups(data);
         internal.toast = MonitorToast.afterReading(internal.toast, MonitorSetup.combination(present),
             MonitorSetup.savedEntries(data, present).length > 0, root.locked);
-        kept.combination = internal.toast.combination;
+        told.combination = internal.toast.combination;
         if (!root.locked)
             notices.running = true;
     }
 
     function tell(text) {
-        const notice = MonitorToast.noticed(text, kept.toldFallbacks);
-        kept.toldFallbacks = notice.told;
+        const notice = MonitorToast.noticed(text, told.fallbacks);
+        told.fallbacks = notice.told;
         if (notice.message !== "")
             warn(notice.message);
     }
@@ -222,12 +274,12 @@ Scope {
 
     // What the toasts have already said, so that a reload of the shell doesn't say it again.
     PersistentProperties {
-        id: kept
+        id: told
 
         reloadableId: "monitorSetups"
 
         property string combination: ""
-        property string toldFallbacks: ""
+        property string fallbacks: ""
 
         onLoaded: internal.toast = MonitorToast.restored(combination)
     }
@@ -242,7 +294,11 @@ Scope {
         property int secondsLeft: 0
         property bool busy: false
         property bool askAfterWrite: false
-        property bool fileMissing: false
+        property bool asking: false
+        // Answers to come from a hyprctl that was given up on.
+        property int staleAnswers: 0
+        // How the last load of the saved file went: see MonitorSetup.loadedText.
+        property string fileLoad: "failed"
         property bool readAgain: false
         property var toast: MonitorToast.idle
     }
@@ -255,8 +311,8 @@ Scope {
         atomicWrites: true
         printErrors: false
 
-        onLoaded: internal.fileMissing = false
-        onLoadFailed: error => internal.fileMissing = error === FileViewError.FileNotFound
+        onLoaded: internal.fileLoad = "loaded"
+        onLoadFailed: error => internal.fileLoad = error === FileViewError.FileNotFound ? "missing" : "failed"
         onSaved: root.written()
         onSaveFailed: error => {
             root.warn("The monitor setups couldn't be saved: " + FileViewError.toString(error));
@@ -269,10 +325,7 @@ Scope {
         id: remover
 
         command: ["rm", "-f", file.path]
-        onExited: {
-            internal.fileMissing = true;
-            root.written();
-        }
+        onExited: root.written()
     }
 
     Process {
@@ -281,6 +334,17 @@ Scope {
         command: MonitorChange.applyCommand
         stdout: StdioCollector {
             onStreamFinished: root.hyprlandAnswered(text)
+        }
+    }
+
+    // A hyprctl that hangs mustn't hold up everything after it.
+    Timer {
+        id: applierTimeout
+
+        interval: 5000
+        onTriggered: {
+            root.stopAsking();
+            root.takeAnswer("no answer from hyprctl");
         }
     }
 
@@ -299,18 +363,14 @@ Scope {
         }
     }
 
-    // What Hyprland left for the shell beside the saved file: see MonitorToast.noticesCommand.
+    // What Hyprland left for the shell beside the saved file.
     Process {
         id: notices
 
-        command: MonitorToast.noticesCommand(file.path)
+        command: ["sh", Quickshell.shellDir + "/services/monitor-notices.sh", file.path]
         stdout: StdioCollector {
             onStreamFinished: root.tell(text)
         }
-    }
-
-    Process {
-        id: warning
     }
 
     Connections {

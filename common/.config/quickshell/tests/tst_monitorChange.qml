@@ -70,7 +70,7 @@ TestCase {
         const step = started(savedText);
         const kept = MonitorChange.kept(step.state);
         compare(MonitorChange.counting(kept.state), false);
-        compare(MonitorChange.parsedUnkept(kept.text), null);
+        compare(MonitorSetup.parsedFile(kept.text).unkept, undefined);
         compare(setupsIn(kept.text)[1].monitors[0].position, "100x0");
         compare(kept.apply, false);
     }
@@ -88,7 +88,7 @@ TestCase {
     function test_afterRevertTheFileIsExactlyWhatItWas() {
         const step = started(savedText);
         const back = MonitorChange.reverted(step.state);
-        const done = MonitorChange.restored(back.state);
+        const done = MonitorChange.restored(back.state, false);
         compare(done.text, savedText);
         compare(done.remove, false);
         compare(done.apply, false);
@@ -116,6 +116,109 @@ TestCase {
         compare(MonitorChange.interrupted(savedText), null);
         compare(MonitorChange.interrupted(null), null);
         compare(MonitorChange.interrupted("{ not json"), null);
+    }
+
+    // A failed read is neither a file nor no file: nothing may be built on it.
+    function test_aFileThatCouldntBeLoadedIsNotAMissingFile() {
+        compare(MonitorSetup.loadedText("missing", ""), null);
+        compare(MonitorSetup.loadedText("loaded", savedText), savedText);
+        compare(MonitorSetup.loadedText("failed", ""), undefined);
+        compare(MonitorSetup.loadedText("failed", savedText), undefined);
+    }
+
+    function test_anEmptyFileIsNotAMissingFile() {
+        compare(MonitorSetup.parsedFile(MonitorSetup.loadedText("loaded", "")), null);
+    }
+
+    function test_nothingIsBuiltOnAFailedRead() {
+        const unread = MonitorSetup.loadedText("failed", "");
+        compare(MonitorSetup.parsedFile(unread), null);
+        compare(MonitorChange.remembered(unread, setup("0x0")), null);
+        compare(MonitorChange.forgotten(unread, "Other"), null);
+        compare(MonitorChange.interrupted(unread), null);
+    }
+
+    function test_aChangeNeedsSomethingNewThatShowsSomething() {
+        const here = setup("0x0");
+        compare(MonitorChange.canTry(setup("100x0"), here, false), true);
+        compare(MonitorChange.canTry(setup("100x0"), here, true), false);
+        compare(MonitorChange.canTry(setup("0x0"), here, false), false);
+        compare(MonitorChange.canTry([], here, false), false);
+        const dark = setup("0x0");
+        dark[0].disabled = true;
+        compare(MonitorChange.canTry(dark, here, false), false);
+    }
+
+    function test_rememberingNeedsWhatTheMonitorsAlreadyAre() {
+        const here = setup("0x0");
+        compare(MonitorChange.canRemember(setup("0x0"), here, false, false), true);
+        compare(MonitorChange.canRemember(setup("100x0"), here, false, false), false);
+        compare(MonitorChange.canRemember(setup("0x0"), here, true, false), false);
+        compare(MonitorChange.canRemember(setup("0x0"), here, false, true), false);
+        compare(MonitorChange.canRemember([], [], false, false), false);
+    }
+
+    function test_hyprlandTakingATrialLeavesItCounting() {
+        const answer = MonitorChange.afterAnswer(started(savedText).state, "ok\n");
+        compare(answer.warning, "");
+        compare(answer.step, null);
+    }
+
+    function test_hyprlandTakingARevertPutsTheFileBack() {
+        const back = MonitorChange.reverted(started(savedText).state);
+        const answer = MonitorChange.afterAnswer(back.state, "ok");
+        compare(answer.warning, "");
+        compare(answer.step.text, savedText);
+        compare(answer.step.apply, false);
+    }
+
+    // A rule that failed can leave some monitors changed, so the restored file is applied too.
+    function test_aFailedTrialPutsTheFileBackAndAppliesIt() {
+        const answer = MonitorChange.afterAnswer(started(savedText).state, "no such rule");
+        verify(answer.warning.indexOf("no such rule") !== -1);
+        compare(answer.step.text, savedText);
+        compare(answer.step.apply, true);
+        compare(MonitorChange.counting(answer.step.state), false);
+    }
+
+    function test_aFailedRevertPutsTheFileBackAndAppliesIt() {
+        const back = MonitorChange.reverted(started(savedText).state);
+        const answer = MonitorChange.afterAnswer(back.state, "");
+        compare(answer.step.text, savedText);
+        compare(answer.step.apply, true);
+    }
+
+    function test_aFailedTrialWithNoFileBeforeRemovesItAndApplies() {
+        const answer = MonitorChange.afterAnswer(started(null).state, "no");
+        compare(answer.step.remove, true);
+        compare(answer.step.apply, true);
+    }
+
+    // That second apply failing has nowhere left to go.
+    function test_failingAgainOnlyWarns() {
+        const answer = MonitorChange.afterAnswer(MonitorChange.idle, "no");
+        verify(answer.warning !== "");
+        compare(answer.step, null);
+    }
+
+    // Hyprland went back by itself: its deadline passed, or the config was reloaded.
+    function test_aCountdownIsOvertakenOnceTheFileHasNoUnkept() {
+        const step = started(savedText);
+        compare(MonitorChange.overtaken(step.state, step.text), false);
+        compare(MonitorChange.overtaken(step.state, savedText), true);
+        compare(MonitorChange.overtaken(step.state, null), true);
+    }
+
+    function test_onlyACountdownCanBeOvertaken() {
+        compare(MonitorChange.overtaken(MonitorChange.idle, savedText), false);
+        const back = MonitorChange.reverted(started(savedText).state);
+        compare(MonitorChange.overtaken(back.state, savedText), false);
+    }
+
+    function test_aFileThatCantBeReadOvertakesNothing() {
+        const state = started(savedText).state;
+        compare(MonitorChange.overtaken(state, undefined), false);
+        compare(MonitorChange.overtaken(state, "{ not json"), false);
     }
 
     function test_forgettingWritesTheFileWithoutAskingHyprland() {

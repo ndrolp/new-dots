@@ -21,6 +21,7 @@ suites=(
     common/.config/quickshell/tests/state-files.sh
     common/.config/quickshell/tests/startup.sh
     common/.config/quickshell/tests/app-menu-bridge.sh
+    common/.config/quickshell/tests/monitor-notices.sh
 )
 
 case "${1:-}" in

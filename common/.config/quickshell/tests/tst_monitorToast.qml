@@ -61,6 +61,27 @@ TestCase {
         compare(MonitorToast.afterReading(MonitorToast.idle, "", false, false).offering, false);
     }
 
+    function test_aFailureIsANoticeUntilDismissed() {
+        const told = MonitorToast.withNotice(MonitorToast.idle, "It failed.");
+        compare(told.notice, "It failed.");
+        compare(MonitorToast.noticeDismissed(told).notice, "");
+    }
+
+    function test_aSecondFailureAddsToTheNotice() {
+        const first = MonitorToast.withNotice(MonitorToast.idle, "It failed.");
+        compare(MonitorToast.withNotice(first, "So did this.").notice, "It failed. So did this.");
+        compare(MonitorToast.withNotice(first, "It failed.").notice, "It failed.");
+    }
+
+    function test_aNoticeStaysThroughReadingsAndTheOfferBesideIt() {
+        const told = MonitorToast.withNotice(MonitorToast.idle, "It failed.");
+        const read = MonitorToast.afterReading(told, "AOC", false, false);
+        compare(read.notice, "It failed.");
+        compare(read.offering, true);
+        compare(MonitorToast.dismissed(read).notice, "It failed.");
+        compare(MonitorToast.noticeDismissed(read).offering, true);
+    }
+
     function test_anUnreadableFileIsToldOnce() {
         const notice = MonitorToast.noticed("unreadable\n", "");
         verify(notice.message.indexOf("automatic") !== -1);

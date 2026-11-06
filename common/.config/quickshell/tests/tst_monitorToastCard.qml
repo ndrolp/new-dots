@@ -27,6 +27,21 @@ Item {
         choices: root.choices
     }
 
+    Panels.MonitorNoticeCard {
+        id: notice
+
+        y: 200
+        appearance: testAppearance
+        message: "Hyprland didn't apply the monitor setup."
+    }
+
+    SignalSpy {
+        id: noticeDismiss
+
+        target: notice
+        signalName: "dismissAsked"
+    }
+
     SignalSpy {
         id: chosen
 
@@ -83,6 +98,16 @@ Item {
             mouseClick(button("Dismiss"));
             compare(dismiss.count, 1);
             compare(chosen.count, 0);
+        }
+
+        function test_aNoticeSaysWhatFailed() {
+            compare(findChild(notice, "card hint").text, "Hyprland didn't apply the monitor setup.");
+        }
+
+        function test_aNoticeCanBeDismissed() {
+            noticeDismiss.clear();
+            mouseClick(findChild(notice, "notice Dismiss"));
+            compare(noticeDismiss.count, 1);
         }
     }
 }

@@ -39,10 +39,24 @@ function changesMonitors(eventName) {
     return /^(monitoradded|monitorremoved|configreloaded)/.test(eventName);
 }
 
-function savedEntryFor(monitor, saved) {
-    return saved.filter(entry => entry.description === monitor.description && entry.port === monitor.name)[0]
-        || saved.filter(entry => entry.description === monitor.description)[0]
-        || {};
+// Each monitor's saved entry, by port: the same pairing as `pair` in setups.lua, which applies it. By
+// description and port, then by description, and an entry goes to one monitor only, so identical
+// monitors that changed ports can't end up showing what Hyprland didn't apply.
+function paired(monitors, saved) {
+    const pairs = {};
+    const taken = [];
+    function take(accepts) {
+        monitors.filter(monitor => pairs[monitor.name] === undefined).forEach(monitor => {
+            const index = saved.findIndex((entry, at) => !taken[at] && accepts(monitor, entry));
+            if (index !== -1) {
+                taken[index] = true;
+                pairs[monitor.name] = saved[index];
+            }
+        });
+    }
+    take((monitor, entry) => entry.description === monitor.description && entry.port === monitor.name);
+    take((monitor, entry) => entry.description === monitor.description);
+    return pairs;
 }
 
 // A mirror names the monitor it copies by description, or by port between identical monitors.
@@ -56,8 +70,8 @@ function mirrorName(monitor, monitors) {
 
 // A monitor that is off says little about itself, so what it would come back with is the saved
 // entry's.
-function entryFrom(monitor, monitors, saved) {
-    const entry = Object.assign({}, savedEntryFor(monitor, saved), {
+function entryFrom(monitor, monitors, savedEntry) {
+    const entry = Object.assign({}, savedEntry, {
         description: monitor.description,
         port: monitor.name,
         disabled: monitor.disabled === true,
@@ -78,12 +92,18 @@ function entryFrom(monitor, monitors, saved) {
 // The setup the monitors are in now, on top of the `saved` entries of their combination.
 function entriesFrom(monitors, saved, lidClosed) {
     const present = presentMonitors(monitors, lidClosed);
-    return present.map(monitor => entryFrom(monitor, present, saved));
+    const pairs = paired(present, saved);
+    return present.map(monitor => entryFrom(monitor, present, pairs[monitor.name]));
 }
 
 function modesOf(monitors, port) {
     const monitor = monitors.filter(candidate => candidate.name === port)[0];
     return monitor !== undefined ? MonitorModes.parsedModes(monitor.availableModes || []) : [];
+}
+
+// A monitor's number: the one Identify flashes on it. 0 for a port that isn't one of them.
+function numberOf(entries, port) {
+    return entries.findIndex(entry => entry.port === port) + 1;
 }
 
 function hasOwnPicture(entry) {
@@ -248,8 +268,16 @@ function combination(entries) {
     return entries.map(entry => entry.description).sort().join("\n");
 }
 
-// The saved file's data. A file that isn't there has no setups; one that can't be read is null, so
-// nothing overwrites it. `text` is null for a file that isn't there.
+// The saved file's text from how loading it went, "loaded", "missing" or anything else: null for a
+// file that isn't there and undefined for one that couldn't be loaded, which isn't the same thing.
+function loadedText(outcome, text) {
+    if (outcome === "loaded")
+        return text;
+    return outcome === "missing" ? null : undefined;
+}
+
+// The saved file's data from `loadedText`. A file that isn't there has no setups; one that can't be
+// read is null, so nothing overwrites it.
 function parsedFile(text) {
     if (text === null)
         return { setups: [] };

@@ -327,11 +327,27 @@ Item {
             compare(item.reverted, 1);
         }
 
+        function test_enterKeeps() {
+            for (const key of [Qt.Key_Return, Qt.Key_Enter]) {
+                const item = card();
+                item.forceActiveFocus();
+                keyClick(key);
+                compare(item.kept, 1);
+                compare(item.reverted, 0);
+            }
+        }
+
+        function test_escapeReverts() {
+            const item = card();
+            item.forceActiveFocus();
+            keyClick(Qt.Key_Escape);
+            compare(item.reverted, 1);
+            compare(item.kept, 0);
+        }
+
         function test_applyingAsksHyprlandToReadTheFile() {
             compare(MonitorChange.applyCommand[0], "hyprctl");
             verify(MonitorChange.applyCommand[2].indexOf("apply_now") !== -1);
-            compare(MonitorChange.answeredOk("ok\n"), true);
-            compare(MonitorChange.answeredOk("[string]:1: attempt to call a nil value"), false);
         }
 
         function test_theEventsThatChangeMonitorsAreKnown() {

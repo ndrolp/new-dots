@@ -8,16 +8,25 @@
 //
 // Hyprland only applies what's in the saved file, so the change has to be in it while it's tried
 // out. The file also holds what to go back to, as `unkept`, written in the same atomic write: if the
-// shell stops during a countdown, it finds that when it starts and reverts, so only Keep ever saves.
+// shell stops during a countdown, Hyprland goes back by itself soon after it should have ended
+// (hypr/modules/monitors/apply.lua), and a shell starting first finds `unkept` and reverts. Either way
+// only Keep ever saves.
 
+// TRIAL_MS in apply.lua is a few seconds more. Keep them in step.
 const countdownSeconds = 15;
 
 // How Hyprland is asked to read the saved file. See hypr/modules/monitors/apply.lua.
 const applyCommand = ["hyprctl", "eval", 'require("modules.monitors.apply").apply_now()'];
 
-// Whether Hyprland took it: anything else hyprctl prints is why not.
-function answeredOk(output) {
-    return output.trim() === "ok";
+// Whether `next` is worth trying out from `current`: not with another step running, and not if it
+// would leave every screen dark or is what's already there.
+function canTry(next, current, busy) {
+    return !busy && next.length > 0 && MonitorSetup.showsSomething(next) && !MonitorSetup.sameEntries(next, current);
+}
+
+// Whether `next` is what the monitors are already in, with nothing else going on.
+function canRemember(next, current, busy, waiting) {
+    return !busy && !waiting && next.length > 0 && MonitorSetup.sameEntries(next, current);
 }
 
 // - before: the saved file's text when the change began, null when there was no file.
@@ -77,9 +86,29 @@ function reverted(state) {
 }
 
 // Revert, second half, once Hyprland has read that: the file goes back to exactly what it was, and
-// a file that wasn't there goes again, so a change nobody kept leaves no trace.
-function restored(state) {
-    return { state: idle, text: state.before, remove: state.before === null, apply: false };
+// a file that wasn't there goes again, so a change nobody kept leaves no trace. `failed` says Hyprland
+// didn't take what it was given, which can leave some monitors changed, so it's asked again.
+function restored(state, failed) {
+    return { state: idle, text: state.before, remove: state.before === null, apply: failed };
+}
+
+// What to do with what hyprctl printed: { warning, step }, the warning to show, "" for none, and the
+// next step, null if there isn't one. Anything but "ok" is why Hyprland didn't apply it. A trial it
+// took just goes on counting down.
+function afterAnswer(state, output) {
+    const ok = output.trim() === "ok";
+    const unfinished = counting(state) || restoring(state);
+    return {
+        warning: ok ? "" : ("Hyprland didn't apply the monitor setup: " + output.trim()).trim(),
+        step: (unfinished && !ok) || restoring(state) ? restored(state, !ok) : null
+    };
+}
+
+// Whether Hyprland has already gone back by itself, past its deadline or on a reload, so there's
+// nothing left to answer: the file no longer has `unkept`. A file that can't be read says nothing.
+function overtaken(state, fileText) {
+    const data = MonitorSetup.parsedFile(fileText);
+    return counting(state) && data !== null && data.unkept === undefined;
 }
 
 // Forget: the combination's setup leaves the file and Hyprland isn't asked, so the monitors stay as
@@ -107,9 +136,4 @@ function interrupted(fileText) {
         return null;
     return { phase: "counting", endsAt: 0, before: data.unkept.before, previous: data.unkept.monitors,
         trying: [] };
-}
-
-function parsedUnkept(fileText) {
-    const data = MonitorSetup.parsedFile(fileText);
-    return data !== null && data.unkept !== undefined ? data.unkept : null;
 }
