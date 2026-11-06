@@ -173,172 +173,184 @@ Variants {
             }
         }
 
+        // One capture per window while open. A window with no frame, which can
+        // happen on a hidden workspace, keeps the application icon.
+        WindowFrames {
+            id: windowFrames
+
+            windows: switcher.visible ? root.windows() : []
+        }
+
         Rectangle {
             id: switcherCard
 
+            readonly property int windowCount: root.windows().length
+            readonly property int cardWidth: 260
+            readonly property int cardSpacing: 8
+            readonly property int padding: 12
+
             anchors.centerIn: parent
-            width: Math.min(parent.width - 64, 680)
-            height: Math.min(parent.height - 96, Math.max(154,
-                82 + windowList.contentHeight + 58))
+            width: Math.min(parent.width - 64, Math.max(cardWidth, windowCount * cardWidth
+                + (windowCount - 1) * cardSpacing) + padding * 2)
+            height: 190 + padding * 2
             radius: root.appearance.radius
             color: Qt.rgba(theme.surface.r, theme.surface.g, theme.surface.b, 0.92)
             border.color: theme.border
             border.width: 1
 
-            Column {
+            ListView {
+                id: windowList
+
                 anchors.fill: parent
-                anchors.margins: 16
-                spacing: 10
+                anchors.margins: switcherCard.padding
+                orientation: ListView.Horizontal
+                clip: true
+                spacing: switcherCard.cardSpacing
+                model: root.windows()
+                currentIndex: root.windows().findIndex(
+                    window => window.address === root.selectedAddress)
+                highlightMoveDuration: root.appearance.motion.brief
+                boundsBehavior: Flickable.StopAtBounds
 
-                Item {
-                    width: parent.width
-                    height: 21
-
-                    Text {
-                        anchors.left: parent.left
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: "WINDOW SWITCHER"
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize + 1
-                        font.bold: true
-                    }
-
-                    Text {
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: root.windows().length + " windows"
-                        color: theme.textMuted
-                        font.pixelSize: root.appearance.textSize - 2
-                    }
+                onCurrentIndexChanged: {
+                    if (currentIndex >= 0)
+                        positionViewAtIndex(currentIndex, ListView.Contain);
                 }
 
-                ListView {
-                    id: windowList
+                delegate: Rectangle {
+                    id: windowCard
 
-                    width: parent.width
-                    height: parent.height - 58
-                    clip: true
-                    spacing: 5
-                    model: root.windows()
-                    boundsBehavior: Flickable.StopAtBounds
+                    required property var modelData
+                    readonly property var toplevel: modelData
+                    readonly property bool selected: root.selectedAddress === toplevel.address
+                    readonly property var frame: windowFrames.frameOf(toplevel)
+                    readonly property string appClass: String(
+                        toplevel.lastIpcObject?.class
+                            || toplevel.lastIpcObject?.initialClass
+                            || "application"
+                    ).toLowerCase()
 
-                    delegate: Rectangle {
-                        id: windowRow
+                    width: switcherCard.cardWidth
+                    height: windowList.height
+                    radius: root.appearance.radius
+                    color: selected ? Qt.rgba(theme.accent.r, theme.accent.g,
+                        theme.accent.b, 0.2) : cardHover.hovered ? theme.surfaceHover
+                            : theme.backgroundSecondary
+                    border.color: selected ? theme.accent : "transparent"
+                    border.width: selected ? 2 : 0
 
-                        required property var modelData
-                        readonly property var toplevel: modelData
-                        readonly property bool selected: root.selectedAddress === toplevel.address
-                        readonly property string appClass: String(
-                            toplevel.lastIpcObject?.class
-                                || toplevel.lastIpcObject?.initialClass
-                                || "application"
-                        ).toLowerCase()
+                    Behavior on color {
+                        ColorAnimation { duration: root.appearance.motion.brief }
+                    }
 
-                        width: windowList.width
-                        height: 52
-                        radius: root.appearance.radius
-                        color: selected ? Qt.rgba(theme.accent.r, theme.accent.g,
-                            theme.accent.b, 0.2) : rowHover.hovered ? theme.surfaceHover
-                                : theme.backgroundSecondary
-                        border.color: selected ? theme.accent : "transparent"
-                        border.width: selected ? 1 : 0
+                    HoverHandler {
+                        id: cardHover
+                    }
 
-                        Behavior on color {
-                            ColorAnimation { duration: root.appearance.motion.brief }
+                    Loader {
+                        id: applicationIcon
+
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.margins: 10
+                        width: 20
+                        height: 20
+                        active: root.iconRefreshStep % 2 === 0
+                        sourceComponent: Component {
+                            Image {
+                                anchors.fill: parent
+                                cache: false
+                                source: IconSource.forName(windowCard.appClass)
+                            }
                         }
+                    }
 
-                        HoverHandler {
-                            id: rowHover
-                        }
+                    Text {
+                        anchors.left: applicationIcon.right
+                        anchors.leftMargin: 8
+                        anchors.right: parent.right
+                        anchors.rightMargin: 10
+                        anchors.verticalCenter: applicationIcon.verticalCenter
+                        text: windowCard.toplevel.title || windowCard.appClass
+                        color: theme.text
+                        elide: Text.ElideRight
+                        font.pixelSize: root.appearance.textSize - 1
+                        font.bold: windowCard.selected
+                    }
+
+                    Item {
+                        id: preview
+
+                        // Fits the frame in the card without stretching it.
+                        readonly property real frameScale: windowCard.frame
+                            && windowCard.frame.sourceSize.width > 0
+                            ? Math.min(width / windowCard.frame.sourceSize.width,
+                                height / windowCard.frame.sourceSize.height) : 1
+
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: applicationIcon.bottom
+                        anchors.bottom: parent.bottom
+                        anchors.margins: 10
 
                         Loader {
-                            id: applicationIcon
-
-                            anchors.left: parent.left
-                            anchors.leftMargin: 12
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 28
-                            height: 28
+                            anchors.centerIn: parent
+                            width: 64
+                            height: 64
+                            // A translucent window would show it through its frame.
+                            visible: !windowCard.frame || !windowCard.frame.hasContent
                             active: root.iconRefreshStep % 2 === 0
                             sourceComponent: Component {
                                 Image {
                                     anchors.fill: parent
                                     cache: false
-                                    source: IconSource.forName(windowRow.appClass)
+                                    source: IconSource.forName(windowCard.appClass)
                                 }
                             }
                         }
 
+                        WindowThumbnail {
+                            anchors.centerIn: parent
+                            width: frame ? frame.sourceSize.width * preview.frameScale : 0
+                            height: frame ? frame.sourceSize.height * preview.frameScale : 0
+                            frame: windowCard.frame
+                        }
+
                         Rectangle {
-                            anchors.fill: applicationIcon
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
+                            width: workspaceLabel.implicitWidth + 12
+                            height: workspaceLabel.implicitHeight + 6
                             radius: root.appearance.radius
-                            visible: applicationIcon.item
-                                && applicationIcon.item.status !== Image.Ready
                             color: theme.surface
 
                             Text {
+                                id: workspaceLabel
+
                                 anchors.centerIn: parent
-                                text: "󰣆"
-                                color: theme.textMuted
-                                font.pixelSize: 15
-                            }
-                        }
-
-                        Column {
-                            anchors.left: applicationIcon.right
-                            anchors.leftMargin: 10
-                            anchors.right: workspaceLabel.left
-                            anchors.rightMargin: 10
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: 2
-
-                            Text {
-                                width: parent.width
-                                text: windowRow.toplevel.title || windowRow.appClass
-                                color: theme.text
-                                elide: Text.ElideRight
-                                font.pixelSize: root.appearance.textSize
-                                font.bold: windowRow.selected
-                            }
-
-                            Text {
-                                width: parent.width
-                                text: windowRow.appClass
-                                color: theme.textMuted
-                                elide: Text.ElideRight
+                                text: "󰍹 " + windowCard.toplevel.workspace.id
+                                color: windowCard.selected ? theme.accent : theme.textMuted
                                 font.pixelSize: root.appearance.textSize - 3
-                            }
-                        }
-
-                        Text {
-                            id: workspaceLabel
-
-                            anchors.right: parent.right
-                            anchors.rightMargin: 12
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: "󰍹 " + windowRow.toplevel.workspace.id
-                            color: windowRow.selected ? theme.accent : theme.textMuted
-                            font.pixelSize: root.appearance.textSize - 2
-                            font.bold: true
-                        }
-
-                        TapHandler {
-                            onTapped: {
-                                root.selectedAddress = windowRow.toplevel.address;
-                                root.activateSelected(true);
+                                font.bold: true
                             }
                         }
                     }
-                }
 
-                Text {
-                    width: parent.width
-                    visible: root.windows().length === 0
-                    text: "No switchable windows"
-                    color: theme.textMuted
-                    horizontalAlignment: Text.AlignHCenter
-                    font.pixelSize: root.appearance.textSize
+                    TapHandler {
+                        onTapped: {
+                            root.selectedAddress = windowCard.toplevel.address;
+                            root.activateSelected(true);
+                        }
+                    }
                 }
+            }
+
+            Text {
+                anchors.centerIn: parent
+                visible: switcherCard.windowCount === 0
+                text: "No switchable windows"
+                color: theme.textMuted
+                font.pixelSize: root.appearance.textSize
             }
         }
     }
