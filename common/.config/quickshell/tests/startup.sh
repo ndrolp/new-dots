@@ -26,8 +26,41 @@ start_quickshell() {
     [[ -z "${ACTIVE_COLORSCHEME:-}" ]] || ln -s "$ACTIVE_COLORSCHEME" "$HOME_DIR/.dotfiles/colorschemes/active"
     [[ -z "${DEFAULT_COLORSCHEME:-}" ]] || echo "$DEFAULT_COLORSCHEME" >"$HOME_DIR/.dotfiles/colorschemes/default.txt"
     cp "$QS_DIR/start.sh" "$HOME_DIR/.dotfiles/common/.config/quickshell/"
-    OUT="$(HOME="$HOME_DIR" PATH="$HOME_DIR/bin:$PATH" sh "$HOME_DIR/.config/quickshell/start.sh" 2>&1)" || true
+    run_start_sh
 }
+
+# run_start_sh: runs start.sh with a runtime directory of its own, $HOME_DIR/run. Sets OUT.
+run_start_sh() {
+    mkdir -p "$HOME_DIR/run"
+    OUT="$(HOME="$HOME_DIR" PATH="$HOME_DIR/bin:$PATH" XDG_RUNTIME_DIR="$HOME_DIR/run" XDG_STATE_HOME= \
+        HYPRLAND_INSTANCE_SIGNATURE=sig sh "$HOME_DIR/.config/quickshell/start.sh" 2>&1)" || true
+}
+
+# shell_dies: a scratch HOME whose shell, the first time it runs, exits 139 with the session locked, and
+# then exits cleanly. Records each program in $CALLS.
+shell_dies() {
+    changer_home
+    cp "$QS_DIR/start.sh" "$HOME_DIR/.dotfiles/common/.config/quickshell/"
+    cat >"$HOME_DIR/bin/quickshell" <<'SHIM'
+#!/bin/sh
+echo quickshell >>"$HOME/program-order"
+[ -e "$HOME/died" ] && exit 0
+touch "$HOME/died"
+echo locked >"$XDG_RUNTIME_DIR/quickshell-locked"
+exit 139
+SHIM
+    cat >"$HOME_DIR/bin/hyprlock" <<'SHIM'
+#!/bin/sh
+echo hyprlock >>"$HOME/program-order"
+SHIM
+    chmod +x "$HOME_DIR/bin/quickshell" "$HOME_DIR/bin/hyprlock"
+    mkdir -p "$HOME_DIR/run/hypr/sig" "$HOME_DIR/run/quickshell/by-id/abc"
+    echo compositor >"$HOME_DIR/run/hypr/sig/hyprland.log"
+    echo shell >"$HOME_DIR/run/quickshell/by-id/abc/log.log"
+    run_start_sh
+}
+
+failures() { echo "$HOME_DIR/.local/state/quickshell/lock-failures"; }
 
 colorschemes() { echo "$HOME_DIR/.dotfiles/colorschemes"; }
 
@@ -64,6 +97,36 @@ test_starting_drives_nothing_but_quickshell_and_gsettings() {
 test_quickshell_still_starts_when_the_links_cannot_be_created() {
     DEFAULT_COLORSCHEME=nosuch start_quickshell
     grep -q "^quickshell --path $HOME_DIR/.config/quickshell" "$CALLS" || fail "Quickshell was not started"
+}
+
+test_a_shell_that_exits_unlocked_is_left_alone() {
+    shell_dies
+    rm -rf "$HOME_DIR/program-order" "$HOME_DIR/run/quickshell-locked" "$(failures)"
+    touch "$HOME_DIR/died" "$HOME_DIR/run/quickshell-locked"
+    run_start_sh
+    [[ "$(tr '\n' ' ' <"$HOME_DIR/program-order")" == "quickshell " ]] \
+        || fail "ran: $(cat "$HOME_DIR/program-order")"
+    [[ ! -e "$(failures)" ]] || fail "saved a failure that didn't happen"
+}
+
+test_a_shell_that_dies_locked_gets_hyprlock_then_starts_again() {
+    shell_dies
+    [[ "$(tr '\n' ' ' <"$HOME_DIR/program-order")" == "quickshell hyprlock quickshell " ]] \
+        || fail "ran: $(cat "$HOME_DIR/program-order")"
+}
+
+test_the_shell_started_again_doesnt_count_as_locked() {
+    shell_dies
+    [[ ! -s "$HOME_DIR/run/quickshell-locked" ]] || fail "still marked locked"
+}
+
+test_a_shell_that_dies_locked_leaves_its_exit_status_and_logs() {
+    shell_dies
+    local saved
+    saved="$(ls -d "$(failures)"/* | head -1)"
+    grep -qx 139 "$saved/exit-status" || fail "no exit status in: $(ls -R "$(failures)")"
+    grep -qx compositor "$saved/hyprland.log" || fail "no compositor log"
+    grep -qx shell "$saved/log.log" || fail "no shell log"
 }
 
 for t in $(declare -F | awk '{print $3}' | grep "^test_.*${1:-}"); do
