@@ -131,7 +131,7 @@ TestCase {
         compare(rects[0].height, 1125);
     }
 
-    // scripts/import-monitor-setups keeps what the old config said, which isn't always a number.
+    // Setups imported from the old config keep what it said, which isn't always a number.
     function imported(fields) {
         return Object.assign({ description: "Imported", port: "DP-3", mode: "1000x800@60.00", position: "auto-left",
             scale: 1, transform: 0, disabled: false, mirror: "" }, fields);

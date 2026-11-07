@@ -10,7 +10,7 @@ SCRATCH="$(mktemp -d)"
 trap 'rm -rf "$SCRATCH"' EXIT
 
 for saved in monitor-setups.json monitor-setups.json.bad monitor-setups.json.bad.1 monitor-setups.json.bad.told \
-    monitor-setups.json.bad.told.1 monitor-setups.json.fallback modules/monitors/monitors.lua; do
+    monitor-setups.json.bad.told.1 monitor-setups.json.fallback; do
     if ! git -C "$HYPR" check-ignore -q "$saved"; then
         echo "FAIL  $saved is not gitignored"
         exit 1
