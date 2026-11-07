@@ -146,11 +146,14 @@ which monitor's bar they show (`components/FocusedWindow.js`).
 Monitor setups are covered too: where monitors snap, edge to edge with no gaps
 (`services/MonitorArrangement.js`), resolution, refresh and scale choices
 (`services/MonitorModes.js`), what a setup holds, how it changes, values an
-imported setup leaves that aren't numbers, and the saved file
-(`services/MonitorEntries.js`), the *Keep* / *Revert* countdown
-(`services/MonitorChange.js`), and the Displays section and its card
+imported setup leaves that aren't numbers, and the saved file, including one that
+couldn't be loaded (`services/MonitorEntries.js`), the *Keep* / *Revert* countdown,
+what a change needs, what follows each answer from Hyprland and Hyprland going
+back by itself (`services/MonitorChange.js`), and the Displays section and its
+card with its keys
 (`components/panels/MonitorArrangeSettings.qml`, `MonitorArrangeCanvas.qml`,
-`MonitorControls.qml`, `MonitorSavedSetups.qml`, `MonitorChangeCard.qml`; `services/MonitorSetups.qml` and
+`MonitorControls.qml`, `MonitorSavedSetups.qml`, `MonitorChangeCard.qml`; `services/MonitorSetups.qml`,
+its 5-second limit on `hyprctl`, and
 `modules/MonitorChange.qml` need Quickshell and aren't tested here), and the quick
 switch: its choices and the setup each builds, what *Extend* brings back and how a
 kept choice is saved (`services/QuickSwitch.js`), and its keys
@@ -158,9 +161,11 @@ kept choice is saved (`services/QuickSwitch.js`), and its keys
 `modules/QuickSwitch.qml` need Quickshell and aren't tested here), and the
 toasts about monitors: when an unknown combination is offered, waiting for
 unlock, and telling a fallback or an unreadable file once
-(`services/MonitorToast.js`), and the toast's card
-(`components/panels/MonitorToastCard.qml`; `modules/MonitorToast.qml` needs
-Quickshell and isn't tested here).
+(`services/MonitorToast.js`), and the cards
+(`components/panels/MonitorToastCard.qml`, `MonitorNoticeCard.qml`;
+`modules/MonitorToast.qml` needs Quickshell and isn't tested here).
+`monitor-notices.sh` runs `services/monitor-notices.sh` on a scratch folder, to
+show that a backup is told once and never replaces another.
 They run with QtTest outside of `qs`:
 
 ```sh

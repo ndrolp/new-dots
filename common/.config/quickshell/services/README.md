@@ -57,14 +57,24 @@ It's refused during a countdown, when Revert would put the file back, and
 A change has to be in the file for Hyprland to apply it, so it's in there before
 it's kept, with what to go back to under `unkept` in the same write. Revert
 applies the previous arrangement through the file, then puts the file back
-exactly as it was, or removes it if there was none; if the shell stops during a
-countdown it finds `unkept` when it starts and reverts. `apply` refuses a setup
-that leaves every screen dark. The steps are `MonitorChange.js`, snapping is
+exactly as it was, or removes it if there was none. `apply` refuses a setup
+that leaves every screen dark, and any change when the saved file couldn't be
+loaded: that's not the same as no file, and a write on top of it would lose every
+saved setup. The steps are `MonitorChange.js`, snapping is
 `MonitorArrangement.js` and mode and scale choices are `MonitorModes.js`, whose
 `nearestScale` is the search Hyprland does, so a preset it won't take snaps
 before it's written. All are tested without Quickshell. With a closed lid and an
 external monitor the laptop screen is no part of a setup, by the same rule as
 `split_by_lid` in `hypr/modules/monitors/setups.lua`: the two must stay in step.
+
+Hyprland doesn't need the shell to get out of a change. If `apply_now` finds
+`unkept`, Hyprland starts its own timer, a few seconds longer than the countdown,
+and anything else that finds `unkept`, like a config load, goes back to what it
+says and restores the file. A shell that starts first finds the same `unkept`
+and reverts; either order ends the same. A countdown that finds `unkept` gone
+ends there. `hyprctl` gets 5 seconds to answer, and *Revert* doesn't wait for it.
+If Hyprland doesn't take something, the restored file is applied again, as a rule
+that failed can leave some monitors changed.
 
 `QuickSwitch.js` holds the quick switch's choices and the entries each one builds,
 for the panel on SUPER+P and anything else that offers them: show
@@ -79,13 +89,16 @@ like *Extend* on monitors already extended, is saved straight away with no count
 
 `MonitorToast.js` decides the toasts. After each reading of the monitors, an
 unknown combination sets `offeringChoices`, once for each time it appears; only
-choosing or changing something saves it. Failures are toasts through the
-notifications, from what Hyprland leaves beside the saved file: `.bad` for a file
-it couldn't read, which the shell moves to `.bad.told` as it reads it so that it's
-told once, and `.fallback`, the monitors whose saved mode is gone, one per line,
-there for as long as that lasts. What's been told survives a reload of the shell;
-a shell that restarts, rather than reloads, tells a fallback again. Nothing
-is read or told while `locked`, so what happened meanwhile comes up after unlock.
+choosing or changing something saves it. Failures set `notice`, which
+`modules/MonitorToast.qml` shows beside that toast on the focused monitor. Some of
+them come from what Hyprland leaves beside the saved file: `.bad` for a file it
+couldn't read, with a number after it if that name is taken, which
+`monitor-notices.sh` moves to a `.bad.told` name of its own as it reads it so that
+it's told once and no backup replaces another, and `.fallback`, the monitors whose
+saved mode is gone, one per line, there for as long as that lasts. What's been told
+survives a reload of the shell; a shell that restarts, rather than reloads, tells a
+fallback again. Nothing is read or told while `locked`, so what happened meanwhile
+comes up after unlock.
 
 ## Keep-awake
 

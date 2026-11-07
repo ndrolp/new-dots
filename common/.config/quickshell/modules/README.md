@@ -21,11 +21,11 @@ adding or editing one file here.
   `Settings`, `ThemeSelector`, `UnifiedSearch`, `WallpaperSelector`,
   `WindowSwitcher` and `WorkspaceOverview`.
 - `MonitorChange.qml`: not a `Feature`, it follows `services/MonitorSetups.qml`:
-  the *Keep* / *Revert* card on every screen that still works, and each monitor's
-  number for *Identify*.
-- `MonitorToast.qml`: not a `Feature` either: the toast for an unknown
-  combination on the focused monitor, with the quick switch's choices and
-  *Arrange…*. It goes by itself after 20 seconds, saving nothing.
+  the *Keep* / *Revert* card on every screen that still works, which takes `Enter`
+  and `Esc`, and each monitor's number for *Identify*.
+- `MonitorToast.qml`: not a `Feature` either: on the focused monitor, the toast for
+  an unknown combination, with the quick switch's choices and *Arrange…*, and any
+  failure with the monitors. Each goes by itself after 20 seconds, saving nothing.
 - `Bar.qml`: a bar on every monitor, and which popup is open
   (`OpenPopup.js`, tested). Its settings button opens the settings panel on
   that bar, and a bar element opens its popup (`barElementOpening` tells

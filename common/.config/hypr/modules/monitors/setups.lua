@@ -8,7 +8,8 @@ local M = {}
 
 -- hl.monitor starts from the last rule for that output, so every rule writes every field and nothing
 -- of the previous setup carries over. These are the values Hyprland gives a rule that sets none.
--- icc is the one gap: Hyprland rejects an empty icc, so a rule can't clear one from an earlier setup.
+-- icc is the one gap: Hyprland rejects an empty icc, so a rule can't clear one from an earlier setup
+-- (docs/adr/0002-hyprland-owns-monitor-setups.md).
 local UNSET = {
 	disabled = false,
 	transform = 0,

@@ -137,6 +137,25 @@ _Avoid_: Perfil (a secas), monitor profile, display profile, layout
 El panel pequeño que abre SUPER+P para elegir entre *Extend*, *Mirror* y *<monitor> only*. Lo que se elige se recuerda como la monitor setup de esa combinación. No es un popup ni el settings panel.
 _Avoid_: Display menu, projector menu
 
+**Displays** (pantallas):
+La section del settings panel donde se colocan los monitores arrastrándolos, se elige la resolución, la frecuencia, la escala y la rotación de cada uno, se ven sus ajustes de barra y workspaces, y se listan las monitor setups guardadas. Cualquier cambio pasa por *Keep or Revert*.
+_Avoid_: Monitors, pantalla (a secas)
+
+**Identify** (identificar):
+El botón de *Displays* que muestra un momento en cada monitor su número, el mismo que tiene en la lista.
+
+**Automatic setup** (configuración automática):
+Lo que usan los monitores cuando no hay una monitor setup que aplicar: todos encendidos, extendidos hacia la derecha, a su resolución más alta y su frecuencia más alta. También la usa un solo monitor si su modo guardado ya no existe, y toda la combinación si su monitor setup dejaría todas las pantallas apagadas o no se puede leer.
+_Avoid_: Modo por defecto, fallback
+
+**Keep or Revert** (mantener o revertir):
+La cuenta atrás de 15 segundos tras cualquier cambio de monitores, con una tarjeta en todos los monitores encendidos. *Keep* (`Enter`) lo guarda y *Revert* (`Esc`) lo deshace; sin respuesta se deshace solo. Hyprland también lo deshace por su cuenta poco después si la shell ya no está, así que un cambio de prueba nunca cuenta como guardado.
+_Avoid_: Diálogo de confirmación, popup
+
+**Monitor toast** (aviso de monitores):
+La tarjeta que aparece en el monitor enfocado y se va sola a los 20 segundos: al conectar una combinación desconocida, con las opciones del *quick switch* y *Arrange…*, o cuando algo falla con los monitores o sus configuraciones guardadas. No es una notification card y no queda en el historial.
+_Avoid_: Notificación, popup
+
 **Workspace overview** (vista de workspaces):
 La vista a pantalla completa que se abre con SUPER+TAB sobre el monitor enfocado, atenuando el escritorio, y muestra los workspaces de todos los monitores, agrupados por monitor y sin repetir ninguno, cada uno como una miniatura con sus ventanas en su sitio. Arrastrar una ventana a otro workspace la mueve allí sin seguirla y la vista sigue abierta; soltarla en la casilla vacía tras el último workspace de un monitor crea uno nuevo. Pulsar una ventana la enfoca y pulsar un workspace cambia a él, y las dos cosas cierran la vista. No es un popup. No es el *window switcher*.
 _Avoid_: Expose, overview (a secas), desktop overview, escritorio (para un workspace), app (para una ventana)
