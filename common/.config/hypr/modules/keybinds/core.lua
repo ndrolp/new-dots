@@ -61,6 +61,11 @@ hl.bind(
 	{ description = "Reload Hyprland and shell" }
 )
 hl.bind(
+	win .. " + SHIFT + r",
+	hl.dsp.exec_cmd("~/.config/quickshell/restart.sh"),
+	{ description = "Restart the shell" }
+)
+hl.bind(
 	mainMod .. " + r",
 	hl.dsp.exec_cmd(qs .. "command-launcher toggle"),
 	{ description = "Toggle command launcher" }
