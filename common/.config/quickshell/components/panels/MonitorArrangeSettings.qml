@@ -13,21 +13,12 @@ Column {
     // Config.Monitors: this monitor's workspace and bar settings.
     property var monitors
     // Services.MonitorSetups.
-    property var setups
+    property var monitorSetups
     property string selectedPort: ""
 
-    readonly property var entries: setups ? setups.entries : []
+    readonly property var entries: monitorSetups ? monitorSetups.entries : []
     readonly property var selected: entries.filter(entry => entry.port === selectedPort)[0] || entries[0] || null
-    readonly property var selectedModes: selected !== null ? setups.modesOf(selected.port) : []
-
-    // A monitor's number: the one Identify flashes on it.
-    function numberOf(entry) {
-        return entries.findIndex(candidate => candidate.port === entry.port) + 1;
-    }
-
-    function change(next) {
-        root.setups.apply(next);
-    }
+    readonly property var selectedModes: selected !== null ? monitorSetups.modesOf(selected.port) : []
 
     width: parent ? parent.width : 0
     spacing: 16
@@ -42,7 +33,7 @@ Column {
             anchors.rightMargin: 12
             appearance: root.appearance
             options: root.entries.map(entry => ({
-                label: root.numberOf(entry) + " " + entry.description, value: entry.port
+                label: MonitorSetup.numberOf(root.entries, entry.port) + " " + entry.description, value: entry.port
             }))
             value: root.selected !== null ? root.selected.port : ""
             onChosen: port => root.selectedPort = port
@@ -54,7 +45,7 @@ Column {
             anchors.right: parent.right
             appearance: root.appearance
             label: "Identify"
-            onActivated: root.setups.identify()
+            onActivated: root.monitorSetups.identify()
         }
     }
 
@@ -64,10 +55,10 @@ Column {
         selectedId: root.selected !== null ? root.selected.port : ""
         monitors: MonitorSetup.rectangles(root.entries).map(rect => {
             const entry = root.entries.filter(candidate => candidate.port === rect.id)[0];
-            return Object.assign({ number: root.numberOf(entry), label: entry.description }, rect);
+            return Object.assign({ number: MonitorSetup.numberOf(root.entries, entry.port), label: entry.description }, rect);
         })
         onSelected: id => root.selectedPort = id
-        onDropped: (id, x, y) => root.change(MonitorSetup.moved(root.entries, id, x, y))
+        onDropped: (id, x, y) => root.monitorSetups.apply(MonitorSetup.moved(root.entries, id, x, y))
     }
 
     Panels.MonitorControls {
@@ -79,15 +70,15 @@ Column {
         canTurnOff: root.selected !== null && MonitorSetup.canTurnOff(root.entries, root.selected.port)
         onOnOffAsked: {
             const port = root.selected.port;
-            root.change(root.selected.disabled
+            root.monitorSetups.apply(root.selected.disabled
                 ? MonitorSetup.turnedOn(root.entries, port, root.selectedModes)
                 : MonitorSetup.turnedOff(root.entries, port));
         }
-        onResolutionChosen: (width, height) => root.change(MonitorSetup.withResolution(root.entries,
+        onResolutionChosen: (width, height) => root.monitorSetups.apply(MonitorSetup.withResolution(root.entries,
             root.selected.port, root.selectedModes, width, height))
-        onRefreshChosen: refresh => root.change(MonitorSetup.withRefresh(root.entries, root.selected.port, refresh))
-        onScaleChosen: scale => root.change(MonitorSetup.withScale(root.entries, root.selected.port, scale))
-        onRotationChosen: transform => root.change(MonitorSetup.withRotation(root.entries, root.selected.port,
+        onRefreshChosen: refresh => root.monitorSetups.apply(MonitorSetup.withRefresh(root.entries, root.selected.port, refresh))
+        onScaleChosen: scale => root.monitorSetups.apply(MonitorSetup.withScale(root.entries, root.selected.port, scale))
+        onRotationChosen: transform => root.monitorSetups.apply(MonitorSetup.withRotation(root.entries, root.selected.port,
             transform))
     }
 
@@ -102,8 +93,8 @@ Column {
     Panels.MonitorSavedSetups {
         width: parent.width
         appearance: root.appearance
-        setups: root.setups ? root.setups.savedSetups : []
-        canForget: root.setups ? !root.setups.counting : false
-        onForgetAsked: combination => root.setups.forget(combination)
+        setups: root.monitorSetups ? root.monitorSetups.savedSetups : []
+        canForget: root.monitorSetups ? !root.monitorSetups.counting : false
+        onForgetAsked: combination => root.monitorSetups.forget(combination)
     }
 }

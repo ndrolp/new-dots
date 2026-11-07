@@ -91,7 +91,7 @@ Rectangle {
         } else if (currentSection === "Monitors") {
             source = "MonitorArrangeSettings.qml";
             properties.monitors = root.monitors;
-            properties.setups = root.monitorSetups;
+            properties.monitorSetups = root.monitorSetups;
         } else if (currentSection === "Labels") {
             source = "WorkspaceLabelsSettings.qml";
         } else if (currentSection === "Bookmarks") {

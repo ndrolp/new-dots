@@ -24,14 +24,10 @@ Column {
     // The last scale asked for on this monitor, to tell if what applied is a different one.
     property real askedScale: 0
     readonly property bool scaleSnapped: on && askedScale !== 0
-        && scaleLabel(askedScale) !== scaleLabel(entry.scale)
+        && trimmed(askedScale) !== trimmed(entry.scale)
 
     function trimmed(value) {
         return String(Math.round(value * 100) / 100);
-    }
-
-    function scaleLabel(scale) {
-        return trimmed(scale);
     }
 
     onEntryChanged: {
@@ -99,7 +95,7 @@ Column {
             width: parent.width
             appearance: root.appearance
             options: root.on ? MonitorModes.scaleChoices(root.entry.scale).map(scale => ({
-                label: root.scaleLabel(scale), value: scale
+                label: root.trimmed(scale), value: scale
             })) : []
             value: root.on ? root.entry.scale : 0
             onChosen: chosen => {
@@ -112,8 +108,8 @@ Column {
             width: parent.width
             visible: root.scaleSnapped
             appearance: root.appearance
-            text: root.scaleSnapped ? root.scaleLabel(root.askedScale) + " isn't available at this resolution, so "
-                + root.scaleLabel(root.entry.scale) + " was applied." : ""
+            text: root.scaleSnapped ? root.trimmed(root.askedScale) + " isn't available at this resolution, so "
+                + root.trimmed(root.entry.scale) + " was applied." : ""
         }
     }
 

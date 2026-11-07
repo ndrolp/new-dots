@@ -8,14 +8,15 @@
 // of a setup, in the saved format: { description, port, mode, position, scale, transform, disabled,
 // mirror } and whatever else the file holds for it, which is kept and written back.
 
-function internal(monitor) {
-    return /^(eDP|LVDS|DSI)-/.test(monitor.name);
+// Also in setups.lua and scripts/import-monitor-setups, which can't share code with this.
+function isLaptopPort(port) {
+    return /^(eDP|LVDS|DSI)-/.test(port);
 }
 
 // The monitors that count: the same rule as split_by_lid in setups.lua. With a closed lid and an
 // external monitor the laptop screen is no part of the combination, so it's no part of a setup.
 function presentMonitors(monitors, lidClosed) {
-    const present = monitors.filter(monitor => !(lidClosed && internal(monitor)));
+    const present = monitors.filter(monitor => !(lidClosed && isLaptopPort(monitor.name)));
     return present.length > 0 ? present : monitors;
 }
 
@@ -59,13 +60,17 @@ function paired(monitors, saved) {
     return pairs;
 }
 
+// Whether another of these monitors or entries has the same description, so only ports tell them apart.
+function hasTwin(list, one) {
+    return list.filter(other => other.description === one.description).length > 1;
+}
+
 // A mirror names the monitor it copies by description, or by port between identical monitors.
 function mirrorName(monitor, monitors) {
     const copied = monitors.filter(other => String(other.id) === String(monitor.mirrorOf))[0];
     if (copied === undefined)
         return "";
-    const twins = monitors.filter(other => other.description === copied.description);
-    return twins.length > 1 ? copied.name : copied.description;
+    return hasTwin(monitors, copied) ? copied.name : copied.description;
 }
 
 // A monitor that is off says little about itself, so what it would come back with is the saved
@@ -80,7 +85,7 @@ function entryFrom(monitor, monitors, savedEntry) {
     if (entry.disabled)
         return entry;
 
-    entry.mode = MonitorModes.modeText(monitor.width, monitor.height, monitor.refreshRate);
+    entry.mode = MonitorModes.modeText({ width: monitor.width, height: monitor.height, refresh: monitor.refreshRate });
     entry.position = monitor.x + "x" + monitor.y;
     entry.scale = monitor.scale;
     entry.transform = monitor.transform;
@@ -195,14 +200,14 @@ function withResolution(entries, port, modes, width, height) {
     const current = MonitorModes.parsedMode(entry.mode);
     const mode = MonitorModes.afterResolution(modes, width, height, current !== null ? current.refresh : 0);
     return rearranged(withEntry(entries, port, {
-        mode: MonitorModes.modeText(mode.width, mode.height, mode.refresh),
+        mode: MonitorModes.modeText(mode),
         scale: cleanScale(width, height, scaleOf(entry))
     }), port);
 }
 
 function withRefresh(entries, port, refresh) {
     const mode = MonitorModes.parsedMode(find(entries, port).mode);
-    return withEntry(entries, port, { mode: MonitorModes.modeText(mode.width, mode.height, refresh) });
+    return withEntry(entries, port, { mode: MonitorModes.modeText(Object.assign(mode, { refresh: refresh })) });
 }
 
 // `scale` as Hyprland will take it; the entry holds the scale that applies, not the one asked for.
@@ -254,12 +259,8 @@ function turnedOff(entries, port) {
 // Back on past the others, with the mode it had, or the highest if it never had one.
 function turnedOn(entries, port, modes) {
     const entry = find(entries, port);
-    const highest = MonitorModes.highest(modes);
-    const mode = MonitorModes.parsedMode(entry.mode) !== null || highest === null
-        ? entry.mode || "preferred"
-        : MonitorModes.modeText(highest.width, highest.height, highest.refresh);
-    const list = withEntry(entries, port, { disabled: false, mode: mode, scale: scaleOf(entry),
-        transform: entry.transform || 0 });
+    const list = withEntry(entries, port, { disabled: false, mode: MonitorModes.modeOrHighest(entry.mode, modes),
+        scale: scaleOf(entry), transform: entry.transform || 0 });
     return closedUp(atTheEnd(list, port));
 }
 

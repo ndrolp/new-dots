@@ -42,7 +42,7 @@ Column {
     Panels.PopupHeader {
         appearance: root.appearance
         icon: "󰍹"
-        title: "Displays"
+        title: "Quick switch"
         subtitle: "P to move · Enter to apply"
     }
 

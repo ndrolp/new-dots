@@ -7,8 +7,7 @@
 
 // A monitor's "only" choice. Identical monitors share a description, so their ports tell them apart.
 function onlyLabel(entry, entries) {
-    const twins = entries.filter(other => other.description === entry.description);
-    return twins.length > 1
+    return MonitorSetup.hasTwin(entries, entry)
         ? entry.description + " (" + entry.port + ") only"
         : entry.description + " only";
 }
@@ -35,7 +34,7 @@ function next(index, count) {
 function turnedBackOn(entry, modes) {
     const last = entry.mirror ? entry.arrangement || {} : entry;
     const on = Object.assign({}, entry, {
-        mode: last.mode,
+        mode: MonitorModes.modeOrHighest(last.mode, modes),
         position: last.position,
         scale: MonitorSetup.scaleOf(last),
         transform: entry.transform || 0,
@@ -43,10 +42,6 @@ function turnedBackOn(entry, modes) {
         mirror: ""
     });
     delete on.arrangement;
-    const highest = MonitorModes.highest(modes);
-    if (MonitorModes.parsedMode(on.mode) === null)
-        on.mode = highest !== null ? MonitorModes.modeText(highest.width, highest.height, highest.refresh)
-            : on.mode || "preferred";
     return on;
 }
 
@@ -76,8 +71,7 @@ function mirrored(entries, focusedPort) {
         ? focused : entries.filter(MonitorSetup.hasOwnPicture)[0];
     if (source === undefined)
         return entries;
-    const twins = entries.filter(entry => entry.description === source.description);
-    const name = twins.length > 1 ? source.port : source.description;
+    const name = MonitorSetup.hasTwin(entries, source) ? source.port : source.description;
     return entries.map(entry => entry.port === source.port ? entry : copying(entry, name));
 }
 

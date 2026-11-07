@@ -217,15 +217,19 @@ function M.going_back(unkept)
 	return saved
 end
 
+-- Laptop ports are listed rather than external ones, so that a port nobody thought of can't lose its
+-- picture. Also in the shell's MonitorEntries.js and scripts/import-monitor-setups.
+local function is_laptop_port(port)
+	return port:match("^eDP%-") or port:match("^LVDS%-") or port:match("^DSI%-")
+end
+
 -- With a closed lid and an external monitor, the laptop screen isn't part of the combination. With no
--- external monitor the lid means nothing here: what happens then is logind's. Internal ports are
--- listed rather than external ones, so that a port nobody thought of can't lose its picture.
+-- external monitor the lid means nothing here: what happens then is logind's.
 local function split_by_lid(connected, lid_closed)
 	local present, closed = {}, {}
 	for i = 1, #connected do
 		local monitor = connected[i]
-		local internal = monitor.name:match("^eDP%-") or monitor.name:match("^LVDS%-") or monitor.name:match("^DSI%-")
-		local list = (lid_closed and internal) and closed or present
+		local list = (lid_closed and is_laptop_port(monitor.name)) and closed or present
 		list[#list + 1] = monitor
 	end
 	if #present == 0 then

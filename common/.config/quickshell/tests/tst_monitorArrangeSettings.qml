@@ -136,7 +136,7 @@ Item {
             const item = createTemporaryObject(sectionComponent, scene, {
                 appearance: fakeAppearance,
                 monitors: fakeMonitors,
-                setups: setups
+                monitorSetups: setups
             });
             waitForRendering(item);
             return item;
@@ -160,16 +160,16 @@ Item {
             const item = section();
             const aoc = monitorOnCanvas(item, "DP-2");
             mouseDrag(aoc, aoc.width / 2, aoc.height / 2, -aoc.x, 150);
-            tryCompare(item.setups.applied, "length", 1);
-            const moved = item.setups.applied[0].filter(entry => entry.port === "DP-2")[0];
-            const rects = MonitorSetup.rectangles(item.setups.applied[0]);
+            tryCompare(item.monitorSetups.applied, "length", 1);
+            const moved = item.monitorSetups.applied[0].filter(entry => entry.port === "DP-2")[0];
+            const rects = MonitorSetup.rectangles(item.monitorSetups.applied[0]);
             compare(moved.position.split("x")[1] !== "0", true);
             compare(rects.length, 2);
         }
 
         function test_aMonitorGoesBackIfItsSetupIsRefused() {
             const item = section();
-            item.setups.refuses = true;
+            item.monitorSetups.refuses = true;
             const aoc = monitorOnCanvas(item, "DP-2");
             const startX = aoc.x;
             mouseDrag(aoc, aoc.width / 2, aoc.height / 2, -40, 150);
@@ -181,7 +181,7 @@ Item {
             const aoc = monitorOnCanvas(item, "DP-2");
             mouseClick(aoc);
             compare(item.selected.port, "DP-2");
-            compare(item.setups.applied.length, 0);
+            compare(item.monitorSetups.applied.length, 0);
         }
 
         function test_theFirstMonitorStartsSelected() {
@@ -208,7 +208,7 @@ Item {
             verify(shown(item, "100 Hz") === null);
             mouseClick(shown(item, "1920x1080"));
             tryVerify(() => shown(item, "100 Hz") !== null);
-            compare(item.setups.entries[1].mode, "1920x1080@100.00");
+            compare(item.monitorSetups.entries[1].mode, "1920x1080@100.00");
         }
 
         function test_aScaleThatSnapsSaysWhatWasApplied() {
@@ -223,14 +223,14 @@ Item {
             const item = section();
             select(item, "DP-2");
             mouseClick(shown(item, "90°"));
-            compare(item.setups.applied[0][1].transform, 1);
+            compare(item.monitorSetups.applied[0][1].transform, 1);
         }
 
         function test_theLastMonitorCantBeTurnedOff() {
             const item = section();
             const off = entries();
             off[1].disabled = true;
-            item.setups.entries = off;
+            item.monitorSetups.entries = off;
             waitForRendering(item);
             const row = all(item, child => child.label === "On" && child.switchItem !== undefined)[0];
             compare(row.enabled, false);
@@ -240,20 +240,20 @@ Item {
             const item = section();
             const off = entries();
             off[1].disabled = true;
-            item.setups.entries = off;
+            item.monitorSetups.entries = off;
             waitForRendering(item);
             verify(monitorOnCanvas(item, "DP-2") === undefined);
             mouseClick(shown(item, "2 AOC"));
             tryCompare(item, "selectedPort", "DP-2");
             const row = all(item, child => child.label === "On" && child.switchItem !== undefined)[0];
             mouseClick(row);
-            compare(item.setups.applied[0][1].disabled, false);
+            compare(item.monitorSetups.applied[0][1].disabled, false);
         }
 
         function test_identifyAsksTheService() {
             const item = section();
             mouseClick(shown(item, "Identify"));
-            compare(item.setups.identified, 1);
+            compare(item.monitorSetups.identified, 1);
         }
 
         // The list is below the monitor's settings, so the section moves up to bring a button into the window.
@@ -274,25 +274,25 @@ Item {
         function test_forgetAsksTheServiceForThatSetupAndChangesNoMonitor() {
             const item = section();
             mouseClick(forgetButton(item, "AOC + Philips"));
-            compare(item.setups.forgot, ["AOC\nPhilips"]);
-            compare(item.setups.applied.length, 0);
+            compare(item.monitorSetups.forgot, ["AOC\nPhilips"]);
+            compare(item.monitorSetups.applied.length, 0);
             compare(shown(item, "AOC + Philips"), null);
             verify(shown(item, "Samsung") !== null);
         }
 
         function test_nothingCanBeForgottenDuringACountdown() {
             const item = section();
-            item.setups.counting = true;
+            item.monitorSetups.counting = true;
             const button = forgetButton(item, "Samsung");
             compare(button.enabled, false);
             mouseClick(button);
-            compare(item.setups.forgot.length, 0);
+            compare(item.monitorSetups.forgot.length, 0);
         }
 
         function test_withNothingSavedTheListIsNotShown() {
             const item = section();
             verify(shown(item, "Saved setups") !== null);
-            item.setups.savedSetups = [];
+            item.monitorSetups.savedSetups = [];
             compare(shown(item, "Saved setups"), null);
         }
 

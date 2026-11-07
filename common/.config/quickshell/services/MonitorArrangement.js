@@ -25,10 +25,6 @@ function touching(a, b) {
         || (stacked && overlapsOnAxis(a.x, a.width, b.x, b.width) > 0);
 }
 
-function overlapping(rects) {
-    return rects.some((a, i) => rects.some((b, j) => j > i && overlap(a, b)));
-}
-
 // The monitors reachable from `first`, each touching another.
 function reachable(rects, first) {
     const found = [first];
@@ -39,10 +35,6 @@ function reachable(rects, first) {
         });
     }
     return found;
-}
-
-function connected(rects) {
-    return rects.length === 0 || reachable(rects, rects[0]).length === rects.length;
 }
 
 // Where `start`, `length` long, goes along the edge of a neighbour: as near as it can stay to where

@@ -21,9 +21,17 @@ function parsedModes(texts) {
     return texts.map(parsedMode).filter(mode => mode !== null);
 }
 
-// A mode the way a monitor setup saves it.
-function modeText(width, height, refresh) {
-    return width + "x" + height + "@" + refresh.toFixed(2);
+// A mode the way a monitor setup saves it, from { width, height, refresh }.
+function modeText(mode) {
+    return mode.width + "x" + mode.height + "@" + mode.refresh.toFixed(2);
+}
+
+// `mode` if it's a size, otherwise the highest of `modes`, or failing that a keyword Hyprland knows.
+function modeOrHighest(mode, modes) {
+    if (parsedMode(mode) !== null)
+        return mode;
+    const top = highest(modes);
+    return top !== null ? modeText(top) : mode || "preferred";
 }
 
 // Each resolution once, largest first, as { width, height, label }.

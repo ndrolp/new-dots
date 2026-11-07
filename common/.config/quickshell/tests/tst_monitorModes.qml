@@ -29,7 +29,7 @@ TestCase {
     }
 
     function test_aModeIsWrittenTheWaySetupsSaveIt() {
-        compare(MonitorModes.modeText(2560, 1440, 143.912), "2560x1440@143.91");
+        compare(MonitorModes.modeText({ width: 2560, height: 1440, refresh: 143.912 }), "2560x1440@143.91");
     }
 
     function test_resolutionsAreListedOnceLargestFirst() {

@@ -15,6 +15,14 @@ TestCase {
         return [found.x, found.y];
     }
 
+    function overlapping(rects) {
+        return rects.some((a, i) => rects.some((b, j) => j > i && MonitorArrangement.overlap(a, b)));
+    }
+
+    function connected(rects) {
+        return MonitorArrangement.reachable(rects, rects[0]).length === rects.length;
+    }
+
     readonly property var pair: [rect("a", 0, 0, 1800, 1125), rect("b", 1800, 0, 2560, 1440)]
 
     function test_droppingNearAnEdgeSnapsToIt() {
@@ -36,8 +44,8 @@ TestCase {
 
     function test_droppingOnTopOfAnotherPutsItBesideIt() {
         const placed = MonitorArrangement.snapped(pair, "b", 100, 100);
-        compare(MonitorArrangement.overlapping(placed), false);
-        compare(MonitorArrangement.connected(placed), true);
+        compare(overlapping(placed), false);
+        compare(connected(placed), true);
     }
 
     function test_aMonitorCanSitPartWayDownItsNeighbour() {
@@ -56,8 +64,8 @@ TestCase {
     function test_movingTheMiddleMonitorAwayClosesTheGapItLeft() {
         const row = [rect("a", 0, 0, 1000, 800), rect("b", 1000, 0, 1000, 800), rect("c", 2000, 0, 1000, 800)];
         const placed = MonitorArrangement.snapped(row, "b", 500, 800);
-        compare(MonitorArrangement.connected(placed), true);
-        compare(MonitorArrangement.overlapping(placed), false);
+        compare(connected(placed), true);
+        compare(overlapping(placed), false);
         compare(at(placed, "a"), [0, 0]);
         compare(at(placed, "c"), [1000, 0]);
     }
