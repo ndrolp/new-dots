@@ -8,7 +8,7 @@
 // of a setup, in the saved format: { description, port, mode, position, scale, transform, disabled,
 // mirror } and whatever else the file holds for it, which is kept and written back.
 
-// Also in setups.lua and scripts/import-monitor-setups, which can't share code with this.
+// Also in setups.lua, which can't share code with this.
 function isLaptopPort(port) {
     return /^(eDP|LVDS|DSI)-/.test(port);
 }

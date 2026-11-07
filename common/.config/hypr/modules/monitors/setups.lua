@@ -219,7 +219,7 @@ function M.going_back(unkept)
 end
 
 -- Laptop ports are listed rather than external ones, so that a port nobody thought of can't lose its
--- picture. Also in the shell's MonitorEntries.js and scripts/import-monitor-setups.
+-- picture. Also in the shell's MonitorEntries.js.
 local function is_laptop_port(port)
 	return port:match("^eDP%-") or port:match("^LVDS%-") or port:match("^DSI%-")
 end
