@@ -1,6 +1,6 @@
 import QtQuick
 import "." as Panels
-import "../../services/MonitorSetup.js" as MonitorSetup
+import "../../services/MonitorEntries.js" as MonitorEntries
 
 // The Displays section: the monitors to arrange, and the selected one's controls followed by its
 // workspace and bar settings. Every change goes through the service, which applies it and starts the
@@ -33,7 +33,7 @@ Column {
             anchors.rightMargin: 12
             appearance: root.appearance
             options: root.entries.map(entry => ({
-                label: MonitorSetup.numberOf(root.entries, entry.port) + " " + entry.description, value: entry.port
+                label: MonitorEntries.numberOf(root.entries, entry.port) + " " + entry.description, value: entry.port
             }))
             value: root.selected !== null ? root.selected.port : ""
             onChosen: port => root.selectedPort = port
@@ -53,12 +53,12 @@ Column {
         width: parent.width
         appearance: root.appearance
         selectedId: root.selected !== null ? root.selected.port : ""
-        monitors: MonitorSetup.rectangles(root.entries).map(rect => {
+        monitors: MonitorEntries.rectangles(root.entries).map(rect => {
             const entry = root.entries.filter(candidate => candidate.port === rect.id)[0];
-            return Object.assign({ number: MonitorSetup.numberOf(root.entries, entry.port), label: entry.description }, rect);
+            return Object.assign({ number: MonitorEntries.numberOf(root.entries, entry.port), label: entry.description }, rect);
         })
         onSelected: id => root.selectedPort = id
-        onDropped: (id, x, y) => root.monitorSetups.apply(MonitorSetup.moved(root.entries, id, x, y))
+        onDropped: (id, x, y) => root.monitorSetups.apply(MonitorEntries.moved(root.entries, id, x, y))
     }
 
     Panels.MonitorControls {
@@ -67,18 +67,18 @@ Column {
         appearance: root.appearance
         entry: root.selected
         modes: root.selectedModes
-        canTurnOff: root.selected !== null && MonitorSetup.canTurnOff(root.entries, root.selected.port)
+        canTurnOff: root.selected !== null && MonitorEntries.canTurnOff(root.entries, root.selected.port)
         onOnOffAsked: {
             const port = root.selected.port;
             root.monitorSetups.apply(root.selected.disabled
-                ? MonitorSetup.turnedOn(root.entries, port, root.selectedModes)
-                : MonitorSetup.turnedOff(root.entries, port));
+                ? MonitorEntries.turnedOn(root.entries, port, root.selectedModes)
+                : MonitorEntries.turnedOff(root.entries, port));
         }
-        onResolutionChosen: (width, height) => root.monitorSetups.apply(MonitorSetup.withResolution(root.entries,
+        onResolutionChosen: (width, height) => root.monitorSetups.apply(MonitorEntries.withResolution(root.entries,
             root.selected.port, root.selectedModes, width, height))
-        onRefreshChosen: refresh => root.monitorSetups.apply(MonitorSetup.withRefresh(root.entries, root.selected.port, refresh))
-        onScaleChosen: scale => root.monitorSetups.apply(MonitorSetup.withScale(root.entries, root.selected.port, scale))
-        onRotationChosen: transform => root.monitorSetups.apply(MonitorSetup.withRotation(root.entries, root.selected.port,
+        onRefreshChosen: refresh => root.monitorSetups.apply(MonitorEntries.withRefresh(root.entries, root.selected.port, refresh))
+        onScaleChosen: scale => root.monitorSetups.apply(MonitorEntries.withScale(root.entries, root.selected.port, scale))
+        onRotationChosen: transform => root.monitorSetups.apply(MonitorEntries.withRotation(root.entries, root.selected.port,
             transform))
     }
 

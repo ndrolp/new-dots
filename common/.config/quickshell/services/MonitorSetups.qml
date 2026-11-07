@@ -3,19 +3,19 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick
 import "MonitorChange.js" as MonitorChange
-import "MonitorSetup.js" as MonitorSetup
+import "MonitorEntries.js" as MonitorEntries
 import "MonitorToast.js" as MonitorToast
 import "QuickSwitch.js" as QuickSwitch
 
 // The shell's one way to change the monitors: Displays and the quick switch both hand `apply` the
 // entries they want. It writes the saved file, asks Hyprland to apply it and runs the Keep or Revert
-// countdown; only Keep saves. What each step does is decided in MonitorChange.js and MonitorSetup.js;
+// countdown; only Keep saves. What each step does is decided in MonitorChange.js and MonitorEntries.js;
 // this only carries it out. Hyprland owns the setups (docs/adr/0002-hyprland-owns-monitor-setups.md).
 Scope {
     id: root
 
     // The setup the monitors are in now, and any change being tried out, as entries
-    // (MonitorSetup.js). A closed lid's laptop screen isn't one of them.
+    // (MonitorEntries.js). A closed lid's laptop screen isn't one of them.
     readonly property var entries: internal.entries
     // Whether a change is waiting for Keep or Revert, and the whole seconds left.
     readonly property bool counting: MonitorChange.counting(internal.change)
@@ -35,12 +35,12 @@ Scope {
     readonly property string notice: internal.toast.notice
 
     function numberOf(port) {
-        return MonitorSetup.numberOf(internal.entries, port);
+        return MonitorEntries.numberOf(internal.entries, port);
     }
 
     // A monitor's modes, as MonitorModes.parsedModes gives them.
     function modesOf(port) {
-        return MonitorSetup.modesOf(internal.monitors, port);
+        return MonitorEntries.modesOf(internal.monitors, port);
     }
 
     // Tries out `entries`. False, with nothing changed, if they would leave every screen dark, are
@@ -54,7 +54,7 @@ Scope {
             warn(unreadMessage);
             return false;
         }
-        if (MonitorSetup.parsedFile(text) === null) {
+        if (MonitorEntries.parsedFile(text) === null) {
             // Asking Hyprland to read it moves it aside as .bad, so the next try starts clean, and
             // that's what brings up the toast saying so.
             askHyprland();
@@ -163,7 +163,7 @@ Scope {
         internal.fileLoad = "failed";
         file.reload();
         file.waitForJob();
-        return MonitorSetup.loadedText(internal.fileLoad, file.text());
+        return MonitorEntries.loadedText(internal.fileLoad, file.text());
     }
 
     function warn(message) {
@@ -232,20 +232,20 @@ Scope {
         // Mid-step the file is being written and `entries` is ahead of the monitors. `finished` reads again.
         if (internal.busy)
             return;
-        const reading = MonitorSetup.parsedReading(text);
+        const reading = MonitorEntries.parsedReading(text);
         if (reading === null)
             return;
         const saved = fileText();
         if (MonitorChange.overtaken(internal.change, saved))
             internal.change = MonitorChange.idle;
-        const data = MonitorSetup.parsedFile(saved) || { setups: [] };
-        const present = MonitorSetup.presentMonitors(reading.monitors, reading.lidClosed);
+        const data = MonitorEntries.parsedFile(saved) || { setups: [] };
+        const present = MonitorEntries.presentMonitors(reading.monitors, reading.lidClosed);
         internal.monitors = reading.monitors;
-        internal.entries = MonitorSetup.entriesFrom(reading.monitors, MonitorSetup.savedEntries(data, present),
+        internal.entries = MonitorEntries.entriesFrom(reading.monitors, MonitorEntries.savedEntries(data, present),
             reading.lidClosed);
-        internal.savedSetups = MonitorSetup.listedSetups(data);
-        internal.toast = MonitorToast.afterReading(internal.toast, MonitorSetup.combination(present),
-            MonitorSetup.savedEntries(data, present).length > 0, root.locked);
+        internal.savedSetups = MonitorEntries.listedSetups(data);
+        internal.toast = MonitorToast.afterReading(internal.toast, MonitorEntries.combination(present),
+            MonitorEntries.savedEntries(data, present).length > 0, root.locked);
         told.combination = internal.toast.combination;
         if (!root.locked)
             notices.running = true;
@@ -297,7 +297,7 @@ Scope {
         property bool asking: false
         // Answers to come from a hyprctl that was given up on.
         property int staleAnswers: 0
-        // How the last load of the saved file went: see MonitorSetup.loadedText.
+        // How the last load of the saved file went: see MonitorEntries.loadedText.
         property string fileLoad: "failed"
         property bool readAgain: false
         property var toast: MonitorToast.idle
@@ -377,7 +377,7 @@ Scope {
         target: Hyprland
 
         function onRawEvent(event) {
-            if (MonitorSetup.changesMonitors(event.name))
+            if (MonitorEntries.changesMonitors(event.name))
                 settle.restart();
         }
     }

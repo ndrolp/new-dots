@@ -1,5 +1,5 @@
 .pragma library
-.import "MonitorSetup.js" as MonitorSetup
+.import "MonitorEntries.js" as MonitorEntries
 
 // A change of monitors waiting for Keep or Revert, however it was made. Pure, no Quickshell;
 // MonitorSetups.qml carries out each step: { state, text, remove, apply } is the next state, the text
@@ -21,12 +21,12 @@ const applyCommand = ["hyprctl", "eval", 'require("modules.monitors.apply").appl
 // Whether `next` is worth trying out from `current`: not with another step running, and not if it
 // would leave every screen dark or is what's already there.
 function canTry(next, current, busy) {
-    return !busy && next.length > 0 && MonitorSetup.showsSomething(next) && !MonitorSetup.sameEntries(next, current);
+    return !busy && next.length > 0 && MonitorEntries.showsSomething(next) && !MonitorEntries.sameEntries(next, current);
 }
 
 // Whether `next` is what the monitors are already in, with nothing else going on.
 function canRemember(next, current, busy, waiting) {
-    return !busy && !waiting && next.length > 0 && MonitorSetup.sameEntries(next, current);
+    return !busy && !waiting && next.length > 0 && MonitorEntries.sameEntries(next, current);
 }
 
 // - before: the saved file's text when the change began, null when there was no file.
@@ -48,9 +48,9 @@ function step(state, text, apply) {
 }
 
 function fileWith(before, entries, previous) {
-    const data = MonitorSetup.parsedFile(before);
-    const replaced = entries.length > 0 ? MonitorSetup.withSetup(data, entries) : data;
-    return MonitorSetup.serialized(previous !== undefined
+    const data = MonitorEntries.parsedFile(before);
+    const replaced = entries.length > 0 ? MonitorEntries.withSetup(data, entries) : data;
+    return MonitorEntries.serialized(previous !== undefined
         ? Object.assign({}, replaced, { unkept: { before: before, monitors: previous } })
         : replaced);
 }
@@ -107,7 +107,7 @@ function afterAnswer(state, output) {
 // Whether Hyprland has already gone back by itself, past its deadline or on a reload, so there's
 // nothing left to answer: the file no longer has `unkept`. A file that can't be read says nothing.
 function overtaken(state, fileText) {
-    const data = MonitorSetup.parsedFile(fileText);
+    const data = MonitorEntries.parsedFile(fileText);
     return counting(state) && data !== null && data.unkept === undefined;
 }
 
@@ -115,23 +115,23 @@ function overtaken(state, fileText) {
 // they are until the next time it detects them. Null, with nothing to write, if the file can't be
 // read. Not for use during a countdown: Revert would put the file back as it was.
 function forgotten(fileText, combination) {
-    const data = MonitorSetup.parsedFile(fileText);
-    return data !== null ? step(idle, MonitorSetup.serialized(MonitorSetup.withoutSetup(data, combination)), false) : null;
+    const data = MonitorEntries.parsedFile(fileText);
+    return data !== null ? step(idle, MonitorEntries.serialized(MonitorEntries.withoutSetup(data, combination)), false) : null;
 }
 
 // Remembers what the monitors are already in, for a choice that changes nothing: there's nothing to
 // try out, so no countdown. Null, with nothing to write, if the combination has a setup or the file
 // can't be read.
 function remembered(fileText, entries) {
-    const data = MonitorSetup.parsedFile(fileText);
-    if (data === null || MonitorSetup.savedEntries(data, entries).length > 0)
+    const data = MonitorEntries.parsedFile(fileText);
+    if (data === null || MonitorEntries.savedEntries(data, entries).length > 0)
         return null;
     return step(idle, fileWith(fileText, entries), false);
 }
 
 // The countdown a shell that stopped left in the file, as a state to revert, or null.
 function interrupted(fileText) {
-    const data = MonitorSetup.parsedFile(fileText);
+    const data = MonitorEntries.parsedFile(fileText);
     if (data === null || data.unkept === undefined)
         return null;
     return { phase: "counting", endsAt: 0, before: data.unkept.before, previous: data.unkept.monitors,

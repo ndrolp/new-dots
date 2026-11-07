@@ -3,7 +3,7 @@ import QtTest
 import "../components/panels" as Panels
 import "../config" as Config
 import "../services/MonitorChange.js" as MonitorChange
-import "../services/MonitorSetup.js" as MonitorSetup
+import "../services/MonitorEntries.js" as MonitorEntries
 
 // The Displays section: the arrange canvas, the selected monitor's controls and the countdown card.
 Item {
@@ -162,7 +162,7 @@ Item {
             mouseDrag(aoc, aoc.width / 2, aoc.height / 2, -aoc.x, 150);
             tryCompare(item.monitorSetups.applied, "length", 1);
             const moved = item.monitorSetups.applied[0].filter(entry => entry.port === "DP-2")[0];
-            const rects = MonitorSetup.rectangles(item.monitorSetups.applied[0]);
+            const rects = MonitorEntries.rectangles(item.monitorSetups.applied[0]);
             compare(moved.position.split("x")[1] !== "0", true);
             compare(rects.length, 2);
         }
@@ -351,10 +351,10 @@ Item {
         }
 
         function test_theEventsThatChangeMonitorsAreKnown() {
-            compare(MonitorSetup.changesMonitors("monitoradded"), true);
-            compare(MonitorSetup.changesMonitors("monitorremovedv2"), true);
-            compare(MonitorSetup.changesMonitors("configreloaded"), true);
-            compare(MonitorSetup.changesMonitors("workspace"), false);
+            compare(MonitorEntries.changesMonitors("monitoradded"), true);
+            compare(MonitorEntries.changesMonitors("monitorremovedv2"), true);
+            compare(MonitorEntries.changesMonitors("configreloaded"), true);
+            compare(MonitorEntries.changesMonitors("workspace"), false);
         }
     }
 }

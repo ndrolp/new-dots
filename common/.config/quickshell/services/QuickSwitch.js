@@ -1,13 +1,13 @@
 .pragma library
 .import "MonitorModes.js" as MonitorModes
-.import "MonitorSetup.js" as MonitorSetup
+.import "MonitorEntries.js" as MonitorEntries
 
 // The quick switch's choices and the setup each one builds. Pure, no Quickshell; the panel and the
 // toast for an unknown combination offer the same list and hand the choice to MonitorSetups.qml.
 
 // A monitor's "only" choice. Identical monitors share a description, so their ports tell them apart.
 function onlyLabel(entry, entries) {
-    return MonitorSetup.hasTwin(entries, entry)
+    return MonitorEntries.hasTwin(entries, entry)
         ? entry.description + " (" + entry.port + ") only"
         : entry.description + " only";
 }
@@ -20,7 +20,7 @@ function choices(entries) {
 
 // Whether a monitor is copying another. Such a monitor has no bar of its own.
 function mirroring(entries, port) {
-    const entry = MonitorSetup.find(entries, port);
+    const entry = MonitorEntries.find(entries, port);
     return entry !== undefined && !entry.disabled && !!entry.mirror;
 }
 
@@ -36,7 +36,7 @@ function turnedBackOn(entry, modes) {
     const on = Object.assign({}, entry, {
         mode: MonitorModes.modeOrHighest(last.mode, modes),
         position: last.position,
-        scale: MonitorSetup.scaleOf(last),
+        scale: MonitorEntries.scaleOf(last),
         transform: entry.transform || 0,
         disabled: false,
         mirror: ""
@@ -47,7 +47,7 @@ function turnedBackOn(entry, modes) {
 
 // Every monitor on, where it last was; closing up places one with no place yet past the others.
 function extended(entries, modesOf) {
-    return MonitorSetup.closedUp(entries.map(entry => turnedBackOn(entry, modesOf(entry.port))));
+    return MonitorEntries.closedUp(entries.map(entry => turnedBackOn(entry, modesOf(entry.port))));
 }
 
 // Monitors copying `name`, each at its own preferred mode. Scale 1 fits any mode, and what the monitor
@@ -66,18 +66,18 @@ function copying(entry, name) {
 
 // A monitor can't copy a copy, so one with no picture of its own can't be the one copied.
 function mirrored(entries, focusedPort) {
-    const focused = MonitorSetup.find(entries, focusedPort);
-    const source = focused !== undefined && MonitorSetup.hasOwnPicture(focused)
-        ? focused : entries.filter(MonitorSetup.hasOwnPicture)[0];
+    const focused = MonitorEntries.find(entries, focusedPort);
+    const source = focused !== undefined && MonitorEntries.hasOwnPicture(focused)
+        ? focused : entries.filter(MonitorEntries.hasOwnPicture)[0];
     if (source === undefined)
         return entries;
-    const name = MonitorSetup.hasTwin(entries, source) ? source.port : source.description;
+    const name = MonitorEntries.hasTwin(entries, source) ? source.port : source.description;
     return entries.map(entry => entry.port === source.port ? entry : copying(entry, name));
 }
 
 // The others keep where they were, and so does `port`, so Extend finds everything in place.
 function only(entries, port, modesOf) {
-    if (MonitorSetup.find(entries, port) === undefined)
+    if (MonitorEntries.find(entries, port) === undefined)
         return entries;
     return extended(entries, modesOf).map(entry => Object.assign({}, entry, { disabled: entry.port !== port }));
 }

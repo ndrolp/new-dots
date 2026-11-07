@@ -38,7 +38,7 @@ or the one a rule names.
 
 `MonitorSetups.qml` is the shell's one way to change the monitors. Displays and
 the quick switch work out the entries they want with the plain functions in
-`MonitorSetup.js` (`moved`, `withResolution`, `turnedOff`…) and hand them to
+`MonitorEntries.js` (`moved`, `withResolution`, `turnedOff`…) and hand them to
 `apply(entries)`, which starts the 15-second countdown; `keep()` and `revert()`
 answer it, and an unanswered one reverts. `entries`, `modesOf(port)` and
 `savedSetups` are what there is to show, and `modules/MonitorChange.qml` shows

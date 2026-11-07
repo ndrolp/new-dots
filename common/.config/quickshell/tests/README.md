@@ -147,7 +147,7 @@ Monitor setups are covered too: where monitors snap, edge to edge with no gaps
 (`services/MonitorArrangement.js`), resolution, refresh and scale choices
 (`services/MonitorModes.js`), what a setup holds, how it changes, values an
 imported setup leaves that aren't numbers, and the saved file
-(`services/MonitorSetup.js`), the *Keep* / *Revert* countdown
+(`services/MonitorEntries.js`), the *Keep* / *Revert* countdown
 (`services/MonitorChange.js`), and the Displays section and its card
 (`components/panels/MonitorArrangeSettings.qml`, `MonitorArrangeCanvas.qml`,
 `MonitorControls.qml`, `MonitorSavedSetups.qml`, `MonitorChangeCard.qml`; `services/MonitorSetups.qml` and

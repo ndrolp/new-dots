@@ -1,7 +1,7 @@
 import QtQuick
 import QtTest
 import "../services/MonitorChange.js" as MonitorChange
-import "../services/MonitorSetup.js" as MonitorSetup
+import "../services/MonitorEntries.js" as MonitorEntries
 
 // The 15-second Keep or Revert on every change, shared by Displays and the quick switch.
 TestCase {
@@ -19,7 +19,7 @@ TestCase {
     }
 
     function setupsIn(text) {
-        return MonitorSetup.parsedFile(text).setups;
+        return MonitorEntries.parsedFile(text).setups;
     }
 
     function test_rememberingSavesTheSetupWithoutAskingHyprland() {
@@ -70,7 +70,7 @@ TestCase {
         const step = started(savedText);
         const kept = MonitorChange.kept(step.state);
         compare(MonitorChange.counting(kept.state), false);
-        compare(MonitorSetup.parsedFile(kept.text).unkept, undefined);
+        compare(MonitorEntries.parsedFile(kept.text).unkept, undefined);
         compare(setupsIn(kept.text)[1].monitors[0].position, "100x0");
         compare(kept.apply, false);
     }
@@ -120,19 +120,19 @@ TestCase {
 
     // A failed read is neither a file nor no file: nothing may be built on it.
     function test_aFileThatCouldntBeLoadedIsNotAMissingFile() {
-        compare(MonitorSetup.loadedText("missing", ""), null);
-        compare(MonitorSetup.loadedText("loaded", savedText), savedText);
-        compare(MonitorSetup.loadedText("failed", ""), undefined);
-        compare(MonitorSetup.loadedText("failed", savedText), undefined);
+        compare(MonitorEntries.loadedText("missing", ""), null);
+        compare(MonitorEntries.loadedText("loaded", savedText), savedText);
+        compare(MonitorEntries.loadedText("failed", ""), undefined);
+        compare(MonitorEntries.loadedText("failed", savedText), undefined);
     }
 
     function test_anEmptyFileIsNotAMissingFile() {
-        compare(MonitorSetup.parsedFile(MonitorSetup.loadedText("loaded", "")), null);
+        compare(MonitorEntries.parsedFile(MonitorEntries.loadedText("loaded", "")), null);
     }
 
     function test_nothingIsBuiltOnAFailedRead() {
-        const unread = MonitorSetup.loadedText("failed", "");
-        compare(MonitorSetup.parsedFile(unread), null);
+        const unread = MonitorEntries.loadedText("failed", "");
+        compare(MonitorEntries.parsedFile(unread), null);
         compare(MonitorChange.remembered(unread, setup("0x0")), null);
         compare(MonitorChange.forgotten(unread, "Other"), null);
         compare(MonitorChange.interrupted(unread), null);

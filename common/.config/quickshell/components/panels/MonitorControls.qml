@@ -8,7 +8,7 @@ Column {
     id: root
 
     required property var appearance
-    // The monitor's entry in the setup (services/MonitorSetup.js).
+    // The monitor's entry in the setup (services/MonitorEntries.js).
     property var entry: null
     // Its modes, as MonitorModes.parsedModes gives them.
     property var modes: []

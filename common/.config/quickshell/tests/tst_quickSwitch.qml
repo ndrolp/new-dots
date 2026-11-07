@@ -1,7 +1,7 @@
 import QtQuick
 import QtTest
 import "../services/MonitorChange.js" as MonitorChange
-import "../services/MonitorSetup.js" as MonitorSetup
+import "../services/MonitorEntries.js" as MonitorEntries
 import "../services/QuickSwitch.js" as QuickSwitch
 
 // The quick switch's choices and the setup each one builds. The toast offers the same ones.
@@ -167,7 +167,7 @@ TestCase {
     function test_everyChoiceLeavesSomethingToSee() {
         QuickSwitch.choices(entries()).forEach(choice => {
             const result = QuickSwitch.entriesFor(choice, entries(), "eDP-1", modesOf);
-            verify(MonitorSetup.showsSomething(result), choice.label);
+            verify(MonitorEntries.showsSomething(result), choice.label);
         });
     }
 
@@ -175,11 +175,11 @@ TestCase {
     function test_aKeptChoiceIsSavedAsThatCombinationsSetup() {
         const trying = build("mirror", entries());
         const step = MonitorChange.kept(MonitorChange.changed(MonitorChange.idle, null, entries(), trying, 0).state);
-        const data = MonitorSetup.parsedFile(step.text);
+        const data = MonitorEntries.parsedFile(step.text);
         compare(data.setups.length, 1);
-        compare(MonitorSetup.combination(data.setups[0].monitors), "AOC\nSamsung");
+        compare(MonitorEntries.combination(data.setups[0].monitors), "AOC\nSamsung");
         compare(entry(data.setups[0].monitors, "DP-2").mirror, "Samsung");
-        const reread = MonitorSetup.savedEntries(data, entries());
+        const reread = MonitorEntries.savedEntries(data, entries());
         compare(JSON.stringify(build("extend", reread)), JSON.stringify(entries()));
     }
 
