@@ -33,4 +33,10 @@ colorschemes/shown
 common/.config/quickshell/services/launcher.json
 common/.config/quickshell/config/wallpapers.json
 common/.local/share/fonts/.uuid
+
+# What hyprdynamicmonitors generated. This line can go once both machines have migrated.
 common/.config/hypr/modules/monitors/monitors.lua
+
+# Saved monitor setups are machine-local (docs/adr/0002-hyprland-owns-monitor-setups.md), with the
+# backup of a file that couldn't be read and what Hyprland leaves for the shell's toasts
+common/.config/hypr/monitor-setups.json*

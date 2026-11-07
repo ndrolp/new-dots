@@ -87,13 +87,38 @@ ShellRoot {
         id: screenShares
     }
 
+    Services.MonitorSetups {
+        id: monitorSetups
+
+        locked: lockModule.locked
+    }
+
     Services.NightLight {
         id: nightLight
 
         appearance: appearance
     }
 
+    Modules.MonitorChange {
+        appearance: appearance
+        monitorSetups: monitorSetups
+    }
+
+    Modules.QuickSwitch {
+        appearance: appearance
+        monitorSetups: monitorSetups
+    }
+
+    Modules.MonitorToast {
+        appearance: appearance
+        monitorSetups: monitorSetups
+        settings: settings
+        bar: bar
+    }
+
     Modules.Lock {
+        id: lockModule
+
         wallpapers: wallpapers
         appearance: appearance
     }
@@ -276,6 +301,7 @@ ShellRoot {
 
         appearance: appearance
         monitors: monitors
+        monitorSetups: monitorSetups
         wallpapers: wallpapers
         bookmarks: bookmarks
         plugins: plugins
@@ -297,6 +323,7 @@ ShellRoot {
         cava: cava
         systemMonitor: systemMonitor
         workspaceService: workspaceService
+        monitorSetups: monitorSetups
         settings: settings
         osd: osd
     }

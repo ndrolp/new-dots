@@ -11,6 +11,7 @@ PanelWindow {
     required property var bookmarks
     required property var plugins
     property var cava
+    property var monitorSetups
     property bool open: false
     property var targetWindow
     property real reveal: open ? 1 : 0
@@ -61,6 +62,7 @@ PanelWindow {
         bookmarks: root.bookmarks
         plugins: root.plugins
         cava: root.cava
+        monitorSetups: root.monitorSetups
 
         onCloseRequested: root.closeRequested()
     }

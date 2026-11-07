@@ -390,7 +390,7 @@ test_every_required_service_comes_from_a_core_package() {
             fail "$unit is required but $package is not in core or core-aur"
     done < <(sed -e 's/#.*//' "$file" | grep -v '^[[:space:]]*$')
     for unit in sddm NetworkManager bluetooth docker cups pipewire pipewire-pulse wireplumber \
-        hyprdynamicmonitors auto-cpufreq proton.VPN openlogi-agent; do
+        auto-cpufreq proton.VPN openlogi-agent; do
         grep -qE "^(system|user) $unit " "$file" || fail "$unit is not in the list"
     done
     for unit in auto-cpufreq proton.VPN openlogi-agent; do

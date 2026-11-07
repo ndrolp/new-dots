@@ -72,8 +72,7 @@ The wallpaper images aren't part of this repo.
 │   ├── .config/     # hypr, quickshell, kitty, ...
 │   ├── bootstrap/   # the bootstrap's steps and tests
 │   └── packages/    # package groups: core, apps, hardware
-├── host-omelas/     # config for one machine, linked over common/
-├── host-sodoma/
+├── host-sodoma/     # config for one machine, linked over common/
 ├── colorschemes/    # one folder per colorscheme
 ├── scripts/         # scripts/test-all runs every test suite
 └── wallpapers/      # rofi wallpaper picker

@@ -34,6 +34,72 @@ a new workspace that doesn't exist yet takes a second step, sending the workspac
 to the monitor it was meant for, because Hyprland makes it on the focused monitor
 or the one a rule names.
 
+## Monitor setups
+
+`MonitorSetups.qml` is the shell's one way to change the monitors. Displays and
+the quick switch work out the entries they want with the plain functions in
+`MonitorEntries.js` (`moved`, `withResolution`, `turnedOff`…) and hand them to
+`apply(entries)`, which starts the 15-second countdown; `keep()` and `revert()`
+answer it, and an unanswered one reverts. `entries`, `modesOf(port)` and
+`savedSetups` are what there is to show, and `modules/MonitorChange.qml` shows
+the countdown card and *Identify* on the screens. Hyprland owns the setups
+(`docs/adr/0002-hyprland-owns-monitor-setups.md`): the shell writes
+`~/.config/hypr/monitor-setups.json` atomically, then runs `hyprctl eval` on
+`apply_now` in `hypr/modules/monitors/apply.lua`, which reads it without the
+full config reload `hyprctl reload` would do.
+
+`forget(combination)` removes a saved setup from the file and doesn't ask
+Hyprland, so the monitors stay as they are until the next time it detects them.
+Hyprland doesn't watch that file: only the config and the modules it requires.
+It's refused during a countdown, when Revert would put the file back, and
+`savedSetups` leaves out a change being tried out, which isn't saved yet.
+
+A change has to be in the file for Hyprland to apply it, so it's in there before
+it's kept, with what to go back to under `unkept` in the same write. Revert
+applies the previous arrangement through the file, then puts the file back
+exactly as it was, or removes it if there was none. `apply` refuses a setup
+that leaves every screen dark, and any change when the saved file couldn't be
+loaded: that's not the same as no file, and a write on top of it would lose every
+saved setup. The steps are `MonitorChange.js`, snapping is
+`MonitorArrangement.js` and mode and scale choices are `MonitorModes.js`, whose
+`nearestScale` is the search Hyprland does, so a preset it won't take snaps
+before it's written. All are tested without Quickshell. With a closed lid and an
+external monitor the laptop screen is no part of a setup, by the same rule as
+`split_by_lid` in `hypr/modules/monitors/setups.lua`: the two must stay in step.
+
+Hyprland doesn't need the shell to get out of a change. If `apply_now` finds
+`unkept`, Hyprland starts its own timer, a few seconds longer than the countdown,
+and anything else that finds `unkept`, like a config load, goes back to what it
+says and restores the file. A shell that starts first finds the same `unkept`
+and reverts; either order ends the same. A countdown that finds `unkept` gone
+ends there. `hyprctl` gets 5 seconds to answer, and *Revert* doesn't wait for it.
+If Hyprland doesn't take something, the restored file is applied again, as a rule
+that failed can leave some monitors changed.
+
+`QuickSwitch.js` holds the quick switch's choices and the entries each one builds,
+for the panel on SUPER+P and anything else that offers them: show
+`quickSwitchChoices` and hand one to `quickSwitch(choice)`, which goes through
+`apply`, so it gets the countdown and only *Keep* saves it. *Mirror* copies the
+focused monitor. A mirror's own mode and position say what it's copying, so what
+it was before goes in its entry's `arrangement` for *Extend* to bring back;
+`setups.lua` ignores that field. *<monitor> only* leaves everything where it was
+for the same reason. A monitor mirroring another stays one of Quickshell's
+screens, so `isMirroring(port)` is what hides its bar. A choice that changes nothing,
+like *Extend* on monitors already extended, is saved straight away with no countdown.
+
+`MonitorToast.js` decides the toasts. After each reading of the monitors, an
+unknown combination sets `offeringChoices`, once for each time it appears; only
+choosing or changing something saves it. Failures set `notice`, which
+`modules/MonitorToast.qml` shows beside that toast on the focused monitor. Some of
+them come from what Hyprland leaves beside the saved file: `.bad` for a file it
+couldn't read, with a number after it if that name is taken, which
+`monitor-notices.sh` moves to a `.bad.told` name of its own as it reads it so that
+it's told once and no backup replaces another, and `.fallback`, the monitors whose
+saved mode is gone, one per line, there for as long as that lasts. What's been told
+survives a reload of the shell; a shell that restarts, rather than reloads, tells a
+fallback again. Nothing is read or told while `locked`, so what happened meanwhile
+comes up after unlock.
+
 ## Keep-awake
 
 `KeepAwake.qml` is the shell's one keep-awake. Its `on` and selected `duration`

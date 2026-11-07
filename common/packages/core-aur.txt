@@ -5,7 +5,6 @@ auto-cpufreq-git
 aylurs-gtk-shell-git
 bibata-cursor-theme
 catppuccin-gtk-theme-macchiato
-hyprdynamicmonitors-bin
 kvantum-theme-catppuccin-git
 libastal-meta
 paru

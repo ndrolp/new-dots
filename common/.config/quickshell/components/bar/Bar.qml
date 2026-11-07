@@ -24,6 +24,7 @@ Variants {
     required property var cava
     required property var systemMonitor
     required property var workspaceService
+    required property var monitorSetups
 
     signal configRequested(var screen, var panelWindow)
     signal panelReady(var screen, var panelWindow)
@@ -84,9 +85,10 @@ Variants {
             Component.onCompleted: bar.panelReady(panel.screen, panel)
 
             screen: modelData
+            // A monitor mirroring another stays a screen, showing the other's bar already.
             visible: bar.monitors.barVisible(
                 monitorDescription
-            )
+            ) && !bar.monitorSetups.isMirroring(modelData.name)
             WlrLayershell.namespace: "ndro-shell-bar"
             WlrLayershell.layer: WlrLayer.Top
             color: "transparent"

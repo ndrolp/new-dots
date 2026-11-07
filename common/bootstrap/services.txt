@@ -12,7 +12,6 @@ system cups            cups
 user pipewire              pipewire
 user pipewire-pulse        pipewire-pulse
 user wireplumber           wireplumber
-user hyprdynamicmonitors   hyprdynamicmonitors-bin
 
 system auto-cpufreq    auto-cpufreq-git    optional
 system proton.VPN      proton-vpn-daemon   optional

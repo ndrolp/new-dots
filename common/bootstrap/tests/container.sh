@@ -26,9 +26,9 @@ test_stow_only_passes_in_a_fresh_container() {
 }
 
 test_extra_args_reach_the_bootstrap() {
-    run_harness --stow-only --host omelas
+    run_harness --stow-only --host sodoma
     [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
-    grep -q "stow: host-omelas" <<<"$OUT" || fail "--host omelas did not reach the bootstrap"
+    grep -q "stow: host-sodoma" <<<"$OUT" || fail "--host sodoma did not reach the bootstrap"
 }
 
 test_a_failing_bootstrap_fails_the_harness() {
@@ -57,15 +57,15 @@ test_full_minimal_run_passes_and_a_second_run_changes_nothing() {
     STATUS=0
     OUT="$(TEST_BOOTSTRAP_BEFORE='echo mine >~/.zshrc' \
         TEST_BOOTSTRAP_AFTER='echo "=== second run"
-                              bash ~/.dotfiles/bootstrap.sh --no-system --minimal --host omelas || exit
+                              bash ~/.dotfiles/bootstrap.sh --no-system --minimal --host sodoma || exit
                               [ "$(readlink -f ~/.zshrc)" = ~/.dotfiles/common/.zshrc ] && echo ZSHRC-LINKED
                               [ "$(cat ~/.dotfiles-backup/*/.zshrc)" = mine ] && echo ZSHRC-BACKED-UP' \
-        "$HARNESS" --minimal --host omelas 2>&1)" || STATUS=$?
+        "$HARNESS" --minimal --host sodoma 2>&1)" || STATUS=$?
     [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
     local first second
     first="$(sed '/^=== second run/,$d' <<<"$OUT")"
     second="$(sed -n '/^=== second run/,$p' <<<"$OUT")"
-    for what in "pacman packages: core" "hardware packages: hardware-any" "paru" oh-my-zsh nvm "stow: common" "stow: host-omelas"; do
+    for what in "pacman packages: core" "hardware packages: hardware-any" "paru" oh-my-zsh nvm "stow: common" "stow: host-sodoma"; do
         sed -n '/^Installed:/,/^[A-Z]/p' <<<"$first" | grep -q -- "- $what" || fail "first run did not install $what"
     done
     grep -q ZSHRC-LINKED <<<"$OUT" || fail "~/.zshrc is not a link into the repo"
