@@ -29,7 +29,7 @@ Flow {
             required property var modelData
             readonly property bool isChosen: control.value === modelData.value
 
-            width: optionLabel.implicitWidth + 20
+            width: Math.min(optionLabel.implicitWidth + 20, control.width)
             height: 30
             radius: control.appearance.radius
             color: isChosen ? theme.surfaceHover : "transparent"
@@ -40,6 +40,8 @@ Flow {
                 id: optionLabel
 
                 anchors.centerIn: parent
+                width: Math.min(implicitWidth, option.width - 20)
+                elide: Text.ElideRight
                 text: option.modelData.label
                 color: option.isChosen ? theme.accent : theme.text
                 font.pixelSize: control.appearance.textSize - 1

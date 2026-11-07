@@ -88,6 +88,8 @@ Rectangle {
                 property real pressY: 0
 
                 anchors.fill: parent
+                // The section scrolls, and would take a drag that drifts up or down.
+                preventStealing: true
                 cursorShape: monitor.dragging ? Qt.ClosedHandCursor : Qt.OpenHandCursor
 
                 onPressed: mouse => {
@@ -106,6 +108,8 @@ Rectangle {
                     monitor.dragX += dx;
                     monitor.dragY += dy;
                 }
+
+                onCanceled: monitor.dragging = false
 
                 onReleased: {
                     if (!monitor.dragging) {

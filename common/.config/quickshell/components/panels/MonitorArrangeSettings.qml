@@ -25,9 +25,11 @@ Column {
 
     Item {
         width: parent.width
-        height: identifyButton.height
+        height: Math.max(identifyButton.height, monitorChoices.implicitHeight)
 
         Panels.SettingsChoiceList {
+            id: monitorChoices
+
             anchors.left: parent.left
             anchors.right: identifyButton.left
             anchors.rightMargin: 12

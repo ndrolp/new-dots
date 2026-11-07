@@ -150,6 +150,22 @@ Item {
             fuzzyCompare(aoc.height / laptop.height, 1440 / 1125, 0.02);
         }
 
+        function test_longMonitorNamesStayClearOfTheCanvas() {
+            const item = section();
+            const long = "Philips Consumer Electronics Company PHL 243V7 0x00009A4C and then some more of it to wrap";
+            item.monitorSetups.entries = item.monitorSetups.entries.map(entry => Object.assign({}, entry, {
+                description: entry.description + " " + long
+            }));
+            waitForRendering(item);
+            const canvas = monitorOnCanvas(item, "DP-2").parent;
+            const chip = containing(item, "Samsung " + long.slice(0, 5)).parent;
+            const list = chip.parent;
+            verify(chip.mapToItem(item, 0, chip.height).y <= canvas.y);
+            const last = containing(item, "2 AOC").parent;
+            verify(last.mapToItem(item, 0, last.height).y <= canvas.y);
+            verify(chip.x + chip.width <= list.width);
+        }
+
         function test_monitorsStayInsideTheCanvas() {
             const item = section();
             const canvas = monitorOnCanvas(item, "DP-2").parent;
