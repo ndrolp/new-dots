@@ -1,5 +1,6 @@
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Io
 import Quickshell.Services.Pam
 import Quickshell.Wayland
 import QtQuick
@@ -102,6 +103,24 @@ Scope {
 
         interval: root.motion.long
         onTriggered: root.lockState = LockState.unlockFinished(root.lockState)
+    }
+
+    // Tells start.sh the session is locked, for if the shell dies: nothing else can say so once it has.
+    FileView {
+        id: lockedMarker
+
+        readonly property bool locked: root.lockState.locked
+
+        path: Quickshell.env("XDG_RUNTIME_DIR") + "/quickshell-locked"
+        blockWrites: true
+        printErrors: false
+
+        function write() {
+            setText(locked ? "locked\n" : "");
+        }
+
+        onLockedChanged: write()
+        Component.onCompleted: write()
     }
 
     SystemClock {
