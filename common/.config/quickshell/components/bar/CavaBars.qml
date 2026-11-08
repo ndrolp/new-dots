@@ -14,16 +14,16 @@ Item {
     // it may hold more bars than this draws.
     property var frame: []
     property int barCount: 12
-    property int barWidth: 3
+    property real barWidth: 3
     // The Bar position.
     property string barPosition: "top"
-    // One of the theme's named colors, so it follows the theme.
+    // One of the theme's named colors, so it follows the theme, or "white".
     property string colorName: "blue"
     // How long a bar takes to reach its next height (appearance.motion.frame).
     property int smoothing: 0
     readonly property var heights: CavaOutput.resample(frame, barCount)
-    readonly property color color: theme[colorName] || theme.blue
-    readonly property int gap: 1
+    readonly property color color: colorName === "white" ? "#ffffff" : theme[colorName] || theme.blue
+    property real gap: 1
     readonly property real flatHeight: 2
 
     readonly property bool sideBar: BarPosition.sideBar(barPosition)

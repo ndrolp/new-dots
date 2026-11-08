@@ -109,4 +109,18 @@ TestCase {
     function test_flatBarsLeaveAThinLineAcrossToo() {
         compare(drawn(sideBars())[2].width, 2);
     }
+
+    function test_whiteBarsArePureWhiteWhateverTheTheme() {
+        const item = bars({ barCount: 4, barWidth: 2, colorName: "white" });
+
+        verify(Qt.colorEqual(item.color, "#ffffff"));
+        verify(Qt.colorEqual(drawn(item)[0].color, "#ffffff"));
+    }
+
+    function test_theGapBetweenBarsCanBeWidened() {
+        const item = bars({ barCount: 4, barWidth: 10, gap: 2 });
+
+        compare(item.implicitWidth, 46);
+        compare(drawn(item)[1].x, 12);
+    }
 }
