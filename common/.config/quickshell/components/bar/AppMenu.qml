@@ -130,8 +130,8 @@ Item {
         radius: root.appearance.radius
         color: root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
             || root.grouped ? "transparent" : theme.surface
-        border.width: root.appearance.barTransparentBorder && !root.grouped ? 1 : 0
-        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+        border.width: root.appearance.elementBorder && !root.grouped ? 1 : 0
+        border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Row {
             id: titleRow

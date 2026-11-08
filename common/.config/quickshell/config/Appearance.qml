@@ -67,7 +67,9 @@ QtObject {
     readonly property int groupRadius: editedBarProfile.groupRadius
     readonly property var barElements: editedBarProfile.barElements
     readonly property bool barTransparent: editedBarProfile.barTransparent
-    readonly property bool barTransparentBorder: editedBarProfile.barTransparentBorder
+    readonly property bool barBorder: editedBarProfile.barBorder
+    readonly property bool elementBorder: editedBarProfile.elementBorder
+    readonly property bool groupBorder: editedBarProfile.groupBorder
     readonly property int barOpacity: editedBarProfile.barOpacity
 
     // Applies changes returned by BarProfileModel: saved profiles go to the

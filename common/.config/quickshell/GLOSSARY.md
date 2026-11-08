@@ -70,8 +70,19 @@ Con la barra opaca o con la docked bar un popup va **anclado** (attached): sale 
 _Avoid_: Menu, dropdown, status popup
 
 **Docked bar** (barra acoplada):
-La barra transparente cuyas zonas cuelgan del borde de la pantalla en el que está la barra, cada una con el contorno, el color y la opacidad de un popup anclado. Mientras un popup anclado está abierto, la zona de la que sale se ensancha para recibirlo.
+La barra transparente cuyas zonas cuelgan del borde de la pantalla en el que está la barra, cada una con el contorno, el color y la opacidad de un popup anclado. Mientras un popup anclado está abierto, la zona de la que sale se ensancha para recibirlo. Con el bar border activo, cada zona lo lleva por su contorno.
 _Avoid_: Barra inclinada, slanted bar
+
+**Bar border** (borde de la barra):
+Un ajuste del perfil de barra que dibuja una línea fina en el color de borde del colorscheme por la propia barra: con la barra opaca, a lo largo del borde que da al escritorio; con la docked bar, por el contorno de cada zona, salvo por el lado pegado al borde de la pantalla. Un popup anclado continúa esa línea por su contorno, sin línea donde se une a la barra. Con cualquier otra barra transparente no dibuja nada; un popup flotante tiene siempre su propio borde.
+_Avoid_: Transparent bar border, borde transparente
+
+**Element border** (borde de los elementos):
+Un ajuste del perfil de barra que dibuja la misma línea alrededor de la pill de cada bar element que no está en un grupo, con cualquier estilo de barra.
+_Avoid_: Pill border
+
+**Group border** (borde de los grupos):
+Un ajuste del perfil de barra que dibuja la misma línea alrededor del fondo compartido de cada grupo, con cualquier estilo de barra.
 
 **Icon theme** (tema de iconos):
 El conjunto de iconos de aplicaciones y de la bandeja que usa el escritorio (hoy Papirus-Dark). Lo decide GTK y Quickshell lo sigue; es el mismo para todos los temas de color y no cambia al cambiar de tema.

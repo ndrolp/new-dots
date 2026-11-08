@@ -115,4 +115,31 @@ TestCase {
         compare(BarPlacement.contentMargins(styled), data.margins);
         compare(PopupPlacement.attached(styled), data.attached);
     }
+
+    function test_anOpaqueBarsBorderRunsAlongTheEdgeFacingTheDesktop_data() {
+        return [
+            { tag: "top", window: { width: 1000, height: 30 },
+                pieces: [{ x: 0, y: 29, width: 1000, height: 1 }] },
+            { tag: "bottom", window: { width: 1000, height: 30 },
+                pieces: [{ x: 0, y: 0, width: 1000, height: 1 }] },
+            { tag: "left", window: { width: 30, height: 800 },
+                pieces: [{ x: 29, y: 0, width: 1, height: 800 }] },
+            { tag: "right", window: { width: 30, height: 800 },
+                pieces: [{ x: 0, y: 0, width: 1, height: 800 }] }
+        ];
+    }
+
+    function test_anOpaqueBarsBorderRunsAlongTheEdgeFacingTheDesktop(data) {
+        compare(BarPlacement.edgeBorder(data.tag, data.window, null), data.pieces);
+    }
+
+    function test_anOpaqueBarsBorderBreaksWhereAPopupHangsFromIt() {
+        compare(BarPlacement.edgeBorder("top", { width: 1000, height: 30 }, { start: 100, end: 300 }), [
+            { x: 0, y: 29, width: 100, height: 1 },
+            { x: 300, y: 29, width: 700, height: 1 }
+        ]);
+        compare(BarPlacement.edgeBorder("left", { width: 30, height: 800 }, { start: 0, end: 300 }), [
+            { x: 29, y: 300, width: 1, height: 500 }
+        ]);
+    }
 }

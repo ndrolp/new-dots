@@ -161,8 +161,8 @@ Item {
             : root.elementGrouped("notifications") || root.appearance.pillsTransparent
                 || root.appearance.transparentBarSlanted
                 ? "transparent" : theme.surface
-        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("notifications") ? 1 : 0
-        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+        border.width: root.appearance.elementBorder && !root.elementGrouped("notifications") ? 1 : 0
+        border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
             ColorAnimation { duration: root.appearance.motion.short }
@@ -211,8 +211,8 @@ Item {
             : root.elementGrouped("recording") || root.appearance.pillsTransparent
                 || root.appearance.transparentBarSlanted
                 ? "transparent" : theme.surface
-        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("recording") ? 1 : 0
-        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+        border.width: root.appearance.elementBorder && !root.elementGrouped("recording") ? 1 : 0
+        border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
             ColorAnimation { duration: root.appearance.motion.short }
@@ -278,8 +278,8 @@ Item {
 
         readonly property var size: root.elementSize(mediaContent.implicitWidth + 16)
 
-        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("media") ? 1 : 0
-        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+        border.width: root.appearance.elementBorder && !root.elementGrouped("media") ? 1 : 0
+        border.color: root.appearance.elementBorder ? theme.border : "transparent"
         visible: root.itemVisible("media")
         x: root.elementX("media")
         y: root.elementY("media")
@@ -393,8 +393,8 @@ Item {
         radius: root.appearance.radius
         color: root.elementGrouped("cava") || root.appearance.pillsTransparent
             || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
-        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("cava") ? 1 : 0
-        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+        border.width: root.appearance.elementBorder && !root.elementGrouped("cava") ? 1 : 0
+        border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         onDrawingChanged: root.cava.setDrawing(cavaElement, drawing)
         Component.onCompleted: root.cava.setDrawing(cavaElement, drawing)
@@ -445,8 +445,8 @@ Item {
             : root.elementGrouped("audio") || root.appearance.pillsTransparent
                 || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
-        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("audio") ? 1 : 0
-        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+        border.width: root.appearance.elementBorder && !root.elementGrouped("audio") ? 1 : 0
+        border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
             ColorAnimation { duration: root.appearance.motion.short }
@@ -487,8 +487,8 @@ Item {
             : root.elementGrouped("bluetooth") || root.appearance.pillsTransparent
                 || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
-        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("bluetooth") ? 1 : 0
-        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+        border.width: root.appearance.elementBorder && !root.elementGrouped("bluetooth") ? 1 : 0
+        border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
             ColorAnimation { duration: root.appearance.motion.short }
@@ -527,8 +527,8 @@ Item {
             : root.elementGrouped("tray") || root.appearance.pillsTransparent
                 || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
-        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("tray") ? 1 : 0
-        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+        border.width: root.appearance.elementBorder && !root.elementGrouped("tray") ? 1 : 0
+        border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
             ColorAnimation { duration: root.appearance.motion.short }
@@ -567,8 +567,8 @@ Item {
             : root.elementGrouped("network") || root.appearance.pillsTransparent
                 || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
-        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("network") ? 1 : 0
-        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+        border.width: root.appearance.elementBorder && !root.elementGrouped("network") ? 1 : 0
+        border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
             ColorAnimation { duration: root.appearance.motion.short }
@@ -607,8 +607,8 @@ Item {
             : root.elementGrouped("battery") || root.appearance.pillsTransparent
                 || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
-        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("battery") ? 1 : 0
-        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+        border.width: root.appearance.elementBorder && !root.elementGrouped("battery") ? 1 : 0
+        border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
             ColorAnimation { duration: root.appearance.motion.short }
@@ -651,8 +651,8 @@ Item {
             : root.elementGrouped("clock") || root.appearance.pillsTransparent
                 || root.appearance.transparentBarSlanted ? "transparent" : theme.surface
 
-        border.width: root.appearance.barTransparentBorder && !root.elementGrouped("clock") ? 1 : 0
-        border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+        border.width: root.appearance.elementBorder && !root.elementGrouped("clock") ? 1 : 0
+        border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
             ColorAnimation { duration: root.appearance.motion.short }

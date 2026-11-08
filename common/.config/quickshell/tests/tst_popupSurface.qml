@@ -220,6 +220,38 @@ TestCase {
         compare(surface.mapToItem(surface.parent, 0, 0).y, 0);
     }
 
+    // The shape an attached surface draws its bar border with: its path has
+    // parts but no side against the bar.
+    function barBorderOf(surface) {
+        for (let i = 0; i < surface.children.length; i++) {
+            const child = surface.children[i];
+            if (child.path !== undefined && child.path.parts !== undefined
+                    && child.path.parts.barSide === undefined)
+                return child;
+        }
+        return null;
+    }
+
+    function test_withTheBarBorderAnAttachedSurfaceDrawsItRoundItself() {
+        const surface = makeSurface({ attached: true, barBorder: true, open: false });
+
+        revealTo(surface, 1);
+        const border = barBorderOf(surface);
+
+        verify(border.visible);
+        compare(surface.border.width, 0);
+        surface.barBorder = false;
+        verify(!border.visible);
+    }
+
+    function test_aFloatingSurfaceKeepsItsOwnBorderWithTheBarBorderOn() {
+        const surface = makeSurface({ barBorder: true });
+        const border = barBorderOf(surface);
+
+        verify(!border.visible);
+        compare(surface.border.width, 1);
+    }
+
     function test_aClosedSurfaceWaitsTowardsTheBar_data() {
         return [
             { tag: "top", x: 0, y: -8 },

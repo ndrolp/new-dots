@@ -60,7 +60,9 @@ Variants {
                 property bool transparentBarSlanted: bar.appearance.barProfileValue(panel.profileName, "transparentBarSlanted")
                 property int groupRadius: bar.appearance.barProfileValue(panel.profileName, "groupRadius")
                 property bool barTransparent: bar.appearance.barProfileValue(panel.profileName, "barTransparent")
-                property bool barTransparentBorder: bar.appearance.barProfileValue(panel.profileName, "barTransparentBorder")
+                property bool barBorder: bar.appearance.barProfileValue(panel.profileName, "barBorder")
+                property bool elementBorder: bar.appearance.barProfileValue(panel.profileName, "elementBorder")
+                property bool groupBorder: bar.appearance.barProfileValue(panel.profileName, "groupBorder")
                 property int barOpacity: bar.appearance.barProfileValue(panel.profileName, "barOpacity")
                 property var barElements: bar.appearance.barProfileValue(panel.profileName, "barElements")
                 // Global, not part of the bar profile.
@@ -131,6 +133,27 @@ Variants {
                     ColorAnimation {
                         duration: panel.barAppearance.motion.long
                         easing.type: panel.barAppearance.motion.easing
+                    }
+                }
+
+                // An opaque bar's bar border, along its edge facing the desktop.
+                Repeater {
+                    model: panel.barAppearance.barBorder && !panel.barAppearance.barTransparent
+                        ? BarPlacement.edgeBorder(panel.barAppearance.barPosition,
+                            { width: barBackground.width, height: barBackground.height },
+                            barPopups.openPopup
+                                ? { start: barPopups.openPopup.start, end: barPopups.openPopup.end } : null)
+                        : []
+
+                    delegate: Rectangle {
+                        required property var modelData
+
+                        x: modelData.x
+                        y: modelData.y
+                        width: modelData.width
+                        height: modelData.height
+                        color: theme.border
+                        z: 1
                     }
                 }
 

@@ -310,4 +310,34 @@ TestCase {
         verify(painted(item, 28, 5), "its join meets the bar");
         verify(!painted(item, 1, 5), "its corner is round");
     }
+
+    // Whether the bar border (blue) shows at the given point, in the zone.
+    function bordered(item, x, y) {
+        const pixel = grabImage(item).pixel(x, y);
+        return pixel.b > 0.5 && pixel.r < 0.5;
+    }
+
+    function test_withTheBarBorderOnAZoneDrawsItAlongItsInnerSide() {
+        const item = createTemporaryObject(surface, this, { border: true, borderColor: "#0000ff" });
+
+        tryVerify(() => bordered(item, 100, 29));
+        verify(!bordered(item, 100, 1), "not along the screen edge");
+        verify(painted(item, 100, 27), "the zone is still filled inside it");
+    }
+
+    function test_withTheBarBorderOffAZoneDrawsNone() {
+        const item = createTemporaryObject(surface, this, { borderColor: "#0000ff" });
+
+        tryVerify(() => painted(item, 100, 29));
+        verify(!bordered(item, 100, 29));
+    }
+
+    function test_theBarBorderLeavesOutTheStretchAPopupHangsFrom() {
+        const item = createTemporaryObject(surface, this,
+            { border: true, borderColor: "#0000ff", popup: { start: 130, end: 270 } });
+
+        tryVerify(() => bordered(item, 20, 29));
+        verify(!bordered(item, 100, 29));
+        verify(painted(item, 100, 29));
+    }
 }

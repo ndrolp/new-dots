@@ -8,7 +8,7 @@ import "PopupPlacement.js" as PopupPlacement
 // The surface a popup draws on, its contents inset by the padding. Floating,
 // it is one flat card with a hairline border and no shadow, opening with a
 // fade and a short slide away from the bar. Attached, it hangs from the bar with
-// no border: square corners against it, small curved corners joining it to the
+// no border unless the bar border is on: square corners against it, small curved corners joining it to the
 // bar, round corners away from it, unfolding away from the bar with its contents
 // fading in after. Any window can host it; hide the window while reveal is 0. It
 // takes no appearance, so the host passes in its motion settings. Closing, it
@@ -26,6 +26,9 @@ Rectangle {
     // The host may paint a floating surface in its own colors.
     property color fillColor: theme.surface
     property color borderColor: theme.border
+    // The bar border is on: an attached surface carries the bar's hairline on
+    // round itself, leaving out the side against the bar.
+    property bool barBorder: false
     // The bar's opacity, 0 to 100 as the bar profile keeps it. An attached
     // surface is painted in the bar's own color and opacity, so it looks like
     // part of the bar.
@@ -129,6 +132,56 @@ Rectangle {
             PathQuad {
                 x: outline.path.parts.startJoin.x; y: outline.path.parts.startJoin.y
                 controlX: outline.path.parts.startJoin.controlX; controlY: outline.path.parts.startJoin.controlY
+            }
+        }
+    }
+
+    // The bar border round an attached surface.
+    Shape {
+        id: attachedBorder
+
+        readonly property var path: PopupOutline.attachedBorder({
+            barPosition: surface.barPosition,
+            width: surface.width,
+            height: surface.height,
+            unfolded: surface.unfolded,
+            radius: surface.radius,
+            joinRadius: surface.joinRadius
+        })
+
+        x: path.x
+        y: path.y
+        width: path.width
+        height: path.height
+        visible: surface.attached && surface.barBorder && surface.unfolded > 0
+        preferredRendererType: Shape.CurveRenderer
+
+        ShapePath {
+            fillColor: "transparent"
+            strokeColor: surface.borderColor
+            strokeWidth: 1
+            capStyle: ShapePath.FlatCap
+            startX: attachedBorder.path.start.x
+            startY: attachedBorder.path.start.y
+
+            PathQuad {
+                x: attachedBorder.path.parts.endJoin.x; y: attachedBorder.path.parts.endJoin.y
+                controlX: attachedBorder.path.parts.endJoin.controlX; controlY: attachedBorder.path.parts.endJoin.controlY
+            }
+            PathLine { x: attachedBorder.path.parts.endSide.x; y: attachedBorder.path.parts.endSide.y }
+            PathQuad {
+                x: attachedBorder.path.parts.endCorner.x; y: attachedBorder.path.parts.endCorner.y
+                controlX: attachedBorder.path.parts.endCorner.controlX; controlY: attachedBorder.path.parts.endCorner.controlY
+            }
+            PathLine { x: attachedBorder.path.parts.farSide.x; y: attachedBorder.path.parts.farSide.y }
+            PathQuad {
+                x: attachedBorder.path.parts.startCorner.x; y: attachedBorder.path.parts.startCorner.y
+                controlX: attachedBorder.path.parts.startCorner.controlX; controlY: attachedBorder.path.parts.startCorner.controlY
+            }
+            PathLine { x: attachedBorder.path.parts.startSide.x; y: attachedBorder.path.parts.startSide.y }
+            PathQuad {
+                x: attachedBorder.path.parts.startJoin.x; y: attachedBorder.path.parts.startJoin.y
+                controlX: attachedBorder.path.parts.startJoin.controlX; controlY: attachedBorder.path.parts.startJoin.controlY
             }
         }
     }

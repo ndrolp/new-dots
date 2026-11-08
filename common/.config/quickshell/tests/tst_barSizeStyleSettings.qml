@@ -65,7 +65,9 @@ TestCase {
                 property int groupRadius: 16
                 property int spacing: 8
                 property bool barTransparent: false
-                property bool barTransparentBorder: false
+                property bool barBorder: false
+                property bool elementBorder: false
+                property bool groupBorder: false
                 property bool transparentBarSlanted: false
                 property bool pillsTransparent: false
                 property string matchingDensityPreset: "balanced"
@@ -144,16 +146,20 @@ TestCase {
     function test_styleSwitchesSitTwoPerLineAndSaveWhenToggled() {
         const built = make();
         const transparent = switchRow(built.item, "Transparent bar");
-        const border = switchRow(built.item, "Transparent bar border");
+        const border = switchRow(built.item, "Bar border");
         const docked = switchRow(built.item, "Docked bar");
         const pills = switchRow(built.item, "Transparent pills");
+        const elementBorder = switchRow(built.item, "Element border");
+        const groupBorder = switchRow(built.item, "Group border");
 
         verify(sameLine(built.item, transparent, border));
         verify(sameLine(built.item, docked, pills));
+        verify(sameLine(built.item, elementBorder, groupBorder));
         compare(transparent.color, Qt.rgba(0, 0, 0, 0));
 
         pills.toggled();
-        compare(built.appearance.saved, [["pillsTransparent", true]]);
+        groupBorder.toggled();
+        compare(built.appearance.saved, [["pillsTransparent", true], ["groupBorder", true]]);
     }
 
     function test_theMatchingDensityPresetIsMarkedAndChoosingOneFillsInTheSizes() {

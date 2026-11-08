@@ -3,6 +3,9 @@
         "media": {
             "activeWorkspaceHorizontalPadding": 6,
             "archButtonHorizontalPadding": 6,
+            "barBorder": true,
+            "elementBorder": true,
+            "groupBorder": true,
             "barElements": {
                 "center": [
                     {
@@ -136,7 +139,6 @@
             "barHeight": 30,
             "barOpacity": 55,
             "barTransparent": true,
-            "barTransparentBorder": true,
             "elementVerticalPadding": 8,
             "groupRadius": 31,
             "horizontalPadding": 13,
@@ -153,6 +155,9 @@
         "minimal": {
             "activeWorkspaceHorizontalPadding": 5,
             "archButtonHorizontalPadding": 6,
+            "barBorder": true,
+            "elementBorder": true,
+            "groupBorder": true,
             "barElements": {
                 "center": [
                     {
@@ -274,7 +279,6 @@
             "barOpacity": 80,
             "barPosition": "top",
             "barTransparent": false,
-            "barTransparentBorder": false,
             "elementVerticalPadding": 8,
             "groupRadius": 3,
             "horizontalPadding": 8,
@@ -291,6 +295,9 @@
         "presentation": {
             "activeWorkspaceHorizontalPadding": 5,
             "archButtonHorizontalPadding": 5,
+            "barBorder": false,
+            "elementBorder": false,
+            "groupBorder": false,
             "barElements": {
                 "center": [
                     {
@@ -394,7 +401,6 @@
             "barHeight": 30,
             "barOpacity": 90,
             "barTransparent": true,
-            "barTransparentBorder": false,
             "elementVerticalPadding": 8,
             "groupRadius": 8,
             "horizontalPadding": 8,
@@ -411,6 +417,9 @@
         "work": {
             "activeWorkspaceHorizontalPadding": 5,
             "archButtonHorizontalPadding": 6,
+            "barBorder": true,
+            "elementBorder": true,
+            "groupBorder": true,
             "barElements": {
                 "center": [
                     {
@@ -544,7 +553,6 @@
             "barOpacity": 78,
             "barPosition": "top",
             "barTransparent": true,
-            "barTransparentBorder": true,
             "elementVerticalPadding": 5,
             "groupRadius": 5,
             "horizontalPadding": 14,
@@ -621,5 +629,5 @@
     "nightLightTemperature": 3800,
     "notificationPopupLocation": "top-right",
     "reduceMotion": false,
-    "schemaVersion": 11
+    "schemaVersion": 12
 }
