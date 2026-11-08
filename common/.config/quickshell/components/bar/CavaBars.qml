@@ -21,6 +21,14 @@ Item {
     property string colorName: "blue"
     // How long a bar takes to reach its next height (appearance.motion.frame).
     property int smoothing: 0
+    // The played fraction of the track, from 0 to 1: on a top or bottom bar,
+    // the bars are painted in `progressColorName` from the left up to that
+    // point, splitting the bar it falls in. Below 0, nothing is painted.
+    property real progress: -1
+    property string progressColorName: "accent"
+    readonly property color progressColor: progressColorName === "white" ? "#ffffff"
+        : theme[progressColorName] || theme.accent
+    readonly property real progressX: progress < 0 || sideBar ? -1 : width * Math.min(1, progress)
     readonly property var heights: CavaOutput.resample(frame, barCount)
     readonly property color color: colorName === "white" ? "#ffffff" : theme[colorName] || theme.blue
     property real gap: 1
@@ -51,6 +59,16 @@ Item {
             height: root.sideBar ? root.barWidth : Math.max(root.flatHeight, root.height * level)
             radius: 1
             color: root.color
+
+            // The played part of this bar, in the progress color.
+            Rectangle {
+                objectName: "barProgress"
+                width: Math.max(0, Math.min(parent.width, root.progressX - parent.x))
+                height: parent.height
+                visible: width > 0
+                radius: parent.radius
+                color: root.progressColor
+            }
 
             Behavior on width {
                 enabled: root.sideBar

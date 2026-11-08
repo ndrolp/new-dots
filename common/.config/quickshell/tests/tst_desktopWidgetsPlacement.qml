@@ -63,4 +63,26 @@ TestCase {
         compare(DesktopWidgetsModel.clockPosition("bottom-right", clock, area), { x: 652, y: 424 });
         compare(DesktopWidgetsModel.clockPosition("center", clock, area), { x: 350, y: 240 });
     }
+
+    function test_theEdgePaddingMovesTheCardsAndTheClockFromTheEdges() {
+        const area = { width: 1000, height: 600 };
+        const card = { width: 200, height: 70 };
+        const alone = { offset: 0, height: 70 };
+
+        compare(DesktopWidgetsModel.cardPosition("top-left", card, area, alone, 60), { x: 60, y: 60 });
+        compare(DesktopWidgetsModel.cardPosition("bottom-right", card, area, alone, 0), { x: 800, y: 522 });
+        compare(DesktopWidgetsModel.clockPosition("top-left", card, area, 0), { x: 20, y: 20 });
+        compare(DesktopWidgetsModel.clockPosition("top-left", card, area, 60), { x: 80, y: 80 });
+    }
+
+    function test_theEdgePaddingIsKeptPerMonitorAndWithinItsRange() {
+        let settings = DesktopWidgetsModel.setEdgePadding({}, "HDMI-9", 64);
+
+        compare(DesktopWidgetsModel.desktopWidgetsFor(settings, "HDMI-9").edgePadding, 64);
+        compare(DesktopWidgetsModel.desktopWidgetsFor(settings, "DP-1").edgePadding, 28);
+        settings = DesktopWidgetsModel.setEdgePadding(settings, "HDMI-9", 900);
+        compare(DesktopWidgetsModel.desktopWidgetsFor(settings, "HDMI-9").edgePadding, 200);
+        settings = DesktopWidgetsModel.setEdgePadding(settings, "HDMI-9", -4);
+        compare(DesktopWidgetsModel.desktopWidgetsFor(settings, "HDMI-9").edgePadding, 0);
+    }
 }

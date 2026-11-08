@@ -9,6 +9,8 @@ import QtQuick.Effects
 import "../bar" as Bar
 import "../../config" as Config
 import "../../config/DesktopWidgetsModel.js" as DesktopWidgetsModel
+import "../IconSource.js" as IconSource
+import "CavaMedia.js" as CavaMedia
 
 Variants {
     id: root
@@ -34,7 +36,7 @@ Variants {
 
     function widgetHeight(desktop, widget) {
         if (widget === "cava")
-            return desktop.cava.height;
+            return desktop.cava.height + DesktopWidgetsModel.cavaExtraHeight(desktop.cava, appearance.textSize);
         if (widget === "media")
             return 74;
         if (widget === "weather")
@@ -93,7 +95,8 @@ Variants {
             { width: width, height: height },
             { width: parent.width, height: parent.height },
             { offset: root.stackOffset(desktop, position, widget),
-                height: root.stackHeight(desktop, position) })
+                height: root.stackHeight(desktop, position) },
+            desktop ? desktop.edgePadding : undefined)
 
         x: placed.x
         y: placed.y
@@ -414,8 +417,10 @@ Variants {
 
             mask: Region {}
 
-            // Just the bars, on the wallpaper: no card behind them. They fade out
-            // while cava is silent and back in with sound.
+            // Just the bars, on the wallpaper: no card behind them, and below
+            // them the progress line and the media info when they are on. The
+            // bars fade out while cava is silent and back in with sound; the
+            // line and the info stay while the track is paused.
             DesktopCard {
                 id: cavaWidget
 
@@ -425,10 +430,35 @@ Variants {
                 // sound that shows it again.
                 readonly property bool drawing: active && cavaWindow.visible
                 readonly property int barCount: options.barCount
+                readonly property var player: widgetWindow.player
+                // What CavaMedia.js reads of the player.
+                readonly property var playerState: ({
+                    exists: !!player,
+                    playing: !!player && player.isPlaying,
+                    stopped: !!player && player.playbackState === MprisPlaybackState.Stopped,
+                    position: widgetWindow.mediaPosition,
+                    length: player ? player.length : 0,
+                    lengthKnown: !!player && player.lengthSupported
+                })
+                readonly property bool infoShown: CavaMedia.infoShown(playerState)
+                readonly property real lineProgress: CavaMedia.lineProgress(options.progress, playerState)
+                readonly property string horizontal: DesktopWidgetsModel.placementOf(position).horizontal
+                // The player's app icon from its desktop entry, or nothing, so
+                // the media info falls back to its music note.
+                readonly property string appIconSource: {
+                    if (!player)
+                        return "";
+                    const entry = DesktopEntries.heuristicLookup(player.desktopEntry || player.identity);
+                    const icon = entry ? entry.icon : "";
+                    if (!icon)
+                        return "";
+                    return icon.startsWith("/") || icon.indexOf("://") >= 0
+                        ? IconSource.forName(icon) : Quickshell.iconPath(icon, true);
+                }
 
                 widget: "cava"
                 width: options.width
-                height: options.height
+                height: options.height + DesktopWidgetsModel.cavaExtraHeight(options, root.appearance.textSize)
                 desktop: widgetWindow.desktop
                 color: "transparent"
                 border.width: 0
@@ -437,15 +467,8 @@ Variants {
                 Component.onCompleted: root.cava.setDrawing(cavaWidget, drawing)
                 Component.onDestruction: root.cava.setDrawing(cavaWidget, false)
 
-                Bar.CavaBars {
+                Item {
                     anchors.fill: parent
-                    opacity: root.cava.silent ? 0 : 1
-                    frame: root.cava.heights
-                    barCount: cavaWidget.barCount
-                    gap: 2
-                    barWidth: Math.max(1, (width - gap * (barCount - 1)) / Math.max(1, barCount))
-                    colorName: cavaWidget.options.color
-                    smoothing: root.appearance.motion.frame
                     layer.enabled: cavaWidget.options.shadow
                     layer.effect: MultiEffect {
                         shadowEnabled: true
@@ -455,10 +478,77 @@ Variants {
                         autoPaddingEnabled: true
                     }
 
-                    Behavior on opacity {
-                        NumberAnimation {
-                            duration: root.appearance.motion.long
-                            easing.type: root.appearance.motion.easing
+                    Bar.CavaBars {
+                        id: cavaBars
+
+                        width: parent.width
+                        height: cavaWidget.options.height
+                        opacity: root.cava.silent ? 0 : 1
+                        frame: root.cava.heights
+                        barCount: cavaWidget.barCount
+                        gap: 2
+                        barWidth: Math.max(1, (width - gap * (barCount - 1)) / Math.max(1, barCount))
+                        colorName: cavaWidget.options.color
+                        progress: CavaMedia.barsProgress(cavaWidget.options.progress, cavaWidget.playerState)
+                        progressColorName: cavaWidget.options.progressColor
+                        smoothing: root.appearance.motion.frame
+
+                        Behavior on opacity {
+                            NumberAnimation {
+                                duration: root.appearance.motion.long
+                                easing.type: root.appearance.motion.easing
+                            }
+                        }
+                    }
+
+                    // The progress line: played in the progress color, the rest
+                    // in a faint bar color.
+                    Rectangle {
+                        y: cavaBars.height + DesktopWidgetsModel.cavaLineGap
+                        width: parent.width
+                        height: DesktopWidgetsModel.cavaLineHeight
+                        radius: height / 2
+                        visible: cavaWidget.options.progress === "line"
+                        opacity: cavaWidget.lineProgress >= 0 ? 1 : 0
+                        color: Qt.rgba(cavaBars.color.r, cavaBars.color.g, cavaBars.color.b, 0.3)
+
+                        Rectangle {
+                            width: parent.width * Math.max(0, cavaWidget.lineProgress)
+                            height: parent.height
+                            radius: parent.radius
+                            color: cavaBars.progressColor
+                        }
+
+                        Behavior on opacity {
+                            NumberAnimation {
+                                duration: root.appearance.motion.long
+                                easing.type: root.appearance.motion.easing
+                            }
+                        }
+                    }
+
+                    CavaMediaInfo {
+                        id: cavaInfo
+
+                        appearance: root.appearance
+                        visible: cavaWidget.options.mediaInfo
+                        opacity: cavaWidget.infoShown ? 1 : 0
+                        x: CavaMedia.infoX(cavaWidget.horizontal, parent.width, width)
+                        y: parent.height - height
+                        maxWidth: parent.width
+                        title: cavaWidget.player ? (cavaWidget.player.trackTitle || cavaWidget.player.identity) : ""
+                        artist: cavaWidget.player ? cavaWidget.player.trackArtist : ""
+                        album: cavaWidget.player ? cavaWidget.player.trackAlbum : ""
+                        coverSource: cavaWidget.player ? cavaWidget.player.trackArtUrl : ""
+                        appIconSource: cavaWidget.appIconSource
+                        paused: cavaWidget.infoShown && !cavaWidget.playerState.playing
+                        noteColor: cavaBars.progressColor
+
+                        Behavior on opacity {
+                            NumberAnimation {
+                                duration: root.appearance.motion.long
+                                easing.type: root.appearance.motion.easing
+                            }
                         }
                     }
                 }

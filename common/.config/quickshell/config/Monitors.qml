@@ -88,6 +88,10 @@ QtObject {
             displaySettings, monitorName, widget, key, value);
     }
 
+    function setDesktopWidgetsEdgePadding(monitorName, padding) {
+        displaySettings = DesktopWidgetsModel.setEdgePadding(displaySettings, monitorName, padding);
+    }
+
     function moveDesktopWidget(monitorName, widget, offset) {
         displaySettings = DesktopWidgetsModel.moveDesktopWidget(
             displaySettings, monitorName, widget, offset);

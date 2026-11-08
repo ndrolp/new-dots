@@ -14,6 +14,7 @@ TestCase {
     name: "DesktopWidgetsSettings"
     width: 800
     height: 1600
+    visible: true
     when: windowShown
 
     Config.Theme {
@@ -72,6 +73,10 @@ TestCase {
                 function setDesktopWidgetSetting(monitorName, widget, key, value) {
                     displaySettings = DesktopWidgetsModel.setDesktopWidgetSetting(
                         displaySettings, monitorName, widget, key, value);
+                }
+
+                function setDesktopWidgetsEdgePadding(monitorName, padding) {
+                    displaySettings = DesktopWidgetsModel.setEdgePadding(displaySettings, monitorName, padding);
                 }
 
                 function moveDesktopWidget(monitorName, widget, offset) {
@@ -310,5 +315,63 @@ TestCase {
         const media = switchRow(built.item, "Media");
 
         compare(all(media.parent, child => child.label === "Cava width" && child.visible).length, 0);
+    }
+
+    // Every widget's grid builds the Cava rows hidden; the Cava grid is last.
+    function field(item, label) {
+        const found = all(item, child => child.label === label && child.small !== undefined);
+        return found[found.length - 1];
+    }
+
+    function test_theCavaWidgetHasMediaInfoAndAProgressStyle() {
+        const built = make();
+        const info = switchRow(built.item, "Cava media info");
+        const progress = all(field(built.item, "Cava progress"),
+            child => child.options !== undefined && child.chosen !== undefined)[0];
+
+        compare(info.checked, false);
+        compare(progress.value, "off");
+        compare(progress.options.map(option => option.label), ["Off", "Line", "Bars"]);
+
+        info.toggled();
+        progress.chosen("bars");
+
+        compare(widgetsOf(built).cava.mediaInfo, true);
+        compare(widgetsOf(built).cava.progress, "bars");
+    }
+
+    function test_theProgressColorOnlyShowsWithAProgressStyle() {
+        const built = make();
+        const color = field(built.item, "Cava progress color");
+        const chooser = all(color, child => child.options !== undefined && child.chosen !== undefined)[0];
+
+        verify(!color.visible);
+
+        built.monitors.setDesktopWidgetSetting("DELL U2720Q", "cava", "progress", "line");
+        verify(color.visible);
+        compare(chooser.value, "accent");
+
+        chooser.chosen("red");
+        compare(widgetsOf(built).cava.progressColor, "red");
+    }
+
+    function test_everySettingOfTheSectionHasAnIcon() {
+        const built = make();
+        const named = all(built.item, child => child.icon !== undefined && child.label !== undefined
+            && child.label !== "");
+
+        verify(named.length > 20);
+        compare(named.filter(child => child.icon === "").map(child => child.label), []);
+    }
+
+    function test_theEdgePaddingIsSetForTheWholeMonitor() {
+        const built = make();
+        const padding = numberCell(built.item, "Edge padding");
+
+        compare(padding.value, 28);
+        padding.edited(60);
+
+        compare(widgetsOf(built).edgePadding, 60);
+        compare(padding.value, 60);
     }
 }

@@ -17,8 +17,19 @@ const desktopWidgetNames = ["media", "system", "calendar", "network", "weather",
 // theme's named colors, which follow the colorscheme.
 const cavaColors = ["white", "accent", "blue", "green", "yellow", "orange", "red", "purple", "text"];
 
+// How the Cava desktop widget shows the track progress: not at all, as a thin
+// line under the bars, or by painting the bars in the progress color up to
+// the played fraction.
+const cavaProgressStyles = ["off", "line", "bars"];
+
+// How far the desktop widgets keep from the edges of what the monitor's bar
+// leaves free, in pixels; the background clock keeps a little more.
+const defaultEdgePadding = 28;
+const edgePaddingRange = { from: 0, to: 200 };
+
 const defaultDesktopWidgets = {
     order: ["media", "system", "calendar", "network", "weather", "cava"],
+    edgePadding: defaultEdgePadding,
     backgroundClock: {
         enabled: true, position: "center", size: 96, opacity: 100,
         dateFormat: "full", calendarEnabled: false
@@ -28,12 +39,35 @@ const defaultDesktopWidgets = {
     calendar: { enabled: false, position: "top-left" },
     network: { enabled: false, position: "bottom-right" },
     weather: { enabled: false, position: "top-center", location: "Ourense, ES" },
-    // Just the bars, no card: `width` and `height` are the area they fill.
+    // Just the bars, no card: `width` and `height` are the area they fill; the
+    // progress line and the media info go below them (cavaExtraHeight).
     cava: {
         enabled: false, position: "bottom-center", width: 360, height: 80, barCount: 32,
-        color: "white", shadow: true
+        color: "white", shadow: true, mediaInfo: false, progress: "off", progressColor: "accent"
     }
 };
+
+// The Cava widget's media info: the cover is a square as tall as the title,
+// artist and album together, so it grows with the shell's text size.
+function cavaCoverSize(textSize) {
+    return Math.round(textSize * 5.6);
+}
+
+const cavaLineGap = 8;
+const cavaLineHeight = 3;
+const cavaInfoGap = 10;
+
+// What the Cava widget adds below its bars: the progress line when that is
+// the progress style, and the media info when it is on. It doesn't depend on
+// what plays, so the widget keeps its place in the stack.
+function cavaExtraHeight(cava, textSize) {
+    let height = 0;
+    if (cava.progress === "line")
+        height += cavaLineGap + cavaLineHeight;
+    if (cava.mediaInfo)
+        height += cavaInfoGap + cavaCoverSize(textSize);
+    return height;
+}
 
 // `widgets` completed with the built-in defaults, as a fresh object.
 function completeDesktopWidgets(widgets) {
@@ -43,7 +77,7 @@ function completeDesktopWidgets(widgets) {
     for (const key in complete) {
         if (source[key] === undefined)
             continue;
-        if (Array.isArray(complete[key]))
+        if (Array.isArray(complete[key]) || typeof complete[key] !== "object")
             complete[key] = cloneValue(source[key]);
         else
             Object.assign(complete[key], cloneValue(source[key]));
@@ -64,6 +98,13 @@ function withDesktopWidgets(displaySettings, monitorName, widgets) {
     monitorSettings.desktopWidgets = widgets;
     updated[monitorName] = monitorSettings;
     return updated;
+}
+
+// New displaySettings with the edge padding of `monitorName` only set.
+function setEdgePadding(displaySettings, monitorName, padding) {
+    const widgets = desktopWidgetsFor(displaySettings, monitorName);
+    widgets.edgePadding = Math.max(edgePaddingRange.from, Math.min(edgePaddingRange.to, Math.round(padding)));
+    return withDesktopWidgets(displaySettings, monitorName, widgets);
 }
 
 // New displaySettings with `widget.key = value` on `monitorName` only.
@@ -116,13 +157,17 @@ function placedInArea(position, size, area, gaps, stack) {
 }
 
 // The area is what the monitor's bar leaves free, the size of the windows of
-// the desktop widgets, so the gaps don't depend on the bar.
-function cardPosition(position, size, area, stack) {
-    return placedInArea(position, size, area, { top: 28, bottom: 36, side: 28 }, stack);
+// the desktop widgets, so the gaps don't depend on the bar. `padding` is the
+// monitor's edge padding; the bottom keeps 8px more, and the background clock
+// 20px more all round.
+function cardPosition(position, size, area, stack, padding) {
+    const edge = padding === undefined ? defaultEdgePadding : padding;
+    return placedInArea(position, size, area, { top: edge, bottom: edge + 8, side: edge }, stack);
 }
 
-function clockPosition(position, size, area) {
-    return placedInArea(position, size, area, { top: 48, bottom: 56, side: 48 },
+function clockPosition(position, size, area, padding) {
+    const edge = (padding === undefined ? defaultEdgePadding : padding) + 20;
+    return placedInArea(position, size, area, { top: edge, bottom: edge + 8, side: edge },
         { offset: 0, height: size.height });
 }
 

@@ -26,6 +26,7 @@ TestCase {
     // profile `minimal`.
     readonly property var liveDesktop: ({
         order: ["calendar", "media", "weather", "network", "system"],
+        edgePadding: 28,
         backgroundClock: {
             enabled: true, position: "bottom-right", size: 96, opacity: 100,
             dateFormat: "full", calendarEnabled: true
@@ -37,7 +38,7 @@ TestCase {
         weather: { enabled: false, position: "bottom-left", location: "Ourense, ES" },
         cava: {
             enabled: false, position: "bottom-center", width: 360, height: 80, barCount: 32,
-            color: "white", shadow: true
+            color: "white", shadow: true, mediaInfo: false, progress: "off", progressColor: "accent"
         }
     })
 
@@ -230,12 +231,33 @@ TestCase {
 
         compare(cava, {
             enabled: false, position: "bottom-center", width: 360, height: 80, barCount: 32,
-            color: "white", shadow: true
+            color: "white", shadow: true, mediaInfo: false, progress: "off", progressColor: "accent"
         });
     }
 
     function test_theCavaWidgetCanBeWhiteOrAnyThemeColor() {
         compare(DesktopWidgetsModel.cavaColors,
             ["white", "accent", "blue", "green", "yellow", "orange", "red", "purple", "text"]);
+    }
+
+    function test_theCavaProgressIsOffALineOrTheBars() {
+        compare(DesktopWidgetsModel.cavaProgressStyles, ["off", "line", "bars"]);
+    }
+
+    function test_theCavaWidgetGrowsBelowItsBarsForTheLineAndTheMediaInfo() {
+        const cava = DesktopWidgetsModel.desktopWidgetsFor({}, "HDMI-9").cava;
+        const cover = DesktopWidgetsModel.cavaCoverSize(13);
+
+        compare(cover, 73);
+        compare(DesktopWidgetsModel.cavaExtraHeight(cava, 13), 0);
+        compare(DesktopWidgetsModel.cavaExtraHeight(Object.assign({}, cava, { progress: "bars" }), 13), 0);
+        compare(DesktopWidgetsModel.cavaExtraHeight(Object.assign({}, cava, { progress: "line" }), 13), 11);
+        compare(DesktopWidgetsModel.cavaExtraHeight(Object.assign({}, cava, { mediaInfo: true }), 13), 10 + cover);
+        compare(DesktopWidgetsModel.cavaExtraHeight(
+            Object.assign({}, cava, { mediaInfo: true, progress: "line" }), 13), 21 + cover);
+    }
+
+    function test_theCoverGrowsWithTheTextSize() {
+        verify(DesktopWidgetsModel.cavaCoverSize(16) > DesktopWidgetsModel.cavaCoverSize(13));
     }
 }

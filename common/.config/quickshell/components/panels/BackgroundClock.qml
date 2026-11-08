@@ -58,7 +58,8 @@ Variants {
             onTriggered: clockWindow.currentTime = new Date()
         }
 
-        readonly property var clock: root.monitors.desktopWidgetsFor(monitorDescription).backgroundClock
+        readonly property var desktop: root.monitors.desktopWidgetsFor(monitorDescription)
+        readonly property var clock: desktop.backgroundClock
 
         visible: clock.enabled
 
@@ -68,7 +69,8 @@ Variants {
             readonly property var placed: DesktopWidgetsModel.clockPosition(
                 clockWindow.clock ? clockWindow.clock.position : "center",
                 { width: width, height: height },
-                { width: parent.width, height: parent.height })
+                { width: parent.width, height: parent.height },
+                clockWindow.desktop.edgePadding)
 
             x: placed.x
             y: placed.y
