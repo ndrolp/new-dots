@@ -93,6 +93,10 @@ ShellRoot {
         locked: lockModule.locked
     }
 
+    Services.WebApps {
+        id: webApps
+    }
+
     Services.NightLight {
         id: nightLight
 
@@ -217,6 +221,15 @@ ShellRoot {
         plugins: plugins
         settings: settings
         keybindCheatsheet: keybindCheatsheet
+        webAppMaker: webAppMaker
+    }
+
+    Modules.WebApps {
+        id: webAppMaker
+
+        appearance: appearance
+        webApps: webApps
+        plugins: plugins
     }
 
     Modules.KeybindCheatsheet {

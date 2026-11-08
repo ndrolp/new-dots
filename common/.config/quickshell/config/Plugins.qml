@@ -10,6 +10,7 @@ QtObject {
     property alias quickSettingsEnabled: settings.quickSettingsEnabled
     property alias screenCaptureEnabled: settings.screenCaptureEnabled
     property alias controlCenterEnabled: settings.controlCenterEnabled
+    property alias webAppsEnabled: settings.webAppsEnabled
     property alias launcherRecentLimit: settings.launcherRecentLimit
     property alias clipboardImagePreviewsEnabled: settings.clipboardImagePreviewsEnabled
 
@@ -39,6 +40,7 @@ QtObject {
             property bool quickSettingsEnabled: true
             property bool screenCaptureEnabled: true
             property bool controlCenterEnabled: true
+            property bool webAppsEnabled: true
             property int launcherRecentLimit: 20
             property bool clipboardImagePreviewsEnabled: true
         }

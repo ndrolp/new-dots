@@ -47,7 +47,9 @@ Column {
                 { label: "Screen capture", propertyName: "screenCaptureEnabled",
                   description: "Choose screenshot and screen recording actions." },
                 { label: "Control center", propertyName: "controlCenterEnabled",
-                  description: "Open the expanded system and media control panel." }
+                  description: "Open the expanded system and media control panel." },
+                { label: "Web app maker", propertyName: "webAppsEnabled",
+                  description: "Turn a website into an app that opens in its own Chrome window." }
             ]
 
             delegate: Column {

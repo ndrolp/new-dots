@@ -141,6 +141,25 @@ are a shared screen (not a camera or a virtual camera) and the start times
 are decided in `components/bar/RecordingIndicator.js`, tested without
 Quickshell.
 
+## Web apps
+
+`WebApps.qml` is the shell's one view of the web apps on this machine, for
+the web app maker. `webapps.py` does the file and network work, one command
+at a time, answering in JSON: `list` reads the `.desktop` files in
+`~/.local/share/applications` marked `X-Webapp=true` (the URL is in
+`X-Webapp-Url`), `probe` fetches a page with curl for its name (the
+manifest's `short_name`, else `application-name` or `og:site_name`, else the
+`<title>`) and its largest icon (manifest, link icons, `/favicon.ico`, then
+Google's favicon service), `icon` converts a local image picked with zenity,
+`create` writes the entry (`google-chrome-stable --app=<url>`, the window
+class Chrome gives it as `StartupWMClass`) with its icon as a 256 px PNG in
+`~/.local/share/icons/hicolor/256x256/apps`, and `delete` removes both. Icons
+are converted with ImageMagick and wait in `~/.cache/ndro-shell/webapps`
+until created. A probe answer for a URL no longer in the field is dropped.
+Which text is a URL, the fallback name, duplicates (the exact URL only) and
+the window class are plain functions in `WebApps.js`, tested without
+Quickshell; `tests/webapps.sh` tests the script on a scratch folder.
+
 ## Screen capture integration
 
 `ScreenCapture.qml` detects `grim`, `slurp`, `wf-recorder`, and `wayshot` at runtime.

@@ -19,6 +19,8 @@ adding or editing one file here.
   `PowerMenu`, `QuickSearch`, `QuickSettings`, `QuickSwitch` (SUPER+P,
   `quick-switch press`, which moves down when it's open), `ScreenCapture` (the chooser),
   `Settings`, `ThemeSelector`, `UnifiedSearch`, `WallpaperSelector`,
+  `WebApps` (the web app maker, SUPER+SHIFT+W, `web-apps toggle`, which
+  opens a new web app itself so it opens once, not once per monitor),
   `WindowSwitcher` and `WorkspaceOverview`.
 - `MonitorChange.qml`: not a `Feature`, it follows `services/MonitorSetups.qml`:
   the *Keep* / *Revert* card on every screen that still works, which takes `Enter`

@@ -23,6 +23,7 @@ Variants {
     signal closeRequested()
     signal settingsRequested()
     signal keybindCheatsheetRequested()
+    signal webAppMakerRequested()
 
     model: Quickshell.screens
 
@@ -328,6 +329,13 @@ Variants {
                         title: "Show keybind cheatsheet",
                         subtitle: "Every key binding with what it does",
                         glyph: "󰌌"
+                    },
+                    {
+                        type: "webapp",
+                        category: "ACTIONS",
+                        title: "Create web app",
+                        subtitle: "Turn a website into an app with its own window",
+                        glyph: "󰖟"
                     }
                 ];
                 const workspaceIds = root.workspaceService.workspacesForScreen(
@@ -423,6 +431,8 @@ Variants {
                 root.settingsRequested();
             } else if (result.type === "keybinds") {
                 root.keybindCheatsheetRequested();
+            } else if (result.type === "webapp") {
+                root.webAppMakerRequested();
             } else if (result.type === "workspace") {
                 root.workspaceService.switchTo(result.workspaceId);
             } else {
