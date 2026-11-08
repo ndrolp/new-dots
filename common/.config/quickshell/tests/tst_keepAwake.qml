@@ -101,6 +101,15 @@ TestCase {
         compare(cup.color, theme.textMuted);
     }
 
+    // A plain Text would take Qt's default font, and icons would fall back to
+    // whichever font has them, at that font's proportions.
+    function test_theCupIsDrawnInTheShellsPropoFont() {
+        const cup = cupOf(makeElement(false));
+
+        compare(cup.font.family, "GeistMono Nerd Font Propo");
+        compare(cup.fontInfo.family, "GeistMono Nerd Font Propo");
+    }
+
     function test_theCupFollowsTheIconSizeNotTheTextSize() {
         const cup = cupOf(makeElement(false));
 

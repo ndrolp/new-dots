@@ -19,7 +19,7 @@ Item {
         id: theme
     }
 
-    Text {
+    ShellText {
         anchors.left: parent.left
         anchors.right: addWorkspaceButton.visible ? addWorkspaceButton.left : parent.right
         anchors.verticalCenter: parent.verticalCenter
@@ -46,7 +46,7 @@ Item {
             id: addWorkspaceHover
         }
 
-        Text {
+        ShellText {
             anchors.centerIn: parent
             text: "+"
             color: theme.accent

@@ -155,7 +155,7 @@ Row {
                     visible: icon.displayedIconSource !== "" && icon.displayedTerminalGlyph === ""
                 }
 
-                Text {
+                ShellText {
                     id: glyph
 
                     // Centers the glyph's drawn shape, not its line box.
@@ -184,7 +184,7 @@ Row {
                 }
             }
 
-            Text {
+            ShellText {
                 id: appName
 
                 property string displayedLabel: root.label

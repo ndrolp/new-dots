@@ -35,7 +35,7 @@ Column {
             width: root.width
             height: forget.height
 
-            Panels.Text {
+            Panels.ShellText {
                 anchors.left: parent.left
                 anchors.right: forget.left
                 anchors.rightMargin: 12

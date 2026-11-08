@@ -3,7 +3,7 @@ import "../../config" as Config
 import "." as Panels
 
 // Secondary text: regular weight, muted.
-Panels.Text {
+Panels.ShellText {
     required property var appearance
 
     color: theme.textMuted

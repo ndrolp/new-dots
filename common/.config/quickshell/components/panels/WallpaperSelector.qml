@@ -190,7 +190,7 @@ Variants {
                 width: parent.width
                 spacing: 18
 
-                Text {
+                ShellText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: "WALLPAPERS · " + (selector.monitor ? selector.monitor.name : "")
                     color: theme.text
@@ -253,7 +253,7 @@ Variants {
                             previewHeight: selector.thumbnailDecodeHeight
                         }
 
-                        Text {
+                        ShellText {
                             anchors.centerIn: parent
                             visible: incoming.failed
                             text: "Preview unavailable"
@@ -356,7 +356,7 @@ Variants {
                     }
                 }
 
-                Text {
+                ShellText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     visible: selectorWallpapers.count === 0
                     text: "No wallpapers found in the configured "
@@ -367,7 +367,7 @@ Variants {
                     font.bold: true
                 }
 
-                Text {
+                ShellText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: Math.min(implicitWidth, parent.width - 32)
                     visible: selectorWallpapers.count > 0
@@ -380,7 +380,7 @@ Variants {
                     font.bold: true
                 }
 
-                Text {
+                ShellText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: "h/l  ·  Enter apply  ·  Esc close"
                     color: theme.textDisabled

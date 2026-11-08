@@ -138,6 +138,10 @@ const defaultProfile = {
     transparentBarTopMargin: 0,
     transparentBarSlanted: false,
     groupRadius: 8,
+    // The room inside a group's background: between its edges and its first
+    // and last element along the bar, and from the bar's edges across it.
+    groupHorizontalPadding: 8,
+    groupVerticalPadding: 0,
     barTransparent: false,
     barBorder: false,
     elementBorder: false,
@@ -159,7 +163,7 @@ function defaultBarProfiles() {
     }
 
     const compact = {
-        barHeight: 30, horizontalPadding: 10, spacing: 4, radius: 6,
+        barHeight: 30, horizontalPadding: 10, spacing: 4, groupHorizontalPadding: 4, radius: 6,
         workspaceButtonSize: 18, textSize: 13, iconSize: 13, archButtonHorizontalPadding: 5,
         activeWorkspaceHorizontalPadding: 5, pillVerticalPadding: 2, workspacePadding: 3
     };

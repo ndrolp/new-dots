@@ -251,7 +251,7 @@ Variants {
                 anchors.margins: 16
                 spacing: 10
 
-                Text {
+                ShellText {
                     text: "THEMES"
                     color: theme.text
                     font.family: theme.fontFamily
@@ -340,7 +340,7 @@ Variants {
                                 }
                             }
 
-                            Text {
+                            ShellText {
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: parent.width - 94
                                 text: themeTile.themeName
@@ -351,7 +351,7 @@ Variants {
                                 font.bold: true
                             }
 
-                            Text {
+                            ShellText {
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: "󰄬"
                                 visible: themeTile.active
@@ -373,7 +373,7 @@ Variants {
                     }
                 }
 
-                Text {
+                ShellText {
                     text: themes.count > 0
                         ? "󰄬 active · H / L or arrows · Enter to apply"
                         : "No theme directories found"

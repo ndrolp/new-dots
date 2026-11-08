@@ -52,7 +52,7 @@ Rectangle {
                     id: optionHover
                 }
 
-                Panels.Text {
+                Panels.ShellText {
                     anchors.centerIn: parent
                     width: Math.min(implicitWidth, parent.width - 8)
                     text: option.modelData.label

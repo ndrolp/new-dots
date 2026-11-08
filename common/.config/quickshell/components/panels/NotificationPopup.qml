@@ -169,7 +169,7 @@ PanelWindow {
                             fillMode: Image.PreserveAspectCrop
                         }
 
-                        Text {
+                        ShellText {
                             anchors.centerIn: parent
                             visible: parent.children[0].status !== Image.Ready
                             text: "󰂚"
@@ -184,7 +184,7 @@ PanelWindow {
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: 3
 
-                        Text {
+                        ShellText {
                             width: parent.width
                             text: notificationCard.modelData.appName
                             color: theme.textMuted
@@ -193,7 +193,7 @@ PanelWindow {
                             font.bold: true
                         }
 
-                        Text {
+                        ShellText {
                             width: parent.width
                             text: notificationCard.modelData.summary
                             color: theme.text
@@ -202,7 +202,7 @@ PanelWindow {
                             font.bold: true
                         }
 
-                        Text {
+                        ShellText {
                             width: parent.width
                             visible: text !== ""
                             text: notificationCard.modelData.body
@@ -234,7 +234,7 @@ PanelWindow {
                         id: closeHover
                     }
 
-                    Text {
+                    ShellText {
                         anchors.centerIn: parent
                         text: "󰅖"
                         color: theme.textMuted

@@ -15,7 +15,7 @@ WorkspaceDropSurface {
         id: theme
     }
 
-    Text {
+    ShellText {
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.margins: 6
@@ -25,7 +25,7 @@ WorkspaceDropSurface {
         font.bold: true
     }
 
-    Text {
+    ShellText {
         anchors.centerIn: parent
         text: "New workspace"
         color: theme.textDisabled

@@ -47,7 +47,7 @@ Column {
         width: root.width
         height: 30
 
-        Panels.Text {
+        Panels.ShellText {
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.right: parent.right
@@ -92,7 +92,7 @@ Column {
                 color: theme.border
             }
 
-            Panels.Text {
+            Panels.ShellText {
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.right: submenuMark.left
@@ -105,7 +105,7 @@ Column {
                 font.pixelSize: root.appearance.textSize - 1
             }
 
-            Panels.Text {
+            Panels.ShellText {
                 id: submenuMark
 
                 anchors.right: parent.right

@@ -60,6 +60,8 @@ Variants {
                 property int transparentBarTopMargin: bar.appearance.barProfileValue(panel.profileName, "transparentBarTopMargin")
                 property bool transparentBarSlanted: bar.appearance.barProfileValue(panel.profileName, "transparentBarSlanted")
                 property int groupRadius: bar.appearance.barProfileValue(panel.profileName, "groupRadius")
+                property int groupHorizontalPadding: bar.appearance.barProfileValue(panel.profileName, "groupHorizontalPadding")
+                property int groupVerticalPadding: bar.appearance.barProfileValue(panel.profileName, "groupVerticalPadding")
                 property bool barTransparent: bar.appearance.barProfileValue(panel.profileName, "barTransparent")
                 property bool barBorder: bar.appearance.barProfileValue(panel.profileName, "barBorder")
                 property bool elementBorder: bar.appearance.barProfileValue(panel.profileName, "elementBorder")

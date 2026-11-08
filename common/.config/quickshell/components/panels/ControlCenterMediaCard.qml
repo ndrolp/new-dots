@@ -47,7 +47,7 @@ Rectangle {
             asynchronous: true
         }
 
-        Panels.Text {
+        Panels.ShellText {
             anchors.centerIn: parent
             visible: artImage.status !== Image.Ready
             text: "󰎈"

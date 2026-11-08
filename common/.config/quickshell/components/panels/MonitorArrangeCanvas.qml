@@ -63,7 +63,7 @@ Rectangle {
                 anchors.centerIn: parent
                 width: parent.width - 12
 
-                Panels.Text {
+                Panels.ShellText {
                     width: parent.width
                     horizontalAlignment: Text.AlignHCenter
                     text: monitor.modelData.number
@@ -71,7 +71,7 @@ Rectangle {
                     font.pixelSize: canvas.appearance.textSize + 8
                 }
 
-                Panels.Text {
+                Panels.ShellText {
                     width: parent.width
                     horizontalAlignment: Text.AlignHCenter
                     text: monitor.modelData.label

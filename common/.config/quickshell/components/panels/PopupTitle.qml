@@ -3,7 +3,7 @@ import "../../config" as Config
 import "." as Panels
 
 // The only bold text in a popup.
-Panels.Text {
+Panels.ShellText {
     required property var appearance
 
     color: theme.text

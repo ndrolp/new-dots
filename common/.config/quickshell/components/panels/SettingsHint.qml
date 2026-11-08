@@ -4,7 +4,7 @@ import "." as Panels
 
 // Secondary text beside a setting, a hint or a value: muted and a little
 // smaller.
-Panels.Text {
+Panels.ShellText {
     required property var appearance
 
     color: theme.textMuted

@@ -221,7 +221,7 @@ Variants {
                         border.width: 1
                     }
 
-                    Text {
+                    ShellText {
                         anchors.left: parent.left
                         anchors.leftMargin: 14
                         anchors.verticalCenter: parent.verticalCenter
@@ -264,7 +264,7 @@ Variants {
                     height: 24
                     spacing: 12
 
-                    Text {
+                    ShellText {
                         width: parent.width - clearHistoryButton.width - parent.spacing
                         anchors.verticalCenter: parent.verticalCenter
                         text: "SPACE pin  •  DELETE remove  •  CTRL+DELETE clear unpinned"
@@ -287,7 +287,7 @@ Variants {
                             id: clearHistoryHover
                         }
 
-                        Text {
+                        ShellText {
                             anchors.centerIn: parent
                             text: selector.clearArmed ? "CONFIRM CLEAR" : "CLEAR UNPINNED"
                             color: selector.clearArmed ? theme.red : theme.textMuted
@@ -357,7 +357,7 @@ Variants {
                             id: entryHover
                         }
 
-                        Text {
+                        ShellText {
                             anchors.left: parent.left
                             anchors.leftMargin: 14
                             anchors.verticalCenter: parent.verticalCenter
@@ -366,7 +366,7 @@ Variants {
                             font.pixelSize: 19
                         }
 
-                        Text {
+                        ShellText {
                             anchors.left: parent.left
                             anchors.leftMargin: 46
                             anchors.right: parent.right
@@ -396,7 +396,7 @@ Variants {
                                     id: pinHover
                                 }
 
-                                Text {
+                                ShellText {
                                     anchors.centerIn: parent
                                     text: "󰐃"
                                     color: root.clipboardHistory.isPinned(historyEntry.entry.id)
@@ -424,7 +424,7 @@ Variants {
                                     id: deleteHover
                                 }
 
-                                Text {
+                                ShellText {
                                     anchors.centerIn: parent
                                     text: "󰆴"
                                     color: theme.red

@@ -25,7 +25,7 @@ BarPopup {
             title: "Pomodoro"
         }
 
-        Panels.Text {
+        Panels.ShellText {
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
             text: root.pomodoro.remainingLabel

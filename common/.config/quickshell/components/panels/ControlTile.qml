@@ -44,7 +44,7 @@ PopupRow {
         width: parent.width - 12
         spacing: 4
 
-        Panels.Text {
+        Panels.ShellText {
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
             text: tile.icon
@@ -56,7 +56,7 @@ PopupRow {
             }
         }
 
-        Panels.Text {
+        Panels.ShellText {
             width: parent.width
             visible: tile.labelShown
             horizontalAlignment: Text.AlignHCenter

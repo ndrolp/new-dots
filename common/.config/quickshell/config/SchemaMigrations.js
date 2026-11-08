@@ -532,12 +532,25 @@ function seedIconSize(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
+// Step 15: groups get a horizontal padding of their own, starting as the
+// component spacing they followed.
+function seedGroupPadding(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+    for (const profileName in migrated.barProfiles || {}) {
+        const profile = migrated.barProfiles[profileName];
+        if (profile.spacing !== undefined && profile.groupHorizontalPadding === undefined)
+            profile.groupHorizontalPadding = profile.spacing;
+    }
+
+    return { appearance: migrated, monitors: monitors };
+}
+
 const migrationSteps = [
     migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
     migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles, explicitMonitorEntries,
     moveOptionsOntoElements, renameElementVerticalPadding, seedControlCenterTiles,
     seedWorkspaceRadius, splitBarBorder, seedWorkspaceVerticalPadding,
-    seedIconSize
+    seedIconSize, seedGroupPadding
 ];
 const schemaVersion = migrationSteps.length;
 

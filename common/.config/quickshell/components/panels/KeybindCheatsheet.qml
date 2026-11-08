@@ -135,7 +135,7 @@ Variants {
                         border.width: 1
                     }
 
-                    Text {
+                    ShellText {
                         anchors.left: parent.left
                         anchors.leftMargin: 14
                         anchors.verticalCenter: parent.verticalCenter
@@ -190,7 +190,7 @@ Variants {
                         width: bindingList.width
                         height: (groupStart ? 28 : 0) + 34
 
-                        Text {
+                        ShellText {
                             visible: bindingDelegate.groupStart
                             anchors.left: parent.left
                             anchors.bottom: bindingRow.top
@@ -213,7 +213,7 @@ Variants {
                             color: bindingDelegate.ListView.isCurrentItem
                                 ? theme.surfaceHover : "transparent"
 
-                            Text {
+                            ShellText {
                                 id: keysText
 
                                 anchors.left: parent.left
@@ -228,7 +228,7 @@ Variants {
                                 font.bold: true
                             }
 
-                            Text {
+                            ShellText {
                                 anchors.left: keysText.right
                                 anchors.leftMargin: 12
                                 anchors.right: parent.right
@@ -243,7 +243,7 @@ Variants {
                         }
                     }
 
-                    Text {
+                    ShellText {
                         anchors.centerIn: parent
                         visible: bindingList.count === 0
                         text: bindsQuery.running ? "Reading key bindings…" : "No matching key bindings"

@@ -30,7 +30,7 @@ Rectangle {
         id: buttonHover
     }
 
-    Panels.Text {
+    Panels.ShellText {
         id: buttonLabel
 
         anchors.centerIn: parent

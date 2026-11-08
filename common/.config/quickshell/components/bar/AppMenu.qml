@@ -166,7 +166,7 @@ Item {
                         id: hover
                     }
 
-                    Text {
+                    ShellText {
                         id: name
 
                         // Centers the capital letters, not the line box.

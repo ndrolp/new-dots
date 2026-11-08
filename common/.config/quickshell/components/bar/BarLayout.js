@@ -3,9 +3,9 @@
 
 // Where things sit in the bar, measured along it: from the left on a top or
 // bottom bar, from the top on a side bar. `bar` is { barPosition, width, height,
-// spacing, groupPadding, endPadding }: the Bar position, the size of the bar
-// content, the room between groups and inside one, and the room kept at the
-// bar's ends. Without a Bar position it lays out like a top bar.
+// spacing, groupPadding, groupInset, endPadding }: the Bar position, the size
+// of the bar content, the room between groups, the room inside one along the
+// bar and across it, and the room kept at the bar's ends. Without a Bar position it lays out like a top bar.
 
 function barLength(bar) {
     return BarPosition.sideBar(bar.barPosition) ? bar.height : bar.width;
@@ -76,12 +76,16 @@ function place(bar, start, item) {
         : { x: start, y: centred(bar.height, item.height) };
 }
 
-// Where a group's background goes: its stretch of the bar, across the whole
-// thickness.
+// Where a group's background goes: its stretch of the bar, across the bar's
+// thickness but for the group inset on either side.
 function groupBackground(bar, start, length) {
-    return BarPosition.sideBar(bar.barPosition)
-        ? { x: 0, y: start, width: bar.width, height: length }
-        : { x: start, y: 0, width: length, height: bar.height };
+    const sideBar = BarPosition.sideBar(bar.barPosition);
+    const thickness = sideBar ? bar.width : bar.height;
+    const inset = Math.max(0, Math.min(bar.groupInset || 0, (thickness - 1) / 2));
+
+    return sideBar
+        ? { x: inset, y: start, width: bar.width - inset * 2, height: length }
+        : { x: start, y: inset, width: length, height: bar.height - inset * 2 };
 }
 
 // How thick a bar element is across the bar. Takes the bar profile.

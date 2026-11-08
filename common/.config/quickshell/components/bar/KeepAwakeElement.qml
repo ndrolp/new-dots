@@ -54,7 +54,7 @@ Rectangle {
         text: KeepAwakeState.cups.off
     }
 
-    Text {
+    ShellText {
         id: keepAwakeIcon
 
         anchors.centerIn: parent

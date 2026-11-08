@@ -66,6 +66,8 @@ QtObject {
     readonly property int transparentBarTopMargin: editedBarProfile.transparentBarTopMargin
     readonly property bool transparentBarSlanted: editedBarProfile.transparentBarSlanted
     readonly property int groupRadius: editedBarProfile.groupRadius
+    readonly property int groupHorizontalPadding: editedBarProfile.groupHorizontalPadding
+    readonly property int groupVerticalPadding: editedBarProfile.groupVerticalPadding
     readonly property var barElements: editedBarProfile.barElements
     readonly property bool barTransparent: editedBarProfile.barTransparent
     readonly property bool barBorder: editedBarProfile.barBorder

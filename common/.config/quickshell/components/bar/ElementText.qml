@@ -6,7 +6,7 @@ import "BarLayout.js" as BarLayout
 // A short value in a bar element, as it comes on a top or bottom bar. On a side
 // bar it stands upright (see StatusText.sideBarValue), centred, and shrinks if
 // a line is still wider than the bar element.
-Text {
+ShellText {
     id: root
 
     required property var appearance

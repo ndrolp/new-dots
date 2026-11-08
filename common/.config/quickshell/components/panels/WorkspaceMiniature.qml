@@ -51,7 +51,7 @@ WorkspaceDropSurface {
         }
     }
 
-    Text {
+    ShellText {
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.margins: 6
@@ -63,7 +63,7 @@ WorkspaceDropSurface {
         font.bold: true
     }
 
-    Text {
+    ShellText {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.margins: 6
@@ -76,7 +76,7 @@ WorkspaceDropSurface {
         font.bold: true
     }
 
-    Text {
+    ShellText {
         anchors.centerIn: parent
         visible: windowItems.count === 0
         text: "Empty workspace"

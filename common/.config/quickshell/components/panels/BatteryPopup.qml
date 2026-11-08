@@ -82,7 +82,7 @@ BarPopup {
                         text: modelData.label
                     }
 
-                    Panels.Text {
+                    Panels.ShellText {
                         width: parent.width
                         text: modelData.value
                         color: theme.text

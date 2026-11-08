@@ -33,7 +33,7 @@ Rectangle {
         width: parent.width - 32
         spacing: 10
 
-        Panels.Text {
+        Panels.ShellText {
             width: parent.width
             text: card.title
             color: theme.text

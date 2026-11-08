@@ -143,7 +143,7 @@ BarPopup {
                         visible: height > 0
                         opacity: BluetoothDevices.isDimmed(deviceRow.modelData) ? 0.5 : 1
 
-                        Panels.Text {
+                        Panels.ShellText {
                             anchors.left: parent.left
                             anchors.leftMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
@@ -160,7 +160,7 @@ BarPopup {
                             anchors.verticalCenter: parent.verticalCenter
                             spacing: 6
 
-                            Panels.Text {
+                            Panels.ShellText {
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: Math.min(implicitWidth, parent.width
                                     - (deviceIdentifier.visible ? deviceIdentifier.implicitWidth + parent.spacing : 0))
@@ -171,7 +171,7 @@ BarPopup {
                             }
 
                             // Tells unnamed devices apart.
-                            Panels.Text {
+                            Panels.ShellText {
                                 id: deviceIdentifier
 
                                 anchors.verticalCenter: parent.verticalCenter
@@ -182,7 +182,7 @@ BarPopup {
                             }
                         }
 
-                        Panels.Text {
+                        Panels.ShellText {
                             anchors.right: parent.right
                             anchors.rightMargin: 8
                             anchors.verticalCenter: parent.verticalCenter

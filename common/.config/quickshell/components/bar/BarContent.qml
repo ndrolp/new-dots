@@ -44,7 +44,7 @@ Item {
     readonly property real dockedPadding: appearance.barTransparent && appearance.transparentBarSlanted
         ? appearance.horizontalPadding : 0
     // Room between a group's shared background and its first and last element.
-    readonly property real groupPadding: appearance.spacing
+    readonly property real groupPadding: appearance.groupHorizontalPadding
     // The bar as BarLayout measures it.
     readonly property var layoutBar: ({
         barPosition: appearance.barPosition,
@@ -52,6 +52,7 @@ Item {
         height: root.height,
         spacing: appearance.spacing,
         groupPadding: groupPadding,
+        groupInset: appearance.groupVerticalPadding,
         endPadding: dockedPadding
     })
     // Whether the bar runs from the top of the screen down.

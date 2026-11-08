@@ -111,7 +111,7 @@ BarPopup {
                         visible: status === Image.Ready
                     }
 
-                    Panels.Text {
+                    Panels.ShellText {
                         anchors.left: parent.left
                         anchors.leftMargin: 8
                         anchors.verticalCenter: parent.verticalCenter
@@ -121,7 +121,7 @@ BarPopup {
                         font.pixelSize: root.appearance.textSize
                     }
 
-                    Panels.Text {
+                    Panels.ShellText {
                         anchors.left: parent.left
                         anchors.leftMargin: 36
                         anchors.right: parent.right
@@ -184,7 +184,7 @@ BarPopup {
                         width: parent.width
                         height: 30
 
-                        Panels.Text {
+                        Panels.ShellText {
                             anchors.left: parent.left
                             anchors.leftMargin: 36
                             anchors.verticalCenter: parent.verticalCenter
@@ -220,7 +220,7 @@ BarPopup {
                                 color: theme.border
                             }
 
-                            Panels.Text {
+                            Panels.ShellText {
                                 anchors.left: parent.left
                                 anchors.leftMargin: 36
                                 anchors.right: parent.right

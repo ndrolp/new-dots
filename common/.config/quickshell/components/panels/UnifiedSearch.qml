@@ -515,7 +515,7 @@ Variants {
                         border.width: 1
                     }
 
-                    Text {
+                    ShellText {
                         anchors.left: parent.left
                         anchors.leftMargin: 14
                         anchors.verticalCenter: parent.verticalCenter
@@ -547,7 +547,7 @@ Variants {
                             anchors.rightMargin: 8
                             spacing: 5
 
-                            Text {
+                            ShellText {
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: searchPanel.selectedSearchEngine.glyph
                                 color: theme.accent
@@ -555,7 +555,7 @@ Variants {
                                 font.pixelSize: 15
                             }
 
-                            Text {
+                            ShellText {
                                 width: parent.width - 31
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: searchPanel.selectedSearchEngine.label
@@ -608,7 +608,7 @@ Variants {
                     width: parent.width
                     height: 18
 
-                    Text {
+                    ShellText {
                         text: searchPanel.selectedCategory === "ALL"
                             ? "UNIFIED SEARCH" : searchPanel.selectedCategory
                         color: theme.text
@@ -617,7 +617,7 @@ Variants {
                         font.bold: true
                     }
 
-                    Text {
+                    ShellText {
                         anchors.right: parent.right
                         text: "Tab category  •  > command  •  ? web  •  @ windows  •  = calculate  •  : emoji"
                         color: theme.textMuted
@@ -650,7 +650,7 @@ Variants {
                         width: resultList.width
                         height: (categoryStart ? 24 : 0) + 52
 
-                        Text {
+                        ShellText {
                             visible: resultDelegate.categoryStart
                             anchors.left: parent.left
                             anchors.top: parent.top
@@ -684,7 +684,7 @@ Variants {
                                 id: resultHover
                             }
 
-                            Text {
+                            ShellText {
                                 anchors.left: parent.left
                                 anchors.leftMargin: 13
                                 anchors.verticalCenter: parent.verticalCenter
@@ -702,7 +702,7 @@ Variants {
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: 2
 
-                                Text {
+                                ShellText {
                                     width: parent.width
                                     text: resultDelegate.result.title
                                     color: theme.text
@@ -712,7 +712,7 @@ Variants {
                                     font.bold: resultDelegate.selected
                                 }
 
-                                Text {
+                                ShellText {
                                     width: parent.width
                                     text: resultDelegate.result.subtitle
                                     color: theme.textMuted
@@ -731,7 +731,7 @@ Variants {
                         }
                     }
 
-                    Text {
+                    ShellText {
                         anchors.centerIn: parent
                         visible: resultList.count === 0
                         text: "No matching results"

@@ -106,7 +106,7 @@ Rectangle {
             }
         }
 
-        Text {
+        ShellText {
             anchors.horizontalCenter: parent.horizontalCenter
             text: Qt.formatTime(root.now, "HH:mm")
             color: theme.text
@@ -115,7 +115,7 @@ Rectangle {
             font.bold: true
         }
 
-        Text {
+        ShellText {
             anchors.horizontalCenter: parent.horizontalCenter
             text: Qt.formatDate(root.now, "dddd, MMMM d")
             color: theme.textMuted
@@ -180,7 +180,7 @@ Rectangle {
                     root.passwordSubmitted(typed);
                 }
 
-                Text {
+                ShellText {
                     anchors.verticalCenter: parent.verticalCenter
                     text: root.checking ? "Checking…" : "Password"
                     color: theme.textDisabled
@@ -190,7 +190,7 @@ Rectangle {
             }
         }
 
-        Text {
+        ShellText {
             anchors.horizontalCenter: parent.horizontalCenter
             text: root.error
             color: theme.red

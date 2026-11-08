@@ -199,7 +199,7 @@ Variants {
                 anchors.bottomMargin: 20
                 spacing: 9
 
-                Text {
+                ShellText {
                     anchors.verticalCenter: parent.verticalCenter
                     text: widgetWindow.player && widgetWindow.player.isPlaying ? "󰏤" : "󰐊"
                     color: theme.green
@@ -216,7 +216,7 @@ Variants {
                     width: parent.width - 38
                     spacing: 2
 
-                    Text {
+                    ShellText {
                         width: parent.width
                         text: widgetWindow.player ? widgetWindow.player.trackTitle : ""
                         color: theme.text
@@ -225,7 +225,7 @@ Variants {
                         font.bold: true
                     }
 
-                    Text {
+                    ShellText {
                         width: parent.width
                         text: widgetWindow.player ? widgetWindow.player.trackArtist : ""
                         color: theme.textMuted
@@ -268,26 +268,26 @@ Variants {
                 anchors.margins: 10
                 spacing: 5
 
-                Text {
+                ShellText {
                     text: "SYSTEM"
                     color: theme.textMuted
                     font.pixelSize: root.appearance.textSize - 3
                     font.bold: true
                 }
 
-                Text {
+                ShellText {
                     text: "󰻠  CPU  " + Math.round(root.systemMonitor.cpuUsage) + "%"
                     color: theme.text
                     font.pixelSize: root.appearance.textSize - 2
                 }
 
-                Text {
+                ShellText {
                     text: "󰍛  RAM  " + Math.round(root.systemMonitor.memoryUsage) + "%"
                     color: theme.text
                     font.pixelSize: root.appearance.textSize - 2
                 }
 
-                Text {
+                ShellText {
                     text: "󰔏  " + Math.round(root.systemMonitor.temperature) + "°C"
                     color: theme.text
                     font.pixelSize: root.appearance.textSize - 2
@@ -305,7 +305,7 @@ Variants {
                 anchors.centerIn: parent
                 spacing: 4
 
-                Text {
+                ShellText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: Qt.formatDate(widgetWindow.currentTime, "dddd").toUpperCase()
                     color: theme.textMuted
@@ -313,7 +313,7 @@ Variants {
                     font.bold: true
                 }
 
-                Text {
+                ShellText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: Qt.formatDate(widgetWindow.currentTime, "MMMM d")
                     color: theme.text
@@ -334,7 +334,7 @@ Variants {
                 anchors.margins: 10
                 spacing: 5
 
-                Text {
+                ShellText {
                     width: parent.width
                     text: widgetWindow.wifi && widgetWindow.wifi.connected ? "󰤨  CONNECTED" : "󰤮  NETWORK"
                     color: widgetWindow.wifi && widgetWindow.wifi.connected ? theme.purple : theme.textMuted
@@ -343,7 +343,7 @@ Variants {
                     font.bold: true
                 }
 
-                Text {
+                ShellText {
                     text: "󰇚  " + root.systemMonitor.formatRate(root.systemMonitor.networkDownloadRate)
                         + "    󰕒  " + root.systemMonitor.formatRate(root.systemMonitor.networkUploadRate)
                     color: theme.text
@@ -362,7 +362,7 @@ Variants {
                 anchors.centerIn: parent
                 spacing: 3
 
-                Text {
+                ShellText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: widgetWindow.desktop.weather.location.toUpperCase()
                     color: theme.textMuted
@@ -370,7 +370,7 @@ Variants {
                     font.bold: true
                 }
 
-                Text {
+                ShellText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: widgetWindow.weather
                     color: theme.text

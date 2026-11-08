@@ -180,7 +180,7 @@ Variants {
                         border.width: 1
                     }
 
-                    Text {
+                    ShellText {
                         anchors.left: parent.left
                         anchors.leftMargin: 14
                         anchors.verticalCenter: parent.verticalCenter
@@ -211,7 +211,7 @@ Variants {
                             anchors.rightMargin: 8
                             spacing: 5
 
-                            Text {
+                            ShellText {
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: searchPanel.selectedSearchEngine.glyph
                                 color: theme.accent
@@ -219,7 +219,7 @@ Variants {
                                 font.pixelSize: 15
                             }
 
-                            Text {
+                            ShellText {
                                 width: parent.width - 31
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: searchPanel.selectedSearchEngine.label
@@ -323,7 +323,7 @@ Variants {
                             id: tileHover
                         }
 
-                        Text {
+                        ShellText {
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.top: parent.top
                             anchors.topMargin: 32
@@ -333,7 +333,7 @@ Variants {
                             font.pixelSize: 38
                         }
 
-                        Text {
+                        ShellText {
                             anchors.left: parent.left
                             anchors.leftMargin: 8
                             anchors.right: parent.right

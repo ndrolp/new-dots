@@ -84,7 +84,7 @@ Variants {
                 shadowVerticalOffset: 3
             }
 
-            Text {
+            ShellText {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: Qt.formatTime(clockWindow.currentTime, "HH:mm")
                 color: theme.text
@@ -93,7 +93,7 @@ Variants {
                 font.bold: true
             }
 
-            Text {
+            ShellText {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: {
                     switch (clockWindow.clock.dateFormat) {
@@ -119,7 +119,7 @@ Variants {
                 spacing: 5
                 visible: clockWindow.clock.calendarEnabled
 
-                Text {
+                ShellText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: Qt.formatDate(clockWindow.currentTime, "MMMM yyyy").toUpperCase()
                     color: theme.text
@@ -137,7 +137,7 @@ Variants {
                     Repeater {
                         model: ["S", "M", "T", "W", "T", "F", "S"]
 
-                        delegate: Text {
+                        delegate: ShellText {
                             required property var modelData
 
                             width: 18
@@ -153,7 +153,7 @@ Variants {
                     Repeater {
                         model: 42
 
-                        delegate: Text {
+                        delegate: ShellText {
                             required property int index
 
                             readonly property int day: index - clockWindow.monthStartDay + 1

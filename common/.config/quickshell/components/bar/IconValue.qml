@@ -16,7 +16,7 @@ ElementStack {
 
     spacing: sideBar ? 0 : gap
 
-    Text {
+    ShellText {
         id: iconText
 
         text: root.icon

@@ -127,7 +127,7 @@ Item {
                     border.width: 1
                     border.color: theme.border
 
-                    Panels.Text {
+                    Panels.ShellText {
                         anchors.bottom: parent.bottom
                         anchors.horizontalCenter: parent.horizontalCenter
                         height: 22

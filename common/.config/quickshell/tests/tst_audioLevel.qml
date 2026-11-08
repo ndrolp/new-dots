@@ -17,7 +17,6 @@ TestCase {
         id: barAppearance
 
         property int textSize: 13
-
         property int iconSize: 13
     }
 
@@ -31,6 +30,30 @@ TestCase {
 
     function level(properties) {
         return createTemporaryObject(audioLevel, this, properties);
+    }
+
+    // The first Text under `item` whose text passes `test`.
+    function textOf(item, test) {
+        if (item.text !== undefined && test(item.text))
+            return item;
+        for (let i = 0; i < item.children.length; i++) {
+            const found = textOf(item.children[i], test);
+            if (found)
+                return found;
+        }
+        return null;
+    }
+
+    function test_aBiggerIconKeepsThePercentageCentredOnIt() {
+        barAppearance.iconSize = 20;
+        const item = level({ meterVisible: false, volume: 0.6, muted: false });
+        const percentage = textOf(item, text => text === "60%");
+        const icon = textOf(item, text => text === "󰕾");
+
+        waitForRendering(item);
+        fuzzyCompare(percentage.mapToItem(item, 0, percentage.height / 2).y,
+            icon.mapToItem(item, 0, icon.height / 2).y, 0.5);
+        barAppearance.iconSize = 13;
     }
 
     function test_withTheMeterHiddenItFitsThePercentage() {

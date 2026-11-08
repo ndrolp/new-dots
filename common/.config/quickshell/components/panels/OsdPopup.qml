@@ -199,7 +199,7 @@ PanelWindow {
                 radius: 21
                 color: root.highlighted ? theme.accent : theme.backgroundSecondary
 
-                Text {
+                ShellText {
                     anchors.centerIn: parent
                     text: root.mode === "volume"
                         ? (!root.audio || root.audio.muted ? "󰝟" : "󰕾")
@@ -226,7 +226,7 @@ PanelWindow {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 6
 
-                Text {
+                ShellText {
                     id: osdLabel
 
                     width: parent.width
@@ -257,7 +257,7 @@ PanelWindow {
                     }
                 }
 
-                Text {
+                ShellText {
                     visible: root.mode === "volume" || root.mode === "brightness"
                     text: Math.round(root.level * 100) + "%"
                     color: theme.textMuted
