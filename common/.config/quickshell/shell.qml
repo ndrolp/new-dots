@@ -164,6 +164,7 @@ ShellRoot {
         appearance: appearance
         monitors: monitors
         systemMonitor: systemMonitor
+        cava: cava
     }
 
     Modules.WallpaperSelector {

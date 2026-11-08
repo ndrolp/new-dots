@@ -14,7 +14,8 @@ Column {
     readonly property var desktop: monitors.desktopWidgetsFor(monitorName)
     readonly property var widgetOrder: monitors.desktopWidgetOrder(monitorName)
     readonly property var widgetLabels: ({
-        media: "Media", system: "System", calendar: "Calendar", network: "Network", weather: "Weather"
+        media: "Media", system: "System", calendar: "Calendar", network: "Network", weather: "Weather",
+        cava: "Cava"
     })
 
     width: parent ? parent.width : 0
@@ -180,7 +181,54 @@ Column {
                 widget: widgetGrid.modelData.widget
             }
 
-            // Only the weather widget has a setting of its own.
+            // The Cava widget's size, bars, color and shadow.
+            Repeater {
+                model: widgetGrid.modelData.widget === "cava" ? [
+                    { label: "Cava width", from: 80, to: 1600, key: "width" },
+                    { label: "Cava height", from: 20, to: 400, key: "height" },
+                    { label: "Cava bars", from: 8, to: 96, key: "barCount" }
+                ] : []
+
+                delegate: Panels.SettingsNumber {
+                    required property var modelData
+
+                    width: widgetGrid.cellWidth
+                    appearance: root.appearance
+                    label: modelData.label
+                    from: modelData.from
+                    to: modelData.to
+                    value: root.desktop.cava[modelData.key]
+                    onEdited: number => root.setWidget("cava", modelData.key, number)
+                }
+            }
+
+            Panels.SettingsField {
+                width: widgetGrid.cellWidth
+                visible: widgetGrid.modelData.widget === "cava"
+                appearance: root.appearance
+                label: "Cava color"
+
+                Panels.SettingsChoiceList {
+                    width: parent.width
+                    appearance: root.appearance
+                    options: DesktopWidgetsModel.cavaColors.map(color => ({
+                        label: color.charAt(0).toUpperCase() + color.slice(1), value: color
+                    }))
+                    value: root.desktop.cava.color
+                    onChosen: color => root.setWidget("cava", "color", color)
+                }
+            }
+
+            Panels.SettingsSwitchRow {
+                width: widgetGrid.cellWidth
+                visible: widgetGrid.modelData.widget === "cava"
+                appearance: root.appearance
+                label: "Cava shadow"
+                checked: root.desktop.cava.shadow
+                onToggled: root.setWidget("cava", "shadow", !root.desktop.cava.shadow)
+            }
+
+            // The weather widget's location.
             Panels.SettingsField {
                 width: widgetGrid.cellWidth
                 visible: widgetGrid.modelData.widget === "weather"

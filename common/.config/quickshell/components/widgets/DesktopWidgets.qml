@@ -5,6 +5,8 @@ import Quickshell.Networking
 import Quickshell.Services.Mpris
 import Quickshell.Wayland
 import QtQuick
+import QtQuick.Effects
+import "../bar" as Bar
 import "../../config" as Config
 import "../../config/DesktopWidgetsModel.js" as DesktopWidgetsModel
 
@@ -14,6 +16,8 @@ Variants {
     required property var appearance
     required property var monitors
     required property var systemMonitor
+    // The shell's shared cava (services/Cava.qml).
+    required property var cava
 
     model: Quickshell.screens
 
@@ -28,7 +32,9 @@ Variants {
         return desktop[widget].enabled;
     }
 
-    function widgetHeight(widget) {
+    function widgetHeight(desktop, widget) {
+        if (widget === "cava")
+            return desktop.cava.height;
         if (widget === "media")
             return 74;
         if (widget === "weather")
@@ -51,7 +57,7 @@ Variants {
             if (candidate === widget)
                 break;
             if (widgetEnabled(desktop, candidate) && desktop[candidate].position === position)
-                offset += widgetHeight(candidate) + widgetGap;
+                offset += widgetHeight(desktop, candidate) + widgetGap;
         }
 
         return offset;
@@ -66,7 +72,7 @@ Variants {
         for (let index = 0; index < widgetOrder.length; index++) {
             const widget = widgetOrder[index];
             if (widgetEnabled(desktop, widget) && desktop[widget].position === position)
-                height += widgetHeight(widget) + (height > 0 ? widgetGap : 0);
+                height += widgetHeight(desktop, widget) + (height > 0 ? widgetGap : 0);
         }
 
         return height;
@@ -376,6 +382,56 @@ Variants {
                     color: theme.text
                     font.pixelSize: root.appearance.textSize
                     font.bold: true
+                }
+            }
+        }
+
+        // Just the bars, on the wallpaper: no card behind them. They fade out
+        // while cava is silent and back in with sound.
+        DesktopCard {
+            id: cavaWidget
+
+            readonly property var options: widgetWindow.desktop.cava
+            // While shown, it keeps the shared cava running with at least its
+            // bar count; faded out in silence still counts, so cava hears the
+            // sound that shows it again.
+            readonly property bool drawing: active && widgetWindow.visible
+            readonly property int barCount: options.barCount
+
+            widget: "cava"
+            width: options.width
+            height: options.height
+            desktop: widgetWindow.desktop
+            color: "transparent"
+            border.width: 0
+
+            onDrawingChanged: root.cava.setDrawing(cavaWidget, drawing)
+            Component.onCompleted: root.cava.setDrawing(cavaWidget, drawing)
+            Component.onDestruction: root.cava.setDrawing(cavaWidget, false)
+
+            Bar.CavaBars {
+                anchors.fill: parent
+                opacity: root.cava.silent ? 0 : 1
+                frame: root.cava.heights
+                barCount: cavaWidget.barCount
+                gap: 2
+                barWidth: Math.max(1, (width - gap * (barCount - 1)) / Math.max(1, barCount))
+                colorName: cavaWidget.options.color
+                smoothing: root.appearance.motion.frame
+                layer.enabled: cavaWidget.options.shadow
+                layer.effect: MultiEffect {
+                    shadowEnabled: true
+                    shadowColor: Qt.rgba(0, 0, 0, 0.6)
+                    shadowBlur: 0.5
+                    shadowVerticalOffset: 2
+                    autoPaddingEnabled: true
+                }
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: root.appearance.motion.long
+                        easing.type: root.appearance.motion.easing
+                    }
                 }
             }
         }

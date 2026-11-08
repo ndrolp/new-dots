@@ -34,7 +34,11 @@ TestCase {
         system: { enabled: true, position: "bottom-left" },
         calendar: { enabled: false, position: "top-left" },
         network: { enabled: true, position: "bottom-left" },
-        weather: { enabled: false, position: "bottom-left", location: "Ourense, ES" }
+        weather: { enabled: false, position: "bottom-left", location: "Ourense, ES" },
+        cava: {
+            enabled: false, position: "bottom-center", width: 360, height: 80, barCount: 32,
+            color: "white", shadow: true
+        }
     })
 
     function test_migrationMarksTheFilesWithTheSchemaVersion() {
@@ -205,7 +209,7 @@ TestCase {
         const updated = DesktopWidgetsModel.moveDesktopWidget(displaySettings, aoc, "media", -1);
 
         compare(DesktopWidgetsModel.desktopWidgetOrder(updated[aoc].desktopWidgets),
-            ["media", "calendar", "weather", "network", "system"]);
+            ["media", "calendar", "weather", "network", "system", "cava"]);
         compare(updated[samsung].desktopWidgets.order, liveDesktop.order);
         compare(DesktopWidgetsModel.moveDesktopWidget(updated, aoc, "media", -1), updated);
     }
@@ -219,5 +223,19 @@ TestCase {
         compare(updated["HDMI-9"].desktopWidgets.weather.location, "Vigo, ES");
         compare(updated["HDMI-9"].desktopWidgets.media, { enabled: false, position: "bottom-left" });
         compare(updated[aoc].desktopWidgets.weather.location, "Ourense, ES");
+    }
+
+    function test_aMonitorWithoutCavaSettingsGetsTheCavaWidgetOff() {
+        const cava = DesktopWidgetsModel.desktopWidgetsFor({}, "HDMI-9").cava;
+
+        compare(cava, {
+            enabled: false, position: "bottom-center", width: 360, height: 80, barCount: 32,
+            color: "white", shadow: true
+        });
+    }
+
+    function test_theCavaWidgetCanBeWhiteOrAnyThemeColor() {
+        compare(DesktopWidgetsModel.cavaColors,
+            ["white", "accent", "blue", "green", "yellow", "orange", "red", "purple", "text"]);
     }
 }

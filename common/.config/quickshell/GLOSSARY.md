@@ -25,7 +25,7 @@ Un atajo (compact, balanced, spacious) que rellena de una vez los tamaños de un
 _Avoid_: Densidad (como ajuste guardado)
 
 **Desktop widget** (widget de escritorio):
-Una pieza informativa dibujada sobre el fondo de un monitor (media, calendario, tiempo, red, sistema, reloj de fondo). Se configura por monitor, fuera de los bar profiles.
+Una pieza informativa dibujada sobre el fondo de un monitor (media, calendario, tiempo, red, sistema, cava, reloj de fondo). Se configura por monitor, fuera de los bar profiles. El de cava son solo las barras, sin tarjeta: se elige su ancho, alto, número de barras, color (blanco o un color del tema) y si lleva sombra, y se desvanece mientras no suena nada.
 _Avoid_: Widget (a secas, para cosas de la barra)
 
 **Wallpaper selector** (selector de fondos):

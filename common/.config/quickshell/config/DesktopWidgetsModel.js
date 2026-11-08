@@ -11,10 +11,14 @@ function cloneValue(value) {
 // Desktop widgets: configured per monitor in monitors.json under
 // displaySettings[monitor].desktopWidgets.
 
-const desktopWidgetNames = ["media", "system", "calendar", "network", "weather"];
+const desktopWidgetNames = ["media", "system", "calendar", "network", "weather", "cava"];
+
+// The colors the Cava desktop widget's bars can take: white, or one of the
+// theme's named colors, which follow the colorscheme.
+const cavaColors = ["white", "accent", "blue", "green", "yellow", "orange", "red", "purple", "text"];
 
 const defaultDesktopWidgets = {
-    order: ["media", "system", "calendar", "network", "weather"],
+    order: ["media", "system", "calendar", "network", "weather", "cava"],
     backgroundClock: {
         enabled: true, position: "center", size: 96, opacity: 100,
         dateFormat: "full", calendarEnabled: false
@@ -23,7 +27,12 @@ const defaultDesktopWidgets = {
     system: { enabled: false, position: "top-right" },
     calendar: { enabled: false, position: "top-left" },
     network: { enabled: false, position: "bottom-right" },
-    weather: { enabled: false, position: "top-center", location: "Ourense, ES" }
+    weather: { enabled: false, position: "top-center", location: "Ourense, ES" },
+    // Just the bars, no card: `width` and `height` are the area they fill.
+    cava: {
+        enabled: false, position: "bottom-center", width: 360, height: 80, barCount: 32,
+        color: "white", shadow: true
+    }
 };
 
 // `widgets` completed with the built-in defaults, as a fresh object.

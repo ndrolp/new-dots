@@ -251,16 +251,16 @@ TestCase {
         const up = buttons(built.item, "󰁝");
         const down = buttons(built.item, "󰁅");
 
-        compare(up.length, 5);
-        compare(down.length, 5);
+        compare(up.length, 6);
+        compare(down.length, 6);
         verify(textShown(built.item, "1. Media"));
         verify(!up[0].enabled, "the first can't move up");
-        verify(!down[4].enabled, "the last can't move down");
+        verify(!down[5].enabled, "the last can't move down");
 
         down[0].activated();
 
         compare(built.monitors.desktopWidgetOrder("DELL U2720Q"),
-            ["system", "media", "calendar", "network", "weather"]);
+            ["system", "media", "calendar", "network", "weather", "cava"]);
         verify(textShown(built.item, "1. System"));
         verify(textShown(built.item, "2. Media"));
     }
@@ -274,5 +274,41 @@ TestCase {
 
         compare(bold.length, 0);
         compare(filled.length, 0);
+    }
+
+    function test_theCavaWidgetHasItsSizeBarsColorAndShadow() {
+        const built = make();
+        const width = numberCell(built.item, "Cava width");
+        const bars = numberCell(built.item, "Cava bars");
+        const color = all(built.item, child => child.options !== undefined && child.chosen !== undefined
+            && child.options.length === 9)[0];
+        const shadow = switchRow(built.item, "Cava shadow");
+
+        verify(width);
+        verify(numberCell(built.item, "Cava height"));
+        compare(bars.value, 32);
+        compare(color.value, "white");
+        compare(color.options.map(option => option.value)[0], "white");
+        compare(shadow.checked, true);
+
+        width.field.forceActiveFocus();
+        width.field.selectAll();
+        keyClick("5");
+        keyClick("0");
+        keyClick("0");
+        keyClick(Qt.Key_Return);
+        color.chosen("accent");
+        shadow.toggled();
+
+        compare(widgetsOf(built).cava.width, 500);
+        compare(widgetsOf(built).cava.color, "accent");
+        compare(widgetsOf(built).cava.shadow, false);
+    }
+
+    function test_onlyTheCavaWidgetShowsTheCavaSettings() {
+        const built = make();
+        const media = switchRow(built.item, "Media");
+
+        compare(all(media.parent, child => child.label === "Cava width" && child.visible).length, 0);
     }
 }
