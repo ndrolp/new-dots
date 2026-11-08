@@ -61,9 +61,8 @@ Variants {
                 property int groupRadius: bar.appearance.barProfileValue(panel.profileName, "groupRadius")
                 property bool barTransparent: bar.appearance.barProfileValue(panel.profileName, "barTransparent")
                 property bool barBorder: bar.appearance.barProfileValue(panel.profileName, "barBorder")
-                // Pills and group backgrounds draw the bar border, except in a
-                // docked bar's zones, which draw it round themselves.
-                readonly property bool elementBorder: barBorder && !(barTransparent && transparentBarSlanted)
+                property bool elementBorder: bar.appearance.barProfileValue(panel.profileName, "elementBorder")
+                property bool groupBorder: bar.appearance.barProfileValue(panel.profileName, "groupBorder")
                 property int barOpacity: bar.appearance.barProfileValue(panel.profileName, "barOpacity")
                 property var barElements: bar.appearance.barProfileValue(panel.profileName, "barElements")
                 // Global, not part of the bar profile.

@@ -68,9 +68,8 @@ QtObject {
     readonly property var barElements: editedBarProfile.barElements
     readonly property bool barTransparent: editedBarProfile.barTransparent
     readonly property bool barBorder: editedBarProfile.barBorder
-    // Pills and group backgrounds draw the bar border, except in a docked bar's
-    // zones, which draw it round themselves.
-    readonly property bool elementBorder: barBorder && !(barTransparent && transparentBarSlanted)
+    readonly property bool elementBorder: editedBarProfile.elementBorder
+    readonly property bool groupBorder: editedBarProfile.groupBorder
     readonly property int barOpacity: editedBarProfile.barOpacity
 
     // Applies changes returned by BarProfileModel: saved profiles go to the

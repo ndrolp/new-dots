@@ -32,6 +32,7 @@ TestCase {
         property bool barTransparent: false
         property bool barBorder: false
         property bool elementBorder: false
+        property bool groupBorder: false
         property var barElements: BarProfileModel.normalizeBarElements({
             left: [{ id: "workspaces", enabled: true }], center: [], right: []
         })

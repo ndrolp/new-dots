@@ -31,6 +31,7 @@ TestCase {
         property bool transparentBarSlanted: false
         property bool barBorder: false
         property bool elementBorder: false
+        property bool groupBorder: false
         readonly property var motion: Motion.motion(true)
     }
 

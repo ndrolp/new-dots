@@ -240,8 +240,8 @@ Item {
                     radius: root.appearance.groupRadius
                     color: Qt.rgba(theme.surface.r, theme.surface.g, theme.surface.b,
                         theme.surface.a * root.appearance.barOpacity / 100)
-                    border.width: root.appearance.elementBorder ? 1 : 0
-                    border.color: root.appearance.elementBorder ? theme.border : "transparent"
+                    border.width: root.appearance.groupBorder ? 1 : 0
+                    border.color: root.appearance.groupBorder ? theme.border : "transparent"
 
                     AlongBarBehavior on x { appearance: root.appearance }
                     AlongBarBehavior on y { appearance: root.appearance }

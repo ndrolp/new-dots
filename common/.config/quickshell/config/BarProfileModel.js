@@ -133,6 +133,8 @@ const defaultProfile = {
     groupRadius: 8,
     barTransparent: false,
     barBorder: false,
+    elementBorder: false,
+    groupBorder: false,
     barOpacity: 100,
     barElements: defaultBarElements([])
 };
@@ -159,16 +161,16 @@ function defaultBarProfiles() {
     return {
         "minimal": profile(Object.assign({}, compact, {
             pillsTransparent: true, transparentBarTopMargin: 6, barTransparent: true,
-            barBorder: true, groupRadius: 6
+            barBorder: true, elementBorder: true, groupBorder: true, groupRadius: 6
         }), ["systemMonitor", "currentApp", "media", "bluetooth", "tray"], compactOptions),
         "work": profile({}, []),
         "media": profile({
             barHeight: 34, transparentBarTopMargin: 7, barTransparent: true,
-            barBorder: true
+            barBorder: true, elementBorder: true, groupBorder: true
         }, ["bluetooth", "tray"]),
         "presentation": profile(Object.assign({}, compact, {
             pillsTransparent: true, transparentBarTopMargin: 8, barTransparent: true,
-            barBorder: true, groupRadius: 6
+            barBorder: true, elementBorder: true, groupBorder: true, groupRadius: 6
         }), ["arch", "systemMonitor", "currentApp", "workspaces", "media", "audio",
             "bluetooth", "tray"], compactOptions)
     };

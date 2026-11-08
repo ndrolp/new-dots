@@ -544,7 +544,7 @@ TestCase {
         }
     }
 
-    function test_migratingRenamesTheTransparentBarBorderToTheBarBorder() {
+    function test_migratingSplitsTheTransparentBarBorderIntoThreeBorders() {
         const version11 = { schemaVersion: 11, barProfiles: {
             work: { barTransparentBorder: false },
             media: { barTransparentBorder: true },
@@ -553,7 +553,11 @@ TestCase {
         const profiles = SchemaMigrations.migrate(version11, {}).appearance.barProfiles;
 
         compare(profiles.work.barBorder, false);
+        compare(profiles.work.elementBorder, false);
+        compare(profiles.work.groupBorder, false);
         compare(profiles.media.barBorder, true);
+        compare(profiles.media.elementBorder, true);
+        compare(profiles.media.groupBorder, true);
         verify(profiles.media.barTransparentBorder === undefined);
         verify(profiles.presentation.barBorder === undefined);
     }

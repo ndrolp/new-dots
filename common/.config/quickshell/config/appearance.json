@@ -3,6 +3,9 @@
         "media": {
             "activeWorkspaceHorizontalPadding": 6,
             "archButtonHorizontalPadding": 6,
+            "barBorder": true,
+            "elementBorder": true,
+            "groupBorder": true,
             "barElements": {
                 "center": [
                     {
@@ -128,8 +131,10 @@
                         "joinPrevious": true
                     }
                 ],
-                "left": [],
-                "right": []
+                "left": [
+                ],
+                "right": [
+                ]
             },
             "barHeight": 30,
             "barOpacity": 55,
@@ -145,12 +150,14 @@
             "transparentBarSlanted": false,
             "transparentBarTopMargin": 10,
             "workspaceButtonSize": 18,
-            "workspacePadding": 3,
-            "barBorder": true
+            "workspacePadding": 3
         },
         "minimal": {
             "activeWorkspaceHorizontalPadding": 5,
             "archButtonHorizontalPadding": 6,
+            "barBorder": true,
+            "elementBorder": true,
+            "groupBorder": true,
             "barElements": {
                 "center": [
                     {
@@ -283,12 +290,14 @@
             "transparentBarSlanted": false,
             "transparentBarTopMargin": 7,
             "workspaceButtonSize": 18,
-            "workspacePadding": 3,
-            "barBorder": false
+            "workspacePadding": 3
         },
         "presentation": {
             "activeWorkspaceHorizontalPadding": 5,
             "archButtonHorizontalPadding": 5,
+            "barBorder": false,
+            "elementBorder": false,
+            "groupBorder": false,
             "barElements": {
                 "center": [
                     {
@@ -403,12 +412,14 @@
             "transparentBarSlanted": true,
             "transparentBarTopMargin": 8,
             "workspaceButtonSize": 18,
-            "workspacePadding": 3,
-            "barBorder": false
+            "workspacePadding": 3
         },
         "work": {
             "activeWorkspaceHorizontalPadding": 5,
             "archButtonHorizontalPadding": 6,
+            "barBorder": true,
+            "elementBorder": true,
+            "groupBorder": true,
             "barElements": {
                 "center": [
                     {
@@ -553,8 +564,7 @@
             "transparentBarSlanted": false,
             "transparentBarTopMargin": 10,
             "workspaceButtonSize": 18,
-            "workspacePadding": 3,
-            "barBorder": true
+            "workspacePadding": 3
         }
     },
     "controlCenterTiles": [

@@ -74,8 +74,15 @@ La barra transparente cuyas zonas cuelgan del borde de la pantalla en el que est
 _Avoid_: Barra inclinada, slanted bar
 
 **Bar border** (borde de la barra):
-Un ajuste del perfil de barra que dibuja una línea fina en el color de borde del colorscheme. La llevan las pills y los grupos; además, con la barra opaca va a lo largo del borde que da al escritorio, y con la docked bar va por el contorno de cada zona, salvo por el lado pegado al borde de la pantalla, y entonces las pills y los grupos de dentro no llevan la suya. Un popup anclado continúa la línea de la barra o de la zona por su contorno, sin línea donde se une a ella; un popup flotante tiene siempre su propio borde.
+Un ajuste del perfil de barra que dibuja una línea fina en el color de borde del colorscheme por la propia barra: con la barra opaca, a lo largo del borde que da al escritorio; con la docked bar, por el contorno de cada zona, salvo por el lado pegado al borde de la pantalla. Un popup anclado continúa esa línea por su contorno, sin línea donde se une a la barra. Con cualquier otra barra transparente no dibuja nada; un popup flotante tiene siempre su propio borde.
 _Avoid_: Transparent bar border, borde transparente
+
+**Element border** (borde de los elementos):
+Un ajuste del perfil de barra que dibuja la misma línea alrededor de la pill de cada bar element que no está en un grupo, con cualquier estilo de barra.
+_Avoid_: Pill border
+
+**Group border** (borde de los grupos):
+Un ajuste del perfil de barra que dibuja la misma línea alrededor del fondo compartido de cada grupo, con cualquier estilo de barra.
 
 **Icon theme** (tema de iconos):
 El conjunto de iconos de aplicaciones y de la bandeja que usa el escritorio (hoy Papirus-Dark). Lo decide GTK y Quickshell lo sigue; es el mismo para todos los temas de color y no cambia al cambiar de tema.
