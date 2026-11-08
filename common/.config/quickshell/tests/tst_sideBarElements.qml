@@ -476,10 +476,11 @@ TestCase {
         useDefaultThickness();
 
         const level = shown(audioLevel, { meterVisible: false, volume: 1 });
-        const [icon, percentage] = drawn(level);
+        const [icon, percentageBox] = drawn(level);
+        const percentage = percentageBox.children[0];
 
         compare(percentage.text, "100");
-        verify(percentage.y >= icon.height);
+        verify(percentageBox.y >= icon.height);
         verifyReadable(percentage);
     }
 

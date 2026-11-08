@@ -69,12 +69,22 @@ ElementStack {
         }
     }
 
-    ElementText {
-        appearance: root.appearance
+    // As high as the icon beside it, so the percentage stays centred on it
+    // when the icon is bigger than the text.
+    Item {
         visible: !root.meterVisible
-        value: VolumeText.percentage(root.volume)
-        color: root.muted ? theme.textMuted : theme.blue
-        font.pixelSize: root.appearance.textSize
-        font.bold: true
+        width: percentage.width
+        height: root.sideBar ? percentage.height : icon.height
+
+        ElementText {
+            id: percentage
+
+            anchors.centerIn: parent
+            appearance: root.appearance
+            value: VolumeText.percentage(root.volume)
+            color: root.muted ? theme.textMuted : theme.blue
+            font.pixelSize: root.appearance.textSize
+            font.bold: true
+        }
     }
 }
