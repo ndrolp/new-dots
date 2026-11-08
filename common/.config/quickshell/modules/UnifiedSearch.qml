@@ -14,6 +14,7 @@ Feature {
     // The features its results open.
     required property var settings
     required property var keybindCheatsheet
+    required property var webAppMaker
 
     // What the search field holds when it opens.
     property string query: ""
@@ -32,6 +33,7 @@ Feature {
         onCloseRequested: root.open = false
         onSettingsRequested: root.switchTo(root.settings)
         onKeybindCheatsheetRequested: root.switchTo(root.keybindCheatsheet)
+        onWebAppMakerRequested: root.switchTo(root.webAppMaker)
     }
 
     IpcHandler {

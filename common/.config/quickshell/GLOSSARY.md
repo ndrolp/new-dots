@@ -171,6 +171,14 @@ _Avoid_: Notificación, popup
 La vista a pantalla completa que se abre con SUPER+TAB sobre el monitor enfocado, atenuando el escritorio, y muestra los workspaces de todos los monitores, agrupados por monitor y sin repetir ninguno, cada uno como una miniatura con sus ventanas en su sitio. Arrastrar una ventana a otro workspace la mueve allí sin seguirla y la vista sigue abierta; soltarla en la casilla vacía tras el último workspace de un monitor crea uno nuevo. Pulsar una ventana la enfoca y pulsar un workspace cambia a él, y las dos cosas cierran la vista. No es un popup. No es el *window switcher*.
 _Avoid_: Expose, overview (a secas), desktop overview, escritorio (para un workspace), app (para una ventana)
 
+**Web app** (aplicación web):
+Un sitio web que se abre en su propia ventana de Chrome, sin pestañas ni barra de direcciones, y aparece como una app más: con su nombre y su icono, en la búsqueda unificada y en las barras. Usa el perfil normal de Chrome, así que comparte las sesiones iniciadas. Se reconoce por su URL exacta: dos web apps del mismo sitio con distinta URL son distintas. Pertenece a la máquina, no al repo. No es un PWA instalado ni un marcador.
+_Avoid_: PWA, shortcut, acceso directo, bookmark (que es otra cosa en la unified search)
+
+**Web app maker** (creador de web apps):
+El panel pequeño que abre SUPER+SHIFT+W en el centro del monitor enfocado para crear una web app a partir de una URL —con el nombre del título de la página y el icono del sitio, ambos editables— y para listar y borrar las web apps que ya creó. Solo ve las web apps que creó él. No es un popup.
+_Avoid_: Webapp manager, PWA installer
+
 **Query mode** (modo de búsqueda):
 Lo que pide el carácter con el que empieza la búsqueda en la unified search: `>` comandos, `?` web, `@` ventanas, `=` calculadora, `:` emoji. Sin prefijo se busca en todo.
 _Avoid_: Prefijo (para el modo en sí), filtro

@@ -94,6 +94,11 @@ hl.bind(mainMod .. " + d", hl.dsp.exec_cmd(qs .. "launcher toggle"), { descripti
 hl.bind(mainMod .. " + v", hl.dsp.exec_cmd(qs .. "clipboard toggle"), { description = "Toggle clipboard history" })
 hl.bind(mainMod .. " + p", hl.dsp.exec_cmd(qs .. "config toggle"), { description = "Toggle shell settings" })
 hl.bind(win .. " + p", hl.dsp.exec_cmd(qs .. "quick-switch press"), { description = "Quick switch monitors" })
+hl.bind(
+	win .. " + SHIFT + w",
+	hl.dsp.exec_cmd(qs .. "web-apps toggle"),
+	{ description = "Toggle web app maker" }
+)
 hl.bind(mainMod .. " + c", hl.dsp.exec_cmd(qs .. "control-center toggle"), { description = "Toggle control center" })
 hl.bind(mainMod .. " + q", hl.dsp.exec_cmd(qs .. "quick-settings toggle"), { description = "Toggle quick settings" })
 hl.bind(mainMod .. " + n", hl.dsp.exec_cmd(qs .. "notifications toggle"), { description = "Toggle notifications" })

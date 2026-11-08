@@ -64,6 +64,7 @@ TestCase {
                 property bool commandLauncherEnabled: true
                 property bool screenCaptureEnabled: true
                 property bool controlCenterEnabled: true
+                property bool webAppsEnabled: false
                 property int launcherRecentLimit: 8
                 property bool clipboardImagePreviewsEnabled: false
             }
@@ -92,7 +93,8 @@ TestCase {
             ["Quick settings", "quickSettingsEnabled"],
             ["Command launcher", "commandLauncherEnabled"],
             ["Screen capture", "screenCaptureEnabled"],
-            ["Control center", "controlCenterEnabled"]
+            ["Control center", "controlCenterEnabled"],
+            ["Web app maker", "webAppsEnabled"]
         ];
 
         for (const pair of rows) {

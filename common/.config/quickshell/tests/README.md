@@ -212,6 +212,15 @@ isn't held up by a connection that never answers:
 common/.config/quickshell/tests/app-menu-bridge.sh
 ```
 
+`webapps.sh` runs `services/webapps.py` on a scratch `XDG_DATA_HOME`, offline:
+creating a web app's entry and icon, listing only web apps, refusing the same
+URL twice, keeping `%` and quotes in the `Exec` key, and deleting only web
+apps. The rules in `services/WebApps.js` are in `tst_webApps.qml`:
+
+```sh
+common/.config/quickshell/tests/webapps.sh
+```
+
 `startup.sh` checks that `start.sh` creates the machine-local colorscheme links
 (`colorschemes/active` and `shown`) before Quickshell starts, through the
 colorscheme changer's harness, so no live session is touched:

@@ -8,5 +8,6 @@
     "quickSearchEnabled": true,
     "quickSettingsEnabled": true,
     "screenCaptureEnabled": true,
-    "unifiedSearchEnabled": true
+    "unifiedSearchEnabled": true,
+    "webAppsEnabled": true
 }
