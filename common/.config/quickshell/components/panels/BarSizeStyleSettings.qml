@@ -99,7 +99,7 @@ Column {
         Repeater {
             model: [
                 { label: "Transparent bar", propertyName: "barTransparent" },
-                { label: "Transparent bar border", propertyName: "barTransparentBorder" },
+                { label: "Bar border", propertyName: "barBorder" },
                 { label: "Docked bar", propertyName: "transparentBarSlanted" },
                 { label: "Transparent pills", propertyName: "pillsTransparent" }
             ]

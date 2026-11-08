@@ -29,7 +29,8 @@ TestCase {
         property int textSize: 13
         property bool pillsTransparent: false
         property bool transparentBarSlanted: false
-        property bool barTransparentBorder: false
+        property bool barBorder: false
+        property bool elementBorder: false
         readonly property var motion: Motion.motion(true)
     }
 

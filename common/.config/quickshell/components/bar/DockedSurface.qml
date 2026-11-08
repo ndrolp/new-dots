@@ -9,7 +9,8 @@ import "DockedZones.js" as DockedZones
 // joining it to that edge and rounded corners away from it. A side on the
 // screen's edge stays straight. While an attached popup hangs from the zone, it
 // grows to receive it. Spans run along the bar: they start at its left, or at
-// its top on a side bar.
+// its top on a side bar. With the bar border on, a hairline runs along the zone,
+// except on the screen's edge, and round the popup hanging from it.
 Canvas {
     id: root
 
@@ -26,6 +27,9 @@ Canvas {
     // null. While it resizes the zone keeps up with it frame by frame.
     property var popup: null
     property color fillColor: "#313244"
+    // Draws the bar border.
+    property bool border: false
+    property color borderColor: theme.border
     // The room beyond a zone's contents for the curves at that end.
     readonly property int endWidth: 15
     readonly property real joinRadius: 6
@@ -49,6 +53,16 @@ Canvas {
         keepStart: keepStart,
         keepEnd: keepEnd
     })
+    readonly property var borderRuns: border ? PopupOutline.dockedBorder({
+        barPosition: barPosition,
+        length: zoneLength,
+        depth: thickness,
+        radius: theme.radius,
+        joinRadius: joinRadius,
+        keepStart: keepStart,
+        keepEnd: keepEnd,
+        gap: popup ? { start: popup.start - zoneStart, end: popup.end - zoneStart } : null
+    }) : []
 
     x: sideBar ? 0 : zoneStart
     y: sideBar ? zoneStart : 0
@@ -75,6 +89,8 @@ Canvas {
 
     onPathChanged: requestPaint()
     onFillColorChanged: requestPaint()
+    onBorderRunsChanged: requestPaint()
+    onBorderColorChanged: requestPaint()
 
     Config.Theme {
         id: theme
@@ -83,18 +99,31 @@ Canvas {
     onPaint: {
         const context = getContext("2d");
 
+        function trace(run) {
+            context.moveTo(run.start.x, run.start.y);
+            for (const segment of run.segments) {
+                if (segment.controlX === undefined)
+                    context.lineTo(segment.x, segment.y);
+                else
+                    context.quadraticCurveTo(segment.controlX, segment.controlY, segment.x, segment.y);
+            }
+        }
+
         context.reset();
         context.fillStyle = fillColor;
         context.beginPath();
-        context.moveTo(path.start.x, path.start.y);
-        for (const segment of path.segments) {
-            if (segment.controlX === undefined)
-                context.lineTo(segment.x, segment.y);
-            else
-                context.quadraticCurveTo(segment.controlX, segment.controlY, segment.x, segment.y);
-        }
-
+        trace(path);
         context.closePath();
         context.fill();
+
+        if (borderRuns.length === 0)
+            return;
+
+        context.strokeStyle = borderColor;
+        context.lineWidth = 1;
+        context.beginPath();
+        for (const run of borderRuns)
+            trace(run);
+        context.stroke();
     }
 }

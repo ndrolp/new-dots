@@ -33,8 +33,8 @@ Rectangle {
     radius: appearance.radius
     color: appearance.barTransparent && !appearance.pillsTransparent
         && !appearance.transparentBarSlanted && !grouped ? theme.surface : "transparent"
-    border.width: appearance.barTransparentBorder && !grouped ? 1 : 0
-    border.color: appearance.barTransparentBorder ? theme.border : "transparent"
+    border.width: appearance.elementBorder && !grouped ? 1 : 0
+    border.color: appearance.elementBorder ? theme.border : "transparent"
 
     Behavior on color {
         ColorAnimation {

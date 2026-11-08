@@ -174,6 +174,7 @@ Item {
         thickness: root.sideBar ? root.width : root.height
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
         fillColor: root.dockedColor
+        border: root.appearance.barBorder
         keepStart: true
         z: -1
     }
@@ -189,6 +190,7 @@ Item {
         thickness: root.sideBar ? root.width : root.height
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
         fillColor: root.dockedColor
+        border: root.appearance.barBorder
         z: -1
     }
 
@@ -203,6 +205,7 @@ Item {
         thickness: root.sideBar ? root.width : root.height
         visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
         fillColor: root.dockedColor
+        border: root.appearance.barBorder
         keepEnd: true
         z: -1
     }
@@ -237,8 +240,8 @@ Item {
                     radius: root.appearance.groupRadius
                     color: Qt.rgba(theme.surface.r, theme.surface.g, theme.surface.b,
                         theme.surface.a * root.appearance.barOpacity / 100)
-                    border.width: root.appearance.barTransparentBorder ? 1 : 0
-                    border.color: root.appearance.barTransparentBorder ? theme.border : "transparent"
+                    border.width: root.appearance.elementBorder ? 1 : 0
+                    border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
                     AlongBarBehavior on x { appearance: root.appearance }
                     AlongBarBehavior on y { appearance: root.appearance }

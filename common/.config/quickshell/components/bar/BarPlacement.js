@@ -36,3 +36,25 @@ function contentMargins(bar) {
 
     return BarPosition.sides(bar.barPosition, margin(bar), 0, padding);
 }
+
+// An opaque bar's bar border: a 1px line along its edge facing the desktop,
+// left out where an attached popup hangs from it, so the popup's own border
+// carries it on. Takes the Bar position, the bar window's { width, height } and
+// that stretch { start, end } along the bar, or null. Returns the line's pieces,
+// each { x, y, width, height } in the window.
+function edgeBorder(barPosition, window, gap) {
+    const sideBar = BarPosition.sideBar(barPosition);
+    const length = sideBar ? window.height : window.width;
+    const depth = sideBar ? window.width : window.height;
+    const stretches = gap
+        ? [{ start: 0, end: Math.min(length, gap.start) }, { start: Math.max(0, gap.end), end: length }]
+        : [{ start: 0, end: length }];
+
+    return stretches.filter(stretch => stretch.end > stretch.start).map(stretch =>
+        BarPosition.area(barPosition, {
+            along: stretch.start,
+            away: depth - 1,
+            length: stretch.end - stretch.start,
+            depth: 1
+        }, depth));
+}

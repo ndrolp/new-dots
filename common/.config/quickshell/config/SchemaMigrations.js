@@ -482,11 +482,26 @@ function seedWorkspaceRadius(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
+// Step 12: the transparent bar's border becomes the bar border, which every
+// bar style draws, so its key loses "Transparent". Each profile keeps its value.
+function renameBarBorder(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+    for (const profileName in migrated.barProfiles || {}) {
+        const profile = migrated.barProfiles[profileName];
+        if (profile.barTransparentBorder === undefined)
+            continue;
+        profile.barBorder = profile.barTransparentBorder;
+        delete profile.barTransparentBorder;
+    }
+
+    return { appearance: migrated, monitors: monitors };
+}
+
 const migrationSteps = [
     migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
     migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles, explicitMonitorEntries,
     moveOptionsOntoElements, renameElementVerticalPadding, seedControlCenterTiles,
-    seedWorkspaceRadius
+    seedWorkspaceRadius, renameBarBorder
 ];
 const schemaVersion = migrationSteps.length;
 

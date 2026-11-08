@@ -543,4 +543,18 @@ TestCase {
                 profiles[name].radius, name);
         }
     }
+
+    function test_migratingRenamesTheTransparentBarBorderToTheBarBorder() {
+        const version11 = { schemaVersion: 11, barProfiles: {
+            work: { barTransparentBorder: false },
+            media: { barTransparentBorder: true },
+            presentation: {}
+        } };
+        const profiles = SchemaMigrations.migrate(version11, {}).appearance.barProfiles;
+
+        compare(profiles.work.barBorder, false);
+        compare(profiles.media.barBorder, true);
+        verify(profiles.media.barTransparentBorder === undefined);
+        verify(profiles.presentation.barBorder === undefined);
+    }
 }

@@ -23,8 +23,8 @@ Rectangle {
         : appearance.pillsTransparent || appearance.transparentBarSlanted || root.grouped
             ? "transparent" : theme.surface
 
-    border.width: appearance.barTransparentBorder && !root.grouped ? 1 : 0
-    border.color: appearance.barTransparentBorder ? theme.border : "transparent"
+    border.width: appearance.elementBorder && !root.grouped ? 1 : 0
+    border.color: appearance.elementBorder ? theme.border : "transparent"
 
     Behavior on color {
         ColorAnimation {

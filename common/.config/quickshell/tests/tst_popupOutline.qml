@@ -223,4 +223,90 @@ TestCase {
         compare(path.parts.startSide, { x: 6, y: 6 });
         compare(path.parts.startJoin, { x: 0, y: 0, controlX: 6, controlY: 0 });
     }
+
+    // The bar border round a 300x200 attached surface, as outline() gives it.
+    function attachedBorder(barPosition, unfolded) {
+        const path = PopupOutline.attachedBorder({
+            barPosition: barPosition,
+            width: 300,
+            height: 200,
+            unfolded: unfolded,
+            radius: 12,
+            joinRadius: 6
+        });
+
+        return [path.start].concat(path.segments).map(point => point.controlX === undefined
+            ? [point.x + path.x, point.y + path.y]
+            : [point.x + path.x, point.y + path.y, point.controlX + path.x, point.controlY + path.y]);
+    }
+
+    // Runs as lists of points, as outline() gives them.
+    function runPoints(runs) {
+        return runs.map(run => [run.start].concat(run.segments).map(point =>
+            point.controlX === undefined ? [point.x, point.y]
+                : [point.x, point.y, point.controlX, point.controlY]));
+    }
+
+    function test_anAttachedBorderLeavesOutTheSideAgainstTheBar_data() {
+        return [
+            { tag: "top", unfolded: 200, points: [
+                [305.5, 0], [299.5, 6, 299.5, 0], [299.5, 187.5], [287.5, 199.5, 299.5, 199.5],
+                [12.5, 199.5], [0.5, 187.5, 0.5, 199.5], [0.5, 6], [-5.5, 0, 0.5, 0]
+            ] },
+            { tag: "right", unfolded: 300, points: [
+                [300, 205.5], [294, 199.5, 300, 199.5], [12.5, 199.5], [0.5, 187.5, 0.5, 199.5],
+                [0.5, 12.5], [12.5, 0.5, 0.5, 0.5], [294, 0.5], [300, -5.5, 300, 0.5]
+            ] }
+        ];
+    }
+
+    // Half a pixel inside the outline, so the 1px line covers its edge pixel.
+    function test_anAttachedBorderLeavesOutTheSideAgainstTheBar(data) {
+        compare(attachedBorder(data.tag, data.unfolded), data.points);
+    }
+
+    function test_anAttachedBorderNamesItsParts() {
+        const path = PopupOutline.attachedBorder({
+            barPosition: "top", width: 300, height: 200, unfolded: 200, radius: 12, joinRadius: 6
+        });
+
+        compare(path.parts.endJoin, path.segments[0]);
+        compare(path.parts.startJoin, path.segments[6]);
+    }
+
+    function dockedBorder(options) {
+        return runPoints(PopupOutline.dockedBorder(Object.assign({
+            barPosition: "top", length: 200, depth: 30, radius: 8, joinRadius: 6,
+            keepStart: false, keepEnd: false, gap: null
+        }, options)));
+    }
+
+    function test_aDockedBorderLeavesOutTheScreenEdge() {
+        compare(dockedBorder({}), [[
+            [199.5, 0], [193.5, 6, 193.5, 0], [193.5, 21.5], [185.5, 29.5, 193.5, 29.5],
+            [14.5, 29.5], [6.5, 21.5, 6.5, 29.5], [6.5, 6], [0.5, 0, 6.5, 0]
+        ]]);
+    }
+
+    function test_aDockedBorderBreaksWhereAPopupHangsFromIt() {
+        compare(dockedBorder({ gap: { start: 50, end: 150 } }), [
+            [[199.5, 0], [193.5, 6, 193.5, 0], [193.5, 21.5], [185.5, 29.5, 193.5, 29.5], [150, 29.5]],
+            [[50, 29.5], [14.5, 29.5], [6.5, 21.5, 6.5, 29.5], [6.5, 6], [0.5, 0, 6.5, 0]]
+        ]);
+    }
+
+    function test_aDockedBorderLeavesOutAStraightEndOnTheScreensEdge() {
+        compare(dockedBorder({ keepStart: true, keepEnd: true }), [[[200, 29.5], [0, 29.5]]]);
+    }
+
+    function test_aPopupRunningToTheScreensEdgeLeavesNoBorderPastIt() {
+        compare(dockedBorder({ keepStart: true, gap: { start: 0, end: 100 } }), [
+            [[199.5, 0], [193.5, 6, 193.5, 0], [193.5, 21.5], [185.5, 29.5, 193.5, 29.5], [100, 29.5]]
+        ]);
+    }
+
+    function test_aDockedBorderFollowsTheBarToTheBottom() {
+        compare(dockedBorder({ barPosition: "bottom", keepStart: true, keepEnd: true }),
+            [[[200, 0.5], [0, 0.5]]]);
+    }
 }

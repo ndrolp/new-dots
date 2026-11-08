@@ -25,8 +25,8 @@ Rectangle {
     color: keepAwakeHover.hovered ? theme.surfaceHover
         : grouped || appearance.pillsTransparent || appearance.transparentBarSlanted
             ? "transparent" : theme.surface
-    border.width: appearance.barTransparentBorder && !grouped ? 1 : 0
-    border.color: appearance.barTransparentBorder ? theme.border : "transparent"
+    border.width: appearance.elementBorder && !grouped ? 1 : 0
+    border.color: appearance.elementBorder ? theme.border : "transparent"
 
     Behavior on color {
         ColorAnimation { duration: root.appearance.motion.short }

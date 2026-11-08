@@ -65,7 +65,7 @@ TestCase {
                 property int groupRadius: 16
                 property int spacing: 8
                 property bool barTransparent: false
-                property bool barTransparentBorder: false
+                property bool barBorder: false
                 property bool transparentBarSlanted: false
                 property bool pillsTransparent: false
                 property string matchingDensityPreset: "balanced"
@@ -144,7 +144,7 @@ TestCase {
     function test_styleSwitchesSitTwoPerLineAndSaveWhenToggled() {
         const built = make();
         const transparent = switchRow(built.item, "Transparent bar");
-        const border = switchRow(built.item, "Transparent bar border");
+        const border = switchRow(built.item, "Bar border");
         const docked = switchRow(built.item, "Docked bar");
         const pills = switchRow(built.item, "Transparent pills");
 
