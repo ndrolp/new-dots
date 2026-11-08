@@ -65,6 +65,8 @@ TestCase {
                 property int transparentBarTopMargin: 8
                 property int groupRadius: 16
                 property int spacing: 8
+                property int groupHorizontalPadding: 8
+                property int groupVerticalPadding: 0
                 property bool barTransparent: false
                 property bool barBorder: false
                 property bool elementBorder: false

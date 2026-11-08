@@ -613,4 +613,26 @@ TestCase {
             compare(profile.iconSize, profile.textSize, name);
         }
     }
+
+    function test_migratingGivesGroupsThePaddingTheyFollowed() {
+        const version14 = { schemaVersion: 14, barProfiles: {
+            work: { spacing: 6 },
+            media: { spacing: 4, groupHorizontalPadding: 9 }
+        } };
+        const profiles = SchemaMigrations.migrate(version14, {}).appearance.barProfiles;
+
+        compare(profiles.work.groupHorizontalPadding, 6);
+        compare(profiles.media.groupHorizontalPadding, 9);
+        compare(BarProfileModel.completeProfile(profiles.work).groupVerticalPadding, 0);
+    }
+
+    function test_aNewProfilesGroupsKeepThePaddingTheyFollowed() {
+        const profiles = BarProfileModel.defaultBarProfiles();
+
+        for (const name in profiles) {
+            const profile = BarProfileModel.completeProfile(profiles[name]);
+            compare(profile.groupHorizontalPadding, profile.spacing, name);
+            compare(profile.groupVerticalPadding, 0, name);
+        }
+    }
 }

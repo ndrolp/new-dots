@@ -52,6 +52,8 @@ Column {
                 { label: "Pill vertical padding", from: 0, to: 8, propertyName: "pillVerticalPadding" },
                 { label: "Workspace bar padding", from: 0, to: 10, propertyName: "workspacePadding" },
                 { label: "Transparent bar margin", from: 0, to: 32, propertyName: "transparentBarTopMargin" },
+                { label: "Group horizontal padding", from: 0, to: 24, propertyName: "groupHorizontalPadding" },
+                { label: "Group vertical padding", from: 0, to: 16, propertyName: "groupVerticalPadding" },
                 { label: "Icon size", from: 8, to: 32, propertyName: "iconSize" }
             ]
 

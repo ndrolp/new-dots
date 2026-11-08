@@ -167,6 +167,28 @@ TestCase {
         compare(BarLayout.groupBackground(sideBar("right"), 24, 92), { x: 0, y: 24, width: 40, height: 92 });
     }
 
+    function test_aGroupBackgroundKeepsItsVerticalPaddingFromTheBarsEdges() {
+        const top = Object.assign(bar("top"), { groupInset: 6 });
+        const left = Object.assign(sideBar("left"), { groupInset: 6 });
+
+        compare(BarLayout.groupBackground(top, 24, 92), { x: 24, y: 6, width: 92, height: 28 });
+        compare(BarLayout.groupBackground(left, 24, 92), { x: 6, y: 24, width: 28, height: 92 });
+    }
+
+    function test_aGroupBackgroundNeverInsetsPastTheMiddleOfTheBar() {
+        const top = Object.assign(bar("top"), { groupInset: 30 });
+
+        compare(BarLayout.groupBackground(top, 24, 92).height, 1);
+    }
+
+    function test_theGroupHorizontalPaddingIsTheRoomInsideAGroup() {
+        const roomy = Object.assign(bar("top"), { groupPadding: 10 });
+        const laid = BarLayout.zone(roomy, [["a", "b"]], () => 20);
+
+        compare(laid.positions.a.start, 10);
+        compare(laid.backgrounds, [{ start: 0, length: 10 + 20 + 4 + 20 + 10 }]);
+    }
+
     function test_aPopupTriggerIsItsWholeElement() {
         compare(BarLayout.trigger({ x: 6, y: 120, width: 28, height: 60 }, null),
             { x: 6, y: 120, width: 28, height: 60 });
