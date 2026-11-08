@@ -20,7 +20,7 @@ Column {
         id: theme
     }
 
-    Panels.Text {
+    Panels.ShellText {
         width: parent.width
         text: AudioOutputs.label(outputName.output)
         color: outputName.highlighted ? theme.accent : theme.text
@@ -28,7 +28,7 @@ Column {
         font.pixelSize: outputName.labelSize
     }
 
-    Panels.Text {
+    Panels.ShellText {
         width: parent.width
         visible: text !== ""
         text: outputName.port

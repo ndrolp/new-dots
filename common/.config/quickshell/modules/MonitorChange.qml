@@ -76,7 +76,7 @@ Scope {
                 border.color: theme.accent
                 border.width: 2
 
-                Panels.Text {
+                Panels.ShellText {
                     anchors.centerIn: parent
                     text: root.monitorSetups.numberOf(modelData.name)
                     color: theme.text

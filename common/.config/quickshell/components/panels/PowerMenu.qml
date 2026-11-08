@@ -161,7 +161,7 @@ Variants {
                                 anchors.centerIn: parent
                                 spacing: 8
 
-                                Panels.Text {
+                                Panels.ShellText {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: actionTile.modelData.icon
                                     color: actionTile.confirming ? theme.red

@@ -43,7 +43,7 @@ Item {
         spacing: 5
         rotation: BarLayout.turn(root.appearance)
 
-        Text {
+        ShellText {
             anchors.verticalCenter: parent.verticalCenter
             rotation: -parent.rotation
             text: value.icon
@@ -52,7 +52,7 @@ Item {
             font.bold: true
         }
 
-        Text {
+        ShellText {
             anchors.verticalCenter: parent.verticalCenter
             width: Math.min(root.maximumLength, implicitWidth)
             text: root.sharing

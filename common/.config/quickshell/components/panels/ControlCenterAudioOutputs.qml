@@ -87,7 +87,7 @@ Column {
                 width: parent.width
                 height: outputName.rowHeight
 
-                Panels.Text {
+                Panels.ShellText {
                     id: outputIcon
 
                     anchors.left: parent.left
@@ -113,7 +113,7 @@ Column {
                     highlighted: row.active
                 }
 
-                Panels.Text {
+                Panels.ShellText {
                     id: activeMark
 
                     anchors.right: parent.right

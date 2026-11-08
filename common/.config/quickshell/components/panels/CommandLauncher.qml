@@ -129,7 +129,7 @@ Variants {
                     border.width: 1
                 }
 
-                Text {
+                ShellText {
                     anchors.left: parent.left
                     anchors.leftMargin: 12
                     anchors.verticalCenter: parent.verticalCenter

@@ -177,7 +177,7 @@ Variants {
                         height: outputName.rowHeight
                         color: selected || hovered ? theme.surfaceHover : "transparent"
 
-                        Panels.Text {
+                        Panels.ShellText {
                             id: sinkIcon
 
                             anchors.left: parent.left
@@ -201,7 +201,7 @@ Variants {
                             highlighted: sinkTile.active
                         }
 
-                        Panels.Text {
+                        Panels.ShellText {
                             id: activeMark
 
                             anchors.right: parent.right

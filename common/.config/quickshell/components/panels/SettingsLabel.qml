@@ -3,7 +3,7 @@ import "../../config" as Config
 import "." as Panels
 
 // A setting's name: sentence case, regular weight, normal text color.
-Panels.Text {
+Panels.ShellText {
     required property var appearance
 
     color: theme.text

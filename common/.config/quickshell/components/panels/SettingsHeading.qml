@@ -3,7 +3,7 @@ import "../../config" as Config
 import "." as Panels
 
 // A group heading inside a section: small, muted, uppercase.
-Panels.Text {
+Panels.ShellText {
     required property var appearance
 
     color: theme.textMuted

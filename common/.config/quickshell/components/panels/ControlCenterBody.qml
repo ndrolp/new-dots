@@ -515,7 +515,7 @@ Column {
                     width: (parent.width - parent.spacing * 2) / 3
                     spacing: 2
 
-                    Panels.Text {
+                    Panels.ShellText {
                         width: parent.width
                         horizontalAlignment: Text.AlignHCenter
                         text: modelData.icon
@@ -530,7 +530,7 @@ Column {
                         text: modelData.label
                     }
 
-                    Panels.Text {
+                    Panels.ShellText {
                         width: parent.width
                         horizontalAlignment: Text.AlignHCenter
                         text: modelData.value

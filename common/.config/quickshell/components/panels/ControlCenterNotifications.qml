@@ -105,7 +105,7 @@ Column {
         }
     }
 
-    Panels.Text {
+    Panels.ShellText {
         visible: root.groups.length === 0 && root.ongoing.length === 0
         width: parent.width
         height: 64

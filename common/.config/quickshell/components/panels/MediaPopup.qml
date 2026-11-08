@@ -77,7 +77,7 @@ BarPopup {
                 fillMode: Image.PreserveAspectCrop
             }
 
-            Panels.Text {
+            Panels.ShellText {
                 anchors.centerIn: parent
                 visible: mediaArtImage.status !== Image.Ready
                 text: "󰎈"
@@ -99,7 +99,7 @@ BarPopup {
                     : "Nothing playing"
             }
 
-            Panels.Text {
+            Panels.ShellText {
                 width: parent.width
                 visible: text !== ""
                 text: root.player ? root.player.trackArtist : ""

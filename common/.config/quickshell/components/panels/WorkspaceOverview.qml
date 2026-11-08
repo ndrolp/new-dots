@@ -309,7 +309,7 @@ Variants {
                 }
             }
 
-            Text {
+            ShellText {
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: screenWindow.padding / 2

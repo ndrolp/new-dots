@@ -112,7 +112,7 @@ Rectangle {
                     }
                 }
 
-                Text {
+                ShellText {
                     anchors.centerIn: parent
                     text: workspaceButton.workspaceGlyph !== ""
                         ? workspaceButton.workspaceGlyph : workspaceButton.workspaceId
@@ -145,7 +145,7 @@ Rectangle {
                         && workspaceButton.occupied && !workspaceButton.active
                     z: 2
 
-                    Text {
+                    ShellText {
                         anchors.centerIn: parent
                         text: workspaceButton.toplevelCount > 9 ? "9+" : workspaceButton.toplevelCount
                         color: workspaceButton.urgent ? theme.background : theme.textMuted
@@ -170,7 +170,7 @@ Rectangle {
                         }
                     }
 
-                    Text {
+                    ShellText {
                         anchors.centerIn: parent
                         text: workspaceButton.workspaceGlyph !== ""
                             ? workspaceButton.workspaceGlyph : workspaceButton.workspaceId

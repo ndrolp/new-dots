@@ -120,7 +120,7 @@ Variants {
                 anchors.margins: 20
                 spacing: 12
 
-                Text {
+                ShellText {
                     width: parent.width
                     text: root.screenCapture.recording ? "SCREEN RECORDING" : "SCREEN CAPTURE"
                     color: theme.text
@@ -129,7 +129,7 @@ Variants {
                     font.bold: true
                 }
 
-                Text {
+                ShellText {
                     width: parent.width
                     text: root.screenCapture.recording
                         ? "Recording this output. Press R or Escape to stop and save."
@@ -192,7 +192,7 @@ Variants {
                             anchors.margins: 12
                             spacing: 2
 
-                            Text {
+                            ShellText {
                                 text: modelData.label
                                 color: theme.text
                                 font.family: theme.fontFamily
@@ -200,7 +200,7 @@ Variants {
                                 font.bold: true
                             }
 
-                            Text {
+                            ShellText {
                                 text: modelData.detail
                                 color: theme.textMuted
                                 font.family: theme.fontFamily
@@ -215,7 +215,7 @@ Variants {
                     }
                 }
 
-                Text {
+                ShellText {
                     width: parent.width
                     text: root.screenCapture.status
                     visible: text !== ""

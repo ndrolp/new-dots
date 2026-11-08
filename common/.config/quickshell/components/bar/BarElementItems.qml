@@ -310,7 +310,7 @@ Item {
             // The title runs sideways on a side bar, the note stays upright.
             rotation: BarLayout.turn(root.appearance)
 
-            Text {
+            ShellText {
                 anchors.verticalCenter: parent.verticalCenter
                 rotation: -parent.rotation
                 text: "󰎈"
@@ -319,7 +319,7 @@ Item {
                 font.bold: true
             }
 
-            Text {
+            ShellText {
                 id: mediaTitle
 
                 property string displayedLabel: root.displayedPlayerLabel
@@ -498,7 +498,7 @@ Item {
             id: bluetoothHover
         }
 
-        Text {
+        ShellText {
             anchors.centerIn: parent
             text: root.bluetoothAdapter && root.bluetoothAdapter.enabled ? "󰂯" : "󰂲"
             color: theme.blue
@@ -538,7 +538,7 @@ Item {
             id: trayHover
         }
 
-        Text {
+        ShellText {
             anchors.centerIn: parent
             text: StatusText.trayIcon(root.appearance.barPosition, root.activePopup === "tray")
             color: theme.green
@@ -578,7 +578,7 @@ Item {
             id: networkHover
         }
 
-        Text {
+        ShellText {
             anchors.centerIn: parent
             text: root.networkIcon()
             color: theme.purple

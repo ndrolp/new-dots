@@ -55,7 +55,7 @@ Rectangle {
         source: IconSource.forName(root.appClass)
     }
 
-    Text {
+    ShellText {
         id: windowTitle
 
         anchors.top: windowIcon.bottom

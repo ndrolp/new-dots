@@ -1,10 +1,11 @@
 import QtQuick
 import "ColorschemeColors.js" as ColorschemeColors
+import "Font.js" as Font
 
 // The shell's look: its font and radius, and the active colorscheme's 16
 // colours, which change in place when a colorscheme is applied.
 QtObject {
-    readonly property string fontFamily: "GeistMono Nerd Font Propo"
+    readonly property string fontFamily: Font.family
     readonly property int radius: 8
 
     readonly property var colorscheme: ColorschemeColors.shared()

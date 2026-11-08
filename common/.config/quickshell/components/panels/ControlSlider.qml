@@ -29,7 +29,7 @@ Column {
         width: parent.width
         height: Math.max(sliderLabel.implicitHeight, sliderValue.implicitHeight)
 
-        Panels.Text {
+        Panels.ShellText {
             id: sliderLabel
 
             anchors.left: parent.left

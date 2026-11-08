@@ -166,7 +166,7 @@ Item {
                 }
             }
 
-            Panels.Text {
+            Panels.ShellText {
                 anchors.centerIn: parent
                 visible: iconImage.status !== Image.Ready
                 text: "󰂚"
@@ -209,7 +209,7 @@ Item {
                 width: parent.width
                 height: titleLine.implicitHeight
 
-                Panels.Text {
+                Panels.ShellText {
                     id: titleLine
 
                     anchors.left: parent.left
@@ -236,7 +236,7 @@ Item {
                         radius: 9
                         color: theme.accent
 
-                        Panels.Text {
+                        Panels.ShellText {
                             anchors.centerIn: parent
                             text: root.record.count
                             color: theme.background
@@ -244,7 +244,7 @@ Item {
                         }
                     }
 
-                    Panels.Text {
+                    Panels.ShellText {
                         anchors.verticalCenter: parent.verticalCenter
                         text: root.relativeTime(root.record.timestamp)
                         color: theme.textMuted
@@ -267,7 +267,7 @@ Item {
                 }
             }
 
-            Panels.Text {
+            Panels.ShellText {
                 id: bodyText
 
                 width: parent.width

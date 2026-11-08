@@ -72,7 +72,7 @@ BarPopup {
                 width: parent.width
                 height: 22
 
-                Panels.Text {
+                Panels.ShellText {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
                     text: modelData.label
@@ -80,7 +80,7 @@ BarPopup {
                     font.pixelSize: root.appearance.textSize - 1
                 }
 
-                Panels.Text {
+                Panels.ShellText {
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
                     text: modelData.value

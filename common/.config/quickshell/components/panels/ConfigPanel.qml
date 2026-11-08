@@ -157,7 +157,7 @@ Rectangle {
         Row {
             width: parent.width
 
-            Text {
+            ShellText {
                 id: title
 
                 text: "Settings"
@@ -238,14 +238,14 @@ Rectangle {
                                 anchors.leftMargin: 12
                                 spacing: 10
 
-                                Text {
+                                ShellText {
                                     anchors.verticalCenter: parent.verticalCenter
                                     text: sectionRow.modelData.icon
                                     color: sectionRow.selected ? theme.accent : theme.textMuted
                                     font.pixelSize: 16
                                 }
 
-                                Text {
+                                ShellText {
                                     anchors.verticalCenter: parent.verticalCenter
                                     text: sectionRow.modelData.label
                                     color: sectionRow.selected ? theme.accent : theme.text
@@ -282,7 +282,7 @@ Rectangle {
                     anchors.fill: parent
                     spacing: 8
 
-                    Text {
+                    ShellText {
                         text: root.currentSection === "Bar" ? "Bar"
                             : root.currentSection === "Notifications" ? "Notifications"
                             : root.currentSection === "ControlCenter" ? "Control center"
@@ -298,7 +298,7 @@ Rectangle {
                         font.bold: true
                     }
 
-                    Text {
+                    ShellText {
                         text: root.currentSection === "Bar"
                             ? "Edit a bar profile: its sizes, style and elements."
                             : root.currentSection === "Notifications"

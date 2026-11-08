@@ -21,7 +21,7 @@ Item {
         id: theme
     }
 
-    Panels.Text {
+    Panels.ShellText {
         id: headerIcon
 
         anchors.left: parent.left

@@ -35,7 +35,7 @@ ElementStack {
         text: "󰕾"
     }
 
-    Text {
+    ShellText {
         id: icon
 
         width: Math.ceil(Math.max(mutedIcon.advanceWidth, unmutedIcon.advanceWidth))

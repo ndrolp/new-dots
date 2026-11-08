@@ -36,7 +36,7 @@ Rectangle {
         id: theme
     }
 
-    Text {
+    ShellText {
         anchors.centerIn: parent
         text: ""
         color: theme.purple

@@ -17,7 +17,7 @@ PopupRow {
         id: theme
     }
 
-    Panels.Text {
+    Panels.ShellText {
         anchors.centerIn: parent
         text: button.label
         color: button.labelColor

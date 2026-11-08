@@ -234,7 +234,7 @@ Variants {
                         border.width: 1
                     }
 
-                    Text {
+                    ShellText {
                         anchors.left: parent.left
                         anchors.leftMargin: 14
                         anchors.verticalCenter: parent.verticalCenter
@@ -296,7 +296,7 @@ Variants {
                             color: launcher.applicationView === modelData.value
                                 ? theme.accent : theme.backgroundSecondary
 
-                            Text {
+                            ShellText {
                                 anchors.centerIn: parent
                                 text: modelData.label + "  " + launcher.applicationCount(modelData.value)
                                 color: launcher.applicationView === modelData.value
@@ -404,7 +404,7 @@ Variants {
                             }
                         }
 
-                        Text {
+                        ShellText {
                             anchors.top: parent.top
                             anchors.right: parent.right
                             anchors.topMargin: 8
@@ -421,7 +421,7 @@ Variants {
                             }
                         }
 
-                        Text {
+                        ShellText {
                             anchors.left: parent.left
                             anchors.leftMargin: 8
                             anchors.right: parent.right
@@ -446,7 +446,7 @@ Variants {
                     }
                 }
 
-                Text {
+                ShellText {
                     width: parent.width
                     visible: launcher.filteredApplications.length === 0
                     text: "No matching applications"
@@ -457,7 +457,7 @@ Variants {
                     font.bold: true
                 }
 
-                Text {
+                ShellText {
                     width: parent.width
                     visible: launcher.applicationView === "favorites"
                     text: "Ctrl+Shift+H/L reorders the selected favorite"

@@ -294,7 +294,7 @@ Variants {
                 Row {
                     width: parent.width
 
-                    Text {
+                    ShellText {
                         text: "QUICK SETTINGS"
                         color: theme.text
                         font.family: theme.fontFamily
@@ -304,7 +304,7 @@ Variants {
 
                     Item { width: parent.width - parent.children[0].implicitWidth - 52; height: 1 }
 
-                    Text {
+                    ShellText {
                         text: "Esc close"
                         color: theme.textMuted
                         font.family: theme.fontFamily
@@ -333,7 +333,7 @@ Variants {
                         border.width: 1
                     }
 
-                    Text {
+                    ShellText {
                         anchors.left: parent.left
                         anchors.leftMargin: 13
                         anchors.verticalCenter: parent.verticalCenter
@@ -371,7 +371,7 @@ Variants {
                     }
                 }
 
-                Text {
+                ShellText {
                     width: parent.width
                     text: "↑↓ select  •  Enter activate  •  Ctrl+M mute  •  Ctrl+W Wi-Fi"
                     color: theme.textMuted
@@ -404,7 +404,7 @@ Variants {
                         width: actionList.width
                         height: (categoryStart ? 21 : 0) + 48
 
-                        Text {
+                        ShellText {
                             visible: actionDelegate.categoryStart
                             anchors.left: parent.left
                             anchors.top: parent.top
@@ -431,7 +431,7 @@ Variants {
 
                             HoverHandler { id: actionHover }
 
-                            Text {
+                            ShellText {
                                 anchors.left: parent.left
                                 anchors.leftMargin: 13
                                 anchors.verticalCenter: parent.verticalCenter
@@ -448,7 +448,7 @@ Variants {
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: 1
 
-                                Text {
+                                ShellText {
                                     width: parent.width
                                     text: actionDelegate.action.title
                                     color: theme.text
@@ -458,7 +458,7 @@ Variants {
                                     elide: Text.ElideRight
                                 }
 
-                                Text {
+                                ShellText {
                                     width: parent.width
                                     text: actionDelegate.action.subtitle
                                     color: theme.textMuted
@@ -477,7 +477,7 @@ Variants {
                         }
                     }
 
-                    Text {
+                    ShellText {
                         anchors.centerIn: parent
                         visible: actionList.count === 0
                         text: "No matching quick settings"

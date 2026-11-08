@@ -65,7 +65,7 @@ Column {
                 height: 36
                 color: selected || hovered ? theme.surfaceHover : "transparent"
 
-                Panels.Text {
+                Panels.ShellText {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.leftMargin: 8

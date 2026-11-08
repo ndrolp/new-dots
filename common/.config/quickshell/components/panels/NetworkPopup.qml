@@ -90,7 +90,7 @@ BarPopup {
                 leftPadding: 30
                 rightPadding: 28
 
-                Panels.Text {
+                Panels.ShellText {
                     anchors.left: parent.left
                     anchors.leftMargin: 10
                     anchors.verticalCenter: parent.verticalCenter
@@ -99,7 +99,7 @@ BarPopup {
                     font.pixelSize: 14
                 }
 
-                Panels.Text {
+                Panels.ShellText {
                     anchors.right: parent.right
                     anchors.rightMargin: 10
                     anchors.verticalCenter: parent.verticalCenter
@@ -155,7 +155,7 @@ BarPopup {
                                 }
                             }
 
-                            Panels.Text {
+                            Panels.ShellText {
                                 anchors.left: parent.left
                                 anchors.leftMargin: 8
                                 anchors.verticalCenter: parent.verticalCenter
@@ -164,7 +164,7 @@ BarPopup {
                                 font.pixelSize: 16
                             }
 
-                            Panels.Text {
+                            Panels.ShellText {
                                 anchors.fill: parent
                                 anchors.leftMargin: 36
                                 anchors.rightMargin: 40
@@ -175,7 +175,7 @@ BarPopup {
                                 font.pixelSize: root.appearance.textSize - 1
                             }
 
-                            Panels.Text {
+                            Panels.ShellText {
                                 anchors.right: parent.right
                                 anchors.rightMargin: 8
                                 anchors.verticalCenter: parent.verticalCenter

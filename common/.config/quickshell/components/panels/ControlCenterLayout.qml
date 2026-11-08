@@ -199,7 +199,7 @@ Column {
             visible: !chevron.visible
         }
 
-        Panels.Text {
+        Panels.ShellText {
             id: chevron
 
             anchors.centerIn: parent

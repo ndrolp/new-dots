@@ -36,7 +36,7 @@ Flow {
             border.color: theme.border
             border.width: 1
 
-            Panels.Text {
+            Panels.ShellText {
                 id: optionLabel
 
                 anchors.centerIn: parent

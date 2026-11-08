@@ -51,7 +51,7 @@ BarPopup {
                 width: parent.width
                 height: outputName.rowHeight
 
-                Panels.Text {
+                Panels.ShellText {
                     id: outputIconLabel
 
                     anchors.left: parent.left

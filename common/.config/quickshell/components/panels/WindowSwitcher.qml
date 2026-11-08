@@ -233,7 +233,7 @@ Variants {
                         source: IconSource.forName(windowCard.appClass)
                     }
 
-                    Text {
+                    ShellText {
                         anchors.left: applicationIcon.right
                         anchors.leftMargin: 8
                         anchors.right: parent.right
@@ -285,7 +285,7 @@ Variants {
                             radius: root.appearance.radius
                             color: theme.surface
 
-                            Text {
+                            ShellText {
                                 id: workspaceLabel
 
                                 anchors.centerIn: parent
@@ -306,7 +306,7 @@ Variants {
                 }
             }
 
-            Text {
+            ShellText {
                 anchors.centerIn: parent
                 visible: switcherCard.windowCount === 0
                 text: "No switchable windows"
