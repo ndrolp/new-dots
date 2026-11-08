@@ -17,6 +17,8 @@ TestCase {
         id: barAppearance
 
         property int textSize: 13
+
+        property int iconSize: 13
     }
 
     Component {

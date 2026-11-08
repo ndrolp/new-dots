@@ -23,6 +23,7 @@ TestCase {
         property int radius: 8
         property int workspaceButtonSize: 20
         property int textSize: 13
+        property int iconSize: 13
         property int archButtonHorizontalPadding: 5
         property int activeWorkspaceHorizontalPadding: 6
         property int pillVerticalPadding: 3

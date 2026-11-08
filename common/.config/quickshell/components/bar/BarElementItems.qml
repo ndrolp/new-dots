@@ -181,7 +181,7 @@ Item {
             icon: root.appearance.doNotDisturb ? "󰂛" : "󰂚"
             iconColor: root.appearance.doNotDisturb ? theme.yellow
                 : root.notificationHistory.unreadCount > 0 ? theme.accent : theme.textMuted
-            iconSize: root.appearance.textSize
+            iconSize: root.appearance.iconSize
             value: root.notificationHistory.unreadCount > 99 ? "99+"
                 : root.notificationHistory.unreadCount
             valueVisible: BarProfileModel.elementOption(root.appearance.barElements, "notifications", "badgeVisible")
@@ -315,7 +315,7 @@ Item {
                 rotation: -parent.rotation
                 text: "󰎈"
                 color: theme.green
-                font.pixelSize: root.appearance.textSize
+                font.pixelSize: root.appearance.iconSize
                 font.bold: true
             }
 
@@ -502,7 +502,7 @@ Item {
             anchors.centerIn: parent
             text: root.bluetoothAdapter && root.bluetoothAdapter.enabled ? "󰂯" : "󰂲"
             color: theme.blue
-            font.pixelSize: root.appearance.textSize
+            font.pixelSize: root.appearance.iconSize
             font.bold: true
         }
 
@@ -542,7 +542,7 @@ Item {
             anchors.centerIn: parent
             text: StatusText.trayIcon(root.appearance.barPosition, root.activePopup === "tray")
             color: theme.green
-            font.pixelSize: root.appearance.textSize
+            font.pixelSize: root.appearance.iconSize
             font.bold: true
         }
 
@@ -582,7 +582,7 @@ Item {
             anchors.centerIn: parent
             text: root.networkIcon()
             color: theme.purple
-            font.pixelSize: root.appearance.textSize
+            font.pixelSize: root.appearance.iconSize
             font.bold: true
         }
 
@@ -625,7 +625,8 @@ Item {
             appearance: root.appearance
             icon: StatusText.batteryIcon(root.battery, UPowerDeviceState)
             iconColor: theme.yellow
-            iconSize: root.appearance.textSize
+            iconSize: root.appearance.iconSize
+            valueSize: root.appearance.textSize
             value: Math.round(root.battery.percentage * 100) + "%"
             valueVisible: BarProfileModel.elementOption(root.appearance.barElements, "battery", "percentageVisible")
         }

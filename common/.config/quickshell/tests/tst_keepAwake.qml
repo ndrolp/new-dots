@@ -27,6 +27,7 @@ TestCase {
 
         property int radius: 12
         property int textSize: 13
+        property int iconSize: 13
         property bool pillsTransparent: false
         property bool transparentBarSlanted: false
         property bool barBorder: false
@@ -98,6 +99,15 @@ TestCase {
 
         compare(cup.text, "󰛊");
         compare(cup.color, theme.textMuted);
+    }
+
+    function test_theCupFollowsTheIconSizeNotTheTextSize() {
+        const cup = cupOf(makeElement(false));
+
+        compare(cup.font.pixelSize, 13);
+        barAppearance.iconSize = 20;
+        compare(cup.font.pixelSize, 20);
+        barAppearance.iconSize = 13;
     }
 
     function test_whileOnTheElementShowsAFilledCupInGreen() {

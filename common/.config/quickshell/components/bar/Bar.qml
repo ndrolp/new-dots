@@ -50,6 +50,7 @@ Variants {
                 property int radius: bar.appearance.barProfileValue(panel.profileName, "radius")
                 property int workspaceButtonSize: bar.appearance.barProfileValue(panel.profileName, "workspaceButtonSize")
                 property int textSize: bar.appearance.barProfileValue(panel.profileName, "textSize")
+                property int iconSize: bar.appearance.barProfileValue(panel.profileName, "iconSize")
                 property int archButtonHorizontalPadding: bar.appearance.barProfileValue(panel.profileName, "archButtonHorizontalPadding")
                 property int activeWorkspaceHorizontalPadding: bar.appearance.barProfileValue(panel.profileName, "activeWorkspaceHorizontalPadding")
                 property int pillVerticalPadding: bar.appearance.barProfileValue(panel.profileName, "pillVerticalPadding")

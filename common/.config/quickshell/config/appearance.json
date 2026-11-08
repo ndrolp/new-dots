@@ -149,7 +149,8 @@
             "transparentBarSlanted": false,
             "transparentBarTopMargin": 10,
             "workspaceButtonSize": 18,
-            "workspacePadding": 3
+            "workspacePadding": 3,
+            "iconSize": 13
         },
         "minimal": {
             "activeWorkspaceHorizontalPadding": 5,
@@ -290,7 +291,8 @@
             "transparentBarSlanted": false,
             "transparentBarTopMargin": 7,
             "workspaceButtonSize": 18,
-            "workspacePadding": 3
+            "workspacePadding": 3,
+            "iconSize": 13
         },
         "presentation": {
             "activeWorkspaceHorizontalPadding": 5,
@@ -413,7 +415,8 @@
             "transparentBarSlanted": true,
             "transparentBarTopMargin": 8,
             "workspaceButtonSize": 18,
-            "workspacePadding": 3
+            "workspacePadding": 3,
+            "iconSize": 13
         },
         "work": {
             "activeWorkspaceHorizontalPadding": 5,
@@ -566,7 +569,8 @@
             "transparentBarSlanted": false,
             "transparentBarTopMargin": 10,
             "workspaceButtonSize": 18,
-            "workspacePadding": 3
+            "workspacePadding": 3,
+            "iconSize": 13
         }
     },
     "controlCenterTiles": [
@@ -631,5 +635,5 @@
     "nightLightTemperature": 3800,
     "notificationPopupLocation": "top-right",
     "reduceMotion": false,
-    "schemaVersion": 13
+    "schemaVersion": 14
 }

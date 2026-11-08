@@ -9,6 +9,8 @@ IconValue {
 
     icon: "󰥔"
     iconColor: color
+    iconSize: appearance.iconSize
+    valueSize: appearance.textSize
     value: Qt.formatTime(clock.date, "HH:mm")
 
     SystemClock {

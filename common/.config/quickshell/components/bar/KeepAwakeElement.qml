@@ -64,7 +64,7 @@ Rectangle {
         horizontalAlignment: Text.AlignHCenter
         text: KeepAwakeState.cup(root.keepAwake.on)
         color: root.keepAwake.on ? theme.green : theme.textMuted
-        font.pixelSize: root.appearance.textSize
+        font.pixelSize: root.appearance.iconSize
         font.bold: true
     }
 
