@@ -4,8 +4,6 @@
             "activeWorkspaceHorizontalPadding": 6,
             "archButtonHorizontalPadding": 6,
             "barBorder": true,
-            "elementBorder": true,
-            "groupBorder": true,
             "barElements": {
                 "center": [
                     {
@@ -48,7 +46,7 @@
                         "id": "workspaces",
                         "joinPrevious": true,
                         "options": {
-                            "appCountVisible": false,
+                            "glyphsEnabled": false,
                             "glyphs": [
                                 "",
                                 "",
@@ -71,9 +69,10 @@
                                 "",
                                 ""
                             ],
-                            "glyphsEnabled": false,
                             "hideEmpty": false,
-                            "radius": 20
+                            "appCountVisible": false,
+                            "radius": 20,
+                            "verticalPadding": 4
                         }
                     },
                     {
@@ -131,15 +130,15 @@
                         "joinPrevious": true
                     }
                 ],
-                "left": [
-                ],
-                "right": [
-                ]
+                "left": [],
+                "right": []
             },
             "barHeight": 30,
             "barOpacity": 55,
             "barTransparent": true,
+            "elementBorder": true,
             "elementVerticalPadding": 8,
+            "groupBorder": true,
             "groupRadius": 31,
             "horizontalPadding": 13,
             "pillVerticalPadding": 2,
@@ -156,15 +155,13 @@
             "activeWorkspaceHorizontalPadding": 5,
             "archButtonHorizontalPadding": 6,
             "barBorder": true,
-            "elementBorder": true,
-            "groupBorder": true,
             "barElements": {
                 "center": [
                     {
                         "enabled": true,
                         "id": "workspaces",
                         "options": {
-                            "appCountVisible": false,
+                            "glyphsEnabled": false,
                             "glyphs": [
                                 "",
                                 "",
@@ -187,9 +184,10 @@
                                 "",
                                 ""
                             ],
-                            "glyphsEnabled": false,
                             "hideEmpty": false,
-                            "radius": 3
+                            "appCountVisible": false,
+                            "radius": 3,
+                            "verticalPadding": 8
                         }
                     }
                 ],
@@ -279,7 +277,9 @@
             "barOpacity": 80,
             "barPosition": "top",
             "barTransparent": false,
+            "elementBorder": false,
             "elementVerticalPadding": 8,
+            "groupBorder": false,
             "groupRadius": 3,
             "horizontalPadding": 8,
             "pillVerticalPadding": 2,
@@ -296,8 +296,6 @@
             "activeWorkspaceHorizontalPadding": 5,
             "archButtonHorizontalPadding": 5,
             "barBorder": false,
-            "elementBorder": false,
-            "groupBorder": false,
             "barElements": {
                 "center": [
                     {
@@ -325,7 +323,7 @@
                         "enabled": true,
                         "id": "workspaces",
                         "options": {
-                            "appCountVisible": false,
+                            "glyphsEnabled": false,
                             "glyphs": [
                                 "",
                                 "",
@@ -348,9 +346,10 @@
                                 "",
                                 ""
                             ],
-                            "glyphsEnabled": false,
                             "hideEmpty": false,
-                            "radius": 8
+                            "appCountVisible": false,
+                            "radius": 8,
+                            "verticalPadding": 4
                         }
                     }
                 ],
@@ -401,7 +400,9 @@
             "barHeight": 30,
             "barOpacity": 90,
             "barTransparent": true,
+            "elementBorder": false,
             "elementVerticalPadding": 8,
+            "groupBorder": false,
             "groupRadius": 8,
             "horizontalPadding": 8,
             "pillVerticalPadding": 2,
@@ -418,8 +419,6 @@
             "activeWorkspaceHorizontalPadding": 5,
             "archButtonHorizontalPadding": 6,
             "barBorder": true,
-            "elementBorder": true,
-            "groupBorder": true,
             "barElements": {
                 "center": [
                     {
@@ -431,7 +430,7 @@
                         "id": "workspaces",
                         "joinPrevious": true,
                         "options": {
-                            "appCountVisible": false,
+                            "glyphsEnabled": false,
                             "glyphs": [
                                 "I",
                                 "II",
@@ -454,9 +453,10 @@
                                 "",
                                 ""
                             ],
-                            "glyphsEnabled": false,
                             "hideEmpty": false,
-                            "radius": 3
+                            "appCountVisible": false,
+                            "radius": 3,
+                            "verticalPadding": 4
                         }
                     },
                     {
@@ -553,7 +553,9 @@
             "barOpacity": 78,
             "barPosition": "top",
             "barTransparent": true,
+            "elementBorder": true,
             "elementVerticalPadding": 5,
+            "groupBorder": true,
             "groupRadius": 5,
             "horizontalPadding": 14,
             "pillVerticalPadding": 2,
@@ -629,5 +631,5 @@
     "nightLightTemperature": 3800,
     "notificationPopupLocation": "top-right",
     "reduceMotion": false,
-    "schemaVersion": 12
+    "schemaVersion": 13
 }

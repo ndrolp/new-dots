@@ -500,11 +500,30 @@ function splitBarBorder(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
+// Step 13: the workspaces element gets a vertical padding of its own, starting
+// as the one it followed: the bar's vertical padding on an opaque bar, and its
+// pill's (2px more than the pill vertical padding) on a transparent one.
+function seedWorkspaceVerticalPadding(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+    for (const profileName in migrated.barProfiles || {}) {
+        const profile = migrated.barProfiles[profileName];
+        const padding = profile.barTransparent
+            ? (profile.pillVerticalPadding === undefined ? undefined : profile.pillVerticalPadding + 2)
+            : profile.elementVerticalPadding;
+        if (profile.barElements === undefined || padding === undefined)
+            continue;
+        profile.barElements = BarProfileModel.setElementOption(profile.barElements, "workspaces",
+            "verticalPadding", padding);
+    }
+
+    return { appearance: migrated, monitors: monitors };
+}
+
 const migrationSteps = [
     migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
     migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles, explicitMonitorEntries,
     moveOptionsOntoElements, renameElementVerticalPadding, seedControlCenterTiles,
-    seedWorkspaceRadius, splitBarBorder
+    seedWorkspaceRadius, splitBarBorder, seedWorkspaceVerticalPadding
 ];
 const schemaVersion = migrationSteps.length;
 

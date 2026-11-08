@@ -51,7 +51,8 @@ Column {
         "workspaces": [
             { label: "Hide empty workspaces", option: "hideEmpty" },
             { label: "Show workspace app counts", option: "appCountVisible" },
-            { label: "Workspace radius", option: "radius" }
+            { label: "Workspace radius", option: "radius" },
+            { label: "Vertical padding", option: "verticalPadding" }
         ],
         "notifications": [{ label: "Show unread badge", option: "badgeVisible" }],
         "media": [{ label: "Show track title", option: "titleVisible" }],

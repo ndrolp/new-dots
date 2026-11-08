@@ -18,13 +18,16 @@ Rectangle {
     readonly property var options: BarProfileModel.elementOptions(appearance.barElements, "workspaces")
 
     readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
-    // The element wraps its line of buttons, which runs along the bar.
+    // How thick the buttons are across the bar: on an opaque bar they fill it
+    // but for the vertical padding on either side.
+    readonly property real buttonThickness: appearance.barTransparent
+        ? appearance.workspaceButtonSize - 2
+        : Math.max(1, appearance.barHeight - options.verticalPadding * 2)
+    // The element wraps its line of buttons, which runs along the bar, and its
+    // own pill adds the vertical padding on either side.
     readonly property var size: BarLayout.size(appearance,
         (sideBar ? workspaceStack.implicitHeight : workspaceStack.implicitWidth) + (ownPill ? 16 : 0),
-        appearance.barTransparent
-            ? (sideBar ? workspaceStack.implicitWidth : workspaceStack.implicitHeight) + (ownPill
-                ? (appearance.pillVerticalPadding + 2) * 2 : 0)
-            : BarLayout.elementThickness(appearance))
+        buttonThickness + (ownPill ? options.verticalPadding * 2 : 0))
 
     implicitWidth: size.width
     implicitHeight: size.height
@@ -85,9 +88,7 @@ Rectangle {
 
                 readonly property var size: BarLayout.size(appearance, active
                     ? appearance.workspaceButtonSize + (appearance.activeWorkspaceHorizontalPadding * 2)
-                    : appearance.workspaceButtonSize, appearance.barTransparent
-                    ? appearance.workspaceButtonSize - 2
-                    : BarLayout.elementThickness(appearance))
+                    : appearance.workspaceButtonSize, root.buttonThickness)
 
                 width: size.width
                 height: size.height
