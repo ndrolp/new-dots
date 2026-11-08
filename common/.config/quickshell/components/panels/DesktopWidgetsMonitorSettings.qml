@@ -17,6 +17,11 @@ Column {
         media: "Media", system: "System", calendar: "Calendar", network: "Network", weather: "Weather",
         cava: "Cava"
     })
+    // The glyph before each desktop widget's settings.
+    readonly property var widgetIcons: ({
+        media: "󰝚", system: "󰻠", calendar: "󰃭", network: "󰤨",
+        weather: "󰖐", cava: ""
+    })
 
     width: parent ? parent.width : 0
     spacing: 14
@@ -76,6 +81,24 @@ Column {
         }
     }
 
+    Panels.SettingsGrid {
+        id: edgeGrid
+
+        width: root.width
+
+        // How far every desktop widget of this monitor keeps from the edges.
+        Panels.SettingsNumber {
+            width: edgeGrid.cellWidth
+            appearance: root.appearance
+            label: "Edge padding"
+            icon: "\uf0b2"
+            from: DesktopWidgetsModel.edgePaddingRange.from
+            to: DesktopWidgetsModel.edgePaddingRange.to
+            value: root.desktop.edgePadding
+            onEdited: padding => root.monitors.setDesktopWidgetsEdgePadding(root.monitorName, padding)
+        }
+    }
+
     Panels.SettingsHeading {
         appearance: root.appearance
         text: "Background clock"
@@ -91,6 +114,7 @@ Column {
             width: clockGrid.cellWidth
             appearance: root.appearance
             label: "Background clock"
+            icon: "󰥔"
             checked: root.desktop.backgroundClock.enabled
             onToggled: root.setWidget("backgroundClock", "enabled", !root.desktop.backgroundClock.enabled)
         }
@@ -98,13 +122,14 @@ Column {
         Placement {
             width: clockGrid.cellWidth
             label: "Clock position"
+            icon: "󰆾"
             widget: "backgroundClock"
         }
 
         Repeater {
             model: [
-                { label: "Clock size", from: 48, to: 160, key: "size" },
-                { label: "Clock opacity", from: 20, to: 100, key: "opacity" }
+                { label: "Clock size", icon: "", from: 48, to: 160, key: "size" },
+                { label: "Clock opacity", icon: "", from: 20, to: 100, key: "opacity" }
             ]
 
             delegate: Panels.SettingsNumber {
@@ -113,6 +138,7 @@ Column {
                 width: clockGrid.cellWidth
                 appearance: root.appearance
                 label: modelData.label
+                icon: modelData.icon
                 from: modelData.from
                 to: modelData.to
                 value: root.desktop.backgroundClock[modelData.key]
@@ -124,6 +150,7 @@ Column {
             width: clockGrid.cellWidth
             appearance: root.appearance
             label: "Clock calendar"
+            icon: "󰃭"
             checked: root.desktop.backgroundClock.calendarEnabled
             onToggled: root.setWidget("backgroundClock", "calendarEnabled",
                 !root.desktop.backgroundClock.calendarEnabled)
@@ -133,6 +160,7 @@ Column {
             width: clockGrid.cellWidth
             appearance: root.appearance
             label: "Date format"
+            icon: ""
 
             Panels.SettingsChoice {
                 width: parent.width
@@ -170,6 +198,7 @@ Column {
                 width: widgetGrid.cellWidth
                 appearance: root.appearance
                 label: widgetGrid.modelData.label
+                icon: root.widgetIcons[widgetGrid.modelData.widget]
                 checked: root.desktop[widgetGrid.modelData.widget].enabled
                 onToggled: root.setWidget(widgetGrid.modelData.widget, "enabled",
                     !root.desktop[widgetGrid.modelData.widget].enabled)
@@ -178,15 +207,16 @@ Column {
             Placement {
                 width: widgetGrid.cellWidth
                 label: widgetGrid.modelData.label + " position"
+                icon: "󰆾"
                 widget: widgetGrid.modelData.widget
             }
 
             // The Cava widget's size, bars, color and shadow.
             Repeater {
                 model: widgetGrid.modelData.widget === "cava" ? [
-                    { label: "Cava width", from: 80, to: 1600, key: "width" },
-                    { label: "Cava height", from: 20, to: 400, key: "height" },
-                    { label: "Cava bars", from: 8, to: 96, key: "barCount" }
+                    { label: "Cava width", icon: "", from: 80, to: 1600, key: "width" },
+                    { label: "Cava height", icon: "", from: 20, to: 400, key: "height" },
+                    { label: "Cava bars", icon: "", from: 8, to: 96, key: "barCount" }
                 ] : []
 
                 delegate: Panels.SettingsNumber {
@@ -195,6 +225,7 @@ Column {
                     width: widgetGrid.cellWidth
                     appearance: root.appearance
                     label: modelData.label
+                    icon: modelData.icon
                     from: modelData.from
                     to: modelData.to
                     value: root.desktop.cava[modelData.key]
@@ -207,6 +238,7 @@ Column {
                 visible: widgetGrid.modelData.widget === "cava"
                 appearance: root.appearance
                 label: "Cava color"
+                icon: ""
 
                 Panels.SettingsChoiceList {
                     width: parent.width
@@ -224,8 +256,56 @@ Column {
                 visible: widgetGrid.modelData.widget === "cava"
                 appearance: root.appearance
                 label: "Cava shadow"
+                icon: ""
                 checked: root.desktop.cava.shadow
                 onToggled: root.setWidget("cava", "shadow", !root.desktop.cava.shadow)
+            }
+
+            // What the Cava widget shows of the track that plays.
+            Panels.SettingsSwitchRow {
+                width: widgetGrid.cellWidth
+                visible: widgetGrid.modelData.widget === "cava"
+                appearance: root.appearance
+                label: "Cava media info"
+                icon: "󰎈"
+                checked: root.desktop.cava.mediaInfo
+                onToggled: root.setWidget("cava", "mediaInfo", !root.desktop.cava.mediaInfo)
+            }
+
+            Panels.SettingsField {
+                width: widgetGrid.cellWidth
+                visible: widgetGrid.modelData.widget === "cava"
+                appearance: root.appearance
+                label: "Cava progress"
+                icon: ""
+
+                Panels.SettingsChoice {
+                    width: parent.width
+                    appearance: root.appearance
+                    options: DesktopWidgetsModel.cavaProgressStyles.map(style => ({
+                        label: style.charAt(0).toUpperCase() + style.slice(1), value: style
+                    }))
+                    value: root.desktop.cava.progress
+                    onChosen: style => root.setWidget("cava", "progress", style)
+                }
+            }
+
+            Panels.SettingsField {
+                width: widgetGrid.cellWidth
+                visible: widgetGrid.modelData.widget === "cava" && root.desktop.cava.progress !== "off"
+                appearance: root.appearance
+                label: "Cava progress color"
+                icon: ""
+
+                Panels.SettingsChoiceList {
+                    width: parent.width
+                    appearance: root.appearance
+                    options: DesktopWidgetsModel.cavaColors.map(color => ({
+                        label: color.charAt(0).toUpperCase() + color.slice(1), value: color
+                    }))
+                    value: root.desktop.cava.progressColor
+                    onChosen: color => root.setWidget("cava", "progressColor", color)
+                }
             }
 
             // The weather widget's location.
@@ -234,6 +314,7 @@ Column {
                 visible: widgetGrid.modelData.widget === "weather"
                 appearance: root.appearance
                 label: "Location"
+                icon: ""
 
                 Panels.SettingsInput {
                     width: parent.width
@@ -271,9 +352,19 @@ Column {
             width: root.width
             height: 36
 
-            Panels.SettingsLabel {
+            Panels.SettingsIcon {
+                id: orderIcon
+
                 anchors.left: parent.left
                 anchors.leftMargin: 12
+                anchors.verticalCenter: parent.verticalCenter
+                appearance: root.appearance
+                text: root.widgetIcons[orderRow.modelData]
+            }
+
+            Panels.SettingsLabel {
+                anchors.left: orderIcon.right
+                anchors.leftMargin: 8
                 anchors.right: moveButtons.left
                 anchors.verticalCenter: parent.verticalCenter
                 appearance: root.appearance

@@ -11,6 +11,8 @@ Column {
 
     required property var appearance
     property string label: ""
+    // An optional glyph shown before the label.
+    property string icon: ""
     property bool small: false
 
     spacing: small ? 4 : 6
@@ -19,11 +21,24 @@ Column {
         id: theme
     }
 
-    Panels.SettingsLabel {
+    Row {
         width: parent.width
-        appearance: field.appearance
-        text: field.label
-        color: field.small ? theme.textMuted : theme.text
-        font.pixelSize: field.small ? field.appearance.textSize - 1 : field.appearance.textSize
+        spacing: field.icon !== "" ? 8 : 0
+
+        Panels.SettingsIcon {
+            id: fieldIcon
+
+            anchors.verticalCenter: parent.verticalCenter
+            appearance: field.appearance
+            text: field.icon
+        }
+
+        Panels.SettingsLabel {
+            width: parent.width - (fieldIcon.visible ? fieldIcon.width + parent.spacing : 0)
+            appearance: field.appearance
+            text: field.label
+            color: field.small ? theme.textMuted : theme.text
+            font.pixelSize: field.small ? field.appearance.textSize - 1 : field.appearance.textSize
+        }
     }
 }

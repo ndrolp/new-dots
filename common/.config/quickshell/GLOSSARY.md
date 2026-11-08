@@ -25,8 +25,16 @@ Un atajo (compact, balanced, spacious) que rellena de una vez los tamaños de un
 _Avoid_: Densidad (como ajuste guardado)
 
 **Desktop widget** (widget de escritorio):
-Una pieza informativa dibujada sobre el fondo de un monitor (media, calendario, tiempo, red, sistema, cava, reloj de fondo). Se configura por monitor, fuera de los bar profiles. El de cava son solo las barras, sin tarjeta: se elige su ancho, alto, número de barras, color (blanco o un color del tema) y si lleva sombra, y se desvanece mientras no suena nada.
+Una pieza informativa dibujada sobre el fondo de un monitor (media, calendario, tiempo, red, sistema, cava, reloj de fondo). Se configura por monitor, fuera de los bar profiles; cada monitor elige también a qué distancia de sus bordes quedan todos sus desktop widgets (el reloj de fondo, algo más lejos). El de cava son solo las barras, sin tarjeta: se elige su ancho, alto, número de barras, color (blanco o un color del tema) y si lleva sombra, y las barras se desvanecen mientras no suena nada. Puede mostrar además, bajo las barras y alineados con su columna, la *media info* y el *track progress*; estos siguen visibles con la pista en pausa y solo se desvanecen cuando no hay reproductor o está parado. El ancho y el alto son siempre los de las barras; lo demás se añade debajo. La sombra, si la lleva, cubre todo el widget. Si suena algo sin reproductor solo hay barras, y sin duración conocida no hay progreso.
 _Avoid_: Widget (a secas, para cosas de la barra)
+
+**Media info** (info de lo que suena):
+Lo que el desktop widget de cava muestra de la pista que suena: carátula, icono de la app que la reproduce, título, artista, álbum y si está en pausa. Es solo para mirar: no tiene controles. Se activa todo junto.
+_Avoid_: Now playing, media card (que es la del control center)
+
+**Track progress** (progreso de la pista):
+Cuánto se ha reproducido de la pista que suena, en el desktop widget de cava. Tiene tres estilos: *off*, *line* (una línea fina aparte de las barras) y *bars* (las barras se pintan en el color de progreso hasta el porcentaje exacto, aunque corte una barra por la mitad, y el resto conserva su color). El color de progreso se elige de la misma lista que el de las barras. Con el estilo *bars*, en pausa no se ve, porque las barras se desvanecen.
+_Avoid_: Seek bar, barra de progreso (para el estilo *bars*)
 
 **Wallpaper selector** (selector de fondos):
 La vista a pantalla completa que se abre sobre el monitor enfocado para elegir el fondo de ese monitor. La lista de fondos dentro de los ajustes no es un wallpaper selector, sino parte de la sección Wallpapers del panel de ajustes.

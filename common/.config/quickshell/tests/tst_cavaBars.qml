@@ -123,4 +123,38 @@ TestCase {
         compare(item.implicitWidth, 46);
         compare(drawn(item)[1].x, 12);
     }
+
+    function painted(item) {
+        return drawn(item).map(bar => {
+            const fill = bar.children.find(child => child.objectName === "barProgress");
+            return fill.visible ? fill.width : 0;
+        });
+    }
+
+    function test_withoutProgressNoBarIsPainted() {
+        compare(painted(bars({ width: 40, barCount: 4, barWidth: 8, gap: 2 })), [0, 0, 0, 0]);
+    }
+
+    function test_progressPaintsTheBarsUpToThePlayedFractionSplittingOne() {
+        // Bars at 0, 10, 20, 30, each 8 wide; half of 38 is 19.
+        const item = bars({ width: 38, barCount: 4, barWidth: 8, gap: 2, progress: 0.5 });
+
+        compare(painted(item), [8, 8, 0, 0]);
+        item.progress = 0.25;
+        compare(painted(item), [8, 0, 0, 0]);
+        item.progress = 0.2;
+        compare(painted(item), [7.6, 0, 0, 0]);
+        item.progress = 1;
+        compare(painted(item), [8, 8, 8, 8]);
+    }
+
+    function test_theProgressHasItsOwnColor() {
+        const item = bars({ width: 38, barCount: 4, barWidth: 8, gap: 2, progress: 1,
+            colorName: "white", progressColorName: "red" });
+        const fill = drawn(item)[0].children.find(child => child.objectName === "barProgress");
+
+        compare(fill.color, theme.red);
+        compare(item.progressColor, theme.red);
+        compare(bars({ barCount: 2 }).progressColor, theme.accent);
+    }
 }
