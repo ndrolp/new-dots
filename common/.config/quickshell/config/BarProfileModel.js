@@ -39,7 +39,11 @@ const elementOptionDefaults = {
             "", "", "", "", "", "", "", "", "", ""],
         hideEmpty: false,
         appCountVisible: true,
-        radius: 8
+        radius: 8,
+        // The room above and below the buttons, across the bar: to the bar's
+        // edges on an opaque bar, to the edge of their own pill on a
+        // transparent one.
+        verticalPadding: 5
     },
     "notifications": { badgeVisible: true },
     "media": { titleVisible: true },
@@ -55,7 +59,8 @@ const elementOptionDefaults = {
 // option is a switch.
 const elementOptionLimits = {
     "workspaces": {
-        radius: { kind: "number", from: 0, to: 24 }
+        radius: { kind: "number", from: 0, to: 24 },
+        verticalPadding: { kind: "number", from: 0, to: 16 }
     },
     "cava": {
         barCount: { kind: "number", from: 6, to: 32 },
@@ -156,7 +161,8 @@ function defaultBarProfiles() {
         workspaceButtonSize: 18, textSize: 13, archButtonHorizontalPadding: 5,
         activeWorkspaceHorizontalPadding: 5, pillVerticalPadding: 2, workspacePadding: 3
     };
-    const compactOptions = { "workspaces": { hideEmpty: true, appCountVisible: false, radius: 6 } };
+    const compactOptions = { "workspaces": { hideEmpty: true, appCountVisible: false, radius: 6,
+        verticalPadding: 4 } };
 
     return {
         "minimal": profile(Object.assign({}, compact, {

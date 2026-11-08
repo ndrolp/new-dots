@@ -34,7 +34,8 @@ TestCase {
         property bool elementBorder: false
         property bool groupBorder: false
         property var barElements: BarProfileModel.normalizeBarElements({
-            left: [{ id: "workspaces", enabled: true }], center: [], right: []
+            left: [{ id: "workspaces", enabled: true, options: { verticalPadding: 3 } }],
+            center: [], right: []
         })
         property var motion: ({ short: 0, medium: 0, long: 0, brief: 0, easing: 0 })
     }
@@ -239,10 +240,34 @@ TestCase {
 
     function test_aFloatingWorkspacesElementKeepsItsPillAroundTheStack() {
         profile.barTransparent = true;
+        const saved = profile.barElements;
+        profile.barElements = BarProfileModel.setElementOption(saved, "workspaces", "verticalPadding", 5);
 
         const element = shown(workspaces);
 
         compare([element.width, element.height], [28, 96]);
+        profile.barElements = saved;
+    }
+
+    function test_theWorkspacesVerticalPaddingSetsTheRoomAcrossAnOpaqueBar() {
+        const element = shown(workspaces);
+        const saved = profile.barElements;
+
+        profile.barElements = BarProfileModel.setElementOption(saved, "workspaces", "verticalPadding", 8);
+        compare(element.width, 24);
+        compare(buttons(element)[0].width, 24);
+        profile.barElements = saved;
+    }
+
+    function test_theWorkspacesVerticalPaddingSetsTheRoomInsideItsPill() {
+        profile.barTransparent = true;
+        const element = shown(workspaces);
+        const saved = profile.barElements;
+
+        profile.barElements = BarProfileModel.setElementOption(saved, "workspaces", "verticalPadding", 1);
+        compare(element.width, 20);
+        compare(buttons(element)[0].width, 18);
+        profile.barElements = saved;
     }
 
     function test_aGroupedWorkspacesElementLeavesThePillToItsGroup() {

@@ -561,4 +561,34 @@ TestCase {
         verify(profiles.media.barTransparentBorder === undefined);
         verify(profiles.presentation.barBorder === undefined);
     }
+
+    function test_workspacesHaveAVerticalPaddingOption() {
+        compare(BarProfileModel.elementOptionField("workspaces", "verticalPadding"),
+            { kind: "number", from: 0, to: 16 });
+    }
+
+    function test_migratingGivesWorkspacesTheVerticalPaddingTheyFollowed() {
+        const barElements = BarProfileModel.defaultBarElements([]);
+        const version12 = { schemaVersion: 12, barProfiles: {
+            work: { barTransparent: false, elementVerticalPadding: 7, pillVerticalPadding: 2,
+                barElements: barElements },
+            media: { barTransparent: true, elementVerticalPadding: 7, pillVerticalPadding: 2,
+                barElements: barElements }
+        } };
+        const profiles = SchemaMigrations.migrate(version12, {}).appearance.barProfiles;
+
+        compare(BarProfileModel.elementOption(profiles.work.barElements, "workspaces", "verticalPadding"), 7);
+        compare(BarProfileModel.elementOption(profiles.media.barElements, "workspaces", "verticalPadding"), 4);
+    }
+
+    function test_aNewProfilesWorkspacesKeepTheVerticalPaddingTheyFollowed() {
+        const profiles = BarProfileModel.defaultBarProfiles();
+
+        for (const name in profiles) {
+            const profile = BarProfileModel.completeProfile(profiles[name]);
+            compare(BarProfileModel.elementOption(profile.barElements, "workspaces", "verticalPadding"),
+                profile.barTransparent ? profile.pillVerticalPadding + 2 : profile.elementVerticalPadding,
+                name);
+        }
+    }
 }
