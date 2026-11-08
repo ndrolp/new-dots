@@ -540,7 +540,7 @@ Item {
 
         Text {
             anchors.centerIn: parent
-            text: root.activePopup === "tray" ? "󰄝" : "󰄠"
+            text: StatusText.trayIcon(root.appearance.barPosition, root.activePopup === "tray")
             color: theme.green
             font.pixelSize: root.appearance.textSize
             font.bold: true

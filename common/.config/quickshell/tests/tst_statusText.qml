@@ -121,4 +121,30 @@ TestCase {
     function test_anEmptySideBarValueStaysEmpty() {
         compare(StatusText.sideBarValue(""), "");
     }
+
+    function test_theClosedTrayPointsWhereItsPopupOpens_data() {
+        return [
+            { tag: "top", icon: "\u{f0b26}" },
+            { tag: "bottom", icon: "\u{f0b2c}" },
+            { tag: "left", icon: "\u{f0b2a}" },
+            { tag: "right", icon: "\u{f0b28}" }
+        ];
+    }
+
+    function test_theClosedTrayPointsWhereItsPopupOpens(data) {
+        compare(StatusText.trayIcon(data.tag, false), data.icon);
+    }
+
+    function test_theOpenTrayPointsBackAtTheBar_data() {
+        return [
+            { tag: "top", icon: "\u{f0b2c}" },
+            { tag: "bottom", icon: "\u{f0b26}" },
+            { tag: "left", icon: "\u{f0b28}" },
+            { tag: "right", icon: "\u{f0b2a}" }
+        ];
+    }
+
+    function test_theOpenTrayPointsBackAtTheBar(data) {
+        compare(StatusText.trayIcon(data.tag, true), data.icon);
+    }
 }
