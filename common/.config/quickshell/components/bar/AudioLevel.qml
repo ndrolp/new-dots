@@ -42,7 +42,7 @@ ElementStack {
         horizontalAlignment: Text.AlignHCenter
         text: root.muted ? mutedIcon.text : unmutedIcon.text
         color: theme.blue
-        font.pixelSize: root.appearance.textSize
+        font.pixelSize: root.appearance.iconSize
         font.bold: true
     }
 

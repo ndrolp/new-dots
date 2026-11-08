@@ -591,4 +591,26 @@ TestCase {
                 name);
         }
     }
+
+    function test_migratingGivesIconsTheTextSizeTheyFollowed() {
+        const version13 = { schemaVersion: 13, barProfiles: {
+            work: { textSize: 13 },
+            media: { textSize: 15, iconSize: 18 },
+            presentation: {}
+        } };
+        const profiles = SchemaMigrations.migrate(version13, {}).appearance.barProfiles;
+
+        compare(profiles.work.iconSize, 13);
+        compare(profiles.media.iconSize, 18);
+        verify(profiles.presentation.iconSize === undefined);
+    }
+
+    function test_aNewProfilesIconsStartAtItsTextSize() {
+        const profiles = BarProfileModel.defaultBarProfiles();
+
+        for (const name in profiles) {
+            const profile = BarProfileModel.completeProfile(profiles[name]);
+            compare(profile.iconSize, profile.textSize, name);
+        }
+    }
 }

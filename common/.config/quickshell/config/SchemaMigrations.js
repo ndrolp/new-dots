@@ -519,11 +519,25 @@ function seedWorkspaceVerticalPadding(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
+// Step 14: the bar elements' icons get a size of their own, starting as the
+// text size they followed.
+function seedIconSize(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+    for (const profileName in migrated.barProfiles || {}) {
+        const profile = migrated.barProfiles[profileName];
+        if (profile.textSize !== undefined && profile.iconSize === undefined)
+            profile.iconSize = profile.textSize;
+    }
+
+    return { appearance: migrated, monitors: monitors };
+}
+
 const migrationSteps = [
     migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
     migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles, explicitMonitorEntries,
     moveOptionsOntoElements, renameElementVerticalPadding, seedControlCenterTiles,
-    seedWorkspaceRadius, splitBarBorder, seedWorkspaceVerticalPadding
+    seedWorkspaceRadius, splitBarBorder, seedWorkspaceVerticalPadding,
+    seedIconSize
 ];
 const schemaVersion = migrationSteps.length;
 

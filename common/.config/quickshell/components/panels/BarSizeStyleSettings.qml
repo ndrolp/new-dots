@@ -51,7 +51,8 @@ Column {
                 { label: "Bar vertical padding", from: 0, to: 16, propertyName: "elementVerticalPadding" },
                 { label: "Pill vertical padding", from: 0, to: 8, propertyName: "pillVerticalPadding" },
                 { label: "Workspace bar padding", from: 0, to: 10, propertyName: "workspacePadding" },
-                { label: "Transparent bar margin", from: 0, to: 32, propertyName: "transparentBarTopMargin" }
+                { label: "Transparent bar margin", from: 0, to: 32, propertyName: "transparentBarTopMargin" },
+                { label: "Icon size", from: 8, to: 32, propertyName: "iconSize" }
             ]
 
             delegate: Panels.SettingsNumber {

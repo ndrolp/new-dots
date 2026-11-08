@@ -54,6 +54,7 @@ TestCase {
 
                 property int radius: 12
                 property int textSize: 13
+                property int iconSize: 13
                 property string barPosition: "top"
                 property int barHeight: 32
                 property int barOpacity: 90

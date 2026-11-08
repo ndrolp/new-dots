@@ -1,7 +1,8 @@
 .pragma library
 
 // What the popups and the bar elements show for the media position, audio
-// outputs, Wi-Fi, the battery and the network connection: pure logic, no
+// outputs, Wi-Fi, the battery, the network connection and the system tray:
+// pure logic, no
 // Quickshell. Quickshell objects are read only through their plain
 // properties, so tests pass plain objects in their place.
 
@@ -100,4 +101,15 @@ function networkIcon(devices) {
 // percent sign is left out, as it wouldn't fit across the bar.
 function sideBarValue(value) {
     return value.replace(/%/g, "").split(/[\s:]+/).filter(part => part !== "").join("\n");
+}
+
+// The system tray element's icon: a filled chevron in a circle, like the other
+// solid bar icons. Closed, it points where the tray popup opens, away from the
+// bar; open, back at the bar. Takes the Bar position and whether it is open.
+function trayIcon(barPosition, open) {
+    const away = { top: "down", bottom: "up", left: "right", right: "left" }[barPosition] || "down";
+    const back = { down: "up", up: "down", right: "left", left: "right" }[away];
+    const chevrons = { down: "\u{f0b26}", up: "\u{f0b2c}", left: "\u{f0b28}", right: "\u{f0b2a}" };
+
+    return chevrons[open ? back : away];
 }

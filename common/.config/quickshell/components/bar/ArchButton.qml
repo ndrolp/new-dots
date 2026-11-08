@@ -40,7 +40,7 @@ Rectangle {
         anchors.centerIn: parent
         text: ""
         color: theme.purple
-        font.pixelSize: appearance.textSize + 4
+        font.pixelSize: appearance.iconSize + 4
         font.bold: true
     }
 

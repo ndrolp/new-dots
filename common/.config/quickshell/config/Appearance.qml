@@ -56,6 +56,7 @@ QtObject {
     readonly property int radius: editedBarProfile.radius
     readonly property int workspaceButtonSize: editedBarProfile.workspaceButtonSize
     readonly property int textSize: editedBarProfile.textSize
+    readonly property int iconSize: editedBarProfile.iconSize
     readonly property int archButtonHorizontalPadding: editedBarProfile.archButtonHorizontalPadding
     readonly property int activeWorkspaceHorizontalPadding: editedBarProfile.activeWorkspaceHorizontalPadding
     readonly property int pillVerticalPadding: editedBarProfile.pillVerticalPadding

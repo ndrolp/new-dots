@@ -30,7 +30,7 @@ Item {
         gap: 5
         icon: "󰑋"
         iconColor: root.iconColor
-        iconSize: root.appearance.textSize
+        iconSize: root.appearance.iconSize
         value: root.sharing !== "" ? root.sharing : root.elapsed
         valueSize: root.appearance.textSize - 2
     }
@@ -48,7 +48,7 @@ Item {
             rotation: -parent.rotation
             text: value.icon
             color: root.iconColor
-            font.pixelSize: root.appearance.textSize
+            font.pixelSize: root.appearance.iconSize
             font.bold: true
         }
 
