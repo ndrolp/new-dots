@@ -34,6 +34,19 @@
                     "enabled": false,
                     "position": "top-left"
                 },
+                "cava": {
+                    "barCount": 91,
+                    "color": "text",
+                    "enabled": true,
+                    "height": 239,
+                    "mediaInfo": true,
+                    "position": "bottom-left",
+                    "progress": "bars",
+                    "progressColor": "accent",
+                    "shadow": false,
+                    "width": 735
+                },
+                "edgePadding": 14,
                 "media": {
                     "enabled": false,
                     "position": "bottom-left"
@@ -61,7 +74,7 @@
             }
         },
         "Philips Consumer Electronics Company PHL 243V7 0x00009A4C": {
-            "barProfile": "presentation",
+            "barProfile": "media",
             "barVisible": true,
             "desktopWidgets": {
                 "backgroundClock": {

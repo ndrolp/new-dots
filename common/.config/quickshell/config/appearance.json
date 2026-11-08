@@ -130,8 +130,10 @@
                         "joinPrevious": true
                     }
                 ],
-                "left": [],
-                "right": []
+                "left": [
+                ],
+                "right": [
+                ]
             },
             "barHeight": 30,
             "barOpacity": 55,
@@ -139,6 +141,7 @@
             "elementBorder": true,
             "elementVerticalPadding": 8,
             "groupBorder": true,
+            "groupHorizontalPadding": 4,
             "groupRadius": 31,
             "horizontalPadding": 13,
             "iconSize": 13,
@@ -150,8 +153,7 @@
             "transparentBarSlanted": false,
             "transparentBarTopMargin": 10,
             "workspaceButtonSize": 18,
-            "workspacePadding": 3,
-            "groupHorizontalPadding": 4
+            "workspacePadding": 3
         },
         "minimal": {
             "activeWorkspaceHorizontalPadding": 5,
@@ -189,7 +191,7 @@
                             "glyphsEnabled": false,
                             "hideEmpty": false,
                             "radius": 3,
-                            "verticalPadding": 8
+                            "verticalPadding": 10
                         }
                     }
                 ],
@@ -282,7 +284,9 @@
             "elementBorder": false,
             "elementVerticalPadding": 8,
             "groupBorder": false,
+            "groupHorizontalPadding": 4,
             "groupRadius": 3,
+            "groupVerticalPadding": 0,
             "horizontalPadding": 8,
             "iconSize": 13,
             "pillVerticalPadding": 2,
@@ -293,8 +297,7 @@
             "transparentBarSlanted": false,
             "transparentBarTopMargin": 7,
             "workspaceButtonSize": 18,
-            "workspacePadding": 3,
-            "groupHorizontalPadding": 4
+            "workspacePadding": 3
         },
         "presentation": {
             "activeWorkspaceHorizontalPadding": 5,
@@ -407,6 +410,7 @@
             "elementBorder": false,
             "elementVerticalPadding": 8,
             "groupBorder": false,
+            "groupHorizontalPadding": 4,
             "groupRadius": 8,
             "horizontalPadding": 8,
             "iconSize": 13,
@@ -418,8 +422,7 @@
             "transparentBarSlanted": true,
             "transparentBarTopMargin": 8,
             "workspaceButtonSize": 18,
-            "workspacePadding": 3,
-            "groupHorizontalPadding": 4
+            "workspacePadding": 3
         },
         "work": {
             "activeWorkspaceHorizontalPadding": 5,
@@ -562,7 +565,9 @@
             "elementBorder": true,
             "elementVerticalPadding": 5,
             "groupBorder": true,
+            "groupHorizontalPadding": 7,
             "groupRadius": 5,
+            "groupVerticalPadding": 0,
             "horizontalPadding": 14,
             "iconSize": 16,
             "pillVerticalPadding": 2,
@@ -573,8 +578,7 @@
             "transparentBarSlanted": false,
             "transparentBarTopMargin": 10,
             "workspaceButtonSize": 18,
-            "workspacePadding": 3,
-            "groupHorizontalPadding": 4
+            "workspacePadding": 3
         }
     },
     "controlCenterTiles": [
