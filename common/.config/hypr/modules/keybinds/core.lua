@@ -149,6 +149,24 @@ hl.bind(mainMod .. " + SHIFT + k", hl.dsp.window.move({ direction = "up" }), { d
 hl.bind(mainMod .. " + SHIFT + h", hl.dsp.window.move({ direction = "left" }), { description = "Move window left" })
 hl.bind(mainMod .. " + SHIFT + l", hl.dsp.window.move({ direction = "right" }), { description = "Move window right" })
 
+local centered = require("modules.layouts.centered")
+hl.bind(mainMod .. " + o", centered.toggle, { description = "Toggle centered layout on this workspace" })
+hl.bind(
+	mainMod .. " + SHIFT + RETURN",
+	centered.swap_into_middle,
+	{ description = "Swap window into the middle (centered layout)" }
+)
+hl.bind(
+	mainMod .. " + minus",
+	centered.narrower,
+	{ repeating = true, description = "Narrower middle column (centered layout)" }
+)
+hl.bind(
+	mainMod .. " + plus",
+	centered.wider,
+	{ repeating = true, description = "Wider middle column (centered layout)" }
+)
+
 hl.bind(
 	mainMod .. " + SHIFT +  m",
 	hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"),
