@@ -14,8 +14,10 @@ M.options = {
 	orientation = "center",
 	mfact = 0.5,
 	new_status = "slave",
-	slave_count_for_center_master = 0, -- centre the main window even with fewer than two side windows
-	always_keep_position = true, -- ...and even when it is alone
+	-- Centre the main window as soon as there is one side window; a window that is alone fills the
+	-- whole width (0 here would keep even a lone window centred).
+	slave_count_for_center_master = 1,
+	always_keep_position = false,
 }
 
 -- Workspace name -> the runtime rule that switches it to the centered layout.
