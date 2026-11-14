@@ -36,6 +36,10 @@ _Avoid_: Temporary theme, try-on
 How see-through kitty's background is. It belongs to the terminal, not to any colorscheme, so applying a colorscheme never changes it.
 _Avoid_: Theme opacity
 
+**Centered layout**:
+A way of arranging a workspace's windows for an ultrawide monitor: one main window sits in a middle column and every other window is tiled to its left or right. A window that is alone fills the whole width; once another window opens, the main window takes the middle and keeps that place when focus moves to a side window; only an explicit swap changes it. New windows open at the sides. It is turned on and off one workspace at a time with a keybind, on any monitor; turning it off gives the workspace back the layout it had before. Nothing remembers it: restarting Hyprland returns every workspace to its usual layout.
+_Avoid_: Profile, layout profile, ultrawide mode
+
 ## Relationships
 
 - **Quickshell → Hyprland**: Quickshell reads workspaces and monitors from Hyprland; monitor names are shared between the two.

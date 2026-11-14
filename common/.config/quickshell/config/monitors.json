@@ -1,5 +1,9 @@
 {
     "assignments": {
+        "AOC CU34G4 2SES7HA013005": {
+            "from": 1,
+            "to": 5
+        },
         "AOC Q27G42XE 2S6S1HA031479": {
             "from": 1,
             "to": 5
@@ -18,6 +22,10 @@
         }
     },
     "displaySettings": {
+        "AOC CU34G4 2SES7HA013005": {
+            "barProfile": "minimal",
+            "barVisible": true
+        },
         "AOC Q27G42XE 2S6S1HA031479": {
             "barProfile": "minimal",
             "barVisible": true,
@@ -43,7 +51,7 @@
                     "position": "bottom-left",
                     "progress": "bars",
                     "progressColor": "accent",
-                    "shadow": false,
+                    "shadow": true,
                     "width": 735
                 },
                 "edgePadding": 14,
@@ -72,6 +80,10 @@
                     "position": "bottom-left"
                 }
             }
+        },
+        "Hisense Electric Co. Ltd. HISENSE 0x00000001": {
+            "barProfile": "minimal",
+            "barVisible": true
         },
         "Philips Consumer Electronics Company PHL 243V7 0x00009A4C": {
             "barProfile": "media",
@@ -116,7 +128,7 @@
             }
         },
         "Samsung Display Corp. ATNA40HQ01-0": {
-            "barProfile": "work",
+            "barProfile": "minimal",
             "barVisible": true,
             "desktopWidgets": {
                 "backgroundClock": {
@@ -131,6 +143,19 @@
                     "enabled": false,
                     "position": "top-left"
                 },
+                "cava": {
+                    "barCount": 86,
+                    "color": "white",
+                    "enabled": true,
+                    "height": 279,
+                    "mediaInfo": true,
+                    "position": "bottom-left",
+                    "progress": "bars",
+                    "progressColor": "accent",
+                    "shadow": true,
+                    "width": 836
+                },
+                "edgePadding": 28,
                 "media": {
                     "enabled": false,
                     "position": "bottom-left"
