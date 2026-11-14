@@ -1,7 +1,7 @@
 hl.workspace_rule({ workspace = "special:scratchpad" })
 
 for i = 1, 10 do
-	hl.workspace_rule({ workspace = tostring(i), monitor = "desc:AOC Q27G42XE 2S6S1HA031479" })
+	hl.workspace_rule({ workspace = tostring(i), monitor = "desc:AOC CU34G4 2SES7HA013005" })
 end
 
 for i = 11, 20 do
