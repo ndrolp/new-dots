@@ -14,9 +14,11 @@ M.options = {
 	orientation = "center",
 	mfact = 0.5,
 	new_status = "slave",
-	-- Centre the main window as soon as there is one side window; a window that is alone fills the
-	-- whole width (0 here would keep even a lone window centred).
-	slave_count_for_center_master = 1,
+	-- Centre the main window once there are two side windows. With one side window the main window
+	-- sits on the left and the side window on the right; a window that is alone fills the whole
+	-- width (0 here would keep even a lone window centred).
+	slave_count_for_center_master = 2,
+	center_master_fallback = "left",
 	always_keep_position = false,
 }
 
