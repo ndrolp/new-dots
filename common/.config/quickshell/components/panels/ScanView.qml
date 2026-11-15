@@ -4,10 +4,10 @@ import "../../services/Scanners.js" as Scanners
 import "." as Panels
 
 // The scan view of the Printers panel, for one scanner: resolution, colour
-// mode and format (the last ones used), *Scan*, then its progress, and
-// what went wrong if it failed. There is no preview pass. It only shows
-// what it's handed and asks; the scanners service scans and keeps the
-// settings.
+// mode (only the ones the scanner offers) and format (the last ones used),
+// *Scan*, then its progress, and what went wrong if it failed. There is no
+// preview pass. It only shows what it's handed and asks; the scanners
+// service scans and keeps the settings.
 Column {
     id: root
 
@@ -16,6 +16,9 @@ Column {
     property var scanner: null
     // { resolution, mode, format }
     property var settings: Scanners.settings(undefined)
+    // The colour modes the scanner offers ([{ label, value, sane }]); a
+    // remembered one it doesn't offer shows as the nearest it does.
+    property var modes: Scanners.availableModes([])
     property bool scanning: false
     // 0 to 1 while scanning.
     property real progress: 0
@@ -77,8 +80,8 @@ Column {
     Panels.SettingsChoice {
         width: parent.width
         appearance: root.appearance
-        options: Scanners.modes
-        value: root.settings.mode
+        options: root.modes
+        value: Scanners.modeFor(root.settings.mode, root.modes)
         enabled: !root.scanning
         onChosen: value => root.settingChosen("mode", value)
     }
@@ -113,18 +116,20 @@ Column {
         fraction: root.progress
     }
 
+    // Why the scan failed, or, when it was saved all the same, what
+    // scanimage said.
     Panels.ShellText {
         width: parent.width
         visible: !root.scanning && root.failure !== ""
         text: root.failure
         wrapMode: Text.Wrap
-        color: theme.red
+        color: root.lastScan !== "" ? theme.orange : theme.red
         font.pixelSize: root.appearance.textSize - 1
     }
 
     Panels.ShellText {
         width: parent.width
-        visible: !root.scanning && root.failure === "" && root.lastScan !== ""
+        visible: !root.scanning && root.lastScan !== ""
         text: "Saved to " + root.lastScan
         elide: Text.ElideMiddle
         color: theme.textMuted

@@ -150,7 +150,10 @@ Variants {
                         appearance: root.appearance
                         scanners: root.scanners.scanners
                         problem: root.scanners.problem
-                        onScanRequested: scanner => panel.scanTarget = scanner
+                        onScanRequested: scanner => {
+                            root.scanners.readModes(scanner.device);
+                            panel.scanTarget = scanner;
+                        }
                     }
                 }
             }
@@ -166,6 +169,7 @@ Variants {
                 appearance: root.appearance
                 scanner: panel.scanTarget
                 settings: root.scanners.settings
+                modes: root.scanners.modes
                 scanning: root.scanners.scanning
                 progress: root.scanners.progress
                 failure: root.scanners.scanFailure

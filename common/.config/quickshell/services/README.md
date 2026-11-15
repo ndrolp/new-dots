@@ -195,15 +195,24 @@ seconds, with `scanimage -f` (fields split by tabs), leaving out webcams
 (the `v4l` backend); sane-airscan, escl and `net` devices are network,
 the rest USB. It checks once per opening that sane-airscan is loaded
 (`/etc/sane.d/dll.d/airscan` or `dll.conf`) and says why network scanners
-can't show up when it isn't. A scan runs `scanimage --format=pdf|png -p -o`
-into `~/Pictures/Scans/scan-YYYY-MM-DD-HHMMSS.<ext>` (the folder is made
-first, a failed scan's file removed), reads progress from stderr, and on
-success sends a notification whose *Open* runs `xdg-open` and *Show in
-folder* asks the file manager over `org.freedesktop.FileManager1`
-(opening the folder otherwise). The last settings are `scanSettings` in
-`appearance.json`, starting at 300 dpi, colour and PDF. Parsing, naming,
-the commands, progress, errors and the settings are plain functions in
-`Scanners.js`, tested without Quickshell.
+can't show up when it isn't. When a scanner's scan view opens it reads the
+colour modes the scanner offers (`scanimage -d <scanner> -A`, its `--mode`
+option) and offers only those: Lineart, Binary, Halftone or "Black & White"
+are black and white, and a remembered mode the scanner lacks falls back to
+the nearest one it has. A scan runs `services/scan.sh`, which makes the
+folder and runs `scanimage --format=pdf|png -p -o` into
+`~/Pictures/Scans/scan-YYYY-MM-DD-HHMMSS.<ext>`. scanimage 1.4 writes
+`<file>.part` and renames it when done, so the file being there is what
+tells a saved scan; a failed one's `.part` is removed, and the file is
+never deleted (scanimage's error is shown even when it was saved). It reads
+progress from stderr, and on success sends a notification whose *Open* runs
+`xdg-open` and *Show in folder* hands the file manager the encoded
+`file://` URI over `org.freedesktop.FileManager1` (opening the folder
+otherwise). The last settings are `scanSettings` in `appearance.json`,
+starting at 300 dpi, colour and PDF. Parsing, naming, the colour modes, the
+commands, progress, errors and the settings are plain functions in
+`Scanners.js`, tested without Quickshell; `tests/scan.sh` tests `scan.sh`
+with a fake scanimage.
 
 ## Screen capture integration
 

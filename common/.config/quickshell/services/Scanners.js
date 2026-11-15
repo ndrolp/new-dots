@@ -27,9 +27,18 @@ function savedNoticeCommand(path) {
         + '  open) xdg-open "$1" ;;\n'
         + '  folder) gdbus call --session --dest org.freedesktop.FileManager1 '
         + '--object-path /org/freedesktop/FileManager1 --method org.freedesktop.FileManager1.ShowItems '
-        + '"[\'file://$1\']" "" >/dev/null 2>&1 || xdg-open "${1%/*}" ;;\n'
+        + '"$2" "" >/dev/null 2>&1 || xdg-open "${1%/*}" ;;\n'
         + 'esac',
-        "sh", path];
+        "sh", path, "['" + fileUri(path) + "']"];
+}
+
+// The file:// URI of the absolute `path`, every segment percent-encoded
+// (quotes too, so it fits in a GVariant string).
+function fileUri(path) {
+    return "file://" + String(path).split("/")
+        .map(segment => encodeURIComponent(segment).replace(/[!'()*]/g,
+            c => "%" + c.charCodeAt(0).toString(16).toUpperCase()))
+        .join("/");
 }
 
 // How a scanner with the SANE device name `device` is connected: "network"
@@ -108,17 +117,90 @@ function settings(stored) {
     };
 }
 
-// Scans one page from `device` with `scanSettings` into `path`, making its
-// folder first. `-p` prints progress on stderr (see progressOf); a failed
-// scan leaves no half-written file behind.
-function scanCommand(device, scanSettings, path) {
+// Reads every option of the scanner `device`, for parseModes().
+function modesCommand(device) {
+    return ["env", "LC_ALL=C", "scanimage", "-d", device, "-A"];
+}
+
+// The SANE colour modes in `text`, what modesCommand prints: its --mode
+// line ("    --mode Lineart|Gray|Color [Color]"), without the current one.
+function parseModes(text) {
+    const line = /^\s*--mode\s+(.*?)(?:\s+\[[^\]]*\])?\s*$/m.exec(String(text || ""));
+    return line ? line[1].split("|").map(mode => mode.trim()).filter(mode => mode !== "") : [];
+}
+
+// Which colour mode the SANE mode `name` is ("color", "gray", "lineart"),
+// or "" for one that's none of them (pixma's "auto"). Backends name black
+// and white Lineart, Binary, Halftone or "Black & White".
+function colourOf(name) {
+    if (/lineart|binary|black|halftone|mono/i.test(name))
+        return "lineart";
+    if (/gr[ae]y/i.test(name))
+        return "gray";
+    if (/colou?r/i.test(name))
+        return "color";
+    return "";
+}
+
+// How well the SANE mode `name` stands for its colour mode, lower better:
+// SANE's own name, then one without a variant in brackets ("True Gray"
+// over "Gray[Error Diffusion]"), then the rest.
+function fit(name, value) {
+    if (name.toLowerCase() === saneModes[value].toLowerCase())
+        return 0;
+    return name.indexOf("[") < 0 ? 1 : 2;
+}
+
+// The colour choices for a scanner offering the SANE modes `offered`
+// (parseModes): [{ label, value, sane }], with `sane` the scanner's name
+// for it. When none of them is known, all three, by SANE's names.
+function availableModes(offered) {
+    const available = [];
+    for (const mode of modes) {
+        const names = (offered || []).filter(name => colourOf(name) === mode.value)
+            .sort((first, second) => fit(first, mode.value) - fit(second, mode.value));
+        if (names.length > 0)
+            available.push({ label: mode.label, value: mode.value, sane: names[0] });
+    }
+    if (available.length > 0)
+        return available;
+    return modes.map(mode => ({ label: mode.label, value: mode.value, sane: saneModes[mode.value] }));
+}
+
+// The colour mode to scan in when `mode` is wanted from a scanner with the
+// `available` modes (availableModes): it, or the nearest one there is.
+var nearestModes = { color: ["color", "gray", "lineart"], gray: ["gray", "color", "lineart"],
+    lineart: ["lineart", "gray", "color"] };
+
+function modeFor(mode, available) {
+    const values = (available || []).map(option => option.value);
+    const order = nearestModes[mode] || nearestModes[defaultSettings.mode];
+    return order.find(value => values.indexOf(value) >= 0) || defaultSettings.mode;
+}
+
+// Scans one page from `device` with `scanSettings` into `path` through
+// `script` (services/scan.sh), which makes the folder first and removes a
+// half-written file; see outcomeOf. The mode is the nearest of the
+// scanner's `available` ones (availableModes), by its own name. `-p`
+// prints progress on stderr (see progressOf).
+function scanCommand(script, device, scanSettings, path, available) {
     const chosen = settings(scanSettings);
-    const folderOf = path.slice(0, path.lastIndexOf("/")) || "/";
-    return ["sh", "-c",
-        'mkdir -p -- "$1" && out=$2 && shift 2 && "$@" || { status=$?; rm -f -- "$out"; exit "$status"; }',
-        "sh", folderOf, path,
+    const offered = available && available.length > 0 ? available : availableModes([]);
+    const mode = offered.find(option => option.value === modeFor(chosen.mode, offered));
+    return ["bash", script, path,
         "scanimage", "-d", device, "--resolution", String(chosen.resolution),
-        "--mode", saneModes[chosen.mode], "--format=" + chosen.format, "-p", "-o", path];
+        "--mode", mode.sane, "--format=" + chosen.format, "-p", "-o", path];
+}
+
+// What a scan that scanCommand ran with `exitCode` and `stderr` came to:
+// { saved, problem }. scan.sh exits 0 when the file was saved, 100 when it
+// was saved but scanimage failed after, and anything else when it wasn't;
+// `problem` is what scanimage said when it failed ("" otherwise).
+function outcomeOf(exitCode, stderr) {
+    return {
+        saved: exitCode === 0 || exitCode === 100,
+        problem: exitCode === 0 ? "" : failureOf(stderr)
+    };
 }
 
 // How far a scan is, 0 to 1, from what scanCommand has printed on stderr so

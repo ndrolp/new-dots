@@ -6,9 +6,10 @@ import "Scanners.js" as Scanners
 // The scanners SANE can see, for the Printers panel, and scanning one page
 // from one of them. It lists them only while `watching` (the panel is
 // open), every few seconds so the list keeps up, and nothing runs while
-// the panel is closed. A scan finishes even if the panel closes.
-// scanimage's output is read in Scanners.js. The last scan settings are
-// kept in appearance.json.
+// the panel is closed. When a scanner's scan view opens, the colour modes
+// it offers are read. A scan, run by scan.sh, finishes even if the panel
+// closes. scanimage's output is read in Scanners.js. The last scan
+// settings are kept in appearance.json.
 QtObject {
     id: root
 
@@ -23,16 +24,36 @@ QtObject {
     // The settings the scan view shows and the next scan uses
     // ({ resolution, mode, format }).
     readonly property var settings: Scanners.settings(appearance.scanSettings)
+    // The colour modes the scanner `modesScanner` offers
+    // ([{ label, value, sane }]); all three until they're read.
+    property string modesScanner: ""
+    property var modes: Scanners.availableModes([])
     readonly property bool scanning: scanProcess.running
     // 0 to 1 while scanning.
     property real progress: 0
-    // Why the last scan failed ("" otherwise), and where the last one went.
+    // Why the last scan failed, or what scanimage said when it saved one
+    // all the same ("" otherwise), and where the last one went.
     property string scanFailure: ""
     property string lastScan: ""
 
     function refresh() {
         if (!listProcess.running)
             listProcess.running = true;
+    }
+
+    // Reads which colour modes the scanner `device` offers, when its scan
+    // view opens.
+    function readModes(device) {
+        modesScanner = device;
+        modes = Scanners.availableModes([]);
+        if (!modesProcess.running)
+            startModes();
+    }
+
+    function startModes() {
+        modesProcess.scanner = modesScanner;
+        modesProcess.command = Scanners.modesCommand(modesScanner);
+        modesProcess.running = true;
     }
 
     // Keeps `key` of the scan settings as `value` for every scan after.
@@ -50,7 +71,8 @@ QtObject {
         lastScan = "";
         progress = 0;
         scanProcess.path = path;
-        scanProcess.command = Scanners.scanCommand(device, settings, path);
+        scanProcess.command = Scanners.scanCommand(Quickshell.shellDir + "/services/scan.sh", device, settings,
+            path, device === modesScanner ? modes : []);
         scanProcess.running = true;
     }
 
@@ -106,14 +128,35 @@ QtObject {
                 root.progress = Scanners.progressOf(scanProcess.errors);
             }
         }
+        // A scan is saved when its file is there, even if scanimage failed
+        // after; what it said is shown all the same.
         onExited: exitCode => {
-            if (exitCode === 0) {
+            const outcome = Scanners.outcomeOf(exitCode, errors);
+            root.scanFailure = outcome.problem;
+            if (outcome.saved) {
                 root.progress = 1;
                 root.lastScan = path;
                 Quickshell.execDetached(Scanners.savedNoticeCommand(path));
-            } else {
-                root.scanFailure = Scanners.failureOf(errors);
             }
+        }
+    }
+
+    property var modesProcess: Process {
+        id: modesProcess
+
+        // The scanner these modes are of; a reply for another is dropped.
+        property string scanner: ""
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (modesProcess.scanner === root.modesScanner)
+                    root.modes = Scanners.availableModes(Scanners.parseModes(text));
+            }
+        }
+        // Another scanner's view was opened while this one was read.
+        onExited: {
+            if (scanner !== root.modesScanner)
+                root.startModes();
         }
     }
 }
