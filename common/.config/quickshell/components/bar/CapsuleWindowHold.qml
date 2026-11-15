@@ -1,39 +1,21 @@
 import QtQuick
 
 // How much taller a capsule's bar window is held for a popup inside it: as
-// much as the popup needs as soon as it needs more, and what it needs last
-// only `shrinkDelay` after it last needed less, once the capsule has shrunk.
-// So the window is resized once per change rather than every frame, and never
-// cuts off a capsule still shrinking.
-Item {
+// much as the tallest popup has needed so far, from the moment it needs it.
+// It never shrinks: Hyprland animates a layer's size change, stretching its
+// last picture to the old size meanwhile, so a shrinking window would flash
+// a stretched capsule. The room left over is transparent and takes no clicks.
+QtObject {
     id: root
 
     // How much taller the window must be now, in px.
     property real needed: 0
-    // How long the window waits before it shrinks, in ms.
-    property int shrinkDelay: 0
     // How much taller the window is held, in px.
-    readonly property alias held: state.held
+    readonly property real held: Math.max(needed, state.tallest)
 
-    onNeededChanged: {
-        if (needed >= state.held) {
-            shrinkTimer.stop();
-            state.held = needed;
-        } else {
-            shrinkTimer.restart();
-        }
-    }
+    onNeededChanged: state.tallest = Math.max(state.tallest, needed)
 
-    QtObject {
-        id: state
-
-        property real held: 0
-    }
-
-    Timer {
-        id: shrinkTimer
-
-        interval: root.shrinkDelay
-        onTriggered: state.held = root.needed
+    readonly property QtObject state: QtObject {
+        property real tallest: 0
     }
 }

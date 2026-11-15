@@ -6,7 +6,8 @@ and schema migrations (`config/SchemaMigrations.js`), among them the one that
 turns the two bar style switches into one bar style and keeps each saved
 profile's look (`tst_barStyleMigration.qml`). They also cover where
 the bar sits on its screen: the edges its window is anchored to, the space it
-reserves and where the margin goes, for every bar style on each Bar position
+reserves, where the margin goes and where its content sits, against its edge
+however tall a capsule's window grows, for every bar style on each Bar position
 (`components/bar/BarPlacement.js`; `Bar.qml` itself is a Quickshell window and
 isn't tested here), and where the toasts and desktop widgets sit in the area
 the bar leaves free: their anchors and plain gaps from that area
@@ -76,9 +77,8 @@ the pointer leaves (`CapsuleHover.qml`), that SUPER+I holds it expanded until
 pressed again or until the pointer leaves it (`CapsuleToggle.qml`), how it is
 drawn with its fill and bar border (`CapsuleSurface.qml`), where its workspace row sits, under a top
 capsule and above a bottom one, centred on it, how it grows round a popup
-inside it and keeps its bar content in place in its taller window
-(`Capsule.js`), that its window grows at once for a popup inside and
-shrinks only once the capsule has (`CapsuleWindowHold.qml`), that the row
+inside it (`Capsule.js`), that its window grows at once for a popup inside and
+never shrinks back (`CapsuleWindowHold.qml`), that the row
 has one pill per workspace in order, in the profile's fill and bar border,
 highlights the active one as it changes and switches workspace on a click
 (`CapsuleWorkspaceRow.qml`), and that a capsule sits only at the top or

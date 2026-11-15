@@ -148,4 +148,27 @@ TestCase {
             { x: 29, y: 300, width: 1, height: 500 }
         ]);
     }
+
+    // The bar content sits in the bar window inside its margins, as deep as
+    // the bar's thickness leaves it, against the bar's screen edge: a
+    // capsule's window grown for a popup inside leaves its content where it
+    // was, whatever size the window is.
+    function test_theBarContentSitsAgainstItsScreenEdge_data() {
+        return [
+            { tag: "opaque top", values: {}, window: { width: 1920, height: 30 },
+                area: { x: 12, y: 0, width: 1896, height: 30 } },
+            { tag: "capsule top, grown", values: { barStyle: "capsule" }, window: { width: 1920, height: 400 },
+                area: { x: 12, y: 6, width: 1896, height: 30 } },
+            { tag: "capsule bottom, grown", values: { barStyle: "capsule", barPosition: "bottom" },
+                window: { width: 1920, height: 400 }, area: { x: 12, y: 364, width: 1896, height: 30 } },
+            { tag: "opaque left", values: { barPosition: "left" }, window: { width: 30, height: 1080 },
+                area: { x: 0, y: 12, width: 30, height: 1056 } },
+            { tag: "transparent right", values: { barStyle: "transparent", barPosition: "right" },
+                window: { width: 36, height: 1080 }, area: { x: 0, y: 12, width: 30, height: 1056 } }
+        ];
+    }
+
+    function test_theBarContentSitsAgainstItsScreenEdge(data) {
+        compare(BarPlacement.contentArea(bar(data.values), data.window), data.area);
+    }
 }

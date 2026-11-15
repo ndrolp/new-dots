@@ -37,6 +37,34 @@ function contentMargins(bar) {
     return BarPosition.sides(bar.barPosition, margin(bar), 0, padding);
 }
 
+// Where the bar content sits in the bar window, { x, y, width, height }:
+// inside its margins (contentMargins), against the bar's screen edge and as
+// deep as the bar's thickness leaves it, whatever the window's depth. So a
+// capsule's window, grown away from its edge for a popup inside, leaves the
+// content where it was. Takes the bar window's { width, height }.
+function contentArea(bar, window) {
+    const margins = contentMargins(bar);
+    const depth = thickness(bar);
+
+    if (BarPosition.sideBar(bar.barPosition)) {
+        const width = depth - margins.left - margins.right;
+        return {
+            x: bar.barPosition === "right" ? window.width - margins.right - width : margins.left,
+            y: margins.top,
+            width: width,
+            height: window.height - margins.top - margins.bottom
+        };
+    }
+
+    const height = depth - margins.top - margins.bottom;
+    return {
+        x: margins.left,
+        y: bar.barPosition === "bottom" ? window.height - margins.bottom - height : margins.top,
+        width: window.width - margins.left - margins.right,
+        height: height
+    };
+}
+
 // An opaque bar's bar border: a 1px line along its edge facing the desktop,
 // left out where an attached popup hangs from it, so the popup's own border
 // carries it on. Takes the Bar position, the bar window's { width, height } and

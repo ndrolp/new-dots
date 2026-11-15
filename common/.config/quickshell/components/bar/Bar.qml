@@ -119,7 +119,7 @@ Variants {
             // capsule does, a popup inside included, so clicks beside it reach
             // the windows below.
             readonly property var inputRegion: barContent.capsuleShape
-                ? Capsule.inputRegion(barContent.capsuleShape, panel.contentMargins)
+                ? Capsule.inputRegion(barContent.capsuleShape, { left: barContent.x, top: barContent.y })
                 : { x: 0, y: 0, width: panel.width, height: panel.height }
             mask: Region {
                 x: panel.inputRegion.x
@@ -129,11 +129,11 @@ Variants {
             }
             readonly property int barThickness: BarPlacement.thickness(panel.barAppearance)
             readonly property var windowAnchors: BarPlacement.windowAnchors(panel.barAppearance.barPosition)
-            // The bar content keeps its place and depth in a capsule's window
-            // grown for a popup inside.
-            readonly property var contentMargins: Capsule.contentMargins(
-                BarPlacement.contentMargins(panel.barAppearance),
-                panel.barAppearance.barPosition, capsuleWindowHold.held)
+            // Where the bar content sits: against the screen edge, as deep as
+            // the bar, so it keeps its place and depth in a capsule's window
+            // grown for a popup inside (BarPlacement.contentArea).
+            readonly property var contentArea: BarPlacement.contentArea(panel.barAppearance,
+                { width: barBackground.width, height: barBackground.height })
 
             exclusiveZone: barThickness
             // Only the size across the bar counts: the compositor stretches the
@@ -141,7 +141,8 @@ Variants {
             // window grows away from its edge to hold a popup inside, past
             // what it reserves.
             implicitWidth: barThickness
-            implicitHeight: barThickness + capsuleWindowHold.held
+            implicitHeight: barThickness
+                + (panel.barAppearance.barStyle === "capsule" ? capsuleWindowHold.held : 0)
 
             anchors {
                 top: panel.windowAnchors.top
@@ -161,13 +162,12 @@ Variants {
                 hovering: barContent.capsuleHovered
             }
 
-            // How much taller a capsule's window is for the popup inside it.
+            // How much taller a capsule's window is for the popups inside it.
             CapsuleWindowHold {
                 id: capsuleWindowHold
 
                 needed: barPopups.openPopup && barPopups.openPopup.inside
                     ? barPopups.openPopup.windowHeight : 0
-                shrinkDelay: panel.barAppearance.motion.long
             }
 
             // SUPER+I expands the capsule until pressed again or until the
@@ -223,11 +223,10 @@ Variants {
                 BarContent {
                     id: barContent
 
-                    anchors.fill: parent
-                    anchors.leftMargin: panel.contentMargins.left
-                    anchors.rightMargin: panel.contentMargins.right
-                    anchors.topMargin: panel.contentMargins.top
-                    anchors.bottomMargin: panel.contentMargins.bottom
+                    x: panel.contentArea.x
+                    y: panel.contentArea.y
+                    width: panel.contentArea.width
+                    height: panel.contentArea.height
                     appearance: panel.barAppearance
                     configOpen: panel.configOpen
                     activePopup: panel.activePopup

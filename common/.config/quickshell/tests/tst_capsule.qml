@@ -327,22 +327,4 @@ TestCase {
     function test_aPopupInsideGrowsTheCapsuleRoundIt(data) {
         compare(Capsule.withPopup(row, data.popup, data.barPosition), data.place);
     }
-
-    // The bar window grows by what a popup inside needs, away from the screen
-    // edge, while the bar content keeps its place and depth: the margin on
-    // that far side takes it all.
-    function test_theBarContentKeepsItsDepthInATallerWindow_data() {
-        return [
-            { tag: "top", barPosition: "top", margins: { top: 6, right: 12, bottom: 300, left: 12 } },
-            { tag: "bottom", barPosition: "bottom", margins: { top: 300, right: 12, bottom: 6, left: 12 } }
-        ];
-    }
-
-    function test_theBarContentKeepsItsDepthInATallerWindow(data) {
-        const margins = data.barPosition === "top"
-            ? { top: 6, right: 12, bottom: 0, left: 12 }
-            : { top: 0, right: 12, bottom: 6, left: 12 };
-
-        compare(Capsule.contentMargins(margins, data.barPosition, 300), data.margins);
-    }
 }

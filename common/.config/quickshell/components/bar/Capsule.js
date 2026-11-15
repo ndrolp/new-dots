@@ -135,21 +135,10 @@ function withPopup(place, popup, barPosition) {
     };
 }
 
-// The margins { top, right, bottom, left } the bar content keeps in a capsule's
-// bar window grown `depth` taller for a popup inside: the bar's own `margins`
-// (BarPlacement.contentMargins), with the growth on the side away from the
-// screen edge, so the content keeps its place and depth.
-function contentMargins(margins, barPosition, depth) {
-    const far = barPosition === "bottom" ? "top" : "bottom";
-    const grown = Object.assign({}, margins);
-    grown[far] += depth;
-    return grown;
-}
-
 // The part of the bar window that takes clicks, { x, y, width, height }: only
 // the capsule, so clicks around it reach the windows below. Takes the
-// capsule's surface and the margins { top, right, bottom, left } the bar
-// content keeps in the window.
+// capsule's surface and where the bar content starts in the window,
+// { top, left }.
 function inputRegion(surface, margins) {
     return {
         x: margins.left + surface.x,
