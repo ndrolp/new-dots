@@ -129,4 +129,41 @@ TestCase {
     function test_onlyTheCapsuleTakesClicks(data) {
         compare(Capsule.inputRegion(data.surface, data.margins), data.region);
     }
+
+    // The workspace row has a window of its own on the capsule's screen edge,
+    // running the length of the screen. It keeps clear of what the capsule
+    // reserves, then the profile's spacing: under a top capsule and above a
+    // bottom one. Its pills are centred on the capsule's centre.
+    function test_theWorkspaceRowSitsPastTheCapsuleCentredWithIt_data() {
+        const capsule = { x: 420, y: 6, width: 184, height: 30 };
+        return [
+            { tag: "top", barPosition: "top", capsule: capsule,
+                place: { anchors: { top: true, right: true, bottom: false, left: true }, margin: 4, centre: 512 } },
+            { tag: "bottom", barPosition: "bottom", capsule: capsule,
+                place: { anchors: { top: false, right: true, bottom: true, left: true }, margin: 4, centre: 512 } }
+        ];
+    }
+
+    function test_theWorkspaceRowSitsPastTheCapsuleCentredWithIt(data) {
+        const bar = { barStyle: "capsule", barPosition: data.barPosition, spacing: 4 };
+
+        compare(Capsule.workspaceRow(bar, data.capsule), data.place);
+    }
+
+    // Only a capsule has a workspace row, and only while the capsule is there.
+    function test_onlyACapsuleHasAWorkspaceRow_data() {
+        const capsule = { x: 420, y: 6, width: 184, height: 30 };
+        return [
+            { tag: "opaque", barStyle: "opaque", capsule: capsule },
+            { tag: "transparent", barStyle: "transparent", capsule: capsule },
+            { tag: "docked", barStyle: "docked", capsule: capsule },
+            { tag: "no capsule", barStyle: "capsule", capsule: { x: 500, y: 6, width: 0, height: 0 } }
+        ];
+    }
+
+    function test_onlyACapsuleHasAWorkspaceRow(data) {
+        const bar = { barStyle: data.barStyle, barPosition: "top", spacing: 4 };
+
+        compare(Capsule.workspaceRow(bar, data.capsule), null);
+    }
 }
