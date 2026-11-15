@@ -65,18 +65,19 @@ function inputRegion(surface, margins) {
 // clear of what the capsule reserves, so `margin`, the profile's spacing, is
 // its gap from the capsule: it is under a top capsule and above a bottom one.
 // Its pills are centred on `centre`, the capsule's centre along the bar.
-// Takes the bar profile, { barStyle, barPosition, spacing }, and the capsule
-// in its bar window, { x, y, width, height } (see inputRegion). Returns
+// Takes the bar profile, { barStyle, barPosition, spacing }, and the part of
+// its bar window that takes clicks, { x, y, width, height }, as inputRegion
+// gives it: on a capsule, the capsule itself. Returns
 // { anchors: { top, right, bottom, left }, margin, centre }, or null on any
 // other bar style or with no capsule drawn.
-function workspaceRow(bar, capsule) {
-    if (!BarProfileModel.capsule(bar) || capsule.width <= 0)
+function workspaceRow(bar, capsuleRegion) {
+    if (!BarProfileModel.capsule(bar) || capsuleRegion.width <= 0)
         return null;
 
     return {
         anchors: BarPlacement.windowAnchors(bar.barPosition),
         margin: bar.spacing,
-        centre: capsule.x + capsule.width / 2
+        centre: capsuleRegion.x + capsuleRegion.width / 2
     };
 }
 
