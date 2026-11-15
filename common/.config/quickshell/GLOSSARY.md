@@ -77,6 +77,10 @@ La ventana pequeña que se despliega desde un bar element al pulsarlo (Bluetooth
 Con la barra opaca o con la docked bar un popup va **anclado** (attached): sale de la barra como si fuera parte de ella. Con cualquier otra barra transparente va **flotante** (floating), separado de la barra. Con la capsule va **dentro** (inside) de ella.
 _Avoid_: Menu, dropdown, status popup
 
+**Bar style** (estilo de barra):
+Cómo se ve la barra, elegido en el bar profile como un solo ajuste: opaca (una barra sólida a lo largo del borde), transparente (los bar elements flotan separados del borde) o docked bar. La capsule será otro estilo más. No son interruptores que se combinan: cada perfil tiene exactamente un estilo.
+_Avoid_: Modo de barra, slanted bar
+
 **Docked bar** (barra acoplada):
 La barra transparente cuyas zonas cuelgan del borde de la pantalla en el que está la barra, cada una con el contorno, el color y la opacidad de un popup anclado. Mientras un popup anclado está abierto, la zona de la que sale se ensancha para recibirlo. Con el bar border activo, cada zona lo lleva por su contorno.
 _Avoid_: Barra inclinada, slanted bar
