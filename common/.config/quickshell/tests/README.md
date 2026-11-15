@@ -84,7 +84,9 @@ while a popup is inside it, and otherwise to the OSD on the focused monitor's
 screen (`CapsuleRouting.js`), and that the capsule then shows that change
 and no bar element (`CapsuleElements.js`), for about 1.5 s from the latest one (`CapsuleChange.qml`),
 what each of the six changes shows, the same in the OSD and the capsule
-(`components/panels/OsdChange.js`), how it is
+(`components/panels/OsdChange.js`), in the same tone colours and with the
+same level bar and percent, under the bar in the OSD and beside it in the
+capsule (`OsdChange.toneColor`, `ChangeLevel.qml`), how it is
 drawn with its fill and bar border (`CapsuleSurface.qml`), where its workspace row sits, under a top
 capsule and above a bottom one, centred on it, how it grows round a popup
 inside it (`CapsulePlacement.js`), that its window grows at once for a popup inside and

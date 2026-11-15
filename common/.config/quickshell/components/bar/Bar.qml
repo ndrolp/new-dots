@@ -97,7 +97,7 @@ Variants {
             // Whether this window's capsule shows a change instead of its row:
             // for a moment after one (see CapsuleChange.qml), unless a popup
             // is inside, which a change never interrupts.
-            readonly property bool showingChange: capsuleChange.shown && panel.activePopup === ""
+            readonly property bool showingChange: capsuleChange.showing && panel.activePopup === ""
             property bool configOpen: bar.configOpen
             property string activePopup: bar.activePopupWindow === panel
                 ? bar.activePopup : ""

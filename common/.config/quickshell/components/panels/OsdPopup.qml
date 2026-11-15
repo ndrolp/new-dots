@@ -14,11 +14,10 @@ PanelWindow {
     property real reveal: 0
     // The change shown, as OsdChange.js describes it.
     property var change: OsdChange.volume(0, false)
-    readonly property var shown: OsdChange.display(change)
-    readonly property bool compact: shown.compact
-    readonly property color toneColor: shown.tone === "blue" ? theme.blue
-        : shown.tone === "yellow" ? theme.yellow
-        : shown.tone === "accent" ? theme.accent : theme.textMuted
+    // What it shows: its icon, label and level (see OsdChange.display).
+    readonly property var display: OsdChange.display(change)
+    readonly property bool compact: display.compact
+    readonly property color toneColor: OsdChange.toneColor(display.tone, theme)
 
     screen: Quickshell.screens.values.length > 0 ? Quickshell.screens.values[0] : null
     color: "transparent"
@@ -103,12 +102,12 @@ PanelWindow {
                 width: 42
                 height: 42
                 radius: 21
-                color: root.shown.highlighted ? theme.accent : theme.backgroundSecondary
+                color: root.display.highlighted ? theme.accent : theme.backgroundSecondary
 
                 ShellText {
                     anchors.centerIn: parent
-                    text: root.shown.icon
-                    color: root.shown.highlighted ? theme.background : root.toneColor
+                    text: root.display.icon
+                    color: root.display.highlighted ? theme.background : root.toneColor
                     font.pixelSize: 21
                     font.bold: true
                 }
@@ -123,34 +122,21 @@ PanelWindow {
                     id: osdLabel
 
                     width: parent.width
-                    text: root.shown.label
+                    text: root.display.label
                     color: theme.text
                     elide: Text.ElideRight
                     font.pixelSize: root.appearance.textSize
                     font.bold: true
                 }
 
-                Rectangle {
-                    visible: root.shown.level !== null
-                    width: parent.width
-                    height: 6
-                    radius: 3
-                    color: theme.backgroundSecondary
-
-                    Rectangle {
-                        width: parent.width * (root.shown.level || 0)
-                        height: parent.height
-                        radius: parent.radius
-                        color: root.toneColor
-                    }
-                }
-
-                ShellText {
-                    visible: root.shown.level !== null
-                    text: Math.round((root.shown.level || 0) * 100) + "%"
-                    color: theme.textMuted
-                    font.pixelSize: root.appearance.textSize - 2
-                    font.bold: true
+                ChangeLevel {
+                    visible: root.display.level !== null
+                    stacked: true
+                    barWidth: parent.width
+                    level: root.display.level || 0
+                    toneColor: root.toneColor
+                    appearance: root.appearance
+                    theme: theme
                 }
             }
         }

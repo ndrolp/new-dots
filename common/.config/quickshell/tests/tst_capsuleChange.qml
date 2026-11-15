@@ -21,7 +21,7 @@ TestCase {
     function test_itShowsNothingAtFirst() {
         const capsule = capsuleChange();
 
-        compare(capsule.shown, false);
+        compare(capsule.showing, false);
         compare(capsule.change, null);
     }
 
@@ -31,11 +31,11 @@ TestCase {
         const change = { kind: "volume", level: 0.4, muted: false };
 
         capsule.show(change);
-        compare(capsule.shown, true);
+        compare(capsule.showing, true);
         compare(capsule.change, change);
         wait(1300);
-        compare(capsule.shown, true);
-        tryCompare(capsule, "shown", false, 500);
+        compare(capsule.showing, true);
+        tryCompare(capsule, "showing", false, 500);
     }
 
     // Holding a volume key: each change keeps it open another 1.5 s and shows
@@ -47,8 +47,8 @@ TestCase {
         wait(1000);
         capsule.show({ kind: "volume", level: 0.45, muted: false });
         wait(1000);
-        compare(capsule.shown, true);
+        compare(capsule.showing, true);
         compare(capsule.change.level, 0.45);
-        tryCompare(capsule, "shown", false, 800);
+        tryCompare(capsule, "showing", false, 800);
     }
 }

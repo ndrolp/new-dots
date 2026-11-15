@@ -10,21 +10,21 @@ Item {
     // How long a change shows, in ms.
     property int duration: 1500
     // Whether a change shows now.
-    readonly property alias shown: state.shown
+    readonly property alias showing: state.showing
     // The latest change, as OsdChange.js describes it, or null before any.
     readonly property alias change: state.change
 
     // Shows `change`, replacing the one showing, for another `duration`.
     function show(change) {
         state.change = change;
-        state.shown = true;
+        state.showing = true;
         hideTimer.restart();
     }
 
     QtObject {
         id: state
 
-        property bool shown: false
+        property bool showing: false
         property var change: null
     }
 
@@ -32,6 +32,6 @@ Item {
         id: hideTimer
 
         interval: root.duration
-        onTriggered: state.shown = false
+        onTriggered: state.showing = false
     }
 }

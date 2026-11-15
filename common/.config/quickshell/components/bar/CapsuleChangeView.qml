@@ -1,4 +1,5 @@
 import QtQuick
+import "../panels" as Panels
 import "../panels/OsdChange.js" as OsdChange
 
 // What a capsule shows instead of the OSD while a change shows: the OSD's
@@ -13,15 +14,14 @@ Item {
     required property var appearance
     // The colorscheme (config/Theme.qml).
     required property var theme
-    readonly property var shown: change ? OsdChange.display(change) : null
-    readonly property color toneColor: !shown ? theme.textMuted
-        : shown.tone === "blue" ? theme.blue
-        : shown.tone === "yellow" ? theme.yellow
-        : shown.tone === "accent" ? theme.accent : theme.textMuted
+    // What it shows: its icon, label and level (see OsdChange.display), or
+    // null without a change.
+    readonly property var display: change ? OsdChange.display(change) : null
+    readonly property color toneColor: OsdChange.toneColor(display ? display.tone : "muted", theme)
 
     implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
-    visible: shown !== null
+    visible: display !== null
 
     Row {
         id: row
@@ -34,12 +34,12 @@ Item {
             width: root.appearance.textSize + 10
             height: width
             radius: width / 2
-            color: root.shown && root.shown.highlighted ? root.theme.accent : "transparent"
+            color: root.display && root.display.highlighted ? root.theme.accent : "transparent"
 
             ShellText {
                 anchors.centerIn: parent
-                text: root.shown ? root.shown.icon : ""
-                color: root.shown && root.shown.highlighted ? root.theme.background : root.toneColor
+                text: root.display ? root.display.icon : ""
+                color: root.display && root.display.highlighted ? root.theme.background : root.toneColor
                 font.pixelSize: root.appearance.textSize + 2
                 font.bold: true
             }
@@ -48,36 +48,20 @@ Item {
         ShellText {
             anchors.verticalCenter: parent.verticalCenter
             width: Math.min(implicitWidth, 240)
-            text: root.shown ? root.shown.label : ""
+            text: root.display ? root.display.label : ""
             color: root.theme.text
             elide: Text.ElideRight
             font.pixelSize: root.appearance.textSize
             font.bold: true
         }
 
-        Rectangle {
+        Panels.ChangeLevel {
             anchors.verticalCenter: parent.verticalCenter
-            visible: root.shown !== null && root.shown.level !== null
-            width: 96
-            height: 6
-            radius: 3
-            color: root.theme.backgroundSecondary
-
-            Rectangle {
-                width: parent.width * (root.shown && root.shown.level !== null ? root.shown.level : 0)
-                height: parent.height
-                radius: parent.radius
-                color: root.toneColor
-            }
-        }
-
-        ShellText {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: root.shown !== null && root.shown.level !== null
-            text: root.shown && root.shown.level !== null ? Math.round(root.shown.level * 100) + "%" : ""
-            color: root.theme.textMuted
-            font.pixelSize: root.appearance.textSize - 2
-            font.bold: true
+            visible: root.display !== null && root.display.level !== null
+            level: root.display && root.display.level !== null ? root.display.level : 0
+            toneColor: root.toneColor
+            appearance: root.appearance
+            theme: root.theme
         }
     }
 }

@@ -42,6 +42,21 @@ function keepAwake(on, duration) {
     return { kind: "keepAwake", on: on === true, label: KeepAwakeState.osdLabel(on, duration) };
 }
 
+// The theme colour of a change's `tone` (see display), from `theme`
+// (config/Theme.qml): muted for any other tone.
+function toneColor(tone, theme) {
+    switch (tone) {
+    case "blue":
+        return theme.blue;
+    case "yellow":
+        return theme.yellow;
+    case "accent":
+        return theme.accent;
+    default:
+        return theme.textMuted;
+    }
+}
+
 function audioOutputIcon(type) {
     if (type.includes("headphone") || type.includes("headset"))
         return "󰋋";
