@@ -1,6 +1,6 @@
 import QtQuick
 import "../../config" as Config
-import "../../services/Printers.js" as Printers
+import "PrinterLabels.js" as Labels
 import "." as Panels
 
 // The Printers heading of the Printers panel: every printer with its state,
@@ -72,49 +72,18 @@ Column {
             width: root.width
             spacing: 2
 
-            Panels.PopupRow {
+            Panels.PrinterRow {
                 width: parent.width
-                height: 44
                 appearance: root.appearance
                 color: printer.open ? theme.backgroundSecondary
                     : hovered ? theme.surfaceHover : "transparent"
-
-                Panels.ShellText {
-                    id: glyph
-
-                    anchors.left: parent.left
-                    anchors.leftMargin: 10
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "󰐪"
-                    color: printer.modelData.state === "error" ? theme.red
-                        : printer.modelData.state === "stopped" ? theme.orange : theme.textMuted
-                    font.pixelSize: root.appearance.textSize + 6
-                }
-
-                Column {
-                    anchors.left: glyph.right
-                    anchors.leftMargin: 10
-                    anchors.right: defaultBadge.visible ? defaultBadge.left : parent.right
-                    anchors.rightMargin: 8
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    Panels.ShellText {
-                        width: parent.width
-                        text: printer.modelData.name
-                        elide: Text.ElideRight
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize - 1
-                    }
-
-                    Panels.ShellText {
-                        width: parent.width
-                        text: Printers.statusText(printer.modelData) + " · "
-                            + Printers.connectionText(printer.modelData.connection)
-                        elide: Text.ElideRight
-                        color: printer.modelData.state === "error" ? theme.red : theme.textMuted
-                        font.pixelSize: root.appearance.textSize - 3
-                    }
-                }
+                glyphColor: printer.modelData.state === "error" ? theme.red
+                    : printer.modelData.state === "stopped" ? theme.orange : theme.textMuted
+                title: printer.modelData.name
+                subtitle: Labels.statusText(printer.modelData) + " · "
+                    + Labels.connectionText(printer.modelData.connection)
+                subtitleColor: printer.modelData.state === "error" ? theme.red : theme.textMuted
+                trailingWidth: defaultBadge.visible ? defaultBadge.width + 10 : 0
 
                 Rectangle {
                     id: defaultBadge
@@ -200,7 +169,7 @@ Column {
 
                             Panels.ShellText {
                                 width: parent.width
-                                text: Printers.jobText(job.modelData)
+                                text: Labels.jobText(job.modelData)
                                 elide: Text.ElideRight
                                 color: job.modelData.state === "stopped" ? theme.orange : theme.textMuted
                                 font.pixelSize: root.appearance.textSize - 3

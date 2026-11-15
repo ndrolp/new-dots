@@ -1,4 +1,5 @@
 .pragma library
+.import "Printers.js" as Printers
 
 // The discovered printers: IPP printers avahi sees on the network, and USB
 // ones ipp-usb serves as IPP on localhost, read from what `avahi-browse -rpk`
@@ -181,10 +182,6 @@ function partsOf(uri) {
     };
 }
 
-function isLoopback(host) {
-    return host === "localhost" || host === "::1" || host.startsWith("127.");
-}
-
 // Is the added printer with device URI `uri` one of the records in `group`
 // (the same printer, seen several ways)? By its uuid, its dnssd name, or
 // the host it's at; ipp-usb serves each USB printer on its own localhost
@@ -198,7 +195,7 @@ function isAddedAs(group, uri) {
             return true;
         if (parts.service !== "")
             return parts.service === service.name.toLowerCase();
-        if (isLoopback(parts.host))
+        if (Printers.isLoopback(parts.host))
             return isUsb(service) && (parts.port || 631) === service.port;
         return !isUsb(service) && parts.host !== ""
             && (parts.host === service.hostname || parts.host === service.address);

@@ -1,5 +1,6 @@
 import Quickshell.Io
 import QtQuick
+import "Assign.js" as Assign
 import "Printers.js" as Printers
 
 // The printers CUPS has added, for the Printers panel. It reads them only
@@ -86,11 +87,7 @@ QtObject {
         stdout: StdioCollector {
             // Only a change replaces the list, so the panel's rows aren't
             // rebuilt on every poll.
-            onStreamFinished: {
-                const printers = Printers.parse(text);
-                if (JSON.stringify(printers) !== JSON.stringify(root.printers))
-                    root.printers = printers;
-            }
+            onStreamFinished: Assign.ifChanged(root, "printers", Printers.parse(text))
         }
         stderr: StdioCollector {
             onStreamFinished: root.readFailure = Printers.listProblem(text)
@@ -107,9 +104,7 @@ QtObject {
             onStreamFinished: {
                 if (jobsProcess.printer !== root.jobsPrinter)
                     return;
-                const jobs = Printers.parseJobs(text);
-                if (JSON.stringify(jobs) !== JSON.stringify(root.jobs))
-                    root.jobs = jobs;
+                Assign.ifChanged(root, "jobs", Printers.parseJobs(text));
             }
         }
         // Another printer was opened while this one was read.

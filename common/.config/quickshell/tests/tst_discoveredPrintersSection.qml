@@ -114,7 +114,7 @@ TestCase {
 
     function test_whileAddingThePrinterWaits() {
         const section = make([laser]);
-        section.adding = "laser";
+        section.addState = { adding: "laser", failedKey: "", failure: "" };
         verify(shown(section, "Adding…"));
         compare(buttons(section, "Add").length, 0);
     }
@@ -129,8 +129,8 @@ TestCase {
 
     function test_aFailedAddShowsWhyAndOffersPrintSettings() {
         const section = make([laser, inkjet]);
-        section.addFailureKey = "laser";
-        section.addFailure = "Couldn't add HP LaserJet Pro M404 driverless: Unable to query printer";
+        section.addState = { adding: "", failedKey: "laser",
+            failure: "Couldn't add HP LaserJet Pro M404 driverless: Unable to query printer" };
         verify(shown(section, "Couldn't add HP LaserJet Pro M404 driverless: Unable to query printer"));
         compare(buttons(section, "Print settings").length, 1);
         buttons(section, "Print settings")[0].activated();

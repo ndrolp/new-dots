@@ -27,16 +27,10 @@ function removeCommand(name) {
     return ["lpadmin", "-x", name];
 }
 
-// A printer's state as the Printers panel says it, with the reason when
-// there is one.
-function statusText(printer) {
-    const label = { idle: "Idle", printing: "Printing", stopped: "Stopped", error: "Error" }[printer.state]
-        || "Unknown";
-    return printer.reason ? label + ": " + printer.reason : label;
-}
-
-function connectionText(connection) {
-    return { network: "Network", usb: "USB", local: "Local" }[connection] || "Network";
+// Is `host` this computer (localhost, 127.x or ::1, with or without brackets)?
+function isLoopback(host) {
+    const name = String(host).toLowerCase().replace(/^\[|\]$/g, "");
+    return name === "localhost" || name === "::1" || name.startsWith("127.");
 }
 
 // How a printer with the device URI `uri` is connected: "usb", "network"
@@ -52,8 +46,7 @@ function connectionOf(uri) {
         return "usb";
     if (scheme === "file" || scheme === "cups-pdf")
         return "local";
-    if ((scheme === "ipp" || scheme === "ipps")
-            && (host === "localhost" || host === "[::1]" || host.startsWith("127.")))
+    if ((scheme === "ipp" || scheme === "ipps") && isLoopback(host))
         return "usb";
     return "network";
 }
@@ -198,13 +191,6 @@ function parseJobs(text) {
         });
     }
     return jobs;
-}
-
-// What the Printers panel says under a print job's document name.
-function jobText(job) {
-    const label = { waiting: "Waiting", held: "Held", printing: "Printing", stopped: "Stopped" }[job.state]
-        || "Waiting";
-    return [label, job.progress, job.owner].filter(part => part).join(" · ");
 }
 
 // Reads a printer's print jobs not completed, for parseJobs(). lpstat

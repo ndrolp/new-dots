@@ -21,10 +21,9 @@ Scope {
     readonly property var discovered: Discovery.discovered(services, addedUris)
     // Why printers can't be found ("" otherwise).
     property string problem: ""
-    // The printer being added (its key), and why the last add failed.
-    property string adding: ""
-    property string addFailureKey: ""
-    property string addFailure: ""
+    // { adding, failedKey, failure }: the printer being added (its key), and
+    // the one whose last add failed and why.
+    property var addState: ({ adding: "", failedKey: "", failure: "" })
 
     // avahi-browse's resolved services, kept by takeLine().
     property var services: ({})
@@ -35,9 +34,7 @@ Scope {
     function add(printer) {
         if (addProcess.running)
             return;
-        adding = printer.key;
-        addFailureKey = "";
-        addFailure = "";
+        addState = { adding: printer.key, failedKey: "", failure: "" };
         addProcess.model = printer.model;
         addProcess.command = Discovery.addCommand(printer, printers.map(added => added.name));
         addProcess.running = true;
@@ -62,8 +59,7 @@ Scope {
 
     onWatchingChanged: {
         if (watching) {
-            addFailureKey = "";
-            addFailure = "";
+            addState = { adding: addState.adding, failedKey: "", failure: "" };
             start();
         } else {
             for (const browser of browsers)
@@ -137,11 +133,12 @@ Scope {
             id: addErrors
         }
         onExited: exitCode => {
-            if (exitCode !== 0) {
-                root.addFailureKey = root.adding;
-                root.addFailure = Discovery.addProblem(addErrors.text, model);
-            }
-            root.adding = "";
+            const failed = exitCode !== 0;
+            root.addState = {
+                adding: "",
+                failedKey: failed ? root.addState.adding : "",
+                failure: failed ? Discovery.addProblem(addErrors.text, model) : ""
+            };
             // The printers are read again only while the panel is open.
             if (root.watching)
                 root.added();

@@ -1,6 +1,6 @@
 import QtQuick
 import "../../config" as Config
-import "../../services/Printers.js" as Printers
+import "PrinterLabels.js" as Labels
 import "." as Panels
 
 // The Discovered printers heading of the Printers panel: the printers found
@@ -17,11 +17,9 @@ Column {
     property var discovered: []
     // Why printers can't be found ("" otherwise).
     property string problem: ""
-    // The printer being added (its key); the others wait for it.
-    property string adding: ""
-    // The printer whose add failed (its key), and why.
-    property string addFailureKey: ""
-    property string addFailure: ""
+    // { adding, failedKey, failure }: the printer being added (its key; the
+    // others wait for it), and the one whose add failed and why.
+    property var addState: ({ adding: "", failedKey: "", failure: "" })
 
     signal addRequested(var printer)
     signal printSettingsRequested()
@@ -62,51 +60,19 @@ Column {
             id: printer
 
             required property var modelData
-            readonly property bool failed: root.addFailureKey === modelData.key && root.addFailure !== ""
+            readonly property bool failed: root.addState.failedKey === modelData.key
+                && root.addState.failure !== ""
 
             width: root.width
             spacing: 2
 
-            Panels.PopupRow {
+            Panels.PrinterRow {
                 width: parent.width
-                height: 44
                 appearance: root.appearance
-
-                Panels.ShellText {
-                    id: glyph
-
-                    anchors.left: parent.left
-                    anchors.leftMargin: 10
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "󰐪"
-                    color: theme.textMuted
-                    font.pixelSize: root.appearance.textSize + 6
-                }
-
-                Column {
-                    anchors.left: glyph.right
-                    anchors.leftMargin: 10
-                    anchors.right: action.left
-                    anchors.rightMargin: 8
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    Panels.ShellText {
-                        width: parent.width
-                        text: printer.modelData.model
-                        elide: Text.ElideRight
-                        color: theme.text
-                        font.pixelSize: root.appearance.textSize - 1
-                    }
-
-                    Panels.ShellText {
-                        width: parent.width
-                        text: Printers.connectionText(printer.modelData.connection)
-                            + (printer.modelData.driverless ? "" : " · Can't print driverless")
-                        elide: Text.ElideRight
-                        color: theme.textMuted
-                        font.pixelSize: root.appearance.textSize - 3
-                    }
-                }
+                title: printer.modelData.model
+                subtitle: Labels.connectionText(printer.modelData.connection)
+                    + (printer.modelData.driverless ? "" : " · Can't print driverless")
+                trailingWidth: action.width + 6
 
                 Item {
                     id: action
@@ -119,9 +85,9 @@ Column {
 
                     Panels.PopupButton {
                         anchors.fill: parent
-                        visible: printer.modelData.driverless && root.adding !== printer.modelData.key
+                        visible: printer.modelData.driverless && root.addState.adding !== printer.modelData.key
                         appearance: root.appearance
-                        interactive: root.adding === ""
+                        interactive: root.addState.adding === ""
                         label: "Add"
                         labelColor: theme.accent
                         onActivated: root.addRequested(printer.modelData)
@@ -129,7 +95,7 @@ Column {
 
                     Panels.ShellText {
                         anchors.centerIn: parent
-                        visible: root.adding === printer.modelData.key
+                        visible: root.addState.adding === printer.modelData.key
                         text: "Adding…"
                         color: theme.textMuted
                         font.pixelSize: root.appearance.textSize - 1
@@ -155,7 +121,7 @@ Column {
 
                 Panels.ShellText {
                     width: parent.width - parent.leftPadding
-                    text: root.addFailure
+                    text: root.addState.failure
                     wrapMode: Text.Wrap
                     color: theme.red
                     font.pixelSize: root.appearance.textSize - 2

@@ -1,6 +1,6 @@
 import QtQuick
 import "../../config" as Config
-import "../../services/Printers.js" as Printers
+import "PrinterLabels.js" as Labels
 import "." as Panels
 
 // The Scanners heading of the Printers panel: every scanner SANE can see,
@@ -49,50 +49,18 @@ Column {
     Repeater {
         model: root.scanners
 
-        delegate: Panels.PopupRow {
+        delegate: Panels.PrinterRow {
             id: scanner
 
             required property var modelData
 
             width: root.width
-            height: 44
             appearance: root.appearance
             interactive: false
-
-            Panels.ShellText {
-                id: glyph
-
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                text: "󰚫"
-                color: theme.textMuted
-                font.pixelSize: root.appearance.textSize + 6
-            }
-
-            Column {
-                anchors.left: glyph.right
-                anchors.leftMargin: 10
-                anchors.right: scanButton.left
-                anchors.rightMargin: 8
-                anchors.verticalCenter: parent.verticalCenter
-
-                Panels.ShellText {
-                    width: parent.width
-                    text: scanner.modelData.name
-                    elide: Text.ElideRight
-                    color: theme.text
-                    font.pixelSize: root.appearance.textSize - 1
-                }
-
-                Panels.ShellText {
-                    width: parent.width
-                    text: Printers.connectionText(scanner.modelData.connection)
-                    elide: Text.ElideRight
-                    color: theme.textMuted
-                    font.pixelSize: root.appearance.textSize - 3
-                }
-            }
+            glyph: "󰚫"
+            title: modelData.name
+            subtitle: Labels.connectionText(modelData.connection)
+            trailingWidth: scanButton.width + 8
 
             Panels.PopupButton {
                 id: scanButton

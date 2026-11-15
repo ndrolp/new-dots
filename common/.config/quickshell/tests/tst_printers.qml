@@ -85,17 +85,6 @@ TestCase {
             "\tPrinting page 2, 50% complete.", "\tDescription: HP", "\tAlerts: none"]), ["printing", ""]);
     }
 
-    function test_whatThePanelSaysOfAPrinter() {
-        compare(Printers.statusText({ state: "idle", reason: "" }), "Idle");
-        compare(Printers.statusText({ state: "printing", reason: "" }), "Printing");
-        compare(Printers.statusText({ state: "stopped", reason: "" }), "Stopped");
-        compare(Printers.statusText({ state: "stopped", reason: "Paused" }), "Stopped: Paused");
-        compare(Printers.statusText({ state: "error", reason: "Media jam" }), "Error: Media jam");
-        compare(Printers.connectionText("network"), "Network");
-        compare(Printers.connectionText("usb"), "USB");
-        compare(Printers.connectionText("local"), "Local");
-    }
-
     // Under LC_ALL=C, which is what parse() reads; wheel lets lpadmin run
     // without a password.
     function test_theCommandsThatReadAndChangePrinters() {
@@ -176,11 +165,6 @@ TestCase {
         const jobs = Printers.parseJobs([jobsHeader,
             "8,pending-held,a.pdf,ana,,,,", "9,processing-stopped,b.pdf,ana,3,,3,", ""].join("\n"));
         compare(jobs.map(job => [job.state, job.progress]), [["held", ""], ["stopped", ""]]);
-        compare(Printers.jobText(jobs[0]), "Held · ana");
-        compare(Printers.jobText({ state: "printing", owner: "ndrolp", progress: "Page 2 of 5" }),
-            "Printing · Page 2 of 5 · ndrolp");
-        compare(Printers.jobText({ state: "waiting", owner: "", progress: "" }), "Waiting");
-        compare(Printers.jobText({ state: "stopped", owner: "ana", progress: "" }), "Stopped · ana");
     }
 
     // ipptool asks CUPS for the jobs not completed; cancel needs no password

@@ -138,9 +138,7 @@ Variants {
                         appearance: root.appearance
                         discovered: root.discoveredPrinters.discovered
                         problem: root.discoveredPrinters.problem
-                        adding: root.discoveredPrinters.adding
-                        addFailureKey: root.discoveredPrinters.addFailureKey
-                        addFailure: root.discoveredPrinters.addFailure
+                        addState: root.discoveredPrinters.addState
                         onAddRequested: printer => root.discoveredPrinters.add(printer)
                         onPrintSettingsRequested: root.discoveredPrinters.openPrintSettings()
                     }

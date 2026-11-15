@@ -1,6 +1,7 @@
 import Quickshell
 import Quickshell.Io
 import QtQuick
+import "Assign.js" as Assign
 import "Scanners.js" as Scanners
 
 // The scanners SANE can see, for the Printers panel, and scanning one page
@@ -98,11 +99,7 @@ QtObject {
         stdout: StdioCollector {
             // Only a change replaces the list, so the panel's rows aren't
             // rebuilt on every poll.
-            onStreamFinished: {
-                const scanners = Scanners.parse(text);
-                if (JSON.stringify(scanners) !== JSON.stringify(root.scanners))
-                    root.scanners = scanners;
-            }
+            onStreamFinished: Assign.ifChanged(root, "scanners", Scanners.parse(text))
         }
     }
 
