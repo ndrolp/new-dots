@@ -100,6 +100,12 @@ calculator and how qalc is run and answers
 (`components/panels/SearchQuery.js`), which emoji the emoji picker finds
 (`components/panels/EmojiSearch.js`), and how the keybind cheatsheet groups
 and filters `hyprctl binds -j` (`components/panels/KeybindCheatsheet.js`),
+the printers the Printers panel lists, read from `lpstat` output, with their
+state, network or USB and the default, and the `lpadmin` commands that
+change them (`services/Printers.js`), and its *Printers* heading: the
+empty list, each printer's row and opening one for *Set default* and
+*Remove* (`components/panels/PrintersSection.qml`; `PrintersPanel.qml`
+and `services/Printers.qml` need Quickshell and aren't tested here),
 what the keep-awake bar element shows and its popup's switch, duration choice
 and time left (`components/bar/KeepAwakeElement.qml`,
 `components/panels/KeepAwakePopupBody.qml`), keep-awake's duration and

@@ -21,6 +21,8 @@ adding or editing one file here.
   `Settings`, `ThemeSelector`, `UnifiedSearch`, `WallpaperSelector`,
   `WebApps` (the web app maker, SUPER+SHIFT+W, `web-apps toggle`, which
   opens a new web app itself so it opens once, not once per monitor),
+  `Printers` (the Printers panel, SUPER+SHIFT+P, `printers toggle`, which
+  has the printers service read CUPS only while it's open),
   `WindowSwitcher` and `WorkspaceOverview`.
 - `MonitorChange.qml`: not a `Feature`, it follows `services/MonitorSetups.qml`:
   the *Keep* / *Revert* card on every screen that still works, which takes `Enter`

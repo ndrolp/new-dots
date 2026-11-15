@@ -15,6 +15,7 @@ Feature {
     required property var settings
     required property var keybindCheatsheet
     required property var webAppMaker
+    required property var printersPanel
 
     // What the search field holds when it opens.
     property string query: ""
@@ -34,6 +35,7 @@ Feature {
         onSettingsRequested: root.switchTo(root.settings)
         onKeybindCheatsheetRequested: root.switchTo(root.keybindCheatsheet)
         onWebAppMakerRequested: root.switchTo(root.webAppMaker)
+        onPrintersRequested: root.switchTo(root.printersPanel)
     }
 
     IpcHandler {

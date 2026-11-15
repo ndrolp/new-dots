@@ -24,6 +24,7 @@ Variants {
     signal settingsRequested()
     signal keybindCheatsheetRequested()
     signal webAppMakerRequested()
+    signal printersRequested()
 
     model: Quickshell.screens
 
@@ -336,6 +337,13 @@ Variants {
                         title: "Create web app",
                         subtitle: "Turn a website into an app with its own window",
                         glyph: "󰖟"
+                    },
+                    {
+                        type: "printers",
+                        category: "ACTIONS",
+                        title: "Printers",
+                        subtitle: "Open the Printers panel",
+                        glyph: "󰐪"
                     }
                 ];
                 const workspaceIds = root.workspaceService.workspacesForScreen(
@@ -433,6 +441,8 @@ Variants {
                 root.keybindCheatsheetRequested();
             } else if (result.type === "webapp") {
                 root.webAppMakerRequested();
+            } else if (result.type === "printers") {
+                root.printersRequested();
             } else if (result.type === "workspace") {
                 root.workspaceService.switchTo(result.workspaceId);
             } else {

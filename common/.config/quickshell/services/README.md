@@ -160,6 +160,19 @@ Which text is a URL, the fallback name, duplicates (the exact URL only) and
 the window class are plain functions in `WebApps.js`, tested without
 Quickshell; `tests/webapps.sh` tests the script on a scratch folder.
 
+## Printers
+
+`Printers.qml` is the Printers panel's view of the printers CUPS has added.
+It reads them only while `watching` (the panel is open), every 3 seconds,
+with `lpstat -l -p -d -v` under `LC_ALL=C`, and nothing runs while the panel
+is closed. *Set default* runs `lpadmin -d` and *Remove* `lpadmin -x`; the
+user is in `wheel`, which CUPS on Arch takes as an admin group, so neither
+asks for a password. Parsing lpstat (state, the reason CUPS gives, network
+or USB from the device URI, ipp-usb's localhost IPP counting as USB, the
+default) and the commands are plain functions in `Printers.js`, tested
+without Quickshell. Discovered printers, print jobs and scanners belong
+next to it.
+
 ## Screen capture integration
 
 `ScreenCapture.qml` detects `grim`, `slurp`, `wf-recorder`, and `wayshot` at runtime.

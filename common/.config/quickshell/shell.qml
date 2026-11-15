@@ -97,6 +97,10 @@ ShellRoot {
         id: webApps
     }
 
+    Services.Printers {
+        id: printers
+    }
+
     Services.NightLight {
         id: nightLight
 
@@ -222,6 +226,7 @@ ShellRoot {
         settings: settings
         keybindCheatsheet: keybindCheatsheet
         webAppMaker: webAppMaker
+        printersPanel: printersPanel
     }
 
     Modules.WebApps {
@@ -229,6 +234,14 @@ ShellRoot {
 
         appearance: appearance
         webApps: webApps
+        plugins: plugins
+    }
+
+    Modules.Printers {
+        id: printersPanel
+
+        appearance: appearance
+        printers: printers
         plugins: plugins
     }
 

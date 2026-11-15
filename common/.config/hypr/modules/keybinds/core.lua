@@ -99,6 +99,11 @@ hl.bind(
 	hl.dsp.exec_cmd(qs .. "web-apps toggle"),
 	{ description = "Toggle web app maker" }
 )
+hl.bind(
+	win .. " + SHIFT + p",
+	hl.dsp.exec_cmd(qs .. "printers toggle"),
+	{ description = "Toggle printers panel" }
+)
 hl.bind(mainMod .. " + c", hl.dsp.exec_cmd(qs .. "control-center toggle"), { description = "Toggle control center" })
 hl.bind(mainMod .. " + q", hl.dsp.exec_cmd(qs .. "quick-settings toggle"), { description = "Toggle quick settings" })
 hl.bind(mainMod .. " + n", hl.dsp.exec_cmd(qs .. "notifications toggle"), { description = "Toggle notifications" })
