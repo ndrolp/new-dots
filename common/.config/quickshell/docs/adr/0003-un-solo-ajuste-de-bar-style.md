@@ -14,5 +14,5 @@ El estilo de la barra se guardaba en el bar profile como dos interruptores: `bar
 ## Consequences
 
 - La migración 16 convierte los perfiles guardados conservando su aspecto: un perfil opaco con el interruptor docked pasa a `opaque` con las pills transparentes, que era lo único que ese interruptor cambiaba.
-- El panel de ajustes ofrece el estilo como una sola elección (Opaque / Transparent / Docked).
+- El panel de ajustes ofrece el estilo como una sola elección (Opaque / Transparent / Docked / Capsule). La capsule es el cuarto valor de `barStyle`, sin interruptor propio ni migración aparte, y solo admite arriba y abajo como Bar position.
 - Un `barStyle` desconocido se carga como `opaque`, igual que una Bar position desconocida se carga como arriba.
