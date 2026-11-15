@@ -144,9 +144,34 @@ TestCase {
     // profile's order rather than the order they were chosen in.
     function test_aCollapsedCapsuleShowsTheChosenElementsInTheProfilesOrder() {
         const drawn = CapsuleElements.drawnElements({ barStyle: "capsule", barElements: barElements(),
-            capsuleElements: ["clock", "battery", "workspaces"] });
+            capsuleElements: ["clock", "battery", "arch"] });
 
-        compare(shownIds(drawn, "center"), ["workspaces", "battery", "clock"]);
+        compare(shownIds(drawn, "center"), ["arch", "battery", "clock"]);
+    }
+
+    // A profile chooses neither the workspaces, which the workspace row shows,
+    // nor the live elements, which a collapsed capsule always draws.
+    function test_onlyOtherElementsCanBeChosenForACollapsedCapsule_data() {
+        return [
+            { tag: "workspaces", id: "workspaces", choosable: false },
+            { tag: "recording", id: "recording", choosable: false },
+            { tag: "media", id: "media", choosable: false },
+            { tag: "clock", id: "clock", choosable: true },
+            { tag: "battery", id: "battery", choosable: true }
+        ];
+    }
+
+    function test_onlyOtherElementsCanBeChosenForACollapsedCapsule(data) {
+        compare(CapsuleElements.choosable(data.id), data.choosable);
+    }
+
+    // So a saved choice of the workspaces doesn't show them in the capsule
+    // as well as in the workspace row.
+    function test_aSavedChoiceOfTheWorkspacesIsIgnored() {
+        const drawn = CapsuleElements.drawnElements({ barStyle: "capsule", barElements: barElements(),
+            capsuleElements: ["workspaces", "clock"] });
+
+        compare(shownIds(drawn, "center"), ["clock"]);
     }
 
     // While collapsed the capsule also draws the live bar elements, the

@@ -65,7 +65,9 @@ its joins on every Bar position
 row (the ones its profile chose, in the profile's order, else Arch, the clock
 and the control center; the choice is kept with the profile by
 `BarProfileModel.js` and offered, on a capsule profile, for the elements the
-profile shows by `BarElementsSettings.qml`), live ones included (the recording
+profile shows but the workspaces and the live ones by
+`BarElementsSettings.qml`, and a saved choice of those is ignored), live ones
+included (the recording
 indicator, and media only while a track plays), which ones it shows expanded
 (all but the workspaces, with their groups, and media while any player
 exists) (`components/bar/CapsuleElements.js`), that only the pointer over

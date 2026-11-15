@@ -50,9 +50,16 @@ function expandedElementIds(barElements) {
     return ids;
 }
 
+// Whether a profile can choose the bar element `id` for its collapsed
+// capsule: any but the workspaces, which the workspace row shows, and the
+// live bar elements, which it always draws.
+function choosable(id) {
+    return id !== "workspaces" && liveElementIds.indexOf(id) === -1;
+}
+
 // The bar elements a bar window draws: on a capsule, the collapsed row of the
-// elements its profile chose (`capsuleElements`, else the default ones), live
-// bar elements included, or its expanded row while `expanded`, or none while
+// elements its profile chose (`capsuleElements`, else the default ones; any
+// it can't choose are ignored), live bar elements included, or its expanded row while `expanded`, or none while
 // it shows a `change` instead; the profile's own on any other bar style.
 // Takes { barStyle, barElements, capsuleElements, expanded, change }.
 function drawnElements(bar) {
@@ -62,7 +69,7 @@ function drawnElements(bar) {
         return collapsedRow(bar.barElements, []);
     return collapsedRow(bar.barElements, bar.expanded
         ? expandedElementIds(bar.barElements)
-        : (bar.capsuleElements || collapsedElementIds).concat(liveElementIds));
+        : (bar.capsuleElements || collapsedElementIds).filter(choosable).concat(liveElementIds));
 }
 
 // Whether media has something to show, given the bar style and the Mpris

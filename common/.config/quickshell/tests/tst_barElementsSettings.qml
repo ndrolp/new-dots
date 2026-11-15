@@ -490,9 +490,26 @@ TestCase {
         const built = make();
         built.appearance.barStyle = "capsule";
 
-        const offered = ["Arch icon", "Workspaces", "Clock & pomodoro", "Audio", "Battery", "Cava"]
+        const offered = ["Arch icon", "Clock & pomodoro", "Audio", "Battery", "Cava"]
             .filter(label => button(elementRow(built.item, label), "In capsule") !== null);
-        compare(offered, ["Arch icon", "Workspaces", "Clock & pomodoro", "Audio"]);
+        compare(offered, ["Arch icon", "Clock & pomodoro", "Audio"]);
+    }
+
+    // The workspaces, which the workspace row shows, and the live elements,
+    // which a collapsed capsule always draws while they are active, aren't
+    // offered.
+    function test_theWorkspacesAndTheLiveElementsCannotBeChosenForTheCapsule() {
+        const built = make();
+        built.appearance.barStyle = "capsule";
+        built.appearance.barElements = {
+            left: [{ id: "workspaces", enabled: true }],
+            center: [{ id: "recording", enabled: true }, { id: "media", enabled: true }],
+            right: [{ id: "clock", enabled: true }]
+        };
+
+        const offered = ["Workspaces", "Recording indicator", "Media", "Clock & pomodoro"]
+            .filter(label => button(elementRow(built.item, label), "In capsule") !== null);
+        compare(offered, ["Clock & pomodoro"]);
     }
 
     // The choice marks the chosen elements and saves a change to the profile.
