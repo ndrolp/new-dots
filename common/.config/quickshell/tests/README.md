@@ -60,8 +60,13 @@ drawn, grows for an attached popup, keeps up with one that resizes and meets
 its joins on every Bar position
 (`components/bar/DockedSurface.qml`,
 `DockedZones.js`), which bar elements a collapsed capsule shows in its one
-row, where the capsule sits around that row and that only it takes clicks in
-its bar window (`components/bar/Capsule.js`), how it is drawn with its fill and
+row, which ones it shows expanded (all but the workspaces, with their
+groups), that any one cause holds it expanded, that only the pointer over the
+capsule itself counts as hovering it, where the capsule sits around that row
+and that only it takes clicks in its bar window
+(`components/bar/Capsule.js`), that hovering it expands it only after a
+moment and collapses it a while after the pointer leaves
+(`CapsuleHover.qml`), how it is drawn with its fill and
 bar border (`CapsuleSurface.qml`), and that a capsule sits only at the top or
 bottom, where zones, bar elements, group backgrounds and popup
 triggers sit along either axis of the bar, to the pixel the anchors they

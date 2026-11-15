@@ -31,11 +31,39 @@ function collapsedRow(barElements, shownIds) {
     return { left: [], center: center, right: [] };
 }
 
-// The bar elements a bar window draws: the collapsed row on a capsule, the
-// profile's own on any other bar style. Takes { barStyle, barElements }.
+// The bar elements an expanded capsule shows: every one the profile has but
+// the workspaces, which the workspace row already shows.
+function expandedElementIds(barElements) {
+    const ids = [];
+    for (const zone of zoneNames)
+        ((barElements || {})[zone] || []).forEach(element => {
+            if (element.id !== "workspaces")
+                ids.push(element.id);
+        });
+    return ids;
+}
+
+// The bar elements a bar window draws: on a capsule, its collapsed row, or
+// its expanded row while `expanded`; the profile's own on any other bar style.
+// Takes { barStyle, barElements, expanded }.
 function drawnElements(bar) {
-    return bar.barStyle === "capsule"
-        ? collapsedRow(bar.barElements, collapsedElementIds) : bar.barElements;
+    if (bar.barStyle !== "capsule")
+        return bar.barElements;
+    return collapsedRow(bar.barElements,
+        bar.expanded ? expandedElementIds(bar.barElements) : collapsedElementIds);
+}
+
+// Whether the capsule is expanded: while any of its causes holds it, given as
+// { cause: bool }. Hovering it is one ("hover"); others join as more keys.
+function expanded(causes) {
+    return Object.keys(causes || {}).some(cause => causes[cause] === true);
+}
+
+// Whether `point` { x, y } is over the capsule `place` (as Capsule.surface
+// gives it, or null when there is no capsule), in the bar content.
+function contains(place, point) {
+    return !!place && point.x >= place.x && point.x < place.x + place.width
+        && point.y >= place.y && point.y < place.y + place.height;
 }
 
 // Where the capsule is drawn in the bar content, { x, y, width, height,

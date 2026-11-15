@@ -65,6 +65,14 @@ Item {
         ? Capsule.surface(layoutBar, { start: zoneStart("center"), end: zoneEnd("center") },
             appearance.horizontalPadding)
         : null
+    // Whether the pointer is over the capsule itself, not elsewhere in its bar
+    // window such as the workspace row.
+    readonly property bool capsuleHovered: capsulePlace !== null && pointer.hovered
+        && Capsule.contains(capsulePlace, pointer.point.position)
+
+    HoverHandler {
+        id: pointer
+    }
 
     // The item of every bar element, by element id.
     readonly property var elementItems: Object.assign({

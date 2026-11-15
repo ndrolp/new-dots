@@ -92,6 +92,59 @@ TestCase {
         compare(shownIds(drawn, "center"), data.center);
     }
 
+    // Expanded, the capsule shows every bar element the profile enables, in
+    // its order and with its groups, except the workspaces: the workspace row
+    // already shows them.
+    function test_anExpandedCapsuleShowsEveryElementButTheWorkspaces() {
+        const elements = barElements();
+        elements.left[0].enabled = false;
+        const row = Capsule.drawnElements({ barStyle: "capsule", barElements: elements, expanded: true });
+
+        compare(shownIds(row, "center"), ["systemMonitor", "notifications", "battery", "clock"]);
+        compare(BarProfileModel.zoneGroups(row, "center"),
+            [["systemMonitor"], ["notifications"], ["battery", "clock"]]);
+    }
+
+    // Expanding means nothing on any other bar style.
+    function test_onlyACapsuleExpands() {
+        const drawn = Capsule.drawnElements({ barStyle: "opaque", barElements: barElements(), expanded: true });
+
+        compare(shownIds(drawn, "center"), ["workspaces"]);
+        compare(shownIds(drawn, "left"), ["arch", "systemMonitor"]);
+    }
+
+    // Any one cause holds the capsule expanded: hovering it, and the causes
+    // later tickets add (SUPER+I, a popup inside, a change being shown).
+    function test_anyCauseHoldsTheCapsuleExpanded_data() {
+        return [
+            { tag: "none", causes: {}, expanded: false },
+            { tag: "all off", causes: { hover: false, toggled: false }, expanded: false },
+            { tag: "hover", causes: { hover: true }, expanded: true },
+            { tag: "another", causes: { hover: false, popupInside: true }, expanded: true }
+        ];
+    }
+
+    function test_anyCauseHoldsTheCapsuleExpanded(data) {
+        compare(Capsule.expanded(data.causes), data.expanded);
+    }
+
+    // Only the pointer over the capsule itself counts as hovering it, not
+    // over the rest of its bar window (such as the workspace row).
+    function test_hoveringCountsOnlyOverTheCapsule_data() {
+        const place = { x: 408, y: 0, width: 184, height: 30, radius: 15 };
+        return [
+            { tag: "inside", place: place, point: { x: 500, y: 15 }, inside: true },
+            { tag: "left end", place: place, point: { x: 408, y: 0 }, inside: true },
+            { tag: "beside", place: place, point: { x: 400, y: 15 }, inside: false },
+            { tag: "below", place: place, point: { x: 500, y: 31 }, inside: false },
+            { tag: "no capsule", place: null, point: { x: 500, y: 15 }, inside: false }
+        ];
+    }
+
+    function test_hoveringCountsOnlyOverTheCapsule(data) {
+        compare(Capsule.contains(data.place, data.point), data.inside);
+    }
+
     // The capsule wraps its row with the profile's horizontal padding at both
     // ends, as deep as the bar content, its ends fully round.
     function test_theCapsuleWrapsItsRow_data() {

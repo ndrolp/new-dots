@@ -70,13 +70,21 @@ Variants {
                 // On a capsule, only the row it shows (see Capsule.drawnElements).
                 property var barElements: Capsule.drawnElements({
                     barStyle: bar.appearance.barProfileValue(panel.profileName, "barStyle"),
-                    barElements: bar.appearance.barProfileValue(panel.profileName, "barElements")
+                    barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
+                    expanded: panel.capsuleExpanded
                 })
                 // Global, not part of the bar profile.
                 property bool doNotDisturb: bar.appearance.doNotDisturb
                 property var controlCenterTiles: bar.appearance.controlCenterTiles
                 property var motion: bar.appearance.motion
             }
+            // Whether this window's capsule is expanded, held by any of its
+            // causes (see Capsule.expanded); always false on other bar styles,
+            // where nothing reads it. Its size changes as the row does,
+            // animated, and the reserved space stays at the collapsed height.
+            readonly property bool capsuleExpanded: Capsule.expanded({
+                hover: capsuleHover.expanded
+            })
             property bool configOpen: bar.configOpen
             property string activePopup: bar.activePopupWindow === panel
                 ? bar.activePopup : ""
@@ -131,6 +139,13 @@ Variants {
 
             Config.Theme {
                 id: theme
+            }
+
+            // Hovering the capsule expands it after a moment.
+            CapsuleHover {
+                id: capsuleHover
+
+                hovering: barContent.capsuleHovered
             }
 
             Rectangle {
