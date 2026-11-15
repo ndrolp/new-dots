@@ -63,7 +63,9 @@ its joins on every Bar position
 row (the ones its profile chose, in the profile's order, else Arch, the clock
 and the control center; the choice is kept with the profile by
 `BarProfileModel.js` and offered, on a capsule profile, for the elements the
-profile shows by `BarElementsSettings.qml`), where the capsule sits around that row and that only it takes clicks in
+profile shows by `BarElementsSettings.qml`), live ones included (the recording
+indicator, and media only while a track plays), where the capsule sits around
+that row and that only it takes clicks in
 its bar window (`components/bar/Capsule.js`), how it is drawn with its fill and
 bar border (`CapsuleSurface.qml`), and that a capsule sits only at the top or
 bottom, where zones, bar elements, group backgrounds and popup
