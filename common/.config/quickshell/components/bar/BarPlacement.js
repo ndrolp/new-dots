@@ -1,5 +1,6 @@
 .pragma library
 .import "../BarPosition.js" as BarPosition
+.import "../../config/BarProfileModel.js" as BarProfileModel
 
 // Where the bar sits on its screen, from its Bar position. Every function takes
 // the bar profile of its monitor, or as much of it as it reads.
@@ -7,7 +8,7 @@
 // The gap a floating bar or a capsule keeps from the screen edge it sits on.
 // The key still says top, but it applies from whichever edge that is.
 function margin(bar) {
-    return bar.barStyle === "transparent" || bar.barStyle === "capsule"
+    return BarProfileModel.transparent(bar) || BarProfileModel.capsule(bar)
         ? bar.transparentBarTopMargin : 0;
 }
 
@@ -32,7 +33,7 @@ function windowAnchors(barPosition) {
 // screen's edge, nothing away from it and the padding at the bar's two ends,
 // which a docked bar's zones reach. Returns { top, right, bottom, left }.
 function contentMargins(bar) {
-    const padding = bar.barStyle === "docked" ? 0 : bar.horizontalPadding;
+    const padding = BarProfileModel.docked(bar) ? 0 : bar.horizontalPadding;
 
     return BarPosition.sides(bar.barPosition, margin(bar), 0, padding);
 }

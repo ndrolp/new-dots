@@ -5,6 +5,7 @@ import "../../config" as Config
 import "../IconSource.js" as IconSource
 import "../FocusedWindow.js" as FocusedWindow
 import "BarLayout.js" as BarLayout
+import "../../config/BarProfileModel.js" as BarProfileModel
 
 // On a side bar the text runs sideways with its ellipsis and the icon stays
 // upright, on top of it.
@@ -104,7 +105,7 @@ Row {
         height: size.height
         radius: appearance.radius
         color: appHover.hovered ? theme.surfaceHover
-            : root.appearance.pillsTransparent || root.appearance.barStyle === "docked"
+            : root.appearance.pillsTransparent || BarProfileModel.docked(root.appearance)
                 || root.grouped ? "transparent" : theme.surface
 
         border.width: appearance.elementBorder && !root.grouped ? 1 : 0

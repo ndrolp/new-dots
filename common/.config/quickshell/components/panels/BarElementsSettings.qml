@@ -197,7 +197,7 @@ Column {
                                     .indexOf(elementDelegate.element) !== -1
 
                                 anchors.verticalCenter: parent.verticalCenter
-                                visible: root.appearance.barStyle === "capsule" && elementDelegate.elementOn
+                                visible: BarProfileModel.capsule(root.appearance) && elementDelegate.elementOn
                                     && CapsuleElements.choosable(elementDelegate.element)
                                 appearance: root.appearance
                                 label: "In capsule"

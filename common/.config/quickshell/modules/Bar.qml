@@ -4,6 +4,7 @@ import QtQuick
 import "../components/bar" as BarComponents
 import "../components/bar/CapsuleRouting.js" as CapsuleRouting
 import "OpenPopup.js" as OpenPopup
+import "../config/BarProfileModel.js" as BarProfileModel
 
 // A bar on every monitor, and which of their popups is open (OpenPopup.js).
 // Its settings button opens the settings panel on that bar, and the bell
@@ -51,7 +52,7 @@ Scope {
                 monitor: panel.monitorDescription,
                 screen: panel.screen,
                 visible: panel.visible,
-                capsule: panel.barAppearance.barStyle === "capsule",
+                capsule: BarProfileModel.capsule(panel.barAppearance),
                 popupInside: root.openPopup.window === panel
             });
         }

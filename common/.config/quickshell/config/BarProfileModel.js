@@ -123,6 +123,24 @@ const barPositions = ["top", "bottom", "left", "right"];
 // capsule floating away from the edge).
 const barStyles = ["opaque", "transparent", "docked", "capsule"];
 
+// Whether a bar profile, or anything with its { barStyle }, is of each bar
+// style. Every bar style but opaque is see-through.
+function opaque(bar) {
+    return bar.barStyle === "opaque";
+}
+
+function transparent(bar) {
+    return bar.barStyle === "transparent";
+}
+
+function docked(bar) {
+    return bar.barStyle === "docked";
+}
+
+function capsule(bar) {
+    return bar.barStyle === "capsule";
+}
+
 // The Bar positions a bar of this bar style can take: a capsule only sits at
 // the top or the bottom.
 function barPositionsFor(barStyle) {

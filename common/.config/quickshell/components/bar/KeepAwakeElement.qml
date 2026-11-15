@@ -2,6 +2,7 @@ import QtQuick
 import "../../config" as Config
 import "../../services/KeepAwakeState.js" as KeepAwakeState
 import "BarLayout.js" as BarLayout
+import "../../config/BarProfileModel.js" as BarProfileModel
 
 // The keep-awake bar element: a cup, filled and green while keep-awake is on,
 // an outline in the subtext color while it is off. A click asks for the
@@ -23,7 +24,7 @@ Rectangle {
     height: size.height
     radius: appearance.radius
     color: keepAwakeHover.hovered ? theme.surfaceHover
-        : grouped || appearance.pillsTransparent || appearance.barStyle === "docked"
+        : grouped || appearance.pillsTransparent || BarProfileModel.docked(appearance)
             ? "transparent" : theme.surface
     border.width: appearance.elementBorder && !grouped ? 1 : 0
     border.color: appearance.elementBorder ? theme.border : "transparent"

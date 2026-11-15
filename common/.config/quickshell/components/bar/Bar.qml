@@ -7,6 +7,7 @@ import "BarPlacement.js" as BarPlacement
 import "CapsuleElements.js" as CapsuleElements
 import "CapsulePlacement.js" as CapsulePlacement
 import "CapsuleRouting.js" as CapsuleRouting
+import "../../config/BarProfileModel.js" as BarProfileModel
 
 Variants {
     id: bar
@@ -71,7 +72,7 @@ Variants {
                 property int barOpacity: bar.appearance.barProfileValue(panel.profileName, "barOpacity")
                 // On a capsule, only the row it shows (see CapsuleElements.drawnElements).
                 property var barElements: CapsuleElements.drawnElements({
-                    barStyle: bar.appearance.barProfileValue(panel.profileName, "barStyle"),
+                    barStyle: panel.barAppearance.barStyle,
                     barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
                     expanded: panel.capsuleExpanded,
                     change: panel.showingChange,
@@ -149,7 +150,7 @@ Variants {
             // what it reserves.
             implicitWidth: barThickness
             implicitHeight: barThickness
-                + (panel.barAppearance.barStyle === "capsule" ? capsuleWindowHold.held : 0)
+                + (BarProfileModel.capsule(panel.barAppearance) ? capsuleWindowHold.held : 0)
 
             anchors {
                 top: panel.windowAnchors.top
@@ -208,7 +209,7 @@ Variants {
                 id: barBackground
 
                 anchors.fill: parent
-                color: panel.barAppearance.barStyle !== "opaque"
+                color: !BarProfileModel.opaque(panel.barAppearance)
                     ? "transparent" : Qt.rgba(theme.background.r, theme.background.g,
                         theme.background.b, panel.barAppearance.barOpacity / 100)
 
@@ -221,7 +222,7 @@ Variants {
 
                 // An opaque bar's bar border, along its edge facing the desktop.
                 Repeater {
-                    model: panel.barAppearance.barBorder && panel.barAppearance.barStyle === "opaque"
+                    model: panel.barAppearance.barBorder && BarProfileModel.opaque(panel.barAppearance)
                         ? BarPlacement.edgeBorder(panel.barAppearance.barPosition,
                             { width: barBackground.width, height: barBackground.height },
                             barPopups.openPopup

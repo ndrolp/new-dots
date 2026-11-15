@@ -135,6 +135,23 @@ TestCase {
         compare(BarProfileModel.completeProfile({ barStyle: data.style }).barStyle, data.style);
     }
 
+    // Each bar style has a name to ask a profile whether it is that style.
+    function test_eachBarStyleIsAskedForByName_data() {
+        return [
+            { tag: "opaque", style: "opaque", answers: [true, false, false, false] },
+            { tag: "transparent", style: "transparent", answers: [false, true, false, false] },
+            { tag: "docked", style: "docked", answers: [false, false, true, false] },
+            { tag: "capsule", style: "capsule", answers: [false, false, false, true] }
+        ];
+    }
+
+    function test_eachBarStyleIsAskedForByName(data) {
+        const bar = { barStyle: data.style };
+
+        compare([BarProfileModel.opaque(bar), BarProfileModel.transparent(bar),
+            BarProfileModel.docked(bar), BarProfileModel.capsule(bar)], data.answers);
+    }
+
     function test_theOldBarStyleSwitchesAreNotKept() {
         const profile = BarProfileModel.completeProfile({ barTransparent: true,
             transparentBarSlanted: true });

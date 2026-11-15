@@ -202,7 +202,7 @@ TestCase {
     }
 
     function test_mediaShowsOnACapsuleOnlyWhileATrackPlays(data) {
-        compare(CapsuleElements.hasMedia(data.barStyle, data.player), data.shown);
+        compare(CapsuleElements.hasMedia({ barStyle: data.barStyle }, data.player), data.shown);
     }
 
     // Expanded, the capsule shows media as the bar does: while any player
@@ -216,6 +216,6 @@ TestCase {
     }
 
     function test_anExpandedCapsuleShowsMediaWhileAnyPlayerExists(data) {
-        compare(CapsuleElements.hasMedia("capsule", data.player, true), data.shown);
+        compare(CapsuleElements.hasMedia({ barStyle: "capsule" }, data.player, true), data.shown);
     }
 }

@@ -1,5 +1,6 @@
 .pragma library
 .import "../BarPosition.js" as BarPosition
+.import "../../config/BarProfileModel.js" as BarProfileModel
 
 // Where things sit in the bar, measured along it: from the left on a top or
 // bottom bar, from the top on a side bar. `bar` is { barPosition, width, height,
@@ -90,7 +91,7 @@ function groupBackground(bar, start, length) {
 
 // How thick a bar element is across the bar. Takes the bar profile.
 function elementThickness(profile) {
-    return profile.barStyle !== "opaque"
+    return !BarProfileModel.opaque(profile)
         ? profile.workspaceButtonSize + profile.pillVerticalPadding * 2
         : Math.max(1, profile.barHeight - profile.elementVerticalPadding * 2);
 }

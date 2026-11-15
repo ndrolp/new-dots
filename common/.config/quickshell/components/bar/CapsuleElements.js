@@ -63,7 +63,7 @@ function choosable(id) {
 // it shows a `change` instead; the profile's own on any other bar style.
 // Takes { barStyle, barElements, capsuleElements, expanded, change }.
 function drawnElements(bar) {
-    if (bar.barStyle !== "capsule")
+    if (!BarProfileModel.capsule(bar))
         return bar.barElements;
     if (bar.change === true)
         return collapsedRow(bar.barElements, []);
@@ -72,12 +72,12 @@ function drawnElements(bar) {
         : (bar.capsuleElements || collapsedElementIds).filter(choosable).concat(liveElementIds));
 }
 
-// Whether media has something to show, given the bar style and the Mpris
-// player it follows (null without one): on a collapsed capsule only while a
-// track plays, on an `expanded` one or any other bar style while there is a
-// player at all.
-function hasMedia(barStyle, player, expanded) {
+// Whether media has something to show, given the bar profile, { barStyle },
+// and the Mpris player it follows (null without one): on a collapsed capsule
+// only while a track plays, on an `expanded` one or any other bar style while
+// there is a player at all.
+function hasMedia(bar, player, expanded) {
     if (!player)
         return false;
-    return barStyle !== "capsule" || expanded === true || player.isPlaying === true;
+    return !BarProfileModel.capsule(bar) || expanded === true || player.isPlaying === true;
 }

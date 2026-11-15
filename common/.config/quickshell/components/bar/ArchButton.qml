@@ -1,6 +1,7 @@
 import QtQuick
 import "../../config" as Config
 import "BarLayout.js" as BarLayout
+import "../../config/BarProfileModel.js" as BarProfileModel
 
 Rectangle {
     id: root
@@ -20,7 +21,7 @@ Rectangle {
     height: size.height
     radius: appearance.radius
     color: hover.hovered ? theme.surfaceHover
-        : appearance.pillsTransparent || appearance.barStyle === "docked" || root.grouped
+        : appearance.pillsTransparent || BarProfileModel.docked(appearance) || root.grouped
             ? "transparent" : theme.surface
 
     border.width: appearance.elementBorder && !root.grouped ? 1 : 0

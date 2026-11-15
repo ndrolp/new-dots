@@ -14,13 +14,13 @@ Rectangle {
     required property var monitors
     required property var workspaceService
 
-    readonly property bool ownPill: appearance.barStyle !== "opaque" && !grouped
+    readonly property bool ownPill: !BarProfileModel.opaque(appearance) && !grouped
     readonly property var options: BarProfileModel.elementOptions(appearance.barElements, "workspaces")
 
     readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
     // How thick the buttons are across the bar: on an opaque bar they fill it
     // but for the vertical padding on either side.
-    readonly property real buttonThickness: appearance.barStyle !== "opaque"
+    readonly property real buttonThickness: !BarProfileModel.opaque(appearance)
         ? appearance.workspaceButtonSize - 2
         : Math.max(1, appearance.barHeight - options.verticalPadding * 2)
     // The element wraps its line of buttons, which runs along the bar, and its
@@ -34,7 +34,7 @@ Rectangle {
     width: implicitWidth
     height: implicitHeight
     radius: appearance.radius
-    color: appearance.barStyle === "transparent" && !appearance.pillsTransparent && !grouped
+    color: BarProfileModel.transparent(appearance) && !appearance.pillsTransparent && !grouped
         ? theme.surface : "transparent"
     border.width: appearance.elementBorder && !grouped ? 1 : 0
     border.color: appearance.elementBorder ? theme.border : "transparent"
@@ -95,7 +95,7 @@ Rectangle {
                 radius: root.options.radius
                 color: active ? theme.accent : urgent
                     ? Qt.rgba(theme.red.r, theme.red.g, theme.red.b, 0.22)
-                    : occupied && !appearance.pillsTransparent && appearance.barStyle !== "docked"
+                    : occupied && !appearance.pillsTransparent && !BarProfileModel.docked(appearance)
                         && !root.grouped
                         ? theme.surface : "transparent"
                 border.color: urgent ? theme.red : "transparent"

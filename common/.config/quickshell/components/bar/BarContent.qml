@@ -46,7 +46,7 @@ Item {
     // capsule takes the same, the profile's background at its opacity.
     readonly property color dockedColor: Qt.rgba(theme.background.r, theme.background.g,
         theme.background.b, appearance.barOpacity / 100)
-    readonly property real dockedPadding: appearance.barStyle === "docked"
+    readonly property real dockedPadding: BarProfileModel.docked(appearance)
         ? appearance.horizontalPadding : 0
     // Room between a group's shared background and its first and last element.
     readonly property real groupPadding: appearance.groupHorizontalPadding
@@ -64,7 +64,7 @@ Item {
     readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
     // On a capsule, where the capsule is drawn around its row, the centre zone
     // (see CapsuleElements.drawnElements); null on any other bar style.
-    readonly property var capsulePlace: appearance.barStyle === "capsule"
+    readonly property var capsulePlace: BarProfileModel.capsule(appearance)
         ? CapsulePlacement.surface(layoutBar, capsuleChange !== null
                 ? { start: changeStart, end: changeStart + changeView.width }
                 : { start: zoneStart("center"), end: zoneEnd("center") },
@@ -204,7 +204,7 @@ Item {
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
         thickness: root.sideBar ? root.width : root.height
-        visible: root.appearance.barStyle === "docked"
+        visible: BarProfileModel.docked(root.appearance)
         fillColor: root.dockedColor
         border: root.appearance.barBorder
         keepStart: true
@@ -220,7 +220,7 @@ Item {
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
         thickness: root.sideBar ? root.width : root.height
-        visible: root.appearance.barStyle === "docked"
+        visible: BarProfileModel.docked(root.appearance)
         fillColor: root.dockedColor
         border: root.appearance.barBorder
         z: -1
@@ -235,7 +235,7 @@ Item {
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
         thickness: root.sideBar ? root.width : root.height
-        visible: root.appearance.barStyle === "docked"
+        visible: BarProfileModel.docked(root.appearance)
         fillColor: root.dockedColor
         border: root.appearance.barBorder
         keepEnd: true

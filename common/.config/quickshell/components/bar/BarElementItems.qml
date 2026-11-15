@@ -123,7 +123,7 @@ Item {
     function itemVisible(element) {
         return BarElementItems.itemVisible(element, appearance.barElements, {
             // On a collapsed capsule, media shows only while a track plays.
-            hasPlayer: CapsuleElements.hasMedia(appearance.barStyle, player, appearance.capsuleExpanded),
+            hasPlayer: CapsuleElements.hasMedia(appearance, player, appearance.capsuleExpanded),
             hasBattery: hasBattery,
             recording: RecordingIndicator.shown(recordings),
             cavaSilent: cava.silent
@@ -161,7 +161,7 @@ Item {
         radius: root.appearance.radius
         color: notificationHover.hovered ? theme.surfaceHover
             : root.elementGrouped("notifications") || root.appearance.pillsTransparent
-                || root.appearance.barStyle === "docked"
+                || BarProfileModel.docked(root.appearance)
                 ? "transparent" : theme.surface
         border.width: root.appearance.elementBorder && !root.elementGrouped("notifications") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
@@ -211,7 +211,7 @@ Item {
         radius: root.appearance.radius
         color: recordingHover.hovered ? theme.surfaceHover
             : root.elementGrouped("recording") || root.appearance.pillsTransparent
-                || root.appearance.barStyle === "docked"
+                || BarProfileModel.docked(root.appearance)
                 ? "transparent" : theme.surface
         border.width: root.appearance.elementBorder && !root.elementGrouped("recording") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
@@ -290,7 +290,7 @@ Item {
         radius: root.appearance.radius
         color: mediaHover.hovered ? theme.surfaceHover
             : root.elementGrouped("media") || root.appearance.pillsTransparent
-                || root.appearance.barStyle === "docked" ? "transparent" : theme.surface
+                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
 
 
         Behavior on color {
@@ -394,7 +394,7 @@ Item {
         height: size.height
         radius: root.appearance.radius
         color: root.elementGrouped("cava") || root.appearance.pillsTransparent
-            || root.appearance.barStyle === "docked" ? "transparent" : theme.surface
+            || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
         border.width: root.appearance.elementBorder && !root.elementGrouped("cava") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
@@ -445,7 +445,7 @@ Item {
         radius: root.appearance.radius
         color: audioHover.hovered ? theme.surfaceHover
             : root.elementGrouped("audio") || root.appearance.pillsTransparent
-                || root.appearance.barStyle === "docked" ? "transparent" : theme.surface
+                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
 
         border.width: root.appearance.elementBorder && !root.elementGrouped("audio") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
@@ -487,7 +487,7 @@ Item {
         radius: root.appearance.radius
         color: bluetoothHover.hovered ? theme.surfaceHover
             : root.elementGrouped("bluetooth") || root.appearance.pillsTransparent
-                || root.appearance.barStyle === "docked" ? "transparent" : theme.surface
+                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
 
         border.width: root.appearance.elementBorder && !root.elementGrouped("bluetooth") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
@@ -527,7 +527,7 @@ Item {
         radius: root.appearance.radius
         color: trayHover.hovered ? theme.surfaceHover
             : root.elementGrouped("tray") || root.appearance.pillsTransparent
-                || root.appearance.barStyle === "docked" ? "transparent" : theme.surface
+                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
 
         border.width: root.appearance.elementBorder && !root.elementGrouped("tray") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
@@ -567,7 +567,7 @@ Item {
         radius: root.appearance.radius
         color: networkHover.hovered ? theme.surfaceHover
             : root.elementGrouped("network") || root.appearance.pillsTransparent
-                || root.appearance.barStyle === "docked" ? "transparent" : theme.surface
+                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
 
         border.width: root.appearance.elementBorder && !root.elementGrouped("network") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
@@ -607,7 +607,7 @@ Item {
         radius: root.appearance.radius
         color: batteryHover.hovered ? theme.surfaceHover
             : root.elementGrouped("battery") || root.appearance.pillsTransparent
-                || root.appearance.barStyle === "docked" ? "transparent" : theme.surface
+                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
 
         border.width: root.appearance.elementBorder && !root.elementGrouped("battery") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
@@ -652,7 +652,7 @@ Item {
         radius: root.appearance.radius
         color: clockHover.hovered ? theme.surfaceHover
             : root.elementGrouped("clock") || root.appearance.pillsTransparent
-                || root.appearance.barStyle === "docked" ? "transparent" : theme.surface
+                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
 
         border.width: root.appearance.elementBorder && !root.elementGrouped("clock") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"

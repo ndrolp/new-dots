@@ -1,5 +1,6 @@
 .pragma library
 .import "../BarPosition.js" as BarPosition
+.import "../../config/BarProfileModel.js" as BarProfileModel
 
 // Where a popup opens in its bar window, from the Bar position: away from the
 // bar, towards the inside of the screen; along the bar, centred on the bar
@@ -12,12 +13,12 @@
 
 // Takes the bar profile of the popup's monitor, { barStyle }.
 function attached(bar) {
-    return bar.barStyle === "opaque" || bar.barStyle === "docked";
+    return BarProfileModel.opaque(bar) || BarProfileModel.docked(bar);
 }
 
 // Whether popups open inside the capsule. Takes the bar profile, { barStyle }.
 function inside(bar) {
-    return bar.barStyle === "capsule";
+    return BarProfileModel.capsule(bar);
 }
 
 // A popup inside a capsule placed as one floating right past the capsule's

@@ -1,6 +1,7 @@
 .pragma library
 .import "../BarPosition.js" as BarPosition
 .import "BarPlacement.js" as BarPlacement
+.import "../../config/BarProfileModel.js" as BarProfileModel
 
 // Where the capsule bar style's capsule sits: its surface in the bar content,
 // grown round a popup inside, the part of its window that takes clicks and
@@ -69,7 +70,7 @@ function inputRegion(surface, margins) {
 // { anchors: { top, right, bottom, left }, margin, centre }, or null on any
 // other bar style or with no capsule drawn.
 function workspaceRow(bar, capsule) {
-    if (bar.barStyle !== "capsule" || capsule.width <= 0)
+    if (!BarProfileModel.capsule(bar) || capsule.width <= 0)
         return null;
 
     return {
