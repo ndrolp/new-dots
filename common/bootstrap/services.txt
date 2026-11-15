@@ -2,7 +2,8 @@
 # <system|user> <unit> <package that ships it> [optional] [now]
 # A required unit's package must be in core.txt or core-aur.txt (tests check this).
 # An optional unit is enabled only when its package is installed.
-# A now unit is also started right away (enable --now), instead of on the next boot or login.
+# A now unit is also started right away (enable --now, or start when it is already enabled),
+# instead of on the next boot or login.
 
 system sddm            sddm
 system NetworkManager  networkmanager

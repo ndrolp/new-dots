@@ -88,14 +88,20 @@ touch "$FAKE/installed/$pkg"'
     : >"$FAKE/cpuinfo"
     shim lspci 'echo "lspci $*" >>"$FAKE/calls"; cat "$FAKE/lspci"'
     # systemctl: is-enabled succeeds for units in $FAKE/enabled (as <system|user>-<unit>);
-    # enable adds them there; enabling a unit named bogus-* fails.
+    # enable adds them there; enabling a unit named bogus-* fails. is-active succeeds for units
+    # in $FAKE/active, which start and enable --now add them to.
     shim systemctl '
 echo "systemctl $*" >>"$FAKE/calls"
 scope=system
 [[ "$1" == --user ]] && { scope=user; shift; }
 case "$1" in
     is-enabled) [[ -e "$FAKE/enabled/$scope-${!#}" ]] ;;
-    enable) [[ "${!#}" != bogus-* ]] || exit 1; mkdir -p "$FAKE/enabled"; touch "$FAKE/enabled/$scope-${!#}" ;;
+    is-active) [[ -e "$FAKE/active/$scope-${!#}" ]] ;;
+    enable)
+        [[ "${!#}" != bogus-* ]] || exit 1
+        mkdir -p "$FAKE/enabled"; touch "$FAKE/enabled/$scope-${!#}"
+        [[ "$2" != --now ]] || { mkdir -p "$FAKE/active"; touch "$FAKE/active/$scope-${!#}"; } ;;
+    start) mkdir -p "$FAKE/active"; touch "$FAKE/active/$scope-${!#}" ;;
 esac'
     shim usermod 'echo "usermod $*" >>"$FAKE/calls"'
     # id -nG: the user is in the groups listed in FAKE_GROUPS.
@@ -343,6 +349,25 @@ test_services_starts_a_unit_marked_now_as_well_as_enabling_it() {
     grep -q "^sudo systemctl enable --now avahi-daemon$" "$CALLS" || fail "avahi-daemon not enabled and started"
     grep -q "^systemctl --user enable --now openlogi-agent$" "$CALLS" || fail "an optional now unit not started"
     grep -q "^sudo systemctl enable sddm$" "$CALLS" || fail "sddm was started or not enabled"
+}
+
+# A unit marked now that is enabled but not running (say, enabled by hand without --now) is
+# started, so printer discovery works right after the bootstrap.
+test_services_starts_an_enabled_but_stopped_unit_marked_now() {
+    setup_fakes
+    make_services "system avahi-daemon avahi now" "user openlogi-agent openlogi-bin optional now" "system sddm sddm"
+    touch "$FAKE/installed/openlogi-bin"
+    mkdir -p "$FAKE/enabled" "$FAKE/active"
+    touch "$FAKE/enabled/system-avahi-daemon" "$FAKE/enabled/user-openlogi-agent" "$FAKE/enabled/system-sddm"
+    touch "$FAKE/active/user-openlogi-agent"
+    run_steps false services
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    grep -q "^sudo systemctl start avahi-daemon$" "$CALLS" || fail "enabled but stopped avahi-daemon not started"
+    grep -q "^systemctl is-active --quiet avahi-daemon$" "$CALLS" || fail "avahi-daemon's state not read without sudo"
+    ! grep -q "start openlogi-agent" "$CALLS" || fail "started a unit that was already running"
+    ! grep -q "start sddm" "$CALLS" || fail "started sddm, which isn't marked now"
+    ! grep -q " enable " "$CALLS" || fail "enabled an enabled unit again"
+    grep -q "^installed	service: avahi-daemon (system, started)$" <<<"$SUMMARY" || fail "start not in the summary: $SUMMARY"
 }
 
 test_services_adds_the_user_to_the_docker_group_once() {
