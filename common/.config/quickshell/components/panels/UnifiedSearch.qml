@@ -344,6 +344,13 @@ Variants {
                         title: "Printers",
                         subtitle: "Open the Printers panel",
                         glyph: "󰐪"
+                    },
+                    {
+                        type: "printers",
+                        category: "ACTIONS",
+                        title: "Scan",
+                        subtitle: "Scan a page from a scanner in the Printers panel",
+                        glyph: "󰚫"
                     }
                 ];
                 const workspaceIds = root.workspaceService.workspacesForScreen(

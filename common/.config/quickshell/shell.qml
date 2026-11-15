@@ -101,6 +101,12 @@ ShellRoot {
         id: printers
     }
 
+    Services.Scanners {
+        id: scanners
+
+        appearance: appearance
+    }
+
     Services.NightLight {
         id: nightLight
 
@@ -242,6 +248,7 @@ ShellRoot {
 
         appearance: appearance
         printers: printers
+        scanners: scanners
         plugins: plugins
     }
 
