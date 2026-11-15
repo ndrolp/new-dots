@@ -92,6 +92,15 @@ TestCase {
         compare(shownIds(drawn, "center"), data.center);
     }
 
+    // A collapsed capsule shows the bar elements its profile chose, in the
+    // profile's order rather than the order they were chosen in.
+    function test_aCollapsedCapsuleShowsTheChosenElementsInTheProfilesOrder() {
+        const drawn = Capsule.drawnElements({ barStyle: "capsule", barElements: barElements(),
+            capsuleElements: ["clock", "battery", "workspaces"] });
+
+        compare(shownIds(drawn, "center"), ["workspaces", "battery", "clock"]);
+    }
+
     // The capsule wraps its row with the profile's horizontal padding at both
     // ends, as deep as the bar content, its ends fully round.
     function test_theCapsuleWrapsItsRow_data() {
