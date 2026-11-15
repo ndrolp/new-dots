@@ -14,6 +14,7 @@ Variants {
 
     required property var appearance
     required property var printers
+    required property var discoveredPrinters
     property bool open: false
 
     signal closeRequested()
@@ -111,6 +112,18 @@ Variants {
                         busy: root.printers.changing
                         onSetDefaultRequested: name => root.printers.setDefault(name)
                         onRemoveRequested: name => root.printers.remove(name)
+                    }
+
+                    Panels.DiscoveredPrintersSection {
+                        width: parent.width
+                        appearance: root.appearance
+                        discovered: root.discoveredPrinters.discovered
+                        problem: root.discoveredPrinters.problem
+                        adding: root.discoveredPrinters.adding
+                        addFailureKey: root.discoveredPrinters.addFailureKey
+                        addFailure: root.discoveredPrinters.addFailure
+                        onAddRequested: printer => root.discoveredPrinters.add(printer)
+                        onPrintSettingsRequested: root.discoveredPrinters.openPrintSettings()
                     }
                 }
             }
