@@ -49,7 +49,9 @@ Column {
                 { label: "Control center", propertyName: "controlCenterEnabled",
                   description: "Open the expanded system and media control panel." },
                 { label: "Web app maker", propertyName: "webAppsEnabled",
-                  description: "Turn a website into an app that opens in its own Chrome window." }
+                  description: "Turn a website into an app that opens in its own Chrome window." },
+                { label: "Printers", propertyName: "printersEnabled",
+                  description: "See the printers, choose the default one, and remove them." }
             ]
 
             delegate: Column {
