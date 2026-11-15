@@ -160,6 +160,63 @@ Which text is a URL, the fallback name, duplicates (the exact URL only) and
 the window class are plain functions in `WebApps.js`, tested without
 Quickshell; `tests/webapps.sh` tests the script on a scratch folder.
 
+## Printers
+
+`Printers.qml` is the Printers panel's view of the printers CUPS has added.
+It reads them only while `watching` (the panel is open), every 3 seconds,
+with `lpstat -l -p -d -v` under `LC_ALL=C`, and nothing runs while the panel
+is closed. *Set default* runs `lpadmin -d` and *Remove* `lpadmin -x`; the
+user is in `wheel`, which CUPS on Arch takes as an admin group, so neither
+asks for a password. Parsing lpstat (state, the reason CUPS gives, network
+or USB from the device URI, ipp-usb's localhost IPP counting as USB, the
+default) and the commands are plain functions in `Printers.js`, tested
+without Quickshell. The open printer's print jobs (`jobsPrinter`) are read
+with the list, over IPP with `ipptool`, and *Cancel* runs `cancel`. After
+a change the list is read again only while the panel is open.
+
+`DiscoveredPrinters.qml` finds the printers not added yet, only while
+`watching`: `avahi-browse -rpk` streams `_ipp._tcp` and `_ipps._tcp`
+printers as they appear and go, and is stopped when the panel closes. USB
+printers come through ipp-usb, which advertises them on `lo`. `shell.qml`
+creates it next to the printers service, hands it the added printers and
+reads them again after an add; the panel module (`modules/Printers.qml`)
+sets `watching`. *Add* runs `lpadmin -p <model> -E
+-v <uri> -m everywhere` (driverless, no password for `wheel`) with a
+`dnssd://` URI for a network printer and ipp-usb's `ipp://localhost:<port>`
+for a USB one. If avahi-daemon isn't running it says so and tries again
+every 5 seconds. Parsing avahi-browse (its `\DDD` escapes, the TXT record,
+one printer seen several ways), whether a printer is already added (its
+uuid, dnssd name, host, or ipp-usb port in an added printer's device URI,
+from `lpstat -v`) and the command are in `PrinterDiscovery.js`, tested
+without Quickshell.
+
+## Scanners
+
+`Scanners.qml` is the Printers panel's view of the scanners SANE can see.
+Like the printers service it lists them only while `watching`, every 5
+seconds, with `scanimage -f` (fields split by tabs), leaving out webcams
+(the `v4l` backend); sane-airscan, escl and `net` devices are network,
+the rest USB. It checks once per opening that sane-airscan is loaded
+(`/etc/sane.d/dll.d/airscan` or `dll.conf`) and says why network scanners
+can't show up when it isn't. When a scanner's scan view opens it reads the
+colour modes the scanner offers (`scanimage -d <scanner> -A`, its `--mode`
+option) and offers only those: Lineart, Binary, Halftone or "Black & White"
+are black and white, and a remembered mode the scanner lacks falls back to
+the nearest one it has. A scan runs `services/scan.sh`, which makes the
+folder and runs `scanimage --format=pdf|png -p -o` into
+`~/Pictures/Scans/scan-YYYY-MM-DD-HHMMSS.<ext>`. scanimage 1.4 writes
+`<file>.part` and renames it when done, so the file being there is what
+tells a saved scan; a failed one's `.part` is removed, and the file is
+never deleted (scanimage's error is shown even when it was saved). It reads
+progress from stderr, and on success sends a notification whose *Open* runs
+`xdg-open` and *Show in folder* hands the file manager the encoded
+`file://` URI over `org.freedesktop.FileManager1` (opening the folder
+otherwise). The last settings are `scanSettings` in `appearance.json`,
+starting at 300 dpi, colour and PDF. Parsing, naming, the colour modes, the
+commands, progress, errors and the settings are plain functions in
+`Scanners.js`, tested without Quickshell; `tests/scan.sh` tests `scan.sh`
+with a fake scanimage.
+
 ## Screen capture integration
 
 `ScreenCapture.qml` detects `grim`, `slurp`, `wf-recorder`, and `wayshot` at runtime.

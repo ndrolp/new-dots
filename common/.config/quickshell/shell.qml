@@ -97,6 +97,24 @@ ShellRoot {
         id: webApps
     }
 
+    Services.Printers {
+        id: printers
+    }
+
+    // An added printer leaves the discovered ones and joins the printers.
+    Services.DiscoveredPrinters {
+        id: discoveredPrinters
+
+        printers: printers.printers
+        onAdded: printers.refresh()
+    }
+
+    Services.Scanners {
+        id: scanners
+
+        appearance: appearance
+    }
+
     Services.NightLight {
         id: nightLight
 
@@ -222,6 +240,7 @@ ShellRoot {
         settings: settings
         keybindCheatsheet: keybindCheatsheet
         webAppMaker: webAppMaker
+        printersPanel: printersPanel
     }
 
     Modules.WebApps {
@@ -229,6 +248,16 @@ ShellRoot {
 
         appearance: appearance
         webApps: webApps
+        plugins: plugins
+    }
+
+    Modules.Printers {
+        id: printersPanel
+
+        appearance: appearance
+        printers: printers
+        discoveredPrinters: discoveredPrinters
+        scanners: scanners
         plugins: plugins
     }
 

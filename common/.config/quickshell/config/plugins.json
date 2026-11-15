@@ -5,6 +5,7 @@
     "commandLauncherEnabled": true,
     "controlCenterEnabled": true,
     "launcherRecentLimit": 5,
+    "printersEnabled": true,
     "quickSearchEnabled": true,
     "quickSettingsEnabled": true,
     "screenCaptureEnabled": true,
