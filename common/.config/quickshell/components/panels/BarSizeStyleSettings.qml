@@ -3,8 +3,8 @@ import "." as Panels
 import "../../config/BarProfileModel.js" as BarProfileModel
 
 // The Bar section's sizes and style for the edited bar profile: a density
-// preset, the sizes as number settings, the Bar position and the style as
-// switch rows, two per line.
+// preset, the sizes as number settings, the Bar position and the Bar style as
+// choices, and the style's switches as rows, two per line.
 Column {
     id: root
 
@@ -12,6 +12,15 @@ Column {
 
     width: parent ? parent.width : 0
     spacing: 14
+
+    // A choice's options from the profile values it offers, each labelled
+    // by its value with a capital letter: "top" is offered as "Top".
+    function choiceOptions(values) {
+        return values.map(value => ({
+            label: value.charAt(0).toUpperCase() + value.slice(1),
+            value: value
+        }));
+    }
 
     Panels.SettingsHeading {
         appearance: root.appearance
@@ -87,10 +96,7 @@ Column {
             width: Math.min(parent.width, 360)
             appearance: root.appearance
             // Only the positions the bar style can take: a capsule has no side.
-            options: BarProfileModel.barPositionsFor(root.appearance.barStyle).map(position => ({
-                label: position.charAt(0).toUpperCase() + position.slice(1),
-                value: position
-            }))
+            options: root.choiceOptions(BarProfileModel.barPositionsFor(root.appearance.barStyle))
             value: root.appearance.barPosition
             onChosen: position => root.appearance.setBarSetting("barPosition", position)
         }
@@ -104,12 +110,7 @@ Column {
         Panels.SettingsChoice {
             width: Math.min(parent.width, 360)
             appearance: root.appearance
-            options: [
-                { label: "Opaque", value: "opaque" },
-                { label: "Transparent", value: "transparent" },
-                { label: "Docked", value: "docked" },
-                { label: "Capsule", value: "capsule" }
-            ]
+            options: root.choiceOptions(BarProfileModel.barStyles)
             value: root.appearance.barStyle
             onChosen: style => root.appearance.setBarSetting("barStyle", style)
         }

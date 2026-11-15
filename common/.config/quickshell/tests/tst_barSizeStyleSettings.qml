@@ -206,6 +206,13 @@ TestCase {
         compare(built.appearance.saved, [["barStyle", "transparent"]]);
     }
 
+    function test_theBarStyleOffersEveryStyle() {
+        const choice = styleChoice(make().item);
+
+        compare(choice.options.map(option => option.value), ["opaque", "transparent", "docked", "capsule"]);
+        compare(choice.options.map(option => option.label), ["Opaque", "Transparent", "Docked", "Capsule"]);
+    }
+
     function test_theBarPositionOffersAllFourPositions() {
         const choice = positionChoice(make().item);
 
