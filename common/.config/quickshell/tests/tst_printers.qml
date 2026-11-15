@@ -143,4 +143,53 @@ TestCase {
         compare(connectionOf("cups-pdf:/"), "local");
         compare(connectionOf("file:///dev/null"), "local");
     }
+
+    // The print jobs of one printer, from what `ipptool -c` prints for
+    // CUPS's get-jobs.test: a CSV header, then a row per job not completed.
+    readonly property string jobsHeader: "job-id,job-state,job-name,job-originating-user-name,"
+        + "job-impressions,job-impressions-completed,job-media-sheets,job-media-sheets-completed"
+
+    function test_aPrinterWithNoPrintJobsHasNone() {
+        compare(Printers.parseJobs(""), []);
+        compare(Printers.parseJobs(jobsHeader + "\n"), []);
+    }
+
+    function test_everyPrintJobHasItsDocumentOwnerStateAndProgress() {
+        compare(Printers.parseJobs([jobsHeader,
+            "42,processing,report.pdf,ndrolp,5,2,5,2",
+            "43,pending,Test page,ndrolp,,,,",
+            ""].join("\n")), [
+            { id: 42, document: "report.pdf", owner: "ndrolp", state: "printing", progress: "Page 2 of 5" },
+            { id: 43, document: "Test page", owner: "ndrolp", state: "waiting", progress: "" }
+        ]);
+    }
+
+    // ipptool quotes a field with a comma or quote, escaping with a backslash.
+    function test_aDocumentNameWithACommaOrQuoteIsKept() {
+        const jobs = Printers.parseJobs([jobsHeader,
+            "7,pending,\"Invoice, March \\\"final\\\".pdf\",ana,,,,", ""].join("\n"));
+        compare(jobs[0].document, "Invoice, March \"final\".pdf");
+        compare(jobs[0].owner, "ana");
+    }
+
+    function test_aPrintJobHeldOrStoppedSaysSo() {
+        const jobs = Printers.parseJobs([jobsHeader,
+            "8,pending-held,a.pdf,ana,,,,", "9,processing-stopped,b.pdf,ana,3,,3,", ""].join("\n"));
+        compare(jobs.map(job => [job.state, job.progress]), [["held", ""], ["stopped", ""]]);
+        compare(Printers.jobText(jobs[0]), "Held · ana");
+        compare(Printers.jobText({ state: "printing", owner: "ndrolp", progress: "Page 2 of 5" }),
+            "Printing · Page 2 of 5 · ndrolp");
+        compare(Printers.jobText({ state: "waiting", owner: "", progress: "" }), "Waiting");
+        compare(Printers.jobText({ state: "stopped", owner: "ana", progress: "" }), "Stopped · ana");
+    }
+
+    // ipptool asks CUPS for the jobs not completed; cancel needs no password
+    // for a user in wheel; the test page is the one cups-filters ships.
+    function test_theCommandsForPrintJobsAndTestPage() {
+        compare(Printers.jobsCommand("Office_Laser"), ["env", "LC_ALL=C", "ipptool", "-c",
+            "ipp://localhost/printers/Office_Laser", "/usr/share/cups/ipptool/get-jobs.test"]);
+        compare(Printers.cancelJobCommand(42), ["cancel", "42"]);
+        compare(Printers.testPageCommand("Office_Laser"), ["lp", "-d", "Office_Laser", "-t", "Test page",
+            "/usr/share/cups/data/default-testpage.pdf"]);
+    }
 }

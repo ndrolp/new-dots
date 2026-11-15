@@ -5,8 +5,9 @@ import "." as Panels
 
 // The Printers heading of the Printers panel: every printer with its state,
 // connection and whether it's the default. Pressing a printer opens it,
-// with *Set default* and *Remove* (which asks once more). It only shows
-// what it's handed and asks for changes; the printers service makes them.
+// with its print jobs (each with *Cancel*), *Set default*, *Test page* and
+// *Remove* (which asks once more). It only shows what it's handed and
+// asks for changes; the printers service makes them.
 Column {
     id: root
 
@@ -20,9 +21,13 @@ Column {
     // The open printer's name, and the one whose removal waits for a yes.
     property string expanded: ""
     property string removeArmed: ""
+    // The open printer's print jobs: [{ id, document, owner, state, progress }].
+    property var jobs: []
 
     signal setDefaultRequested(string name)
     signal removeRequested(string name)
+    signal cancelJobRequested(int id)
+    signal testPageRequested(string name)
 
     spacing: 4
 
@@ -140,8 +145,10 @@ Column {
                 }
             }
 
-            // An open printer. Its print jobs and *Test page* go here too.
+            // An open printer: its print jobs, then its buttons.
             Column {
+                id: details
+
                 width: parent.width
                 visible: printer.open
                 leftPadding: 40
@@ -155,6 +162,64 @@ Column {
                     elide: Text.ElideRight
                     color: theme.textMuted
                     font.pixelSize: root.appearance.textSize - 2
+                }
+
+                Panels.ShellText {
+                    visible: root.jobs.length === 0
+                    text: "No print jobs"
+                    color: theme.textMuted
+                    font.pixelSize: root.appearance.textSize - 2
+                }
+
+                Repeater {
+                    model: printer.open ? root.jobs : []
+
+                    delegate: Item {
+                        id: job
+
+                        required property var modelData
+
+                        width: details.width - details.leftPadding
+                        height: Math.max(jobLabels.implicitHeight, cancelJob.height)
+
+                        Column {
+                            id: jobLabels
+
+                            anchors.left: parent.left
+                            anchors.right: cancelJob.left
+                            anchors.rightMargin: 8
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            Panels.ShellText {
+                                width: parent.width
+                                text: job.modelData.document || "Untitled"
+                                elide: Text.ElideRight
+                                color: theme.text
+                                font.pixelSize: root.appearance.textSize - 1
+                            }
+
+                            Panels.ShellText {
+                                width: parent.width
+                                text: Printers.jobText(job.modelData)
+                                elide: Text.ElideRight
+                                color: job.modelData.state === "stopped" ? theme.orange : theme.textMuted
+                                font.pixelSize: root.appearance.textSize - 3
+                            }
+                        }
+
+                        Panels.PopupButton {
+                            id: cancelJob
+
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 80
+                            appearance: root.appearance
+                            interactive: !root.busy
+                            label: "Cancel"
+                            labelColor: theme.red
+                            onActivated: root.cancelJobRequested(job.modelData.id)
+                        }
+                    }
                 }
 
                 Panels.ShellText {
@@ -174,6 +239,15 @@ Column {
                         interactive: !root.busy
                         label: "Set default"
                         onActivated: root.setDefaultRequested(printer.modelData.name)
+                    }
+
+                    Panels.PopupButton {
+                        width: 90
+                        visible: !printer.armed
+                        appearance: root.appearance
+                        interactive: !root.busy
+                        label: "Test page"
+                        onActivated: root.testPageRequested(printer.modelData.name)
                     }
 
                     Panels.PopupButton {

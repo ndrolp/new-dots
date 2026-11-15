@@ -1,7 +1,7 @@
 .pragma library
 
-// The printers CUPS has added, read from `lpstat`, and the commands that
-// change them. Pure, no Quickshell; Printers.qml runs the commands.
+// The printers CUPS has added, read from `lpstat`, their print jobs, read
+// over IPP with `ipptool`, and the commands that change them. Pure, no Quickshell; Printers.qml runs the commands.
 
 // Reads every printer, its state, alerts, the default and device URIs, in
 // the English parse() reads.
@@ -134,4 +134,91 @@ function takeAlerts(printer, reasons) {
     printer.state = "error";
     if (printer.reason === "")
         printer.reason = reasonText(error);
+}
+
+// A print job's state from its IPP job-state: "waiting", "held",
+// "printing" or "stopped". Get-Jobs only returns jobs not completed.
+var jobStates = {
+    "pending": "waiting",
+    "pending-held": "held",
+    "processing": "printing",
+    "processing-stopped": "stopped"
+};
+
+// The fields of one line of `ipptool -c` CSV. A field with a comma or a
+// quote is quoted, with a backslash before a quote or backslash inside.
+function csvFields(line) {
+    const fields = [];
+    let field = "";
+    let quoted = false;
+    for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (quoted && c === "\\" && i + 1 < line.length)
+            field += line[++i];
+        else if (c === "\"")
+            quoted = !quoted;
+        else if (c === "," && !quoted) {
+            fields.push(field);
+            field = "";
+        } else
+            field += c;
+    }
+    fields.push(field);
+    return fields;
+}
+
+// How far a print job is: "Page 2 of 5", "Page 2", or "" when unknown.
+function progressOf(done, total) {
+    if (!(done > 0))
+        return "";
+    return total > 0 ? "Page " + done + " of " + total : "Page " + done;
+}
+
+// Every print job in `text`, what `ipptool -c` prints for get-jobs.test:
+// [{ id, document, owner, state, progress }], in the order CUPS gives.
+function parseJobs(text) {
+    const lines = String(text || "").split("\n").filter(line => line.trim() !== "");
+    if (lines.length === 0)
+        return [];
+    const header = csvFields(lines[0]);
+    const jobs = [];
+    for (const line of lines.slice(1)) {
+        const fields = csvFields(line);
+        const value = name => fields[header.indexOf(name)] || "";
+        const id = parseInt(value("job-id"), 10);
+        if (!(id > 0))
+            continue;
+        jobs.push({
+            id: id,
+            document: value("job-name"),
+            owner: value("job-originating-user-name"),
+            state: jobStates[value("job-state")] || "waiting",
+            progress: progressOf(parseInt(value("job-impressions-completed"), 10),
+                parseInt(value("job-impressions"), 10))
+        });
+    }
+    return jobs;
+}
+
+// What the Printers panel says under a print job's document name.
+function jobText(job) {
+    const label = { waiting: "Waiting", held: "Held", printing: "Printing", stopped: "Stopped" }[job.state]
+        || "Waiting";
+    return [label, job.progress, job.owner].filter(part => part).join(" · ");
+}
+
+// Reads a printer's print jobs not completed, for parseJobs(). lpstat
+// doesn't tell the document name, so this asks CUPS over IPP.
+function jobsCommand(name) {
+    return ["env", "LC_ALL=C", "ipptool", "-c", "ipp://localhost/printers/" + encodeURIComponent(name),
+        "/usr/share/cups/ipptool/get-jobs.test"];
+}
+
+function cancelJobCommand(id) {
+    return ["cancel", String(id)];
+}
+
+// CUPS's own test page, from cups-filters (a dependency of cups).
+function testPageCommand(name) {
+    return ["lp", "-d", name, "-t", "Test page", "/usr/share/cups/data/default-testpage.pdf"];
 }
