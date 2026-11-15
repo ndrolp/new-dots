@@ -92,6 +92,46 @@ TestCase {
         compare(shownIds(drawn, "center"), data.center);
     }
 
+    // A collapsed capsule shows the bar elements its profile chose, in the
+    // profile's order rather than the order they were chosen in.
+    function test_aCollapsedCapsuleShowsTheChosenElementsInTheProfilesOrder() {
+        const drawn = Capsule.drawnElements({ barStyle: "capsule", barElements: barElements(),
+            capsuleElements: ["clock", "battery", "workspaces"] });
+
+        compare(shownIds(drawn, "center"), ["workspaces", "battery", "clock"]);
+    }
+
+    // While collapsed the capsule also draws the live bar elements, the
+    // recording indicator and media, which show only while they are active.
+    // In the default order they sit between Arch and the clock.
+    function test_aCollapsedCapsuleDrawsTheLiveElementsBetweenArchAndTheClock() {
+        const drawn = Capsule.drawnElements({
+            barStyle: "capsule",
+            barElements: BarProfileModel.defaultProfile.barElements
+        });
+
+        compare(shownIds(drawn, "center"), ["arch", "notifications", "recording", "media", "clock"]);
+    }
+
+    // Media has something to show on a bar while any player exists, but on a
+    // capsule only while a track plays: a paused player leaves it.
+    function test_mediaShowsOnACapsuleOnlyWhileATrackPlays_data() {
+        const playing = { isPlaying: true };
+        const paused = { isPlaying: false };
+        return [
+            { tag: "capsule, playing", barStyle: "capsule", player: playing, shown: true },
+            { tag: "capsule, paused", barStyle: "capsule", player: paused, shown: false },
+            { tag: "capsule, no player", barStyle: "capsule", player: null, shown: false },
+            { tag: "opaque, playing", barStyle: "opaque", player: playing, shown: true },
+            { tag: "opaque, paused", barStyle: "opaque", player: paused, shown: true },
+            { tag: "docked, no player", barStyle: "docked", player: null, shown: false }
+        ];
+    }
+
+    function test_mediaShowsOnACapsuleOnlyWhileATrackPlays(data) {
+        compare(Capsule.hasMedia(data.barStyle, data.player), data.shown);
+    }
+
     // The capsule wraps its row with the profile's horizontal padding at both
     // ends, as deep as the bar content, its ends fully round.
     function test_theCapsuleWrapsItsRow_data() {

@@ -70,7 +70,8 @@ Variants {
                 // On a capsule, only the row it shows (see Capsule.drawnElements).
                 property var barElements: Capsule.drawnElements({
                     barStyle: bar.appearance.barProfileValue(panel.profileName, "barStyle"),
-                    barElements: bar.appearance.barProfileValue(panel.profileName, "barElements")
+                    barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
+                    capsuleElements: bar.appearance.barProfileValue(panel.profileName, "capsuleElements")
                 })
                 // Global, not part of the bar profile.
                 property bool doNotDisturb: bar.appearance.doNotDisturb

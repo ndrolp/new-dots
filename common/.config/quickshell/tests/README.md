@@ -60,7 +60,12 @@ drawn, grows for an attached popup, keeps up with one that resizes and meets
 its joins on every Bar position
 (`components/bar/DockedSurface.qml`,
 `DockedZones.js`), which bar elements a collapsed capsule shows in its one
-row, where the capsule sits around that row and that only it takes clicks in
+row (the ones its profile chose, in the profile's order, else Arch, the clock
+and the control center; the choice is kept with the profile by
+`BarProfileModel.js` and offered, on a capsule profile, for the elements the
+profile shows by `BarElementsSettings.qml`), live ones included (the recording
+indicator, and media only while a track plays), where the capsule sits around
+that row and that only it takes clicks in
 its bar window (`components/bar/Capsule.js`), how it is drawn with its fill and
 bar border (`CapsuleSurface.qml`), where its workspace row sits, under a top
 capsule and above a bottom one, centred on it (`Capsule.js`), that the row
