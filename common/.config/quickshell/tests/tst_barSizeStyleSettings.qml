@@ -187,8 +187,8 @@ TestCase {
         const choice = styleChoice(built.item);
 
         verify(choice);
-        compare(choice.options.map(option => option.value), ["opaque", "transparent", "docked"]);
-        compare(choice.options.map(option => option.label), ["Opaque", "Transparent", "Docked"]);
+        compare(choice.options.map(option => option.value), ["opaque", "transparent", "docked", "capsule"]);
+        compare(choice.options.map(option => option.label), ["Opaque", "Transparent", "Docked", "Capsule"]);
         verify(!switchRow(built.item, "Transparent bar"));
         verify(!switchRow(built.item, "Docked bar"));
     }
@@ -211,6 +211,21 @@ TestCase {
 
         verify(choice);
         compare(choice.options.map(option => option.value), ["top", "bottom", "left", "right"]);
+        compare(choice.options.map(option => option.label), ["Top", "Bottom", "Left", "Right"]);
+    }
+
+    // A capsule sits only at the top or the bottom of its screen.
+    function test_aCapsuleOffersOnlyTheTopAndBottomPositions() {
+        const built = make();
+        const choice = positionChoice(built.item);
+
+        built.appearance.barStyle = "capsule";
+        compare(choice.options.map(option => option.label), ["Top", "Bottom"]);
+
+        choice.chosen("bottom");
+        compare(built.appearance.saved, [["barPosition", "bottom"]]);
+
+        built.appearance.barStyle = "docked";
         compare(choice.options.map(option => option.label), ["Top", "Bottom", "Left", "Right"]);
     }
 

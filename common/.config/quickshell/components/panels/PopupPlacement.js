@@ -6,11 +6,11 @@
 // element that opened it, whatever zone it sits in, shifted to stay on screen;
 // at an end of the bar when its element isn't on the bar. Either way it keeps clear
 // of the bar's rounded ends. On an opaque or docked bar popups are attached:
-// they hang from the bar itself.
+// they hang from the bar itself. On a transparent bar or a capsule they float.
 
 // Takes the bar profile of the popup's monitor, { barStyle }.
 function attached(bar) {
-    return bar.barStyle !== "transparent";
+    return bar.barStyle === "opaque" || bar.barStyle === "docked";
 }
 
 // A distance as an { x, y } offset pointing at the bar.

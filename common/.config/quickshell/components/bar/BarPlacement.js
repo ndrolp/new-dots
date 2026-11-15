@@ -4,10 +4,11 @@
 // Where the bar sits on its screen, from its Bar position. Every function takes
 // the bar profile of its monitor, or as much of it as it reads.
 
-// The gap a floating bar keeps from the screen edge it sits on. The key still
-// says top, but it applies from whichever edge that is.
+// The gap a floating bar or a capsule keeps from the screen edge it sits on.
+// The key still says top, but it applies from whichever edge that is.
 function margin(bar) {
-    return bar.barStyle === "transparent" ? bar.transparentBarTopMargin : 0;
+    return bar.barStyle === "transparent" || bar.barStyle === "capsule"
+        ? bar.transparentBarTopMargin : 0;
 }
 
 // The space the bar takes from its screen edge inwards. Also what it reserves,

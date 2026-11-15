@@ -128,7 +128,7 @@ TestCase {
     }
 
     function test_everyBarStyleIsKeptAsSaved_data() {
-        return ["opaque", "transparent", "docked"].map(style => ({ tag: style, style: style }));
+        return ["opaque", "transparent", "docked", "capsule"].map(style => ({ tag: style, style: style }));
     }
 
     function test_everyBarStyleIsKeptAsSaved(data) {
@@ -150,6 +150,33 @@ TestCase {
 
     function test_everyBarPositionIsKeptAsSaved(data) {
         compare(BarProfileModel.completeProfile({ barPosition: data.position }).barPosition, data.position);
+    }
+
+    // A capsule sits only at the top or the bottom: on a side it moves to the top.
+    function test_aCapsuleOnASideLoadsAtTheTop_data() {
+        return [
+            { tag: "left", position: "left", loaded: "top" },
+            { tag: "right", position: "right", loaded: "top" },
+            { tag: "bottom", position: "bottom", loaded: "bottom" }
+        ];
+    }
+
+    function test_aCapsuleOnASideLoadsAtTheTop(data) {
+        compare(BarProfileModel.completeProfile({ barStyle: "capsule", barPosition: data.position })
+            .barPosition, data.loaded);
+    }
+
+    function test_choosingTheCapsuleOnASideBarMovesItToTheTop() {
+        const side = fixtures.edited(fixtures.startedBarState(), { barPosition: "left" });
+        const capsule = fixtures.edited(side, { barStyle: "capsule" });
+
+        compare(BarProfileModel.editedProfile(capsule).barStyle, "capsule");
+        compare(BarProfileModel.editedProfile(capsule).barPosition, "top");
+    }
+
+    function test_theBarPositionsABarStyleCanTake() {
+        compare(BarProfileModel.barPositionsFor("capsule"), ["top", "bottom"]);
+        compare(BarProfileModel.barPositionsFor("docked"), ["top", "bottom", "left", "right"]);
     }
 
     function test_choosingABarPositionIsAPendingChangeUntilSaved() {

@@ -36,6 +36,7 @@ TestCase {
             { tag: "opaque", values: {}, thickness: 30 },
             { tag: "floating", values: { barStyle: "transparent" }, thickness: 36 },
             { tag: "docked", values: { barStyle: "docked" }, thickness: 30 },
+            { tag: "capsule", values: { barStyle: "capsule" }, thickness: 36 },
             { tag: "floating at the bottom", values: { barStyle: "transparent", barPosition: "bottom" },
                 thickness: 36 }
         ];
@@ -71,12 +72,15 @@ TestCase {
         compare(BarPlacement.contentMargins(bar({ barPosition: "bottom", barStyle: "docked" })), { top: 0, right: 0, bottom: 0, left: 0 });
     }
 
-    // No bar style is tied to a Bar position: all twelve are a working bar with
-    // the room it reserves, its margins and how its popups open.
+    // Only the capsule is tied to a Bar position (top or bottom): the other
+    // styles' twelve and the capsule's two are a working bar with the room it
+    // reserves, its margins and how its popups open.
     function test_everyBarStyleWorksOnEveryBarPosition_data() {
         const opaque = { barStyle: "opaque" };
         const floating = { barStyle: "transparent" };
         const docked = { barStyle: "docked" };
+        // A capsule only sits at the top or the bottom.
+        const capsule = { barStyle: "capsule" };
 
         return [
             { tag: "opaque top", style: opaque, barPosition: "top", thickness: 30, attached: true,
@@ -102,7 +106,11 @@ TestCase {
             { tag: "docked left", style: docked, barPosition: "left", thickness: 30, attached: true,
                 margins: { top: 0, right: 0, bottom: 0, left: 0 } },
             { tag: "docked right", style: docked, barPosition: "right", thickness: 30, attached: true,
-                margins: { top: 0, right: 0, bottom: 0, left: 0 } }
+                margins: { top: 0, right: 0, bottom: 0, left: 0 } },
+            { tag: "capsule top", style: capsule, barPosition: "top", thickness: 36, attached: false,
+                margins: { top: 6, right: 12, bottom: 0, left: 12 } },
+            { tag: "capsule bottom", style: capsule, barPosition: "bottom", thickness: 36, attached: false,
+                margins: { top: 0, right: 12, bottom: 6, left: 12 } }
         ];
     }
 

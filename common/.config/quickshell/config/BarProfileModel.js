@@ -118,9 +118,16 @@ function defaultBarElements(disabledIds, options) {
 const barPositions = ["top", "bottom", "left", "right"];
 
 // How a bar looks, its bar style: opaque (a solid bar along the edge),
-// transparent (floating elements away from the edge) or docked (zones hanging
-// from the edge, outlined like an attached popup).
-const barStyles = ["opaque", "transparent", "docked"];
+// transparent (floating elements away from the edge), docked (zones hanging
+// from the edge, outlined like an attached popup) or capsule (a single centred
+// capsule floating away from the edge).
+const barStyles = ["opaque", "transparent", "docked", "capsule"];
+
+// The Bar positions a bar of this bar style can take: a capsule only sits at
+// the top or the bottom.
+function barPositionsFor(barStyle) {
+    return barStyle === "capsule" ? ["top", "bottom"] : barPositions;
+}
 
 // Every setting a bar profile stores, with the value a profile that lacks it
 // gets.
@@ -201,18 +208,19 @@ function sameValue(left, right) {
 }
 
 // `profile` with every profile setting, as a fresh object: missing settings
-// take their default, an unknown Bar position or bar style too, and the bar
-// elements are normalized. Other keys are dropped.
+// take their default, an unknown bar style too, a Bar position the bar style
+// can't take becomes the default one (a capsule on a side moves to the top),
+// and the bar elements are normalized. Other keys are dropped.
 function completeProfile(profile) {
     const source = profile || {};
     const complete = {};
 
     for (const key of profileKeys)
         complete[key] = cloneValue(source[key] !== undefined ? source[key] : defaultProfile[key]);
-    if (barPositions.indexOf(complete.barPosition) === -1)
-        complete.barPosition = defaultProfile.barPosition;
     if (barStyles.indexOf(complete.barStyle) === -1)
         complete.barStyle = defaultProfile.barStyle;
+    if (barPositionsFor(complete.barStyle).indexOf(complete.barPosition) === -1)
+        complete.barPosition = defaultProfile.barPosition;
     complete.barElements = normalizeBarElements(complete.barElements);
     return complete;
 }

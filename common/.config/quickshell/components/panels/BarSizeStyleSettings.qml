@@ -1,5 +1,6 @@
 import QtQuick
 import "." as Panels
+import "../../config/BarProfileModel.js" as BarProfileModel
 
 // The Bar section's sizes and style for the edited bar profile: a density
 // preset, the sizes as number settings, the Bar position and the style as
@@ -85,12 +86,11 @@ Column {
         Panels.SettingsChoice {
             width: Math.min(parent.width, 360)
             appearance: root.appearance
-            options: [
-                { label: "Top", value: "top" },
-                { label: "Bottom", value: "bottom" },
-                { label: "Left", value: "left" },
-                { label: "Right", value: "right" }
-            ]
+            // Only the positions the bar style can take: a capsule has no side.
+            options: BarProfileModel.barPositionsFor(root.appearance.barStyle).map(position => ({
+                label: position.charAt(0).toUpperCase() + position.slice(1),
+                value: position
+            }))
             value: root.appearance.barPosition
             onChosen: position => root.appearance.setBarSetting("barPosition", position)
         }
@@ -107,7 +107,8 @@ Column {
             options: [
                 { label: "Opaque", value: "opaque" },
                 { label: "Transparent", value: "transparent" },
-                { label: "Docked", value: "docked" }
+                { label: "Docked", value: "docked" },
+                { label: "Capsule", value: "capsule" }
             ]
             value: root.appearance.barStyle
             onChosen: style => root.appearance.setBarSetting("barStyle", style)
