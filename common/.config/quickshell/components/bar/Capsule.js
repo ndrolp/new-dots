@@ -1,5 +1,6 @@
 .pragma library
 .import "../BarPosition.js" as BarPosition
+.import "BarPlacement.js" as BarPlacement
 .import "../../config/BarProfileModel.js" as BarProfileModel
 
 // The capsule bar style: a single centred capsule instead of the bar. Pure
@@ -117,5 +118,25 @@ function inputRegion(surface, margins) {
         y: margins.top + surface.y,
         width: surface.width,
         height: surface.height
+    };
+}
+
+// Where the capsule's workspace row sits: in a window of its own on the
+// capsule's screen edge, running the length of the screen. That window keeps
+// clear of what the capsule reserves, so `margin`, the profile's spacing, is
+// its gap from the capsule: it is under a top capsule and above a bottom one.
+// Its pills are centred on `centre`, the capsule's centre along the bar.
+// Takes the bar profile, { barStyle, barPosition, spacing }, and the capsule
+// in its bar window, { x, y, width, height } (see inputRegion). Returns
+// { anchors: { top, right, bottom, left }, margin, centre }, or null on any
+// other bar style or with no capsule drawn.
+function workspaceRow(bar, capsule) {
+    if (bar.barStyle !== "capsule" || capsule.width <= 0)
+        return null;
+
+    return {
+        anchors: BarPlacement.windowAnchors(bar.barPosition),
+        margin: bar.spacing,
+        centre: capsule.x + capsule.width / 2
     };
 }

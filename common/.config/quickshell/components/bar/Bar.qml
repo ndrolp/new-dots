@@ -224,6 +224,55 @@ Variants {
                 }
             }
 
+            // A capsule's workspace row, in a window of its own past what the
+            // capsule reserves, so the bar window keeps the capsule's size and
+            // only the capsule's height is reserved.
+            PanelWindow {
+                id: workspaceRowWindow
+
+                readonly property var place: Capsule.workspaceRow(panel.barAppearance,
+                    panel.inputRegion)
+
+                screen: panel.screen
+                visible: panel.visible && place !== null
+                WlrLayershell.namespace: "ndro-shell-capsule-workspaces"
+                WlrLayershell.layer: WlrLayer.Top
+                exclusionMode: ExclusionMode.Normal
+                exclusiveZone: 0
+                color: "transparent"
+                implicitHeight: workspaceRow.implicitHeight
+                mask: Region {
+                    item: workspaceRow
+                }
+
+                anchors {
+                    top: workspaceRowWindow.place ? workspaceRowWindow.place.anchors.top : true
+                    bottom: workspaceRowWindow.place ? workspaceRowWindow.place.anchors.bottom : false
+                    left: true
+                    right: true
+                }
+                margins {
+                    top: workspaceRowWindow.place ? workspaceRowWindow.place.margin : 0
+                    bottom: workspaceRowWindow.place ? workspaceRowWindow.place.margin : 0
+                }
+
+                CapsuleWorkspaceRow {
+                    id: workspaceRow
+
+                    x: workspaceRowWindow.place
+                        ? workspaceRowWindow.place.centre - workspaceRow.width / 2 : 0
+                    workspaceIds: panel.workspaceService.workspacesForScreen(panel.screen,
+                        panel.monitors.workspacesFor(panel.monitorDescription))
+                    workspaceService: panel.workspaceService
+                    fillColor: barContent.dockedColor
+                    border: panel.barAppearance.barBorder
+                    borderColor: theme.border
+                    appearance: panel.barAppearance
+
+                    AlongBarBehavior on x { appearance: panel.barAppearance }
+                }
+            }
+
             Panels.BarPopups {
                 id: barPopups
 
