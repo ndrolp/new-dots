@@ -4,6 +4,7 @@ alacritty
 appmenu-gtk-module
 arandr
 autorandr
+avahi
 awww
 base-devel
 blueman
@@ -44,6 +45,7 @@ hyprpolkitagent
 hyprsunset
 imagemagick
 impala
+ipp-usb
 jq
 kitty
 kvantum
@@ -57,6 +59,7 @@ nemo-fileroller
 network-manager-applet
 networkmanager
 noto-fonts-cjk
+nss-mdns
 nwg-look
 papirus-icon-theme
 pciutils
@@ -75,6 +78,7 @@ ripgrep
 ristretto
 rofi
 rustup
+sane-airscan
 sddm
 slurp
 spotify-player

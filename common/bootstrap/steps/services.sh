@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Enables the units in common/bootstrap/services.txt (system units with sudo, user units as the
 # user) and adds the user to the docker group. Skipped whole under --no-system. Units are only
-# enabled, not started: they come up on the next boot or login. A unit that fails to enable is
-# listed as failed in the summary and the rest go on.
+# enabled, so they come up on the next boot or login, unless marked now, which also starts them.
+# A unit that fails to enable is listed as failed in the summary and the rest go on.
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 
@@ -27,13 +27,15 @@ scoped_systemctl() {
 info "Enabling services from ${services_file#"$DOTFILES_DIR"/}..."
 already=0
 failed=0
-while read -r scope unit package optional _; do
-    if [[ "$optional" == optional ]] && ! pacman -Q "$package" >/dev/null 2>&1; then
+while read -r scope unit package flags; do
+    enable=(enable)
+    [[ " $flags " == *" now "* ]] && enable+=(--now)
+    if [[ " $flags " == *" optional "* ]] && ! pacman -Q "$package" >/dev/null 2>&1; then
         info "Skipping $unit: $package is not installed."
         summary_add skipped "service: $unit ($package not installed)"
     elif scoped_systemctl "$scope" is-enabled --quiet "$unit" 2>/dev/null; then
         already=$((already + 1))
-    elif scoped_systemctl "$scope" enable "$unit"; then
+    elif scoped_systemctl "$scope" "${enable[@]}" "$unit"; then
         summary_add installed "service: $unit ($scope)"
     else
         warn "Could not enable $unit ($scope), going on with the rest."

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Tests for the preflight, packages, paru, aur, hardware and services steps. pacman, paru, sudo,
+# Tests for the preflight, packages, paru, aur, hardware, nsswitch and services steps. pacman, paru, sudo,
 # rustup, git, makepkg, lspci, systemctl, usermod and id are PATH shims that log their calls, so
 # nothing is installed or enabled and no root is needed.
 set -uo pipefail
@@ -95,7 +95,7 @@ scope=system
 [[ "$1" == --user ]] && { scope=user; shift; }
 case "$1" in
     is-enabled) [[ -e "$FAKE/enabled/$scope-${!#}" ]] ;;
-    enable) [[ "$2" != bogus-* ]] || exit 1; mkdir -p "$FAKE/enabled"; touch "$FAKE/enabled/$scope-$2" ;;
+    enable) [[ "${!#}" != bogus-* ]] || exit 1; mkdir -p "$FAKE/enabled"; touch "$FAKE/enabled/$scope-${!#}" ;;
 esac'
     shim usermod 'echo "usermod $*" >>"$FAKE/calls"'
     # id -nG: the user is in the groups listed in FAKE_GROUPS.
@@ -143,7 +143,7 @@ run_steps() {
     STATUS=0
     OUT="$(env PATH="$FAKE_BIN:$SYS_BIN" HOME="$FAKE" DOTFILES_MINIMAL="$minimal" \
         DOTFILES_SUMMARY_FILE="$summary" DOTFILES_PACKAGES_DIR="${LISTS:-}" DOTFILES_CPUINFO="$FAKE/cpuinfo" \
-        DOTFILES_SERVICES_FILE="${SERVICES:-}" DOTFILES_NO_SYSTEM="${DOTFILES_NO_SYSTEM:-false}" \
+        DOTFILES_SERVICES_FILE="${SERVICES:-}" DOTFILES_NSSWITCH_FILE="${NSSWITCH:-}" DOTFILES_NO_SYSTEM="${DOTFILES_NO_SYSTEM:-false}" \
         bash -c 'source "$1/common/bootstrap/lib.sh"; shift; for s in "$@"; do run_step "$s" || exit 1; done' \
         bash "$REPO" "$@" 2>&1)" || STATUS=$?
     SUMMARY="$(cat "$summary")"
@@ -334,6 +334,17 @@ test_services_enables_an_optional_unit_only_when_its_package_is_installed() {
     grep -q "^skipped	.*auto-cpufreq.*auto-cpufreq-git" <<<"$SUMMARY" || fail "skip not in the summary: $SUMMARY"
 }
 
+test_services_starts_a_unit_marked_now_as_well_as_enabling_it() {
+    setup_fakes
+    make_services "system avahi-daemon avahi now" "system sddm sddm" "user openlogi-agent openlogi-bin optional now"
+    touch "$FAKE/installed/openlogi-bin"
+    run_steps false services
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    grep -q "^sudo systemctl enable --now avahi-daemon$" "$CALLS" || fail "avahi-daemon not enabled and started"
+    grep -q "^systemctl --user enable --now openlogi-agent$" "$CALLS" || fail "an optional now unit not started"
+    grep -q "^sudo systemctl enable sddm$" "$CALLS" || fail "sddm was started or not enabled"
+}
+
 test_services_adds_the_user_to_the_docker_group_once() {
     setup_fakes
     make_services "system docker docker"
@@ -378,24 +389,28 @@ test_a_unit_that_fails_to_enable_is_listed_and_the_rest_go_on() {
 
 # A required unit whose package is not always installed would fail on every --minimal machine.
 test_every_required_service_comes_from_a_core_package() {
-    local file="$REPO/common/bootstrap/services.txt" core scope unit package optional
+    local file="$REPO/common/bootstrap/services.txt" core scope unit package flags flag
     OUT=""
     [[ -f "$file" ]] || fail "no services list at $file"
     core="$(cat "$REPO"/common/packages/core.txt "$REPO"/common/packages/core-aur.txt)"
-    while read -r scope unit package optional; do
+    while read -r scope unit package flags; do
         [[ "$scope" == system || "$scope" == user ]] || fail "$unit: scope is '$scope'"
         [[ -n "$package" ]] || fail "$unit: no package"
-        [[ -z "$optional" || "$optional" == optional ]] || fail "$unit: fourth column is '$optional'"
-        [[ "$optional" == optional ]] || grep -qx "$package" <<<"$core" ||
+        for flag in $flags; do
+            [[ "$flag" == optional || "$flag" == now ]] || fail "$unit: unknown flag '$flag'"
+        done
+        [[ " $flags " == *" optional "* ]] || grep -qx "$package" <<<"$core" ||
             fail "$unit is required but $package is not in core or core-aur"
     done < <(sed -e 's/#.*//' "$file" | grep -v '^[[:space:]]*$')
-    for unit in sddm NetworkManager bluetooth docker cups pipewire pipewire-pulse wireplumber \
+    for unit in sddm NetworkManager bluetooth docker cups avahi-daemon pipewire pipewire-pulse wireplumber \
         auto-cpufreq proton.VPN openlogi-agent; do
         grep -qE "^(system|user) $unit " "$file" || fail "$unit is not in the list"
     done
     for unit in auto-cpufreq proton.VPN openlogi-agent; do
         grep -qE "^(system|user) $unit .* optional" "$file" || fail "$unit is not optional"
     done
+    # Printer discovery has to work right after the bootstrap, not only after a reboot.
+    grep -qE "^system avahi-daemon +avahi +now$" "$file" || fail "avahi-daemon is not started now"
 }
 
 # The app menu shows an app's own menus only when GTK apps export them (appmenu-gtk-module) and
@@ -412,6 +427,64 @@ test_the_app_menu_dependencies_are_core_packages() {
         || fail "xorg-xprop is not in core"
     grep -qx vala-panel-appmenu-registrar-git "$REPO/common/packages/core-aur.txt" \
         || fail "vala-panel-appmenu-registrar-git is not in core-aur"
+}
+
+# Every host finds network and USB printers and scanners: avahi with nss-mdns resolves .local
+# names, sane-airscan finds network scanners and ipp-usb drives IPP-over-USB devices.
+# cups-browsed is left out, because it would add print queues on its own.
+test_the_printer_discovery_packages_are_core_packages() {
+    OUT=""
+    CALLS=/dev/null
+    local pkg
+    for pkg in avahi nss-mdns sane-airscan ipp-usb; do
+        grep -qx "$pkg" "$REPO/common/packages/core.txt" || fail "$pkg is not in core"
+    done
+    ! grep -rqx cups-browsed "$REPO/common/packages" || fail "cups-browsed is in a package list"
+}
+
+# An nsswitch.conf whose hosts line is <hosts>, between the lines Arch ships around it.
+make_nsswitch() {
+    NSSWITCH="$(mktemp "$SCRATCH/nsswitch.XXXX")"
+    printf '%s\n' "# Name Service Switch configuration file." "passwd: files systemd" \
+        "hosts: $1" "networks: files" >"$NSSWITCH"
+}
+
+test_nsswitch_adds_mdns_minimal_before_resolve_and_a_second_run_changes_nothing() {
+    setup_fakes
+    make_nsswitch "mymachines resolve [!UNAVAIL=return] files myhostname dns"
+    run_steps false nsswitch
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    grep -qx "hosts: mymachines mdns_minimal \[NOTFOUND=return\] resolve \[!UNAVAIL=return\] files myhostname dns" \
+        "$NSSWITCH" || fail "hosts line is: $(grep '^hosts:' "$NSSWITCH")"
+    grep -qx "passwd: files systemd" "$NSSWITCH" || fail "changed another line"
+    grep -q "^sudo " "$CALLS" || fail "did not write it with sudo"
+    grep -q "^installed	.*nsswitch" <<<"$SUMMARY" || fail "not in the summary: $SUMMARY"
+    local before
+    before="$(cat "$NSSWITCH")"
+    : >"$CALLS"
+    run_steps false nsswitch
+    [[ $STATUS -eq 0 ]] || fail "second run exited $STATUS"
+    [[ "$(cat "$NSSWITCH")" == "$before" ]] || fail "second run changed it: $(grep '^hosts:' "$NSSWITCH")"
+    ! grep -q "^sudo " "$CALLS" || fail "second run wrote the file"
+    grep -q "^skipped	.*nsswitch" <<<"$SUMMARY" || fail "second run not reported as skipped: $SUMMARY"
+}
+
+test_nsswitch_adds_mdns_minimal_before_dns_when_there_is_no_resolve() {
+    setup_fakes
+    make_nsswitch "files myhostname dns"
+    run_steps false nsswitch
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    grep -qx "hosts: files myhostname mdns_minimal \[NOTFOUND=return\] dns" "$NSSWITCH" \
+        || fail "hosts line is: $(grep '^hosts:' "$NSSWITCH")"
+}
+
+test_nsswitch_is_skipped_under_no_system() {
+    setup_fakes
+    make_nsswitch "mymachines resolve [!UNAVAIL=return] files myhostname dns"
+    DOTFILES_NO_SYSTEM=true run_steps false nsswitch
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    ! grep -q mdns "$NSSWITCH" || fail "changed nsswitch.conf under --no-system"
+    grep -q "^skipped	.*(--no-system)" <<<"$SUMMARY" || fail "skip not in the summary: $SUMMARY"
 }
 
 test_hardware_installs_the_intel_set_on_an_intel_machine() {
