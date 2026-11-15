@@ -60,14 +60,17 @@ drawn, grows for an attached popup, keeps up with one that resizes and meets
 its joins on every Bar position
 (`components/bar/DockedSurface.qml`,
 `DockedZones.js`), which bar elements a collapsed capsule shows in its one
-row, live ones included (the recording indicator, and media only while a
-track plays), which ones it shows expanded (all but the workspaces, with their
-groups, and media while any player exists), that any one cause holds it
-expanded, that only the pointer over the capsule itself counts as hovering it,
-where the capsule sits around that row and that only it takes clicks in its
-bar window (`components/bar/Capsule.js`), that hovering it expands it only
-after a moment and collapses it a while after the pointer leaves
-(`CapsuleHover.qml`), how it is drawn with its fill and
+row (the ones its profile chose, in the profile's order, else Arch, the clock
+and the control center; the choice is kept with the profile by
+`BarProfileModel.js` and offered, on a capsule profile, for the elements the
+profile shows by `BarElementsSettings.qml`), live ones included (the recording
+indicator, and media only while a track plays), which ones it shows expanded
+(all but the workspaces, with their groups, and media while any player
+exists), that any one cause holds it expanded, that only the pointer over the
+capsule itself counts as hovering it, where the capsule sits around that row
+and that only it takes clicks in its bar window (`components/bar/Capsule.js`),
+that hovering it expands it only after a moment and collapses it a while after
+the pointer leaves (`CapsuleHover.qml`), how it is drawn with its fill and
 bar border (`CapsuleSurface.qml`), and that a capsule sits only at the top or
 bottom, where zones, bar elements, group backgrounds and popup
 triggers sit along either axis of the bar, to the pixel the anchors they

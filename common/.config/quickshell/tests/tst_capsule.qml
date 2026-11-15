@@ -145,6 +145,15 @@ TestCase {
         compare(Capsule.contains(data.place, data.point), data.inside);
     }
 
+    // A collapsed capsule shows the bar elements its profile chose, in the
+    // profile's order rather than the order they were chosen in.
+    function test_aCollapsedCapsuleShowsTheChosenElementsInTheProfilesOrder() {
+        const drawn = Capsule.drawnElements({ barStyle: "capsule", barElements: barElements(),
+            capsuleElements: ["clock", "battery", "workspaces"] });
+
+        compare(shownIds(drawn, "center"), ["workspaces", "battery", "clock"]);
+    }
+
     // While collapsed the capsule also draws the live bar elements, the
     // recording indicator and media, which show only while they are active.
     // In the default order they sit between Arch and the clock.

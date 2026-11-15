@@ -71,7 +71,8 @@ Variants {
                 property var barElements: Capsule.drawnElements({
                     barStyle: bar.appearance.barProfileValue(panel.profileName, "barStyle"),
                     barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
-                    expanded: panel.capsuleExpanded
+                    expanded: panel.capsuleExpanded,
+                    capsuleElements: bar.appearance.barProfileValue(panel.profileName, "capsuleElements")
                 })
                 // Whether this window's capsule is expanded (see panel.capsuleExpanded).
                 property bool capsuleExpanded: panel.capsuleExpanded

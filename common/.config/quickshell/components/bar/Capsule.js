@@ -1,11 +1,13 @@
 .pragma library
 .import "../BarPosition.js" as BarPosition
+.import "../../config/BarProfileModel.js" as BarProfileModel
 
 // The capsule bar style: a single centred capsule instead of the bar. Pure
 // functions over the bar profile of its monitor; they never mutate it.
 
-// The bar elements a collapsed capsule shows, when the profile enables them.
-const collapsedElementIds = ["arch", "clock", "notifications"];
+// The bar elements a collapsed capsule shows, when the profile enables them,
+// for a profile that never chose its own (see capsuleElements).
+const collapsedElementIds = BarProfileModel.defaultProfile.capsuleElements;
 
 // The live bar elements: a collapsed capsule also draws them, in the
 // profile's order, but they show only while active: the recording indicator
@@ -48,14 +50,17 @@ function expandedElementIds(barElements) {
     return ids;
 }
 
-// The bar elements a bar window draws: on a capsule, its collapsed row, live
+// The bar elements a bar window draws: on a capsule, the collapsed row of the
+// elements its profile chose (`capsuleElements`, else the default ones), live
 // bar elements included, or its expanded row while `expanded`; the profile's
-// own on any other bar style. Takes { barStyle, barElements, expanded }.
+// own on any other bar style. Takes { barStyle, barElements, capsuleElements,
+// expanded }.
 function drawnElements(bar) {
     if (bar.barStyle !== "capsule")
         return bar.barElements;
     return collapsedRow(bar.barElements, bar.expanded
-        ? expandedElementIds(bar.barElements) : collapsedElementIds.concat(liveElementIds));
+        ? expandedElementIds(bar.barElements)
+        : (bar.capsuleElements || collapsedElementIds).concat(liveElementIds));
 }
 
 // Whether the capsule is expanded: while any of its causes holds it, given as

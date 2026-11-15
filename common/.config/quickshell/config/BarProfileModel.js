@@ -158,7 +158,10 @@ const defaultProfile = {
     elementBorder: false,
     groupBorder: false,
     barOpacity: 100,
-    barElements: defaultBarElements([])
+    barElements: defaultBarElements([]),
+    // The bar elements a collapsed capsule shows, by id, when the profile
+    // enables them; they show in the profile's order, not this one's.
+    capsuleElements: ["arch", "clock", "notifications"]
 };
 
 const profileKeys = Object.keys(defaultProfile);
@@ -210,7 +213,8 @@ function sameValue(left, right) {
 // `profile` with every profile setting, as a fresh object: missing settings
 // take their default, an unknown bar style too, a Bar position the bar style
 // can't take becomes the default one (a capsule on a side moves to the top),
-// and the bar elements are normalized. Other keys are dropped.
+// the bar elements are normalized and the collapsed capsule's keeps only
+// known bar elements, once each. Other keys are dropped.
 function completeProfile(profile) {
     const source = profile || {};
     const complete = {};
@@ -222,7 +226,18 @@ function completeProfile(profile) {
     if (barPositionsFor(complete.barStyle).indexOf(complete.barPosition) === -1)
         complete.barPosition = defaultProfile.barPosition;
     complete.barElements = normalizeBarElements(complete.barElements);
+    complete.capsuleElements = setCapsuleElement(complete.capsuleElements, "", false);
     return complete;
+}
+
+// The bar elements a collapsed capsule shows, `capsuleElements`, with `id`
+// added (`shown`) or taken out, as a new list of known bar elements, each
+// listed once.
+function setCapsuleElement(capsuleElements, id, shown) {
+    const listed = (Array.isArray(capsuleElements) ? capsuleElements : [])
+        .concat(shown ? [id] : []);
+    return listed.filter((element, index) => elementIds.indexOf(element) !== -1
+        && listed.indexOf(element) === index && (shown || element !== id));
 }
 
 // The profile edited first and given to new monitors: the default one if it

@@ -73,6 +73,7 @@ QtObject {
     readonly property int groupHorizontalPadding: editedBarProfile.groupHorizontalPadding
     readonly property int groupVerticalPadding: editedBarProfile.groupVerticalPadding
     readonly property var barElements: editedBarProfile.barElements
+    readonly property var capsuleElements: editedBarProfile.capsuleElements
     readonly property bool barBorder: editedBarProfile.barBorder
     readonly property bool elementBorder: editedBarProfile.elementBorder
     readonly property bool groupBorder: editedBarProfile.groupBorder
@@ -177,6 +178,11 @@ QtObject {
     function setBarElementOption(element, option, value) {
         setBarSetting("barElements", BarProfileModel.setElementOption(barElements, element,
             option, value));
+    }
+
+    // Whether the edited profile's collapsed capsule shows `element`.
+    function setCapsuleElement(element, shown) {
+        setBarSetting("capsuleElements", BarProfileModel.setCapsuleElement(capsuleElements, element, shown));
     }
 
     function moveBarElementToZone(element, zone) {

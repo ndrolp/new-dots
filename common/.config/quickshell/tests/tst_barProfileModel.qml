@@ -166,6 +166,35 @@ TestCase {
             .barPosition, data.loaded);
     }
 
+    // A profile that never chose what its collapsed capsule shows shows Arch,
+    // the clock and the control center.
+    function test_aProfileWithoutACollapsedChoiceShowsArchTheClockAndTheControlCenter() {
+        compare(BarProfileModel.completeProfile({ barStyle: "capsule" }).capsuleElements,
+            ["arch", "clock", "notifications"]);
+    }
+
+    // The choice is saved with the profile: it survives completing it, as
+    // every read and save does, without unknown or repeated bar elements.
+    function test_theCollapsedChoiceIsKeptWithTheProfile() {
+        compare(BarProfileModel.completeProfile({ capsuleElements: ["battery", "clock"] })
+            .capsuleElements, ["battery", "clock"]);
+        compare(BarProfileModel.completeProfile({ capsuleElements: ["battery", "wifi", "battery"] })
+            .capsuleElements, ["battery"]);
+        compare(BarProfileModel.completeProfile({ capsuleElements: [] }).capsuleElements, []);
+    }
+
+    // Choosing an element adds it to the collapsed capsule, and unchoosing it
+    // takes it out, without changing the list it was given.
+    function test_choosingAnElementForTheCollapsedCapsule() {
+        const chosen = ["arch", "clock"];
+
+        compare(BarProfileModel.setCapsuleElement(chosen, "battery", true), ["arch", "clock", "battery"]);
+        compare(BarProfileModel.setCapsuleElement(chosen, "battery", true).length, 3);
+        compare(BarProfileModel.setCapsuleElement(chosen, "arch", true), ["arch", "clock"]);
+        compare(BarProfileModel.setCapsuleElement(chosen, "arch", false), ["clock"]);
+        compare(chosen, ["arch", "clock"]);
+    }
+
     function test_choosingTheCapsuleOnASideBarMovesItToTheTop() {
         const side = fixtures.edited(fixtures.startedBarState(), { barPosition: "left" });
         const capsule = fixtures.edited(side, { barStyle: "capsule" });

@@ -187,6 +187,20 @@ Column {
                             anchors.verticalCenter: parent.verticalCenter
                             spacing: 4
 
+                            // On a capsule profile: whether the collapsed
+                            // capsule shows this element, if the profile does.
+                            Panels.SettingsButton {
+                                readonly property bool chosen: (root.appearance.capsuleElements || [])
+                                    .indexOf(elementDelegate.element) !== -1
+
+                                anchors.verticalCenter: parent.verticalCenter
+                                visible: root.appearance.barStyle === "capsule" && elementDelegate.elementOn
+                                appearance: root.appearance
+                                label: "In capsule"
+                                labelColor: chosen ? theme.accent : theme.textMuted
+                                onActivated: root.appearance.setCapsuleElement(elementDelegate.element, !chosen)
+                            }
+
                             // Join: shares one background with the element above.
                             Panels.SettingsButton {
                                 anchors.verticalCenter: parent.verticalCenter
