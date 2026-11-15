@@ -1,0 +1,132 @@
+import QtQuick
+import QtTest
+import "../components/bar/Capsule.js" as Capsule
+import "../config/BarProfileModel.js" as BarProfileModel
+
+// The capsule: which bar elements it shows while collapsed, in one row, and
+// where it sits in its bar window.
+TestCase {
+    name: "Capsule"
+
+    function element(id, values) {
+        return Object.assign({ id: id, enabled: true }, values);
+    }
+
+    function barElements() {
+        return {
+            left: [element("arch"), element("systemMonitor")],
+            center: [element("workspaces")],
+            right: [element("notifications", { options: { badgeVisible: false } }),
+                element("battery"), element("clock", { joinPrevious: true })]
+        };
+    }
+
+    function shownIds(row, zone) {
+        return row[zone].filter(item => item.enabled).map(item => item.id);
+    }
+
+    // A collapsed capsule shows Arch, the clock and the control center, in the
+    // profile's order, as one row in the middle of the bar.
+    function test_aCollapsedCapsuleShowsArchTheClockAndTheControlCenter() {
+        const row = Capsule.collapsedRow(barElements(), Capsule.collapsedElementIds);
+
+        compare(shownIds(row, "center"), ["arch", "notifications", "clock"]);
+        compare(row.left, []);
+        compare(row.right, []);
+    }
+
+    // The other elements are still listed, only switched off, so their options
+    // and their place in the profile's order stay.
+    function test_theOtherElementsAreListedSwitchedOff() {
+        const row = Capsule.collapsedRow(barElements(), Capsule.collapsedElementIds);
+
+        compare(row.center.map(item => item.id),
+            ["arch", "systemMonitor", "workspaces", "notifications", "battery", "clock"]);
+        compare(row.center.filter(item => !item.enabled).map(item => item.id),
+            ["systemMonitor", "workspaces", "battery"]);
+        compare(row.center[3].options, { badgeVisible: false });
+    }
+
+    // A disabled element stays off in the capsule too.
+    function test_anElementTheProfileDisablesStaysOff() {
+        const elements = barElements();
+        elements.left[0].enabled = false;
+
+        compare(shownIds(Capsule.collapsedRow(elements, Capsule.collapsedElementIds), "center"),
+            ["notifications", "clock"]);
+    }
+
+    // Groups stay within the zone they were made in: the first element of a
+    // zone never joins the last one of the zone before.
+    function test_groupsDoNotReachAcrossTheProfilesZones() {
+        const elements = barElements();
+        elements.right[0].joinPrevious = true;
+        const row = Capsule.collapsedRow(elements, ["arch", "notifications", "battery", "clock"]);
+
+        compare(BarProfileModel.zoneGroups(row, "center"),
+            [["arch"], ["notifications"], ["battery", "clock"]]);
+    }
+
+    function test_theCollapsedRowLeavesTheProfileAsItWas() {
+        const elements = barElements();
+        const before = JSON.stringify(elements);
+
+        Capsule.collapsedRow(elements, Capsule.collapsedElementIds);
+        compare(JSON.stringify(elements), before);
+    }
+
+    // The bar window draws the collapsed row on a capsule and the profile's
+    // bar elements as they are on any other bar style.
+    function test_onlyACapsuleDrawsTheCollapsedRow_data() {
+        return [
+            { tag: "capsule", barStyle: "capsule", center: ["arch", "notifications", "clock"] },
+            { tag: "opaque", barStyle: "opaque", center: ["workspaces"] },
+            { tag: "transparent", barStyle: "transparent", center: ["workspaces"] },
+            { tag: "docked", barStyle: "docked", center: ["workspaces"] }
+        ];
+    }
+
+    function test_onlyACapsuleDrawsTheCollapsedRow(data) {
+        const drawn = Capsule.drawnElements({ barStyle: data.barStyle, barElements: barElements() });
+
+        compare(shownIds(drawn, "center"), data.center);
+    }
+
+    // The capsule wraps its row with the profile's horizontal padding at both
+    // ends, as deep as the bar content, its ends fully round.
+    function test_theCapsuleWrapsItsRow_data() {
+        return [
+            { tag: "top", barPosition: "top" },
+            { tag: "bottom", barPosition: "bottom" }
+        ];
+    }
+
+    function test_theCapsuleWrapsItsRow(data) {
+        const content = { barPosition: data.barPosition, width: 1000, height: 30 };
+
+        compare(Capsule.surface(content, { start: 420, end: 580 }, 12),
+            { x: 408, y: 0, width: 184, height: 30, radius: 15 });
+    }
+
+    // With nothing in its row there is no capsule to draw.
+    function test_anEmptyRowHasNoCapsule() {
+        compare(Capsule.surface({ barPosition: "top", width: 1000, height: 30 }, { start: 500, end: 500 }, 12),
+            { x: 500, y: 0, width: 0, height: 0, radius: 0 });
+    }
+
+    // Only the capsule takes clicks in its bar window: around it they reach
+    // the windows below. The bar content sits inside the window's margins.
+    function test_onlyTheCapsuleTakesClicks_data() {
+        const surface = { x: 408, y: 0, width: 184, height: 30, radius: 15 };
+        return [
+            { tag: "top", surface: surface, margins: { top: 6, right: 12, bottom: 0, left: 12 },
+                region: { x: 420, y: 6, width: 184, height: 30 } },
+            { tag: "bottom", surface: surface, margins: { top: 0, right: 12, bottom: 6, left: 12 },
+                region: { x: 420, y: 0, width: 184, height: 30 } }
+        ];
+    }
+
+    function test_onlyTheCapsuleTakesClicks(data) {
+        compare(Capsule.inputRegion(data.surface, data.margins), data.region);
+    }
+}

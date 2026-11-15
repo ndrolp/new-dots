@@ -78,7 +78,7 @@ Con la barra opaca o con la docked bar un popup va **anclado** (attached): sale 
 _Avoid_: Menu, dropdown, status popup
 
 **Bar style** (estilo de barra):
-Cómo se ve la barra, elegido en el bar profile como un solo ajuste: opaca (una barra sólida a lo largo del borde), transparente (los bar elements flotan separados del borde) o docked bar. La capsule será otro estilo más. No son interruptores que se combinan: cada perfil tiene exactamente un estilo.
+Cómo se ve la barra, elegido en el bar profile como un solo ajuste: opaca (una barra sólida a lo largo del borde), transparente (los bar elements flotan separados del borde), docked bar o capsule. No son interruptores que se combinan: cada perfil tiene exactamente un estilo.
 _Avoid_: Modo de barra, slanted bar
 
 **Docked bar** (barra acoplada):

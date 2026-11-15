@@ -4,6 +4,7 @@ import QtQuick
 import "../../config" as Config
 import "../panels" as Panels
 import "BarPlacement.js" as BarPlacement
+import "Capsule.js" as Capsule
 
 Variants {
     id: bar
@@ -66,7 +67,11 @@ Variants {
                 property bool elementBorder: bar.appearance.barProfileValue(panel.profileName, "elementBorder")
                 property bool groupBorder: bar.appearance.barProfileValue(panel.profileName, "groupBorder")
                 property int barOpacity: bar.appearance.barProfileValue(panel.profileName, "barOpacity")
-                property var barElements: bar.appearance.barProfileValue(panel.profileName, "barElements")
+                // On a capsule, only the row it shows (see Capsule.drawnElements).
+                property var barElements: Capsule.drawnElements({
+                    barStyle: bar.appearance.barProfileValue(panel.profileName, "barStyle"),
+                    barElements: bar.appearance.barProfileValue(panel.profileName, "barElements")
+                })
                 // Global, not part of the bar profile.
                 property bool doNotDisturb: bar.appearance.doNotDisturb
                 property var controlCenterTiles: bar.appearance.controlCenterTiles
@@ -96,11 +101,16 @@ Variants {
             WlrLayershell.namespace: "ndro-shell-bar"
             WlrLayershell.layer: WlrLayer.Top
             color: "transparent"
+            // The whole window takes clicks, except on a capsule: only the
+            // capsule does, so clicks beside it reach the windows below.
+            readonly property var inputRegion: barContent.capsulePlace
+                ? Capsule.inputRegion(barContent.capsulePlace, panel.contentMargins)
+                : { x: 0, y: 0, width: panel.width, height: panel.height }
             mask: Region {
-                x: 0
-                y: 0
-                width: panel.width
-                height: panel.height
+                x: panel.inputRegion.x
+                y: panel.inputRegion.y
+                width: panel.inputRegion.width
+                height: panel.inputRegion.height
             }
             readonly property int barThickness: BarPlacement.thickness(panel.barAppearance)
             readonly property var windowAnchors: BarPlacement.windowAnchors(panel.barAppearance.barPosition)

@@ -6,6 +6,7 @@ import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 import "BarElementItems.js" as BarElementItemsModel
 import "BarLayout.js" as BarLayout
+import "Capsule.js" as Capsule
 
 Item {
     id: root
@@ -38,7 +39,8 @@ Item {
     // A bar element that opens no popup was pressed.
     signal popupCloseRequested()
     readonly property var zoneNames: ["left", "center", "right"]
-    // The docked bar's zones match an attached popup's color and opacity.
+    // The docked bar's zones match an attached popup's color and opacity; the
+    // capsule takes the same, the profile's background at its opacity.
     readonly property color dockedColor: Qt.rgba(theme.background.r, theme.background.g,
         theme.background.b, appearance.barOpacity / 100)
     readonly property real dockedPadding: appearance.barStyle === "docked"
@@ -57,6 +59,12 @@ Item {
     })
     // Whether the bar runs from the top of the screen down.
     readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
+    // On a capsule, where the capsule is drawn around its row, the centre zone
+    // (see Capsule.drawnElements); null on any other bar style.
+    readonly property var capsulePlace: appearance.barStyle === "capsule"
+        ? Capsule.surface(layoutBar, { start: zoneStart("center"), end: zoneEnd("center") },
+            appearance.horizontalPadding)
+        : null
 
     // The item of every bar element, by element id.
     readonly property var elementItems: Object.assign({
@@ -208,6 +216,16 @@ Item {
         fillColor: root.dockedColor
         border: root.appearance.barBorder
         keepEnd: true
+        z: -1
+    }
+
+    CapsuleSurface {
+        place: root.capsulePlace || { x: 0, y: 0, width: 0, height: 0, radius: 0 }
+        visible: root.capsulePlace !== null
+        fillColor: root.dockedColor
+        border: root.appearance.barBorder
+        borderColor: theme.border
+        appearance: root.appearance
         z: -1
     }
 

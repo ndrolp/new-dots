@@ -59,7 +59,11 @@ straight, on each Bar position (`PopupOutline.js`), and how it is
 drawn, grows for an attached popup, keeps up with one that resizes and meets
 its joins on every Bar position
 (`components/bar/DockedSurface.qml`,
-`DockedZones.js`), where zones, bar elements, group backgrounds and popup
+`DockedZones.js`), which bar elements a collapsed capsule shows in its one
+row, where the capsule sits around that row and that only it takes clicks in
+its bar window (`components/bar/Capsule.js`), how it is drawn with its fill and
+bar border (`CapsuleSurface.qml`), and that a capsule sits only at the top or
+bottom, where zones, bar elements, group backgrounds and popup
 triggers sit along either axis of the bar, to the pixel the anchors they
 replaced put them at (`components/bar/BarLayout.js`; `BarContent.qml` itself
 needs Quickshell's services and isn't tested here), how workspaces, icon
