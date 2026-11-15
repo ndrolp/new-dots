@@ -50,8 +50,10 @@ Variants {
         }
 
         onVisibleChanged: {
-            if (visible)
+            if (visible) {
                 card.forceActiveFocus();
+                root.printers.jobsPrinter = printersSection.expanded;
+            }
         }
 
         Connections {
@@ -120,6 +122,14 @@ Variants {
                         busy: root.printers.changing
                         onSetDefaultRequested: name => root.printers.setDefault(name)
                         onRemoveRequested: name => root.printers.remove(name)
+                        jobs: root.printers.jobs
+                        onCancelJobRequested: id => root.printers.cancelJob(id)
+                        onTestPageRequested: name => root.printers.printTestPage(name)
+                        // Only the open printer's print jobs are read.
+                        onExpandedChanged: {
+                            if (panel.visible)
+                                root.printers.jobsPrinter = expanded;
+                        }
                     }
 
                     Panels.ScannersSection {
