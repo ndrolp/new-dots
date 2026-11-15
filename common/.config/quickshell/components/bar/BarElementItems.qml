@@ -11,6 +11,7 @@ import "../../config/BarProfileModel.js" as BarProfileModel
 import "../StatusText.js" as StatusText
 import "BarElementItems.js" as BarElementItems
 import "BarLayout.js" as BarLayout
+import "Capsule.js" as Capsule
 import "../panels/ControlCenterNames.js" as Names
 import "RecordingIndicator.js" as RecordingIndicator
 
@@ -121,7 +122,8 @@ Item {
     // or sound) are hidden; see BarElementItems.js.
     function itemVisible(element) {
         return BarElementItems.itemVisible(element, appearance.barElements, {
-            hasPlayer: player !== null,
+            // On a collapsed capsule, media shows only while a track plays.
+            hasPlayer: Capsule.hasMedia(appearance.barStyle, player, appearance.capsuleExpanded),
             hasBattery: hasBattery,
             recording: RecordingIndicator.shown(recordings),
             cavaSilent: cava.silent

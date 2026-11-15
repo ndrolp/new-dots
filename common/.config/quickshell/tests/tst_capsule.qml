@@ -145,6 +145,51 @@ TestCase {
         compare(Capsule.contains(data.place, data.point), data.inside);
     }
 
+    // While collapsed the capsule also draws the live bar elements, the
+    // recording indicator and media, which show only while they are active.
+    // In the default order they sit between Arch and the clock.
+    function test_aCollapsedCapsuleDrawsTheLiveElementsBetweenArchAndTheClock() {
+        const drawn = Capsule.drawnElements({
+            barStyle: "capsule",
+            barElements: BarProfileModel.defaultProfile.barElements
+        });
+
+        compare(shownIds(drawn, "center"), ["arch", "notifications", "recording", "media", "clock"]);
+    }
+
+    // Media has something to show on a bar while any player exists, but on a
+    // capsule only while a track plays: a paused player leaves it.
+    function test_mediaShowsOnACapsuleOnlyWhileATrackPlays_data() {
+        const playing = { isPlaying: true };
+        const paused = { isPlaying: false };
+        return [
+            { tag: "capsule, playing", barStyle: "capsule", player: playing, shown: true },
+            { tag: "capsule, paused", barStyle: "capsule", player: paused, shown: false },
+            { tag: "capsule, no player", barStyle: "capsule", player: null, shown: false },
+            { tag: "opaque, playing", barStyle: "opaque", player: playing, shown: true },
+            { tag: "opaque, paused", barStyle: "opaque", player: paused, shown: true },
+            { tag: "docked, no player", barStyle: "docked", player: null, shown: false }
+        ];
+    }
+
+    function test_mediaShowsOnACapsuleOnlyWhileATrackPlays(data) {
+        compare(Capsule.hasMedia(data.barStyle, data.player), data.shown);
+    }
+
+    // Expanded, the capsule shows media as the bar does: while any player
+    // exists, playing or not.
+    function test_anExpandedCapsuleShowsMediaWhileAnyPlayerExists_data() {
+        return [
+            { tag: "playing", player: { isPlaying: true }, shown: true },
+            { tag: "paused", player: { isPlaying: false }, shown: true },
+            { tag: "no player", player: null, shown: false }
+        ];
+    }
+
+    function test_anExpandedCapsuleShowsMediaWhileAnyPlayerExists(data) {
+        compare(Capsule.hasMedia("capsule", data.player, true), data.shown);
+    }
+
     // The capsule wraps its row with the profile's horizontal padding at both
     // ends, as deep as the bar content, its ends fully round.
     function test_theCapsuleWrapsItsRow_data() {

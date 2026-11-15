@@ -7,6 +7,11 @@
 // The bar elements a collapsed capsule shows, when the profile enables them.
 const collapsedElementIds = ["arch", "clock", "notifications"];
 
+// The live bar elements: a collapsed capsule also draws them, in the
+// profile's order, but they show only while active: the recording indicator
+// while recording, media while a track plays (see hasMedia).
+const liveElementIds = ["recording", "media"];
+
 const zoneNames = ["left", "center", "right"];
 
 // The capsule's row: the profile's bar elements as one centre zone, in the
@@ -43,14 +48,14 @@ function expandedElementIds(barElements) {
     return ids;
 }
 
-// The bar elements a bar window draws: on a capsule, its collapsed row, or
-// its expanded row while `expanded`; the profile's own on any other bar style.
-// Takes { barStyle, barElements, expanded }.
+// The bar elements a bar window draws: on a capsule, its collapsed row, live
+// bar elements included, or its expanded row while `expanded`; the profile's
+// own on any other bar style. Takes { barStyle, barElements, expanded }.
 function drawnElements(bar) {
     if (bar.barStyle !== "capsule")
         return bar.barElements;
-    return collapsedRow(bar.barElements,
-        bar.expanded ? expandedElementIds(bar.barElements) : collapsedElementIds);
+    return collapsedRow(bar.barElements, bar.expanded
+        ? expandedElementIds(bar.barElements) : collapsedElementIds.concat(liveElementIds));
 }
 
 // Whether the capsule is expanded: while any of its causes holds it, given as
@@ -64,6 +69,16 @@ function expanded(causes) {
 function contains(place, point) {
     return !!place && point.x >= place.x && point.x < place.x + place.width
         && point.y >= place.y && point.y < place.y + place.height;
+}
+
+// Whether media has something to show, given the bar style and the Mpris
+// player it follows (null without one): on a collapsed capsule only while a
+// track plays, on an `expanded` one or any other bar style while there is a
+// player at all.
+function hasMedia(barStyle, player, expanded) {
+    if (!player)
+        return false;
+    return barStyle !== "capsule" || expanded === true || player.isPlaying === true;
 }
 
 // Where the capsule is drawn in the bar content, { x, y, width, height,

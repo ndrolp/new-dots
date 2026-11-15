@@ -73,6 +73,8 @@ Variants {
                     barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
                     expanded: panel.capsuleExpanded
                 })
+                // Whether this window's capsule is expanded (see panel.capsuleExpanded).
+                property bool capsuleExpanded: panel.capsuleExpanded
                 // Global, not part of the bar profile.
                 property bool doNotDisturb: bar.appearance.doNotDisturb
                 property var controlCenterTiles: bar.appearance.controlCenterTiles
