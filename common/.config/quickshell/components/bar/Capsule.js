@@ -69,6 +69,14 @@ function expanded(causes) {
     return Object.keys(causes || {}).some(cause => causes[cause] === true);
 }
 
+// The bar window SUPER+I expands or collapses: the focused monitor's, when it
+// is shown and is a capsule; else null, and the toggle does nothing. `bars`
+// are { window, monitor, visible, capsule }, as modules/Bar.qml lists them.
+function toggledBar(bars, focusedMonitor) {
+    const bar = (bars || []).find(bar => bar.monitor === focusedMonitor);
+    return bar && bar.visible && bar.capsule ? bar.window : null;
+}
+
 // Whether `point` { x, y } is over the capsule `place` (as Capsule.surface
 // gives it, or null when there is no capsule), in the bar content.
 function contains(place, point) {

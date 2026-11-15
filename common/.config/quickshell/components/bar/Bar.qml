@@ -86,7 +86,8 @@ Variants {
             // where nothing reads it. Its size changes as the row does,
             // animated, and the reserved space stays at the collapsed height.
             readonly property bool capsuleExpanded: Capsule.expanded({
-                hover: capsuleHover.expanded
+                hover: capsuleHover.expanded,
+                toggled: capsuleToggle.toggled
             })
             property bool configOpen: bar.configOpen
             property string activePopup: bar.activePopupWindow === panel
@@ -149,6 +150,20 @@ Variants {
                 id: capsuleHover
 
                 hovering: barContent.capsuleHovered
+            }
+
+            // SUPER+I expands the capsule until pressed again or until the
+            // pointer leaves it.
+            CapsuleToggle {
+                id: capsuleToggle
+
+                hovering: barContent.capsuleHovered
+            }
+
+            // Expands this window's capsule, or collapses it if SUPER+I
+            // expanded it; modules/Bar.qml calls it on the focused monitor's.
+            function toggleCapsule() {
+                capsuleToggle.toggle();
             }
 
             Rectangle {

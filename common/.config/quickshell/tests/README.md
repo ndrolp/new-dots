@@ -67,10 +67,12 @@ profile shows by `BarElementsSettings.qml`), live ones included (the recording
 indicator, and media only while a track plays), which ones it shows expanded
 (all but the workspaces, with their groups, and media while any player
 exists), that any one cause holds it expanded, that only the pointer over the
-capsule itself counts as hovering it, where the capsule sits around that row
-and that only it takes clicks in its bar window (`components/bar/Capsule.js`),
+capsule itself counts as hovering it, where the capsule sits around that row,
+that only it takes clicks in its bar window and that SUPER+I acts only on the
+focused monitor's capsule (`components/bar/Capsule.js`),
 that hovering it expands it only after a moment and collapses it a while after
-the pointer leaves (`CapsuleHover.qml`), how it is drawn with its fill and
+the pointer leaves (`CapsuleHover.qml`), that SUPER+I holds it expanded until
+pressed again or until the pointer leaves it (`CapsuleToggle.qml`), how it is drawn with its fill and
 bar border (`CapsuleSurface.qml`), and that a capsule sits only at the top or
 bottom, where zones, bar elements, group backgrounds and popup
 triggers sit along either axis of the bar, to the pixel the anchors they

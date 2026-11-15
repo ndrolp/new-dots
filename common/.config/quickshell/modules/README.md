@@ -35,7 +35,9 @@ adding or editing one file here.
   (`OpenPopup.js`, tested). Its settings button opens the settings panel on
   that bar, and a bar element opens its popup (`barElementOpening` tells
   first); one that opens none closes the open popup. Other modules open and close popups through its `openPopup`,
-  `bars()`, `focusedMonitor()` and `closePopup()`.
+  `bars()`, `focusedMonitor()` and `closePopup()`. Its `capsule toggle`
+  IPC call (SUPER+I) expands the focused monitor's capsule, or collapses it
+  again; on a normal bar it does nothing (`Capsule.toggledBar`, tested).
 - `ControlCenter.qml`: not a `Feature`: the control center is the bell's
   popup. The module owns its state and is handed, as one object, through
   the bar to the popup and its controls: the services they show,

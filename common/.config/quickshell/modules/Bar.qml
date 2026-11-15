@@ -1,6 +1,8 @@
 import Quickshell
+import Quickshell.Io
 import QtQuick
 import "../components/bar" as BarComponents
+import "../components/bar/Capsule.js" as Capsule
 import "OpenPopup.js" as OpenPopup
 
 // A bar on every monitor, and which of their popups is open (OpenPopup.js).
@@ -44,7 +46,12 @@ Scope {
         const bars = [];
         for (let index = 0; index < barWindows.instances.length; index++) {
             const panel = barWindows.instances[index];
-            bars.push({ window: panel, monitor: panel.monitorDescription, visible: panel.visible });
+            bars.push({
+                window: panel,
+                monitor: panel.monitorDescription,
+                visible: panel.visible,
+                capsule: panel.barAppearance.barStyle === "capsule"
+            });
         }
         return bars;
     }
@@ -52,6 +59,18 @@ Scope {
     // The focused monitor's description: IPC opens popups on its bar.
     function focusedMonitor() {
         return root.workspaceService.focusedMonitorDescription();
+    }
+
+    // SUPER+I (`capsule toggle`) expands the focused monitor's capsule, or
+    // collapses it; on a normal bar it does nothing (Capsule.toggledBar).
+    IpcHandler {
+        target: "capsule"
+
+        function toggle(): void {
+            const window = Capsule.toggledBar(root.bars(), root.focusedMonitor());
+            if (window !== null)
+                window.toggleCapsule();
+        }
     }
 
     BarComponents.Bar {

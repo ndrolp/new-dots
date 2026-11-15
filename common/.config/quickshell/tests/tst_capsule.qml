@@ -236,4 +236,32 @@ TestCase {
     function test_onlyTheCapsuleTakesClicks(data) {
         compare(Capsule.inputRegion(data.surface, data.margins), data.region);
     }
+
+    // The bars as modules/Bar.qml lists them: one per monitor, each a window.
+    function capsuleBars() {
+        return [
+            { window: "left window", monitor: "Left", visible: true, capsule: false },
+            { window: "middle window", monitor: "Middle", visible: true, capsule: true },
+            { window: "hidden window", monitor: "Hidden", visible: false, capsule: true }
+        ];
+    }
+
+    // SUPER+I acts on the focused monitor's capsule.
+    function test_theToggleActsOnTheFocusedMonitorsCapsule() {
+        compare(Capsule.toggledBar(capsuleBars(), "Middle"), "middle window");
+    }
+
+    // On a focused monitor with a normal bar, a hidden one or none, it does
+    // nothing: no other monitor's capsule stands in for it.
+    function test_theToggleDoesNothingWithoutACapsuleOnTheFocusedMonitor_data() {
+        return [
+            { tag: "a normal bar", monitor: "Left" },
+            { tag: "a hidden bar", monitor: "Hidden" },
+            { tag: "no bar", monitor: "Elsewhere" }
+        ];
+    }
+
+    function test_theToggleDoesNothingWithoutACapsuleOnTheFocusedMonitor(data) {
+        compare(Capsule.toggledBar(capsuleBars(), data.monitor), null);
+    }
 }
