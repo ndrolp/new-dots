@@ -25,7 +25,7 @@ PanelWindow {
     // Normal: it stays inside what the monitor's bar leaves free.
     exclusionMode: ExclusionMode.Normal
     implicitWidth: compact ? osdContent.implicitWidth + 32
-        : change.kind === "sink" ? Math.min(460, Math.max(292, osdLabel.implicitWidth + 86)) : 292
+        : change.kind === "audioOutput" ? Math.min(460, Math.max(292, osdLabel.implicitWidth + 86)) : 292
     implicitHeight: compact ? 74 : 92
     WlrLayershell.namespace: "ndro-shell-osd"
 

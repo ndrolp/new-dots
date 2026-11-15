@@ -64,6 +64,11 @@ TestCase {
         compare(shown(data.change), data.shown);
     }
 
+    // A chosen audio output is its own kind of change, as the glossary names it.
+    function test_anAudioOutputChangeIsAnAudioOutput() {
+        compare(OsdChange.audioOutput({ nickname: "Buds" }).kind, "audioOutput");
+    }
+
     // A level past either end shows as the end.
     function test_aLevelStaysBetweenNoneAndFull() {
         compare(OsdChange.display(OsdChange.volume(1.3, false)).level, 1);

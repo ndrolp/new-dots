@@ -25,7 +25,7 @@ function capsLock(on) {
 function audioOutput(output) {
     const label = AudioOutputs.label(output);
     return {
-        kind: "sink",
+        kind: "audioOutput",
         name: label !== "" ? label : "Audio output",
         // The icon goes by the description: it names the kind, the nickname doesn't.
         type: String((output && output.description) || "").toLowerCase()
@@ -42,7 +42,7 @@ function keepAwake(on, duration) {
     return { kind: "keepAwake", on: on === true, label: KeepAwakeState.osdLabel(on, duration) };
 }
 
-function sinkIcon(type) {
+function audioOutputIcon(type) {
     if (type.includes("headphone") || type.includes("headset"))
         return "󰋋";
     return type.includes("hdmi") || type.includes("displayport") ? "󰍹" : "󰓃";
@@ -66,8 +66,8 @@ function display(change) {
     case "caps":
         return { icon: "󰪛", tone: "muted", label: change.on ? "Caps Lock on" : "Caps Lock off",
             level: null, highlighted: change.on, compact: true };
-    case "sink":
-        return { icon: sinkIcon(change.type), tone: "accent", label: change.name, level: null,
+    case "audioOutput":
+        return { icon: audioOutputIcon(change.type), tone: "accent", label: change.name, level: null,
             highlighted: false, compact: false };
     case "profile":
         return { icon: "󰘳", tone: "accent", label: change.name + " bar profile", level: null,
