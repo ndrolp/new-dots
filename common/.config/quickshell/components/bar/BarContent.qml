@@ -73,6 +73,8 @@ Item {
     // Where a change the capsule shows starts along the bar: centred, as its
     // row would be.
     readonly property real changeStart: BarLayout.zoneStart(layoutBar, "center", changeView.width)
+    // Where that change goes in the bar content, { x, y }.
+    readonly property var changePlace: BarLayout.place(layoutBar, changeStart, changeView)
     // The open popup when it is inside this bar's capsule, or null.
     readonly property var insidePopup: capsulePlace !== null && openPopup && openPopup.inside
         ? openPopup : null
@@ -257,8 +259,8 @@ Item {
     CapsuleChangeView {
         id: changeView
 
-        x: BarLayout.place(root.layoutBar, root.changeStart, changeView).x
-        y: BarLayout.place(root.layoutBar, root.changeStart, changeView).y
+        x: root.changePlace.x
+        y: root.changePlace.y
         change: root.capsuleChange
         appearance: root.appearance
         theme: theme

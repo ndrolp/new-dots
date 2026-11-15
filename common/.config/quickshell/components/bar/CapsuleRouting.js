@@ -10,11 +10,16 @@ function expanded(causes) {
     return Object.keys(causes || {}).some(cause => causes[cause] === true);
 }
 
+// The focused monitor's bar, as `bars` list it, or undefined without one.
+function barOnMonitor(bars, focusedMonitor) {
+    return (bars || []).find(bar => bar.monitor === focusedMonitor);
+}
+
 // The bar window SUPER+I expands or collapses: the focused monitor's, when it
 // is shown and is a capsule; else null, and the toggle does nothing. `bars`
 // are { window, monitor, visible, capsule }, as modules/Bar.qml lists them.
 function toggledBar(bars, focusedMonitor) {
-    const bar = (bars || []).find(bar => bar.monitor === focusedMonitor);
+    const bar = barOnMonitor(bars, focusedMonitor);
     return bar && bar.visible && bar.capsule ? bar.window : null;
 }
 
@@ -26,7 +31,7 @@ function toggledBar(bars, focusedMonitor) {
 // no bar is on it. `bars` are { window, monitor, screen, visible, capsule,
 // popupInside }, as modules/Bar.qml lists them.
 function changeTarget(bars, focusedMonitor) {
-    const bar = (bars || []).find(bar => bar.monitor === focusedMonitor);
+    const bar = barOnMonitor(bars, focusedMonitor);
     if (!bar)
         return { osd: null };
     if (!bar.visible || !bar.capsule)
