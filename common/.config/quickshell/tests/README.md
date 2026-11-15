@@ -72,8 +72,12 @@ that only it takes clicks in its bar window and that SUPER+I acts only on the
 focused monitor's capsule (`components/bar/Capsule.js`),
 that hovering it expands it only after a moment and collapses it a while after
 the pointer leaves (`CapsuleHover.qml`), that SUPER+I holds it expanded until
-pressed again or until the pointer leaves it (`CapsuleToggle.qml`), how it is drawn with its fill and
-bar border (`CapsuleSurface.qml`), and that a capsule sits only at the top or
+pressed again or until the pointer leaves it (`CapsuleToggle.qml`), how it is
+drawn with its fill and bar border (`CapsuleSurface.qml`), where its workspace row sits, under a top
+capsule and above a bottom one, centred on it (`Capsule.js`), that the row
+has one pill per workspace in order, in the profile's fill and bar border,
+highlights the active one as it changes and switches workspace on a click
+(`CapsuleWorkspaceRow.qml`), and that a capsule sits only at the top or
 bottom, where zones, bar elements, group backgrounds and popup
 triggers sit along either axis of the bar, to the pixel the anchors they
 replaced put them at (`components/bar/BarLayout.js`; `BarContent.qml` itself
