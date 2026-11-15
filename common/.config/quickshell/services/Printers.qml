@@ -130,7 +130,9 @@ QtObject {
         onExited: exitCode => {
             if (exitCode !== 0)
                 root.changeFailure = changeErrors.text.trim() || fallback;
-            root.refresh();
+            // Nothing is read once the panel has closed.
+            if (root.watching)
+                root.refresh();
         }
     }
 }

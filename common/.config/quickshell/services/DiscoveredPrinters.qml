@@ -142,7 +142,9 @@ Scope {
                 root.addFailure = Discovery.addProblem(addErrors.text, model);
             }
             root.adding = "";
-            root.added();
+            // The printers are read again only while the panel is open.
+            if (root.watching)
+                root.added();
         }
     }
 }
