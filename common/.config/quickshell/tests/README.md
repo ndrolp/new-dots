@@ -74,7 +74,14 @@ that only it takes clicks in its bar window and that SUPER+I acts only on the
 focused monitor's capsule (`components/bar/Capsule.js`),
 that hovering it expands it only after a moment and collapses it a while after
 the pointer leaves (`CapsuleHover.qml`), that SUPER+I holds it expanded until
-pressed again or until the pointer leaves it (`CapsuleToggle.qml`), how it is
+pressed again or until the pointer leaves it (`CapsuleToggle.qml`), that a
+change (volume, brightness, Caps Lock, audio output, bar profile or
+keep-awake) goes to the focused monitor's capsule instead of the OSD, nowhere
+while a popup is inside it, and otherwise to the OSD on the focused monitor's
+screen, and that the capsule then shows that change and no bar element
+(`Capsule.js`), for about 1.5 s from the latest one (`CapsuleChange.qml`),
+what each of the six changes shows, the same in the OSD and the capsule
+(`components/panels/OsdChange.js`), how it is
 drawn with its fill and bar border (`CapsuleSurface.qml`), where its workspace row sits, under a top
 capsule and above a bottom one, centred on it, how it grows round a popup
 inside it (`Capsule.js`), that its window grows at once for a popup inside and

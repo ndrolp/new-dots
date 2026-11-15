@@ -72,6 +72,7 @@ Variants {
                     barStyle: bar.appearance.barProfileValue(panel.profileName, "barStyle"),
                     barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
                     expanded: panel.capsuleExpanded,
+                    change: panel.showingChange,
                     capsuleElements: bar.appearance.barProfileValue(panel.profileName, "capsuleElements")
                 })
                 // Whether this window's capsule is expanded (see panel.capsuleExpanded).
@@ -91,6 +92,10 @@ Variants {
                 toggled: capsuleToggle.toggled,
                 popupInside: panel.activePopup !== ""
             })
+            // Whether this window's capsule shows a change instead of its row:
+            // for a moment after one (see CapsuleChange.qml), unless a popup
+            // is inside, which a change never interrupts.
+            readonly property bool showingChange: capsuleChange.shown && panel.activePopup === ""
             property bool configOpen: bar.configOpen
             property string activePopup: bar.activePopupWindow === panel
                 ? bar.activePopup : ""
@@ -178,6 +183,19 @@ Variants {
                 hovering: barContent.capsuleHovered
             }
 
+            // A change (volume, brightness, Caps Lock, audio output, bar
+            // profile or keep-awake) shows in the capsule for a moment.
+            CapsuleChange {
+                id: capsuleChange
+            }
+
+            // Shows a change in this window's capsule instead of the OSD;
+            // modules/Osd.qml calls it on the focused monitor's (see
+            // Capsule.changeTarget).
+            function showChange(change) {
+                capsuleChange.show(change);
+            }
+
             // Expands this window's capsule, or collapses it if SUPER+I
             // expanded it; modules/Bar.qml calls it on the focused monitor's.
             function toggleCapsule() {
@@ -243,6 +261,7 @@ Variants {
                     barVisible: panel.visible
                     systemMonitor: panel.systemMonitor
                     workspaceService: panel.workspaceService
+                    capsuleChange: panel.showingChange ? capsuleChange.change : null
 
                     onConfigRequested: function(screen) {
                         bar.configRequested(screen, panel);

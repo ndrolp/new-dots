@@ -30,6 +30,9 @@ Item {
     property var openPopup: null
     required property var systemMonitor
     required property var workspaceService
+    // The change a capsule shows instead of its row (see CapsuleChange.qml),
+    // or null while it shows none.
+    property var capsuleChange: null
 
     // The menu the app menu's Popup shows (AppMenuPopup.menuId).
     readonly property string appMenuId: appMenuElement.menuId
@@ -62,9 +65,14 @@ Item {
     // On a capsule, where the capsule is drawn around its row, the centre zone
     // (see Capsule.drawnElements); null on any other bar style.
     readonly property var capsulePlace: appearance.barStyle === "capsule"
-        ? Capsule.surface(layoutBar, { start: zoneStart("center"), end: zoneEnd("center") },
+        ? Capsule.surface(layoutBar, capsuleChange !== null
+                ? { start: changeStart, end: changeStart + changeView.width }
+                : { start: zoneStart("center"), end: zoneEnd("center") },
             appearance.horizontalPadding)
         : null
+    // Where a change the capsule shows starts along the bar: centred, as its
+    // row would be.
+    readonly property real changeStart: BarLayout.zoneStart(layoutBar, "center", changeView.width)
     // The open popup when it is inside this bar's capsule, or null.
     readonly property var insidePopup: capsulePlace !== null && openPopup && openPopup.inside
         ? openPopup : null
@@ -243,6 +251,17 @@ Item {
         borderColor: theme.border
         appearance: root.appearance
         z: -1
+    }
+
+    // A change the capsule shows instead of its row.
+    CapsuleChangeView {
+        id: changeView
+
+        x: BarLayout.place(root.layoutBar, root.changeStart, changeView).x
+        y: BarLayout.place(root.layoutBar, root.changeStart, changeView).y
+        change: root.capsuleChange
+        appearance: root.appearance
+        theme: theme
     }
 
     // One shared background per group.

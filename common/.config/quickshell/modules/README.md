@@ -64,7 +64,11 @@ adding or editing one file here.
   `bar-profiles` IPC calls.
 - `KeepAwake.qml`: the `keep-awake` IPC call the keybind runs, which toggles
   keep-awake and shows the OSD.
-- `Osd.qml`, `Lock.qml` (the one lock screen and the `lock` IPC call) and
+- `Osd.qml`: the `osd` IPC calls (the volume and brightness keys), Caps Lock
+  watching, and where each change shows: on the focused monitor only, in its
+  capsule if it has one, else in the OSD on that monitor
+  (`Capsule.changeTarget`, tested).
+- `Lock.qml` (the one lock screen and the `lock` IPC call) and
   `LowBattery.qml`.
 
 These files import Quickshell, so they can't be loaded under the tests; what

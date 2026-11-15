@@ -113,6 +113,33 @@ TestCase {
         compare(shownIds(drawn, "left"), ["arch", "systemMonitor"]);
     }
 
+    // While a change shows, the capsule shows only that change: no bar
+    // element, even hovered or toggled expanded. Its elements stay listed,
+    // with their options, for when the change is gone.
+    function test_aCapsuleShowingAChangeShowsNoBarElement_data() {
+        return [
+            { tag: "collapsed", expanded: false },
+            { tag: "expanded", expanded: true }
+        ];
+    }
+
+    function test_aCapsuleShowingAChangeShowsNoBarElement(data) {
+        const drawn = Capsule.drawnElements({ barStyle: "capsule", barElements: barElements(),
+            expanded: data.expanded, change: true });
+
+        compare(shownIds(drawn, "center"), []);
+        compare(drawn.center.length, 6);
+        compare(drawn.center[3].options, { badgeVisible: false });
+    }
+
+    // A change means nothing to the elements of any other bar style.
+    function test_onlyACapsuleShowsAChange() {
+        const drawn = Capsule.drawnElements({ barStyle: "docked", barElements: barElements(),
+            change: true });
+
+        compare(shownIds(drawn, "left"), ["arch", "systemMonitor"]);
+    }
+
     // Any one cause holds the capsule expanded: hovering it, and the causes
     // later tickets add (SUPER+I, a popup inside, a change being shown).
     function test_anyCauseHoldsTheCapsuleExpanded_data() {
@@ -263,6 +290,49 @@ TestCase {
 
     function test_theToggleDoesNothingWithoutACapsuleOnTheFocusedMonitor(data) {
         compare(Capsule.toggledBar(capsuleBars(), data.monitor), null);
+    }
+
+    // The bars with their screens and whether a popup is inside, as
+    // modules/Bar.qml lists them for a change (volume, brightness, Caps Lock,
+    // audio output, bar profile or keep-awake).
+    function changeBars() {
+        return [
+            { window: "left window", monitor: "Left", screen: "left screen", visible: true,
+                capsule: false, popupInside: false },
+            { window: "middle window", monitor: "Middle", screen: "middle screen", visible: true,
+                capsule: true, popupInside: false },
+            { window: "busy window", monitor: "Busy", screen: "busy screen", visible: true,
+                capsule: true, popupInside: true },
+            { window: "hidden window", monitor: "Hidden", screen: "hidden screen", visible: false,
+                capsule: true, popupInside: false }
+        ];
+    }
+
+    // A change on a focused monitor with a capsule expands that capsule; the
+    // OSD doesn't show.
+    function test_aChangeExpandsTheFocusedMonitorsCapsule() {
+        compare(Capsule.changeTarget(changeBars(), "Middle"), { capsule: "middle window" });
+    }
+
+    // With a popup inside the focused monitor's capsule, a change shows
+    // nowhere: neither the capsule nor the OSD.
+    function test_aChangeIsIgnoredWhileAPopupIsInsideTheCapsule() {
+        compare(Capsule.changeTarget(changeBars(), "Busy"), {});
+    }
+
+    // Without a capsule shown on the focused monitor, the OSD shows the change
+    // on that monitor's screen; on the first screen (null) when no bar knows
+    // the focused monitor.
+    function test_otherwiseTheOsdShowsItOnTheFocusedScreen_data() {
+        return [
+            { tag: "a normal bar", monitor: "Left", target: { osd: "left screen" } },
+            { tag: "a hidden capsule", monitor: "Hidden", target: { osd: "hidden screen" } },
+            { tag: "no bar", monitor: "Elsewhere", target: { osd: null } }
+        ];
+    }
+
+    function test_otherwiseTheOsdShowsItOnTheFocusedScreen(data) {
+        compare(Capsule.changeTarget(changeBars(), data.monitor), data.target);
     }
 
     // The workspace row has a window of its own on the capsule's screen edge,

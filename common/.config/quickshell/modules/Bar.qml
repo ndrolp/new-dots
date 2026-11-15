@@ -49,8 +49,10 @@ Scope {
             bars.push({
                 window: panel,
                 monitor: panel.monitorDescription,
+                screen: panel.screen,
                 visible: panel.visible,
-                capsule: panel.barAppearance.barStyle === "capsule"
+                capsule: panel.barAppearance.barStyle === "capsule",
+                popupInside: root.openPopup.window === panel
             });
         }
         return bars;

@@ -53,12 +53,14 @@ function expandedElementIds(barElements) {
 
 // The bar elements a bar window draws: on a capsule, the collapsed row of the
 // elements its profile chose (`capsuleElements`, else the default ones), live
-// bar elements included, or its expanded row while `expanded`; the profile's
-// own on any other bar style. Takes { barStyle, barElements, capsuleElements,
-// expanded }.
+// bar elements included, or its expanded row while `expanded`, or none while
+// it shows a `change` instead; the profile's own on any other bar style.
+// Takes { barStyle, barElements, capsuleElements, expanded, change }.
 function drawnElements(bar) {
     if (bar.barStyle !== "capsule")
         return bar.barElements;
+    if (bar.change === true)
+        return collapsedRow(bar.barElements, []);
     return collapsedRow(bar.barElements, bar.expanded
         ? expandedElementIds(bar.barElements)
         : (bar.capsuleElements || collapsedElementIds).concat(liveElementIds));
@@ -76,6 +78,22 @@ function expanded(causes) {
 function toggledBar(bars, focusedMonitor) {
     const bar = (bars || []).find(bar => bar.monitor === focusedMonitor);
     return bar && bar.visible && bar.capsule ? bar.window : null;
+}
+
+// Where a change (volume, brightness, Caps Lock, audio output, bar profile or
+// keep-awake) shows, on the focused monitor only: { capsule: window } when it
+// has a capsule shown, which expands to show it instead of the OSD; {} while a
+// popup is inside that capsule, when it shows nowhere; else { osd: screen },
+// the OSD on the focused monitor's screen, or on the first screen (null) when
+// no bar is on it. `bars` are { window, monitor, screen, visible, capsule,
+// popupInside }, as modules/Bar.qml lists them.
+function changeTarget(bars, focusedMonitor) {
+    const bar = (bars || []).find(bar => bar.monitor === focusedMonitor);
+    if (!bar)
+        return { osd: null };
+    if (!bar.visible || !bar.capsule)
+        return { osd: bar.screen };
+    return bar.popupInside ? {} : { capsule: bar.window };
 }
 
 // Whether `point` { x, y } is over the capsule `place` (as Capsule.surface
