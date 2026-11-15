@@ -16,7 +16,7 @@ QtObject {
     required property var appearance
 
     property bool watching: false
-    // [{ device, name, connection }], in the order SANE lists them.
+    // [{ saneName, name, connection }], in the order SANE lists them.
     property var scanners: []
     // Why network scanners can't be found ("" when nothing's wrong).
     property string problem: ""
@@ -41,10 +41,10 @@ QtObject {
             listProcess.running = true;
     }
 
-    // Reads which colour modes the scanner `device` offers, when its scan
+    // Reads which colour modes the scanner `saneName` offers, when its scan
     // view opens.
-    function readModes(device) {
-        modesScanner = device;
+    function readModes(saneName) {
+        modesScanner = saneName;
         modes = Scanners.availableModes([]);
         if (!modesProcess.running)
             startModes();
@@ -63,7 +63,7 @@ QtObject {
         appearance.scanSettings = Scanners.settings(next);
     }
 
-    function scan(device) {
+    function scan(saneName) {
         if (scanProcess.running)
             return;
         const path = Scanners.filePath(Quickshell.env("HOME"), new Date(), settings.format);
@@ -71,8 +71,8 @@ QtObject {
         lastScan = "";
         progress = 0;
         scanProcess.path = path;
-        scanProcess.command = Scanners.scanCommand(Quickshell.shellDir + "/services/scan.sh", device, settings,
-            path, device === modesScanner ? modes : []);
+        scanProcess.command = Scanners.scanCommand(Quickshell.shellDir + "/services/scan.sh", saneName, settings,
+            path, saneName === modesScanner ? modes : []);
         scanProcess.running = true;
     }
 

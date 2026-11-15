@@ -12,7 +12,7 @@ Column {
     id: root
 
     required property var appearance
-    // { device, name, connection }
+    // { saneName, name, connection }
     property var scanner: null
     // { resolution, mode, format }
     property var settings: Scanners.settings(undefined)

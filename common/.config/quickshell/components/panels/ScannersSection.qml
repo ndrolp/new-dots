@@ -10,7 +10,7 @@ Column {
     id: root
 
     required property var appearance
-    // [{ device, name, connection }]
+    // [{ saneName, name, connection }]
     property var scanners: []
     // Why network scanners can't be found ("" otherwise).
     property string problem: ""

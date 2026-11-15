@@ -151,7 +151,7 @@ Variants {
                         scanners: root.scanners.scanners
                         problem: root.scanners.problem
                         onScanRequested: scanner => {
-                            root.scanners.readModes(scanner.device);
+                            root.scanners.readModes(scanner.saneName);
                             panel.scanTarget = scanner;
                         }
                     }
@@ -175,7 +175,7 @@ Variants {
                 failure: root.scanners.scanFailure
                 lastScan: root.scanners.lastScan
                 onSettingChosen: (key, value) => root.scanners.setSetting(key, value)
-                onScanRequested: root.scanners.scan(panel.scanTarget.device)
+                onScanRequested: root.scanners.scan(panel.scanTarget.saneName)
                 onBackRequested: panel.scanTarget = null
             }
         }

@@ -3,8 +3,8 @@
 // The scanners SANE can see, read from `scanimage`, and how a scan is
 // named and run. Pure, no Quickshell; Scanners.qml runs the commands.
 
-// Lists every device, one per line: name, vendor, model and type, split by
-// tabs (none of them holds one).
+// Lists every scanner SANE can see (webcams too), one per line: its SANE name,
+// vendor, model and type, split by tabs (none of them holds one).
 var listCommand = ["scanimage", "-f", "%d\t%v\t%m\t%t%n"];
 
 // Succeeds when SANE loads sane-airscan, without which no network scanner
@@ -41,31 +41,31 @@ function fileUri(path) {
         .join("/");
 }
 
-// How a scanner with the SANE device name `device` is connected: "network"
+// How a scanner with the SANE name `saneName` is connected: "network"
 // (sane-airscan, the escl and net backends, or a backend's own "net"
 // address such as epson2:net:… or hpaio:/net/…) or "usb".
-function connectionOf(device) {
-    const backend = String(device).split(":")[0].toLowerCase();
+function connectionOf(saneName) {
+    const backend = String(saneName).split(":")[0].toLowerCase();
     if (backend === "airscan" || backend === "escl" || backend === "net")
         return "network";
-    return /[:/]net[:/]/i.test(device) ? "network" : "usb";
+    return /[:/]net[:/]/i.test(saneName) ? "network" : "usb";
 }
 
-// Every scanner in `text`, what listCommand prints: [{ device, name,
+// Every scanner in `text`, what listCommand prints: [{ saneName, name,
 // connection }], in the order SANE lists them. Webcams (the v4l backend)
 // aren't scanners and are left out.
 function parse(text) {
     const scanners = [];
     for (const line of String(text || "").split("\n")) {
         const fields = line.split("\t");
-        const device = fields[0].trim();
-        if (device === "" || fields.length < 3 || /^v4l:/i.test(device))
+        const saneName = fields[0].trim();
+        if (saneName === "" || fields.length < 3 || /^v4l:/i.test(saneName))
             continue;
         const vendor = fields[1].trim();
         const model = fields[2].trim();
         const name = model.toLowerCase().startsWith(vendor.toLowerCase()) || vendor === "" ? model
             : vendor + " " + model;
-        scanners.push({ device: device, name: name || device, connection: connectionOf(device) });
+        scanners.push({ saneName: saneName, name: name || saneName, connection: connectionOf(saneName) });
     }
     return scanners;
 }
@@ -117,9 +117,9 @@ function settings(stored) {
     };
 }
 
-// Reads every option of the scanner `device`, for parseModes().
-function modesCommand(device) {
-    return ["env", "LC_ALL=C", "scanimage", "-d", device, "-A"];
+// Reads every option of the scanner `saneName`, for parseModes().
+function modesCommand(saneName) {
+    return ["env", "LC_ALL=C", "scanimage", "-d", saneName, "-A"];
 }
 
 // The SANE colour modes in `text`, what modesCommand prints: its --mode
@@ -178,17 +178,17 @@ function modeFor(mode, available) {
     return order.find(value => values.indexOf(value) >= 0) || defaultSettings.mode;
 }
 
-// Scans one page from `device` with `scanSettings` into `path` through
+// Scans one page from `saneName` with `scanSettings` into `path` through
 // `script` (services/scan.sh), which makes the folder first and removes a
 // half-written file; see outcomeOf. The mode is the nearest of the
 // scanner's `available` ones (availableModes), by its own name. `-p`
 // prints progress on stderr (see progressOf).
-function scanCommand(script, device, scanSettings, path, available) {
+function scanCommand(script, saneName, scanSettings, path, available) {
     const chosen = settings(scanSettings);
     const offered = available && available.length > 0 ? available : availableModes([]);
     const mode = offered.find(option => option.value === modeFor(chosen.mode, offered));
     return ["bash", script, path,
-        "scanimage", "-d", device, "--resolution", String(chosen.resolution),
+        "scanimage", "-d", saneName, "--resolution", String(chosen.resolution),
         "--mode", mode.sane, "--format=" + chosen.format, "-p", "-o", path];
 }
 

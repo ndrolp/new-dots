@@ -73,7 +73,7 @@ TestCase {
     }
 
     // This computer's own CUPS advertises its shared printers on lo too.
-    function test_thisComputersOwnQueuesAreNotDiscovered() {
+    function test_thisComputersOwnPrintersAreNotDiscovered() {
         compare(Discovery.discovered(found([
             "=;lo;IPv4;Office_Laser\\032\\064\\032myhost;_ipp._tcp;local;myhost.local;127.0.0.1;631;"
                 + "\"txtvers=1\" \"rp=printers/Office_Laser\" \"ty=HP LaserJet Pro M404\" \"printer-type=0x809046\""
@@ -135,8 +135,8 @@ TestCase {
     }
 
     function test_aModelNameCupsWouldRefuseIsMadeSafe() {
-        compare(Discovery.queueName("Brother HL-L2350DW series (USB) #2 / ünï", []), "Brother_HL-L2350DW_series_USB_2_n");
-        compare(Discovery.queueName("   ", []), "Printer");
+        compare(Discovery.printerName("Brother HL-L2350DW series (USB) #2 / ünï", []), "Brother_HL-L2350DW_series_USB_2_n");
+        compare(Discovery.printerName("   ", []), "Printer");
     }
 
     function test_whyNetworkPrintersCantBeFound() {

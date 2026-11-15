@@ -8,8 +8,8 @@ import "../services/Scanners.js" as Scanners
 TestCase {
     name: "Scanners"
 
-    function line(device, vendor, model, type) {
-        return [device, vendor, model, type].join("\t");
+    function line(saneName, vendor, model, type) {
+        return [saneName, vendor, model, type].join("\t");
     }
 
     function test_noScannersListsNone() {
@@ -32,26 +32,26 @@ TestCase {
             line("epkowa:interpreter:001:004", "Epson", "Perfection V39", "flatbed scanner"),
             ""
         ].join("\n")), [{
-            device: "airscan:e0:Canon TS5300 series",
+            saneName: "airscan:e0:Canon TS5300 series",
             name: "Canon TS5300 series",
             connection: "network"
         }, {
-            device: "epkowa:interpreter:001:004",
+            saneName: "epkowa:interpreter:001:004",
             name: "Epson Perfection V39",
             connection: "usb"
         }]);
     }
 
-    function connectionOf(device) {
-        return Scanners.parse(line(device, "Vendor", "Model", "flatbed scanner") + "\n")[0].connection;
+    function connectionOf(saneName) {
+        return Scanners.parse(line(saneName, "Vendor", "Model", "flatbed scanner") + "\n")[0].connection;
     }
 
     function test_backendsWithANetworkAddressAreNetwork() {
-        for (const device of ["escl:https://192.168.1.5:443", "net:server.local:pixma:MX920",
+        for (const saneName of ["escl:https://192.168.1.5:443", "net:server.local:pixma:MX920",
                 "epson2:net:192.168.1.30", "hpaio:/net/officejet_8010?ip=10.0.0.5"])
-            compare(connectionOf(device), "network", device);
-        for (const device of ["pixma:04A91912_43B2C1", "hpaio:/usb/Deskjet_2700?serial=CN1", "genesys:libusb:001:007"])
-            compare(connectionOf(device), "usb", device);
+            compare(connectionOf(saneName), "network", saneName);
+        for (const saneName of ["pixma:04A91912_43B2C1", "hpaio:/usb/Deskjet_2700?serial=CN1", "genesys:libusb:001:007"])
+            compare(connectionOf(saneName), "usb", saneName);
     }
 
     // The agreed name: ~/Pictures/Scans/scan-YYYY-MM-DD-HHMMSS.<ext>, in local time.

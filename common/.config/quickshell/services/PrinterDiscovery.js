@@ -86,7 +86,7 @@ function isUsb(service) {
 
 // This computer's CUPS advertises the printers it shares on lo too, as
 // printers/<name> or classes/<name>; those are already added.
-function isOwnQueue(service) {
+function isOwnPrinter(service) {
     return isUsb(service) && /^(printers|classes)\//.test(service.txt.rp || "");
 }
 
@@ -138,7 +138,7 @@ function browseProblem(stderr) {
 // A CUPS printer name for `model`: letters, digits, - and _ only (CUPS
 // refuses spaces, / and #, and other apps choke on the rest), with a
 // number when `takenNames` already has it (CUPS ignores case).
-function queueName(model, takenNames) {
+function printerName(model, takenNames) {
     const base = String(model || "").replace(/[^A-Za-z0-9_-]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 120)
         || "Printer";
     const taken = (takenNames || []).map(name => String(name).toLowerCase());
@@ -152,7 +152,7 @@ function queueName(model, takenNames) {
 // its model and enabled. The user is in wheel, which CUPS on Arch takes as
 // an admin group, so it needs no password.
 function addCommand(printer, takenNames) {
-    return ["lpadmin", "-p", queueName(printer.model, takenNames), "-E", "-v", printer.uri, "-m", "everywhere"];
+    return ["lpadmin", "-p", printerName(printer.model, takenNames), "-E", "-v", printer.uri, "-m", "everywhere"];
 }
 
 // What the Printers panel says when adding `model` failed, from lpadmin's stderr.
@@ -224,7 +224,7 @@ function discovered(services, addedUris) {
     const groups = {};
     for (const id of Object.keys(services)) {
         const service = services[id];
-        if (isOwnQueue(service))
+        if (isOwnPrinter(service))
             continue;
         const key = (service.txt.uuid || service.name).toLowerCase();
         (groups[key] = groups[key] || []).push(service);
