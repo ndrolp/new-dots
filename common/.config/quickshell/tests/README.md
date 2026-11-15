@@ -101,15 +101,29 @@ calculator and how qalc is run and answers
 (`components/panels/EmojiSearch.js`), and how the keybind cheatsheet groups
 and filters `hyprctl binds -j` (`components/panels/KeybindCheatsheet.js`),
 the printers the Printers panel lists, read from `lpstat` output, with their
-state, network or USB and the default, and the `lpadmin` commands that
-change them (`services/Printers.js`), and its *Printers* heading: the
-empty list, each printer's row and opening one for *Set default* and
-*Remove* (`components/panels/PrintersSection.qml`; `PrintersPanel.qml`
-and `services/Printers.qml` need Quickshell and aren't tested here),
-the scanners it lists from `scanimage -f` output (webcams left out,
-network or USB), how a scan is named, run and reports progress or its
-error, and the scan settings kept in `appearance.json`
-(`services/Scanners.js`),
+state, network or USB and the default, their print jobs read from `ipptool`,
+and the `lpadmin`, `cancel` and `lp` commands that change them
+(`services/Printers.js`), what its rows say of a printer, a print job and a
+connection (`components/panels/PrinterLabels.js`), that a polled list is
+only replaced when it changes (`services/Assign.js`), and its *Printers*
+heading: the empty list, each printer's row and opening one for its print
+jobs, *Set default*, *Test page* and *Remove*
+(`components/panels/PrintersSection.qml`), the discovered printers read from
+`avahi-browse -rpk` (escapes, TXT records, one printer seen several ways,
+this computer's own printers and the ones already added left out), the
+printer name and `lpadmin` command an *Add* runs and why one failed
+(`services/PrinterDiscovery.js`), and the *Discovered printers* heading:
+*Add*, adding, a failed add and a printer that can't print driverless
+offering *Print settings*, and why none can be found
+(`components/panels/DiscoveredPrintersSection.qml`), the scanners it lists
+from `scanimage -f` output (webcams left out, network or USB), the colour
+modes a scanner offers from `scanimage -A` and the nearest one to a
+remembered mode, how a scan is named, run and reports progress, its outcome
+or its error, the *Show in folder* URI, and the scan settings kept in
+`appearance.json` (`services/Scanners.js`; `scan.sh`, below, runs the scan
+wrapper; `ScannersSection.qml` and `ScanView.qml` have no tests yet,
+`PrinterRow.qml` is tested through the sections, and `PrintersPanel.qml`
+and the services' `.qml` files need Quickshell and aren't tested here),
 what the keep-awake bar element shows and its popup's switch, duration choice
 and time left (`components/bar/KeepAwakeElement.qml`,
 `components/panels/KeepAwakePopupBody.qml`), keep-awake's duration and
@@ -229,6 +243,16 @@ apps. The rules in `services/WebApps.js` are in `tst_webApps.qml`:
 
 ```sh
 common/.config/quickshell/tests/webapps.sh
+```
+
+`scan.sh` runs `services/scan.sh`, the Printers panel's scan wrapper, with a
+fake scanimage that writes `<file>.part` the way scanimage 1.4 does: a saved
+scan, a failed one whose `.part` is removed, a scan saved before scanimage
+failed (kept, exit 100), and a file already there left alone. It is in
+`scripts/test-all`:
+
+```sh
+common/.config/quickshell/tests/scan.sh
 ```
 
 `startup.sh` checks that `start.sh` creates the machine-local colorscheme links

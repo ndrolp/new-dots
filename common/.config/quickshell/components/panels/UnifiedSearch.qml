@@ -349,7 +349,7 @@ Variants {
                         type: "printers",
                         category: "ACTIONS",
                         title: "Scan",
-                        subtitle: "Scan a page from a scanner in the Printers panel",
+                        subtitle: "Open the Printers panel to scan a page",
                         glyph: "󰚫"
                     }
                 ];

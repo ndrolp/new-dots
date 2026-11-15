@@ -51,7 +51,7 @@ Column {
                 { label: "Web app maker", propertyName: "webAppsEnabled",
                   description: "Turn a website into an app that opens in its own Chrome window." },
                 { label: "Printers", propertyName: "printersEnabled",
-                  description: "See the printers, choose the default one, and remove them." }
+                  description: "See and manage the printers, add the ones found on the network or USB, follow print jobs, and scan." }
             ]
 
             delegate: Column {
