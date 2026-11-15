@@ -7,6 +7,11 @@
 // The bar elements a collapsed capsule shows, when the profile enables them.
 const collapsedElementIds = ["arch", "clock", "notifications"];
 
+// The live bar elements: a collapsed capsule also draws them, in the
+// profile's order, but they show only while active: the recording indicator
+// while recording, media while a track plays (see hasMedia).
+const liveElementIds = ["recording", "media"];
+
 const zoneNames = ["left", "center", "right"];
 
 // The capsule's row: the profile's bar elements as one centre zone, in the
@@ -31,11 +36,22 @@ function collapsedRow(barElements, shownIds) {
     return { left: [], center: center, right: [] };
 }
 
-// The bar elements a bar window draws: the collapsed row on a capsule, the
-// profile's own on any other bar style. Takes { barStyle, barElements }.
+// The bar elements a bar window draws: the collapsed row, live bar elements
+// included, on a capsule; the profile's own on any other bar style. Takes
+// { barStyle, barElements }.
 function drawnElements(bar) {
     return bar.barStyle === "capsule"
-        ? collapsedRow(bar.barElements, collapsedElementIds) : bar.barElements;
+        ? collapsedRow(bar.barElements, collapsedElementIds.concat(liveElementIds))
+        : bar.barElements;
+}
+
+// Whether media has something to show, given the bar style and the Mpris
+// player it follows (null without one): on a capsule only while a track
+// plays, on any other bar style while there is a player at all.
+function hasMedia(barStyle, player) {
+    if (!player)
+        return false;
+    return barStyle !== "capsule" || player.isPlaying === true;
 }
 
 // Where the capsule is drawn in the bar content, { x, y, width, height,
