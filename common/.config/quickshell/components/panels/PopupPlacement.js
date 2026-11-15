@@ -8,10 +8,9 @@
 // of the bar's rounded ends. On an opaque or docked bar popups are attached:
 // they hang from the bar itself.
 
-// Takes the bar profile of the popup's monitor,
-// { barTransparent, transparentBarSlanted }.
+// Takes the bar profile of the popup's monitor, { barStyle }.
 function attached(bar) {
-    return !bar.barTransparent || !!bar.transparentBarSlanted;
+    return bar.barStyle !== "transparent";
 }
 
 // A distance as an { x, y } offset pointing at the bar.

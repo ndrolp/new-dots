@@ -14,8 +14,7 @@ TestCase {
             barHeight: 30,
             horizontalPadding: 12,
             transparentBarTopMargin: 6,
-            barTransparent: false,
-            transparentBarSlanted: false
+            barStyle: "opaque"
         }, values);
     }
 
@@ -35,9 +34,9 @@ TestCase {
     function test_theBarReservesItsThickness_data() {
         return [
             { tag: "opaque", values: {}, thickness: 30 },
-            { tag: "floating", values: { barTransparent: true }, thickness: 36 },
-            { tag: "docked", values: { barTransparent: true, transparentBarSlanted: true }, thickness: 30 },
-            { tag: "floating at the bottom", values: { barTransparent: true, barPosition: "bottom" },
+            { tag: "floating", values: { barStyle: "transparent" }, thickness: 36 },
+            { tag: "docked", values: { barStyle: "docked" }, thickness: 30 },
+            { tag: "floating at the bottom", values: { barStyle: "transparent", barPosition: "bottom" },
                 thickness: 36 }
         ];
     }
@@ -58,7 +57,7 @@ TestCase {
     }
 
     function test_theMarginIsOnTheBarsScreenEdge(data) {
-        compare(BarPlacement.contentMargins(bar({ barTransparent: true, barPosition: data.tag })),
+        compare(BarPlacement.contentMargins(bar({ barStyle: "transparent", barPosition: data.tag })),
             data.margins);
     }
 
@@ -69,16 +68,15 @@ TestCase {
 
     // A docked bar's zones reach the screen's sides and pad their own contents.
     function test_aDockedBarHasNoMarginOrPadding() {
-        compare(BarPlacement.contentMargins(bar({ barPosition: "bottom", barTransparent: true,
-            transparentBarSlanted: true })), { top: 0, right: 0, bottom: 0, left: 0 });
+        compare(BarPlacement.contentMargins(bar({ barPosition: "bottom", barStyle: "docked" })), { top: 0, right: 0, bottom: 0, left: 0 });
     }
 
     // No bar style is tied to a Bar position: all twelve are a working bar with
     // the room it reserves, its margins and how its popups open.
     function test_everyBarStyleWorksOnEveryBarPosition_data() {
-        const opaque = { barTransparent: false, transparentBarSlanted: false };
-        const floating = { barTransparent: true, transparentBarSlanted: false };
-        const docked = { barTransparent: true, transparentBarSlanted: true };
+        const opaque = { barStyle: "opaque" };
+        const floating = { barStyle: "transparent" };
+        const docked = { barStyle: "docked" };
 
         return [
             { tag: "opaque top", style: opaque, barPosition: "top", thickness: 30, attached: true,

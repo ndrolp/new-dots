@@ -104,7 +104,7 @@ Row {
         height: size.height
         radius: appearance.radius
         color: appHover.hovered ? theme.surfaceHover
-            : root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
+            : root.appearance.pillsTransparent || root.appearance.barStyle === "docked"
                 || root.grouped ? "transparent" : theme.surface
 
         border.width: appearance.elementBorder && !root.grouped ? 1 : 0

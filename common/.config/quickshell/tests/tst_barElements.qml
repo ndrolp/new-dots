@@ -587,7 +587,7 @@ TestCase {
         for (const name in profiles) {
             const profile = BarProfileModel.completeProfile(profiles[name]);
             compare(BarProfileModel.elementOption(profile.barElements, "workspaces", "verticalPadding"),
-                profile.barTransparent ? profile.pillVerticalPadding + 2 : profile.elementVerticalPadding,
+                profile.barStyle !== "opaque" ? profile.pillVerticalPadding + 2 : profile.elementVerticalPadding,
                 name);
         }
     }

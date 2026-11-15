@@ -7,7 +7,7 @@
 // The gap a floating bar keeps from the screen edge it sits on. The key still
 // says top, but it applies from whichever edge that is.
 function margin(bar) {
-    return bar.barTransparent && !bar.transparentBarSlanted ? bar.transparentBarTopMargin : 0;
+    return bar.barStyle === "transparent" ? bar.transparentBarTopMargin : 0;
 }
 
 // The space the bar takes from its screen edge inwards. Also what it reserves,
@@ -31,8 +31,7 @@ function windowAnchors(barPosition) {
 // screen's edge, nothing away from it and the padding at the bar's two ends,
 // which a docked bar's zones reach. Returns { top, right, bottom, left }.
 function contentMargins(bar) {
-    const docked = bar.barTransparent && bar.transparentBarSlanted;
-    const padding = docked ? 0 : bar.horizontalPadding;
+    const padding = bar.barStyle === "docked" ? 0 : bar.horizontalPadding;
 
     return BarPosition.sides(bar.barPosition, margin(bar), 0, padding);
 }

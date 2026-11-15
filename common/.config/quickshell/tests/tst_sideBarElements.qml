@@ -29,8 +29,7 @@ TestCase {
         property int pillVerticalPadding: 3
         property int elementVerticalPadding: 3
         property bool pillsTransparent: false
-        property bool transparentBarSlanted: false
-        property bool barTransparent: false
+        property string barStyle: "opaque"
         property bool barBorder: false
         property bool elementBorder: false
         property bool groupBorder: false
@@ -158,7 +157,7 @@ TestCase {
 
     function init() {
         profile.barPosition = "left";
-        profile.barTransparent = false;
+        profile.barStyle = "opaque";
         profile.barHeight = 40;
         profile.elementVerticalPadding = 3;
         fakeService.activeWorkspace = 2;
@@ -240,7 +239,7 @@ TestCase {
     }
 
     function test_aFloatingWorkspacesElementKeepsItsPillAroundTheStack() {
-        profile.barTransparent = true;
+        profile.barStyle = "transparent";
         const saved = profile.barElements;
         profile.barElements = BarProfileModel.setElementOption(saved, "workspaces", "verticalPadding", 5);
 
@@ -261,7 +260,7 @@ TestCase {
     }
 
     function test_theWorkspacesVerticalPaddingSetsTheRoomInsideItsPill() {
-        profile.barTransparent = true;
+        profile.barStyle = "transparent";
         const element = shown(workspaces);
         const saved = profile.barElements;
 
@@ -272,7 +271,7 @@ TestCase {
     }
 
     function test_aGroupedWorkspacesElementLeavesThePillToItsGroup() {
-        profile.barTransparent = true;
+        profile.barStyle = "transparent";
 
         const element = shown(workspaces, { grouped: true });
 

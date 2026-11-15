@@ -218,17 +218,21 @@ TestCase {
     }
 
     function test_onAnOpaqueBarAnElementFillsTheBarLessItsPadding() {
-        compare(BarLayout.elementThickness({ barTransparent: false, barHeight: 40, elementVerticalPadding: 3,
+        compare(BarLayout.elementThickness({ barStyle: "opaque", barHeight: 40, elementVerticalPadding: 3,
             workspaceButtonSize: 22, pillVerticalPadding: 4 }), 34);
     }
 
-    function test_onATransparentBarAnElementIsAButtonAndItsPadding() {
-        compare(BarLayout.elementThickness({ barTransparent: true, barHeight: 40, elementVerticalPadding: 3,
+    function test_onATransparentOrDockedBarAnElementIsAButtonAndItsPadding_data() {
+        return [{ tag: "transparent" }, { tag: "docked" }];
+    }
+
+    function test_onATransparentOrDockedBarAnElementIsAButtonAndItsPadding(data) {
+        compare(BarLayout.elementThickness({ barStyle: data.tag, barHeight: 40, elementVerticalPadding: 3,
             workspaceButtonSize: 22, pillVerticalPadding: 4 }), 30);
     }
 
     function test_anElementNeverCollapsesOnAThinBar() {
-        compare(BarLayout.elementThickness({ barTransparent: false, barHeight: 4, elementVerticalPadding: 3 }), 1);
+        compare(BarLayout.elementThickness({ barStyle: "opaque", barHeight: 4, elementVerticalPadding: 3 }), 1);
     }
 
     function test_longTextTurnsSidewaysOnlyOnASideBar_data() {

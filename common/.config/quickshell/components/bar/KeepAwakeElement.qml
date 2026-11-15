@@ -23,7 +23,7 @@ Rectangle {
     height: size.height
     radius: appearance.radius
     color: keepAwakeHover.hovered ? theme.surfaceHover
-        : grouped || appearance.pillsTransparent || appearance.transparentBarSlanted
+        : grouped || appearance.pillsTransparent || appearance.barStyle === "docked"
             ? "transparent" : theme.surface
     border.width: appearance.elementBorder && !grouped ? 1 : 0
     border.color: appearance.elementBorder ? theme.border : "transparent"

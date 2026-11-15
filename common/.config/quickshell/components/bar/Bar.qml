@@ -43,6 +43,7 @@ Variants {
             readonly property string monitorDescription: bar.workspaceService.monitorDescriptionForScreen(modelData)
             readonly property string profileName: bar.monitors.barProfileFor(monitorDescription)
             property var barAppearance: QtObject {
+                property string barStyle: bar.appearance.barProfileValue(panel.profileName, "barStyle")
                 property string barPosition: bar.appearance.barProfileValue(panel.profileName, "barPosition")
                 property int barHeight: bar.appearance.barProfileValue(panel.profileName, "barHeight")
                 property int horizontalPadding: bar.appearance.barProfileValue(panel.profileName, "horizontalPadding")
@@ -58,11 +59,9 @@ Variants {
                 property int elementVerticalPadding: bar.appearance.barProfileValue(panel.profileName, "elementVerticalPadding")
                 property bool pillsTransparent: bar.appearance.barProfileValue(panel.profileName, "pillsTransparent")
                 property int transparentBarTopMargin: bar.appearance.barProfileValue(panel.profileName, "transparentBarTopMargin")
-                property bool transparentBarSlanted: bar.appearance.barProfileValue(panel.profileName, "transparentBarSlanted")
                 property int groupRadius: bar.appearance.barProfileValue(panel.profileName, "groupRadius")
                 property int groupHorizontalPadding: bar.appearance.barProfileValue(panel.profileName, "groupHorizontalPadding")
                 property int groupVerticalPadding: bar.appearance.barProfileValue(panel.profileName, "groupVerticalPadding")
-                property bool barTransparent: bar.appearance.barProfileValue(panel.profileName, "barTransparent")
                 property bool barBorder: bar.appearance.barProfileValue(panel.profileName, "barBorder")
                 property bool elementBorder: bar.appearance.barProfileValue(panel.profileName, "elementBorder")
                 property bool groupBorder: bar.appearance.barProfileValue(panel.profileName, "groupBorder")
@@ -128,7 +127,7 @@ Variants {
                 id: barBackground
 
                 anchors.fill: parent
-                color: panel.barAppearance.barTransparent
+                color: panel.barAppearance.barStyle !== "opaque"
                     ? "transparent" : Qt.rgba(theme.background.r, theme.background.g,
                         theme.background.b, panel.barAppearance.barOpacity / 100)
 
@@ -141,7 +140,7 @@ Variants {
 
                 // An opaque bar's bar border, along its edge facing the desktop.
                 Repeater {
-                    model: panel.barAppearance.barBorder && !panel.barAppearance.barTransparent
+                    model: panel.barAppearance.barBorder && panel.barAppearance.barStyle === "opaque"
                         ? BarPlacement.edgeBorder(panel.barAppearance.barPosition,
                             { width: barBackground.width, height: barBackground.height },
                             barPopups.openPopup

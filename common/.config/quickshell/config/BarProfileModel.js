@@ -117,10 +117,16 @@ function defaultBarElements(disabledIds, options) {
 // The screen edges a bar can sit on, its Bar position.
 const barPositions = ["top", "bottom", "left", "right"];
 
+// How a bar looks, its bar style: opaque (a solid bar along the edge),
+// transparent (floating elements away from the edge) or docked (zones hanging
+// from the edge, outlined like an attached popup).
+const barStyles = ["opaque", "transparent", "docked"];
+
 // Every setting a bar profile stores, with the value a profile that lacks it
 // gets.
 const defaultProfile = {
     barPosition: "top",
+    barStyle: "opaque",
     barHeight: 32,
     horizontalPadding: 12,
     spacing: 8,
@@ -136,13 +142,11 @@ const defaultProfile = {
     elementVerticalPadding: 5,
     pillsTransparent: false,
     transparentBarTopMargin: 0,
-    transparentBarSlanted: false,
     groupRadius: 8,
     // The room inside a group's background: between its edges and its first
     // and last element along the bar, and from the bar's edges across it.
     groupHorizontalPadding: 8,
     groupVerticalPadding: 0,
-    barTransparent: false,
     barBorder: false,
     elementBorder: false,
     groupBorder: false,
@@ -172,16 +176,16 @@ function defaultBarProfiles() {
 
     return {
         "minimal": profile(Object.assign({}, compact, {
-            pillsTransparent: true, transparentBarTopMargin: 6, barTransparent: true,
+            pillsTransparent: true, transparentBarTopMargin: 6, barStyle: "transparent",
             barBorder: true, elementBorder: true, groupBorder: true, groupRadius: 6
         }), ["systemMonitor", "currentApp", "media", "bluetooth", "tray"], compactOptions),
         "work": profile({}, []),
         "media": profile({
-            barHeight: 34, transparentBarTopMargin: 7, barTransparent: true,
+            barHeight: 34, transparentBarTopMargin: 7, barStyle: "transparent",
             barBorder: true, elementBorder: true, groupBorder: true
         }, ["bluetooth", "tray"]),
         "presentation": profile(Object.assign({}, compact, {
-            pillsTransparent: true, transparentBarTopMargin: 8, barTransparent: true,
+            pillsTransparent: true, transparentBarTopMargin: 8, barStyle: "transparent",
             barBorder: true, elementBorder: true, groupBorder: true, groupRadius: 6
         }), ["arch", "systemMonitor", "currentApp", "workspaces", "media", "audio",
             "bluetooth", "tray"], compactOptions)
@@ -197,8 +201,8 @@ function sameValue(left, right) {
 }
 
 // `profile` with every profile setting, as a fresh object: missing settings
-// take their default, an unknown Bar position too, and the bar elements are
-// normalized. Other keys are dropped.
+// take their default, an unknown Bar position or bar style too, and the bar
+// elements are normalized. Other keys are dropped.
 function completeProfile(profile) {
     const source = profile || {};
     const complete = {};
@@ -207,6 +211,8 @@ function completeProfile(profile) {
         complete[key] = cloneValue(source[key] !== undefined ? source[key] : defaultProfile[key]);
     if (barPositions.indexOf(complete.barPosition) === -1)
         complete.barPosition = defaultProfile.barPosition;
+    if (barStyles.indexOf(complete.barStyle) === -1)
+        complete.barStyle = defaultProfile.barStyle;
     complete.barElements = normalizeBarElements(complete.barElements);
     return complete;
 }

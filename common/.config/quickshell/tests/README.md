@@ -2,7 +2,9 @@
 
 Tests for the pure JS models behind the settings: bar profiles
 (`config/BarProfileModel.js`), desktop widgets (`config/DesktopWidgetsModel.js`)
-and schema migrations (`config/SchemaMigrations.js`). They also cover where
+and schema migrations (`config/SchemaMigrations.js`), among them the one that
+turns the two bar style switches into one bar style and keeps each saved
+profile's look (`tst_barStyleMigration.qml`). They also cover where
 the bar sits on its screen: the edges its window is anchored to, the space it
 reserves and where the margin goes, for every bar style on each Bar position
 (`components/bar/BarPlacement.js`; `Bar.qml` itself is a Quickshell window and
@@ -43,7 +45,7 @@ the settings panel's own parts (`SettingsNumber`,
 `SettingsSwitchRow`, `SettingsChoice`, `SettingsGrid`…), its frame
 (`ConfigPanel.qml`) and the settings panel sections built from them, among
 them the four Bar positions and the zone names of a side bar, which keep their
-saved keys (`BarSizeStyleSettings.qml`, `BarElementsSettings.qml`), the Bluetooth device list and turning Bluetooth
+saved keys, and the bar style as one choice (`BarSizeStyleSettings.qml`, `BarElementsSettings.qml`), the Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
 (`AudioOutputs.js`), how the volume is shown as text
 (`components/VolumeText.js`), what the popups and bar elements show for the

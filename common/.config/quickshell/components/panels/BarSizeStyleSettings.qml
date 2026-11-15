@@ -96,15 +96,31 @@ Column {
         }
     }
 
+    Panels.SettingsField {
+        width: parent.width
+        appearance: root.appearance
+        label: "Bar style"
+
+        Panels.SettingsChoice {
+            width: Math.min(parent.width, 360)
+            appearance: root.appearance
+            options: [
+                { label: "Opaque", value: "opaque" },
+                { label: "Transparent", value: "transparent" },
+                { label: "Docked", value: "docked" }
+            ]
+            value: root.appearance.barStyle
+            onChosen: style => root.appearance.setBarSetting("barStyle", style)
+        }
+    }
+
     Panels.SettingsGrid {
         rowSpacing: 4
 
         Repeater {
             model: [
-                { label: "Transparent bar", propertyName: "barTransparent" },
-                { label: "Bar border", propertyName: "barBorder" },
-                { label: "Docked bar", propertyName: "transparentBarSlanted" },
                 { label: "Transparent pills", propertyName: "pillsTransparent" },
+                { label: "Bar border", propertyName: "barBorder" },
                 { label: "Element border", propertyName: "elementBorder" },
                 { label: "Group border", propertyName: "groupBorder" }
             ]

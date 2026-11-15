@@ -95,15 +95,15 @@ TestCase {
     }
 
     function test_popupsAreAttachedOnAnOpaqueBar() {
-        verify(PopupPlacement.attached({ barTransparent: false }));
+        verify(PopupPlacement.attached({ barStyle: "opaque" }));
     }
 
     function test_popupsFloatOnATransparentBar() {
-        verify(!PopupPlacement.attached({ barTransparent: true }));
+        verify(!PopupPlacement.attached({ barStyle: "transparent" }));
     }
 
     function test_popupsAreAttachedOnADockedBar() {
-        verify(PopupPlacement.attached({ barTransparent: true, transparentBarSlanted: true }));
+        verify(PopupPlacement.attached({ barStyle: "docked" }));
     }
 
     function test_anAttachedPopupOnATopBarOpensRightAtItsBottomEdge() {

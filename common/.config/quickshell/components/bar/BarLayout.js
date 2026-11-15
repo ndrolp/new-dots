@@ -90,7 +90,7 @@ function groupBackground(bar, start, length) {
 
 // How thick a bar element is across the bar. Takes the bar profile.
 function elementThickness(profile) {
-    return profile.barTransparent
+    return profile.barStyle !== "opaque"
         ? profile.workspaceButtonSize + profile.pillVerticalPadding * 2
         : Math.max(1, profile.barHeight - profile.elementVerticalPadding * 2);
 }

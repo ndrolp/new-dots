@@ -50,7 +50,7 @@ TestCase {
         const edited = BarProfileModel.editedProfile(after);
         compare(edited.barHeight, 30);
         compare(edited.horizontalPadding, 12);
-        compare(edited.transparentBarSlanted, true);
+        compare(edited.barStyle, "docked");
         compare(edited.transparentBarTopMargin, 8);
     }
 
@@ -121,6 +121,27 @@ TestCase {
 
     function test_anUnknownBarPositionLoadsAsTop() {
         compare(BarProfileModel.completeProfile({ barPosition: "middle" }).barPosition, "top");
+    }
+
+    function test_anUnknownBarStyleLoadsAsOpaque() {
+        compare(BarProfileModel.completeProfile({ barStyle: "glass" }).barStyle, "opaque");
+    }
+
+    function test_everyBarStyleIsKeptAsSaved_data() {
+        return ["opaque", "transparent", "docked"].map(style => ({ tag: style, style: style }));
+    }
+
+    function test_everyBarStyleIsKeptAsSaved(data) {
+        compare(BarProfileModel.completeProfile({ barStyle: data.style }).barStyle, data.style);
+    }
+
+    function test_theOldBarStyleSwitchesAreNotKept() {
+        const profile = BarProfileModel.completeProfile({ barTransparent: true,
+            transparentBarSlanted: true });
+
+        compare(profile.barStyle, "opaque");
+        verify(!("barTransparent" in profile));
+        verify(!("transparentBarSlanted" in profile));
     }
 
     function test_everyBarPositionIsKeptAsSaved_data() {

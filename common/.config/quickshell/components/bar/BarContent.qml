@@ -41,7 +41,7 @@ Item {
     // The docked bar's zones match an attached popup's color and opacity.
     readonly property color dockedColor: Qt.rgba(theme.background.r, theme.background.g,
         theme.background.b, appearance.barOpacity / 100)
-    readonly property real dockedPadding: appearance.barTransparent && appearance.transparentBarSlanted
+    readonly property real dockedPadding: appearance.barStyle === "docked"
         ? appearance.horizontalPadding : 0
     // Room between a group's shared background and its first and last element.
     readonly property real groupPadding: appearance.groupHorizontalPadding
@@ -173,7 +173,7 @@ Item {
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
         thickness: root.sideBar ? root.width : root.height
-        visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
+        visible: root.appearance.barStyle === "docked"
         fillColor: root.dockedColor
         border: root.appearance.barBorder
         keepStart: true
@@ -189,7 +189,7 @@ Item {
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
         thickness: root.sideBar ? root.width : root.height
-        visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
+        visible: root.appearance.barStyle === "docked"
         fillColor: root.dockedColor
         border: root.appearance.barBorder
         z: -1
@@ -204,7 +204,7 @@ Item {
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
         thickness: root.sideBar ? root.width : root.height
-        visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
+        visible: root.appearance.barStyle === "docked"
         fillColor: root.dockedColor
         border: root.appearance.barBorder
         keepEnd: true

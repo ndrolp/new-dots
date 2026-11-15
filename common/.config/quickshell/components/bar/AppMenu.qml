@@ -128,7 +128,7 @@ Item {
         width: size.width
         height: size.height
         radius: root.appearance.radius
-        color: root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
+        color: root.appearance.pillsTransparent || root.appearance.barStyle === "docked"
             || root.grouped ? "transparent" : theme.surface
         border.width: root.appearance.elementBorder && !root.grouped ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
