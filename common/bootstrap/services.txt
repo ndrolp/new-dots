@@ -9,7 +9,7 @@ system sddm            sddm
 system NetworkManager  networkmanager
 system bluetooth       bluez
 system docker          docker
-system cups            cups
+system cups            cups               now
 system avahi-daemon    avahi              now
 
 user pipewire              pipewire

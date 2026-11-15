@@ -436,6 +436,8 @@ test_every_required_service_comes_from_a_core_package() {
     done
     # Printer discovery has to work right after the bootstrap, not only after a reboot.
     grep -qE "^system avahi-daemon +avahi +now$" "$file" || fail "avahi-daemon is not started now"
+    # The Printers panel talks to CUPS as soon as it opens, so cups is running right away too.
+    grep -qE "^system cups +cups +now$" "$file" || fail "cups is not started now"
 }
 
 # The app menu shows an app's own menus only when GTK apps export them (appmenu-gtk-module) and
@@ -465,6 +467,19 @@ test_the_printer_discovery_packages_are_core_packages() {
         grep -qx "$pkg" "$REPO/common/packages/core.txt" || fail "$pkg is not in core"
     done
     ! grep -rqx cups-browsed "$REPO/common/packages" || fail "cups-browsed is in a package list"
+}
+
+# The Printers panel runs these on every host: lpstat, lpadmin, lp, cancel and ipptool (cups),
+# the test page (cups-filters), avahi-browse (avahi), scanimage (sane), notify-send (libnotify),
+# xdg-open (xdg-utils) and the fallback system-config-printer. They're listed in core by name,
+# not left to come in as dependencies.
+test_the_printers_panel_commands_are_core_packages() {
+    OUT=""
+    CALLS=/dev/null
+    local pkg
+    for pkg in cups cups-filters avahi sane libnotify xdg-utils system-config-printer; do
+        grep -qx "$pkg" "$REPO/common/packages/core.txt" || fail "$pkg is not in core"
+    done
 }
 
 # An nsswitch.conf whose hosts line is <hosts>, between the lines Arch ships around it.

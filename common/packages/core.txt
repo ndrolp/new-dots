@@ -18,6 +18,7 @@ cliphist
 cmake
 cpio
 cups
+cups-filters
 cups-pk-helper
 dmenu
 docker
@@ -50,6 +51,7 @@ jq
 kitty
 kvantum
 lazygit
+libnotify
 libpulse
 lxappearance
 maim
@@ -78,6 +80,7 @@ ripgrep
 ristretto
 rofi
 rustup
+sane
 sane-airscan
 sddm
 slurp
