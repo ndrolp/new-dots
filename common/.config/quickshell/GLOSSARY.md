@@ -202,3 +202,23 @@ _Avoid_: Emoji search, emoji panel (no es un panel aparte)
 **Reduce motion** (reducir movimiento):
 El ajuste global de la sección Motion del settings panel que hace instantáneas las animaciones de la shell: los cambios ocurren igual, pero sin transición. No forma parte de ningún bar profile y se aplica en cuanto se activa.
 _Avoid_: Disable animations, sin animaciones, modo rápido
+
+**Printer** (impresora):
+Una impresora añadida: una a la que se puede mandar a imprimir. Puede estar en la red o por USB.
+_Avoid_: Cola, queue, device, dispositivo
+
+**Discovered printer** (impresora encontrada):
+Una impresora que se ve en la red o por USB pero que todavía no se ha añadido, así que aún no se puede imprimir en ella. Al añadirla pasa a ser una *printer*.
+_Avoid_: Impresora disponible, device
+
+**Scanner** (escáner):
+Cualquier escáner que se ve ahora mismo en la red o por USB. No se añade: si se ve, se puede usar.
+_Avoid_: Device, dispositivo
+
+**Print job** (trabajo de impresión):
+Un documento mandado a una printer que espera o se está imprimiendo. Se puede cancelar.
+_Avoid_: Job (a secas), tarea
+
+**Printers panel** (panel de impresoras):
+El panel que lista las printers, las discovered printers y los scanners, y desde el que se añaden, quitan y eligen por defecto las printers, se ven y cancelan sus print jobs y se escanea. Lleva el nombre de las impresoras aunque también maneja escáneres. No es un popup.
+_Avoid_: Printer manager, device manager, panel de dispositivos
