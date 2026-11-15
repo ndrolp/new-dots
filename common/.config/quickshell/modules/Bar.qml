@@ -2,7 +2,7 @@ import Quickshell
 import Quickshell.Io
 import QtQuick
 import "../components/bar" as BarComponents
-import "../components/bar/Capsule.js" as Capsule
+import "../components/bar/CapsuleRouting.js" as CapsuleRouting
 import "OpenPopup.js" as OpenPopup
 
 // A bar on every monitor, and which of their popups is open (OpenPopup.js).
@@ -64,12 +64,12 @@ Scope {
     }
 
     // SUPER+I (`capsule toggle`) expands the focused monitor's capsule, or
-    // collapses it; on a normal bar it does nothing (Capsule.toggledBar).
+    // collapses it; on a normal bar it does nothing (CapsuleRouting.toggledBar).
     IpcHandler {
         target: "capsule"
 
         function toggle(): void {
-            const window = Capsule.toggledBar(root.bars(), root.focusedMonitor());
+            const window = CapsuleRouting.toggledBar(root.bars(), root.focusedMonitor());
             if (window !== null)
                 window.toggleCapsule();
         }

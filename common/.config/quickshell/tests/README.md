@@ -68,23 +68,24 @@ and the control center; the choice is kept with the profile by
 profile shows by `BarElementsSettings.qml`), live ones included (the recording
 indicator, and media only while a track plays), which ones it shows expanded
 (all but the workspaces, with their groups, and media while any player
-exists), that any one cause holds it expanded, that only the pointer over the
-capsule itself counts as hovering it, where the capsule sits around that row,
-that only it takes clicks in its bar window and that SUPER+I acts only on the
-focused monitor's capsule (`components/bar/Capsule.js`),
+exists) (`components/bar/CapsuleElements.js`), that only the pointer over
+the capsule itself counts as hovering it, where the capsule sits around that
+row and that only it takes clicks in its bar window
+(`CapsulePlacement.js`), that any one cause holds it expanded and that
+SUPER+I acts only on the focused monitor's capsule (`CapsuleRouting.js`),
 that hovering it expands it only after a moment and collapses it a while after
 the pointer leaves (`CapsuleHover.qml`), that SUPER+I holds it expanded until
 pressed again or until the pointer leaves it (`CapsuleToggle.qml`), that a
 change (volume, brightness, Caps Lock, audio output, bar profile or
 keep-awake) goes to the focused monitor's capsule instead of the OSD, nowhere
 while a popup is inside it, and otherwise to the OSD on the focused monitor's
-screen, and that the capsule then shows that change and no bar element
-(`Capsule.js`), for about 1.5 s from the latest one (`CapsuleChange.qml`),
+screen (`CapsuleRouting.js`), and that the capsule then shows that change
+and no bar element (`CapsuleElements.js`), for about 1.5 s from the latest one (`CapsuleChange.qml`),
 what each of the six changes shows, the same in the OSD and the capsule
 (`components/panels/OsdChange.js`), how it is
 drawn with its fill and bar border (`CapsuleSurface.qml`), where its workspace row sits, under a top
 capsule and above a bottom one, centred on it, how it grows round a popup
-inside it (`Capsule.js`), that its window grows at once for a popup inside and
+inside it (`CapsulePlacement.js`), that its window grows at once for a popup inside and
 never shrinks back (`CapsuleWindowHold.qml`), that the row
 has one pill per workspace in order, in the profile's fill and bar border,
 highlights the active one as it changes and switches workspace on a click

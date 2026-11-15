@@ -6,7 +6,7 @@ import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 import "BarElementItems.js" as BarElementItemsModel
 import "BarLayout.js" as BarLayout
-import "Capsule.js" as Capsule
+import "CapsulePlacement.js" as CapsulePlacement
 
 Item {
     id: root
@@ -63,9 +63,9 @@ Item {
     // Whether the bar runs from the top of the screen down.
     readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
     // On a capsule, where the capsule is drawn around its row, the centre zone
-    // (see Capsule.drawnElements); null on any other bar style.
+    // (see CapsuleElements.drawnElements); null on any other bar style.
     readonly property var capsulePlace: appearance.barStyle === "capsule"
-        ? Capsule.surface(layoutBar, capsuleChange !== null
+        ? CapsulePlacement.surface(layoutBar, capsuleChange !== null
                 ? { start: changeStart, end: changeStart + changeView.width }
                 : { start: zoneStart("center"), end: zoneEnd("center") },
             appearance.horizontalPadding)
@@ -77,13 +77,13 @@ Item {
     readonly property var insidePopup: capsulePlace !== null && openPopup && openPopup.inside
         ? openPopup : null
     // The capsule as drawn: its row, grown round a popup inside it
-    // (Capsule.withPopup); null on any other bar style.
+    // (CapsulePlacement.withPopup); null on any other bar style.
     readonly property var capsuleShape: capsulePlace === null ? null
-        : Capsule.withPopup(capsulePlace, insidePopup, appearance.barPosition)
+        : CapsulePlacement.withPopup(capsulePlace, insidePopup, appearance.barPosition)
     // Whether the pointer is over the capsule itself, not elsewhere in its bar
     // window such as the workspace row.
     readonly property bool capsuleHovered: capsulePlace !== null && pointer.hovered
-        && Capsule.contains(capsulePlace, pointer.point.position)
+        && CapsulePlacement.contains(capsulePlace, pointer.point.position)
 
     HoverHandler {
         id: pointer

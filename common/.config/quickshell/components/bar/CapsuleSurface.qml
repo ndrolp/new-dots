@@ -8,7 +8,7 @@ import QtQuick
 Item {
     id: root
 
-    // Where it sits and its size, as Capsule.surface gives it.
+    // Where it sits and its size, as CapsulePlacement.surface gives it.
     required property var place
     required property color fillColor
     // Whether the bar border runs around it.

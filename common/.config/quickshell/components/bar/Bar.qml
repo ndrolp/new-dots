@@ -4,7 +4,9 @@ import QtQuick
 import "../../config" as Config
 import "../panels" as Panels
 import "BarPlacement.js" as BarPlacement
-import "Capsule.js" as Capsule
+import "CapsuleElements.js" as CapsuleElements
+import "CapsulePlacement.js" as CapsulePlacement
+import "CapsuleRouting.js" as CapsuleRouting
 
 Variants {
     id: bar
@@ -67,8 +69,8 @@ Variants {
                 property bool elementBorder: bar.appearance.barProfileValue(panel.profileName, "elementBorder")
                 property bool groupBorder: bar.appearance.barProfileValue(panel.profileName, "groupBorder")
                 property int barOpacity: bar.appearance.barProfileValue(panel.profileName, "barOpacity")
-                // On a capsule, only the row it shows (see Capsule.drawnElements).
-                property var barElements: Capsule.drawnElements({
+                // On a capsule, only the row it shows (see CapsuleElements.drawnElements).
+                property var barElements: CapsuleElements.drawnElements({
                     barStyle: bar.appearance.barProfileValue(panel.profileName, "barStyle"),
                     barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
                     expanded: panel.capsuleExpanded,
@@ -83,11 +85,11 @@ Variants {
                 property var motion: bar.appearance.motion
             }
             // Whether this window's capsule is expanded, held by any of its
-            // causes (see Capsule.expanded); always false on other bar styles,
+            // causes (see CapsuleRouting.expanded); always false on other bar styles,
             // where nothing reads it. Its size changes as the row does,
             // animated, and the reserved space stays at the collapsed height.
             // A popup inside holds it expanded until the popup closes.
-            readonly property bool capsuleExpanded: Capsule.expanded({
+            readonly property bool capsuleExpanded: CapsuleRouting.expanded({
                 hover: capsuleHover.expanded,
                 toggled: capsuleToggle.toggled,
                 popupInside: panel.activePopup !== ""
@@ -124,7 +126,7 @@ Variants {
             // capsule does, a popup inside included, so clicks beside it reach
             // the windows below.
             readonly property var inputRegion: barContent.capsuleShape
-                ? Capsule.inputRegion(barContent.capsuleShape, { left: barContent.x, top: barContent.y })
+                ? CapsulePlacement.inputRegion(barContent.capsuleShape, { left: barContent.x, top: barContent.y })
                 : { x: 0, y: 0, width: panel.width, height: panel.height }
             mask: Region {
                 x: panel.inputRegion.x
@@ -191,7 +193,7 @@ Variants {
 
             // Shows a change in this window's capsule instead of the OSD;
             // modules/Osd.qml calls it on the focused monitor's (see
-            // Capsule.changeTarget).
+            // CapsuleRouting.changeTarget).
             function showChange(change) {
                 capsuleChange.show(change);
             }
@@ -281,7 +283,7 @@ Variants {
             PanelWindow {
                 id: workspaceRowWindow
 
-                readonly property var place: Capsule.workspaceRow(panel.barAppearance,
+                readonly property var place: CapsulePlacement.workspaceRow(panel.barAppearance,
                     panel.inputRegion)
 
                 screen: panel.screen
