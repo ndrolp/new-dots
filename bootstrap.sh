@@ -152,7 +152,7 @@ main() {
         [[ "$DOTFILES_MINIMAL" == true ]] || steps+=(gtk-themes vscode-themes)
         [[ "$DOTFILES_SPICETIFY" == true ]] && steps+=(spicetify)
         steps+=(stow colorscheme)
-        steps+=(services)
+        steps+=(nsswitch services)
     fi
 
     for step in "${steps[@]}"; do
