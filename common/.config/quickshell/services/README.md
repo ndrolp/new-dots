@@ -187,6 +187,24 @@ uuid, dnssd name, host, or ipp-usb port in an added printer's device URI,
 from `lpstat -v`) and the command are in `PrinterDiscovery.js`, tested
 without Quickshell.
 
+## Scanners
+
+`Scanners.qml` is the Printers panel's view of the scanners SANE can see.
+Like the printers service it lists them only while `watching`, every 5
+seconds, with `scanimage -f` (fields split by tabs), leaving out webcams
+(the `v4l` backend); sane-airscan, escl and `net` devices are network,
+the rest USB. It checks once per opening that sane-airscan is loaded
+(`/etc/sane.d/dll.d/airscan` or `dll.conf`) and says why network scanners
+can't show up when it isn't. A scan runs `scanimage --format=pdf|png -p -o`
+into `~/Pictures/Scans/scan-YYYY-MM-DD-HHMMSS.<ext>` (the folder is made
+first, a failed scan's file removed), reads progress from stderr, and on
+success sends a notification whose *Open* runs `xdg-open` and *Show in
+folder* asks the file manager over `org.freedesktop.FileManager1`
+(opening the folder otherwise). The last settings are `scanSettings` in
+`appearance.json`, starting at 300 dpi, colour and PDF. Parsing, naming,
+the commands, progress, errors and the settings are plain functions in
+`Scanners.js`, tested without Quickshell.
+
 ## Screen capture integration
 
 `ScreenCapture.qml` detects `grim`, `slurp`, `wf-recorder`, and `wayshot` at runtime.

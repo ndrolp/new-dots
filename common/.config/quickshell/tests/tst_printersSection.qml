@@ -145,6 +145,58 @@ TestCase {
         compare(removeSpy.signalArguments[0][0], "Brother");
     }
 
+    SignalSpy {
+        id: cancelSpy
+
+        signalName: "cancelJobRequested"
+    }
+
+    SignalSpy {
+        id: testPageSpy
+
+        signalName: "testPageRequested"
+    }
+
+    function test_anOpenPrinterWithNoPrintJobsSaysSo() {
+        const section = make(twoPrinters);
+        verify(!shown(section, "No print jobs"));
+        section.expanded = "Brother";
+        verify(shown(section, "No print jobs"));
+    }
+
+    // The section is handed the open printer's print jobs.
+    function test_anOpenPrinterListsItsPrintJobsAndCancelsOne() {
+        const section = make(twoPrinters);
+        cancelSpy.target = section;
+        cancelSpy.clear();
+        section.jobs = [
+            { id: 42, document: "report.pdf", owner: "ndrolp", state: "printing", progress: "Page 2 of 5" },
+            { id: 43, document: "Test page", owner: "ndrolp", state: "waiting", progress: "" }
+        ];
+        verify(!shown(section, "report.pdf"));
+
+        section.expanded = "Brother";
+        verify(!shown(section, "No print jobs"));
+        verify(shown(section, "report.pdf"));
+        verify(shown(section, "Printing · Page 2 of 5 · ndrolp"));
+        verify(shown(section, "Test page"));
+        verify(shown(section, "Waiting · ndrolp"));
+
+        button(section, "Cancel").activated();
+        compare(cancelSpy.count, 1);
+        compare(cancelSpy.signalArguments[0][0], 42);
+    }
+
+    function test_anOpenPrinterPrintsATestPage() {
+        const section = make(twoPrinters);
+        testPageSpy.target = section;
+        testPageSpy.clear();
+        section.expanded = "Zebra_Label";
+        button(section, "Test page").activated();
+        compare(testPageSpy.count, 1);
+        compare(testPageSpy.signalArguments[0][0], "Zebra_Label");
+    }
+
     function test_aProblemReadingPrintersIsShown() {
         const section = make([]);
         section.failure = "Scheduler is not running.";

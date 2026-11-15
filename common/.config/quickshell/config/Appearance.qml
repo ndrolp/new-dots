@@ -3,6 +3,7 @@ import Quickshell.Io
 import "BarProfileModel.js" as BarProfileModel
 import "Motion.js" as Motion
 import "../services/NightLightState.js" as NightLightState
+import "../services/Scanners.js" as Scanners
 import "SchemaMigrations.js" as SchemaMigrations
 import "ControlCenterTiles.js" as ControlCenterTiles
 
@@ -19,6 +20,9 @@ QtObject {
     property alias reduceMotion: settings.reduceMotion
     // The night light temperature, in kelvin (see services/NightLightState.js).
     property alias nightLightTemperature: settings.nightLightTemperature
+    // The last scan settings used ({ resolution, mode, format }, see
+    // services/Scanners.js).
+    property alias scanSettings: settings.scanSettings
     // The control center's tiles, in order, each shown or hidden
     // ([{ id, enabled }], see ControlCenterTiles); global, not per profile.
     readonly property var controlCenterTiles: ControlCenterTiles.completeTiles(settings.controlCenterTiles)
@@ -242,6 +246,7 @@ QtObject {
             property bool doNotDisturb: false
             property bool reduceMotion: false
             property int nightLightTemperature: NightLightState.defaultTemperature
+            property var scanSettings: Scanners.settings(undefined)
             property var controlCenterTiles: ControlCenterTiles.defaultTiles()
         }
     }
