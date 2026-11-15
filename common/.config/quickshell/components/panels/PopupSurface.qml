@@ -10,8 +10,9 @@ import "PopupPlacement.js" as PopupPlacement
 // fade and a short slide away from the bar. Attached, it hangs from the bar with
 // no border unless the bar border is on: square corners against it, small curved corners joining it to the
 // bar, round corners away from it, unfolding away from the bar with its contents
-// fading in after. Any window can host it; hide the window while reveal is 0. It
-// takes no appearance, so the host passes in its motion settings. Closing, it
+// fading in after. Inside a capsule it draws only its contents, fading in,
+// since the capsule is drawn round it. Any window can host it; hide the window
+// while reveal is 0. It takes no appearance, so the host passes in its motion settings. Closing, it
 // ignores input while the animation runs.
 Rectangle {
     id: surface
@@ -23,6 +24,9 @@ Rectangle {
     property string barPosition: "top"
     // Hangs from the bar instead of floating clear of it.
     property bool attached: false
+    // Sits inside a capsule, which is drawn round it: no fill or border of its
+    // own, and its contents fade in where they rest.
+    property bool inside: false
     // The host may paint a floating surface in its own colors.
     property color fillColor: theme.surface
     property color borderColor: theme.border
@@ -62,14 +66,14 @@ Rectangle {
     // Off while closing, so a fast second click reaches nothing.
     enabled: open
     implicitHeight: content.height + padding * 2
-    color: attached ? "transparent" : fillColor
+    color: attached || inside ? "transparent" : fillColor
     border.color: borderColor
-    border.width: attached ? 0 : 1
+    border.width: attached || inside ? 0 : 1
     radius: theme.radius
     opacity: attached ? 1 : reveal
     transform: Translate {
         readonly property var offset: PopupPlacement.towardsBar(surface.barPosition,
-            surface.attached ? 0 : surface.revealOffset * (1 - surface.reveal))
+            surface.attached || surface.inside ? 0 : surface.revealOffset * (1 - surface.reveal))
 
         x: offset.x
         y: offset.y

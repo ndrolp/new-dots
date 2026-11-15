@@ -17,10 +17,11 @@ the popups: what a Bar position means for what is laid out from the bar
 (`components/BarPosition.js`), where a popup opens on each Bar position, the
 stretch of the bar that opens it, how wide its contents are, and that a popup
 held through a control center stage change stays steady and on screen on a side
-bar (`components/panels/PopupPlacement.js`), the outline of an attached popup
+bar, and that on a capsule a popup is inside it, centred on it right past its
+row with no room round it (`components/panels/PopupPlacement.js`), the outline of an attached popup
 on each of them (`PopupOutline.js`), the surface every popup draws on, how
-it reveals away from the bar and that it ignores input while closing
-(`PopupSurface.qml`; `PopupFrame.qml` itself is a Quickshell window and isn't
+it reveals away from the bar, that inside a capsule it draws only its
+contents, and that it ignores input while closing (`PopupSurface.qml`; `PopupFrame.qml` itself is a Quickshell window and isn't
 tested here), what a popup's focus grab holds
 (`PopupGrab.js`), which bar elements close the open popup when pressed
 (`BarPopupCloser.qml`), the shared popup parts (`PopupTitle`,
@@ -74,7 +75,10 @@ that hovering it expands it only after a moment and collapses it a while after
 the pointer leaves (`CapsuleHover.qml`), that SUPER+I holds it expanded until
 pressed again or until the pointer leaves it (`CapsuleToggle.qml`), how it is
 drawn with its fill and bar border (`CapsuleSurface.qml`), where its workspace row sits, under a top
-capsule and above a bottom one, centred on it (`Capsule.js`), that the row
+capsule and above a bottom one, centred on it, how it grows round a popup
+inside it and keeps its bar content in place in its taller window
+(`Capsule.js`), that its window grows at once for a popup inside and
+shrinks only once the capsule has (`CapsuleWindowHold.qml`), that the row
 has one pill per workspace in order, in the profile's fill and bar border,
 highlights the active one as it changes and switches workspace on a click
 (`CapsuleWorkspaceRow.qml`), and that a capsule sits only at the top or

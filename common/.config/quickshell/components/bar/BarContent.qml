@@ -65,6 +65,13 @@ Item {
         ? Capsule.surface(layoutBar, { start: zoneStart("center"), end: zoneEnd("center") },
             appearance.horizontalPadding)
         : null
+    // The open popup when it is inside this bar's capsule, or null.
+    readonly property var insidePopup: capsulePlace !== null && openPopup && openPopup.inside
+        ? openPopup : null
+    // The capsule as drawn: its row, grown round a popup inside it
+    // (Capsule.withPopup); null on any other bar style.
+    readonly property var capsuleShape: capsulePlace === null ? null
+        : Capsule.withPopup(capsulePlace, insidePopup, appearance.barPosition)
     // Whether the pointer is over the capsule itself, not elsewhere in its bar
     // window such as the workspace row.
     readonly property bool capsuleHovered: capsulePlace !== null && pointer.hovered
@@ -228,7 +235,8 @@ Item {
     }
 
     CapsuleSurface {
-        place: root.capsulePlace || { x: 0, y: 0, width: 0, height: 0, radius: 0 }
+        place: root.capsuleShape || { x: 0, y: 0, width: 0, height: 0, radius: 0 }
+        following: root.insidePopup !== null && root.insidePopup.resizing
         visible: root.capsulePlace !== null
         fillColor: root.dockedColor
         border: root.appearance.barBorder

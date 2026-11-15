@@ -85,9 +85,11 @@ Variants {
             // causes (see Capsule.expanded); always false on other bar styles,
             // where nothing reads it. Its size changes as the row does,
             // animated, and the reserved space stays at the collapsed height.
+            // A popup inside holds it expanded until the popup closes.
             readonly property bool capsuleExpanded: Capsule.expanded({
                 hover: capsuleHover.expanded,
-                toggled: capsuleToggle.toggled
+                toggled: capsuleToggle.toggled,
+                popupInside: panel.activePopup !== ""
             })
             property bool configOpen: bar.configOpen
             property string activePopup: bar.activePopupWindow === panel
@@ -114,9 +116,10 @@ Variants {
             WlrLayershell.layer: WlrLayer.Top
             color: "transparent"
             // The whole window takes clicks, except on a capsule: only the
-            // capsule does, so clicks beside it reach the windows below.
-            readonly property var inputRegion: barContent.capsulePlace
-                ? Capsule.inputRegion(barContent.capsulePlace, panel.contentMargins)
+            // capsule does, a popup inside included, so clicks beside it reach
+            // the windows below.
+            readonly property var inputRegion: barContent.capsuleShape
+                ? Capsule.inputRegion(barContent.capsuleShape, panel.contentMargins)
                 : { x: 0, y: 0, width: panel.width, height: panel.height }
             mask: Region {
                 x: panel.inputRegion.x
@@ -126,13 +129,19 @@ Variants {
             }
             readonly property int barThickness: BarPlacement.thickness(panel.barAppearance)
             readonly property var windowAnchors: BarPlacement.windowAnchors(panel.barAppearance.barPosition)
-            readonly property var contentMargins: BarPlacement.contentMargins(panel.barAppearance)
+            // The bar content keeps its place and depth in a capsule's window
+            // grown for a popup inside.
+            readonly property var contentMargins: Capsule.contentMargins(
+                BarPlacement.contentMargins(panel.barAppearance),
+                panel.barAppearance.barPosition, capsuleWindowHold.held)
 
             exclusiveZone: barThickness
             // Only the size across the bar counts: the compositor stretches the
-            // window between the two anchors it has along the bar.
+            // window between the two anchors it has along the bar. A capsule's
+            // window grows away from its edge to hold a popup inside, past
+            // what it reserves.
             implicitWidth: barThickness
-            implicitHeight: barThickness
+            implicitHeight: barThickness + capsuleWindowHold.held
 
             anchors {
                 top: panel.windowAnchors.top
@@ -150,6 +159,15 @@ Variants {
                 id: capsuleHover
 
                 hovering: barContent.capsuleHovered
+            }
+
+            // How much taller a capsule's window is for the popup inside it.
+            CapsuleWindowHold {
+                id: capsuleWindowHold
+
+                needed: barPopups.openPopup && barPopups.openPopup.inside
+                    ? barPopups.openPopup.windowHeight : 0
+                shrinkDelay: panel.barAppearance.motion.long
             }
 
             // SUPER+I expands the capsule until pressed again or until the
@@ -249,7 +267,8 @@ Variants {
                     panel.inputRegion)
 
                 screen: panel.screen
-                visible: panel.visible && place !== null
+                // Hidden while a popup is inside the capsule.
+                visible: panel.visible && place !== null && panel.activePopup === ""
                 WlrLayershell.namespace: "ndro-shell-capsule-workspaces"
                 WlrLayershell.layer: WlrLayer.Top
                 exclusionMode: ExclusionMode.Normal

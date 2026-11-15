@@ -301,4 +301,48 @@ TestCase {
 
         compare(Capsule.workspaceRow(bar, data.capsule), null);
     }
+
+    // A capsule's row in its bar content: 320 px long, 32 px deep.
+    readonly property var row: ({ x: 800, y: 0, width: 320, height: 32, radius: 16 })
+
+    // Without a popup inside, the capsule is just its row.
+    function test_withoutAPopupInsideTheCapsuleIsItsRow() {
+        compare(Capsule.withPopup(row, null, "top"), row);
+    }
+
+    // With a popup inside it grows to the wider of the row and the popup,
+    // staying centred, and as deep as both, away from its screen edge: down
+    // on a top bar, up on a bottom one. Its ends stay as round.
+    function test_aPopupInsideGrowsTheCapsuleRoundIt_data() {
+        return [
+            { tag: "wider popup, top", barPosition: "top", popup: { width: 424, height: 300 },
+                place: { x: 748, y: 0, width: 424, height: 332, radius: 16 } },
+            { tag: "narrower popup, top", barPosition: "top", popup: { width: 200, height: 120 },
+                place: { x: 800, y: 0, width: 320, height: 152, radius: 16 } },
+            { tag: "wider popup, bottom", barPosition: "bottom", popup: { width: 424, height: 300 },
+                place: { x: 748, y: -300, width: 424, height: 332, radius: 16 } }
+        ];
+    }
+
+    function test_aPopupInsideGrowsTheCapsuleRoundIt(data) {
+        compare(Capsule.withPopup(row, data.popup, data.barPosition), data.place);
+    }
+
+    // The bar window grows by what a popup inside needs, away from the screen
+    // edge, while the bar content keeps its place and depth: the margin on
+    // that far side takes it all.
+    function test_theBarContentKeepsItsDepthInATallerWindow_data() {
+        return [
+            { tag: "top", barPosition: "top", margins: { top: 6, right: 12, bottom: 300, left: 12 } },
+            { tag: "bottom", barPosition: "bottom", margins: { top: 300, right: 12, bottom: 6, left: 12 } }
+        ];
+    }
+
+    function test_theBarContentKeepsItsDepthInATallerWindow(data) {
+        const margins = data.barPosition === "top"
+            ? { top: 6, right: 12, bottom: 0, left: 12 }
+            : { top: 0, right: 12, bottom: 6, left: 12 };
+
+        compare(Capsule.contentMargins(margins, data.barPosition, 300), data.margins);
+    }
 }

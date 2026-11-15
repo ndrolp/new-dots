@@ -116,6 +116,36 @@ function surface(content, span, padding) {
     return Object.assign(rect, { radius: depth / 2 });
 }
 
+// The capsule with a popup inside, { x, y, width, height, radius }: its row's
+// `place` (as surface gives it) grown to the wider of the row and the popup,
+// staying centred on the row, and as deep as the row and the popup together,
+// away from the screen edge at `barPosition` ("top" or "bottom"). Takes the
+// popup's { width, height }, or null without one, when it is just its row.
+function withPopup(place, popup, barPosition) {
+    if (!popup)
+        return place;
+
+    const width = Math.max(place.width, popup.width);
+    return {
+        x: place.x + (place.width - width) / 2,
+        y: barPosition === "bottom" ? place.y - popup.height : place.y,
+        width: width,
+        height: place.height + popup.height,
+        radius: place.radius
+    };
+}
+
+// The margins { top, right, bottom, left } the bar content keeps in a capsule's
+// bar window grown `depth` taller for a popup inside: the bar's own `margins`
+// (BarPlacement.contentMargins), with the growth on the side away from the
+// screen edge, so the content keeps its place and depth.
+function contentMargins(margins, barPosition, depth) {
+    const far = barPosition === "bottom" ? "top" : "bottom";
+    const grown = Object.assign({}, margins);
+    grown[far] += depth;
+    return grown;
+}
+
 // The part of the bar window that takes clicks, { x, y, width, height }: only
 // the capsule, so clicks around it reach the windows below. Takes the
 // capsule's surface and the margins { top, right, bottom, left } the bar
