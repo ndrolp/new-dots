@@ -106,6 +106,10 @@ change them (`services/Printers.js`), and its *Printers* heading: the
 empty list, each printer's row and opening one for *Set default* and
 *Remove* (`components/panels/PrintersSection.qml`; `PrintersPanel.qml`
 and `services/Printers.qml` need Quickshell and aren't tested here),
+the scanners it lists from `scanimage -f` output (webcams left out,
+network or USB), how a scan is named, run and reports progress or its
+error, and the scan settings kept in `appearance.json`
+(`services/Scanners.js`),
 what the keep-awake bar element shows and its popup's switch, duration choice
 and time left (`components/bar/KeepAwakeElement.qml`,
 `components/panels/KeepAwakePopupBody.qml`), keep-awake's duration and
