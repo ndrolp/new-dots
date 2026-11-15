@@ -1,7 +1,6 @@
 import Quickshell.Io
 import QtQuick
 import "../components/panels" as Panels
-import "../services" as Services
 
 // The Printers panel (SUPER+SHIFT+P, `printers toggle`): the printers, which
 // one is the default, removing them and adding the ones found on the network
@@ -12,6 +11,7 @@ Feature {
 
     required property var appearance
     required property var printers
+    required property var discoveredPrinters
     required property var scanners
     required property var plugins
 
@@ -23,13 +23,10 @@ Feature {
         value: root.open
     }
 
-    // Looks for printers to add only while the panel is open.
-    Services.DiscoveredPrinters {
-        id: discoveredPrinters
-
-        watching: root.open
-        printers: root.printers.printers
-        onAdded: root.printers.refresh()
+    Binding {
+        target: root.discoveredPrinters
+        property: "watching"
+        value: root.open
     }
 
     Binding {
@@ -41,7 +38,7 @@ Feature {
     Panels.PrintersPanel {
         appearance: root.appearance
         printers: root.printers
-        discoveredPrinters: discoveredPrinters
+        discoveredPrinters: root.discoveredPrinters
         scanners: root.scanners
         open: root.open
 

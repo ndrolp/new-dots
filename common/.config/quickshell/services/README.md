@@ -170,14 +170,17 @@ user is in `wheel`, which CUPS on Arch takes as an admin group, so neither
 asks for a password. Parsing lpstat (state, the reason CUPS gives, network
 or USB from the device URI, ipp-usb's localhost IPP counting as USB, the
 default) and the commands are plain functions in `Printers.js`, tested
-without Quickshell. Discovered printers, print jobs and scanners belong
-next to it.
+without Quickshell. The open printer's print jobs (`jobsPrinter`) are read
+with the list, over IPP with `ipptool`, and *Cancel* runs `cancel`. After
+a change the list is read again only while the panel is open.
 
 `DiscoveredPrinters.qml` finds the printers not added yet, only while
 `watching`: `avahi-browse -rpk` streams `_ipp._tcp` and `_ipps._tcp`
 printers as they appear and go, and is stopped when the panel closes. USB
-printers come through ipp-usb, which advertises them on `lo`. The panel
-module (`modules/Printers.qml`) owns it. *Add* runs `lpadmin -p <model> -E
+printers come through ipp-usb, which advertises them on `lo`. `shell.qml`
+creates it next to the printers service, hands it the added printers and
+reads them again after an add; the panel module (`modules/Printers.qml`)
+sets `watching`. *Add* runs `lpadmin -p <model> -E
 -v <uri> -m everywhere` (driverless, no password for `wheel`) with a
 `dnssd://` URI for a network printer and ipp-usb's `ipp://localhost:<port>`
 for a USB one. If avahi-daemon isn't running it says so and tries again

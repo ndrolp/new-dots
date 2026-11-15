@@ -101,6 +101,14 @@ ShellRoot {
         id: printers
     }
 
+    // An added printer leaves the discovered ones and joins the printers.
+    Services.DiscoveredPrinters {
+        id: discoveredPrinters
+
+        printers: printers.printers
+        onAdded: printers.refresh()
+    }
+
     Services.Scanners {
         id: scanners
 
@@ -248,6 +256,7 @@ ShellRoot {
 
         appearance: appearance
         printers: printers
+        discoveredPrinters: discoveredPrinters
         scanners: scanners
         plugins: plugins
     }

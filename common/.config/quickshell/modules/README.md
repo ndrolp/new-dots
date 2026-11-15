@@ -16,14 +16,15 @@ adding or editing one file here.
   `ControlCenter`, `QuickSettings`, `UnifiedSearch`).
 - One module per panel: `ApplicationLauncher`, `AudioOutputSelector`,
   `ClipboardSelector`, `CommandLauncher`, `KeybindCheatsheet`,
-  `PowerMenu`, `QuickSearch`, `QuickSettings`, `QuickSwitch` (SUPER+P,
-  `quick-switch press`, which moves down when it's open), `ScreenCapture` (the chooser),
-  `Settings`, `ThemeSelector`, `UnifiedSearch`, `WallpaperSelector`,
-  `WebApps` (the web app maker, SUPER+SHIFT+W, `web-apps toggle`, which
-  opens a new web app itself so it opens once, not once per monitor),
-  `Printers` (the Printers panel, SUPER+SHIFT+P, `printers toggle`, which
-  has the printers and scanners services look only while it's open),
-  `WindowSwitcher` and `WorkspaceOverview`.
+  `PowerMenu`, `Printers` (the Printers panel, SUPER+SHIFT+P,
+  `printers toggle`, which has the printers, discovered printers and
+  scanners services look only while it's open), `QuickSearch`,
+  `QuickSettings`, `QuickSwitch` (SUPER+P, `quick-switch press`, which
+  moves down when it's open), `ScreenCapture` (the chooser), `Settings`,
+  `ThemeSelector`, `UnifiedSearch`, `WallpaperSelector`, `WebApps` (the web
+  app maker, SUPER+SHIFT+W, `web-apps toggle`, which opens a new web app
+  itself so it opens once, not once per monitor), `WindowSwitcher` and
+  `WorkspaceOverview`.
 - `MonitorChange.qml`: not a `Feature`, it follows `services/MonitorSetups.qml`:
   the *Keep* / *Revert* card on every screen that still works, which takes `Enter`
   and `Esc`, and each monitor's number for *Identify*.
