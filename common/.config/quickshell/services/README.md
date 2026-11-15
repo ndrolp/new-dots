@@ -173,6 +173,20 @@ default) and the commands are plain functions in `Printers.js`, tested
 without Quickshell. Discovered printers, print jobs and scanners belong
 next to it.
 
+`DiscoveredPrinters.qml` finds the printers not added yet, only while
+`watching`: `avahi-browse -rpk` streams `_ipp._tcp` and `_ipps._tcp`
+printers as they appear and go, and is stopped when the panel closes. USB
+printers come through ipp-usb, which advertises them on `lo`. The panel
+module (`modules/Printers.qml`) owns it. *Add* runs `lpadmin -p <model> -E
+-v <uri> -m everywhere` (driverless, no password for `wheel`) with a
+`dnssd://` URI for a network printer and ipp-usb's `ipp://localhost:<port>`
+for a USB one. If avahi-daemon isn't running it says so and tries again
+every 5 seconds. Parsing avahi-browse (its `\DDD` escapes, the TXT record,
+one printer seen several ways), whether a printer is already added (its
+uuid, dnssd name, host, or ipp-usb port in an added printer's device URI,
+from `lpstat -v`) and the command are in `PrinterDiscovery.js`, tested
+without Quickshell.
+
 ## Screen capture integration
 
 `ScreenCapture.qml` detects `grim`, `slurp`, `wf-recorder`, and `wayshot` at runtime.
