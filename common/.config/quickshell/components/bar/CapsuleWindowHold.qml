@@ -5,7 +5,7 @@ import QtQuick
 // It never shrinks: Hyprland animates a layer's size change, stretching its
 // last picture to the old size meanwhile, so a shrinking window would flash
 // a stretched capsule. The room left over is transparent and takes no clicks.
-QtObject {
+Item {
     id: root
 
     // How much taller the window must be now, in px.
@@ -15,7 +15,9 @@ QtObject {
 
     onNeededChanged: state.tallest = Math.max(state.tallest, needed)
 
-    readonly property QtObject state: QtObject {
+    QtObject {
+        id: state
+
         property real tallest: 0
     }
 }
