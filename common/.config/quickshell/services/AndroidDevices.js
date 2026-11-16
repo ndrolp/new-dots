@@ -5,6 +5,62 @@
 // Connect uses, and the QR code that pairs a phone. Pure, no Quickshell;
 // AndroidDevices.qml runs adb.
 
+// Whatever adb is on PATH; no SDK path is assumed.
+const devicesCommand = ["adb", "devices", "-l"];
+const servicesCommand = ["adb", "mdns", "services"];
+// Exits 0 when adb (or qrencode) is on PATH.
+function toolCheck(tool) {
+    return ["sh", "-c", "command -v \"$0\" >/dev/null", tool];
+}
+const missingAdb = "adb isn't installed, so Android devices can't be listed or connected. "
+    + "Install android-tools.";
+const missingQrencode = "qrencode isn't installed, so the QR code can't be drawn. "
+    + "Install qrencode, or use a pairing code.";
+
+function connectCommand(address) {
+    return ["adb", "connect", address];
+}
+
+function disconnectCommand(transports) {
+    return ["sh", "-c", "for transport; do adb disconnect \"$transport\"; done", "sh"].concat(transports);
+}
+
+function pairCommand(address, password) {
+    return ["adb", "pair", address, password];
+}
+
+// What a network transport reports as its hardware serial.
+function serialCommand(transport) {
+    return ["adb", "-s", transport, "shell", "getprop", "ro.serialno"];
+}
+
+// From USB: the phone's Wi-Fi address, then adbd listening on the network.
+const tcpipPort = 5555;
+function wifiIpCommand(serial) {
+    return ["adb", "-s", serial, "shell", "ip", "-f", "inet", "addr", "show", "wlan0"];
+}
+function tcpipCommand(serial) {
+    return ["adb", "-s", serial, "tcpip", String(tcpipPort)];
+}
+
+// `command` with stderr folded into stdout: adb prints some answers on one
+// and some on the other.
+function merged(command) {
+    return ["sh", "-c", "exec \"$@\" 2>&1", "sh"].concat(command);
+}
+
+// Where the QR code for `name` is drawn, in `dir` (the runtime directory).
+function qrPath(dir, name) {
+    return dir + "/quickshell-android-pairing-" + name + ".png";
+}
+
+// Removes the old QR codes in `dir` and draws `payload` at `path`. It runs
+// through sh, which exits 127 when it can't find qrencode.
+function qrCommand(dir, path, payload) {
+    return ["sh", "-c", "rm -f \"$0\"/quickshell-android-pairing-*.png; exec qrencode -s 6 -m 2 -o \"$1\" \"$2\"",
+        dir, path, payload];
+}
+
 // The model adb reports ("Pixel_10a") as a person writes it.
 function modelName(model) {
     return String(model || "").replace(/_/g, " ").trim();
@@ -82,6 +138,14 @@ function deviceSerial(transport, known, serials) {
         return named;
     const device = known.find(entry => entry.address === transport);
     return device ? device.serial : transport;
+}
+
+// The network transports deviceSerial can't place: connected ones named
+// after a bare ip:port nobody knows. Each is asked with serialCommand.
+function unplacedTransports(devices, known, serials) {
+    return devices.filter(device => !device.usb && device.state === "device"
+        && deviceSerial(device.transport, known, serials) === device.transport)
+        .map(device => device.transport);
 }
 
 // One row per Android device, merging the live devices (parseDevices), the
@@ -163,14 +227,17 @@ function stateText(row) {
 
 // What a row offers: "connect", "disconnect", "forget" and
 // "connectWirelessly", in that order. A USB device still waiting for the
-// USB debugging prompt offers nothing until it is accepted.
+// USB debugging prompt offers nothing until it is accepted. One connected
+// over the network would be remembered again at once, so it offers
+// Disconnect and not Forget.
 function actions(row) {
     const offered = [];
+    const wifi = row.state === "wifi" || row.state === "both";
     if (row.state === "available" || row.state === "notSeen")
         offered.push("connect");
-    if (row.state === "wifi" || row.state === "both")
+    if (wifi)
         offered.push("disconnect");
-    if (row.known)
+    if (row.known && !wifi)
         offered.push("forget");
     if (row.state === "usb" && row.authorized)
         offered.push("connectWirelessly");

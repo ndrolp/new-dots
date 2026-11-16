@@ -169,12 +169,27 @@ TestCase {
         const unauthorized = rowsOf("61291JEA326957 unauthorized usb:3-3 transport_id:1\n", "")[0];
         compare(Android.actions(unauthorized), []);
         const wifi = rowsOf("192.168.1.44:5555 device model:Pixel_10a\n", "", [pixel])[0];
-        compare(Android.actions(wifi), ["disconnect", "forget"]);
+        // Connected over the network it would be remembered again at once, so
+        // it is disconnected before it can be forgotten.
+        compare(Android.actions(wifi), ["disconnect"]);
         const both = rowsOf(pixelOverUsb + "192.168.1.44:5555 device model:Pixel_10a\n", "", [pixel])[0];
-        compare(Android.actions(both), ["disconnect", "forget"]);
+        compare(Android.actions(both), ["disconnect"]);
+        compare(Android.actions(rowsOf(pixelOverUsb, "", [pixel])[0]), ["forget", "connectWirelessly"]);
         compare(Android.actions(rowsOf("", wirelessDebuggingOn)[0]), ["connect"]);
         compare(Android.actions(rowsOf("", wirelessDebuggingOn, [pixel])[0]), ["connect", "forget"]);
         compare(Android.actions(rowsOf("", "", [pixel])[0]), ["connect", "forget"]);
+    }
+
+    // An ip:port connection nobody can place asks the phone for its serial.
+    function test_onlyUnplacedIpPortConnectionsAskForTheirSerial() {
+        const devices = Android.parseDevices(pixelOverUsb
+            + "192.168.1.44:5555 device model:Pixel_10a\n"
+            + "192.168.1.70:5555 device model:Pixel_10a\n"
+            + "192.168.1.71:5555 device model:Tab\n"
+            + "192.168.1.72:5555 offline\n"
+            + "adb-61291JEA326957-AbCdEf._adb-tls-connect._tcp device model:Pixel_10a\n");
+        compare(Android.unplacedTransports(devices, [pixel], { "192.168.1.71:5555": "TAB1" }),
+            ["192.168.1.70:5555"]);
     }
 
     function test_aDeviceConnectedOverTheNetworkIsRemembered() {
