@@ -87,12 +87,13 @@ what each of the six changes shows, the same in the OSD and the capsule
 (`components/panels/OsdChange.js`), in the same tone colours and with the
 same level bar and percent, under the bar in the OSD and beside it in the
 capsule (`OsdChange.toneColor`, `ChangeLevel.qml`), how it is
-drawn with its fill and bar border (`CapsuleSurface.qml`), where its workspace row sits, under a top
-capsule and above a bottom one, centred on it, how it grows round a popup
+drawn with its fill and bar border (`CapsuleSurface.qml`), that it reaches past its row for its
+workspace pills, and where they sit inside it, under the row of a top
+capsule and above the row of a bottom one, centred on it, how it grows round a popup
 inside it (`CapsulePlacement.js`), that its window grows at once for a popup inside and
-never shrinks back (`CapsuleWindowHold.qml`), that the row
-has one pill per workspace in order, in the profile's fill and bar border,
-highlights the active one as it changes and switches workspace on a click
+never shrinks back (`CapsuleWindowHold.qml`), that the
+pills are small and unlabelled, one per workspace in order, highlight the
+active one as it changes and switch workspace on a click
 (`CapsuleWorkspaceRow.qml`), and that a capsule sits only at the top or
 bottom, where zones, bar elements, group backgrounds and popup
 triggers sit along either axis of the bar, to the pixel the anchors they

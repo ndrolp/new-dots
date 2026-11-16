@@ -6,6 +6,7 @@ import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 import "BarElementItems.js" as BarElementItemsModel
 import "BarLayout.js" as BarLayout
+import "BarPlacement.js" as BarPlacement
 import "CapsulePlacement.js" as CapsulePlacement
 
 Item {
@@ -63,12 +64,13 @@ Item {
     // Whether the bar runs from the top of the screen down.
     readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
     // On a capsule, where the capsule is drawn around its row, the centre zone
-    // (see CapsuleElements.drawnElements); null on any other bar style.
+    // (see CapsuleElements.drawnElements), and its workspace pills past the
+    // row; null on any other bar style.
     readonly property var capsulePlace: BarProfileModel.capsule(appearance)
         ? CapsulePlacement.surface(layoutBar, capsuleChange !== null
                 ? { start: changeStart, end: changeStart + changeView.width }
                 : { start: zoneStart("center"), end: zoneEnd("center") },
-            appearance.horizontalPadding)
+            appearance.horizontalPadding, BarPlacement.workspaceStrip(appearance))
         : null
     // Where a change the capsule shows starts along the bar: centred, as its
     // row would be.
@@ -82,8 +84,8 @@ Item {
     // (CapsulePlacement.withPopup); null on any other bar style.
     readonly property var capsuleShape: capsulePlace === null ? null
         : CapsulePlacement.withPopup(capsulePlace, insidePopup, appearance.barPosition)
-    // Whether the pointer is over the capsule itself, not elsewhere in its bar
-    // window such as the workspace row.
+    // Whether the pointer is over the capsule itself, its workspace pills
+    // included, not elsewhere in its bar window.
     readonly property bool capsuleHovered: capsulePlace !== null && pointer.hovered
         && CapsulePlacement.contains(capsulePlace, pointer.point.position)
 

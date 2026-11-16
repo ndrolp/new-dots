@@ -14,6 +14,7 @@ TestCase {
             barHeight: 30,
             horizontalPadding: 12,
             transparentBarTopMargin: 6,
+            spacing: 4,
             barStyle: "opaque"
         }, values);
     }
@@ -36,7 +37,9 @@ TestCase {
             { tag: "opaque", values: {}, thickness: 30 },
             { tag: "floating", values: { barStyle: "transparent" }, thickness: 36 },
             { tag: "docked", values: { barStyle: "docked" }, thickness: 30 },
-            { tag: "capsule", values: { barStyle: "capsule" }, thickness: 36 },
+            // A capsule also reserves room past its row for its workspace pills:
+            // 4 deep and the profile's spacing past them.
+            { tag: "capsule", values: { barStyle: "capsule" }, thickness: 44 },
             { tag: "floating at the bottom", values: { barStyle: "transparent", barPosition: "bottom" },
                 thickness: 36 }
         ];
@@ -107,9 +110,9 @@ TestCase {
                 margins: { top: 0, right: 0, bottom: 0, left: 0 } },
             { tag: "docked right", style: docked, barPosition: "right", thickness: 30, attached: true,
                 margins: { top: 0, right: 0, bottom: 0, left: 0 } },
-            { tag: "capsule top", style: capsule, barPosition: "top", thickness: 36, attached: false,
+            { tag: "capsule top", style: capsule, barPosition: "top", thickness: 44, attached: false,
                 margins: { top: 6, right: 12, bottom: 0, left: 12 } },
-            { tag: "capsule bottom", style: capsule, barPosition: "bottom", thickness: 36, attached: false,
+            { tag: "capsule bottom", style: capsule, barPosition: "bottom", thickness: 44, attached: false,
                 margins: { top: 0, right: 12, bottom: 6, left: 12 } }
         ];
     }
@@ -166,6 +169,20 @@ TestCase {
             { tag: "transparent right", values: { barStyle: "transparent", barPosition: "right" },
                 window: { width: 36, height: 1080 }, area: { x: 0, y: 12, width: 30, height: 1056 } }
         ];
+    }
+
+    function test_aCapsulesWorkspacePillsReachPastItsRow_data() {
+        return [
+            { tag: "capsule", values: { barStyle: "capsule" }, strip: 8 },
+            { tag: "capsule, wider spacing", values: { barStyle: "capsule", spacing: 6 }, strip: 10 },
+            { tag: "opaque", values: {}, strip: 0 },
+            { tag: "transparent", values: { barStyle: "transparent" }, strip: 0 },
+            { tag: "docked", values: { barStyle: "docked" }, strip: 0 }
+        ];
+    }
+
+    function test_aCapsulesWorkspacePillsReachPastItsRow(data) {
+        compare(BarPlacement.workspaceStrip(bar(data.values)), data.strip);
     }
 
     function test_theBarContentSitsAgainstItsScreenEdge(data) {

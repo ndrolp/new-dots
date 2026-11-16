@@ -12,10 +12,20 @@ function margin(bar) {
         ? bar.transparentBarTopMargin : 0;
 }
 
+// How deep a capsule's workspace pills are.
+var workspacePillDepth = 4;
+
+// How far a capsule reaches past its row of bar elements, away from its
+// screen edge, to hold its workspace pills: the pills and the profile's
+// spacing past them. Nothing on any other bar style.
+function workspaceStrip(bar) {
+    return BarProfileModel.capsule(bar) ? workspacePillDepth + bar.spacing : 0;
+}
+
 // The space the bar takes from its screen edge inwards. Also what it reserves,
-// so windows stay clear of it.
+// so windows stay clear of it: on a capsule, its workspace pills included.
 function thickness(bar) {
-    return bar.barHeight + margin(bar);
+    return bar.barHeight + margin(bar) + workspaceStrip(bar);
 }
 
 // The screen edges the bar's window is anchored to: its own and the two beside
@@ -45,7 +55,8 @@ function contentMargins(bar) {
 // content where it was. Takes the bar window's { width, height }.
 function contentArea(bar, window) {
     const margins = contentMargins(bar);
-    const depth = thickness(bar);
+    // A capsule's workspace pills are past its row, outside the bar content.
+    const depth = thickness(bar) - workspaceStrip(bar);
 
     if (BarPosition.sideBar(bar.barPosition)) {
         const width = depth - margins.left - margins.right;
