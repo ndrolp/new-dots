@@ -208,7 +208,6 @@ export PATH="$PATH:$HOME/.spicetify"
 alias dotsync='~/.dotfiles/bootstrap.sh --stow-only'
 alias tk='zellij --layout ~/.config/zellij/layouts/tomekeeper.kdl'
 alias envact="source venv/bin/activate"
-alias adbwireless="~/.dotfiles/scripts/adb_wireless_helper/wireless_helper.sh"
 alias pjs="cd ~/Documents/00\ -\ Projects/"
 alias fm=yazi
 alias bf="~/.dotfiles/scripts/lenovo/battery_max_charge.sh"
