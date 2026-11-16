@@ -74,12 +74,20 @@ _Avoid_: Blue light filter, filtro de luz azul, modo noche, hyprsunset (para la 
 
 **Popup**:
 La ventana pequeña que se despliega desde un bar element al pulsarlo (Bluetooth, red, batería, audio, media, control center…). Pertenece a ese bar element y se cierra al pulsarlo otra vez, al pulsar un bar element que no abre ningún popup o al pulsar fuera de él y de su barra; pulsar un hueco de la barra no lo cierra. Solo hay uno abierto a la vez en todos los monitores.
-Con la barra opaca o con la docked bar un popup va **anclado** (attached): sale de la barra como si fuera parte de ella. Con cualquier otra barra transparente va **flotante** (floating), separado de la barra.
+Con la barra opaca o con la docked bar un popup va **anclado** (attached): sale de la barra como si fuera parte de ella. Con cualquier otra barra transparente va **flotante** (floating), separado de la barra. Con la capsule va **dentro** (inside) de ella.
 _Avoid_: Menu, dropdown, status popup
+
+**Bar style** (estilo de barra):
+Cómo se ve la barra, elegido en el bar profile como un solo ajuste: opaca (una barra sólida a lo largo del borde), transparente (los bar elements flotan separados del borde), docked bar o capsule. No son interruptores que se combinan: cada perfil tiene exactamente un estilo.
+_Avoid_: Modo de barra, slanted bar
 
 **Docked bar** (barra acoplada):
 La barra transparente cuyas zonas cuelgan del borde de la pantalla en el que está la barra, cada una con el contorno, el color y la opacidad de un popup anclado. Mientras un popup anclado está abierto, la zona de la que sale se ensancha para recibirlo. Con el bar border activo, cada zona lo lleva por su contorno.
 _Avoid_: Barra inclinada, slanted bar
+
+**Capsule** (cápsula):
+Un estilo de barra, elegido en el bar profile como la docked bar, en el que la barra es una sola cápsula centrada arriba o abajo. En reposo muestra solo los bar elements que el perfil elige para ello (por defecto Arch, el reloj y el control center), más el recording indicator y la media mientras están activos. Se expande para mostrar en una fila todos los bar elements del perfil, en su orden y con sus grupos, al pasar el ratón, con SUPER+I o, solo en el monitor enfocado, un momento cuando algo cambia (volumen, brillo, Bloq Mayús, audio output, bar profile o keep-awake), mostrando solo ese cambio en lugar del OSD; las notificaciones nuevas no la expanden. Flota separada del borde con el fondo y la opacidad del perfil, y el bar border la rodea. Los workspaces no van dentro: van debajo de la cápsula (encima, si está abajo) como una fila aparte de pills, una por workspace del monitor, visible siempre. Al pulsar un bar element que abre un popup, ese popup se muestra **dentro** de la cápsula, bajo la fila de bar elements; pulsar otro lo cambia sin plegarla, y no se pliega mientras haya un popup abierto aunque el ratón se vaya. SUPER+N y SUPER+C abren así el control center en un monitor con cápsula. Con un popup dentro la cápsula crece hasta su tamaño, la fila de workspaces se oculta y los cambios de volumen o brillo no la interrumpen. Reserva en la pantalla solo su alto en reposo; expandida, se pone sobre las ventanas. Usa los bar elements del perfil: un monitor tiene una barra o una cápsula, nunca las dos.
+_Avoid_: Pill (que es el fondo de un bar element), isla, notch, dynamic island
 
 **Bar border** (borde de la barra):
 Un ajuste del perfil de barra que dibuja una línea fina en el color de borde del colorscheme por la propia barra: con la barra opaca, a lo largo del borde que da al escritorio; con la docked bar, por el contorno de cada zona, salvo por el lado pegado al borde de la pantalla. Un popup anclado continúa esa línea por su contorno, sin línea donde se une a la barra. Con cualquier otra barra transparente no dibuja nada; un popup flotante tiene siempre su propio borde.

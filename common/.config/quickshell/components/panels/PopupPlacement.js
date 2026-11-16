@@ -1,17 +1,40 @@
 .pragma library
 .import "../BarPosition.js" as BarPosition
+.import "../../config/BarProfileModel.js" as BarProfileModel
 
 // Where a popup opens in its bar window, from the Bar position: away from the
 // bar, towards the inside of the screen; along the bar, centred on the bar
 // element that opened it, whatever zone it sits in, shifted to stay on screen;
 // at an end of the bar when its element isn't on the bar. Either way it keeps clear
 // of the bar's rounded ends. On an opaque or docked bar popups are attached:
-// they hang from the bar itself.
+// they hang from the bar itself. On a transparent bar they float. On a capsule
+// they are inside it: centred on it, right past its row, and the capsule grows
+// round them.
 
-// Takes the bar profile of the popup's monitor,
-// { barTransparent, transparentBarSlanted }.
+// Takes the bar profile of the popup's monitor, { barStyle }.
 function attached(bar) {
-    return !bar.barTransparent || !!bar.transparentBarSlanted;
+    return BarProfileModel.opaque(bar) || BarProfileModel.docked(bar);
+}
+
+// Whether popups open inside the capsule. Takes the bar profile, { barStyle }.
+function inside(bar) {
+    return BarProfileModel.capsule(bar);
+}
+
+// A popup inside a capsule placed as one floating right past the capsule's
+// row, with no gap, and centred on the row whatever element opened it.
+function insidePlacement(placement) {
+    const capsule = placement.capsule;
+    const sideBar = BarPosition.sideBar(placement.barPosition);
+
+    return Object.assign({}, placement, {
+        attached: false,
+        spacing: 0,
+        content: capsule,
+        trigger: sideBar
+            ? { start: capsule.y, length: capsule.height }
+            : { start: capsule.x, length: capsule.width }
+    });
 }
 
 // A distance as an { x, y } offset pointing at the bar.
@@ -68,7 +91,9 @@ function reach(placement) {
 // padding, radius, spacing,
 // trigger: { start, length } | null (the bar element, along the bar in bar
 // window coordinates; null when it isn't on the bar),
-// content: { x, y, width, height } | null (the bar content the elements sit in) }.
+// content: { x, y, width, height } | null (the bar content the elements sit in),
+// inside (on a capsule), capsule: { x, y, width, height } (its row, in the bar
+// window, when inside) }.
 // `popupHeight` is the window's height and `restingHeight` what it would be
 // without a hold (see PopupFrame.heldHeight), the same when left out.
 // Returns the popup window's { x, y } in the bar window, the { start, end } the
@@ -77,7 +102,8 @@ function reach(placement) {
 // popup's place along it follows its resting length, and the window is placed
 // for the held one, so it holds still around that whole stretch. No longer than
 // that, a resting popup always fits inside it.
-function position(placement) {
+function position(given) {
+    const placement = given.inside ? insidePlacement(given) : given;
     const barPosition = placement.barPosition;
     const sideBar = BarPosition.sideBar(barPosition);
     const barLength = sideBar ? placement.window.height : placement.window.width;
@@ -107,9 +133,13 @@ function position(placement) {
 // the bar and leaves room only beside it, for the curved corners that join it
 // to the bar. The window's width counts that room on any Bar position, so a side
 // bar, whose joins are above and below it, leaves as much free on the far side
-// and the contents are as wide as on top. Takes { barPosition, attached, inset,
+// and the contents are as wide as on top. One inside a capsule leaves none: the
+// capsule is drawn round it. Takes { barPosition, attached, inside, inset,
 // joinRadius }.
 function room(placement) {
+    if (placement.inside)
+        return { top: 0, right: 0, bottom: 0, left: 0 };
+
     if (!placement.attached)
         return { top: placement.inset, right: placement.inset, bottom: placement.inset, left: placement.inset };
 

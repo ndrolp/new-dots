@@ -6,6 +6,7 @@ import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 import "BarElementItems.js" as BarElementItemsModel
 import "BarLayout.js" as BarLayout
+import "CapsulePlacement.js" as CapsulePlacement
 
 Item {
     id: root
@@ -29,6 +30,9 @@ Item {
     property var openPopup: null
     required property var systemMonitor
     required property var workspaceService
+    // The change a capsule shows instead of its row (see CapsuleChange.qml),
+    // or null while it shows none.
+    property var capsuleChange: null
 
     // The menu the app menu's Popup shows (AppMenuPopup.menuId).
     readonly property string appMenuId: appMenuElement.menuId
@@ -38,10 +42,11 @@ Item {
     // A bar element that opens no popup was pressed.
     signal popupCloseRequested()
     readonly property var zoneNames: ["left", "center", "right"]
-    // The docked bar's zones match an attached popup's color and opacity.
+    // The docked bar's zones match an attached popup's color and opacity; the
+    // capsule takes the same, the profile's background at its opacity.
     readonly property color dockedColor: Qt.rgba(theme.background.r, theme.background.g,
         theme.background.b, appearance.barOpacity / 100)
-    readonly property real dockedPadding: appearance.barTransparent && appearance.transparentBarSlanted
+    readonly property real dockedPadding: BarProfileModel.docked(appearance)
         ? appearance.horizontalPadding : 0
     // Room between a group's shared background and its first and last element.
     readonly property real groupPadding: appearance.groupHorizontalPadding
@@ -57,6 +62,34 @@ Item {
     })
     // Whether the bar runs from the top of the screen down.
     readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
+    // On a capsule, where the capsule is drawn around its row, the centre zone
+    // (see CapsuleElements.drawnElements); null on any other bar style.
+    readonly property var capsulePlace: BarProfileModel.capsule(appearance)
+        ? CapsulePlacement.surface(layoutBar, capsuleChange !== null
+                ? { start: changeStart, end: changeStart + changeView.width }
+                : { start: zoneStart("center"), end: zoneEnd("center") },
+            appearance.horizontalPadding)
+        : null
+    // Where a change the capsule shows starts along the bar: centred, as its
+    // row would be.
+    readonly property real changeStart: BarLayout.zoneStart(layoutBar, "center", changeView.width)
+    // Where that change goes in the bar content, { x, y }.
+    readonly property var changePlace: BarLayout.place(layoutBar, changeStart, changeView)
+    // The open popup when it is inside this bar's capsule, or null.
+    readonly property var insidePopup: capsulePlace !== null && openPopup && openPopup.inside
+        ? openPopup : null
+    // The capsule as drawn: its row, grown round a popup inside it
+    // (CapsulePlacement.withPopup); null on any other bar style.
+    readonly property var capsuleShape: capsulePlace === null ? null
+        : CapsulePlacement.withPopup(capsulePlace, insidePopup, appearance.barPosition)
+    // Whether the pointer is over the capsule itself, not elsewhere in its bar
+    // window such as the workspace row.
+    readonly property bool capsuleHovered: capsulePlace !== null && pointer.hovered
+        && CapsulePlacement.contains(capsulePlace, pointer.point.position)
+
+    HoverHandler {
+        id: pointer
+    }
 
     // The item of every bar element, by element id.
     readonly property var elementItems: Object.assign({
@@ -173,7 +206,7 @@ Item {
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
         thickness: root.sideBar ? root.width : root.height
-        visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
+        visible: BarProfileModel.docked(root.appearance)
         fillColor: root.dockedColor
         border: root.appearance.barBorder
         keepStart: true
@@ -189,7 +222,7 @@ Item {
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
         thickness: root.sideBar ? root.width : root.height
-        visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
+        visible: BarProfileModel.docked(root.appearance)
         fillColor: root.dockedColor
         border: root.appearance.barBorder
         z: -1
@@ -204,11 +237,33 @@ Item {
         motion: root.appearance.motion
         barPosition: root.appearance.barPosition
         thickness: root.sideBar ? root.width : root.height
-        visible: root.appearance.barTransparent && root.appearance.transparentBarSlanted
+        visible: BarProfileModel.docked(root.appearance)
         fillColor: root.dockedColor
         border: root.appearance.barBorder
         keepEnd: true
         z: -1
+    }
+
+    CapsuleSurface {
+        place: root.capsuleShape || { x: 0, y: 0, width: 0, height: 0, radius: 0 }
+        following: root.insidePopup !== null && root.insidePopup.resizing
+        visible: root.capsulePlace !== null
+        fillColor: root.dockedColor
+        border: root.appearance.barBorder
+        borderColor: theme.border
+        appearance: root.appearance
+        z: -1
+    }
+
+    // A change the capsule shows instead of its row.
+    CapsuleChangeView {
+        id: changeView
+
+        x: root.changePlace.x
+        y: root.changePlace.y
+        change: root.capsuleChange
+        appearance: root.appearance
+        theme: theme
     }
 
     // One shared background per group.

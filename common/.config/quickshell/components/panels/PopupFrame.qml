@@ -9,7 +9,7 @@ import "PopupPlacement.js" as PopupPlacement
 // inside; the window is as tall as they are unless the popup says otherwise.
 // On an opaque or docked bar the popup is attached: it hangs from the bar in the
 // bar's own color and opacity. On any other transparent bar it floats clear of
-// it. A focus grab, not the compositor's popup grab, closes it on a click
+// it. On a capsule it is inside the capsule, which grows round it. A focus grab, not the compositor's popup grab, closes it on a click
 // outside it and its bar, so the window stays up for the close animation.
 PopupWindow {
     id: frame
@@ -28,6 +28,16 @@ PopupWindow {
     readonly property string barPosition: appearance.barPosition
     // Decided by the bar profile of this bar's monitor.
     readonly property bool attached: PopupPlacement.attached(appearance)
+    // Decided by the bar profile too: on a capsule the popup opens inside it.
+    readonly property bool inside: PopupPlacement.inside(appearance)
+    // The capsule's row in the bar window, which a popup inside sits right
+    // past; null without a capsule.
+    readonly property var capsule: anchorProvider && anchorProvider.capsulePlace ? {
+        x: anchorProvider.x + anchorProvider.capsulePlace.x,
+        y: anchorProvider.y + anchorProvider.capsulePlace.y,
+        width: anchorProvider.capsulePlace.width,
+        height: anchorProvider.capsulePlace.height
+    } : null
     // Room around a floating surface inside the window.
     readonly property real inset: 12
     // How far the curved corners joining an attached popup to the bar reach.
@@ -44,6 +54,8 @@ PopupWindow {
         radius: appearance.radius,
         spacing: appearance.spacing,
         attached: attached,
+        inside: inside && capsule !== null,
+        capsule: capsule,
         trigger: anchorProvider ? PopupPlacement.triggerSpan(barPosition, anchorProvider,
             anchorProvider.popupTrigger(popup)) : null,
         edge: edge,
@@ -61,6 +73,7 @@ PopupWindow {
     readonly property var room: PopupPlacement.room({
         barPosition: barPosition,
         attached: attached,
+        inside: inside,
         inset: inset,
         joinRadius: joinRadius
     })
@@ -71,6 +84,10 @@ PopupWindow {
     property real heldHeight: 0
     // The window's height without that hold.
     readonly property real restingHeight: surface.implicitHeight + room.top + room.bottom
+    // The surface's size now, which a capsule grows round while the popup is
+    // inside it; it follows a popup resizing itself, unlike the window.
+    readonly property real surfaceWidth: surface.width
+    readonly property real surfaceHeight: surface.height
     default property alias contents: surface.contents
     // Closed from outside while still open: a click outside it and its bar,
     // another grab taking over, or its bar hiding.
@@ -115,6 +132,7 @@ PopupWindow {
         barPosition: frame.barPosition
         open: frame.open
         attached: frame.attached
+        inside: frame.inside
         joinRadius: frame.joinRadius
         radius: frame.appearance.radius
         barOpacity: frame.appearance.barOpacity

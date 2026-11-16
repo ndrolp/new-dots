@@ -19,10 +19,12 @@ Item {
     property string activePopup: ""
     // Which of the app menu's menus its Popup shows (AppMenuPopup.menuId).
     property string appMenuId: ""
-    // Where the open popup sits, { popup, edge, start, end, resizing }, or null.
-    // Start and end are its span along the bar, from the left or, on a side bar,
-    // the top. `resizing` is true while it holds its window through a stage
-    // change.
+    // Where the open popup sits, { popup, edge, start, end, resizing, inside,
+    // width, height, windowHeight }, or null. Start and end are its span along
+    // the bar, from the left or, on a side bar, the top. `resizing` is true
+    // while it holds its window through a stage change. `inside` is true
+    // inside a capsule, which grows to its surface's `width` and `height`;
+    // `windowHeight` is its window's, held through a stage change.
     property var openPopup: null
     // The bar content; places popups at the bar element that opened them.
     property var popupAnchorProvider: null

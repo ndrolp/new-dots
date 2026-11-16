@@ -1,13 +1,15 @@
 .pragma library
 .import "../BarPosition.js" as BarPosition
+.import "../../config/BarProfileModel.js" as BarProfileModel
 
 // Where the bar sits on its screen, from its Bar position. Every function takes
 // the bar profile of its monitor, or as much of it as it reads.
 
-// The gap a floating bar keeps from the screen edge it sits on. The key still
-// says top, but it applies from whichever edge that is.
+// The gap a floating bar or a capsule keeps from the screen edge it sits on.
+// The key still says top, but it applies from whichever edge that is.
 function margin(bar) {
-    return bar.barTransparent && !bar.transparentBarSlanted ? bar.transparentBarTopMargin : 0;
+    return BarProfileModel.transparent(bar) || BarProfileModel.capsule(bar)
+        ? bar.transparentBarTopMargin : 0;
 }
 
 // The space the bar takes from its screen edge inwards. Also what it reserves,
@@ -31,10 +33,37 @@ function windowAnchors(barPosition) {
 // screen's edge, nothing away from it and the padding at the bar's two ends,
 // which a docked bar's zones reach. Returns { top, right, bottom, left }.
 function contentMargins(bar) {
-    const docked = bar.barTransparent && bar.transparentBarSlanted;
-    const padding = docked ? 0 : bar.horizontalPadding;
+    const padding = BarProfileModel.docked(bar) ? 0 : bar.horizontalPadding;
 
     return BarPosition.sides(bar.barPosition, margin(bar), 0, padding);
+}
+
+// Where the bar content sits in the bar window, { x, y, width, height }:
+// inside its margins (contentMargins), against the bar's screen edge and as
+// deep as the bar's thickness leaves it, whatever the window's depth. So a
+// capsule's window, grown away from its edge for a popup inside, leaves the
+// content where it was. Takes the bar window's { width, height }.
+function contentArea(bar, window) {
+    const margins = contentMargins(bar);
+    const depth = thickness(bar);
+
+    if (BarPosition.sideBar(bar.barPosition)) {
+        const width = depth - margins.left - margins.right;
+        return {
+            x: bar.barPosition === "right" ? window.width - margins.right - width : margins.left,
+            y: margins.top,
+            width: width,
+            height: window.height - margins.top - margins.bottom
+        };
+    }
+
+    const height = depth - margins.top - margins.bottom;
+    return {
+        x: margins.left,
+        y: bar.barPosition === "bottom" ? window.height - margins.bottom - height : margins.top,
+        width: window.width - margins.left - margins.right,
+        height: height
+    };
 }
 
 // An opaque bar's bar border: a 1px line along its edge facing the desktop,

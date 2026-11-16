@@ -117,10 +117,41 @@ function defaultBarElements(disabledIds, options) {
 // The screen edges a bar can sit on, its Bar position.
 const barPositions = ["top", "bottom", "left", "right"];
 
+// How a bar looks, its bar style: opaque (a solid bar along the edge),
+// transparent (floating elements away from the edge), docked (zones hanging
+// from the edge, outlined like an attached popup) or capsule (a single centred
+// capsule floating away from the edge).
+const barStyles = ["opaque", "transparent", "docked", "capsule"];
+
+// Whether a bar profile, or anything with its { barStyle }, is of each bar
+// style. Every bar style but opaque is see-through.
+function opaque(bar) {
+    return bar.barStyle === "opaque";
+}
+
+function transparent(bar) {
+    return bar.barStyle === "transparent";
+}
+
+function docked(bar) {
+    return bar.barStyle === "docked";
+}
+
+function capsule(bar) {
+    return bar.barStyle === "capsule";
+}
+
+// The Bar positions a bar of this bar style can take: a capsule only sits at
+// the top or the bottom.
+function barPositionsFor(barStyle) {
+    return barStyle === "capsule" ? ["top", "bottom"] : barPositions;
+}
+
 // Every setting a bar profile stores, with the value a profile that lacks it
 // gets.
 const defaultProfile = {
     barPosition: "top",
+    barStyle: "opaque",
     barHeight: 32,
     horizontalPadding: 12,
     spacing: 8,
@@ -136,18 +167,19 @@ const defaultProfile = {
     elementVerticalPadding: 5,
     pillsTransparent: false,
     transparentBarTopMargin: 0,
-    transparentBarSlanted: false,
     groupRadius: 8,
     // The room inside a group's background: between its edges and its first
     // and last element along the bar, and from the bar's edges across it.
     groupHorizontalPadding: 8,
     groupVerticalPadding: 0,
-    barTransparent: false,
     barBorder: false,
     elementBorder: false,
     groupBorder: false,
     barOpacity: 100,
-    barElements: defaultBarElements([])
+    barElements: defaultBarElements([]),
+    // The bar elements a collapsed capsule shows, by id, when the profile
+    // enables them; they show in the profile's order, not this one's.
+    capsuleElements: ["arch", "clock", "notifications"]
 };
 
 const profileKeys = Object.keys(defaultProfile);
@@ -172,16 +204,16 @@ function defaultBarProfiles() {
 
     return {
         "minimal": profile(Object.assign({}, compact, {
-            pillsTransparent: true, transparentBarTopMargin: 6, barTransparent: true,
+            pillsTransparent: true, transparentBarTopMargin: 6, barStyle: "transparent",
             barBorder: true, elementBorder: true, groupBorder: true, groupRadius: 6
         }), ["systemMonitor", "currentApp", "media", "bluetooth", "tray"], compactOptions),
         "work": profile({}, []),
         "media": profile({
-            barHeight: 34, transparentBarTopMargin: 7, barTransparent: true,
+            barHeight: 34, transparentBarTopMargin: 7, barStyle: "transparent",
             barBorder: true, elementBorder: true, groupBorder: true
         }, ["bluetooth", "tray"]),
         "presentation": profile(Object.assign({}, compact, {
-            pillsTransparent: true, transparentBarTopMargin: 8, barTransparent: true,
+            pillsTransparent: true, transparentBarTopMargin: 8, barStyle: "transparent",
             barBorder: true, elementBorder: true, groupBorder: true, groupRadius: 6
         }), ["arch", "systemMonitor", "currentApp", "workspaces", "media", "audio",
             "bluetooth", "tray"], compactOptions)
@@ -197,18 +229,33 @@ function sameValue(left, right) {
 }
 
 // `profile` with every profile setting, as a fresh object: missing settings
-// take their default, an unknown Bar position too, and the bar elements are
-// normalized. Other keys are dropped.
+// take their default, an unknown bar style too, a Bar position the bar style
+// can't take becomes the default one (a capsule on a side moves to the top),
+// the bar elements are normalized and the collapsed capsule's keeps only
+// known bar elements, once each. Other keys are dropped.
 function completeProfile(profile) {
     const source = profile || {};
     const complete = {};
 
     for (const key of profileKeys)
         complete[key] = cloneValue(source[key] !== undefined ? source[key] : defaultProfile[key]);
-    if (barPositions.indexOf(complete.barPosition) === -1)
+    if (barStyles.indexOf(complete.barStyle) === -1)
+        complete.barStyle = defaultProfile.barStyle;
+    if (barPositionsFor(complete.barStyle).indexOf(complete.barPosition) === -1)
         complete.barPosition = defaultProfile.barPosition;
     complete.barElements = normalizeBarElements(complete.barElements);
+    complete.capsuleElements = setCapsuleElement(complete.capsuleElements, "", false);
     return complete;
+}
+
+// The bar elements a collapsed capsule shows, `capsuleElements`, with `id`
+// added (`shown`) or taken out, as a new list of known bar elements, each
+// listed once.
+function setCapsuleElement(capsuleElements, id, shown) {
+    const listed = (Array.isArray(capsuleElements) ? capsuleElements : [])
+        .concat(shown ? [id] : []);
+    return listed.filter((element, index) => elementIds.indexOf(element) !== -1
+        && listed.indexOf(element) === index && (shown || element !== id));
 }
 
 // The profile edited first and given to new monitors: the default one if it

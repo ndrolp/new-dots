@@ -3,6 +3,7 @@ import "../BarPosition.js" as BarPosition
 import "." as Panels
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
+import "../bar/CapsuleElements.js" as CapsuleElements
 
 // The Bar section's bar elements list: every bar element of the edited bar
 // profile, zone by zone, in full width rows that stay transparent until
@@ -186,6 +187,23 @@ Column {
                             anchors.rightMargin: 12
                             anchors.verticalCenter: parent.verticalCenter
                             spacing: 4
+
+                            // On a capsule profile: whether the collapsed
+                            // capsule shows this element, if the profile does.
+                            // Not offered for the workspaces or the live
+                            // elements (CapsuleElements.choosable).
+                            Panels.SettingsButton {
+                                readonly property bool chosen: (root.appearance.capsuleElements || [])
+                                    .indexOf(elementDelegate.element) !== -1
+
+                                anchors.verticalCenter: parent.verticalCenter
+                                visible: BarProfileModel.capsule(root.appearance) && elementDelegate.elementOn
+                                    && CapsuleElements.choosable(elementDelegate.element)
+                                appearance: root.appearance
+                                label: "In capsule"
+                                labelColor: chosen ? theme.accent : theme.textMuted
+                                onActivated: root.appearance.setCapsuleElement(elementDelegate.element, !chosen)
+                            }
 
                             // Join: shares one background with the element above.
                             Panels.SettingsButton {

@@ -5,7 +5,7 @@ import "../config" as Config
 
 // The Bar section's Size & spacing and Style groups, built from the settings
 // parts: number settings and switches two per line, paired by meaning, and
-// the density presets and the Bar position as segmented choices.
+// the density presets, the Bar position and the bar style as segmented choices.
 TestCase {
     name: "BarSizeStyleSettings"
     width: 800
@@ -67,11 +67,10 @@ TestCase {
                 property int spacing: 8
                 property int groupHorizontalPadding: 8
                 property int groupVerticalPadding: 0
-                property bool barTransparent: false
+                property string barStyle: "opaque"
                 property bool barBorder: false
                 property bool elementBorder: false
                 property bool groupBorder: false
-                property bool transparentBarSlanted: false
                 property bool pillsTransparent: false
                 property string matchingDensityPreset: "balanced"
                 property var motion: ({ short: 0 })
@@ -148,17 +147,14 @@ TestCase {
 
     function test_styleSwitchesSitTwoPerLineAndSaveWhenToggled() {
         const built = make();
-        const transparent = switchRow(built.item, "Transparent bar");
-        const border = switchRow(built.item, "Bar border");
-        const docked = switchRow(built.item, "Docked bar");
         const pills = switchRow(built.item, "Transparent pills");
+        const border = switchRow(built.item, "Bar border");
         const elementBorder = switchRow(built.item, "Element border");
         const groupBorder = switchRow(built.item, "Group border");
 
-        verify(sameLine(built.item, transparent, border));
-        verify(sameLine(built.item, docked, pills));
+        verify(sameLine(built.item, pills, border));
         verify(sameLine(built.item, elementBorder, groupBorder));
-        compare(transparent.color, Qt.rgba(0, 0, 0, 0));
+        compare(pills.color, Qt.rgba(0, 0, 0, 0));
 
         pills.toggled();
         groupBorder.toggled();
@@ -181,11 +177,62 @@ TestCase {
         return field ? all(field, child => child.options !== undefined && child.chosen !== undefined)[0] : null;
     }
 
+    function styleChoice(item) {
+        const field = all(item, child => child.label === "Bar style" && child.small !== undefined)[0];
+        return field ? all(field, child => child.options !== undefined && child.chosen !== undefined)[0] : null;
+    }
+
+    function test_theBarStyleIsOneChoiceOfEveryStyle() {
+        const built = make();
+        const choice = styleChoice(built.item);
+
+        verify(choice);
+        compare(choice.options.map(option => option.value), ["opaque", "transparent", "docked", "capsule"]);
+        compare(choice.options.map(option => option.label), ["Opaque", "Transparent", "Docked", "Capsule"]);
+        verify(!switchRow(built.item, "Transparent bar"));
+        verify(!switchRow(built.item, "Docked bar"));
+    }
+
+    function test_theCurrentBarStyleIsMarkedAndChoosingOneSavesIt() {
+        const built = make();
+        const choice = styleChoice(built.item);
+
+        compare(textOf(choice, "Opaque").color, theme.accent);
+
+        built.appearance.barStyle = "docked";
+        compare(textOf(choice, "Docked").color, theme.accent);
+
+        choice.chosen("transparent");
+        compare(built.appearance.saved, [["barStyle", "transparent"]]);
+    }
+
+    function test_theBarStyleOffersEveryStyle() {
+        const choice = styleChoice(make().item);
+
+        compare(choice.options.map(option => option.value), ["opaque", "transparent", "docked", "capsule"]);
+        compare(choice.options.map(option => option.label), ["Opaque", "Transparent", "Docked", "Capsule"]);
+    }
+
     function test_theBarPositionOffersAllFourPositions() {
         const choice = positionChoice(make().item);
 
         verify(choice);
         compare(choice.options.map(option => option.value), ["top", "bottom", "left", "right"]);
+        compare(choice.options.map(option => option.label), ["Top", "Bottom", "Left", "Right"]);
+    }
+
+    // A capsule sits only at the top or the bottom of its screen.
+    function test_aCapsuleOffersOnlyTheTopAndBottomPositions() {
+        const built = make();
+        const choice = positionChoice(built.item);
+
+        built.appearance.barStyle = "capsule";
+        compare(choice.options.map(option => option.label), ["Top", "Bottom"]);
+
+        choice.chosen("bottom");
+        compare(built.appearance.saved, [["barPosition", "bottom"]]);
+
+        built.appearance.barStyle = "docked";
         compare(choice.options.map(option => option.label), ["Top", "Bottom", "Left", "Right"]);
     }
 

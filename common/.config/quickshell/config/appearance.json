@@ -130,14 +130,12 @@
                         "joinPrevious": true
                     }
                 ],
-                "left": [
-                ],
-                "right": [
-                ]
+                "left": [],
+                "right": []
             },
             "barHeight": 30,
             "barOpacity": 55,
-            "barTransparent": true,
+            "barStyle": "transparent",
             "elementBorder": true,
             "elementVerticalPadding": 8,
             "groupBorder": true,
@@ -150,7 +148,6 @@
             "radius": 20,
             "spacing": 4,
             "textSize": 13,
-            "transparentBarSlanted": false,
             "transparentBarTopMargin": 10,
             "workspaceButtonSize": 18,
             "workspacePadding": 3
@@ -280,7 +277,7 @@
             "barHeight": 36,
             "barOpacity": 80,
             "barPosition": "top",
-            "barTransparent": false,
+            "barStyle": "opaque",
             "elementBorder": false,
             "elementVerticalPadding": 8,
             "groupBorder": false,
@@ -294,7 +291,6 @@
             "radius": 3,
             "spacing": 4,
             "textSize": 13,
-            "transparentBarSlanted": false,
             "transparentBarTopMargin": 7,
             "workspaceButtonSize": 18,
             "workspacePadding": 3
@@ -406,7 +402,7 @@
             },
             "barHeight": 30,
             "barOpacity": 90,
-            "barTransparent": true,
+            "barStyle": "docked",
             "elementBorder": false,
             "elementVerticalPadding": 8,
             "groupBorder": false,
@@ -419,7 +415,6 @@
             "radius": 8,
             "spacing": 4,
             "textSize": 13,
-            "transparentBarSlanted": true,
             "transparentBarTopMargin": 8,
             "workspaceButtonSize": 18,
             "workspacePadding": 3
@@ -561,7 +556,7 @@
             "barHeight": 30,
             "barOpacity": 78,
             "barPosition": "top",
-            "barTransparent": true,
+            "barStyle": "transparent",
             "elementBorder": true,
             "elementVerticalPadding": 5,
             "groupBorder": true,
@@ -575,7 +570,6 @@
             "radius": 5,
             "spacing": 4,
             "textSize": 13,
-            "transparentBarSlanted": false,
             "transparentBarTopMargin": 10,
             "workspaceButtonSize": 18,
             "workspacePadding": 3
@@ -643,5 +637,5 @@
     "nightLightTemperature": 3800,
     "notificationPopupLocation": "top-right",
     "reduceMotion": false,
-    "schemaVersion": 15
+    "schemaVersion": 16
 }

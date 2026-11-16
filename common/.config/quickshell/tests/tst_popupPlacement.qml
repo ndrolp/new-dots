@@ -95,15 +95,15 @@ TestCase {
     }
 
     function test_popupsAreAttachedOnAnOpaqueBar() {
-        verify(PopupPlacement.attached({ barTransparent: false }));
+        verify(PopupPlacement.attached({ barStyle: "opaque" }));
     }
 
     function test_popupsFloatOnATransparentBar() {
-        verify(!PopupPlacement.attached({ barTransparent: true }));
+        verify(!PopupPlacement.attached({ barStyle: "transparent" }));
     }
 
     function test_popupsAreAttachedOnADockedBar() {
-        verify(PopupPlacement.attached({ barTransparent: true, transparentBarSlanted: true }));
+        verify(PopupPlacement.attached({ barStyle: "docked" }));
     }
 
     function test_anAttachedPopupOnATopBarOpensRightAtItsBottomEdge() {
@@ -350,5 +350,59 @@ TestCase {
 
     function test_nothingTriggersAPopupWhoseElementIsntOnTheBar() {
         compare(PopupPlacement.triggerSpan("left", { x: 0, y: 0 }, null), null);
+    }
+
+    // A capsule's row in its bar window: 320 px long in the middle of a
+    // 1920 px wide window, 32 px deep, 6 px from a top edge or 2 px from the
+    // window's top on a bottom one.
+    function insidePlaced(barPosition, fields) {
+        return PopupPlacement.position(placement(Object.assign({
+            barPosition: barPosition,
+            inside: true,
+            capsule: { x: 800, y: barPosition === "top" ? 6 : 2, width: 320, height: 32 },
+            trigger: { start: 1500, length: 60 }
+        }, fields)));
+    }
+
+    function test_popupsAreInsideOnlyOnACapsule_data() {
+        return [
+            { tag: "capsule", inside: true },
+            { tag: "opaque", inside: false },
+            { tag: "transparent", inside: false },
+            { tag: "docked", inside: false }
+        ];
+    }
+
+    function test_popupsAreInsideOnlyOnACapsule(data) {
+        compare(PopupPlacement.inside({ barStyle: data.tag }), data.inside);
+    }
+
+    // Inside a capsule a popup is centred on the capsule, not on the bar
+    // element that opened it, and takes the same stretch of the bar.
+    function test_aPopupInsideACapsuleIsCentredOnIt() {
+        const placed = insidePlaced("top");
+
+        compare(placed.x, 760);
+        compare(placed.start, 760);
+        compare(placed.end, 1160);
+    }
+
+    // It sits right under the capsule's row on a top bar, with no gap, and
+    // right above it on a bottom one.
+    function test_aPopupInsideACapsuleSitsRightPastItsRow_data() {
+        return [
+            { tag: "top", y: 38 },
+            { tag: "bottom", y: -298 }
+        ];
+    }
+
+    function test_aPopupInsideACapsuleSitsRightPastItsRow(data) {
+        compare(insidePlaced(data.tag).y, data.y);
+    }
+
+    // The capsule draws round it, so it leaves no room round its surface.
+    function test_aPopupInsideACapsuleHasNoRoomAroundItsSurface() {
+        compare(PopupPlacement.room({ barPosition: "top", inside: true, attached: false, inset: 12, joinRadius: 6 }),
+            { top: 0, right: 0, bottom: 0, left: 0 });
     }
 }

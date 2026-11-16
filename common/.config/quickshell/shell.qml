@@ -151,6 +151,7 @@ ShellRoot {
         id: osd
 
         appearance: appearance
+        bar: bar
     }
 
     Modules.KeepAwake {

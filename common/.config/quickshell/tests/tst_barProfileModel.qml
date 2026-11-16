@@ -50,7 +50,7 @@ TestCase {
         const edited = BarProfileModel.editedProfile(after);
         compare(edited.barHeight, 30);
         compare(edited.horizontalPadding, 12);
-        compare(edited.transparentBarSlanted, true);
+        compare(edited.barStyle, "docked");
         compare(edited.transparentBarTopMargin, 8);
     }
 
@@ -123,12 +123,106 @@ TestCase {
         compare(BarProfileModel.completeProfile({ barPosition: "middle" }).barPosition, "top");
     }
 
+    function test_anUnknownBarStyleLoadsAsOpaque() {
+        compare(BarProfileModel.completeProfile({ barStyle: "glass" }).barStyle, "opaque");
+    }
+
+    function test_everyBarStyleIsKeptAsSaved_data() {
+        return ["opaque", "transparent", "docked", "capsule"].map(style => ({ tag: style, style: style }));
+    }
+
+    function test_everyBarStyleIsKeptAsSaved(data) {
+        compare(BarProfileModel.completeProfile({ barStyle: data.style }).barStyle, data.style);
+    }
+
+    // Each bar style has a name to ask a profile whether it is that style.
+    function test_eachBarStyleIsAskedForByName_data() {
+        return [
+            { tag: "opaque", style: "opaque", answers: [true, false, false, false] },
+            { tag: "transparent", style: "transparent", answers: [false, true, false, false] },
+            { tag: "docked", style: "docked", answers: [false, false, true, false] },
+            { tag: "capsule", style: "capsule", answers: [false, false, false, true] }
+        ];
+    }
+
+    function test_eachBarStyleIsAskedForByName(data) {
+        const bar = { barStyle: data.style };
+
+        compare([BarProfileModel.opaque(bar), BarProfileModel.transparent(bar),
+            BarProfileModel.docked(bar), BarProfileModel.capsule(bar)], data.answers);
+    }
+
+    function test_theOldBarStyleSwitchesAreNotKept() {
+        const profile = BarProfileModel.completeProfile({ barTransparent: true,
+            transparentBarSlanted: true });
+
+        compare(profile.barStyle, "opaque");
+        verify(!("barTransparent" in profile));
+        verify(!("transparentBarSlanted" in profile));
+    }
+
     function test_everyBarPositionIsKeptAsSaved_data() {
         return ["top", "bottom", "left", "right"].map(position => ({ tag: position, position: position }));
     }
 
     function test_everyBarPositionIsKeptAsSaved(data) {
         compare(BarProfileModel.completeProfile({ barPosition: data.position }).barPosition, data.position);
+    }
+
+    // A capsule sits only at the top or the bottom: on a side it moves to the top.
+    function test_aCapsuleOnASideLoadsAtTheTop_data() {
+        return [
+            { tag: "left", position: "left", loaded: "top" },
+            { tag: "right", position: "right", loaded: "top" },
+            { tag: "bottom", position: "bottom", loaded: "bottom" }
+        ];
+    }
+
+    function test_aCapsuleOnASideLoadsAtTheTop(data) {
+        compare(BarProfileModel.completeProfile({ barStyle: "capsule", barPosition: data.position })
+            .barPosition, data.loaded);
+    }
+
+    // A profile that never chose what its collapsed capsule shows shows Arch,
+    // the clock and the control center.
+    function test_aProfileWithoutACollapsedChoiceShowsArchTheClockAndTheControlCenter() {
+        compare(BarProfileModel.completeProfile({ barStyle: "capsule" }).capsuleElements,
+            ["arch", "clock", "notifications"]);
+    }
+
+    // The choice is saved with the profile: it survives completing it, as
+    // every read and save does, without unknown or repeated bar elements.
+    function test_theCollapsedChoiceIsKeptWithTheProfile() {
+        compare(BarProfileModel.completeProfile({ capsuleElements: ["battery", "clock"] })
+            .capsuleElements, ["battery", "clock"]);
+        compare(BarProfileModel.completeProfile({ capsuleElements: ["battery", "wifi", "battery"] })
+            .capsuleElements, ["battery"]);
+        compare(BarProfileModel.completeProfile({ capsuleElements: [] }).capsuleElements, []);
+    }
+
+    // Choosing an element adds it to the collapsed capsule, and unchoosing it
+    // takes it out, without changing the list it was given.
+    function test_choosingAnElementForTheCollapsedCapsule() {
+        const chosen = ["arch", "clock"];
+
+        compare(BarProfileModel.setCapsuleElement(chosen, "battery", true), ["arch", "clock", "battery"]);
+        compare(BarProfileModel.setCapsuleElement(chosen, "battery", true).length, 3);
+        compare(BarProfileModel.setCapsuleElement(chosen, "arch", true), ["arch", "clock"]);
+        compare(BarProfileModel.setCapsuleElement(chosen, "arch", false), ["clock"]);
+        compare(chosen, ["arch", "clock"]);
+    }
+
+    function test_choosingTheCapsuleOnASideBarMovesItToTheTop() {
+        const side = fixtures.edited(fixtures.startedBarState(), { barPosition: "left" });
+        const capsule = fixtures.edited(side, { barStyle: "capsule" });
+
+        compare(BarProfileModel.editedProfile(capsule).barStyle, "capsule");
+        compare(BarProfileModel.editedProfile(capsule).barPosition, "top");
+    }
+
+    function test_theBarPositionsABarStyleCanTake() {
+        compare(BarProfileModel.barPositionsFor("capsule"), ["top", "bottom"]);
+        compare(BarProfileModel.barPositionsFor("docked"), ["top", "bottom", "left", "right"]);
     }
 
     function test_choosingABarPositionIsAPendingChangeUntilSaved() {

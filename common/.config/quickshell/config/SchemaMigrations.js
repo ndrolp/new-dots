@@ -545,12 +545,35 @@ function seedGroupPadding(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
+// Step 16: the bar style, stored as two switches (transparent, and docked on
+// top of it), becomes one bar style setting. The docked switch on an opaque bar
+// only made its pills transparent, so that bar keeps transparent pills.
+function singleBarStyle(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+    for (const profileName in migrated.barProfiles || {}) {
+        const profile = migrated.barProfiles[profileName];
+        if (profile.barTransparent === undefined && profile.transparentBarSlanted === undefined)
+            continue;
+        if (profile.barTransparent)
+            profile.barStyle = profile.transparentBarSlanted ? "docked" : "transparent";
+        else {
+            profile.barStyle = "opaque";
+            if (profile.transparentBarSlanted)
+                profile.pillsTransparent = true;
+        }
+        delete profile.barTransparent;
+        delete profile.transparentBarSlanted;
+    }
+
+    return { appearance: migrated, monitors: monitors };
+}
+
 const migrationSteps = [
     migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
     migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles, explicitMonitorEntries,
     moveOptionsOntoElements, renameElementVerticalPadding, seedControlCenterTiles,
     seedWorkspaceRadius, splitBarBorder, seedWorkspaceVerticalPadding,
-    seedIconSize, seedGroupPadding
+    seedIconSize, seedGroupPadding, singleBarStyle
 ];
 const schemaVersion = migrationSteps.length;
 

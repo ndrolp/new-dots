@@ -29,7 +29,7 @@ TestCase {
         property int textSize: 13
         property int iconSize: 13
         property bool pillsTransparent: false
-        property bool transparentBarSlanted: false
+        property string barStyle: "opaque"
         property bool barBorder: false
         property bool elementBorder: false
         property bool groupBorder: false

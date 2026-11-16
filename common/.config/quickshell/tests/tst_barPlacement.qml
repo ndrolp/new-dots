@@ -14,8 +14,7 @@ TestCase {
             barHeight: 30,
             horizontalPadding: 12,
             transparentBarTopMargin: 6,
-            barTransparent: false,
-            transparentBarSlanted: false
+            barStyle: "opaque"
         }, values);
     }
 
@@ -35,9 +34,10 @@ TestCase {
     function test_theBarReservesItsThickness_data() {
         return [
             { tag: "opaque", values: {}, thickness: 30 },
-            { tag: "floating", values: { barTransparent: true }, thickness: 36 },
-            { tag: "docked", values: { barTransparent: true, transparentBarSlanted: true }, thickness: 30 },
-            { tag: "floating at the bottom", values: { barTransparent: true, barPosition: "bottom" },
+            { tag: "floating", values: { barStyle: "transparent" }, thickness: 36 },
+            { tag: "docked", values: { barStyle: "docked" }, thickness: 30 },
+            { tag: "capsule", values: { barStyle: "capsule" }, thickness: 36 },
+            { tag: "floating at the bottom", values: { barStyle: "transparent", barPosition: "bottom" },
                 thickness: 36 }
         ];
     }
@@ -58,7 +58,7 @@ TestCase {
     }
 
     function test_theMarginIsOnTheBarsScreenEdge(data) {
-        compare(BarPlacement.contentMargins(bar({ barTransparent: true, barPosition: data.tag })),
+        compare(BarPlacement.contentMargins(bar({ barStyle: "transparent", barPosition: data.tag })),
             data.margins);
     }
 
@@ -69,16 +69,18 @@ TestCase {
 
     // A docked bar's zones reach the screen's sides and pad their own contents.
     function test_aDockedBarHasNoMarginOrPadding() {
-        compare(BarPlacement.contentMargins(bar({ barPosition: "bottom", barTransparent: true,
-            transparentBarSlanted: true })), { top: 0, right: 0, bottom: 0, left: 0 });
+        compare(BarPlacement.contentMargins(bar({ barPosition: "bottom", barStyle: "docked" })), { top: 0, right: 0, bottom: 0, left: 0 });
     }
 
-    // No bar style is tied to a Bar position: all twelve are a working bar with
-    // the room it reserves, its margins and how its popups open.
+    // Only the capsule is tied to a Bar position (top or bottom): the other
+    // styles' twelve and the capsule's two are a working bar with the room it
+    // reserves, its margins and how its popups open.
     function test_everyBarStyleWorksOnEveryBarPosition_data() {
-        const opaque = { barTransparent: false, transparentBarSlanted: false };
-        const floating = { barTransparent: true, transparentBarSlanted: false };
-        const docked = { barTransparent: true, transparentBarSlanted: true };
+        const opaque = { barStyle: "opaque" };
+        const floating = { barStyle: "transparent" };
+        const docked = { barStyle: "docked" };
+        // A capsule only sits at the top or the bottom.
+        const capsule = { barStyle: "capsule" };
 
         return [
             { tag: "opaque top", style: opaque, barPosition: "top", thickness: 30, attached: true,
@@ -104,7 +106,11 @@ TestCase {
             { tag: "docked left", style: docked, barPosition: "left", thickness: 30, attached: true,
                 margins: { top: 0, right: 0, bottom: 0, left: 0 } },
             { tag: "docked right", style: docked, barPosition: "right", thickness: 30, attached: true,
-                margins: { top: 0, right: 0, bottom: 0, left: 0 } }
+                margins: { top: 0, right: 0, bottom: 0, left: 0 } },
+            { tag: "capsule top", style: capsule, barPosition: "top", thickness: 36, attached: false,
+                margins: { top: 6, right: 12, bottom: 0, left: 12 } },
+            { tag: "capsule bottom", style: capsule, barPosition: "bottom", thickness: 36, attached: false,
+                margins: { top: 0, right: 12, bottom: 6, left: 12 } }
         ];
     }
 
@@ -141,5 +147,28 @@ TestCase {
         compare(BarPlacement.edgeBorder("left", { width: 30, height: 800 }, { start: 0, end: 300 }), [
             { x: 29, y: 300, width: 1, height: 500 }
         ]);
+    }
+
+    // The bar content sits in the bar window inside its margins, as deep as
+    // the bar's thickness leaves it, against the bar's screen edge: a
+    // capsule's window grown for a popup inside leaves its content where it
+    // was, whatever size the window is.
+    function test_theBarContentSitsAgainstItsScreenEdge_data() {
+        return [
+            { tag: "opaque top", values: {}, window: { width: 1920, height: 30 },
+                area: { x: 12, y: 0, width: 1896, height: 30 } },
+            { tag: "capsule top, grown", values: { barStyle: "capsule" }, window: { width: 1920, height: 400 },
+                area: { x: 12, y: 6, width: 1896, height: 30 } },
+            { tag: "capsule bottom, grown", values: { barStyle: "capsule", barPosition: "bottom" },
+                window: { width: 1920, height: 400 }, area: { x: 12, y: 364, width: 1896, height: 30 } },
+            { tag: "opaque left", values: { barPosition: "left" }, window: { width: 30, height: 1080 },
+                area: { x: 0, y: 12, width: 30, height: 1056 } },
+            { tag: "transparent right", values: { barStyle: "transparent", barPosition: "right" },
+                window: { width: 36, height: 1080 }, area: { x: 0, y: 12, width: 30, height: 1056 } }
+        ];
+    }
+
+    function test_theBarContentSitsAgainstItsScreenEdge(data) {
+        compare(BarPlacement.contentArea(bar(data.values), data.window), data.area);
     }
 }

@@ -1,41 +1,30 @@
 import Quickshell
-import Quickshell.Hyprland
-import Quickshell.Io
-import Quickshell.Services.Pipewire
 import Quickshell.Wayland
 import QtQuick
 import QtQuick.Effects
 import "../../config" as Config
-import "AudioOutputs.js" as AudioOutputs
-import "../../services/KeepAwakeState.js" as KeepAwakeState
+import "OsdChange.js" as OsdChange
 
+// The OSD: one change at a time (see OsdChange.js), for a moment, at the
+// bottom of the screen modules/Osd.qml puts it on.
 PanelWindow {
     id: root
 
     required property var appearance
-    property string mode: ""
-    property real level: 0
-    property bool capsLocked: false
-    property bool capsInitialized: false
     property real reveal: 0
-    property string sinkName: ""
-    property string sinkType: ""
-    property string profileName: ""
-    property bool keepAwakeOn: false
-    property string keepAwakeLabel: ""
-    readonly property bool compact: mode === "caps" || mode === "keepAwake"
-    // Caps lock on or keep-awake on: the icon sits on the accent.
-    readonly property bool highlighted: mode === "caps" ? capsLocked : mode === "keepAwake" && keepAwakeOn
-
-    readonly property var audio: Pipewire.defaultAudioSink && Pipewire.defaultAudioSink.audio
-        ? Pipewire.defaultAudioSink.audio : null
+    // The change shown, as OsdChange.js describes it.
+    property var change: OsdChange.volume(0, false)
+    // What it shows: its icon, label and level (see OsdChange.display).
+    readonly property var display: OsdChange.display(change)
+    readonly property bool compact: display.compact
+    readonly property color toneColor: OsdChange.toneColor(display.tone, theme)
 
     screen: Quickshell.screens.values.length > 0 ? Quickshell.screens.values[0] : null
     color: "transparent"
     // Normal: it stays inside what the monitor's bar leaves free.
     exclusionMode: ExclusionMode.Normal
     implicitWidth: compact ? osdContent.implicitWidth + 32
-        : mode === "sink" ? Math.min(460, Math.max(292, osdLabel.implicitWidth + 86)) : 292
+        : change.kind === "audioOutput" ? Math.min(460, Math.max(292, osdLabel.implicitWidth + 86)) : 292
     implicitHeight: compact ? 74 : 92
     WlrLayershell.namespace: "ndro-shell-osd"
 
@@ -54,58 +43,11 @@ PanelWindow {
         id: theme
     }
 
-    function showVolume() {
-        mode = "volume";
-        level = audio && !audio.muted ? audio.volume : 0;
+    // Shows `change` for a moment, replacing the one shown.
+    function show(change) {
+        root.change = change;
         reveal = 1;
         dismissTimer.restart();
-    }
-
-    function showBrightness() {
-        brightnessQuery.running = true;
-    }
-
-    function showAudioSink(sink) {
-        const label = AudioOutputs.label(sink);
-
-        mode = "sink";
-        sinkName = label !== "" ? label : "Audio output";
-        // The icon goes by the description: it names the kind, the nickname doesn't.
-        sinkType = String(sink.description || "").toLowerCase();
-        reveal = 1;
-        dismissTimer.restart();
-    }
-
-    function showBarProfile(name) {
-        mode = "profile";
-        profileName = name;
-        reveal = 1;
-        dismissTimer.restart();
-    }
-
-    function showKeepAwake(on, duration) {
-        mode = "keepAwake";
-        keepAwakeOn = on;
-        keepAwakeLabel = KeepAwakeState.osdLabel(on, duration);
-        reveal = 1;
-        dismissTimer.restart();
-    }
-
-    function updateCaps(value) {
-        if (capsInitialized && capsLocked !== value) {
-            mode = "caps";
-            capsLocked = value;
-            reveal = 1;
-            dismissTimer.restart();
-        } else {
-            capsLocked = value;
-        }
-
-        capsInitialized = true;
-    }
-
-    PwObjectTracker {
-        objects: Pipewire.defaultAudioSink ? [Pipewire.defaultAudioSink] : []
     }
 
     Timer {
@@ -113,43 +55,6 @@ PanelWindow {
 
         interval: 1800
         onTriggered: root.reveal = 0
-    }
-
-    Timer {
-        interval: 500
-        running: true
-        repeat: true
-        onTriggered: {
-            if (!capsQuery.running)
-                capsQuery.running = true;
-        }
-    }
-
-    Process {
-        id: brightnessQuery
-
-        command: ["sh", "-c", "brightnessctl -m | cut -d, -f4"]
-        stdout: SplitParser {
-            onRead: data => {
-                const match = data.match(/(\d+(?:\.\d+)?)%/);
-
-                if (match) {
-                    root.mode = "brightness";
-                    root.level = Number(match[1]) / 100;
-                    root.reveal = 1;
-                    dismissTimer.restart();
-                }
-            }
-        }
-    }
-
-    Process {
-        id: capsQuery
-
-        command: ["sh", "-c", "hyprctl devices -j | jq -r '[.. | objects | select(has(\"capsLock\")) | .capsLock] | any'"]
-        stdout: SplitParser {
-            onRead: data => root.updateCaps(data.trim() === "true")
-        }
     }
 
     Rectangle {
@@ -197,25 +102,12 @@ PanelWindow {
                 width: 42
                 height: 42
                 radius: 21
-                color: root.highlighted ? theme.accent : theme.backgroundSecondary
+                color: root.display.highlighted ? theme.accent : theme.backgroundSecondary
 
                 ShellText {
                     anchors.centerIn: parent
-                    text: root.mode === "volume"
-                        ? (!root.audio || root.audio.muted ? "󰝟" : "󰕾")
-                        : root.mode === "brightness" ? "󰃠"
-                        : root.mode === "sink"
-                            ? (root.sinkType.includes("headphone") || root.sinkType.includes("headset")
-                                ? "󰋋"
-                                : root.sinkType.includes("hdmi") || root.sinkType.includes("displayport")
-                                    ? "󰍹" : "󰓃")
-                            : root.mode === "profile" ? "󰘳"
-                            : root.mode === "keepAwake" ? KeepAwakeState.cup(root.keepAwakeOn)
-                            : "󰪛"
-                    color: root.highlighted ? theme.background
-                        : root.mode === "volume" ? theme.blue
-                        : root.mode === "brightness" ? theme.yellow
-                        : root.mode === "sink" || root.mode === "profile" ? theme.accent : theme.textMuted
+                    text: root.display.icon
+                    color: root.display.highlighted ? theme.background : root.toneColor
                     font.pixelSize: 21
                     font.bold: true
                 }
@@ -230,39 +122,21 @@ PanelWindow {
                     id: osdLabel
 
                     width: parent.width
-                    text: root.mode === "volume" ? "Volume"
-                        : root.mode === "brightness" ? "Brightness"
-                        : root.mode === "sink" ? sinkName
-                        : root.mode === "profile" ? profileName + " bar profile"
-                        : root.mode === "keepAwake" ? keepAwakeLabel
-                        : root.capsLocked ? "Caps Lock on" : "Caps Lock off"
+                    text: root.display.label
                     color: theme.text
                     elide: Text.ElideRight
                     font.pixelSize: root.appearance.textSize
                     font.bold: true
                 }
 
-                Rectangle {
-                    visible: root.mode === "volume" || root.mode === "brightness"
-                    width: parent.width
-                    height: 6
-                    radius: 3
-                    color: theme.backgroundSecondary
-
-                    Rectangle {
-                        width: parent.width * Math.max(0, Math.min(1, root.level))
-                        height: parent.height
-                        radius: parent.radius
-                        color: root.mode === "volume" ? theme.blue : theme.yellow
-                    }
-                }
-
-                ShellText {
-                    visible: root.mode === "volume" || root.mode === "brightness"
-                    text: Math.round(root.level * 100) + "%"
-                    color: theme.textMuted
-                    font.pixelSize: root.appearance.textSize - 2
-                    font.bold: true
+                ChangeLevel {
+                    visible: root.display.level !== null
+                    stacked: true
+                    barWidth: parent.width
+                    level: root.display.level || 0
+                    toneColor: root.toneColor
+                    appearance: root.appearance
+                    theme: theme
                 }
             }
         }

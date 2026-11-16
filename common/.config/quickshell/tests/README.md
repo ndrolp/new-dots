@@ -1,10 +1,13 @@
 # Tests
 
-Tests for the pure JS models behind the settings: bar profiles
-(`config/BarProfileModel.js`), desktop widgets (`config/DesktopWidgetsModel.js`)
-and schema migrations (`config/SchemaMigrations.js`). They also cover where
+Tests for the pure JS models behind the settings: bar profiles, with a name
+to ask a profile for each bar style (`config/BarProfileModel.js`), desktop widgets (`config/DesktopWidgetsModel.js`)
+and schema migrations (`config/SchemaMigrations.js`), among them the one that
+turns the two bar style switches into one bar style and keeps each saved
+profile's look (`tst_barStyleMigration.qml`). They also cover where
 the bar sits on its screen: the edges its window is anchored to, the space it
-reserves and where the margin goes, for every bar style on each Bar position
+reserves, where the margin goes and where its content sits, against its edge
+however tall a capsule's window grows, for every bar style on each Bar position
 (`components/bar/BarPlacement.js`; `Bar.qml` itself is a Quickshell window and
 isn't tested here), and where the toasts and desktop widgets sit in the area
 the bar leaves free: their anchors and plain gaps from that area
@@ -15,10 +18,11 @@ the popups: what a Bar position means for what is laid out from the bar
 (`components/BarPosition.js`), where a popup opens on each Bar position, the
 stretch of the bar that opens it, how wide its contents are, and that a popup
 held through a control center stage change stays steady and on screen on a side
-bar (`components/panels/PopupPlacement.js`), the outline of an attached popup
+bar, and that on a capsule a popup is inside it, centred on it right past its
+row with no room round it (`components/panels/PopupPlacement.js`), the outline of an attached popup
 on each of them (`PopupOutline.js`), the surface every popup draws on, how
-it reveals away from the bar and that it ignores input while closing
-(`PopupSurface.qml`; `PopupFrame.qml` itself is a Quickshell window and isn't
+it reveals away from the bar, that inside a capsule it draws only its
+contents, and that it ignores input while closing (`PopupSurface.qml`; `PopupFrame.qml` itself is a Quickshell window and isn't
 tested here), what a popup's focus grab holds
 (`PopupGrab.js`), which bar elements close the open popup when pressed
 (`BarPopupCloser.qml`), the shared popup parts (`PopupTitle`,
@@ -43,7 +47,7 @@ the settings panel's own parts (`SettingsNumber`,
 `SettingsSwitchRow`, `SettingsChoice`, `SettingsGrid`…), its frame
 (`ConfigPanel.qml`) and the settings panel sections built from them, among
 them the four Bar positions and the zone names of a side bar, which keep their
-saved keys (`BarSizeStyleSettings.qml`, `BarElementsSettings.qml`), the Bluetooth device list and turning Bluetooth
+saved keys, and the bar style as one choice of every style the profile model lists (`BarSizeStyleSettings.qml`, `BarElementsSettings.qml`), the Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
 (`AudioOutputs.js`), how the volume is shown as text
 (`components/VolumeText.js`), what the popups and bar elements show for the
@@ -57,7 +61,40 @@ straight, on each Bar position (`PopupOutline.js`), and how it is
 drawn, grows for an attached popup, keeps up with one that resizes and meets
 its joins on every Bar position
 (`components/bar/DockedSurface.qml`,
-`DockedZones.js`), where zones, bar elements, group backgrounds and popup
+`DockedZones.js`), which bar elements a collapsed capsule shows in its one
+row (the ones its profile chose, in the profile's order, else Arch, the clock
+and the control center; the choice is kept with the profile by
+`BarProfileModel.js` and offered, on a capsule profile, for the elements the
+profile shows but the workspaces and the live ones by
+`BarElementsSettings.qml`, and a saved choice of those is ignored), live ones
+included (the recording
+indicator, and media only while a track plays), which ones it shows expanded
+(all but the workspaces, with their groups, and media while any player
+exists) (`components/bar/CapsuleElements.js`), that only the pointer over
+the capsule itself counts as hovering it, where the capsule sits around that
+row and that only it takes clicks in its bar window
+(`CapsulePlacement.js`), that any one cause holds it expanded and that
+SUPER+I acts only on the focused monitor's capsule (`CapsuleRouting.js`),
+that hovering it expands it only after a moment and collapses it a while after
+the pointer leaves (`CapsuleHover.qml`), that SUPER+I holds it expanded until
+pressed again or until the pointer leaves it (`CapsuleToggle.qml`), that a
+change (volume, brightness, Caps Lock, audio output, bar profile or
+keep-awake) goes to the focused monitor's capsule instead of the OSD, nowhere
+while a popup is inside it, and otherwise to the OSD on the focused monitor's
+screen (`CapsuleRouting.js`), and that the capsule then shows that change
+and no bar element (`CapsuleElements.js`), for about 1.5 s from the latest one (`CapsuleChange.qml`),
+what each of the six changes shows, the same in the OSD and the capsule
+(`components/panels/OsdChange.js`), in the same tone colours and with the
+same level bar and percent, under the bar in the OSD and beside it in the
+capsule (`OsdChange.toneColor`, `ChangeLevel.qml`), how it is
+drawn with its fill and bar border (`CapsuleSurface.qml`), where its workspace row sits, under a top
+capsule and above a bottom one, centred on it, how it grows round a popup
+inside it (`CapsulePlacement.js`), that its window grows at once for a popup inside and
+never shrinks back (`CapsuleWindowHold.qml`), that the row
+has one pill per workspace in order, in the profile's fill and bar border,
+highlights the active one as it changes and switches workspace on a click
+(`CapsuleWorkspaceRow.qml`), and that a capsule sits only at the top or
+bottom, where zones, bar elements, group backgrounds and popup
 triggers sit along either axis of the bar, to the pixel the anchors they
 replaced put them at (`components/bar/BarLayout.js`; `BarContent.qml` itself
 needs Quickshell's services and isn't tested here), how workspaces, icon

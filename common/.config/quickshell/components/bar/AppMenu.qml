@@ -5,6 +5,7 @@ import ".." as Components
 import "../AppMenuModel.js" as AppMenuModel
 import "../FocusedWindow.js" as FocusedWindow
 import "BarLayout.js" as BarLayout
+import "../../config/BarProfileModel.js" as BarProfileModel
 
 // The app menu bar element: one title per menu of AppMenuModel, the focused
 // app's name in bold first (its .desktop Name, or its appId), then the
@@ -128,7 +129,7 @@ Item {
         width: size.width
         height: size.height
         radius: root.appearance.radius
-        color: root.appearance.pillsTransparent || root.appearance.transparentBarSlanted
+        color: root.appearance.pillsTransparent || BarProfileModel.docked(root.appearance)
             || root.grouped ? "transparent" : theme.surface
         border.width: root.appearance.elementBorder && !root.grouped ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"

@@ -35,7 +35,9 @@ adding or editing one file here.
   (`OpenPopup.js`, tested). Its settings button opens the settings panel on
   that bar, and a bar element opens its popup (`barElementOpening` tells
   first); one that opens none closes the open popup. Other modules open and close popups through its `openPopup`,
-  `bars()`, `focusedMonitor()` and `closePopup()`.
+  `bars()`, `focusedMonitor()` and `closePopup()`. Its `capsule toggle`
+  IPC call (SUPER+I) expands the focused monitor's capsule, or collapses it
+  again; on a normal bar it does nothing (`CapsuleRouting.toggledBar`, tested).
 - `ControlCenter.qml`: not a `Feature`: the control center is the bell's
   popup. The module owns its state and is handed, as one object, through
   the bar to the popup and its controls: the services they show,
@@ -62,7 +64,11 @@ adding or editing one file here.
   `bar-profiles` IPC calls.
 - `KeepAwake.qml`: the `keep-awake` IPC call the keybind runs, which toggles
   keep-awake and shows the OSD.
-- `Osd.qml`, `Lock.qml` (the one lock screen and the `lock` IPC call) and
+- `Osd.qml`: the `osd` IPC calls (the volume and brightness keys), Caps Lock
+  watching, and where each change shows: on the focused monitor only, in its
+  capsule if it has one, else in the OSD on that monitor
+  (`CapsuleRouting.changeTarget`, tested).
+- `Lock.qml` (the one lock screen and the `lock` IPC call) and
   `LowBattery.qml`.
 
 These files import Quickshell, so they can't be loaded under the tests; what

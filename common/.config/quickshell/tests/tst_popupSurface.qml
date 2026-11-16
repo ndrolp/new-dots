@@ -409,4 +409,17 @@ TestCase {
         revealTo(surface, 0.3);
         compare(drawnOpacity(surface.box, surface), 0.3);
     }
+
+    // Inside a capsule the capsule is drawn round the surface, so the surface
+    // has no fill and no border of its own, and its contents fade in where
+    // they rest without sliding.
+    function test_aSurfaceInsideACapsuleDrawsOnlyItsContentsFadingInPlace() {
+        const surface = makeSurface({ inside: true, open: false });
+
+        revealTo(surface, 0.3);
+        compare(surface.color.a, 0);
+        compare(surface.border.width, 0);
+        compare(drawnOpacity(surface.box, surface), 0.3);
+        compare(surface.mapToItem(surface.parent, 0, 0).y, 0);
+    }
 }
