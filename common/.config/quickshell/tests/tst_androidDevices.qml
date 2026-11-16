@@ -176,4 +176,133 @@ TestCase {
         compare(Android.actions(rowsOf("", wirelessDebuggingOn, [pixel])[0]), ["connect", "forget"]);
         compare(Android.actions(rowsOf("", "", [pixel])[0]), ["connect", "forget"]);
     }
+
+    function test_aDeviceConnectedOverTheNetworkIsRemembered() {
+        const rows = rowsOf("adb-61291JEA326957-AbCdEf._adb-tls-connect._tcp device model:Pixel_10a\n",
+            wirelessDebuggingOn);
+        compare(Android.remembered([], rows),
+            [{ serial: "61291JEA326957", model: "Pixel 10a", address: "192.168.1.44:37045" }]);
+    }
+
+    function test_aKnownDeviceKeepsItsLastAddress() {
+        const moved = rowsOf("192.168.1.45:5555 device model:Pixel_10a\n", "", [pixel],
+            { "192.168.1.45:5555": "61291JEA326957" });
+        compare(Android.remembered([pixel], moved),
+            [{ serial: "61291JEA326957", model: "Pixel 10a", address: "192.168.1.45:5555" }]);
+        // Not seen, or only over USB, it stays as it was.
+        compare(Android.remembered([pixel], rowsOf("", "", [pixel])), [pixel]);
+        compare(Android.remembered([pixel], rowsOf(pixelOverUsb, "", [pixel])), [pixel]);
+    }
+
+    function test_onlyNetworkConnectionsAreRemembered() {
+        compare(Android.remembered([], rowsOf(pixelOverUsb, wirelessDebuggingOn)), []);
+    }
+
+    function test_forgettingRemovesOnlyThatDevice() {
+        const other = { serial: "OTHER", model: "Tab", address: "192.168.1.9:5555" };
+        compare(Android.forgotten([pixel, other], "61291JEA326957"), [other]);
+    }
+
+    function test_connectTriesTheAnnouncedAddressThenTheLastOne() {
+        const available = rowsOf("", wirelessDebuggingOn, [pixel])[0];
+        compare(Android.connectAddresses(available, [pixel]), ["192.168.1.44:37045", "192.168.1.44:5555"]);
+        const notSeen = rowsOf("", "", [pixel])[0];
+        compare(Android.connectAddresses(notSeen, [pixel]), ["192.168.1.44:5555"]);
+        const unknown = rowsOf("", wirelessDebuggingOn)[0];
+        compare(Android.connectAddresses(unknown, []), ["192.168.1.44:37045"]);
+        const same = { serial: pixel.serial, model: pixel.model, address: "192.168.1.44:37045" };
+        compare(Android.connectAddresses(available, [same]), ["192.168.1.44:37045"]);
+    }
+
+    // What adb connect prints; it exits 0 when it fails too.
+    function test_whatAdbConnectAnswered() {
+        compare(Android.connectOutcome("connected to 192.168.1.44:37045\n"), "connected");
+        compare(Android.connectOutcome("already connected to 192.168.1.44:5555\n"), "connected");
+        compare(Android.connectOutcome("failed to connect to '192.168.1.44:5555': Connection refused\n"),
+            "unreachable");
+        compare(Android.connectOutcome("failed to connect to 192.168.1.44:5555\n"), "unreachable");
+        compare(Android.connectOutcome("failed to authenticate to 192.168.1.44:37045\n"), "unpaired");
+        compare(Android.connectOutcome(""), "unreachable");
+    }
+
+    function test_whatThePanelSaysWhenConnectFails() {
+        compare(Android.connectProblem("unreachable"), "Turn on Wireless debugging on the phone");
+        compare(Android.connectProblem("unpaired"), "Not paired with this computer: pair it below");
+        compare(Android.connectProblem("connected"), "");
+    }
+
+    // After every address failed, not being paired says more than not answering.
+    function test_theWorstOfSeveralAttemptsIsReported() {
+        compare(Android.worstOutcome(["unreachable", "unpaired"]), "unpaired");
+        compare(Android.worstOutcome(["unpaired", "unreachable"]), "unpaired");
+        compare(Android.worstOutcome(["unreachable"]), "unreachable");
+        compare(Android.worstOutcome([]), "unreachable");
+    }
+
+    // A stand-in for Math.random that walks through `values`.
+    function randomFrom(values) {
+        let index = 0;
+        return () => values[index++ % values.length];
+    }
+
+    function test_eachQrCodeHasAFreshNameAndPassword() {
+        const first = Android.qrPairing(randomFrom([0, 0.5, 0.99]));
+        verify(/^studio-[A-Za-z0-9]{8}$/.test(first.name), first.name);
+        verify(/^[A-Za-z0-9]{12}$/.test(first.password), first.password);
+        const second = Android.qrPairing(randomFrom([0.25, 0.75]));
+        verify(second.name !== first.name);
+        verify(second.password !== first.password);
+        // Math.random is what the panel passes.
+        verify(Android.qrPairing(Math.random).name !== Android.qrPairing(Math.random).name);
+    }
+
+    function test_theQrCodeCarriesTheNameAndPasswordTheWayAndroidReadsThem() {
+        compare(Android.qrPayload({ name: "studio-Xy12Ab34", password: "s3cretPass12" }),
+            "WIFI:T:ADB;S:studio-Xy12Ab34;P:s3cretPass12;;");
+    }
+
+    function test_thePhoneThatScannedTheCodeAnnouncesItsName() {
+        const services = Android.parseServices(wirelessDebuggingOn);
+        compare(Android.pairingAddress(services, "studio-Xy12Ab34"), "192.168.1.50:39999");
+        compare(Android.pairingAddress(services, "studio-Other"), "");
+    }
+
+    // While a phone's "Pair device with pairing code" dialog is open it
+    // announces a pairing service of its own, not the QR code's.
+    function test_aPhoneShowingItsPairingCodeFillsTheAddress() {
+        const services = Android.parseServices(wirelessDebuggingOn);
+        compare(Android.codePairingAddress(services), "192.168.1.44:41233");
+        compare(Android.codePairingAddress(Android.parseServices(
+            "studio-Xy12Ab34\t_adb-tls-pairing._tcp\t192.168.1.50:39999\n")), "");
+    }
+
+    function test_aPairingCodeNeedsAnAddressAndSixDigits() {
+        verify(Android.canPairWithCode("192.168.1.44:41233", "123456"));
+        verify(Android.canPairWithCode(" 192.168.1.44:41233 ", " 123456 "));
+        verify(!Android.canPairWithCode("192.168.1.44", "123456"));
+        verify(!Android.canPairWithCode("192.168.1.44:41233", "12345"));
+        verify(!Android.canPairWithCode("192.168.1.44:41233", "12345a"));
+        verify(!Android.canPairWithCode("", ""));
+    }
+
+    function test_whatAdbPairAnswered() {
+        compare(Android.pairedSerial(
+            "Successfully paired to 192.168.1.44:41233 [guid=adb-61291JEA326957-AbCdEf]\n"), "61291JEA326957");
+        compare(Android.pairedSerial("Failed: Wrong password or connection was dropped.\n"), "");
+        compare(Android.pairProblem("Failed: Wrong password or connection was dropped.\n"),
+            "Wrong password or connection was dropped.");
+        compare(Android.pairProblem(""), "Couldn't pair with the phone");
+    }
+
+    // `adb shell ip -f inet addr show wlan0`, captured from the Pixel 10a.
+    function test_thePhonesWifiAddressIsReadFromIp() {
+        compare(Android.wifiIp([
+            "47: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000",
+            "    inet 192.168.1.44/24 brd 192.168.1.255 scope global dynamic wlan0",
+            "       valid_lft 83263sec preferred_lft 83263sec",
+            ""
+        ].join("\n")), "192.168.1.44");
+        compare(Android.wifiIp(""), "");
+        compare(Android.wifiIp("Device \"wlan0\" does not exist.\n"), "");
+    }
 }

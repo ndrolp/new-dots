@@ -176,3 +176,117 @@ function actions(row) {
         offered.push("connectWirelessly");
     return offered;
 }
+
+// The known devices once every row connected over the network now is
+// remembered with its name and address. A device that isn't connected over
+// the network keeps what was remembered of it.
+function remembered(known, rows) {
+    const next = known.map(device => Object.assign({}, device));
+    for (const row of rows) {
+        if (row.state !== "wifi" && row.state !== "both")
+            continue;
+        const entry = next.find(device => device.serial === row.serial);
+        if (entry) {
+            entry.model = row.name;
+            if (row.wifiAddress !== "")
+                entry.address = row.wifiAddress;
+        } else {
+            next.push({ serial: row.serial, model: row.name, address: row.wifiAddress });
+        }
+    }
+    return next;
+}
+
+function forgotten(known, serial) {
+    return known.filter(device => device.serial !== serial);
+}
+
+// The addresses Connect tries, in order: the one mDNS announces now, then
+// the last one remembered.
+function connectAddresses(row, known) {
+    const entry = known.find(device => device.serial === row.serial);
+    const addresses = [row.announced, entry ? entry.address : ""];
+    return addresses.filter((address, index) => address !== "" && addresses.indexOf(address) === index);
+}
+
+// What `adb connect <address>` printed: "connected", "unpaired" (the phone
+// answered but isn't paired with this computer) or "unreachable".
+function connectOutcome(output) {
+    const text = String(output || "");
+    if (/\bconnected to\b/.test(text) && !/failed/.test(text))
+        return "connected";
+    if (/failed to authenticate/.test(text))
+        return "unpaired";
+    return "unreachable";
+}
+
+// The outcome to report after every address failed: not paired says more
+// than not answering.
+function worstOutcome(outcomes) {
+    return outcomes.indexOf("unpaired") >= 0 ? "unpaired" : "unreachable";
+}
+
+function connectProblem(outcome) {
+    if (outcome === "unpaired")
+        return "Not paired with this computer: pair it below";
+    if (outcome === "unreachable")
+        return "Turn on Wireless debugging on the phone";
+    return "";
+}
+
+const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+function randomText(random, length) {
+    let text = "";
+    for (let index = 0; index < length; index++)
+        text += alphabet.charAt(Math.floor(random() * alphabet.length) % alphabet.length);
+    return text;
+}
+
+// A fresh service name and password for the QR code, from `random` (Math.random).
+// Letters and digits only, so the payload needs no escaping.
+function qrPairing(random) {
+    return { name: "studio-" + randomText(random, 8), password: randomText(random, 12) };
+}
+
+// What the QR code holds: the phone's "Pair device with QR code" reads it,
+// then announces a pairing service under `name` and waits for adb pair
+// with `password`.
+function qrPayload(pairing) {
+    return "WIFI:T:ADB;S:" + pairing.name + ";P:" + pairing.password + ";;";
+}
+
+// The address of the pairing service called `name` ("" until it is announced).
+function pairingAddress(services, name) {
+    const service = services.find(entry => entry.type === "pairing" && entry.name === name);
+    return service ? service.address : "";
+}
+
+// The address a phone showing its pairing code dialog announces: its own
+// pairing service ("adb-<serial>-…"), not a QR code's. "" when there is none.
+function codePairingAddress(services) {
+    const service = services.find(entry => entry.type === "pairing" && serialOf(entry.name) !== entry.name);
+    return service ? service.address : "";
+}
+
+function canPairWithCode(address, code) {
+    return /^\S+:\d+$/.test(String(address).trim()) && /^\d{6}$/.test(String(code).trim());
+}
+
+// The hardware serial of the phone `adb pair` paired with, from the guid it
+// prints on success ("" when it failed).
+function pairedSerial(output) {
+    const match = /Successfully paired to \S+ \[guid=([^\]\s]+)\]/.exec(String(output || ""));
+    return match ? serialOf(match[1]) : "";
+}
+
+function pairProblem(output) {
+    const line = String(output || "").split("\n").map(text => text.trim()).find(text => text !== "");
+    return line ? line.replace(/^Failed:\s*/, "") : "Couldn't pair with the phone";
+}
+
+// The phone's Wi-Fi IPv4 address, from `ip -f inet addr show wlan0` ("" if none).
+function wifiIp(output) {
+    const match = /\binet (\d+\.\d+\.\d+\.\d+)\//.exec(String(output || ""));
+    return match ? match[1] : "";
+}
