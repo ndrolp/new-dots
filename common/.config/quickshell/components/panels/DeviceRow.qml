@@ -2,9 +2,10 @@ import QtQuick
 import "../../config" as Config
 import "." as Panels
 
-// One row of the Printers panel: a printer's or scanner's glyph, its name
+// One row of a device list (the Printers panel's printers and scanners,
+// the Android devices panel's Android devices): a glyph, the device's name
 // and a line under it (how it's connected, its state). What goes on the
-// right (a button, the Default badge) is the section's, put in the row and
+// right (buttons, the Default badge) is the section's, put in the row and
 // kept clear of with `trailingWidth`.
 Panels.PopupRow {
     id: row

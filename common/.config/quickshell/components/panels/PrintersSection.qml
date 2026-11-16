@@ -72,7 +72,7 @@ Column {
             width: root.width
             spacing: 2
 
-            Panels.PrinterRow {
+            Panels.DeviceRow {
                 width: parent.width
                 appearance: root.appearance
                 color: printer.open ? theme.backgroundSecondary

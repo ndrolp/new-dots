@@ -51,7 +51,9 @@ Column {
                 { label: "Web app maker", propertyName: "webAppsEnabled",
                   description: "Turn a website into an app that opens in its own Chrome window." },
                 { label: "Printers", propertyName: "printersEnabled",
-                  description: "See and manage the printers, add the ones found on the network or USB, follow print jobs, and scan." }
+                  description: "See and manage the printers, add the ones found on the network or USB, follow print jobs, and scan." },
+                { label: "Android devices", propertyName: "androidDevicesEnabled",
+                  description: "Pair, connect, and disconnect Android devices over the network with adb." }
             ]
 
             delegate: Column {

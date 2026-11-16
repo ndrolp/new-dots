@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Quickshell's runtime state (recent launcher apps, per-monitor wallpapers)
-# belongs to one machine: it is untracked and gitignored, and Quickshell
+# Quickshell's runtime state (recent launcher apps, per-monitor wallpapers,
+# known Android devices) belongs to one machine: it is untracked and gitignored, and Quickshell
 # creates it when missing. Appearance settings stay tracked.
 # Runs a real, headless `qs` on a scratch config: no live session is touched.
 # Usage: common/.config/quickshell/tests/state-files.sh
@@ -16,6 +16,7 @@ FAILED=0
 STATE_FILES=(
     common/.config/quickshell/services/launcher.json
     common/.config/quickshell/config/wallpapers.json
+    common/.config/quickshell/config/android-devices.json
 )
 
 fail() {
@@ -41,8 +42,8 @@ test_appearance_settings_are_still_tracked() {
     ! git -C "$REPO" check-ignore -q --no-index -- "$file" || fail "$file is gitignored"
 }
 
-# Starts a headless qs on a scratch config holding the real LauncherHistory
-# and Wallpapers services, without their state files, then quits.
+# Starts a headless qs on a scratch config holding the real LauncherHistory,
+# Wallpapers and AndroidDevices services, without their state files, then quits.
 test_quickshell_creates_missing_state_files() {
     command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
     local cfg="$SCRATCH/cfg" out
@@ -50,6 +51,8 @@ test_quickshell_creates_missing_state_files() {
     chmod 700 "$SCRATCH/run"
     cp "$QS_DIR/services/LauncherHistory.qml" "$cfg/services/"
     cp "$QS_DIR/config/Wallpapers.qml" "$QS_DIR/config/WallpaperModel.js" "$cfg/config/"
+    cp "$QS_DIR/services/AndroidDevices.qml" "$QS_DIR/services/AndroidDevices.js" \
+        "$QS_DIR/services/Assign.js" "$cfg/services/"
     cat >"$cfg/shell.qml" <<'QML'
 import Quickshell
 import QtQuick
@@ -59,6 +62,7 @@ import "config" as Config
 ShellRoot {
     Services.LauncherHistory {}
     Config.Wallpapers {}
+    Services.AndroidDevices {}
     Timer { interval: 1000; running: true; onTriggered: Qt.quit() }
 }
 QML
@@ -66,13 +70,15 @@ QML
         QT_QPA_PLATFORM=offscreen XDG_RUNTIME_DIR="$SCRATCH/run" \
         timeout 20 qs -p "$cfg/shell.qml" 2>&1)"
     local file
-    for file in services/launcher.json config/wallpapers.json; do
+    for file in services/launcher.json config/wallpapers.json config/android-devices.json; do
         [[ -s "$cfg/$file" ]] || { echo "$out" | sed 's/^/    | /'; fail "qs did not create $file"; return 1; }
     done
     jq -e '.recent == [] and .favorites == []' "$cfg/services/launcher.json" >/dev/null \
         || fail "launcher.json is not empty history: $(cat "$cfg/services/launcher.json")"
     jq -e '.assignments == {}' "$cfg/config/wallpapers.json" >/dev/null \
         || fail "wallpapers.json has assignments: $(cat "$cfg/config/wallpapers.json")"
+    jq -e '.devices == []' "$cfg/config/android-devices.json" >/dev/null \
+        || fail "android-devices.json has known devices: $(cat "$cfg/config/android-devices.json")"
 }
 
 for test in $(declare -F | awk '{print $3}' | grep '^test_'); do

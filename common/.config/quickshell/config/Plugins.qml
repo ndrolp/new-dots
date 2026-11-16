@@ -12,6 +12,7 @@ QtObject {
     property alias controlCenterEnabled: settings.controlCenterEnabled
     property alias webAppsEnabled: settings.webAppsEnabled
     property alias printersEnabled: settings.printersEnabled
+    property alias androidDevicesEnabled: settings.androidDevicesEnabled
     property alias launcherRecentLimit: settings.launcherRecentLimit
     property alias clipboardImagePreviewsEnabled: settings.clipboardImagePreviewsEnabled
 
@@ -43,6 +44,7 @@ QtObject {
             property bool controlCenterEnabled: true
             property bool webAppsEnabled: true
             property bool printersEnabled: true
+            property bool androidDevicesEnabled: true
             property int launcherRecentLimit: 20
             property bool clipboardImagePreviewsEnabled: true
         }

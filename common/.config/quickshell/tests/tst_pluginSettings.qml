@@ -66,6 +66,7 @@ TestCase {
                 property bool controlCenterEnabled: true
                 property bool webAppsEnabled: false
                 property bool printersEnabled: true
+                property bool androidDevicesEnabled: true
                 property int launcherRecentLimit: 8
                 property bool clipboardImagePreviewsEnabled: false
             }
@@ -96,7 +97,8 @@ TestCase {
             ["Screen capture", "screenCaptureEnabled"],
             ["Control center", "controlCenterEnabled"],
             ["Web app maker", "webAppsEnabled"],
-            ["Printers", "printersEnabled"]
+            ["Printers", "printersEnabled"],
+            ["Android devices", "androidDevicesEnabled"]
         ];
 
         for (const pair of rows) {

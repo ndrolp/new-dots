@@ -109,6 +109,17 @@ ShellRoot {
         onAdded: printers.refresh()
     }
 
+    Services.AndroidDevices {
+        id: androidDevices
+    }
+
+    // Pairs new Android devices, reading mDNS from the Android devices service.
+    Services.AndroidPairing {
+        id: androidPairing
+
+        devices: androidDevices
+    }
+
     Services.Scanners {
         id: scanners
 
@@ -242,6 +253,7 @@ ShellRoot {
         keybindCheatsheet: keybindCheatsheet
         webAppMaker: webAppMaker
         printersPanel: printersPanel
+        androidDevicesPanel: androidDevicesPanel
     }
 
     Modules.WebApps {
@@ -259,6 +271,15 @@ ShellRoot {
         printers: printers
         discoveredPrinters: discoveredPrinters
         scanners: scanners
+        plugins: plugins
+    }
+
+    Modules.AndroidDevices {
+        id: androidDevicesPanel
+
+        appearance: appearance
+        androidDevices: androidDevices
+        androidPairing: androidPairing
         plugins: plugins
     }
 
