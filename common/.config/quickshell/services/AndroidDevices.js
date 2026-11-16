@@ -34,10 +34,12 @@ function serialCommand(transport) {
     return ["adb", "-s", transport, "shell", "getprop", "ro.serialno"];
 }
 
-// From USB: the phone's Wi-Fi address, then adbd listening on the network.
+// From USB: the Android device's Wi-Fi address (read with wifiIp), then adbd
+// listening on the network. The interface isn't assumed to be wlan0: it
+// prints the default route, then every IPv4 address.
 const tcpipPort = 5555;
 function wifiIpCommand(serial) {
-    return ["adb", "-s", serial, "shell", "ip", "-f", "inet", "addr", "show", "wlan0"];
+    return ["adb", "-s", serial, "shell", "ip route get 1.1.1.1; ip -f inet addr show"];
 }
 function tcpipCommand(serial) {
     return ["adb", "-s", serial, "tcpip", String(tcpipPort)];
@@ -368,8 +370,18 @@ function pairProblem(output) {
     return line ? line.replace(/^Failed:\s*/, "") : "Couldn't pair with the phone";
 }
 
-// The phone's Wi-Fi IPv4 address, from `ip -f inet addr show wlan0` ("" if none).
+// Interfaces for mobile data (Qualcomm's rmnet, MediaTek's ccmni): this
+// computer can't be reached through them.
+const mobileInterface = /^(rmnet|ccmni)/;
+
+// The Android device's Wi-Fi IPv4 address from what wifiIpCommand prints
+// ("" if none): the source address of its default route, unless that goes
+// over mobile data, else the address of any wlan* interface.
 function wifiIp(output) {
-    const match = /\binet (\d+\.\d+\.\d+\.\d+)\//.exec(String(output || ""));
-    return match ? match[1] : "";
+    const text = String(output || "");
+    const route = /\bdev (\S+)\b.*\bsrc (\d+\.\d+\.\d+\.\d+)/.exec(text);
+    if (route && !mobileInterface.test(route[1]))
+        return route[2];
+    const wlan = /^\s*inet (\d+\.\d+\.\d+\.\d+)\/\d+.*\b(wlan\S*)\s*$/m.exec(text);
+    return wlan ? wlan[1] : "";
 }

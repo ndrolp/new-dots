@@ -342,15 +342,47 @@ TestCase {
         compare(Android.pairProblem(""), "Couldn't pair with the phone");
     }
 
-    // `adb shell ip -f inet addr show wlan0`, captured from the Pixel 10a.
-    function test_thePhonesWifiAddressIsReadFromIp() {
-        compare(Android.wifiIp([
-            "47: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000",
-            "    inet 192.168.1.44/24 brd 192.168.1.255 scope global dynamic wlan0",
-            "       valid_lft 83263sec preferred_lft 83263sec",
-            ""
-        ].join("\n")), "192.168.1.44");
+    // What wifiIpCommand prints (`ip route get 1.1.1.1`, then every inet
+    // address), captured from the Pixel 10a on Wi-Fi with mobile data on.
+    readonly property string routeOverWlan0: "1.1.1.1 via 192.168.1.1 dev wlan0 table 1047 src 192.168.1.44 uid 2000 \n    cache \n"
+    readonly property string mobileAddresses: [
+        "1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000",
+        "    inet 127.0.0.1/8 scope host lo",
+        "       valid_lft forever preferred_lft forever",
+        "15: rmnet1: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1500 qdisc mq state UNKNOWN group default qlen 1000",
+        "    inet 10.112.145.102/32 scope global rmnet1",
+        "       valid_lft forever preferred_lft forever",
+        ""
+    ].join("\n")
+    readonly property string wlanAddress: [
+        "47: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000",
+        "    inet 192.168.1.44/24 brd 192.168.1.255 scope global dynamic wlan0",
+        "       valid_lft 82236sec preferred_lft 82236sec",
+        ""
+    ].join("\n")
+
+    function test_theAndroidDevicesAddressIsTheOneItsDefaultRouteLeavesFrom() {
+        compare(Android.wifiIp(routeOverWlan0 + mobileAddresses + wlanAddress), "192.168.1.44");
+        // Whatever the interface is called.
+        compare(Android.wifiIp("1.1.1.1 via 10.0.0.1 dev wifi0 src 10.0.0.23 uid 2000\n" + mobileAddresses),
+            "10.0.0.23");
+    }
+
+    function test_withoutARouteAnyWlanAddressIsTaken() {
+        compare(Android.wifiIp("RTNETLINK answers: Network is unreachable\n" + mobileAddresses
+            + wlanAddress.replace(/wlan0/g, "wlan1")), "192.168.1.44");
+    }
+
+    // A default route over mobile data can't reach this computer.
+    function test_aRouteOverMobileDataIsntWifi() {
+        compare(Android.wifiIp("1.1.1.1 dev rmnet1 table 1003 src 10.112.145.102 uid 2000\n"
+            + mobileAddresses), "");
+        compare(Android.wifiIp("1.1.1.1 dev rmnet1 table 1003 src 10.112.145.102 uid 2000\n"
+            + mobileAddresses + wlanAddress), "192.168.1.44");
+    }
+
+    function test_noAddressAtAllIsNone() {
         compare(Android.wifiIp(""), "");
-        compare(Android.wifiIp("Device \"wlan0\" does not exist.\n"), "");
+        compare(Android.wifiIp("RTNETLINK answers: Network is unreachable\n" + mobileAddresses), "");
     }
 }
