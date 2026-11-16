@@ -1,6 +1,6 @@
 import QtQuick
 import "../../config" as Config
-import "../../services/AndroidDevices.js" as Android
+import "../../services/AndroidPairing.js" as Pairing
 import "." as Panels
 
 // The *Pair new device* section of the Android devices panel. By default it
@@ -28,7 +28,7 @@ Column {
     property string addressText: ""
     property bool addressEdited: false
     property string codeText: ""
-    readonly property bool canPair: !busy && Android.canPairWithCode(addressText, codeText)
+    readonly property bool canPair: !busy && Pairing.canPairWithCode(addressText, codeText)
 
     signal pairWithCodeRequested(string address, string code)
     // Escape in a field, which keeps it from the panel.

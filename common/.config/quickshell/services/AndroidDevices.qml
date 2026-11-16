@@ -5,12 +5,13 @@ import "Assign.js" as Assign
 import "AndroidDevices.js" as Android
 
 // The Android devices and known devices, for the Android devices panel, and
-// pairing, connecting and disconnecting them over the network with whatever
-// adb is on PATH. It reads `adb devices -l` and `adb mdns services` every
-// 2 s only while `watching` (the panel is open); nothing runs while it is
-// closed. The rules are in AndroidDevices.js; this only runs adb.
-// Known devices are kept in config/android-devices.json, which belongs to
-// the machine and isn't tracked. Nothing connects on its own.
+// connecting and disconnecting them over the network with whatever adb is
+// on PATH. It reads `adb devices -l` and `adb mdns services` every 2 s only
+// while `watching` (the panel is open); nothing runs while it is closed.
+// The rules are in AndroidDevices.js; this only runs adb. Pairing is
+// AndroidPairing.qml, which reads `services` and connects through
+// connectPaired. Known devices are kept in config/android-devices.json,
+// which belongs to the machine and isn't tracked. Nothing connects on its own.
 QtObject {
     id: root
 
@@ -34,28 +35,11 @@ QtObject {
     // failed; "" otherwise.
     property string message: ""
     property string problem: ""
-    // The action running ("connect", "disconnect", "wireless", "pair" or "")
-    // and the serial of the row it is for.
+    // The action running ("connect", "disconnect", "wireless" or "") and the
+    // serial of the row it is for.
     property string task: ""
     property string taskSerial: ""
     readonly property bool busy: task !== ""
-
-    // Pairing: the QR code's service name and password (fresh on every
-    // open), the drawn code ("" until drawn), and what pairing did.
-    property var qr: ({ name: "", password: "" })
-    property string qrImage: ""
-    property bool qrencodeAvailable: true
-    readonly property string qrProblem: qrencodeAvailable ? "" : Android.missingQrencode
-    // True once a phone paired; the QR code is hidden until the next open.
-    property bool paired: false
-    property string pairMessage: ""
-    property string pairProblem: ""
-    // The phone just paired, waiting to be connected ("" for none), and the
-    // address already tried for it.
-    property string pairedSerial: ""
-    property string pairedAddressTried: ""
-    // What a phone showing its pairing code dialog announces ("" otherwise).
-    readonly property string codeAddress: Android.codePairingAddress(services)
 
     // Nothing is read while the panel is closed.
     function refresh() {
@@ -173,67 +157,18 @@ QtObject {
         });
     }
 
-    // Pairs with the pairing service at `address`, then connects the phone
-    // once it announces itself.
-    function pair(address, password) {
-        if (!begin("pair", ""))
-            return;
-        pairMessage = "";
-        pairProblem = "";
-        run(Android.pairCommand(address.trim(), password.trim()), output => {
-            const serial = Android.pairedSerial(output);
-            if (serial === "") {
-                pairProblem = Android.pairProblem(output);
-                // A QR code is only good for one try.
-                if (password === qr.password)
-                    newQrCode();
-            } else {
-                pairedSerial = serial;
-                pairedAddressTried = "";
-                pairMessage = "Paired, connecting…";
-            }
+    // Connects an Android device pairing just paired at `address`, then
+    // `done(outcome)` (connectOutcome / worstOutcome). The pairing service
+    // reports what happened, so the device list says nothing. False when
+    // another action is running.
+    function connectPaired(serial, address, done) {
+        if (!begin("connect", serial))
+            return false;
+        tryAddresses([address], [], outcome => {
             finish();
+            done(outcome);
         });
-    }
-
-    function pairWithCode(address, code) {
-        if (Android.canPairWithCode(address, code))
-            pair(address, code);
-    }
-
-    function newQrCode() {
-        const dir = Quickshell.env("XDG_RUNTIME_DIR") || "/tmp";
-        qr = Android.qrPairing(Math.random);
-        qrImage = "";
-        qrProcess.path = Android.qrPath(dir, qr.name);
-        qrProcess.command = Android.qrCommand(dir, qrProcess.path, Android.qrPayload(qr));
-        qrProcess.running = true;
-    }
-
-    // The phone that scanned the QR code announces its name: pair with it.
-    function followQrCode() {
-        if (paired || busy || qr.name === "")
-            return;
-        const address = Android.pairingAddress(services, qr.name);
-        if (address !== "")
-            pair(address, qr.password);
-    }
-
-    // The phone just paired is connected once it announces itself (unless adb
-    // already connected it); then pairing says which phone it was.
-    function followPairedDevice() {
-        if (pairedSerial === "")
-            return;
-        const row = rowFor(pairedSerial);
-        if (row && Android.connectedOverNetwork(row)) {
-            pairMessage = "Paired with " + row.name;
-            paired = true;
-            pairedSerial = "";
-        } else if (row && row.announced !== "" && row.announced !== pairedAddressTried && !busy) {
-            pairedAddressTried = row.announced;
-            begin("connect", row.serial);
-            tryAddresses([row.announced], [], () => finish());
-        }
+        return true;
     }
 
     // Records that the network transport `transport` is the Android device
@@ -265,21 +200,11 @@ QtObject {
             return;
         message = "";
         problem = "";
-        paired = false;
-        pairMessage = "";
-        pairProblem = "";
-        pairedSerial = "";
-        newQrCode();
         adbCheck.running = true;
     }
 
-    onRowsChanged: {
-        // Every device connected over the network is remembered.
-        Assign.ifChanged(knownDevices, "devices", Android.remembered(known, rows));
-        followPairedDevice();
-    }
-
-    onServicesChanged: followQrCode()
+    // Every device connected over the network is remembered.
+    onRowsChanged: Assign.ifChanged(knownDevices, "devices", Android.remembered(known, rows))
     onDevicesChanged: placeTransports()
 
     property var poll: Timer {
@@ -360,17 +285,6 @@ QtObject {
             const output = stepOutput.text;
             if (done)
                 Qt.callLater(() => done(output, exitCode));
-        }
-    }
-
-    property var qrProcess: Process {
-        id: qrProcess
-
-        property string path: ""
-
-        onExited: exitCode => {
-            root.qrencodeAvailable = exitCode !== 127;
-            root.qrImage = exitCode === 0 ? "file://" + path : "";
         }
     }
 

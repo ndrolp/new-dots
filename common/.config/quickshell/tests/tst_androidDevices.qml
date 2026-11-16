@@ -313,61 +313,6 @@ TestCase {
         compare(Android.worstOutcome([]), "unreachable");
     }
 
-    // A stand-in for Math.random that walks through `values`.
-    function randomFrom(values) {
-        let index = 0;
-        return () => values[index++ % values.length];
-    }
-
-    function test_eachQrCodeHasAFreshNameAndPassword() {
-        const first = Android.qrPairing(randomFrom([0, 0.5, 0.99]));
-        verify(/^studio-[A-Za-z0-9]{8}$/.test(first.name), first.name);
-        verify(/^[A-Za-z0-9]{12}$/.test(first.password), first.password);
-        const second = Android.qrPairing(randomFrom([0.25, 0.75]));
-        verify(second.name !== first.name);
-        verify(second.password !== first.password);
-        // Math.random is what the panel passes.
-        verify(Android.qrPairing(Math.random).name !== Android.qrPairing(Math.random).name);
-    }
-
-    function test_theQrCodeCarriesTheNameAndPasswordTheWayAndroidReadsThem() {
-        compare(Android.qrPayload({ name: "studio-Xy12Ab34", password: "s3cretPass12" }),
-            "WIFI:T:ADB;S:studio-Xy12Ab34;P:s3cretPass12;;");
-    }
-
-    function test_thePhoneThatScannedTheCodeAnnouncesItsName() {
-        const services = Android.parseServices(wirelessDebuggingOn);
-        compare(Android.pairingAddress(services, "studio-Xy12Ab34"), "192.168.1.50:39999");
-        compare(Android.pairingAddress(services, "studio-Other"), "");
-    }
-
-    // While a phone's "Pair device with pairing code" dialog is open it
-    // announces a pairing service of its own, not the QR code's.
-    function test_aPhoneShowingItsPairingCodeFillsTheAddress() {
-        const services = Android.parseServices(wirelessDebuggingOn);
-        compare(Android.codePairingAddress(services), "192.168.1.44:41233");
-        compare(Android.codePairingAddress(Android.parseServices(
-            "studio-Xy12Ab34\t_adb-tls-pairing._tcp\t192.168.1.50:39999\n")), "");
-    }
-
-    function test_aPairingCodeNeedsAnAddressAndSixDigits() {
-        verify(Android.canPairWithCode("192.168.1.44:41233", "123456"));
-        verify(Android.canPairWithCode(" 192.168.1.44:41233 ", " 123456 "));
-        verify(!Android.canPairWithCode("192.168.1.44", "123456"));
-        verify(!Android.canPairWithCode("192.168.1.44:41233", "12345"));
-        verify(!Android.canPairWithCode("192.168.1.44:41233", "12345a"));
-        verify(!Android.canPairWithCode("", ""));
-    }
-
-    function test_whatAdbPairAnswered() {
-        compare(Android.pairedSerial(
-            "Successfully paired to 192.168.1.44:41233 [guid=adb-61291JEA326957-AbCdEf]\n"), "61291JEA326957");
-        compare(Android.pairedSerial("Failed: Wrong password or connection was dropped.\n"), "");
-        compare(Android.pairProblem("Failed: Wrong password or connection was dropped.\n"),
-            "Wrong password or connection was dropped.");
-        compare(Android.pairProblem(""), "Couldn't pair with the phone");
-    }
-
     // What wifiIpCommand prints (`ip route get 1.1.1.1`, then every inet
     // address), captured from the Pixel 10a on Wi-Fi with mobile data on.
     readonly property string routeOverWlan0: "1.1.1.1 via 192.168.1.1 dev wlan0 table 1047 src 192.168.1.44 uid 2000 \n    cache \n"

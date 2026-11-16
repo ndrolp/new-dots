@@ -113,6 +113,13 @@ ShellRoot {
         id: androidDevices
     }
 
+    // Pairs new Android devices, reading mDNS from the Android devices service.
+    Services.AndroidPairing {
+        id: androidPairing
+
+        devices: androidDevices
+    }
+
     Services.Scanners {
         id: scanners
 
@@ -272,6 +279,7 @@ ShellRoot {
 
         appearance: appearance
         androidDevices: androidDevices
+        androidPairing: androidPairing
         plugins: plugins
     }
 

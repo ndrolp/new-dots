@@ -16,6 +16,7 @@ Variants {
 
     required property var appearance
     required property var androidDevices
+    required property var androidPairing
     property bool open: false
 
     signal closeRequested()
@@ -111,7 +112,7 @@ Variants {
                         unavailable: panel.service.adbProblem
                         message: panel.service.message
                         problem: panel.service.problem
-                        busy: panel.service.busy
+                        busy: root.androidPairing.busy
                         onActionRequested: (action, row) => panel.service[Android.rowActions[action].method](row)
                     }
 
@@ -121,14 +122,14 @@ Variants {
                         width: parent.width
                         visible: panel.service.adbAvailable
                         appearance: root.appearance
-                        qrImage: panel.service.qrImage
-                        qrProblem: panel.service.qrProblem
-                        codeAddress: panel.service.codeAddress
-                        paired: panel.service.paired
-                        message: panel.service.pairMessage
-                        problem: panel.service.pairProblem
-                        busy: panel.service.busy
-                        onPairWithCodeRequested: (address, code) => panel.service.pairWithCode(address, code)
+                        qrImage: root.androidPairing.qrImage
+                        qrProblem: root.androidPairing.qrProblem
+                        codeAddress: root.androidPairing.codeAddress
+                        paired: root.androidPairing.paired
+                        message: root.androidPairing.message
+                        problem: root.androidPairing.problem
+                        busy: root.androidPairing.busy
+                        onPairWithCodeRequested: (address, code) => root.androidPairing.pairWithCode(address, code)
                         onCloseRequested: root.closeRequested()
                     }
                 }

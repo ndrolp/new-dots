@@ -2,8 +2,8 @@
 
 // The Android devices panel's rules: reading what adb prints, merging live
 // Android devices with known devices into one row each, choosing the address
-// Connect uses, and the QR code that pairs a phone. Pure, no Quickshell;
-// AndroidDevices.qml runs adb.
+// Connect uses and what connecting answered. Pure, no Quickshell;
+// AndroidDevices.qml runs adb. Pairing is in AndroidPairing.js.
 
 // Whatever adb is on PATH; no SDK path is assumed.
 const devicesCommand = ["adb", "devices", "-l"];
@@ -14,8 +14,6 @@ function toolCheck(tool) {
 }
 const missingAdb = "adb isn't installed, so Android devices can't be listed or connected. "
     + "Install android-tools.";
-const missingQrencode = "qrencode isn't installed, so the QR code can't be drawn. "
-    + "Install qrencode, or use a pairing code.";
 
 function connectCommand(address) {
     return ["adb", "connect", address];
@@ -23,10 +21,6 @@ function connectCommand(address) {
 
 function disconnectCommand(transports) {
     return ["sh", "-c", "for transport; do adb disconnect \"$transport\"; done", "sh"].concat(transports);
-}
-
-function pairCommand(address, password) {
-    return ["adb", "pair", address, password];
 }
 
 // What a network transport reports as its hardware serial.
@@ -49,18 +43,6 @@ function tcpipCommand(serial) {
 // and some on the other.
 function merged(command) {
     return ["sh", "-c", "exec \"$@\" 2>&1", "sh"].concat(command);
-}
-
-// Where the QR code for `name` is drawn, in `dir` (the runtime directory).
-function qrPath(dir, name) {
-    return dir + "/quickshell-android-pairing-" + name + ".png";
-}
-
-// Removes the old QR codes in `dir` and draws `payload` at `path`. It runs
-// through sh, which exits 127 when it can't find qrencode.
-function qrCommand(dir, path, payload) {
-    return ["sh", "-c", "rm -f \"$0\"/quickshell-android-pairing-*.png; exec qrencode -s 6 -m 2 -o \"$1\" \"$2\"",
-        dir, path, payload];
 }
 
 // The model adb reports ("Pixel_10a") as a person writes it.
@@ -339,57 +321,6 @@ const connectProblems = {
 
 function connectProblem(outcome) {
     return connectProblems[outcome] || "";
-}
-
-const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-function randomText(random, length) {
-    let text = "";
-    for (let index = 0; index < length; index++)
-        text += alphabet.charAt(Math.floor(random() * alphabet.length) % alphabet.length);
-    return text;
-}
-
-// A fresh service name and password for the QR code, from `random` (Math.random).
-// Letters and digits only, so the payload needs no escaping.
-function qrPairing(random) {
-    return { name: "studio-" + randomText(random, 8), password: randomText(random, 12) };
-}
-
-// What the QR code holds: the phone's "Pair device with QR code" reads it,
-// then announces a pairing service under `name` and waits for adb pair
-// with `password`.
-function qrPayload(pairing) {
-    return "WIFI:T:ADB;S:" + pairing.name + ";P:" + pairing.password + ";;";
-}
-
-// The address of the pairing service called `name` ("" until it is announced).
-function pairingAddress(services, name) {
-    const service = services.find(entry => entry.type === "pairing" && entry.name === name);
-    return service ? service.address : "";
-}
-
-// The address a phone showing its pairing code dialog announces: its own
-// pairing service ("adb-<serial>-…"), not a QR code's. "" when there is none.
-function codePairingAddress(services) {
-    const service = services.find(entry => entry.type === "pairing" && serialOf(entry.name) !== entry.name);
-    return service ? service.address : "";
-}
-
-function canPairWithCode(address, code) {
-    return /^\S+:\d+$/.test(String(address).trim()) && /^\d{6}$/.test(String(code).trim());
-}
-
-// The hardware serial of the phone `adb pair` paired with, from the guid it
-// prints on success ("" when it failed).
-function pairedSerial(output) {
-    const match = /Successfully paired to \S+ \[guid=([^\]\s]+)\]/.exec(String(output || ""));
-    return match ? serialOf(match[1]) : "";
-}
-
-function pairProblem(output) {
-    const line = String(output || "").split("\n").map(text => text.trim()).find(text => text !== "");
-    return line ? line.replace(/^Failed:\s*/, "") : "Couldn't pair with the phone";
 }
 
 // Interfaces for mobile data (Qualcomm's rmnet, MediaTek's ccmni): this
