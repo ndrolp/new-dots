@@ -105,9 +105,9 @@ hl.bind(
 	hl.dsp.exec_cmd(qs .. "printers toggle"),
 	{ description = "Toggle printers panel" }
 )
-hl.bind(mainMod .. " + c", hl.dsp.exec_cmd(qs .. "control-center toggle"), { description = "Toggle control center" })
+hl.bind(win .. " + c", hl.dsp.exec_cmd(qs .. "control-center toggle"), { description = "Toggle control center" })
 hl.bind(mainMod .. " + q", hl.dsp.exec_cmd(qs .. "quick-settings toggle"), { description = "Toggle quick settings" })
-hl.bind(mainMod .. " + n", hl.dsp.exec_cmd(qs .. "notifications toggle"), { description = "Toggle notifications" })
+hl.bind(win .. " + n", hl.dsp.exec_cmd(qs .. "notifications toggle"), { description = "Toggle notifications" })
 hl.bind(mainMod .. " + b", hl.dsp.exec_cmd("pypr expose"), { description = "Expose all windows" })
 hl.bind(
 	mainMod .. " + SHIFT + b",
