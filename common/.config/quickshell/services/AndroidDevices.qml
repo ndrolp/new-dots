@@ -112,12 +112,12 @@ QtObject {
         run(Android.disconnectCommand(row.wifi), () => finish());
     }
 
-    // Removes it from the list only: the phone keeps the pairing.
+    // Removes it from the list only: the Android device keeps the pairing.
     function forget(row) {
         knownDevices.devices = Android.forgotten(known, row.serial);
     }
 
-    // From USB: reads the phone's Wi-Fi address, has adbd listen on the
+    // From USB: reads the Android device's Wi-Fi address, has adbd listen on the
     // network, then connects to it there.
     function connectWirelessly(row) {
         if (!begin("wireless", row.serial))

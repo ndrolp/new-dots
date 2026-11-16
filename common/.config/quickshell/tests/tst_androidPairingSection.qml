@@ -4,7 +4,7 @@ import "../components/panels" as Panels
 import "../config/Motion.js" as Motion
 
 // The Android devices panel's *Pair new device* section: the QR code by
-// default, and a pairing code typed with the phone's address, filled from
+// default, and a pairing code typed with the Android device's address, filled from
 // mDNS while its pairing dialog is open. AndroidDevicesPanel.qml hands it
 // what the service has.
 TestCase {
@@ -109,7 +109,7 @@ TestCase {
         verify(qrCode(section));
     }
 
-    function test_theAddressIsFilledFromThePhonesPairingDialog() {
+    function test_theAddressIsFilledFromTheAndroidDevicesPairingDialog() {
         const section = make({ qrImage: image });
         link(section).activated();
         section.codeAddress = "192.168.1.44:41233";
@@ -136,7 +136,7 @@ TestCase {
         compare(address.text, "192.168.1.50:37001");
     }
 
-    function test_onceAPhonePairsTheQrCodeGoes() {
+    function test_onceAnAndroidDevicePairsTheQrCodeGoes() {
         const section = make({ qrImage: image, paired: true, message: "Paired with Pixel 10a" });
         verify(!qrCode(section));
         verify(shown(section, "Paired with Pixel 10a"));

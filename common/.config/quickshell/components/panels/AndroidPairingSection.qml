@@ -4,10 +4,10 @@ import "../../services/AndroidPairing.js" as Pairing
 import "." as Panels
 
 // The *Pair new device* section of the Android devices panel. By default it
-// shows the QR code the phone's "Pair device with QR code" scans; the
-// service pairs and connects the phone when it announces the code's name.
-// "Use a pairing code" switches to fields for the phone's IP:port and its
-// 6-digit code; the address fills in from mDNS while the phone's pairing
+// shows the QR code the Android device's "Pair device with QR code" scans; the
+// service pairs and connects the Android device when it announces the code's name.
+// "Use a pairing code" switches to fields for the Android device's IP:port and its
+// 6-digit code; the address fills in from mDNS while the Android device's pairing
 // dialog is open, and both stay editable.
 Column {
     id: root
@@ -16,9 +16,9 @@ Column {
     // The drawn QR code (a file URL, "" until drawn) and why it can't be.
     property string qrImage: ""
     property string qrProblem: ""
-    // What a phone showing its pairing dialog announces ("" otherwise).
+    // What an Android device showing its pairing dialog announces ("" otherwise).
     property string codeAddress: ""
-    // Once a phone paired the QR code goes; `message` says which phone.
+    // Once an Android device paired the QR code goes; `message` says which one.
     property bool paired: false
     property string message: ""
     property string problem: ""

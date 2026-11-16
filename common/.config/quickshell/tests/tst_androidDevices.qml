@@ -206,7 +206,7 @@ TestCase {
         compare(Android.rowActions.connectWirelessly.label, "Connect wirelessly");
     }
 
-    // An ip:port connection nobody can place asks the phone for its serial.
+    // An ip:port connection nobody can place asks the Android device for its serial.
     function test_onlyUnplacedIpPortConnectionsAskForTheirSerial() {
         const devices = Android.parseDevices(pixelOverUsb
             + "192.168.1.44:5555 device model:Pixel_10a\n"

@@ -79,7 +79,7 @@ function parseDevices(text) {
     return devices;
 }
 
-// The mDNS service types the panel uses: a phone with Wireless debugging on
+// The mDNS service types the panel uses: an Android device with Wireless debugging on
 // announces "connect"; one showing its pairing dialog (or the QR code's
 // service) announces "pairing".
 const serviceTypes = {
