@@ -62,41 +62,49 @@ TestCase {
         compare(CapsulePlacement.inputRegion(data.surface, data.margins), data.region);
     }
 
-    // The workspace row has a window of its own on the capsule's screen edge,
-    // running the length of the screen. It keeps clear of what the capsule
-    // reserves, then the profile's spacing: under a top capsule and above a
-    // bottom one. Its pills are centred on the capsule's centre.
-    function test_theWorkspaceRowSitsPastTheCapsuleCentredWithIt_data() {
-        const capsule = { x: 420, y: 6, width: 184, height: 30 };
+    // A capsule reaches past its row, away from its screen edge, by `strip`
+    // for its workspace pills, and stays fully round.
+    function test_theCapsuleHoldsItsWorkspacePills_data() {
         return [
-            { tag: "top", barPosition: "top", capsule: capsule,
-                place: { anchors: { top: true, right: true, bottom: false, left: true }, margin: 4, centre: 512 } },
-            { tag: "bottom", barPosition: "bottom", capsule: capsule,
-                place: { anchors: { top: false, right: true, bottom: true, left: true }, margin: 4, centre: 512 } }
+            { tag: "top", barPosition: "top", place: { x: 408, y: 0, width: 184, height: 38, radius: 19 } },
+            { tag: "bottom", barPosition: "bottom", place: { x: 408, y: -8, width: 184, height: 38, radius: 19 } }
         ];
     }
 
-    function test_theWorkspaceRowSitsPastTheCapsuleCentredWithIt(data) {
-        const bar = { barStyle: "capsule", barPosition: data.barPosition, spacing: 4 };
+    function test_theCapsuleHoldsItsWorkspacePills(data) {
+        const content = { barPosition: data.barPosition, width: 1000, height: 30 };
 
-        compare(CapsulePlacement.workspaceRow(bar, data.capsule), data.place);
+        compare(CapsulePlacement.surface(content, { start: 420, end: 580 }, 12, 8), data.place);
     }
 
-    // Only a capsule has a workspace row, and only while the capsule is there.
-    function test_onlyACapsuleHasAWorkspaceRow_data() {
-        const capsule = { x: 420, y: 6, width: 184, height: 30 };
+    // The workspace pills sit inside the capsule, centred on it, just past its
+    // row of bar elements: under the row of a top capsule and above the row of
+    // a bottom one. Takes the bar content and the capsule.
+    function test_theWorkspacePillsSitInsideTheCapsulePastItsRow_data() {
         return [
-            { tag: "opaque", barStyle: "opaque", capsule: capsule },
-            { tag: "transparent", barStyle: "transparent", capsule: capsule },
-            { tag: "docked", barStyle: "docked", capsule: capsule },
-            { tag: "no capsule", barStyle: "capsule", capsule: { x: 500, y: 6, width: 0, height: 0 } }
+            { tag: "top", barPosition: "top", capsule: { x: 408, y: 0, width: 184, height: 38 },
+                pills: { centre: 500, y: 30 } },
+            { tag: "bottom", barPosition: "bottom", capsule: { x: 408, y: -8, width: 184, height: 38 },
+                pills: { centre: 500, y: -4 } }
         ];
     }
 
-    function test_onlyACapsuleHasAWorkspaceRow(data) {
-        const bar = { barStyle: data.barStyle, barPosition: "top", spacing: 4 };
+    function test_theWorkspacePillsSitInsideTheCapsulePastItsRow(data) {
+        const content = { barPosition: data.barPosition, width: 1000, height: 30 };
 
-        compare(CapsulePlacement.workspaceRow(bar, data.capsule), null);
+        compare(CapsulePlacement.workspacePills(content, data.capsule), data.pills);
+    }
+
+    // With no capsule drawn there are no pills.
+    function test_noCapsuleNoWorkspacePills_data() {
+        return [
+            { tag: "no capsule", capsule: null },
+            { tag: "empty capsule", capsule: { x: 500, y: 0, width: 0, height: 0 } }
+        ];
+    }
+
+    function test_noCapsuleNoWorkspacePills(data) {
+        compare(CapsulePlacement.workspacePills({ barPosition: "top", width: 1000, height: 30 }, data.capsule), null);
     }
 
     // A capsule's row in its bar content: 320 px long, 32 px deep.

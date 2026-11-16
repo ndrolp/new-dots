@@ -1,10 +1,11 @@
 import QtQuick
+import "BarPlacement.js" as BarPlacement
 import "../../config" as Config
 
-// The capsule's workspace row: one round pill per workspace of its monitor, in
-// the profile's background colour and opacity like the capsule, with the bar
-// border around each when that setting is on. The active workspace's pill is
-// highlighted and wider; a click on a pill switches to its workspace.
+// The capsule's workspace pills, inside the capsule past its row of bar
+// elements: one small pill per workspace of its monitor, with no label. The
+// active workspace's pill is twice as long and highlighted; a click on a pill
+// switches to its workspace.
 Row {
     id: root
 
@@ -13,16 +14,11 @@ Row {
     // Tells which workspace is active and switches to one
     // (services/WorkspaceService.qml).
     required property var workspaceService
-    required property color fillColor
     property color activeColor: theme.accent
-    // Whether the bar border runs around each pill.
-    property bool border: false
-    property color borderColor: "transparent"
-    // The bar's appearance: its sizes, spacing and motion.
+    property color idleColor: Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.35)
+    // The bar's appearance: its spacing and motion.
     required property var appearance
-    // How deep every pill is: a workspace button and the pill padding on
-    // either side of it.
-    readonly property real pillDepth: appearance.workspaceButtonSize + appearance.pillVerticalPadding * 2
+    readonly property real pillDepth: BarPlacement.workspacePillDepth
     // The pills, in order.
     readonly property var pills: {
         const items = [];
@@ -45,12 +41,10 @@ Row {
             readonly property int workspaceId: modelData
             readonly property bool active: root.workspaceService.isActive(workspaceId)
 
-            width: root.pillDepth + (active ? root.appearance.activeWorkspaceHorizontalPadding * 2 : 0)
+            width: root.pillDepth * (active ? 4 : 2)
             height: root.pillDepth
             radius: height / 2
-            color: active ? root.activeColor : root.fillColor
-            border.width: root.border ? 1 : 0
-            border.color: root.border ? root.borderColor : "transparent"
+            color: active ? root.activeColor : root.idleColor
 
             AlongBarBehavior on width { appearance: root.appearance }
 
@@ -60,16 +54,10 @@ Row {
                 }
             }
 
-            ShellText {
-                anchors.centerIn: parent
-                text: pill.workspaceId
-                color: pill.active ? theme.background : theme.text
-                font.pixelSize: root.appearance.textSize
-                font.bold: true
-            }
-
+            // The pills are small: each takes clicks a little past its edges.
             MouseArea {
                 anchors.fill: parent
+                anchors.margins: -root.spacing / 2
                 cursorShape: Qt.PointingHandCursor
                 onClicked: root.workspaceService.switchTo(pill.workspaceId)
             }

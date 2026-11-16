@@ -5,27 +5,30 @@
 
 // Where the capsule bar style's capsule sits: its surface in the bar content,
 // grown round a popup inside, the part of its window that takes clicks and
-// its workspace row. Pure functions; they never mutate what they are given.
+// its workspace pills. Pure functions; they never mutate what they are given.
 
 // Where the capsule is drawn in the bar content, { x, y, width, height,
 // radius }: around its row's { start, end } along the bar, with `padding` at
-// both ends, as deep as the content and with fully round ends. Takes the bar
-// content as BarLayout measures it, { barPosition, width, height }. With
-// nothing in the row there is no capsule: it has no size.
-function surface(content, span, padding) {
+// both ends, as deep as the content and `strip` past it, away from the screen
+// edge, for its workspace pills (BarPlacement.workspaceStrip), and with fully
+// round ends. Takes the bar content as BarLayout measures it,
+// { barPosition, width, height }. With nothing in the row there is no
+// capsule: it has no size.
+function surface(content, span, padding, strip) {
     if (span.end <= span.start)
         return { x: span.start, y: 0, width: 0, height: 0, radius: 0 };
 
     const sideBar = BarPosition.sideBar(content.barPosition);
     const depth = sideBar ? content.width : content.height;
+    const reach = depth + (strip || 0);
     const rect = BarPosition.area(content.barPosition, {
         along: span.start - padding,
         away: 0,
         length: span.end - span.start + padding * 2,
-        depth: depth
+        depth: reach
     }, depth);
 
-    return Object.assign(rect, { radius: depth / 2 });
+    return Object.assign(rect, { radius: reach / 2 });
 }
 
 // The capsule with a popup inside, { x, y, width, height, radius }: its row's
@@ -60,24 +63,18 @@ function inputRegion(surface, margins) {
     };
 }
 
-// Where the capsule's workspace row sits: in a window of its own on the
-// capsule's screen edge, running the length of the screen. That window keeps
-// clear of what the capsule reserves, so `margin`, the profile's spacing, is
-// its gap from the capsule: it is under a top capsule and above a bottom one.
-// Its pills are centred on `centre`, the capsule's centre along the bar.
-// Takes the bar profile, { barStyle, barPosition, spacing }, and the part of
-// its bar window that takes clicks, { x, y, width, height }, as inputRegion
-// gives it: on a capsule, the capsule itself. Returns
-// { anchors: { top, right, bottom, left }, margin, centre }, or null on any
-// other bar style or with no capsule drawn.
-function workspaceRow(bar, capsuleRegion) {
-    if (!BarProfileModel.capsule(bar) || capsuleRegion.width <= 0)
+// Where the capsule's workspace pills sit in the bar content,
+// { centre, y }: inside the capsule, centred on it along the bar, just past
+// its row of bar elements, so under the row of a top capsule and above the
+// row of a bottom one. Takes the bar content, { barPosition, height }, and
+// the capsule as surface gives it, or null; null with no capsule drawn.
+function workspacePills(content, capsule) {
+    if (!capsule || capsule.width <= 0)
         return null;
 
     return {
-        anchors: BarPlacement.windowAnchors(bar.barPosition),
-        margin: bar.spacing,
-        centre: capsuleRegion.x + capsuleRegion.width / 2
+        centre: capsule.x + capsule.width / 2,
+        y: content.barPosition === "bottom" ? -BarPlacement.workspacePillDepth : content.height
     };
 }
 
