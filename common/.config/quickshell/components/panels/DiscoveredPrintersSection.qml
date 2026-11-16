@@ -66,7 +66,7 @@ Column {
             width: root.width
             spacing: 2
 
-            Panels.PrinterRow {
+            Panels.DeviceRow {
                 width: parent.width
                 appearance: root.appearance
                 title: printer.modelData.model

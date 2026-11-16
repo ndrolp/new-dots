@@ -160,7 +160,7 @@ remembered mode, how a scan is named, run and reports progress, its outcome
 or its error, the *Show in folder* URI, and the scan settings kept in
 `appearance.json` (`services/Scanners.js`; `scan.sh`, below, runs the scan
 wrapper; `ScannersSection.qml` and `ScanView.qml` have no tests yet,
-`PrinterRow.qml` is tested through the sections, and `PrintersPanel.qml`
+`DeviceRow.qml` is tested through the sections, and `PrintersPanel.qml`
 and the services' `.qml` files need Quickshell and aren't tested here),
 the Android devices panel's rules: `adb devices -l` and `adb mdns services`
 read into one row per Android device with its state, known devices merged

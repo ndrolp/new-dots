@@ -57,7 +57,7 @@ Column {
     Repeater {
         model: root.unavailable === "" ? root.rows : []
 
-        delegate: Panels.PrinterRow {
+        delegate: Panels.DeviceRow {
             id: device
 
             required property var modelData

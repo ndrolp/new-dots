@@ -49,7 +49,7 @@ Column {
     Repeater {
         model: root.scanners
 
-        delegate: Panels.PrinterRow {
+        delegate: Panels.DeviceRow {
             id: scanner
 
             required property var modelData
