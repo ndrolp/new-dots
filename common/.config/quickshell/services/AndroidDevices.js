@@ -215,16 +215,27 @@ function rows(devices, services, known, serials) {
     }).filter(entry => entry.state !== "notSeen" || entry.known);
 }
 
-const stateTexts = {
-    usb: "Connected · USB",
-    wifi: "Connected · Wi-Fi",
-    both: "USB + Wi-Fi",
-    available: "Available",
-    notSeen: "Not seen"
+// How each state looks in the device list: its text, glyph and the Theme
+// colour of the glyph.
+const stateLooks = {
+    usb: { text: "Connected · USB", glyph: "󰕓", color: "accent" },
+    wifi: { text: "Connected · Wi-Fi", glyph: "󰄜", color: "accent" },
+    both: { text: "USB + Wi-Fi", glyph: "󰄜", color: "accent" },
+    available: { text: "Available", glyph: "󰄜", color: "textMuted" },
+    notSeen: { text: "Not seen", glyph: "󱞈", color: "textDisabled" }
 };
 
+function stateLook(row) {
+    return stateLooks[row.state] || stateLooks.notSeen;
+}
+
 function stateText(row) {
-    return stateTexts[row.state] || "";
+    return stateLook(row).text;
+}
+
+// Whether a row is connected over the network now (alone or with USB).
+function connectedOverNetwork(row) {
+    return row.state === "wifi" || row.state === "both";
 }
 
 // What a row offers: "connect", "disconnect", "forget" and
@@ -234,7 +245,7 @@ function stateText(row) {
 // Disconnect and not Forget.
 function actions(row) {
     const offered = [];
-    const wifi = row.state === "wifi" || row.state === "both";
+    const wifi = connectedOverNetwork(row);
     if (row.state === "available" || row.state === "notSeen")
         offered.push("connect");
     if (wifi)
@@ -254,7 +265,7 @@ function actions(row) {
 function remembered(known, rows) {
     const next = known.map(device => Object.assign({}, device));
     for (const row of rows) {
-        if (row.state !== "wifi" && row.state !== "both")
+        if (!connectedOverNetwork(row))
             continue;
         if (row.wifi.indexOf(row.serial) >= 0)
             continue;

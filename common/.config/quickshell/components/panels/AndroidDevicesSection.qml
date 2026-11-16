@@ -69,15 +69,15 @@ Column {
 
             required property var modelData
             readonly property var offered: Android.actions(modelData)
+            readonly property var look: Android.stateLook(modelData)
             readonly property bool waitingForPrompt: modelData.state === "usb" && !modelData.authorized
 
             width: root.width
             appearance: root.appearance
-            glyph: modelData.state === "usb" ? "󰕓" : modelData.state === "notSeen" ? "󱞈" : "󰄜"
-            glyphColor: modelData.state === "notSeen" ? theme.textDisabled
-                : modelData.state === "available" ? theme.textMuted : theme.accent
+            glyph: look.glyph
+            glyphColor: theme[look.color]
             title: modelData.name
-            subtitle: Android.stateText(modelData)
+            subtitle: look.text
             trailingWidth: waitingForPrompt ? prompt.width + 10 : buttons.width + 10
 
             Panels.ShellText {

@@ -163,6 +163,15 @@ TestCase {
         compare(rows[0].authorized, false);
     }
 
+    function test_onlyRowsWithANetworkConnectionAreConnectedOverTheNetwork() {
+        verify(Android.connectedOverNetwork(rowsOf("192.168.1.44:5555 device model:Pixel_10a\n", "", [pixel])[0]));
+        verify(Android.connectedOverNetwork(
+            rowsOf(pixelOverUsb + "192.168.1.44:5555 device model:Pixel_10a\n", "", [pixel])[0]));
+        verify(!Android.connectedOverNetwork(rowsOf(pixelOverUsb, "")[0]));
+        verify(!Android.connectedOverNetwork(rowsOf("", wirelessDebuggingOn)[0]));
+        verify(!Android.connectedOverNetwork(rowsOf("", "", [pixel])[0]));
+    }
+
     function test_whatEachRowOffers() {
         const usb = rowsOf(pixelOverUsb, "")[0];
         compare(Android.actions(usb), ["connectWirelessly"]);

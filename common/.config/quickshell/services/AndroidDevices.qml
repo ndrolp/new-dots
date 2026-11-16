@@ -227,7 +227,7 @@ QtObject {
         if (pairedSerial === "")
             return;
         const row = rowFor(pairedSerial);
-        if (row && (row.state === "wifi" || row.state === "both")) {
+        if (row && Android.connectedOverNetwork(row)) {
             pairMessage = "Paired with " + row.name;
             paired = true;
             pairedSerial = "";
