@@ -246,11 +246,15 @@ function actions(row) {
 
 // The known devices once every row connected over the network now is
 // remembered with its name and address. A device that isn't connected over
-// the network keeps what was remembered of it.
+// the network keeps what was remembered of it, and one whose serial isn't
+// known yet (its ip:port stands in until `getprop ro.serialno` answers)
+// waits for it.
 function remembered(known, rows) {
     const next = known.map(device => Object.assign({}, device));
     for (const row of rows) {
         if (row.state !== "wifi" && row.state !== "both")
+            continue;
+        if (row.wifi.indexOf(row.serial) >= 0)
             continue;
         const entry = next.find(device => device.serial === row.serial);
         if (entry) {

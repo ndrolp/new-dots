@@ -209,6 +209,15 @@ TestCase {
         compare(Android.remembered([pixel], rowsOf(pixelOverUsb, "", [pixel])), [pixel]);
     }
 
+    // Until `getprop ro.serialno` answers, its ip:port stands in for the
+    // serial; remembering it then would leave a second, "Not seen" row.
+    function test_aConnectionWhoseSerialIsntKnownYetIsntRemembered() {
+        const unplaced = rowsOf("192.168.1.70:5555 device model:Pixel_10a\n", "", [pixel]);
+        compare(unplaced[0].serial, "192.168.1.70:5555");
+        compare(Android.remembered([pixel], unplaced), [pixel]);
+        compare(Android.remembered([], unplaced), []);
+    }
+
     function test_onlyNetworkConnectionsAreRemembered() {
         compare(Android.remembered([], rowsOf(pixelOverUsb, wirelessDebuggingOn)), []);
     }
