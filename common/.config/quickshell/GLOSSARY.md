@@ -230,3 +230,19 @@ _Avoid_: Job (a secas), tarea
 **Printers panel** (panel de impresoras):
 El panel que lista las printers, las discovered printers y los scanners, y desde el que se añaden, quitan y eligen por defecto las printers, se ven y cancelan sus print jobs y se escanea. Lleva el nombre de las impresoras aunque también maneja escáneres. No es un popup.
 _Avoid_: Printer manager, device manager, panel de dispositivos
+
+**Android device** (dispositivo Android):
+Un teléfono o tablet Android que adb ve ahora mismo, por USB o por la red. Uno conectado por USB y por la red a la vez es un solo Android device.
+_Avoid_: Phone, teléfono, ADB device, adb target
+
+**Known device** (dispositivo conocido):
+Un Android device al que esta máquina ya se ha conectado por la red, recordado con su nombre y su última dirección aunque ahora no se vea. *Forget* (olvidar) lo quita de la lista, pero el teléfono conserva el emparejamiento: eso se revoca en el propio teléfono. *Disconnect* (desconectar) corta la conexión y lo deja como known device. Pertenece a la máquina, no al repo.
+_Avoid_: Saved device, paired device, favorito
+
+**Wireless debugging** (depuración inalámbrica):
+El interruptor de las opciones de desarrollador del teléfono que le deja aceptar conexiones de adb por la red. Se activa en el teléfono, nunca desde la shell, y al activarlo de nuevo el teléfono cambia de puerto.
+_Avoid_: Wireless ADB, ADB over Wi-Fi (para el interruptor)
+
+**Android devices panel** (panel de dispositivos Android):
+El panel que abre SUPER+SHIFT+A en el centro del monitor enfocado para ver los Android devices y los known devices y para emparejar, conectar y desconectar por la red: con un código QR, con el código de emparejamiento del teléfono o desde uno conectado por USB. Cada dispositivo sale una sola vez: conectado (por USB, por la red o por los dos), *available* (disponible: se ve en la red con wireless debugging activo, pero no está conectado; puede no estar emparejado con esta máquina) o *not seen* (un known device que ahora no se ve). Solo maneja conexiones; no hace nada con el teléfono. No es un popup.
+_Avoid_: ADB panel, wireless debugging panel, device manager
