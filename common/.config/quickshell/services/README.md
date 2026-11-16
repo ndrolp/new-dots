@@ -200,17 +200,33 @@ services` every 2 seconds; nothing runs while the panel is closed. An
 ip:port connection that neither a known device's address nor its name
 places is asked once for `ro.serialno`. Every device connected over the
 network is remembered in `config/android-devices.json`, which belongs to the
-machine and is gitignored; nothing connects on its own. *Connect* runs `adb
-connect` on the address mDNS announces, then the last one remembered;
-*Disconnect* runs `adb disconnect`; *Connect wirelessly* reads the phone's
-`wlan0` address over USB, runs `adb tcpip 5555` and connects to it. Pairing
-draws a fresh QR code (`WIFI:T:ADB;S:<name>;P:<password>;;`, with
-`qrencode` into `$XDG_RUNTIME_DIR`) on every open, runs `adb pair` once the
-phone announces the code's `_adb-tls-pairing` service, and then connects
-the phone when it announces itself. Parsing adb, merging the rows, the
-address Connect tries, what `adb connect` and `adb pair` answered, the QR
-payload and the commands are plain functions in `AndroidDevices.js`, tested
-without Quickshell.
+machine and is gitignored, once its serial is known (an ip:port stands in
+until then); nothing connects on its own. *Connect* runs `adb connect` on
+the address mDNS announces, then the last one remembered; what adb answers
+is matched loosely, and a failure that names neither the network nor
+pairing is reported as either. *Disconnect* runs `adb disconnect`;
+*Connect wirelessly* reads, over USB, the source address of the Android
+device's default route (`ip route get 1.1.1.1`, unless it goes over mobile
+data, else any `wlan*` address), runs `adb tcpip 5555` and connects to it.
+Each action's label and the method that runs it come from one table,
+`rowActions`. Parsing adb, merging the rows, the address Connect tries,
+what `adb connect` answered and the commands are plain functions in
+`AndroidDevices.js`, tested without Quickshell.
+
+`AndroidPairing.qml` pairs new Android devices, only while `watching`.
+`shell.qml` creates it next to the Android devices service, whose mDNS
+services and rows it reads and whose `connectPaired` connects an Android
+device it paired. It draws a fresh QR code
+(`WIFI:T:ADB;S:<name>;P:<password>;;`, with `qrencode` into
+`$XDG_RUNTIME_DIR`; the name starts with `studio-`, as Android Studio's
+do) on every open, runs `adb pair` once the Android device announces the
+code's `_adb-tls-pairing` service (or, if adb is busy then, once it is
+free), and connects it when it announces itself. If that connect fails, or
+nothing connects within 20 s, it says why instead of "Paired,
+connecting…". The QR payload, the pairing services and what `adb pair`
+answered are in `AndroidPairing.js`, tested without Quickshell;
+`tests/android-pairing.sh` runs `AndroidPairing.qml` in a headless `qs`
+with a fake adb.
 
 ## Scanners
 

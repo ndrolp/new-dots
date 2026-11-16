@@ -160,18 +160,24 @@ remembered mode, how a scan is named, run and reports progress, its outcome
 or its error, the *Show in folder* URI, and the scan settings kept in
 `appearance.json` (`services/Scanners.js`; `scan.sh`, below, runs the scan
 wrapper; `ScannersSection.qml` and `ScanView.qml` have no tests yet,
-`DeviceRow.qml` is tested through the sections, and `PrintersPanel.qml`
-and the services' `.qml` files need Quickshell and aren't tested here),
+`DeviceRow.qml` is tested through the sections, and `PrintersPanel.qml`,
+`FocusedMonitorPanel.qml` and the services' `.qml` files need Quickshell
+and aren't tested here),
 the Android devices panel's rules: `adb devices -l` and `adb mdns services`
 read into one row per Android device with its state, known devices merged
-in and remembered, the address Connect tries, what `adb connect` and `adb
-pair` answered, the QR code's payload and the phone's Wi-Fi address
+in and remembered (not before a Wi-Fi connection's serial is known), the
+address Connect tries, what `adb connect` answered in its several
+wordings, each row action's label and service method, and the Android
+device's Wi-Fi address from its default route
 (`services/AndroidDevices.js`, against output captured from a Pixel 10a),
-its device list with each row's state and actions
-(`components/panels/AndroidDevicesSection.qml`) and its *Pair new device*
-section: the QR code, the pairing code fields filled from mDNS
+pairing: the QR code's payload, the pairing services, what `adb pair`
+answered and what is said when a paired Android device didn't connect
+(`services/AndroidPairing.js`), its device list with each row's state and
+actions (`components/panels/AndroidDevicesSection.qml`) and its *Pair new
+device* section: the QR code, the pairing code fields filled from mDNS
 (`components/panels/AndroidPairingSection.qml`; `AndroidDevicesPanel.qml`
-and `services/AndroidDevices.qml` need Quickshell and aren't tested here),
+and the services' `.qml` files need Quickshell and aren't tested here;
+`android-pairing.sh`, below, runs `services/AndroidPairing.qml`),
 what the keep-awake bar element shows and its popup's switch, duration choice
 and time left (`components/bar/KeepAwakeElement.qml`,
 `components/panels/KeepAwakePopupBody.qml`), keep-awake's duration and
@@ -301,6 +307,16 @@ failed (kept, exit 100), and a file already there left alone. It is in
 
 ```sh
 common/.config/quickshell/tests/scan.sh
+```
+
+`android-pairing.sh` runs `services/AndroidPairing.qml` in a headless `qs`
+with a fake adb and a stand-in Android devices service, touching no
+Android device: a QR code scanned while adb is busy is paired once it is
+free, and a paired Android device that connects is named while one that
+doesn't says why. It is in `scripts/test-all`:
+
+```sh
+common/.config/quickshell/tests/android-pairing.sh
 ```
 
 `startup.sh` checks that `start.sh` creates the machine-local colorscheme links

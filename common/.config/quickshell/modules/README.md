@@ -15,7 +15,7 @@ adding or editing one file here.
   A module that opens other parts gets them as properties (`AppMenu`,
   `ControlCenter`, `QuickSettings`, `UnifiedSearch`).
 - One module per panel: `AndroidDevices` (the Android devices panel,
-  SUPER+SHIFT+A, `android-devices toggle`, whose service reads adb only
+  SUPER+SHIFT+A, `android-devices toggle`, whose Android devices and pairing services read adb only
   while it's open), `ApplicationLauncher`, `AudioOutputSelector`,
   `ClipboardSelector`, `CommandLauncher`, `KeybindCheatsheet`,
   `PowerMenu`, `Printers` (the Printers panel, SUPER+SHIFT+P,
