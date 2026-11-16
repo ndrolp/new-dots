@@ -32,6 +32,8 @@ colorschemes/shown
 # Quickshell runtime state, machine-local (created by Quickshell when missing)
 common/.config/quickshell/services/launcher.json
 common/.config/quickshell/config/wallpapers.json
+# Known Android devices: the devices this machine connected to over the network
+common/.config/quickshell/config/android-devices.json
 common/.local/share/fonts/.uuid
 
 # Saved monitor setups are machine-local (docs/adr/0002-hyprland-owns-monitor-setups.md), with the

@@ -1,4 +1,5 @@
 {
+    "androidDevicesEnabled": true,
     "applicationLauncherEnabled": true,
     "clipboardEnabled": true,
     "clipboardImagePreviewsEnabled": true,

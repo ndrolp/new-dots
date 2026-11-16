@@ -31,6 +31,8 @@ Column {
     readonly property bool canPair: !busy && Android.canPairWithCode(addressText, codeText)
 
     signal pairWithCodeRequested(string address, string code)
+    // Escape in a field, which keeps it from the panel.
+    signal closeRequested()
 
     // Back to the QR code with empty fields, as on every open.
     function reset() {
@@ -135,6 +137,7 @@ Column {
                 }
                 onAccepted: root.pair()
                 KeyNavigation.tab: codeField
+                Keys.onEscapePressed: root.closeRequested()
             }
 
             Panels.PopupTextField {
@@ -150,6 +153,7 @@ Column {
                 onTextEdited: root.codeText = text
                 onAccepted: root.pair()
                 KeyNavigation.tab: addressField
+                Keys.onEscapePressed: root.closeRequested()
             }
 
             Panels.PopupButton {

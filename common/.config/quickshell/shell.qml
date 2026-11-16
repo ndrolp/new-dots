@@ -109,6 +109,10 @@ ShellRoot {
         onAdded: printers.refresh()
     }
 
+    Services.AndroidDevices {
+        id: androidDevices
+    }
+
     Services.Scanners {
         id: scanners
 
@@ -242,6 +246,7 @@ ShellRoot {
         keybindCheatsheet: keybindCheatsheet
         webAppMaker: webAppMaker
         printersPanel: printersPanel
+        androidDevicesPanel: androidDevicesPanel
     }
 
     Modules.WebApps {
@@ -259,6 +264,14 @@ ShellRoot {
         printers: printers
         discoveredPrinters: discoveredPrinters
         scanners: scanners
+        plugins: plugins
+    }
+
+    Modules.AndroidDevices {
+        id: androidDevicesPanel
+
+        appearance: appearance
+        androidDevices: androidDevices
         plugins: plugins
     }
 

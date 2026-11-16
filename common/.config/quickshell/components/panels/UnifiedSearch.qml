@@ -25,6 +25,7 @@ Variants {
     signal keybindCheatsheetRequested()
     signal webAppMakerRequested()
     signal printersRequested()
+    signal androidDevicesRequested()
 
     model: Quickshell.screens
 
@@ -351,6 +352,13 @@ Variants {
                         title: "Scan",
                         subtitle: "Open the Printers panel to scan a page",
                         glyph: "󰚫"
+                    },
+                    {
+                        type: "androidDevices",
+                        category: "ACTIONS",
+                        title: "Android devices",
+                        subtitle: "Pair and connect Android devices over the network",
+                        glyph: "󰄜"
                     }
                 ];
                 const workspaceIds = root.workspaceService.workspacesForScreen(
@@ -450,6 +458,8 @@ Variants {
                 root.webAppMakerRequested();
             } else if (result.type === "printers") {
                 root.printersRequested();
+            } else if (result.type === "androidDevices") {
+                root.androidDevicesRequested();
             } else if (result.type === "workspace") {
                 root.workspaceService.switchTo(result.workspaceId);
             } else {

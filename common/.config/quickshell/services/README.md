@@ -190,6 +190,28 @@ uuid, dnssd name, host, or ipp-usb port in an added printer's device URI,
 from `lpstat -v`) and the command are in `PrinterDiscovery.js`, tested
 without Quickshell.
 
+## Android devices
+
+`AndroidDevices.qml` is the Android devices panel's view of the Android
+devices and known devices. It uses whatever `adb` is on PATH, checked on
+every open; without one the panel says to install `android-tools`. Only
+while `watching` (the panel is open) it reads `adb devices -l` and `adb mdns
+services` every 2 seconds; nothing runs while the panel is closed. An
+ip:port connection that neither a known device's address nor its name
+places is asked once for `ro.serialno`. Every device connected over the
+network is remembered in `config/android-devices.json`, which belongs to the
+machine and is gitignored; nothing connects on its own. *Connect* runs `adb
+connect` on the address mDNS announces, then the last one remembered;
+*Disconnect* runs `adb disconnect`; *Connect wirelessly* reads the phone's
+`wlan0` address over USB, runs `adb tcpip 5555` and connects to it. Pairing
+draws a fresh QR code (`WIFI:T:ADB;S:<name>;P:<password>;;`, with
+`qrencode` into `$XDG_RUNTIME_DIR`) on every open, runs `adb pair` once the
+phone announces the code's `_adb-tls-pairing` service, and then connects
+the phone when it announces itself. Parsing adb, merging the rows, the
+address Connect tries, what `adb connect` and `adb pair` answered, the QR
+payload and the commands are plain functions in `AndroidDevices.js`, tested
+without Quickshell.
+
 ## Scanners
 
 `Scanners.qml` is the Printers panel's view of the scanners SANE can see.

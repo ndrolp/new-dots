@@ -162,6 +162,16 @@ or its error, the *Show in folder* URI, and the scan settings kept in
 wrapper; `ScannersSection.qml` and `ScanView.qml` have no tests yet,
 `PrinterRow.qml` is tested through the sections, and `PrintersPanel.qml`
 and the services' `.qml` files need Quickshell and aren't tested here),
+the Android devices panel's rules: `adb devices -l` and `adb mdns services`
+read into one row per Android device with its state, known devices merged
+in and remembered, the address Connect tries, what `adb connect` and `adb
+pair` answered, the QR code's payload and the phone's Wi-Fi address
+(`services/AndroidDevices.js`, against output captured from a Pixel 10a),
+its device list with each row's state and actions
+(`components/panels/AndroidDevicesSection.qml`) and its *Pair new device*
+section: the QR code, the pairing code fields filled from mDNS
+(`components/panels/AndroidPairingSection.qml`; `AndroidDevicesPanel.qml`
+and `services/AndroidDevices.qml` need Quickshell and aren't tested here),
 what the keep-awake bar element shows and its popup's switch, duration choice
 and time left (`components/bar/KeepAwakeElement.qml`,
 `components/panels/KeepAwakePopupBody.qml`), keep-awake's duration and
@@ -256,9 +266,9 @@ common/.config/quickshell/tests/run.sh
   `run.sh test_savingUnderANewNameAddsAProfile`.
 
 `state-files.sh` checks that Quickshell's runtime state (`services/launcher.json`,
-`config/wallpapers.json`) is untracked and gitignored while `appearance.json`
+`config/wallpapers.json`, `config/android-devices.json`) is untracked and gitignored while `appearance.json`
 stays tracked, and starts a headless `qs` on a scratch config to check that
-the launcher history and wallpaper services create those files when missing:
+the launcher history, wallpaper and Android devices services create those files when missing:
 
 ```sh
 common/.config/quickshell/tests/state-files.sh
