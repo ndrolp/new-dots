@@ -22,6 +22,7 @@ suites=(
     common/.config/quickshell/tests/app-menu-bridge.sh
     common/.config/quickshell/tests/monitor-notices.sh
     common/.config/quickshell/tests/scan.sh
+    common/.config/quickshell/tests/android-pairing.sh
 )
 
 case "${1:-}" in

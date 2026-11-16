@@ -72,4 +72,17 @@ TestCase {
             "Wrong password or connection was dropped.");
         compare(Pairing.pairProblem(""), "Couldn't pair with the phone");
     }
+
+    // Paired, but connecting it failed or it never showed up: "Paired,
+    // connecting…" gives way to why.
+    function test_aPairedAndroidDeviceThatDidntConnectSaysWhy() {
+        compare(Pairing.pairedButNotConnected("Pixel 10a", "unreachable"),
+            "Paired with Pixel 10a, but couldn't connect: it didn't answer. Try Connect once Wireless debugging is on");
+        compare(Pairing.pairedButNotConnected("Pixel 10a", "unpaired"),
+            "Paired with Pixel 10a, but couldn't connect: it didn't accept this computer. Try pairing again");
+        compare(Pairing.pairedButNotConnected("Pixel 10a", "unknown"),
+            "Paired with Pixel 10a, but couldn't connect: adb didn't say why. Try Connect");
+        compare(Pairing.pairedButNotConnected("61291JEA326957", "notAnnounced"),
+            "Paired with 61291JEA326957, but couldn't connect: it didn't show up on the network. Try Connect once Wireless debugging is on");
+    }
 }

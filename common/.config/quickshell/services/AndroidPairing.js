@@ -78,6 +78,21 @@ function pairedSerial(output) {
     return match ? Android.serialOf(match[1]) : "";
 }
 
+const notConnectedReasons = {
+    unreachable: "it didn't answer. Try Connect once Wireless debugging is on",
+    unpaired: "it didn't accept this computer. Try pairing again",
+    unknown: "adb didn't say why. Try Connect",
+    notAnnounced: "it didn't show up on the network. Try Connect once Wireless debugging is on"
+};
+
+// What pairing says when the Android device called `name` paired but
+// didn't connect: `outcome` is what connecting answered (connectOutcome),
+// or "notAnnounced" when it never announced itself to be connected.
+function pairedButNotConnected(name, outcome) {
+    return "Paired with " + name + ", but couldn't connect: "
+        + (notConnectedReasons[outcome] || notConnectedReasons.unknown);
+}
+
 function pairProblem(output) {
     const line = String(output || "").split("\n").map(text => text.trim()).find(text => text !== "");
     return line ? line.replace(/^Failed:\s*/, "") : "Couldn't pair with the phone";

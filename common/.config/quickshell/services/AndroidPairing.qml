@@ -64,6 +64,7 @@ QtObject {
             pairedSerial = serial;
             pairedAddressTried = "";
             message = "Paired, connecting…";
+            connectWait.restart();
         }
         pairing = false;
         devices.refresh();
@@ -85,7 +86,7 @@ QtObject {
 
     // The Android device that scanned the QR code announces its name: pair with it.
     function followQrCode() {
-        if (!watching || paired || busy || qr.name === "")
+        if (!watching || paired || pairedSerial !== "" || busy || qr.name === "")
             return;
         const address = Pairing.pairingAddress(devices.services, qr.name);
         if (address !== "")
@@ -93,22 +94,49 @@ QtObject {
     }
 
     // The Android device just paired is connected once it announces itself
-    // (unless adb already connected it); then pairing says which one it was.
+    // (unless adb already connected it); then pairing says which one it was,
+    // or why it didn't connect.
     function followPairedDevice() {
         if (pairedSerial === "")
             return;
         const row = devices.rowFor(pairedSerial);
         if (row && Android.connectedOverNetwork(row)) {
             message = "Paired with " + row.name;
-            paired = true;
-            pairedSerial = "";
+            stopFollowing();
         } else if (row && row.announced !== "" && row.announced !== pairedAddressTried && !busy) {
             pairedAddressTried = row.announced;
-            devices.connectPaired(row.serial, row.announced, () => {});
+            const serial = row.serial;
+            const name = row.name;
+            devices.connectPaired(serial, row.announced, outcome => {
+                if (outcome !== "connected" && pairedSerial === serial)
+                    notConnected(name, outcome);
+            });
         }
     }
 
+    // The paired Android device didn't connect: say why instead of "Paired,
+    // connecting…". It stays paired; Connect in the list tries again.
+    function notConnected(name, outcome) {
+        message = "";
+        problem = Pairing.pairedButNotConnected(name, outcome);
+        stopFollowing();
+    }
+
+    function stopFollowing() {
+        paired = true;
+        pairedSerial = "";
+        connectWait.stop();
+    }
+
+    // What waits for adb to be free: pairing with the Android device that
+    // scanned the QR code, and connecting the one just paired.
+    function follow() {
+        followPairedDevice();
+        followQrCode();
+    }
+
     onWatchingChanged: {
+        connectWait.stop();
         if (!watching)
             return;
         paired = false;
@@ -118,15 +146,41 @@ QtObject {
         newQrCode();
     }
 
-    property var follow: Connections {
+    // An Android device that announces itself while another action runs is
+    // followed once that action is done.
+    onBusyChanged: {
+        if (!busy)
+            Qt.callLater(follow);
+    }
+
+    property var deviceChanges: Connections {
         target: root.devices
 
         function onServicesChanged() {
-            root.followQrCode();
+            root.follow();
         }
 
         function onRowsChanged() {
-            root.followPairedDevice();
+            root.follow();
+        }
+    }
+
+    // How long a paired Android device has to connect before pairing stops
+    // waiting and says so.
+    property var connectWait: Timer {
+        id: connectWait
+
+        interval: 20000
+        onTriggered: {
+            if (root.pairedSerial === "")
+                return;
+            // A connect is running for it; its outcome will tell.
+            if (root.busy) {
+                restart();
+                return;
+            }
+            const row = root.devices.rowFor(root.pairedSerial);
+            root.notConnected(row ? row.name : root.pairedSerial, "notAnnounced");
         }
     }
 
