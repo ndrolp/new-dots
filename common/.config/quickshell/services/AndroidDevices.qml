@@ -161,9 +161,7 @@ QtObject {
         const serial = connectRetry.serial;
         run(Android.connectCommand(address), output => {
             if (Android.connectOutcome(output) === "connected") {
-                const placed = Object.assign({}, serials);
-                placed[address] = serial;
-                serials = placed;
+                placeSerial(address, serial);
                 message = "You can unplug it now";
                 finish();
             } else if (--connectRetry.left > 0) {
@@ -236,6 +234,14 @@ QtObject {
             begin("connect", row.serial);
             tryAddresses([row.announced], [], () => finish());
         }
+    }
+
+    // Records that the network transport `transport` is the Android device
+    // with hardware serial `serial`.
+    function placeSerial(transport, serial) {
+        const placed = Object.assign({}, serials);
+        placed[transport] = serial;
+        serials = placed;
     }
 
     // Asks one unplaced ip:port connection at a time for its serial.
@@ -333,11 +339,8 @@ QtObject {
         }
         onExited: exitCode => {
             const serial = serialOutput.text.trim();
-            if (exitCode === 0 && serial !== "") {
-                const placed = Object.assign({}, root.serials);
-                placed[transport] = serial;
-                root.serials = placed;
-            }
+            if (exitCode === 0 && serial !== "")
+                root.placeSerial(transport, serial);
             root.placeTransports();
         }
     }
