@@ -247,6 +247,8 @@ Item {
     }
 
     CapsuleSurface {
+        id: capsuleSurface
+
         place: root.capsuleShape || { x: 0, y: 0, width: 0, height: 0, radius: 0 }
         following: root.insidePopup !== null && root.insidePopup.resizing
         visible: root.capsulePlace !== null
@@ -257,144 +259,167 @@ Item {
         z: -1
     }
 
-    // A change the capsule shows instead of its row.
-    CapsuleChangeView {
-        id: changeView
+    // Keeps the row inside the capsule while the capsule grows or shrinks:
+    // bar elements that join an expanding row appear at once where they end
+    // up, so they are cut to the capsule as drawn, mid-animation, instead of
+    // spilling past it. On any other bar style it cuts nothing.
+    Item {
+        id: rowClip
 
-        x: root.changePlace.x
-        y: root.changePlace.y
-        change: root.capsuleChange
-        appearance: root.appearance
-        theme: theme
-    }
+        readonly property bool cutting: root.capsulePlace !== null
 
-    // One shared background per group.
-    Repeater {
-        model: root.zoneNames
+        x: cutting ? capsuleSurface.x : 0
+        width: cutting ? capsuleSurface.width : root.width
+        height: root.height
+        clip: cutting
 
-        delegate: Item {
-            id: zoneBackgrounds
+        // As large as the bar content and where it is, so what is inside
+        // keeps its places.
+        Item {
+            x: -rowClip.x
+            width: root.width
+            height: root.height
 
-            required property string modelData
-            readonly property var backgrounds: root.zoneLayout(modelData).backgrounds
+            // A change the capsule shows instead of its row.
+            CapsuleChangeView {
+                id: changeView
 
-            anchors.fill: parent
-            z: -1
+                x: root.changePlace.x
+                y: root.changePlace.y
+                change: root.capsuleChange
+                appearance: root.appearance
+                theme: theme
+            }
 
+            // One shared background per group.
             Repeater {
-                model: zoneBackgrounds.backgrounds.length
+                model: root.zoneNames
 
-                delegate: Rectangle {
-                    required property int index
-                    readonly property var background: zoneBackgrounds.backgrounds[index]
-                        || { start: 0, length: 0 }
-                    readonly property var rect: BarLayout.groupBackground(root.layoutBar,
-                        root.zoneStart(zoneBackgrounds.modelData) + background.start, background.length)
+                delegate: Item {
+                    id: zoneBackgrounds
 
-                    x: rect.x
-                    y: rect.y
-                    width: rect.width
-                    height: rect.height
-                    radius: root.appearance.groupRadius
-                    color: Qt.rgba(theme.surface.r, theme.surface.g, theme.surface.b,
-                        theme.surface.a * root.appearance.barOpacity / 100)
-                    border.width: root.appearance.groupBorder ? 1 : 0
-                    border.color: root.appearance.groupBorder ? theme.border : "transparent"
+                    required property string modelData
+                    readonly property var backgrounds: root.zoneLayout(modelData).backgrounds
 
-                    AlongBarBehavior on x { appearance: root.appearance }
-                    AlongBarBehavior on y { appearance: root.appearance }
-                    AlongBarBehavior on width { appearance: root.appearance }
-                    AlongBarBehavior on height { appearance: root.appearance }
+                    anchors.fill: parent
+                    z: -1
+
+                    Repeater {
+                        model: zoneBackgrounds.backgrounds.length
+
+                        delegate: Rectangle {
+                            required property int index
+                            readonly property var background: zoneBackgrounds.backgrounds[index]
+                                || { start: 0, length: 0 }
+                            readonly property var rect: BarLayout.groupBackground(root.layoutBar,
+                                root.zoneStart(zoneBackgrounds.modelData) + background.start, background.length)
+
+                            x: rect.x
+                            y: rect.y
+                            width: rect.width
+                            height: rect.height
+                            radius: root.appearance.groupRadius
+                            color: Qt.rgba(theme.surface.r, theme.surface.g, theme.surface.b,
+                                theme.surface.a * root.appearance.barOpacity / 100)
+                            border.width: root.appearance.groupBorder ? 1 : 0
+                            border.color: root.appearance.groupBorder ? theme.border : "transparent"
+
+                            AlongBarBehavior on x { appearance: root.appearance }
+                            AlongBarBehavior on y { appearance: root.appearance }
+                            AlongBarBehavior on width { appearance: root.appearance }
+                            AlongBarBehavior on height { appearance: root.appearance }
+                        }
+                    }
                 }
             }
-        }
-    }
 
-    ArchButton {
-        id: archButton
+            ArchButton {
+                id: archButton
 
-        visible: root.elementVisible("arch")
-        x: root.elementX("arch")
-        y: root.elementY("arch")
-        grouped: root.elementGrouped("arch")
-        AlongBarBehavior on x { appearance: root.appearance; duration: root.appearance.motion.long }
-        AlongBarBehavior on y { appearance: root.appearance; duration: root.appearance.motion.long }
-        appearance: root.appearance
-        active: root.configOpen
-        onClicked: root.configRequested(root.monitorScreen)
-    }
+                visible: root.elementVisible("arch")
+                x: root.elementX("arch")
+                y: root.elementY("arch")
+                grouped: root.elementGrouped("arch")
+                AlongBarBehavior on x { appearance: root.appearance; duration: root.appearance.motion.long }
+                AlongBarBehavior on y { appearance: root.appearance; duration: root.appearance.motion.long }
+                appearance: root.appearance
+                active: root.configOpen
+                onClicked: root.configRequested(root.monitorScreen)
+            }
 
-    CurrentApp {
-        id: currentApp
+            CurrentApp {
+                id: currentApp
 
-        x: root.elementX("currentApp")
-        y: root.elementY("currentApp")
-        grouped: root.elementGrouped("currentApp")
-        appearance: root.appearance
-        monitorScreen: root.monitorScreen
-        enabled: root.elementVisible("currentApp")
-    }
+                x: root.elementX("currentApp")
+                y: root.elementY("currentApp")
+                grouped: root.elementGrouped("currentApp")
+                appearance: root.appearance
+                monitorScreen: root.monitorScreen
+                enabled: root.elementVisible("currentApp")
+            }
 
-    AppMenu {
-        id: appMenuElement
+            AppMenu {
+                id: appMenuElement
 
-        x: root.elementX("appMenu")
-        y: root.elementY("appMenu")
-        grouped: root.elementGrouped("appMenu")
-        appearance: root.appearance
-        monitorScreen: root.monitorScreen
-        appMenu: root.appMenu
-        enabled: root.elementVisible("appMenu")
-        popupOpen: root.activePopup === "appMenu"
-        onPopupRequested: root.popupRequested("appMenu")
-    }
+                x: root.elementX("appMenu")
+                y: root.elementY("appMenu")
+                grouped: root.elementGrouped("appMenu")
+                appearance: root.appearance
+                monitorScreen: root.monitorScreen
+                appMenu: root.appMenu
+                enabled: root.elementVisible("appMenu")
+                popupOpen: root.activePopup === "appMenu"
+                onPopupRequested: root.popupRequested("appMenu")
+            }
 
-    SystemMonitor {
-        id: systemMonitor
+            SystemMonitor {
+                id: systemMonitor
 
-        visible: root.elementVisible("systemMonitor")
-        x: root.elementX("systemMonitor")
-        y: root.elementY("systemMonitor")
-        grouped: root.elementGrouped("systemMonitor")
-        appearance: root.appearance
-        systemMonitor: root.systemMonitor
-        onClicked: root.popupRequested("system")
-    }
+                visible: root.elementVisible("systemMonitor")
+                x: root.elementX("systemMonitor")
+                y: root.elementY("systemMonitor")
+                grouped: root.elementGrouped("systemMonitor")
+                appearance: root.appearance
+                systemMonitor: root.systemMonitor
+                onClicked: root.popupRequested("system")
+            }
 
-    Workspaces {
-        id: workspaces
-        visible: root.elementVisible("workspaces")
-        x: root.elementX("workspaces")
-        y: root.elementY("workspaces")
-        grouped: root.elementGrouped("workspaces")
-        AlongBarBehavior on x { appearance: root.appearance; duration: root.appearance.motion.long }
-        AlongBarBehavior on y { appearance: root.appearance; duration: root.appearance.motion.long }
-        appearance: root.appearance
-        monitorScreen: root.monitorScreen
-        monitors: root.monitors
-        workspaceService: root.workspaceService
-    }
+            Workspaces {
+                id: workspaces
+                visible: root.elementVisible("workspaces")
+                x: root.elementX("workspaces")
+                y: root.elementY("workspaces")
+                grouped: root.elementGrouped("workspaces")
+                AlongBarBehavior on x { appearance: root.appearance; duration: root.appearance.motion.long }
+                AlongBarBehavior on y { appearance: root.appearance; duration: root.appearance.motion.long }
+                appearance: root.appearance
+                monitorScreen: root.monitorScreen
+                monitors: root.monitors
+                workspaceService: root.workspaceService
+            }
 
-    BarElementItems {
-        id: barElementItems
+            BarElementItems {
+                id: barElementItems
 
-        anchors.fill: parent
-        appearance: root.appearance
-        activePopup: root.activePopup
-        monitorScreen: root.monitorScreen
-        pomodoro: root.pomodoro
-        notificationHistory: root.notificationHistory
-        screenCapture: root.screenCapture
-        keepAwake: root.keepAwake
-        screenShares: root.screenShares
-        cava: root.cava
-        barVisible: root.barVisible
-        elementX: element => root.elementX(element)
-        elementY: element => root.elementY(element)
-        elementGrouped: element => root.elementGrouped(element)
+                anchors.fill: parent
+                appearance: root.appearance
+                activePopup: root.activePopup
+                monitorScreen: root.monitorScreen
+                pomodoro: root.pomodoro
+                notificationHistory: root.notificationHistory
+                screenCapture: root.screenCapture
+                keepAwake: root.keepAwake
+                screenShares: root.screenShares
+                cava: root.cava
+                barVisible: root.barVisible
+                elementX: element => root.elementX(element)
+                elementY: element => root.elementY(element)
+                elementGrouped: element => root.elementGrouped(element)
 
-        onPopupRequested: function(popup) {
-            root.popupRequested(popup);
+                onPopupRequested: function(popup) {
+                    root.popupRequested(popup);
+                }
+            }
         }
     }
 
