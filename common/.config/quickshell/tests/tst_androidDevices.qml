@@ -244,21 +244,45 @@ TestCase {
         compare(Android.connectOutcome("already connected to 192.168.1.44:5555\n"), "connected");
         compare(Android.connectOutcome("failed to connect to '192.168.1.44:5555': Connection refused\n"),
             "unreachable");
-        compare(Android.connectOutcome("failed to connect to 192.168.1.44:5555\n"), "unreachable");
         compare(Android.connectOutcome("failed to authenticate to 192.168.1.44:37045\n"), "unpaired");
-        compare(Android.connectOutcome(""), "unreachable");
+    }
+
+    // Other adb versions word it differently; whatever names the network is
+    // unreachable, whatever names authentication or pairing is unpaired.
+    function test_adbsOtherWordingsAreRecognised() {
+        compare(Android.connectOutcome("failed to connect to '192.168.1.44:5555': No route to host\n"),
+            "unreachable");
+        compare(Android.connectOutcome("failed to connect to 192.168.1.44:5555: Connection timed out\n"),
+            "unreachable");
+        compare(Android.connectOutcome("cannot connect to 192.168.1.44:5555: Network is unreachable\n"),
+            "unreachable");
+        compare(Android.connectOutcome("failed to connect to 192.168.1.44:37045: Authentication failed\n"),
+            "unpaired");
+        compare(Android.connectOutcome("192.168.1.44:37045: device unauthorized.\n"), "unpaired");
+        compare(Android.connectOutcome("failed to connect: TLS handshake failed\n"), "unpaired");
+    }
+
+    // Saying nothing of why, it could be either.
+    function test_anUnexplainedFailureIsUnknown() {
+        compare(Android.connectOutcome("failed to connect to 192.168.1.44:5555\n"), "unknown");
+        compare(Android.connectOutcome(""), "unknown");
     }
 
     function test_whatThePanelSaysWhenConnectFails() {
         compare(Android.connectProblem("unreachable"), "Turn on Wireless debugging on the phone");
         compare(Android.connectProblem("unpaired"), "Not paired with this computer: pair it below");
+        compare(Android.connectProblem("unknown"),
+            "Couldn't connect: turn on Wireless debugging on the phone, or pair it below if it isn't paired with this computer");
         compare(Android.connectProblem("connected"), "");
     }
 
-    // After every address failed, not being paired says more than not answering.
+    // After every address failed, not being paired says more than not
+    // answering, and an unexplained failure more than either alone.
     function test_theWorstOfSeveralAttemptsIsReported() {
         compare(Android.worstOutcome(["unreachable", "unpaired"]), "unpaired");
         compare(Android.worstOutcome(["unpaired", "unreachable"]), "unpaired");
+        compare(Android.worstOutcome(["unreachable", "unknown"]), "unknown");
+        compare(Android.worstOutcome(["unpaired", "unknown"]), "unpaired");
         compare(Android.worstOutcome(["unreachable"]), "unreachable");
         compare(Android.worstOutcome([]), "unreachable");
     }

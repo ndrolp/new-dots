@@ -280,29 +280,41 @@ function connectAddresses(row, known) {
     return addresses.filter((address, index) => address !== "" && addresses.indexOf(address) === index);
 }
 
-// What `adb connect <address>` printed: "connected", "unpaired" (the phone
-// answered but isn't paired with this computer) or "unreachable".
+// What `adb connect <address>` printed: "connected", "unpaired" (the
+// Android device answered but isn't paired with this computer),
+// "unreachable" (nothing answered there) or "unknown" (it failed without
+// saying why). adb's wording varies between versions, so it is matched
+// loosely.
 function connectOutcome(output) {
     const text = String(output || "");
-    if (/\bconnected to\b/.test(text) && !/failed/.test(text))
+    if (/\bconnected to\b/i.test(text) && !/fail|cannot|unable/i.test(text))
         return "connected";
-    if (/failed to authenticate/.test(text))
+    if (/authenticat|unauthori[sz]ed|not paired|pairing|\btls\b|handshake|certificate/i.test(text))
         return "unpaired";
-    return "unreachable";
+    if (/refused|timed? ?out|no route|unreachable|network|no such host|host is down|resolve/i.test(text))
+        return "unreachable";
+    return "unknown";
 }
 
 // The outcome to report after every address failed: not paired says more
-// than not answering.
+// than not answering, and a failure that didn't say why could be either.
 function worstOutcome(outcomes) {
-    return outcomes.indexOf("unpaired") >= 0 ? "unpaired" : "unreachable";
+    for (const outcome of ["unpaired", "unknown"]) {
+        if (outcomes.indexOf(outcome) >= 0)
+            return outcome;
+    }
+    return "unreachable";
 }
 
+const connectProblems = {
+    unpaired: "Not paired with this computer: pair it below",
+    unreachable: "Turn on Wireless debugging on the phone",
+    unknown: "Couldn't connect: turn on Wireless debugging on the phone, "
+        + "or pair it below if it isn't paired with this computer"
+};
+
 function connectProblem(outcome) {
-    if (outcome === "unpaired")
-        return "Not paired with this computer: pair it below";
-    if (outcome === "unreachable")
-        return "Turn on Wireless debugging on the phone";
-    return "";
+    return connectProblems[outcome] || "";
 }
 
 const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
