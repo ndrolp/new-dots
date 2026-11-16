@@ -238,23 +238,34 @@ function connectedOverNetwork(row) {
     return row.state === "wifi" || row.state === "both";
 }
 
-// What a row offers: "connect", "disconnect", "forget" and
-// "connectWirelessly", in that order. A USB device still waiting for the
+// Every action a row can offer, in the order its buttons go: the button's
+// label, the Android devices service's method that runs it (called with
+// the row), and whether a row offers it. A USB device still waiting for the
 // USB debugging prompt offers nothing until it is accepted. One connected
 // over the network would be remembered again at once, so it offers
 // Disconnect and not Forget.
+const rowActions = {
+    connect: {
+        label: "Connect", method: "connect",
+        offered: row => row.state === "available" || row.state === "notSeen"
+    },
+    disconnect: {
+        label: "Disconnect", method: "disconnect",
+        offered: row => connectedOverNetwork(row)
+    },
+    forget: {
+        label: "Forget", method: "forget",
+        offered: row => row.known && !connectedOverNetwork(row)
+    },
+    connectWirelessly: {
+        label: "Connect wirelessly", method: "connectWirelessly",
+        offered: row => row.state === "usb" && row.authorized
+    }
+};
+
+// The names (rowActions keys) of what `row` offers.
 function actions(row) {
-    const offered = [];
-    const wifi = connectedOverNetwork(row);
-    if (row.state === "available" || row.state === "notSeen")
-        offered.push("connect");
-    if (wifi)
-        offered.push("disconnect");
-    if (row.known && !wifi)
-        offered.push("forget");
-    if (row.state === "usb" && row.authorized)
-        offered.push("connectWirelessly");
-    return offered;
+    return Object.keys(rowActions).filter(action => rowActions[action].offered(row));
 }
 
 // The known devices once every row connected over the network now is

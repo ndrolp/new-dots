@@ -22,15 +22,8 @@ Column {
     // While an action runs; the buttons wait for it.
     property bool busy: false
 
-    // `action` is one of AndroidDevices.js actions(), for `row`.
+    // `action` is one of AndroidDevices.js actions() (a rowActions key), for `row`.
     signal actionRequested(string action, var row)
-
-    readonly property var actionLabels: ({
-        connect: "Connect",
-        disconnect: "Disconnect",
-        forget: "Forget",
-        connectWirelessly: "Connect wirelessly"
-    })
 
     spacing: 4
 
@@ -112,7 +105,7 @@ Column {
                         width: modelData === "connectWirelessly" ? 136 : 86
                         appearance: root.appearance
                         interactive: !root.busy
-                        label: root.actionLabels[modelData]
+                        label: Android.rowActions[modelData].label
                         labelColor: root.busy ? theme.textDisabled
                             : modelData === "forget" ? theme.red : theme.text
                         onActivated: {

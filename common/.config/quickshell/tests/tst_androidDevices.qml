@@ -189,6 +189,23 @@ TestCase {
         compare(Android.actions(rowsOf("", "", [pixel])[0]), ["connect", "forget"]);
     }
 
+    // The panel runs an action by calling the service method its table
+    // names, so each one has to be a method of services/AndroidDevices.qml.
+    function test_everyActionHasALabelAndAServiceMethod() {
+        const request = new XMLHttpRequest();
+        request.open("GET", Qt.resolvedUrl("../services/AndroidDevices.qml"), false);
+        request.send(null);
+        const service = request.responseText;
+        compare(Object.keys(Android.rowActions), ["connect", "disconnect", "forget", "connectWirelessly"]);
+        for (const action of Object.keys(Android.rowActions)) {
+            const entry = Android.rowActions[action];
+            verify(entry.label !== "", action);
+            verify(new RegExp("\\bfunction " + entry.method + "\\(row\\)").test(service),
+                action + " → " + entry.method);
+        }
+        compare(Android.rowActions.connectWirelessly.label, "Connect wirelessly");
+    }
+
     // An ip:port connection nobody can place asks the phone for its serial.
     function test_onlyUnplacedIpPortConnectionsAskForTheirSerial() {
         const devices = Android.parseDevices(pixelOverUsb

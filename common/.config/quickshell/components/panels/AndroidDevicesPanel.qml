@@ -3,6 +3,7 @@ import Quickshell.Hyprland
 import Quickshell.Wayland
 import QtQuick
 import "../../config" as Config
+import "../../services/AndroidDevices.js" as Android
 import "." as Panels
 
 // The Android devices panel's window: a card in the centre of the focused
@@ -111,7 +112,7 @@ Variants {
                         message: panel.service.message
                         problem: panel.service.problem
                         busy: panel.service.busy
-                        onActionRequested: (action, row) => panel.service[action](row)
+                        onActionRequested: (action, row) => panel.service[Android.rowActions[action].method](row)
                     }
 
                     Panels.AndroidPairingSection {
