@@ -1,5 +1,6 @@
 .pragma library
 .import "../../config/BarProfileModel.js" as BarProfileModel
+.import "BarLayout.js" as BarLayout
 
 // The capsule bar style's bar elements: which ones a capsule draws, collapsed
 // or expanded, and which a profile can choose for it. Pure functions over the
@@ -100,4 +101,20 @@ function hasMedia(bar, player, expanded) {
     if (!player)
         return false;
     return !BarProfileModel.capsule(bar) || expanded === true || player.isPlaying === true;
+}
+
+// How large a live element is beside the workspace pills, as a share of the
+// profile's sizes: smaller, with no setting of its own.
+const liveScale = 0.8;
+
+// The sizes a bar element is drawn at, { textSize, iconSize, thickness (its
+// pill's, across the bar) }: the profile's, or a `live` element's beside a
+// capsule's pills, liveScale of them in whole pixels.
+function elementSizes(profile, live) {
+    const scale = value => live ? Math.round(value * liveScale) : value;
+    return {
+        textSize: scale(profile.textSize),
+        iconSize: scale(profile.iconSize),
+        thickness: scale(BarLayout.elementThickness(profile))
+    };
 }

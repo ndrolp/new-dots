@@ -274,4 +274,40 @@ TestCase {
     function test_anExpandedCapsuleShowsMediaWhileAnyPlayerExists(data) {
         compare(CapsuleElements.hasMedia({ barStyle: "capsule" }, data.player, true), data.shown);
     }
+
+    // A capsule profile with the given text and icon sizes; its bar elements
+    // are 20 + 3 * 2 = 26 px thick.
+    function sizedProfile(textSize, iconSize) {
+        return { barStyle: "capsule", barHeight: 34, elementVerticalPadding: 4,
+            workspaceButtonSize: 20, pillVerticalPadding: 3, textSize: textSize, iconSize: iconSize };
+    }
+
+    // A live element beside the pills is drawn at 80% of the profile's text
+    // and icon sizes, in a pill 80% as thick, rounded to whole pixels.
+    function test_aLiveElementIsDrawnAtEightyPercent_data() {
+        return [
+            { tag: "balanced", profile: sizedProfile(14, 14), sizes: { textSize: 11, iconSize: 11, thickness: 21 } },
+            { tag: "compact", profile: sizedProfile(13, 13), sizes: { textSize: 10, iconSize: 10, thickness: 21 } },
+            { tag: "spacious", profile: sizedProfile(15, 15), sizes: { textSize: 12, iconSize: 12, thickness: 21 } },
+            { tag: "large icons", profile: sizedProfile(14, 20), sizes: { textSize: 11, iconSize: 16, thickness: 21 } }
+        ];
+    }
+
+    function test_aLiveElementIsDrawnAtEightyPercent(data) {
+        compare(CapsuleElements.elementSizes(data.profile, true), data.sizes);
+    }
+
+    // So applying a density preset resizes live elements in proportion.
+    function test_aDensityPresetResizesLiveElements() {
+        const profile = Object.assign(sizedProfile(14, 14), BarProfileModel.densityPresetChanges("spacious"));
+
+        compare(CapsuleElements.elementSizes(profile, true), { textSize: 12, iconSize: 12, thickness: 24 });
+    }
+
+    // Any other bar element, and every one on another bar style, keeps the
+    // profile's sizes.
+    function test_otherElementsKeepTheProfilesSizes() {
+        compare(CapsuleElements.elementSizes(sizedProfile(14, 16), false),
+            { textSize: 14, iconSize: 16, thickness: 26 });
+    }
 }
