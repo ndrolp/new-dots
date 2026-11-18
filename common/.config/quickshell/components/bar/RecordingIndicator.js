@@ -18,11 +18,6 @@ function recordings(ownStartedAt, shares) {
         ({ kind: kinds.share, app: share.app, startedAt: share.startedAt })));
 }
 
-// The indicator shows only while something records.
-function shown(recordings) {
-    return recordings.length > 0;
-}
-
 // The screens other apps are sharing through PipeWire, as `{ id, app }`: one
 // per screen the portal offers, named after the app reading it (empty until
 // one is linked). `nodes` are `{ id, isStream, properties }` and `links` are

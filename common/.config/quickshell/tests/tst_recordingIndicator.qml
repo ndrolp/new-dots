@@ -1,5 +1,6 @@
 import QtQuick
 import QtTest
+import "../components/bar/LiveElements.js" as LiveElements
 import "../components/bar/RecordingIndicator.js" as RecordingIndicator
 
 // The recording indicator: shown while something records, with the time
@@ -19,7 +20,7 @@ TestCase {
         const recordings = RecordingIndicator.recordings(0);
 
         compare(recordings, []);
-        verify(!RecordingIndicator.shown(recordings));
+        verify(!LiveElements.active("recording", { recordings: recordings }));
         verify(!RecordingIndicator.stoppable(recordings));
     }
 
@@ -27,7 +28,7 @@ TestCase {
         const recordings = RecordingIndicator.recordings(5000);
 
         compare(recordings, [{ kind: RecordingIndicator.kinds.own, startedAt: 5000 }]);
-        verify(RecordingIndicator.shown(recordings));
+        verify(LiveElements.active("recording", { recordings: recordings }));
         verify(RecordingIndicator.stoppable(recordings));
     }
 
@@ -102,7 +103,7 @@ TestCase {
             [{ id: 101, app: "Firefox", startedAt: 5000 }]);
 
         compare(recordings, [{ kind: RecordingIndicator.kinds.share, app: "Firefox", startedAt: 5000 }]);
-        verify(RecordingIndicator.shown(recordings));
+        verify(LiveElements.active("recording", { recordings: recordings }));
         verify(!RecordingIndicator.stoppable(recordings));
     }
 

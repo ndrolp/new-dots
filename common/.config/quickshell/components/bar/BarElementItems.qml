@@ -11,7 +11,7 @@ import "../../config/BarProfileModel.js" as BarProfileModel
 import "../StatusText.js" as StatusText
 import "BarElementItems.js" as BarElementItems
 import "BarLayout.js" as BarLayout
-import "CapsuleElements.js" as CapsuleElements
+import "LiveElements.js" as LiveElements
 import "../panels/ControlCenterNames.js" as Names
 import "RecordingIndicator.js" as RecordingIndicator
 
@@ -70,18 +70,19 @@ Item {
         id: theme
     }
 
-    // The size of an element this long along the bar. On a side bar it runs
-    // down, and is as thick across the bar as on any other.
-    function elementSize(length) {
-        return BarLayout.size(appearance, length, itemHeight);
+    // The size of an element this long along the bar, `thickness` across it
+    // (itemHeight unless given). On a side bar it runs down, and is as thick
+    // across the bar as on any other.
+    function elementSize(length, thickness) {
+        return BarLayout.size(appearance, length, thickness === undefined ? itemHeight : thickness);
     }
 
     // The size of an element around its content, with the padding along the bar.
-    function sizeAround(content) {
+    function sizeAround(content, thickness) {
         return elementSize(BarLayout.itemLength(appearance, {
             width: content.implicitWidth,
             height: content.implicitHeight
-        }) + 16);
+        }) + 16, thickness);
     }
 
     PwObjectTracker {
@@ -106,9 +107,9 @@ Item {
     // The item of each bar element drawn here, by element id.
     readonly property var items: ({
         "notifications": notificationButton,
-        "recording": recordingButton,
-        "keepAwake": keepAwakeButton,
-        "media": mediaButton,
+        "recording": recordingItem,
+        "keepAwake": keepAwakeItem,
+        "media": mediaItem,
         "cava": cavaElement,
         "audio": audioButton,
         "bluetooth": bluetoothButton,
@@ -118,16 +119,45 @@ Item {
         "clock": pomodoroButton
     })
 
+    // On a capsule, its live elements, beside its workspace pills
+    // (LiveElements.liveElements): they fade in and out and slide with
+    // the pills. None on any other bar style.
+    readonly property var liveIds: LiveElements.ids(appearance.liveElements)
+
+    // Whether `element` is one of this capsule's live elements, drawn beside
+    // its workspace pills; never on any other bar style.
+    function live(element) {
+        return liveIds.indexOf(element) !== -1;
+    }
+
+    // The sizes an element is drawn at: a live element's are smaller
+    // (LiveElements.elementSizes).
+    function sizes(element) {
+        return LiveElements.elementSizes(appearance, live(element));
+    }
+
+    // What there is for the elements to show (see BarElementItems.itemVisible).
+    readonly property var elementStatus: ({
+        live: liveIds,
+        expanded: appearance.capsuleExpanded === true,
+        player: player,
+        recordings: recordings,
+        keepAwakeOn: keepAwake.on,
+        hasBattery: hasBattery,
+        cavaSilent: cava.silent
+    })
+
     // Enabled elements with nothing to show (no player, battery, recording
-    // or sound) are hidden; see BarElementItems.js.
+    // or sound) are hidden, and so are live elements of a collapsed capsule
+    // while they aren't active; see BarElementItems.js.
     function itemVisible(element) {
-        return BarElementItems.itemVisible(element, appearance.barElements, {
-            // On a collapsed capsule, media shows only while a track plays.
-            hasPlayer: CapsuleElements.hasMedia(appearance, player, appearance.capsuleExpanded),
-            hasBattery: hasBattery,
-            recording: RecordingIndicator.shown(recordings),
-            cavaSilent: cava.silent
-        });
+        return BarElementItems.itemVisible(element, appearance.barElements, elementStatus);
+    }
+
+    // Whether a live element is active (LiveElements.active): whether a
+    // collapsed capsule shows it.
+    function liveActive(element) {
+        return live(element) && LiveElements.active(element, elementStatus);
     }
 
     Component.onCompleted: updatePlayer()
@@ -198,178 +228,194 @@ Item {
         }
     }
 
-    Rectangle {
-        id: recordingButton
-
-        readonly property var size: root.sizeAround(recordingContent)
-
-        visible: root.itemVisible("recording")
-        x: root.elementX("recording")
-        y: root.elementY("recording")
-        width: size.width
-        height: size.height
-        radius: root.appearance.radius
-        color: recordingHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("recording") || root.appearance.pillsTransparent
-                || BarProfileModel.docked(root.appearance)
-                ? "transparent" : theme.surface
-        border.width: root.appearance.elementBorder && !root.elementGrouped("recording") ? 1 : 0
-        border.color: root.appearance.elementBorder ? theme.border : "transparent"
-
-        Behavior on color {
-            ColorAnimation { duration: root.appearance.motion.short }
-        }
-
-        HoverHandler {
-            id: recordingHover
-        }
-
-        RecordingContent {
-            id: recordingContent
-
-            anchors.centerIn: parent
-            appearance: root.appearance
-            iconColor: theme.red
-            elapsed: RecordingIndicator.elapsedSince(root.recordings, root.recordingNow)
-            sharing: root.sharingShown
-            maximumLength: root.longTextMaximumLength
-        }
-
-        // Ticks the elapsed time only while the indicator is shown.
-        Timer {
-            interval: 1000
-            repeat: true
-            triggeredOnStart: true
-            running: recordingButton.visible
-            onTriggered: root.recordingNow = Date.now()
-        }
-
-        Timer {
-            id: sharingShownTimer
-
-            interval: 4000
-            onTriggered: root.sharingShown = ""
-        }
-
-        TapHandler {
-            onTapped: {
-                if (RecordingIndicator.stoppable(root.recordings)) {
-                    root.screenCapture.stopRecording();
-                } else {
-                    root.sharingShown = RecordingIndicator.sharingText(root.recordings);
-                    sharingShownTimer.restart();
-                }
-            }
-        }
-    }
-
-    KeepAwakeElement {
-        id: keepAwakeButton
+    LiveCapableItem {
+        id: recordingItem
 
         appearance: root.appearance
-        keepAwake: root.keepAwake
-        grouped: root.elementGrouped("keepAwake")
-        visible: root.itemVisible("keepAwake")
-        x: root.elementX("keepAwake")
-        y: root.elementY("keepAwake")
-        onPopupRequested: root.popupRequested("keepAwake")
+        element: "recording"
+        items: root
+
+        Rectangle {
+            id: recordingButton
+
+            readonly property var size: root.sizeAround(recordingContent, recordingItem.sizes.thickness)
+            width: size.width
+            height: size.height
+            radius: root.appearance.radius
+            color: recordingHover.hovered ? theme.surfaceHover
+                : root.elementGrouped("recording") || root.appearance.pillsTransparent
+                    || BarProfileModel.docked(root.appearance)
+                    ? "transparent" : theme.surface
+            border.width: root.appearance.elementBorder && !root.elementGrouped("recording") ? 1 : 0
+            border.color: root.appearance.elementBorder ? theme.border : "transparent"
+
+            Behavior on color {
+                ColorAnimation { duration: root.appearance.motion.short }
+            }
+
+            HoverHandler {
+                id: recordingHover
+            }
+
+            RecordingContent {
+                id: recordingContent
+
+                anchors.centerIn: parent
+                appearance: root.appearance
+                iconColor: theme.red
+                iconSize: recordingItem.sizes.iconSize
+                textSize: recordingItem.sizes.textSize
+                elapsed: RecordingIndicator.elapsedSince(root.recordings, root.recordingNow)
+                sharing: root.sharingShown
+                maximumLength: root.longTextMaximumLength
+            }
+
+            // Ticks the elapsed time only while the indicator is shown.
+            Timer {
+                interval: 1000
+                repeat: true
+                triggeredOnStart: true
+                running: recordingButton.visible
+                onTriggered: root.recordingNow = Date.now()
+            }
+
+            Timer {
+                id: sharingShownTimer
+
+                interval: 4000
+                onTriggered: root.sharingShown = ""
+            }
+
+            TapHandler {
+                onTapped: {
+                    if (RecordingIndicator.stoppable(root.recordings)) {
+                        root.screenCapture.stopRecording();
+                    } else {
+                        root.sharingShown = RecordingIndicator.sharingText(root.recordings);
+                        sharingShownTimer.restart();
+                    }
+                }
+            }
+        }
     }
 
-    Rectangle {
-        id: mediaButton
+    LiveCapableItem {
+        id: keepAwakeItem
 
-        readonly property var size: root.elementSize(mediaContent.implicitWidth + 16)
+        appearance: root.appearance
+        element: "keepAwake"
+        items: root
 
-        border.width: root.appearance.elementBorder && !root.elementGrouped("media") ? 1 : 0
-        border.color: root.appearance.elementBorder ? theme.border : "transparent"
-        visible: root.itemVisible("media")
-        x: root.elementX("media")
-        y: root.elementY("media")
-        width: size.width
-        height: size.height
-        radius: root.appearance.radius
-        color: mediaHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("media") || root.appearance.pillsTransparent
-                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+        KeepAwakeElement {
+            id: keepAwakeButton
 
-
-        Behavior on color {
-            ColorAnimation { duration: root.appearance.motion.short }
+            appearance: root.appearance
+            keepAwake: root.keepAwake
+            grouped: root.elementGrouped("keepAwake")
+            sizes: keepAwakeItem.sizes
+            onPopupRequested: root.popupRequested("keepAwake")
         }
+    }
 
-        HoverHandler {
-            id: mediaHover
-        }
+    LiveCapableItem {
+        id: mediaItem
 
-        AlongBarBehavior on width { appearance: root.appearance }
-        AlongBarBehavior on height { appearance: root.appearance }
+        appearance: root.appearance
+        element: "media"
+        items: root
 
-        Row {
-            id: mediaContent
+        Rectangle {
+            id: mediaButton
 
-            anchors.centerIn: parent
-            spacing: 7
-            // The title runs sideways on a side bar, the note stays upright.
-            rotation: BarLayout.turn(root.appearance)
+            readonly property var size: root.elementSize(mediaContent.implicitWidth + 16, mediaItem.sizes.thickness)
 
-            ShellText {
-                anchors.verticalCenter: parent.verticalCenter
-                rotation: -parent.rotation
-                text: "󰎈"
-                color: theme.green
-                font.pixelSize: root.appearance.iconSize
-                font.bold: true
+            border.width: root.appearance.elementBorder && !root.elementGrouped("media") ? 1 : 0
+            border.color: root.appearance.elementBorder ? theme.border : "transparent"
+            width: size.width
+            height: size.height
+            radius: root.appearance.radius
+            color: mediaHover.hovered ? theme.surfaceHover
+                : root.elementGrouped("media") || root.appearance.pillsTransparent
+                    || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+
+            Behavior on color {
+                ColorAnimation { duration: root.appearance.motion.short }
             }
 
-            ShellText {
-                id: mediaTitle
-
-                property string displayedLabel: root.displayedPlayerLabel
-
-                anchors.verticalCenter: parent.verticalCenter
-                visible: BarProfileModel.elementOption(root.appearance.barElements, "media", "titleVisible")
-                width: Math.min(root.longTextMaximumLength, implicitWidth)
-                text: displayedLabel
-                color: theme.green
-                elide: Text.ElideRight
-                font.pixelSize: root.appearance.textSize
-                font.bold: true
-
-                transform: Translate {
-                    id: mediaLabelTranslation
-                }
+            HoverHandler {
+                id: mediaHover
             }
 
-            SequentialAnimation {
-                id: mediaLabelTransition
+            AlongBarBehavior on width { appearance: root.appearance }
+            AlongBarBehavior on height { appearance: root.appearance }
 
-                NumberAnimation {
-                    target: mediaLabelTranslation
-                    property: "x"
-                    to: -12
-                    duration: root.appearance.motion.brief
+            Row {
+                id: mediaContent
+
+                anchors.centerIn: parent
+                spacing: 7
+                // The title runs sideways on a side bar, the note stays upright.
+                rotation: BarLayout.turn(root.appearance)
+
+                ShellText {
+                    anchors.verticalCenter: parent.verticalCenter
+                    rotation: -parent.rotation
+                    text: "󰎈"
+                    color: theme.green
+                    font.pixelSize: mediaItem.sizes.iconSize
+                    font.bold: true
                 }
 
-                ScriptAction {
-                    script: {
-                        root.displayedPlayerLabel = root.playerLabel;
-                        mediaLabelTranslation.x = 12;
+                ShellText {
+                    id: mediaTitle
+
+                    property string displayedLabel: root.displayedPlayerLabel
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: BarProfileModel.elementOption(root.appearance.barElements, "media", "titleVisible")
+                    width: Math.min(root.longTextMaximumLength, implicitWidth)
+                    text: displayedLabel
+                    color: theme.green
+                    elide: Text.ElideRight
+                    font.pixelSize: mediaItem.sizes.textSize
+                    font.bold: true
+
+                    transform: Translate {
+                        id: mediaLabelTranslation
                     }
                 }
 
-                NumberAnimation {
-                    target: mediaLabelTranslation
-                    property: "x"
-                    to: 0
-                    duration: root.appearance.motion.medium
-                    easing.type: root.appearance.motion.easing
+                SequentialAnimation {
+                    id: mediaLabelTransition
+
+                    NumberAnimation {
+                        target: mediaLabelTranslation
+                        property: "x"
+                        to: -12
+                        duration: root.appearance.motion.brief
+                    }
+
+                    ScriptAction {
+                        script: {
+                            root.displayedPlayerLabel = root.playerLabel;
+                            mediaLabelTranslation.x = 12;
+                        }
+                    }
+
+                    NumberAnimation {
+                        target: mediaLabelTranslation
+                        property: "x"
+                        to: 0
+                        duration: root.appearance.motion.medium
+                        easing.type: root.appearance.motion.easing
+                    }
                 }
             }
-        }
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked: root.popupRequested("media")
+            MouseArea {
+                anchors.fill: parent
+                onClicked: root.popupRequested("media")
+            }
         }
     }
 

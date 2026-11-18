@@ -5,6 +5,7 @@ import "../../config" as Config
 import "../panels" as Panels
 import "BarPlacement.js" as BarPlacement
 import "CapsuleElements.js" as CapsuleElements
+import "LiveElements.js" as LiveElements
 import "CapsulePlacement.js" as CapsulePlacement
 import "CapsuleRouting.js" as CapsuleRouting
 import "../../config/BarProfileModel.js" as BarProfileModel
@@ -76,7 +77,14 @@ Variants {
                     barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
                     expanded: panel.capsuleExpanded,
                     change: panel.showingChange,
-                    capsuleElements: bar.appearance.barProfileValue(panel.profileName, "capsuleElements")
+                    capsulePlaces: bar.appearance.barProfileValue(panel.profileName, "capsulePlaces")
+                })
+                // On a capsule, the live elements beside its workspace pills,
+                // by side (see LiveElements.liveElements); none otherwise.
+                property var liveElements: LiveElements.liveElements({
+                    barStyle: panel.barAppearance.barStyle,
+                    barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
+                    capsulePlaces: bar.appearance.barProfileValue(panel.profileName, "capsulePlaces")
                 })
                 // Whether this window's capsule is expanded (see panel.capsuleExpanded).
                 property bool capsuleExpanded: panel.capsuleExpanded
@@ -88,7 +96,7 @@ Variants {
             // Whether this window's capsule is expanded, held by any of its
             // causes (see CapsuleRouting.expanded); always false on other bar styles,
             // where nothing reads it. Its size changes as the row does,
-            // animated, and the reserved space stays at the collapsed height.
+            // animated, and the reserved space stays as it is collapsed.
             // A popup inside holds it expanded until the popup closes.
             readonly property bool capsuleExpanded: CapsuleRouting.expanded({
                 hover: capsuleHover.expanded,
@@ -143,14 +151,17 @@ Variants {
             readonly property var contentArea: BarPlacement.contentArea(panel.barAppearance,
                 { width: barBackground.width, height: barBackground.height })
 
-            exclusiveZone: barThickness
+            // On a capsule, the live elements it shows collapsed included,
+            // so windows move clear of them as they appear and back as they go.
+            exclusiveZone: BarPlacement.reservedSpace(panel.barAppearance, barContent.activeLiveDepth)
             // Only the size across the bar counts: the compositor stretches the
             // window between the two anchors it has along the bar. A capsule's
-            // window grows away from its edge to hold a popup inside, past
-            // what it reserves.
+            // window grows away from its edge to hold a popup inside, and a
+            // pill row deepened by its live elements.
             implicitWidth: barThickness
             implicitHeight: barThickness
-                + (BarProfileModel.capsule(panel.barAppearance) ? capsuleWindowHold.held : 0)
+                + (BarProfileModel.capsule(panel.barAppearance)
+                    ? capsuleWindowHold.held + barContent.pillRowExtra : 0)
 
             anchors {
                 top: panel.windowAnchors.top
@@ -265,6 +276,7 @@ Variants {
                     systemMonitor: panel.systemMonitor
                     workspaceService: panel.workspaceService
                     capsuleChange: panel.showingChange ? capsuleChange.change : null
+                    workspacePillsLength: workspaceRow.width
 
                     onConfigRequested: function(screen) {
                         bar.configRequested(screen, panel);
@@ -278,16 +290,16 @@ Variants {
                 }
             }
 
-            // A capsule's workspace pills, inside the capsule past its row
-            // (CapsulePlacement.workspacePills), so they take clicks with it.
+            // A capsule's workspace pills, inside the capsule past its row,
+            // beside its live elements (CapsulePlacement.pillRow), so they
+            // take clicks with it. They slide to make room for a live element.
             CapsuleWorkspaceRow {
                 id: workspaceRow
 
-                readonly property var place: CapsulePlacement.workspacePills(barContent.layoutBar,
-                    barContent.capsulePlace)
+                readonly property var place: barContent.pillRow ? barContent.pillRow.pills : null
 
-                visible: place !== null
-                x: place ? barContent.x + place.centre - width / 2 : 0
+                visible: place !== null && barContent.capsulePlace.width > 0
+                x: place ? barContent.x + place.x : 0
                 y: place ? barContent.y + place.y : 0
                 workspaceIds: panel.workspaceService.workspacesForScreen(panel.screen,
                     panel.monitors.workspacesFor(panel.monitorDescription))

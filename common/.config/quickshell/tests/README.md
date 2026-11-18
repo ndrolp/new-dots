@@ -4,9 +4,11 @@ Tests for the pure JS models behind the settings: bar profiles, with a name
 to ask a profile for each bar style (`config/BarProfileModel.js`), desktop widgets (`config/DesktopWidgetsModel.js`)
 and schema migrations (`config/SchemaMigrations.js`), among them the one that
 turns the two bar style switches into one bar style and keeps each saved
-profile's look (`tst_barStyleMigration.qml`). They also cover where
+profile's look (`tst_barStyleMigration.qml`), and the one that turns a capsule
+profile's list of shown bar elements into collapsed places
+(`tst_barProfileModel.qml`). They also cover where
 the bar sits on its screen: the edges its window is anchored to, the space it
-reserves, where the margin goes and where its content sits, against its edge
+reserves (on a capsule, with the live elements it shows collapsed), where the margin goes and where its content sits, against its edge
 however tall a capsule's window grows, for every bar style on each Bar position
 (`components/bar/BarPlacement.js`; `Bar.qml` itself is a Quickshell window and
 isn't tested here), and where the toasts and desktop widgets sit in the area
@@ -67,14 +69,19 @@ row (the ones its profile chose, in the profile's order, else Arch, the clock
 and the control center; the choice is kept with the profile by
 `BarProfileModel.js` and offered, on a capsule profile, for the elements the
 profile shows but the workspaces and the live ones by
-`BarElementsSettings.qml`, and a saved choice of those is ignored), live ones
-included (the recording
-indicator, and media only while a track plays), which ones it shows expanded
-(all but the workspaces, with their groups, and media while any player
-exists) (`components/bar/CapsuleElements.js`), that only the pointer over
-the capsule itself counts as hovering it, where the capsule sits around that
-row and that only it takes clicks in its bar window
-(`CapsulePlacement.js`), that any one cause holds it expanded and that
+`BarElementsSettings.qml`, and a saved choice of those is ignored), which ones it shows expanded
+(all but the workspaces and the live ones, with their groups), which are its
+live elements and on which side of the workspace pills (media left, shown
+collapsed only while a track plays and expanded while any player exists, the
+recording indicator right, keep-awake hidden unless chosen, then shown
+collapsed only while on), never in its row, at 80% of the profile's sizes
+and out of any group, whose rest keeps one background
+(`components/bar/CapsuleElements.js` for the row, `LiveElements.js` for the
+live elements, `BarElementItems.js`), that only the
+pointer over the capsule itself counts as hovering it, where the capsule sits
+around that row and its pill row, where the pills and the live elements go in
+that row, centred and closing up when one isn't shown, and that only the
+capsule takes clicks in its bar window (`CapsulePlacement.js`), that any one cause holds it expanded and that
 SUPER+I acts only on the focused monitor's capsule (`CapsuleRouting.js`),
 that hovering it expands it only after a moment and collapses it a while after
 the pointer leaves (`CapsuleHover.qml`), that SUPER+I holds it expanded until
@@ -106,7 +113,10 @@ on a top one (`BarLayout.size`, `Workspaces.qml`, `ArchButton.qml`,
 `SystemMonitor.qml`, `RecordingContent.qml`; `BarElementItems.qml` and `Clock.qml`
 need Quickshell's services, so their parts are covered through those), that what
 runs along the bar animates and what runs across it doesn't, on every Bar position
-(`AlongBarBehavior.qml`), what the workspace overview lists: every monitor's
+(`AlongBarBehavior.qml`), that a bar element that can be live sits at its place,
+as large as its item, and fades out as a live element, keeping its room beside
+the pills until its fade-out ends, at once with reduce motion
+(`LiveCapableItem.qml`), what the workspace overview lists: every monitor's
 workspaces in physical order, each one once, how they fit up to 21 with no
 scrolling, what each key does, during a drag too, how the keyboard walks them,
 the number a new one takes, skipping numbers another monitor has or the rules

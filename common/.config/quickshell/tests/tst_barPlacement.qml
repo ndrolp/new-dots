@@ -49,6 +49,26 @@ TestCase {
         compare(BarPlacement.thickness(bar(data.values)), data.thickness);
     }
 
+    // While live elements show on a collapsed capsule, its pill row is as
+    // deep as the deepest of them, and what it reserves grows by what that
+    // adds to its pills, so windows stay clear of it; with none, or on any
+    // other bar style, it reserves its thickness.
+    function test_aCapsuleReservesTheLiveElementsItShows_data() {
+        return [
+            { tag: "capsule, a live element 20 deep", values: { barStyle: "capsule" }, liveDepth: 20,
+                reserved: 60 },
+            { tag: "capsule, none", values: { barStyle: "capsule" }, liveDepth: 0, reserved: 44 },
+            { tag: "capsule, bottom", values: { barStyle: "capsule", barPosition: "bottom" }, liveDepth: 20,
+                reserved: 60 },
+            { tag: "floating", values: { barStyle: "transparent" }, liveDepth: 20, reserved: 36 },
+            { tag: "opaque", values: {}, liveDepth: 20, reserved: 30 }
+        ];
+    }
+
+    function test_aCapsuleReservesTheLiveElementsItShows(data) {
+        compare(BarPlacement.reservedSpace(bar(data.values), data.liveDepth), data.reserved);
+    }
+
     // The margin keeps a floating bar clear of the screen edge it sits on; the
     // padding keeps its contents clear of the bar's two ends.
     function test_theMarginIsOnTheBarsScreenEdge_data() {

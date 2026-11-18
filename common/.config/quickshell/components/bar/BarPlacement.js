@@ -22,10 +22,19 @@ function workspaceStrip(bar) {
     return BarProfileModel.capsule(bar) ? workspacePillDepth + bar.spacing : 0;
 }
 
-// The space the bar takes from its screen edge inwards. Also what it reserves,
-// so windows stay clear of it: on a capsule, its workspace pills included.
+// The space the bar takes from its screen edge inwards: on a capsule, its
+// workspace pills included.
 function thickness(bar) {
     return bar.barHeight + margin(bar) + workspaceStrip(bar);
+}
+
+// The space the bar reserves from its screen edge, so windows stay clear of
+// it: its thickness, and on a capsule whatever its live elements add to the
+// depth of its workspace pills while they show collapsed, `liveDepth` the
+// depth of the deepest of them (0 with none).
+function reservedSpace(bar, liveDepth) {
+    return thickness(bar)
+        + (BarProfileModel.capsule(bar) ? Math.max(0, liveDepth - workspacePillDepth) : 0);
 }
 
 // The screen edges the bar's window is anchored to: its own and the two beside

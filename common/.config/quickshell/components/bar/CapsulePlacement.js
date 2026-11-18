@@ -63,19 +63,66 @@ function inputRegion(surface, margins) {
     };
 }
 
-// Where the capsule's workspace pills sit in the bar content,
-// { centre, y }: inside the capsule, centred on it along the bar, just past
-// its row of bar elements, so under the row of a top capsule and above the
-// row of a bottom one. Takes the bar content, { barPosition, height }, and
-// the capsule as surface gives it, or null; null with no capsule drawn.
-function workspacePills(content, capsule) {
-    if (!capsule || capsule.width <= 0)
-        return null;
+// Where the capsule's pill row goes in the bar content: its workspace pills
+// with its live elements beside them, left and right, `spacing` apart, the
+// lot centred along the bar on `centre`, the centre of its row of bar
+// elements. The row sits just past that row of bar elements, so under the
+// row of a top capsule and above the row of a bottom one, as deep as the
+// deepest of the pills and the live elements shown; each is centred across
+// it. A live element not `shown` takes no room: it waits just outside its
+// side of what is shown, to fade there.
+// Takes the bar content, { barPosition, height }, and { centre, spacing,
+// pills (their length), left, right }, each side a list of live elements
+// { id, length, depth, shown } from the pills outwards for the right and
+// inwards for the left. Returns { start, end, depth, pills: { x, y },
+// elements: { id: { x, y } } }.
+function pillRow(content, given) {
+    const pillDepth = BarPlacement.workspacePillDepth;
+    const shown = given.left.concat(given.right).filter(element => element.shown);
+    const depth = Math.max(pillDepth, ...shown.map(element => element.depth));
+    const length = shown.reduce((total, element) => total + element.length + given.spacing, given.pills);
+    const away = content.barPosition === "bottom" ? -depth : content.height;
+    const across = itemDepth => away + (depth - itemDepth) / 2;
+    const elements = {};
+    let along = given.centre - length / 2;
+
+    const place = element => {
+        elements[element.id] = { x: along, y: across(element.depth) };
+        along += element.length + given.spacing;
+    };
+    const wait = (element, x) => elements[element.id] = { x: x, y: across(element.depth) };
+
+    given.left.forEach(element => element.shown ? place(element)
+        : wait(element, along - given.spacing - element.length));
+    const pills = { x: along, y: across(pillDepth) };
+    along += given.pills;
+    given.right.forEach(element => {
+        if (element.shown) {
+            along += given.spacing;
+            elements[element.id] = { x: along, y: across(element.depth) };
+            along += element.length;
+        } else {
+            wait(element, along + given.spacing);
+        }
+    });
 
     return {
-        centre: capsule.x + capsule.width / 2,
-        y: content.barPosition === "bottom" ? -BarPlacement.workspacePillDepth : content.height
+        start: given.centre - length / 2,
+        end: given.centre + length / 2,
+        depth: depth,
+        pills: pills,
+        elements: elements
     };
+}
+
+// The capsule's span along the bar, { start, end }: round its row of bar
+// elements, `row`, and its pill row, `pills`, as pillRow gives it. With
+// nothing in its row, it is its pill row's: the pills and any live elements
+// they show.
+function span(row, pills) {
+    if (row.end <= row.start)
+        return { start: pills.start, end: pills.end };
+    return { start: Math.min(row.start, pills.start), end: Math.max(row.end, pills.end) };
 }
 
 // Whether `point` { x, y } is over the capsule `place` (as surface
