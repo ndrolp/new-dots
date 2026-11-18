@@ -174,16 +174,72 @@ TestCase {
         compare(shownIds(drawn, "center"), ["clock"]);
     }
 
-    // While collapsed the capsule also draws the live bar elements, the
-    // recording indicator and media, which show only while they are active.
-    // In the default order they sit between Arch and the clock.
-    function test_aCollapsedCapsuleDrawsTheLiveElementsBetweenArchAndTheClock() {
+    // The live elements, the recording indicator and media, are never drawn
+    // in the row, collapsed or expanded: they sit beside the workspace pills
+    // instead (see liveElements).
+    function test_theRowNeverDrawsTheLiveElements_data() {
+        return [
+            { tag: "collapsed", expanded: false },
+            { tag: "expanded", expanded: true }
+        ];
+    }
+
+    function test_theRowNeverDrawsTheLiveElements(data) {
+        const drawn = CapsuleElements.drawnElements({
+            barStyle: "capsule",
+            barElements: BarProfileModel.defaultProfile.barElements,
+            expanded: data.expanded
+        });
+        const shown = shownIds(drawn, "center");
+
+        compare(shown.indexOf("recording"), -1);
+        compare(shown.indexOf("media"), -1);
+        verify(shown.indexOf("clock") !== -1);
+    }
+
+    // So a collapsed capsule's row is just what its profile chose.
+    function test_aCollapsedCapsulesRowIsWhatItsProfileChose() {
         const drawn = CapsuleElements.drawnElements({
             barStyle: "capsule",
             barElements: BarProfileModel.defaultProfile.barElements
         });
 
-        compare(shownIds(drawn, "center"), ["arch", "notifications", "recording", "media", "clock"]);
+        compare(shownIds(drawn, "center"), ["arch", "notifications", "clock"]);
+    }
+
+    // On a capsule, media sits left of the workspace pills and the recording
+    // indicator right of them, while the profile enables them.
+    function test_mediaSitsLeftOfThePillsAndRecordingRight() {
+        compare(CapsuleElements.liveElements({ barStyle: "capsule",
+            barElements: BarProfileModel.defaultProfile.barElements }),
+            { left: ["media"], right: ["recording"] });
+    }
+
+    // A live element the profile disables isn't beside the pills either.
+    function test_aDisabledLiveElementIsNotBesideThePills() {
+        const elements = barElements();
+        elements.right.push(element("recording", { enabled: false }), element("media"));
+
+        compare(CapsuleElements.liveElements({ barStyle: "capsule", barElements: elements }),
+            { left: ["media"], right: [] });
+    }
+
+    // Live elements are a capsule's: any other bar style draws them in its
+    // zones like any other bar element.
+    function test_onlyACapsuleHasLiveElements_data() {
+        return [
+            { tag: "opaque", barStyle: "opaque" },
+            { tag: "transparent", barStyle: "transparent" },
+            { tag: "docked", barStyle: "docked" }
+        ];
+    }
+
+    function test_onlyACapsuleHasLiveElements(data) {
+        const elements = BarProfileModel.defaultProfile.barElements;
+
+        compare(CapsuleElements.liveElements({ barStyle: data.barStyle, barElements: elements }),
+            { left: [], right: [] });
+        compare(CapsuleElements.drawnElements({ barStyle: data.barStyle, barElements: elements }), elements);
     }
 
     // Media has something to show on a bar while any player exists, but on a

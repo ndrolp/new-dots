@@ -9,10 +9,12 @@
 // for a profile that never chose its own (see capsuleElements).
 const collapsedElementIds = BarProfileModel.defaultProfile.capsuleElements;
 
-// The live bar elements: a collapsed capsule also draws them, in the
-// profile's order, but they show only while active: the recording indicator
-// while recording, media while a track plays (see hasMedia).
-const liveElementIds = ["recording", "media"];
+// The live elements and the side of the workspace pills each sits on. A
+// capsule never draws them in its row but beside its pills: collapsed only
+// while active (the recording indicator while recording, media while a track
+// plays, see hasMedia), expanded as on any other bar style.
+const liveSides = Object.freeze({ media: "left", recording: "right" });
+const liveElementIds = Object.keys(liveSides);
 
 const zoneNames = ["left", "center", "right"];
 
@@ -38,13 +40,14 @@ function collapsedRow(barElements, shownIds) {
     return { left: [], center: center, right: [] };
 }
 
-// The bar elements an expanded capsule shows: every one the profile has but
-// the workspaces, which the workspace row already shows.
+// The bar elements an expanded capsule shows in its row: every one the
+// profile has but the workspaces, which the workspace row already shows, and
+// the live elements, which sit beside it.
 function expandedElementIds(barElements) {
     const ids = [];
     for (const zone of zoneNames)
         ((barElements || {})[zone] || []).forEach(element => {
-            if (element.id !== "workspaces")
+            if (choosable(element.id))
                 ids.push(element.id);
         });
     return ids;
@@ -52,15 +55,16 @@ function expandedElementIds(barElements) {
 
 // Whether a profile can choose the bar element `id` for its collapsed
 // capsule: any but the workspaces, which the workspace row shows, and the
-// live bar elements, which it always draws.
+// live elements, which sit beside the workspace pills.
 function choosable(id) {
     return id !== "workspaces" && liveElementIds.indexOf(id) === -1;
 }
 
-// The bar elements a bar window draws: on a capsule, the collapsed row of the
-// elements its profile chose (`capsuleElements`, else the default ones; any
-// it can't choose are ignored), live bar elements included, or its expanded row while `expanded`, or none while
-// it shows a `change` instead; the profile's own on any other bar style.
+// The bar elements a bar window draws in its zones: on a capsule, the
+// collapsed row of the elements its profile chose (`capsuleElements`, else
+// the default ones; any it can't choose are ignored), or its expanded row
+// while `expanded`, or none while it shows a `change` instead, never the live
+// elements (see liveElements); the profile's own on any other bar style.
 // Takes { barStyle, barElements, capsuleElements, expanded, change }.
 function drawnElements(bar) {
     if (!BarProfileModel.capsule(bar))
@@ -69,7 +73,23 @@ function drawnElements(bar) {
         return collapsedRow(bar.barElements, []);
     return collapsedRow(bar.barElements, bar.expanded
         ? expandedElementIds(bar.barElements)
-        : (bar.capsuleElements || collapsedElementIds).filter(choosable).concat(liveElementIds));
+        : (bar.capsuleElements || collapsedElementIds).filter(choosable));
+}
+
+// The live elements a capsule draws beside its workspace pills, by side,
+// { left: [ids], right: [ids] }, in the profile's order: those its profile
+// enables. None on any other bar style. Takes { barStyle, barElements }.
+function liveElements(bar) {
+    const sides = { left: [], right: [] };
+    if (!BarProfileModel.capsule(bar))
+        return sides;
+
+    for (const zone of zoneNames)
+        ((bar.barElements || {})[zone] || []).forEach(element => {
+            if (element.enabled !== false && liveSides[element.id])
+                sides[liveSides[element.id]].push(element.id);
+        });
+    return sides;
 }
 
 // Whether media has something to show, given the bar profile, { barStyle },

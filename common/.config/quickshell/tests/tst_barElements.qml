@@ -363,6 +363,25 @@ TestCase {
         compare(BarElementItems.itemVisible("keepAwake", barElements, nothingGoingOn), true);
     }
 
+    // A capsule's row lists its live elements switched off, but they show
+    // beside its workspace pills while they have something to show.
+    function test_aLiveElementShowsThoughItsRowLeavesItOff_data() {
+        return [
+            { tag: "recording", element: "recording", status: { recording: true }, shown: true },
+            { tag: "not recording", element: "recording", status: { recording: false }, shown: false },
+            { tag: "media playing", element: "media", status: { hasPlayer: true }, shown: true },
+            { tag: "no media", element: "media", status: { hasPlayer: false }, shown: false }
+        ];
+    }
+
+    function test_aLiveElementShowsThoughItsRowLeavesItOff(data) {
+        const barElements = { left: [], right: [],
+            center: [{ id: "recording", enabled: false }, { id: "media", enabled: false }] };
+        const status = Object.assign({ live: ["recording", "media"] }, data.status);
+
+        compare(BarElementItems.itemVisible(data.element, barElements, status), data.shown);
+    }
+
     function test_keepAwakeCanBeMovedToAnotherZone() {
         const barElements = BarProfileModel.normalizeBarElements(minimalElements());
 
