@@ -41,8 +41,19 @@ TestCase {
             && child.visible)[0] || null;
     }
 
+    function isPlaceChoice(child) {
+        return child.options !== undefined && child.chosen !== undefined
+            && child.options.some(option => option.value === "hidden");
+    }
+
     function zoneChoice(item) {
-        return all(item, child => child.options !== undefined && child.chosen !== undefined)[0];
+        return all(item, child => child.options !== undefined && child.chosen !== undefined
+            && !isPlaceChoice(child))[0];
+    }
+
+    // The collapsed-capsule choice of a row, if it shows one.
+    function placeChoice(item) {
+        return all(item, child => isPlaceChoice(child) && child.visible)[0] || null;
     }
 
     function switchRow(item, label) {
@@ -67,7 +78,8 @@ TestCase {
                 property int textSize: 13
                 property string barPosition: "top"
                 property string barStyle: "opaque"
-                property var capsuleElements: ["arch", "clock", "battery"]
+                property var capsulePlaces: ({ arch: "shown", clock: "shown", battery: "shown",
+                    audio: "hidden", media: "liveLeft", recording: "liveRight" })
                 property var barElements: ({
                     left: [{ id: "arch", enabled: true }, { id: "workspaces", enabled: true }],
                     center: [{ id: "clock", enabled: true }],
@@ -111,8 +123,8 @@ TestCase {
                     record(["move", element, offset]);
                 }
 
-                function setCapsuleElement(element, shown) {
-                    record(["capsule", element, shown]);
+                function setCapsulePlace(element, place) {
+                    record(["capsule", element, place]);
                 }
             }
 
@@ -475,30 +487,31 @@ TestCase {
         compare(built.appearance.calls, [["joined", "battery", false]]);
     }
 
-    // Only a capsule profile chooses what its collapsed capsule shows.
+    // Only a capsule profile chooses where its collapsed capsule puts each
+    // bar element.
     function test_onlyACapsuleProfileOffersTheCollapsedChoice() {
         const built = make();
 
-        verify(!button(elementRow(built.item, "Arch icon"), "In capsule"));
+        verify(!placeChoice(elementRow(built.item, "Arch icon")));
 
         built.appearance.barStyle = "capsule";
-        verify(button(elementRow(built.item, "Arch icon"), "In capsule"));
+        verify(placeChoice(elementRow(built.item, "Arch icon")));
     }
 
-    // Only bar elements in the profile can be chosen: a turned off one can't.
-    function test_onlyElementsTheProfileShowsCanBeChosenForTheCapsule() {
+    // Only bar elements in the profile can be placed: a turned off one can't.
+    function test_onlyElementsTheProfileShowsCanBePlacedInTheCapsule() {
         const built = make();
         built.appearance.barStyle = "capsule";
 
         const offered = ["Arch icon", "Clock & pomodoro", "Audio", "Battery", "Cava"]
-            .filter(label => button(elementRow(built.item, label), "In capsule") !== null);
+            .filter(label => placeChoice(elementRow(built.item, label)) !== null);
         compare(offered, ["Arch icon", "Clock & pomodoro", "Audio"]);
     }
 
-    // The workspaces, which the workspace row shows, and the live elements,
-    // which a collapsed capsule always draws while they are active, aren't
-    // offered.
-    function test_theWorkspacesAndTheLiveElementsCannotBeChosenForTheCapsule() {
+    // Every element but the workspaces, which the workspace row shows, offers
+    // Hidden and Shown; only the ones that can be live also offer Live left
+    // and Live right.
+    function test_onlyElementsThatCanBeLiveOfferTheLivePlaces() {
         const built = make();
         built.appearance.barStyle = "capsule";
         built.appearance.barElements = {
@@ -507,24 +520,38 @@ TestCase {
             right: [{ id: "clock", enabled: true }]
         };
 
-        const offered = ["Workspaces", "Recording indicator", "Media", "Clock & pomodoro"]
-            .filter(label => button(elementRow(built.item, label), "In capsule") !== null);
-        compare(offered, ["Clock & pomodoro"]);
+        function labels(label) {
+            const choice = placeChoice(elementRow(built.item, label));
+            return choice ? choice.options.map(option => option.label) : [];
+        }
+
+        const all = ["Hidden", "Shown", "Live left", "Live right"];
+        compare(labels("Workspaces"), []);
+        compare(labels("Recording indicator"), all);
+        compare(labels("Media"), all);
+        compare(labels("Clock & pomodoro"), ["Hidden", "Shown"]);
     }
 
-    // The choice marks the chosen elements and saves a change to the profile.
-    function test_theCollapsedChoiceMarksChosenElementsAndSavesTheChange() {
+    // The choice marks each element's place and saves a change to the profile.
+    function test_theCollapsedChoiceMarksThePlaceAndSavesTheChange() {
         const built = make();
         built.appearance.barStyle = "capsule";
-        const arch = button(elementRow(built.item, "Arch icon"), "In capsule");
-        const audio = button(elementRow(built.item, "Audio"), "In capsule");
+        built.appearance.barElements = {
+            left: [{ id: "arch", enabled: true }],
+            center: [{ id: "media", enabled: true }],
+            right: [{ id: "audio", enabled: true }]
+        };
+        const arch = placeChoice(elementRow(built.item, "Arch icon"));
+        const media = placeChoice(elementRow(built.item, "Media"));
+        const audio = placeChoice(elementRow(built.item, "Audio"));
 
-        compare(arch.labelColor, theme.accent);
-        compare(audio.labelColor, theme.textMuted);
+        compare(arch.value, "shown");
+        compare(media.value, "liveLeft");
+        compare(audio.value, "hidden");
 
-        arch.activated();
-        audio.activated();
-        compare(built.appearance.calls, [["capsule", "arch", false], ["capsule", "audio", true]]);
+        arch.chosen("hidden");
+        media.chosen("liveRight");
+        compare(built.appearance.calls, [["capsule", "arch", "hidden"], ["capsule", "media", "liveRight"]]);
     }
 
     function test_anElementsOptionsAreSwitchRowsThatSaveToTheProfile() {

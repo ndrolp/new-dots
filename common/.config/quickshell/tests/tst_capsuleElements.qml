@@ -8,6 +8,14 @@ import "../config/BarProfileModel.js" as BarProfileModel
 TestCase {
     name: "CapsuleElements"
 
+    // The bar elements a profile shows in its collapsed row by default.
+    readonly property var defaultShown: ["arch", "clock", "notifications"]
+
+    // Collapsed places with `values` over the default ones.
+    function places(values) {
+        return Object.assign(BarProfileModel.completeCapsulePlaces(undefined), values);
+    }
+
     function element(id, values) {
         return Object.assign({ id: id, enabled: true }, values);
     }
@@ -28,7 +36,7 @@ TestCase {
     // A collapsed capsule shows Arch, the clock and the control center, in the
     // profile's order, as one row in the middle of the bar.
     function test_aCollapsedCapsuleShowsArchTheClockAndTheControlCenter() {
-        const row = CapsuleElements.collapsedRow(barElements(), CapsuleElements.collapsedElementIds);
+        const row = CapsuleElements.collapsedRow(barElements(), defaultShown);
 
         compare(shownIds(row, "center"), ["arch", "notifications", "clock"]);
         compare(row.left, []);
@@ -38,7 +46,7 @@ TestCase {
     // The other elements are still listed, only switched off, so their options
     // and their place in the profile's order stay.
     function test_theOtherElementsAreListedSwitchedOff() {
-        const row = CapsuleElements.collapsedRow(barElements(), CapsuleElements.collapsedElementIds);
+        const row = CapsuleElements.collapsedRow(barElements(), defaultShown);
 
         compare(row.center.map(item => item.id),
             ["arch", "systemMonitor", "workspaces", "notifications", "battery", "clock"]);
@@ -52,7 +60,7 @@ TestCase {
         const elements = barElements();
         elements.left[0].enabled = false;
 
-        compare(shownIds(CapsuleElements.collapsedRow(elements, CapsuleElements.collapsedElementIds), "center"),
+        compare(shownIds(CapsuleElements.collapsedRow(elements, defaultShown), "center"),
             ["notifications", "clock"]);
     }
 
@@ -71,7 +79,7 @@ TestCase {
         const elements = barElements();
         const before = JSON.stringify(elements);
 
-        CapsuleElements.collapsedRow(elements, CapsuleElements.collapsedElementIds);
+        CapsuleElements.collapsedRow(elements, defaultShown);
         compare(JSON.stringify(elements), before);
     }
 
@@ -140,43 +148,67 @@ TestCase {
         compare(shownIds(drawn, "left"), ["arch", "systemMonitor"]);
     }
 
-    // A collapsed capsule shows the bar elements its profile chose, in the
-    // profile's order rather than the order they were chosen in.
-    function test_aCollapsedCapsuleShowsTheChosenElementsInTheProfilesOrder() {
+    // A collapsed capsule shows the bar elements whose place is Shown, in
+    // the profile's order.
+    function test_aCollapsedCapsuleShowsTheShownElementsInTheProfilesOrder() {
         const drawn = CapsuleElements.drawnElements({ barStyle: "capsule", barElements: barElements(),
-            capsuleElements: ["clock", "battery", "arch"] });
+            capsulePlaces: places({ clock: "shown", battery: "shown", arch: "shown", notifications: "hidden" }) });
 
         compare(shownIds(drawn, "center"), ["arch", "battery", "clock"]);
     }
 
-    // A profile chooses neither the workspaces, which the workspace row shows,
-    // nor the live elements, which a collapsed capsule always draws.
-    function test_onlyOtherElementsCanBeChosenForACollapsedCapsule_data() {
-        return [
-            { tag: "workspaces", id: "workspaces", choosable: false },
-            { tag: "recording", id: "recording", choosable: false },
-            { tag: "media", id: "media", choosable: false },
-            { tag: "clock", id: "clock", choosable: true },
-            { tag: "battery", id: "battery", choosable: true }
-        ];
-    }
-
-    function test_onlyOtherElementsCanBeChosenForACollapsedCapsule(data) {
-        compare(CapsuleElements.choosable(data.id), data.choosable);
-    }
-
-    // So a saved choice of the workspaces doesn't show them in the capsule
-    // as well as in the workspace row.
-    function test_aSavedChoiceOfTheWorkspacesIsIgnored() {
+    // A saved place for the workspaces doesn't show them in the capsule as
+    // well as in the workspace row.
+    function test_aSavedPlaceOfTheWorkspacesIsIgnored() {
         const drawn = CapsuleElements.drawnElements({ barStyle: "capsule", barElements: barElements(),
-            capsuleElements: ["workspaces", "clock"] });
+            capsulePlaces: places({ workspaces: "shown", arch: "hidden", notifications: "hidden" }) });
 
         compare(shownIds(drawn, "center"), ["clock"]);
     }
 
-    // The live elements, the recording indicator and media, are never drawn
-    // in the row, collapsed or expanded: they sit beside the workspace pills
-    // instead (see liveElements).
+    // A live element whose place is Shown is drawn in the row, collapsed or
+    // expanded, and not beside the pills.
+    function test_aLiveElementShownInTheRowIsDrawnThere_data() {
+        return [
+            { tag: "collapsed", expanded: false },
+            { tag: "expanded", expanded: true }
+        ];
+    }
+
+    function test_aLiveElementShownInTheRowIsDrawnThere(data) {
+        const bar = { barStyle: "capsule", barElements: BarProfileModel.defaultProfile.barElements,
+            capsulePlaces: places({ media: "shown" }), expanded: data.expanded };
+
+        verify(shownIds(CapsuleElements.drawnElements(bar), "center").indexOf("media") !== -1);
+        compare(CapsuleElements.liveElements(bar), { left: [], right: ["recording"] });
+    }
+
+    // A hidden element is neither in the collapsed row nor beside the pills;
+    // expanded, it shows in the row like any other element.
+    function test_aHiddenLiveElementOnlyShowsExpanded() {
+        const bar = { barStyle: "capsule", barElements: BarProfileModel.defaultProfile.barElements,
+            capsulePlaces: places({ recording: "hidden" }) };
+
+        compare(shownIds(CapsuleElements.drawnElements(bar), "center").indexOf("recording"), -1);
+        compare(CapsuleElements.liveElements(bar), { left: ["media"], right: [] });
+        verify(shownIds(CapsuleElements.drawnElements(Object.assign({ expanded: true }, bar)), "center")
+            .indexOf("recording") !== -1);
+    }
+
+    // Live right puts media right of the pills, after the recording
+    // indicator: several on one side follow the profile's order.
+    function test_liveElementsOnOneSideFollowTheProfilesOrder() {
+        const elements = barElements();
+        elements.left.unshift(element("media"));
+        elements.right.push(element("recording"));
+
+        compare(CapsuleElements.liveElements({ barStyle: "capsule", barElements: elements,
+            capsulePlaces: places({ media: "liveRight" }) }), { left: [], right: ["media", "recording"] });
+    }
+
+    // The live elements, by default the recording indicator and media, are
+    // never drawn in the row, collapsed or expanded: they sit beside the
+    // workspace pills instead (see liveElements).
     function test_theRowNeverDrawsTheLiveElements_data() {
         return [
             { tag: "collapsed", expanded: false },

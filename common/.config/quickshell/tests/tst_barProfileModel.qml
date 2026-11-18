@@ -183,33 +183,88 @@ TestCase {
             .barPosition, data.loaded);
     }
 
-    // A profile that never chose what its collapsed capsule shows shows Arch,
-    // the clock and the control center.
-    function test_aProfileWithoutACollapsedChoiceShowsArchTheClockAndTheControlCenter() {
-        compare(BarProfileModel.completeProfile({ barStyle: "capsule" }).capsuleElements,
-            ["arch", "clock", "notifications"]);
+    // A profile that never chose its collapsed capsule's places shows Arch,
+    // the clock and the control center in the row, media live left of the
+    // workspace pills and the recording indicator live right; every other
+    // bar element but the workspaces is hidden.
+    function test_aProfileWithoutCollapsedPlacesGetsTheDefaultOnes() {
+        const places = BarProfileModel.completeProfile({ barStyle: "capsule" }).capsulePlaces;
+
+        compare(places.arch, "shown");
+        compare(places.clock, "shown");
+        compare(places.notifications, "shown");
+        compare(places.media, "liveLeft");
+        compare(places.recording, "liveRight");
+        compare(places.keepAwake, "hidden");
+        compare(places.battery, "hidden");
+        compare(places.workspaces, undefined);
     }
 
-    // The choice is saved with the profile: it survives completing it, as
-    // every read and save does, without unknown or repeated bar elements.
-    function test_theCollapsedChoiceIsKeptWithTheProfile() {
-        compare(BarProfileModel.completeProfile({ capsuleElements: ["battery", "clock"] })
-            .capsuleElements, ["battery", "clock"]);
-        compare(BarProfileModel.completeProfile({ capsuleElements: ["battery", "wifi", "battery"] })
-            .capsuleElements, ["battery"]);
-        compare(BarProfileModel.completeProfile({ capsuleElements: [] }).capsuleElements, []);
+    // A profile saved before collapsed places keeps what its collapsed
+    // capsule showed: the elements its list named stay shown, media and the
+    // recording indicator stay live where they were drawn, the rest hidden.
+    // The list itself is dropped.
+    function test_aProfileSavedWithAListOfShownElementsMigrates() {
+        const profile = BarProfileModel.completeProfile({ barStyle: "capsule",
+            capsuleElements: ["battery", "clock", "media", "workspaces"] });
+
+        compare(profile.capsulePlaces.battery, "shown");
+        compare(profile.capsulePlaces.clock, "shown");
+        compare(profile.capsulePlaces.arch, "hidden");
+        compare(profile.capsulePlaces.notifications, "hidden");
+        compare(profile.capsulePlaces.media, "liveLeft");
+        compare(profile.capsulePlaces.recording, "liveRight");
+        compare(profile.capsulePlaces.workspaces, undefined);
+        compare(profile.capsuleElements, undefined);
     }
 
-    // Choosing an element adds it to the collapsed capsule, and unchoosing it
-    // takes it out, without changing the list it was given.
-    function test_choosingAnElementForTheCollapsedCapsule() {
-        const chosen = ["arch", "clock"];
+    // Saved places survive completing the profile, as every read and save
+    // does; a place an element can't take, or an unknown one, falls back to
+    // the default and unknown elements are dropped.
+    function test_savedCollapsedPlacesAreKeptWhenValid() {
+        const places = BarProfileModel.completeProfile({ capsulePlaces: {
+            battery: "shown", media: "liveRight", recording: "hidden", clock: "liveLeft",
+            arch: "floating", workspaces: "shown", wifi: "shown"
+        } }).capsulePlaces;
 
-        compare(BarProfileModel.setCapsuleElement(chosen, "battery", true), ["arch", "clock", "battery"]);
-        compare(BarProfileModel.setCapsuleElement(chosen, "battery", true).length, 3);
-        compare(BarProfileModel.setCapsuleElement(chosen, "arch", true), ["arch", "clock"]);
-        compare(BarProfileModel.setCapsuleElement(chosen, "arch", false), ["clock"]);
-        compare(chosen, ["arch", "clock"]);
+        compare(places.battery, "shown");
+        compare(places.media, "liveRight");
+        compare(places.recording, "hidden");
+        compare(places.clock, "shown");
+        compare(places.arch, "shown");
+        compare(places.notifications, "shown");
+        compare(places.workspaces, undefined);
+        compare(places.wifi, undefined);
+    }
+
+    // Choosing a place sets it, without changing the places it was given; a
+    // place the element can't take changes nothing.
+    function test_choosingACollapsedPlace() {
+        const places = BarProfileModel.completeCapsulePlaces(undefined);
+
+        compare(BarProfileModel.setCapsulePlace(places, "media", "liveRight").media, "liveRight");
+        compare(BarProfileModel.setCapsulePlace(places, "battery", "shown").battery, "shown");
+        compare(BarProfileModel.setCapsulePlace(places, "battery", "liveLeft").battery, "hidden");
+        compare(BarProfileModel.setCapsulePlace(places, "workspaces", "shown").workspaces, undefined);
+        compare(places.media, "liveLeft");
+    }
+
+    // Every bar element but the workspaces offers Hidden and Shown; only the
+    // ones that can be live, the recording indicator and media, also offer
+    // Live left and Live right.
+    function test_onlyElementsThatCanBeLiveOfferTheLivePlaces_data() {
+        const all = ["Hidden", "Shown", "Live left", "Live right"];
+        return [
+            { tag: "recording", id: "recording", labels: all },
+            { tag: "media", id: "media", labels: all },
+            { tag: "clock", id: "clock", labels: ["Hidden", "Shown"] },
+            { tag: "keepAwake", id: "keepAwake", labels: ["Hidden", "Shown"] },
+            { tag: "workspaces", id: "workspaces", labels: [] }
+        ];
+    }
+
+    function test_onlyElementsThatCanBeLiveOfferTheLivePlaces(data) {
+        compare(BarProfileModel.capsulePlaceChoices(data.id).map(choice => choice.label), data.labels);
     }
 
     function test_choosingTheCapsuleOnASideBarMovesItToTheTop() {

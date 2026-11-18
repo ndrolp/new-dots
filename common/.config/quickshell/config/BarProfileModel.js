@@ -53,6 +53,85 @@ const elementOptionDefaults = {
     "battery": { percentageVisible: true }
 };
 
+// The bar elements that can be live elements (see GLOSSARY.md): a capsule can
+// show them beside its workspace pills, collapsed only while they are active.
+const liveElementIds = ["recording", "media"];
+
+function canBeLive(id) {
+    return liveElementIds.indexOf(id) !== -1;
+}
+
+// Where a collapsed capsule puts a bar element, its collapsed place: hidden,
+// shown in its row, or live beside its workspace pills, on the left or the
+// right. Only the elements that can be live take the live places, and the
+// workspaces, which the capsule shows as pills, take none.
+const capsulePlaceNames = ["hidden", "shown", "liveLeft", "liveRight"];
+const livePlaceSides = { liveLeft: "left", liveRight: "right" };
+const capsulePlaceLabels = {
+    hidden: "Hidden", shown: "Shown", liveLeft: "Live left", liveRight: "Live right"
+};
+
+// The collapsed places element `id` can take, in the order they are offered.
+function capsulePlacesFor(id) {
+    if (id === "workspaces" || elementIds.indexOf(id) === -1)
+        return [];
+    return canBeLive(id) ? capsulePlaceNames : capsulePlaceNames.slice(0, 2);
+}
+
+// The side of the workspace pills `place` sits on, or "" for a place that
+// isn't live.
+function liveSide(place) {
+    return livePlaceSides[place] || "";
+}
+
+// Collapsed places for a profile saved before it had any: the elements its
+// `capsuleElements` listed (the default ones without a list) stay shown,
+// media goes live left and the recording indicator live right, as they were
+// drawn, and every other element is hidden.
+const legacyCapsuleElements = ["arch", "clock", "notifications"];
+const defaultLivePlaces = { media: "liveLeft", recording: "liveRight" };
+
+function migratedCapsulePlaces(capsuleElements) {
+    const shown = Array.isArray(capsuleElements) ? capsuleElements : legacyCapsuleElements;
+    const places = {};
+
+    for (const id of elementIds) {
+        if (capsulePlacesFor(id).length === 0)
+            continue;
+        places[id] = defaultLivePlaces[id] || (shown.indexOf(id) !== -1 ? "shown" : "hidden");
+    }
+    return places;
+}
+
+// `places` with a collapsed place for every element that takes one, as a
+// fresh object: missing or unknown places, or ones the element can't take,
+// fall back to the default one; unknown elements are dropped.
+function completeCapsulePlaces(places) {
+    const source = places && typeof places === "object" ? places : {};
+    const defaults = migratedCapsulePlaces(undefined);
+    const complete = {};
+
+    for (const id in defaults)
+        complete[id] = capsulePlacesFor(id).indexOf(source[id]) !== -1 ? source[id] : defaults[id];
+    return complete;
+}
+
+// What a capsule's every place for `id` is offered as: [{ label, value }],
+// none for an element without places.
+function capsulePlaceChoices(id) {
+    return capsulePlacesFor(id).map(place => ({ label: capsulePlaceLabels[place], value: place }));
+}
+
+// `places` with element `id` at `place`, as a new completed object; a place
+// the element can't take changes nothing.
+function setCapsulePlace(places, id, place) {
+    const updated = completeCapsulePlaces(places);
+
+    if (capsulePlacesFor(id).indexOf(place) !== -1)
+        updated[id] = place;
+    return updated;
+}
+
 // What the options that can't take any value accept: a number in a range
 // ({ kind: "number", from, to }) or one of some values ({ kind: "choice",
 // choices }). A value outside them is clamped, or falls back. Every other
@@ -177,9 +256,9 @@ const defaultProfile = {
     groupBorder: false,
     barOpacity: 100,
     barElements: defaultBarElements([]),
-    // The bar elements a collapsed capsule shows, by id, when the profile
-    // enables them; they show in the profile's order, not this one's.
-    capsuleElements: ["arch", "clock", "notifications"]
+    // Each bar element's collapsed place, by id (see capsulePlacesFor), when
+    // the profile enables it; they show in the profile's order.
+    capsulePlaces: migratedCapsulePlaces(undefined)
 };
 
 const profileKeys = Object.keys(defaultProfile);
@@ -231,8 +310,9 @@ function sameValue(left, right) {
 // `profile` with every profile setting, as a fresh object: missing settings
 // take their default, an unknown bar style too, a Bar position the bar style
 // can't take becomes the default one (a capsule on a side moves to the top),
-// the bar elements are normalized and the collapsed capsule's keeps only
-// known bar elements, once each. Other keys are dropped.
+// the bar elements are normalized and so are the collapsed places (see
+// completeCapsulePlaces); a profile saved without them migrates its
+// `capsuleElements` (see migratedCapsulePlaces). Other keys are dropped.
 function completeProfile(profile) {
     const source = profile || {};
     const complete = {};
@@ -244,18 +324,9 @@ function completeProfile(profile) {
     if (barPositionsFor(complete.barStyle).indexOf(complete.barPosition) === -1)
         complete.barPosition = defaultProfile.barPosition;
     complete.barElements = normalizeBarElements(complete.barElements);
-    complete.capsuleElements = setCapsuleElement(complete.capsuleElements, "", false);
+    complete.capsulePlaces = completeCapsulePlaces(source.capsulePlaces !== undefined
+        ? source.capsulePlaces : migratedCapsulePlaces(source.capsuleElements));
     return complete;
-}
-
-// The bar elements a collapsed capsule shows, `capsuleElements`, with `id`
-// added (`shown`) or taken out, as a new list of known bar elements, each
-// listed once.
-function setCapsuleElement(capsuleElements, id, shown) {
-    const listed = (Array.isArray(capsuleElements) ? capsuleElements : [])
-        .concat(shown ? [id] : []);
-    return listed.filter((element, index) => elementIds.indexOf(element) !== -1
-        && listed.indexOf(element) === index && (shown || element !== id));
 }
 
 // The profile edited first and given to new monitors: the default one if it

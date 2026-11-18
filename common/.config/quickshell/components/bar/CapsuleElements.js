@@ -2,19 +2,25 @@
 .import "../../config/BarProfileModel.js" as BarProfileModel
 
 // The capsule bar style's bar elements: which ones a capsule draws, collapsed
-// or expanded, and which a profile can choose for it. Pure functions over the
-// bar profile of its monitor; they never mutate it.
+// or expanded, in its row or beside its workspace pills. Pure functions over
+// the bar profile of its monitor; they never mutate it.
+//
+// Each bar element has a collapsed place in the profile, `capsulePlaces`
+// (see BarProfileModel.capsulePlacesFor): hidden, shown in the collapsed
+// row, or live beside the pills, left or right; a profile without them takes
+// the default ones. A capsule never draws a live one in its row but beside
+// its pills: collapsed only while active (the recording indicator while
+// recording, media while a track plays, see hasMedia), expanded as on any
+// other bar style.
 
-// The bar elements a collapsed capsule shows, when the profile enables them,
-// for a profile that never chose its own (see capsuleElements).
-const collapsedElementIds = BarProfileModel.defaultProfile.capsuleElements;
-
-// The live elements and the side of the workspace pills each sits on. A
-// capsule never draws them in its row but beside its pills: collapsed only
-// while active (the recording indicator while recording, media while a track
-// plays, see hasMedia), expanded as on any other bar style.
-const liveSides = Object.freeze({ media: "left", recording: "right" });
-const liveElementIds = Object.keys(liveSides);
+// The ids with each collapsed place, { place: [ids] }, from `capsulePlaces`.
+function idsByPlace(capsulePlaces) {
+    const places = BarProfileModel.completeCapsulePlaces(capsulePlaces);
+    const ids = { hidden: [], shown: [], liveLeft: [], liveRight: [] };
+    for (const id in places)
+        ids[places[id]].push(id);
+    return ids;
+}
 
 const zoneNames = ["left", "center", "right"];
 
@@ -40,54 +46,38 @@ function collapsedRow(barElements, shownIds) {
     return { left: [], center: center, right: [] };
 }
 
-// The bar elements an expanded capsule shows in its row: every one the
-// profile has but the workspaces, which the workspace row already shows, and
-// the live elements, which sit beside it.
-function expandedElementIds(barElements) {
-    const ids = [];
-    for (const zone of zoneNames)
-        ((barElements || {})[zone] || []).forEach(element => {
-            if (choosable(element.id))
-                ids.push(element.id);
-        });
-    return ids;
-}
-
-// Whether a profile can choose the bar element `id` for its collapsed
-// capsule: any but the workspaces, which the workspace row shows, and the
-// live elements, which sit beside the workspace pills.
-function choosable(id) {
-    return id !== "workspaces" && liveElementIds.indexOf(id) === -1;
-}
-
 // The bar elements a bar window draws in its zones: on a capsule, the
-// collapsed row of the elements its profile chose (`capsuleElements`, else
-// the default ones; any it can't choose are ignored), or its expanded row
-// while `expanded`, or none while it shows a `change` instead, never the live
-// elements (see liveElements); the profile's own on any other bar style.
-// Takes { barStyle, barElements, capsuleElements, expanded, change }.
+// collapsed row of the elements whose place is shown, or while `expanded`
+// every element but the live ones (the workspaces take no place: the
+// workspace row shows them), or none while it shows a `change` instead,
+// never the live elements (see liveElements); the profile's own on any
+// other bar style. Takes { barStyle, barElements, capsulePlaces, expanded,
+// change }.
 function drawnElements(bar) {
     if (!BarProfileModel.capsule(bar))
         return bar.barElements;
     if (bar.change === true)
         return collapsedRow(bar.barElements, []);
-    return collapsedRow(bar.barElements, bar.expanded
-        ? expandedElementIds(bar.barElements)
-        : (bar.capsuleElements || collapsedElementIds).filter(choosable));
+
+    const ids = idsByPlace(bar.capsulePlaces);
+    return collapsedRow(bar.barElements, bar.expanded ? ids.hidden.concat(ids.shown) : ids.shown);
 }
 
 // The live elements a capsule draws beside its workspace pills, by side,
 // { left: [ids], right: [ids] }, in the profile's order: those its profile
-// enables. None on any other bar style. Takes { barStyle, barElements }.
+// enables and places live on that side. None on any other bar style. Takes
+// { barStyle, barElements, capsulePlaces }.
 function liveElements(bar) {
     const sides = { left: [], right: [] };
     if (!BarProfileModel.capsule(bar))
         return sides;
 
+    const places = BarProfileModel.completeCapsulePlaces(bar.capsulePlaces);
     for (const zone of zoneNames)
         ((bar.barElements || {})[zone] || []).forEach(element => {
-            if (element.enabled !== false && liveSides[element.id])
-                sides[liveSides[element.id]].push(element.id);
+            const side = BarProfileModel.liveSide(places[element.id]);
+            if (element.enabled !== false && side !== "")
+                sides[side].push(element.id);
         });
     return sides;
 }

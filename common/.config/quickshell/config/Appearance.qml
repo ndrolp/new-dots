@@ -73,7 +73,7 @@ QtObject {
     readonly property int groupHorizontalPadding: editedBarProfile.groupHorizontalPadding
     readonly property int groupVerticalPadding: editedBarProfile.groupVerticalPadding
     readonly property var barElements: editedBarProfile.barElements
-    readonly property var capsuleElements: editedBarProfile.capsuleElements
+    readonly property var capsulePlaces: editedBarProfile.capsulePlaces
     readonly property bool barBorder: editedBarProfile.barBorder
     readonly property bool elementBorder: editedBarProfile.elementBorder
     readonly property bool groupBorder: editedBarProfile.groupBorder
@@ -180,9 +180,10 @@ QtObject {
             option, value));
     }
 
-    // Whether the edited profile's collapsed capsule shows `element`.
-    function setCapsuleElement(element, shown) {
-        setBarSetting("capsuleElements", BarProfileModel.setCapsuleElement(capsuleElements, element, shown));
+    // Where the edited profile's collapsed capsule puts `element`: "hidden",
+    // "shown", "liveLeft" or "liveRight" (see BarProfileModel.capsulePlacesFor).
+    function setCapsulePlace(element, place) {
+        setBarSetting("capsulePlaces", BarProfileModel.setCapsulePlace(capsulePlaces, element, place));
     }
 
     function moveBarElementToZone(element, zone) {

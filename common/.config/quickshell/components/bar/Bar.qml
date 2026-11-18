@@ -76,13 +76,14 @@ Variants {
                     barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
                     expanded: panel.capsuleExpanded,
                     change: panel.showingChange,
-                    capsuleElements: bar.appearance.barProfileValue(panel.profileName, "capsuleElements")
+                    capsulePlaces: bar.appearance.barProfileValue(panel.profileName, "capsulePlaces")
                 })
                 // On a capsule, the live elements beside its workspace pills,
                 // by side (see CapsuleElements.liveElements); none otherwise.
                 property var liveElements: CapsuleElements.liveElements({
                     barStyle: panel.barAppearance.barStyle,
-                    barElements: bar.appearance.barProfileValue(panel.profileName, "barElements")
+                    barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
+                    capsulePlaces: bar.appearance.barProfileValue(panel.profileName, "capsulePlaces")
                 })
                 // Whether this window's capsule is expanded (see panel.capsuleExpanded).
                 property bool capsuleExpanded: panel.capsuleExpanded
