@@ -6,9 +6,8 @@
 // draws beside its workspace pills, on which side, when each has something
 // to show there and how large it is drawn. Pure functions over the bar
 // profile of its monitor; they never mutate it. A live element is drawn
-// collapsed only while active (the recording indicator while recording,
-// media while a track plays, see hasMedia, keep-awake while on, see
-// hasKeepAwake), expanded as on any other bar style.
+// collapsed only while active (see activeRules), expanded as on any other
+// bar style.
 
 const zoneNames = ["left", "center", "right"];
 
@@ -31,24 +30,22 @@ function liveElements(bar) {
     return sides;
 }
 
-// Whether media has something to show, given the bar profile, { barStyle },
-// and the Mpris player it follows (null without one): on a collapsed capsule
-// only while a track plays, on an `expanded` one or any other bar style while
-// there is a player at all.
-function hasMedia(bar, player, expanded) {
-    if (!player)
-        return false;
-    return !BarProfileModel.capsule(bar) || expanded === true || player.isPlaying === true;
-}
+// When each bar element that can be live (BarProfileModel.liveElementIds) is
+// active, by id: what a collapsed capsule shows it beside its pills for.
+// Each rule takes what there is to show, { player (the Mpris player media
+// follows, or null), recordings (RecordingIndicator.recordings), keepAwakeOn }.
+// A new live element needs its rule here and its id in liveElementIds.
+const activeRules = Object.freeze({
+    recording: status => status.recordings.length > 0,
+    media: status => !!status.player && status.player.isPlaying === true,
+    keepAwake: status => status.keepAwakeOn === true
+});
 
-// Whether keep-awake has something to show, given a capsule's live elements
-// by side, { left, right } (see liveElements; none on any other bar style),
-// and whether keep-awake is `on`: always, off too, but as a live element of
-// a collapsed capsule only while it is on; an `expanded` capsule shows it as
-// any other bar style does.
-function hasKeepAwake(live, on, expanded) {
-    const ids = live ? live.left.concat(live.right) : [];
-    return ids.indexOf("keepAwake") === -1 || expanded === true || on === true;
+// Whether bar element `id` is active, given what there is to show (see
+// activeRules); never for one that can't be live.
+function active(id, status) {
+    const rule = activeRules[id];
+    return rule !== undefined && rule(status);
 }
 
 // How large a live element is beside the workspace pills, as a share of the

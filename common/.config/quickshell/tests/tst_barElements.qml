@@ -354,34 +354,69 @@ TestCase {
         compare(BarProfileModel.elementEnabled(barElements, "keepAwake"), true);
     }
 
-    // Keep-awake has something to show while off too, the outline cup that
-    // opens its popup (see LiveElements.hasKeepAwake), so nothing else
-    // going on hides it.
-    function test_keepAwakeIsShownWhileOff() {
-        const barElements = BarProfileModel.normalizeBarElements(minimalElements());
-        const nothingGoingOn = { hasPlayer: false, hasBattery: false, recording: false, cavaSilent: true,
-            keepAwake: true };
-
-        compare(BarElementItems.itemVisible("keepAwake", barElements, nothingGoingOn), true);
+    // What there is to show when nothing is going on: no player, battery,
+    // recording or sound, and keep-awake off.
+    function nothingGoingOn(values) {
+        return Object.assign({ live: [], expanded: false, player: null, recordings: [], hasBattery: false,
+            cavaSilent: true, keepAwakeOn: false }, values);
     }
 
-    // A capsule's row lists its live elements switched off, but they show
-    // beside its workspace pills while they have something to show.
-    function test_aLiveElementShowsThoughItsRowLeavesItOff_data() {
+    // Keep-awake has something to show while off too, the outline cup that
+    // opens its popup, so nothing else going on hides it.
+    function test_keepAwakeIsShownWhileOff() {
+        const barElements = BarProfileModel.normalizeBarElements(minimalElements());
+
+        compare(BarElementItems.itemVisible("keepAwake", barElements, nothingGoingOn()), true);
+    }
+
+    // The bar elements that can be live, enabled, on any other bar style, or
+    // in a capsule's row: media while any player exists, playing or not,
+    // the recording indicator while recording, keep-awake on or off.
+    function test_theElementsThatCanBeLiveShowAsOnAnyBar_data() {
         return [
-            { tag: "recording", element: "recording", status: { recording: true }, shown: true },
-            { tag: "not recording", element: "recording", status: { recording: false }, shown: false },
-            { tag: "media playing", element: "media", status: { hasPlayer: true }, shown: true },
-            { tag: "no media", element: "media", status: { hasPlayer: false }, shown: false },
-            { tag: "keep-awake on", element: "keepAwake", status: { keepAwake: true }, shown: true },
-            { tag: "keep-awake off", element: "keepAwake", status: { keepAwake: false }, shown: false }
+            { tag: "media paused", element: "media", status: { player: { isPlaying: false } }, shown: true },
+            { tag: "media playing", element: "media", status: { player: { isPlaying: true } }, shown: true },
+            { tag: "no player", element: "media", status: {}, shown: false },
+            { tag: "recording", element: "recording", status: { recordings: [{ app: "obs" }] }, shown: true },
+            { tag: "not recording", element: "recording", status: {}, shown: false },
+            { tag: "keep-awake off", element: "keepAwake", status: {}, shown: true },
+            { tag: "keep-awake on", element: "keepAwake", status: { keepAwakeOn: true }, shown: true }
         ];
     }
 
-    function test_aLiveElementShowsThoughItsRowLeavesItOff(data) {
+    function test_theElementsThatCanBeLiveShowAsOnAnyBar(data) {
+        const barElements = { left: [], right: [], center: [{ id: "recording", enabled: true },
+            { id: "media", enabled: true }, { id: "keepAwake", enabled: true }] };
+
+        compare(BarElementItems.itemVisible(data.element, barElements, nothingGoingOn(data.status)), data.shown);
+    }
+
+    // A capsule's row lists its live elements switched off, but a collapsed
+    // capsule shows them beside its workspace pills while they are active:
+    // media while a track plays, the recording indicator while recording,
+    // keep-awake while on. Expanded, they show as on any other bar style.
+    function test_aLiveElementShowsCollapsedOnlyWhileActive_data() {
+        const playing = { isPlaying: true };
+        const paused = { isPlaying: false };
+        return [
+            { tag: "recording", element: "recording", status: { recordings: [{ app: "obs" }] }, shown: true },
+            { tag: "not recording", element: "recording", status: {}, shown: false },
+            { tag: "not recording, expanded", element: "recording", status: { expanded: true }, shown: false },
+            { tag: "media playing", element: "media", status: { player: playing }, shown: true },
+            { tag: "media paused", element: "media", status: { player: paused }, shown: false },
+            { tag: "media paused, expanded", element: "media", status: { player: paused, expanded: true },
+                shown: true },
+            { tag: "no player, expanded", element: "media", status: { expanded: true }, shown: false },
+            { tag: "keep-awake on", element: "keepAwake", status: { keepAwakeOn: true }, shown: true },
+            { tag: "keep-awake off", element: "keepAwake", status: {}, shown: false },
+            { tag: "keep-awake off, expanded", element: "keepAwake", status: { expanded: true }, shown: true }
+        ];
+    }
+
+    function test_aLiveElementShowsCollapsedOnlyWhileActive(data) {
         const barElements = { left: [], right: [], center: [{ id: "recording", enabled: false },
             { id: "media", enabled: false }, { id: "keepAwake", enabled: false }] };
-        const status = Object.assign({ live: ["recording", "media", "keepAwake"] }, data.status);
+        const status = nothingGoingOn(Object.assign({ live: ["recording", "media", "keepAwake"] }, data.status));
 
         compare(BarElementItems.itemVisible(data.element, barElements, status), data.shown);
     }

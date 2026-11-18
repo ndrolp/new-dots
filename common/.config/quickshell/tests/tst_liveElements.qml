@@ -4,7 +4,7 @@ import "../components/bar/LiveElements.js" as LiveElements
 import "../config/BarProfileModel.js" as BarProfileModel
 
 // A capsule's live elements: which ones it draws beside its workspace pills
-// and on which side, when each has something to show and how large it is.
+// and on which side, when each is active and how large it is.
 TestCase {
     name: "LiveElements"
 
@@ -84,61 +84,30 @@ TestCase {
             barElements: BarProfileModel.defaultProfile.barElements }), { left: [], right: [] });
     }
 
-    // Media has something to show on a bar while any player exists, but on a
-    // capsule only while a track plays: a paused player leaves it.
-    function test_mediaShowsOnACapsuleOnlyWhileATrackPlays_data() {
-        const playing = { isPlaying: true };
-        const paused = { isPlaying: false };
+    // When each bar element that can be live is active: the recording
+    // indicator while recording, media while a track plays, keep-awake
+    // while on. An element that can't be live never is.
+    function test_whenEachLiveElementIsActive_data() {
         return [
-            { tag: "capsule, playing", barStyle: "capsule", player: playing, shown: true },
-            { tag: "capsule, paused", barStyle: "capsule", player: paused, shown: false },
-            { tag: "capsule, no player", barStyle: "capsule", player: null, shown: false },
-            { tag: "opaque, playing", barStyle: "opaque", player: playing, shown: true },
-            { tag: "opaque, paused", barStyle: "opaque", player: paused, shown: true },
-            { tag: "docked, no player", barStyle: "docked", player: null, shown: false }
+            { tag: "recording", id: "recording", status: { recordings: [{ app: "obs" }] }, active: true },
+            { tag: "not recording", id: "recording", status: { recordings: [] }, active: false },
+            { tag: "playing", id: "media", status: { player: { isPlaying: true } }, active: true },
+            { tag: "paused", id: "media", status: { player: { isPlaying: false } }, active: false },
+            { tag: "no player", id: "media", status: { player: null }, active: false },
+            { tag: "keep-awake on", id: "keepAwake", status: { keepAwakeOn: true }, active: true },
+            { tag: "keep-awake off", id: "keepAwake", status: { keepAwakeOn: false }, active: false },
+            { tag: "clock", id: "clock", status: {}, active: false }
         ];
     }
 
-    function test_mediaShowsOnACapsuleOnlyWhileATrackPlays(data) {
-        compare(LiveElements.hasMedia({ barStyle: data.barStyle }, data.player), data.shown);
+    function test_whenEachLiveElementIsActive(data) {
+        compare(LiveElements.active(data.id, data.status), data.active);
     }
 
-    // Expanded, the capsule shows media as the bar does: while any player
-    // exists, playing or not.
-    function test_anExpandedCapsuleShowsMediaWhileAnyPlayerExists_data() {
-        return [
-            { tag: "playing", player: { isPlaying: true }, shown: true },
-            { tag: "paused", player: { isPlaying: false }, shown: true },
-            { tag: "no player", player: null, shown: false }
-        ];
-    }
-
-    function test_anExpandedCapsuleShowsMediaWhileAnyPlayerExists(data) {
-        compare(LiveElements.hasMedia({ barStyle: "capsule" }, data.player, true), data.shown);
-    }
-
-    // Keep-awake shows while off too, but as a live element a collapsed
-    // capsule shows it only while it is on; expanded, it shows as on a bar.
-    function test_aLiveKeepAwakeShowsCollapsedOnlyWhileOn_data() {
-        const live = { keepAwake: "liveRight" };
-        return [
-            { tag: "live, on", barStyle: "capsule", places: live, on: true, shown: true },
-            { tag: "live, off", barStyle: "capsule", places: live, on: false, shown: false },
-            { tag: "live, off, expanded", barStyle: "capsule", places: live, on: false, expanded: true, shown: true },
-            { tag: "live left, off", barStyle: "capsule", places: { keepAwake: "liveLeft" }, on: false, shown: false },
-            { tag: "shown in the row, off", barStyle: "capsule", places: { keepAwake: "shown" }, on: false, shown: true },
-            { tag: "hidden, off, expanded", barStyle: "capsule", places: { keepAwake: "hidden" }, on: false, expanded: true, shown: true },
-            { tag: "opaque, off", barStyle: "opaque", places: live, on: false, shown: true }
-        ];
-    }
-
-    function test_aLiveKeepAwakeShowsCollapsedOnlyWhileOn(data) {
-        const elements = barElements();
-        elements.right.push(element("keepAwake"));
-        const bar = { barStyle: data.barStyle, barElements: elements, capsulePlaces: places(data.places) };
-
-        compare(LiveElements.hasKeepAwake(LiveElements.liveElements(bar), data.on, data.expanded === true),
-            data.shown);
+    // Every bar element that can be live says when it is active.
+    function test_everyElementThatCanBeLiveSaysWhenItIsActive() {
+        for (const id of BarProfileModel.liveElementIds)
+            verify(id in LiveElements.activeRules, id);
     }
 
     // A capsule profile with the given text and icon sizes; its bar elements

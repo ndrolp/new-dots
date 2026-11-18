@@ -135,29 +135,28 @@ Item {
         return LiveElements.elementSizes(appearance, live(element));
     }
 
+    // What there is for the elements to show (see BarElementItems.itemVisible).
+    readonly property var elementStatus: ({
+        live: liveIds,
+        expanded: appearance.capsuleExpanded === true,
+        player: player,
+        recordings: recordings,
+        keepAwakeOn: keepAwake.on,
+        hasBattery: hasBattery,
+        cavaSilent: cava.silent
+    })
+
     // Enabled elements with nothing to show (no player, battery, recording
-    // or sound) are hidden; see BarElementItems.js. Shown as an `expanded`
-    // capsule shows them.
-    function itemVisibleAs(element, expanded) {
-        return BarElementItems.itemVisible(element, appearance.barElements, {
-            live: liveIds,
-            // On a collapsed capsule, media shows only while a track plays.
-            hasPlayer: LiveElements.hasMedia(appearance, player, expanded),
-            hasBattery: hasBattery,
-            recording: RecordingIndicator.shown(recordings),
-            cavaSilent: cava.silent,
-            // As a live element, keep-awake shows collapsed only while on.
-            keepAwake: LiveElements.hasKeepAwake(appearance.liveElements, keepAwake.on, expanded)
-        });
-    }
-
+    // or sound) are hidden, and so are live elements of a collapsed capsule
+    // while they aren't active; see BarElementItems.js.
     function itemVisible(element) {
-        return itemVisibleAs(element, appearance.capsuleExpanded);
+        return BarElementItems.itemVisible(element, appearance.barElements, elementStatus);
     }
 
-    // Whether a live element is active: whether a collapsed capsule shows it.
+    // Whether a live element is active (LiveElements.active): whether a
+    // collapsed capsule shows it.
     function liveActive(element) {
-        return live(element) && itemVisibleAs(element, false);
+        return live(element) && LiveElements.active(element, elementStatus);
     }
 
     Component.onCompleted: updatePlayer()
