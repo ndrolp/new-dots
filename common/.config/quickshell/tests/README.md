@@ -110,7 +110,9 @@ on a top one (`BarLayout.size`, `Workspaces.qml`, `ArchButton.qml`,
 `SystemMonitor.qml`, `RecordingContent.qml`; `BarElementItems.qml` and `Clock.qml`
 need Quickshell's services, so their parts are covered through those), that what
 runs along the bar animates and what runs across it doesn't, on every Bar position
-(`AlongBarBehavior.qml`), what the workspace overview lists: every monitor's
+(`AlongBarBehavior.qml`), that a bar element that can be live sits at its place,
+as large as its item, and fades out as a live element, at once with reduce motion
+(`LiveCapableItem.qml`), what the workspace overview lists: every monitor's
 workspaces in physical order, each one once, how they fit up to 21 with no
 scrolling, what each key does, during a drag too, how the keyboard walks them,
 the number a new one takes, skipping numbers another monitor has or the rules
