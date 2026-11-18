@@ -77,34 +77,83 @@ TestCase {
         compare(CapsulePlacement.surface(content, { start: 420, end: 580 }, 12, 8), data.place);
     }
 
-    // The workspace pills sit inside the capsule, centred on it, just past its
-    // row of bar elements: under the row of a top capsule and above the row of
-    // a bottom one. Takes the bar content and the capsule.
-    function test_theWorkspacePillsSitInsideTheCapsulePastItsRow_data() {
+    // A capsule's pill row: media 100 px long and recording 60 px, both 24 px
+    // deep, beside 40 px of pills, 8 px apart, on a capsule centred at 500.
+    function pillRowGiven(media, recording) {
+        return {
+            centre: 500,
+            spacing: 8,
+            pills: 40,
+            left: [{ id: "media", length: 100, depth: 24, shown: media }],
+            right: [{ id: "recording", length: 60, depth: 24, shown: recording }]
+        };
+    }
+
+    // Media sits left of the pills and recording right of them, the three
+    // centred on the capsule, as deep as the deepest of them, just past its
+    // row of bar elements: under the row of a top capsule, above a bottom one.
+    // The pills are centred across it.
+    function test_liveElementsSitBesideTheWorkspacePills_data() {
         return [
-            { tag: "top", barPosition: "top", capsule: { x: 408, y: 0, width: 184, height: 38 },
-                pills: { centre: 500, y: 30 } },
-            { tag: "bottom", barPosition: "bottom", capsule: { x: 408, y: -8, width: 184, height: 38 },
-                pills: { centre: 500, y: -4 } }
+            { tag: "top", barPosition: "top", row: { start: 392, end: 608, depth: 24,
+                pills: { x: 500, y: 40 }, elements: { media: { x: 392, y: 30 }, recording: { x: 548, y: 30 } } } },
+            { tag: "bottom", barPosition: "bottom", row: { start: 392, end: 608, depth: 24,
+                pills: { x: 500, y: -14 }, elements: { media: { x: 392, y: -24 }, recording: { x: 548, y: -24 } } } }
         ];
     }
 
-    function test_theWorkspacePillsSitInsideTheCapsulePastItsRow(data) {
+    function test_liveElementsSitBesideTheWorkspacePills(data) {
         const content = { barPosition: data.barPosition, width: 1000, height: 30 };
 
-        compare(CapsulePlacement.workspacePills(content, data.capsule), data.pills);
+        compare(CapsulePlacement.pillRow(content, pillRowGiven(true, true)), data.row);
     }
 
-    // With no capsule drawn there are no pills.
-    function test_noCapsuleNoWorkspacePills_data() {
+    // With no live element shown, the pills are centred on the capsule, just
+    // past its row.
+    function test_withNoLiveElementThePillsAreCentred_data() {
         return [
-            { tag: "no capsule", capsule: null },
-            { tag: "empty capsule", capsule: { x: 500, y: 0, width: 0, height: 0 } }
+            { tag: "top", barPosition: "top", pills: { x: 480, y: 30 } },
+            { tag: "bottom", barPosition: "bottom", pills: { x: 480, y: -4 } }
         ];
     }
 
-    function test_noCapsuleNoWorkspacePills(data) {
-        compare(CapsulePlacement.workspacePills({ barPosition: "top", width: 1000, height: 30 }, data.capsule), null);
+    function test_withNoLiveElementThePillsAreCentred(data) {
+        const content = { barPosition: data.barPosition, width: 1000, height: 30 };
+        const row = CapsulePlacement.pillRow(content, pillRowGiven(false, false));
+
+        compare(row.pills, data.pills);
+        compare(row.depth, 4);
+        compare({ start: row.start, end: row.end }, { start: 480, end: 520 });
+    }
+
+    // A live element that isn't shown takes no room: the others close up
+    // round the pills, still centred, and it waits just outside its side of
+    // them, to fade there.
+    function test_aHiddenLiveElementTakesNoRoom() {
+        const content = { barPosition: "top", width: 1000, height: 30 };
+        const row = CapsulePlacement.pillRow(content, pillRowGiven(false, true));
+
+        compare({ start: row.start, end: row.end }, { start: 446, end: 554 });
+        compare(row.pills.x, 446);
+        compare(row.elements.recording.x, 494);
+        compare(row.elements.media.x, 338);
+    }
+
+    // The capsule reaches round its pill row where that is longer than its
+    // row of bar elements; with nothing in its row there is still no capsule.
+    function test_theCapsuleReachesRoundItsPillRow_data() {
+        return [
+            { tag: "longer pill row", row: { start: 450, end: 550 }, pills: { start: 392, end: 608 },
+                span: { start: 392, end: 608 } },
+            { tag: "shorter pill row", row: { start: 380, end: 620 }, pills: { start: 480, end: 520 },
+                span: { start: 380, end: 620 } },
+            { tag: "empty row", row: { start: 500, end: 500 }, pills: { start: 392, end: 608 },
+                span: { start: 500, end: 500 } }
+        ];
+    }
+
+    function test_theCapsuleReachesRoundItsPillRow(data) {
+        compare(CapsulePlacement.span(data.row, data.pills), data.span);
     }
 
     // A capsule's row in its bar content: 320 px long, 32 px deep.
