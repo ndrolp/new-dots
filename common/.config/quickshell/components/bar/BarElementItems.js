@@ -5,11 +5,11 @@
 // Which of BarElementItems' elements are shown: pure, no Quickshell.
 
 // Whether `element` is shown: it must be enabled in `barElements`, or be one
-// of a capsule's `live` elements (CapsuleElements.liveElements), which its
+// of a capsule's `live` elements (LiveElements.liveElements), which its
 // row lists switched off, and the ones that can have nothing to show are
 // hidden then. `status` says what there is: `live`, `hasPlayer`,
 // `hasBattery`, `recording`, `cavaSilent` and `keepAwake` (whether it has
-// something to show, CapsuleElements.hasKeepAwake). Every other element is
+// something to show, LiveElements.hasKeepAwake). Every other element is
 // always shown when enabled.
 function itemVisible(element, barElements, status) {
     if (!BarProfileModel.elementEnabled(barElements, element) && (status.live || []).indexOf(element) === -1)

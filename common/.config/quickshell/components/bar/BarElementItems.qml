@@ -11,7 +11,7 @@ import "../../config/BarProfileModel.js" as BarProfileModel
 import "../StatusText.js" as StatusText
 import "BarElementItems.js" as BarElementItems
 import "BarLayout.js" as BarLayout
-import "CapsuleElements.js" as CapsuleElements
+import "LiveElements.js" as LiveElements
 import "../panels/ControlCenterNames.js" as Names
 import "RecordingIndicator.js" as RecordingIndicator
 
@@ -120,7 +120,7 @@ Item {
     })
 
     // On a capsule, its live elements, beside its workspace pills
-    // (CapsuleElements.liveElements): they fade in and out and slide with
+    // (LiveElements.liveElements): they fade in and out and slide with
     // the pills. None on any other bar style.
     readonly property var liveIds: appearance.liveElements
         ? appearance.liveElements.left.concat(appearance.liveElements.right) : []
@@ -130,9 +130,9 @@ Item {
     }
 
     // The sizes an element is drawn at: a live element's are smaller
-    // (CapsuleElements.elementSizes).
+    // (LiveElements.elementSizes).
     function sizes(element) {
-        return CapsuleElements.elementSizes(appearance, live(element));
+        return LiveElements.elementSizes(appearance, live(element));
     }
 
     // Enabled elements with nothing to show (no player, battery, recording
@@ -142,12 +142,12 @@ Item {
         return BarElementItems.itemVisible(element, appearance.barElements, {
             live: liveIds,
             // On a collapsed capsule, media shows only while a track plays.
-            hasPlayer: CapsuleElements.hasMedia(appearance, player, expanded),
+            hasPlayer: LiveElements.hasMedia(appearance, player, expanded),
             hasBattery: hasBattery,
             recording: RecordingIndicator.shown(recordings),
             cavaSilent: cava.silent,
             // As a live element, keep-awake shows collapsed only while on.
-            keepAwake: CapsuleElements.hasKeepAwake(appearance.liveElements, keepAwake.on, expanded)
+            keepAwake: LiveElements.hasKeepAwake(appearance.liveElements, keepAwake.on, expanded)
         });
     }
 

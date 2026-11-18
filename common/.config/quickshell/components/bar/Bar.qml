@@ -5,6 +5,7 @@ import "../../config" as Config
 import "../panels" as Panels
 import "BarPlacement.js" as BarPlacement
 import "CapsuleElements.js" as CapsuleElements
+import "LiveElements.js" as LiveElements
 import "CapsulePlacement.js" as CapsulePlacement
 import "CapsuleRouting.js" as CapsuleRouting
 import "../../config/BarProfileModel.js" as BarProfileModel
@@ -79,8 +80,8 @@ Variants {
                     capsulePlaces: bar.appearance.barProfileValue(panel.profileName, "capsulePlaces")
                 })
                 // On a capsule, the live elements beside its workspace pills,
-                // by side (see CapsuleElements.liveElements); none otherwise.
-                property var liveElements: CapsuleElements.liveElements({
+                // by side (see LiveElements.liveElements); none otherwise.
+                property var liveElements: LiveElements.liveElements({
                     barStyle: panel.barAppearance.barStyle,
                     barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
                     capsulePlaces: bar.appearance.barProfileValue(panel.profileName, "capsulePlaces")

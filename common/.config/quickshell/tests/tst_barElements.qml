@@ -355,7 +355,7 @@ TestCase {
     }
 
     // Keep-awake has something to show while off too, the outline cup that
-    // opens its popup (see CapsuleElements.hasKeepAwake), so nothing else
+    // opens its popup (see LiveElements.hasKeepAwake), so nothing else
     // going on hides it.
     function test_keepAwakeIsShownWhileOff() {
         const barElements = BarProfileModel.normalizeBarElements(minimalElements());

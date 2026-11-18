@@ -3,8 +3,9 @@ import QtTest
 import "../components/bar/CapsuleElements.js" as CapsuleElements
 import "../config/BarProfileModel.js" as BarProfileModel
 
-// The capsule's bar elements: which ones it shows while collapsed, in one
-// row, which ones expanded, and when media has something to show.
+// The capsule's row of bar elements: which ones it shows while collapsed,
+// in one row, and which ones expanded; tst_liveElements covers the ones
+// beside its pills.
 TestCase {
     name: "CapsuleElements"
 
@@ -180,35 +181,22 @@ TestCase {
             capsulePlaces: places({ media: "shown" }), expanded: data.expanded };
 
         verify(shownIds(CapsuleElements.drawnElements(bar), "center").indexOf("media") !== -1);
-        compare(CapsuleElements.liveElements(bar), { left: [], right: ["recording"] });
     }
 
-    // A hidden element is neither in the collapsed row nor beside the pills;
-    // expanded, it shows in the row like any other element.
+    // A hidden element isn't in the collapsed row; expanded, it shows in the
+    // row like any other element.
     function test_aHiddenLiveElementOnlyShowsExpanded() {
         const bar = { barStyle: "capsule", barElements: BarProfileModel.defaultProfile.barElements,
             capsulePlaces: places({ recording: "hidden" }) };
 
         compare(shownIds(CapsuleElements.drawnElements(bar), "center").indexOf("recording"), -1);
-        compare(CapsuleElements.liveElements(bar), { left: ["media"], right: [] });
         verify(shownIds(CapsuleElements.drawnElements(Object.assign({ expanded: true }, bar)), "center")
             .indexOf("recording") !== -1);
     }
 
-    // Live right puts media right of the pills, after the recording
-    // indicator: several on one side follow the profile's order.
-    function test_liveElementsOnOneSideFollowTheProfilesOrder() {
-        const elements = barElements();
-        elements.left.unshift(element("media"));
-        elements.right.push(element("recording"));
-
-        compare(CapsuleElements.liveElements({ barStyle: "capsule", barElements: elements,
-            capsulePlaces: places({ media: "liveRight" }) }), { left: [], right: ["media", "recording"] });
-    }
-
     // The live elements, by default the recording indicator and media, are
     // never drawn in the row, collapsed or expanded: they sit beside the
-    // workspace pills instead (see liveElements).
+    // workspace pills instead (see tst_liveElements).
     function test_theRowNeverDrawsTheLiveElements_data() {
         return [
             { tag: "collapsed", expanded: false },
@@ -265,26 +253,9 @@ TestCase {
         compare(shownIds(drawn, "center"), ["arch", "notifications", "clock"]);
     }
 
-    // On a capsule, media sits left of the workspace pills and the recording
-    // indicator right of them, while the profile enables them.
-    function test_mediaSitsLeftOfThePillsAndRecordingRight() {
-        compare(CapsuleElements.liveElements({ barStyle: "capsule",
-            barElements: BarProfileModel.defaultProfile.barElements }),
-            { left: ["media"], right: ["recording"] });
-    }
-
-    // A live element the profile disables isn't beside the pills either.
-    function test_aDisabledLiveElementIsNotBesideThePills() {
-        const elements = barElements();
-        elements.right.push(element("recording", { enabled: false }), element("media"));
-
-        compare(CapsuleElements.liveElements({ barStyle: "capsule", barElements: elements }),
-            { left: ["media"], right: [] });
-    }
-
-    // Live elements are a capsule's: any other bar style draws them in its
-    // zones like any other bar element.
-    function test_onlyACapsuleHasLiveElements_data() {
+    // Any other bar style draws the live-capable elements in its zones like
+    // any other bar element: its profile's as they are.
+    function test_anyOtherBarStyleDrawsItsProfilesElements_data() {
         return [
             { tag: "opaque", barStyle: "opaque" },
             { tag: "transparent", barStyle: "transparent" },
@@ -292,104 +263,9 @@ TestCase {
         ];
     }
 
-    function test_onlyACapsuleHasLiveElements(data) {
+    function test_anyOtherBarStyleDrawsItsProfilesElements(data) {
         const elements = BarProfileModel.defaultProfile.barElements;
 
-        compare(CapsuleElements.liveElements({ barStyle: data.barStyle, barElements: elements }),
-            { left: [], right: [] });
         compare(CapsuleElements.drawnElements({ barStyle: data.barStyle, barElements: elements }), elements);
-    }
-
-    // Media has something to show on a bar while any player exists, but on a
-    // capsule only while a track plays: a paused player leaves it.
-    function test_mediaShowsOnACapsuleOnlyWhileATrackPlays_data() {
-        const playing = { isPlaying: true };
-        const paused = { isPlaying: false };
-        return [
-            { tag: "capsule, playing", barStyle: "capsule", player: playing, shown: true },
-            { tag: "capsule, paused", barStyle: "capsule", player: paused, shown: false },
-            { tag: "capsule, no player", barStyle: "capsule", player: null, shown: false },
-            { tag: "opaque, playing", barStyle: "opaque", player: playing, shown: true },
-            { tag: "opaque, paused", barStyle: "opaque", player: paused, shown: true },
-            { tag: "docked, no player", barStyle: "docked", player: null, shown: false }
-        ];
-    }
-
-    function test_mediaShowsOnACapsuleOnlyWhileATrackPlays(data) {
-        compare(CapsuleElements.hasMedia({ barStyle: data.barStyle }, data.player), data.shown);
-    }
-
-    // Expanded, the capsule shows media as the bar does: while any player
-    // exists, playing or not.
-    function test_anExpandedCapsuleShowsMediaWhileAnyPlayerExists_data() {
-        return [
-            { tag: "playing", player: { isPlaying: true }, shown: true },
-            { tag: "paused", player: { isPlaying: false }, shown: true },
-            { tag: "no player", player: null, shown: false }
-        ];
-    }
-
-    function test_anExpandedCapsuleShowsMediaWhileAnyPlayerExists(data) {
-        compare(CapsuleElements.hasMedia({ barStyle: "capsule" }, data.player, true), data.shown);
-    }
-
-    // Keep-awake shows while off too, but as a live element a collapsed
-    // capsule shows it only while it is on; expanded, it shows as on a bar.
-    function test_aLiveKeepAwakeShowsCollapsedOnlyWhileOn_data() {
-        const live = { keepAwake: "liveRight" };
-        return [
-            { tag: "live, on", barStyle: "capsule", places: live, on: true, shown: true },
-            { tag: "live, off", barStyle: "capsule", places: live, on: false, shown: false },
-            { tag: "live, off, expanded", barStyle: "capsule", places: live, on: false, expanded: true, shown: true },
-            { tag: "live left, off", barStyle: "capsule", places: { keepAwake: "liveLeft" }, on: false, shown: false },
-            { tag: "shown in the row, off", barStyle: "capsule", places: { keepAwake: "shown" }, on: false, shown: true },
-            { tag: "hidden, off, expanded", barStyle: "capsule", places: { keepAwake: "hidden" }, on: false, expanded: true, shown: true },
-            { tag: "opaque, off", barStyle: "opaque", places: live, on: false, shown: true }
-        ];
-    }
-
-    function test_aLiveKeepAwakeShowsCollapsedOnlyWhileOn(data) {
-        const elements = barElements();
-        elements.right.push(element("keepAwake"));
-        const bar = { barStyle: data.barStyle, barElements: elements, capsulePlaces: places(data.places) };
-
-        compare(CapsuleElements.hasKeepAwake(CapsuleElements.liveElements(bar), data.on, data.expanded === true),
-            data.shown);
-    }
-
-    // A capsule profile with the given text and icon sizes; its bar elements
-    // are 20 + 3 * 2 = 26 px thick.
-    function sizedProfile(textSize, iconSize) {
-        return { barStyle: "capsule", barHeight: 34, elementVerticalPadding: 4,
-            workspaceButtonSize: 20, pillVerticalPadding: 3, textSize: textSize, iconSize: iconSize };
-    }
-
-    // A live element beside the pills is drawn at 80% of the profile's text
-    // and icon sizes, in a pill 80% as thick, rounded to whole pixels.
-    function test_aLiveElementIsDrawnAtEightyPercent_data() {
-        return [
-            { tag: "balanced", profile: sizedProfile(14, 14), sizes: { textSize: 11, iconSize: 11, thickness: 21 } },
-            { tag: "compact", profile: sizedProfile(13, 13), sizes: { textSize: 10, iconSize: 10, thickness: 21 } },
-            { tag: "spacious", profile: sizedProfile(15, 15), sizes: { textSize: 12, iconSize: 12, thickness: 21 } },
-            { tag: "large icons", profile: sizedProfile(14, 20), sizes: { textSize: 11, iconSize: 16, thickness: 21 } }
-        ];
-    }
-
-    function test_aLiveElementIsDrawnAtEightyPercent(data) {
-        compare(CapsuleElements.elementSizes(data.profile, true), data.sizes);
-    }
-
-    // So applying a density preset resizes live elements in proportion.
-    function test_aDensityPresetResizesLiveElements() {
-        const profile = Object.assign(sizedProfile(14, 14), BarProfileModel.densityPresetChanges("spacious"));
-
-        compare(CapsuleElements.elementSizes(profile, true), { textSize: 12, iconSize: 12, thickness: 24 });
-    }
-
-    // Any other bar element, and every one on another bar style, keeps the
-    // profile's sizes.
-    function test_otherElementsKeepTheProfilesSizes() {
-        compare(CapsuleElements.elementSizes(sizedProfile(14, 16), false),
-            { textSize: 14, iconSize: 16, thickness: 26 });
     }
 }

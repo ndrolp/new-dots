@@ -16,7 +16,7 @@ Rectangle {
     // Whether the element sits in a group, which draws its background.
     property bool grouped: false
     // The sizes it is drawn at, { iconSize, thickness }: the profile's, or a
-    // live element's (CapsuleElements.elementSizes).
+    // live element's (LiveElements.elementSizes).
     property var sizes: ({ iconSize: appearance.iconSize, thickness: BarLayout.elementThickness(appearance) })
     signal popupRequested()
 
