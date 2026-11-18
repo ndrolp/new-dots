@@ -229,6 +229,32 @@ TestCase {
         verify(shown.indexOf("clock") !== -1);
     }
 
+    // A live element in a group leaves it, since a group can't reach the
+    // pills: the rest of the group keeps one shared background in the
+    // expanded row, and joins no group before it.
+    function test_aLiveElementLeavesItsGroup_data() {
+        return [
+            { tag: "first of its group", right: [element("media"), element("audio", { joinPrevious: true }),
+                element("clock", { joinPrevious: true })], groups: [["battery"], ["audio", "clock"]] },
+            { tag: "inside its group", right: [element("audio"), element("media", { joinPrevious: true }),
+                element("clock", { joinPrevious: true })], groups: [["battery"], ["audio", "clock"]] },
+            { tag: "last of its group", right: [element("audio"), element("clock", { joinPrevious: true }),
+                element("recording", { joinPrevious: true })], groups: [["battery"], ["audio", "clock"]] },
+            { tag: "alone in its group", right: [element("media"), element("clock", { joinPrevious: true })],
+                groups: [["battery"], ["clock"]] },
+            { tag: "both live", right: [element("media"), element("recording", { joinPrevious: true }),
+                element("audio", { joinPrevious: true }), element("clock", { joinPrevious: true })],
+                groups: [["battery"], ["audio", "clock"]] }
+        ];
+    }
+
+    function test_aLiveElementLeavesItsGroup(data) {
+        const elements = { left: [], center: [element("workspaces"), element("battery")], right: data.right };
+        const drawn = CapsuleElements.drawnElements({ barStyle: "capsule", barElements: elements, expanded: true });
+
+        compare(BarProfileModel.zoneGroups(drawn, "center"), data.groups);
+    }
+
     // So a collapsed capsule's row is just what its profile chose.
     function test_aCollapsedCapsulesRowIsWhatItsProfileChose() {
         const drawn = CapsuleElements.drawnElements({
@@ -305,5 +331,41 @@ TestCase {
 
     function test_anExpandedCapsuleShowsMediaWhileAnyPlayerExists(data) {
         compare(CapsuleElements.hasMedia({ barStyle: "capsule" }, data.player, true), data.shown);
+    }
+
+    // A capsule profile with the given text and icon sizes; its bar elements
+    // are 20 + 3 * 2 = 26 px thick.
+    function sizedProfile(textSize, iconSize) {
+        return { barStyle: "capsule", barHeight: 34, elementVerticalPadding: 4,
+            workspaceButtonSize: 20, pillVerticalPadding: 3, textSize: textSize, iconSize: iconSize };
+    }
+
+    // A live element beside the pills is drawn at 80% of the profile's text
+    // and icon sizes, in a pill 80% as thick, rounded to whole pixels.
+    function test_aLiveElementIsDrawnAtEightyPercent_data() {
+        return [
+            { tag: "balanced", profile: sizedProfile(14, 14), sizes: { textSize: 11, iconSize: 11, thickness: 21 } },
+            { tag: "compact", profile: sizedProfile(13, 13), sizes: { textSize: 10, iconSize: 10, thickness: 21 } },
+            { tag: "spacious", profile: sizedProfile(15, 15), sizes: { textSize: 12, iconSize: 12, thickness: 21 } },
+            { tag: "large icons", profile: sizedProfile(14, 20), sizes: { textSize: 11, iconSize: 16, thickness: 21 } }
+        ];
+    }
+
+    function test_aLiveElementIsDrawnAtEightyPercent(data) {
+        compare(CapsuleElements.elementSizes(data.profile, true), data.sizes);
+    }
+
+    // So applying a density preset resizes live elements in proportion.
+    function test_aDensityPresetResizesLiveElements() {
+        const profile = Object.assign(sizedProfile(14, 14), BarProfileModel.densityPresetChanges("spacious"));
+
+        compare(CapsuleElements.elementSizes(profile, true), { textSize: 12, iconSize: 12, thickness: 24 });
+    }
+
+    // Any other bar element, and every one on another bar style, keeps the
+    // profile's sizes.
+    function test_otherElementsKeepTheProfilesSizes() {
+        compare(CapsuleElements.elementSizes(sizedProfile(14, 16), false),
+            { textSize: 14, iconSize: 16, thickness: 26 });
     }
 }

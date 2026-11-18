@@ -70,18 +70,19 @@ Item {
         id: theme
     }
 
-    // The size of an element this long along the bar. On a side bar it runs
-    // down, and is as thick across the bar as on any other.
-    function elementSize(length) {
-        return BarLayout.size(appearance, length, itemHeight);
+    // The size of an element this long along the bar, `thickness` across it
+    // (itemHeight unless given). On a side bar it runs down, and is as thick
+    // across the bar as on any other.
+    function elementSize(length, thickness) {
+        return BarLayout.size(appearance, length, thickness === undefined ? itemHeight : thickness);
     }
 
     // The size of an element around its content, with the padding along the bar.
-    function sizeAround(content) {
+    function sizeAround(content, thickness) {
         return elementSize(BarLayout.itemLength(appearance, {
             width: content.implicitWidth,
             height: content.implicitHeight
-        }) + 16);
+        }) + 16, thickness);
     }
 
     PwObjectTracker {
@@ -126,6 +127,12 @@ Item {
 
     function live(element) {
         return liveIds.indexOf(element) !== -1;
+    }
+
+    // The sizes an element is drawn at: a live element's are smaller
+    // (CapsuleElements.elementSizes).
+    function sizes(element) {
+        return CapsuleElements.elementSizes(appearance, live(element));
     }
 
     // Enabled elements with nothing to show (no player, battery, recording
@@ -212,7 +219,8 @@ Item {
     Rectangle {
         id: recordingButton
 
-        readonly property var size: root.sizeAround(recordingContent)
+        readonly property var sizes: root.sizes("recording")
+        readonly property var size: root.sizeAround(recordingContent, sizes.thickness)
         // Whether it is shown; as a live element it stays visible while it
         // fades out.
         readonly property bool shown: root.itemVisible("recording")
@@ -252,6 +260,8 @@ Item {
             anchors.centerIn: parent
             appearance: root.appearance
             iconColor: theme.red
+            iconSize: recordingButton.sizes.iconSize
+            textSize: recordingButton.sizes.textSize
             elapsed: RecordingIndicator.elapsedSince(root.recordings, root.recordingNow)
             sharing: root.sharingShown
             maximumLength: root.longTextMaximumLength
@@ -300,7 +310,8 @@ Item {
     Rectangle {
         id: mediaButton
 
-        readonly property var size: root.elementSize(mediaContent.implicitWidth + 16)
+        readonly property var sizes: root.sizes("media")
+        readonly property var size: root.elementSize(mediaContent.implicitWidth + 16, sizes.thickness)
 
         border.width: root.appearance.elementBorder && !root.elementGrouped("media") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
@@ -351,7 +362,7 @@ Item {
                 rotation: -parent.rotation
                 text: "󰎈"
                 color: theme.green
-                font.pixelSize: root.appearance.iconSize
+                font.pixelSize: mediaButton.sizes.iconSize
                 font.bold: true
             }
 
@@ -366,7 +377,7 @@ Item {
                 text: displayedLabel
                 color: theme.green
                 elide: Text.ElideRight
-                font.pixelSize: root.appearance.textSize
+                font.pixelSize: mediaButton.sizes.textSize
                 font.bold: true
 
                 transform: Translate {

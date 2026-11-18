@@ -1,5 +1,6 @@
 .pragma library
 .import "../../config/BarProfileModel.js" as BarProfileModel
+.import "BarLayout.js" as BarLayout
 
 // The capsule bar style's bar elements: which ones a capsule draws, collapsed
 // or expanded, in its row or beside its workspace pills. Pure functions over
@@ -28,17 +29,21 @@ const zoneNames = ["left", "center", "right"];
 // profile's order (left, centre, right), with only `shownIds` enabled. Every
 // other element stays listed, switched off, with its options. Groups keep to
 // the zone they were made in: a zone's first element never joins the zone
-// before. Returns new bar elements { left: [], center: [...], right: [] }.
+// before. A live element leaves its group, which carries on without it: when
+// it starts the group, the element after it starts it instead.
+// Returns new bar elements { left: [], center: [...], right: [] }.
 function collapsedRow(barElements, shownIds) {
     const center = [];
 
     for (const zone of zoneNames) {
-        ((barElements || {})[zone] || []).forEach((element, index) => {
+        let startsGroup = true;
+        ((barElements || {})[zone] || []).forEach(element => {
             const item = Object.assign({}, element, {
                 enabled: element.enabled !== false && shownIds.indexOf(element.id) !== -1
             });
-            if (index === 0)
+            if (startsGroup)
                 item.joinPrevious = false;
+            startsGroup = liveSides[element.id] !== undefined && item.joinPrevious !== true;
             center.push(item);
         });
     }
@@ -90,4 +95,20 @@ function hasMedia(bar, player, expanded) {
     if (!player)
         return false;
     return !BarProfileModel.capsule(bar) || expanded === true || player.isPlaying === true;
+}
+
+// How large a live element is beside the workspace pills, as a share of the
+// profile's sizes: smaller, with no setting of its own.
+const liveScale = 0.8;
+
+// The sizes a bar element is drawn at, { textSize, iconSize, thickness (its
+// pill's, across the bar) }: the profile's, or a `live` element's beside a
+// capsule's pills, liveScale of them in whole pixels.
+function elementSizes(profile, live) {
+    const scale = value => live ? Math.round(value * liveScale) : value;
+    return {
+        textSize: scale(profile.textSize),
+        iconSize: scale(profile.iconSize),
+        thickness: scale(BarLayout.elementThickness(profile))
+    };
 }

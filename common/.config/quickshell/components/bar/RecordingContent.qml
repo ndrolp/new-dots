@@ -11,6 +11,9 @@ Item {
 
     required property var appearance
     property color iconColor: "white"
+    // The profile's sizes, unless drawn smaller as a live element.
+    property int iconSize: appearance.iconSize
+    property int textSize: appearance.textSize
     property string elapsed: ""
     // Which apps share the screen; empty shows the time.
     property string sharing: ""
@@ -30,9 +33,9 @@ Item {
         gap: 5
         icon: "󰑋"
         iconColor: root.iconColor
-        iconSize: root.appearance.iconSize
+        iconSize: root.iconSize
         value: root.sharing !== "" ? root.sharing : root.elapsed
-        valueSize: root.appearance.textSize - 2
+        valueSize: root.textSize - 2
     }
 
     Row {
@@ -48,7 +51,7 @@ Item {
             rotation: -parent.rotation
             text: value.icon
             color: root.iconColor
-            font.pixelSize: root.appearance.iconSize
+            font.pixelSize: root.iconSize
             font.bold: true
         }
 
@@ -58,7 +61,7 @@ Item {
             text: root.sharing
             color: root.iconColor
             elide: Text.ElideRight
-            font.pixelSize: root.appearance.textSize - 2
+            font.pixelSize: root.textSize - 2
             font.bold: true
         }
     }
