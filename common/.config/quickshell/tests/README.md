@@ -66,14 +66,16 @@ row (the ones its profile chose, in the profile's order, else Arch, the clock
 and the control center; the choice is kept with the profile by
 `BarProfileModel.js` and offered, on a capsule profile, for the elements the
 profile shows but the workspaces and the live ones by
-`BarElementsSettings.qml`, and a saved choice of those is ignored), live ones
-included (the recording
-indicator, and media only while a track plays), which ones it shows expanded
-(all but the workspaces, with their groups, and media while any player
-exists) (`components/bar/CapsuleElements.js`), that only the pointer over
-the capsule itself counts as hovering it, where the capsule sits around that
-row and that only it takes clicks in its bar window
-(`CapsulePlacement.js`), that any one cause holds it expanded and that
+`BarElementsSettings.qml`, and a saved choice of those is ignored), which ones it shows expanded
+(all but the workspaces and the live ones, with their groups), which are its
+live elements and on which side of the workspace pills (media left, shown
+collapsed only while a track plays and expanded while any player exists, the
+recording indicator right), never in its row
+(`components/bar/CapsuleElements.js`, `BarElementItems.js`), that only the
+pointer over the capsule itself counts as hovering it, where the capsule sits
+around that row and its pill row, where the pills and the live elements go in
+that row, centred and closing up when one isn't shown, and that only the
+capsule takes clicks in its bar window (`CapsulePlacement.js`), that any one cause holds it expanded and that
 SUPER+I acts only on the focused monitor's capsule (`CapsuleRouting.js`),
 that hovering it expands it only after a moment and collapses it a while after
 the pointer leaves (`CapsuleHover.qml`), that SUPER+I holds it expanded until

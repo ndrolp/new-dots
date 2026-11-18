@@ -118,10 +118,21 @@ Item {
         "clock": pomodoroButton
     })
 
+    // On a capsule, its live elements, beside its workspace pills
+    // (CapsuleElements.liveElements): they fade in and out and slide with
+    // the pills. None on any other bar style.
+    readonly property var liveIds: appearance.liveElements
+        ? appearance.liveElements.left.concat(appearance.liveElements.right) : []
+
+    function live(element) {
+        return liveIds.indexOf(element) !== -1;
+    }
+
     // Enabled elements with nothing to show (no player, battery, recording
     // or sound) are hidden; see BarElementItems.js.
     function itemVisible(element) {
         return BarElementItems.itemVisible(element, appearance.barElements, {
+            live: liveIds,
             // On a collapsed capsule, media shows only while a track plays.
             hasPlayer: CapsuleElements.hasMedia(appearance, player, appearance.capsuleExpanded),
             hasBattery: hasBattery,
@@ -202,10 +213,21 @@ Item {
         id: recordingButton
 
         readonly property var size: root.sizeAround(recordingContent)
+        // Whether it is shown; as a live element it stays visible while it
+        // fades out.
+        readonly property bool shown: root.itemVisible("recording")
 
-        visible: root.itemVisible("recording")
+        visible: shown || opacity > 0
+        opacity: shown ? 1 : 0
         x: root.elementX("recording")
         y: root.elementY("recording")
+
+        Behavior on opacity {
+            enabled: root.live("recording")
+            NumberAnimation { duration: root.appearance.motion.medium; easing.type: root.appearance.motion.easing }
+        }
+
+        AlongBarBehavior on x { appearance: root.appearance; enabled: root.live("recording") }
         width: size.width
         height: size.height
         radius: root.appearance.radius
@@ -282,9 +304,21 @@ Item {
 
         border.width: root.appearance.elementBorder && !root.elementGrouped("media") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
-        visible: root.itemVisible("media")
+        // Whether it is shown; as a live element it stays visible while it
+        // fades out.
+        readonly property bool shown: root.itemVisible("media")
+
+        visible: shown || opacity > 0
+        opacity: shown ? 1 : 0
         x: root.elementX("media")
         y: root.elementY("media")
+
+        Behavior on opacity {
+            enabled: root.live("media")
+            NumberAnimation { duration: root.appearance.motion.medium; easing.type: root.appearance.motion.easing }
+        }
+
+        AlongBarBehavior on x { appearance: root.appearance; enabled: root.live("media") }
         width: size.width
         height: size.height
         radius: root.appearance.radius

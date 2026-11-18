@@ -34,6 +34,8 @@ Item {
     // The change a capsule shows instead of its row (see CapsuleChange.qml),
     // or null while it shows none.
     property var capsuleChange: null
+    // How long the capsule's workspace pills are along the bar.
+    property real workspacePillsLength: 0
 
     // The menu the app menu's Popup shows (AppMenuPopup.menuId).
     readonly property string appMenuId: appMenuElement.menuId
@@ -63,14 +65,34 @@ Item {
     })
     // Whether the bar runs from the top of the screen down.
     readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
-    // On a capsule, where the capsule is drawn around its row, the centre zone
-    // (see CapsuleElements.drawnElements), and its workspace pills past the
-    // row; null on any other bar style.
-    readonly property var capsulePlace: BarProfileModel.capsule(appearance)
-        ? CapsulePlacement.surface(layoutBar, capsuleChange !== null
-                ? { start: changeStart, end: changeStart + changeView.width }
-                : { start: zoneStart("center"), end: zoneEnd("center") },
-            appearance.horizontalPadding, BarPlacement.workspaceStrip(appearance))
+    // On a capsule, the span along the bar of its row: the centre zone (see
+    // CapsuleElements.drawnElements), or the change it shows instead.
+    readonly property var rowSpan: capsuleChange !== null
+        ? { start: changeStart, end: changeStart + changeView.width }
+        : { start: zoneStart("center"), end: zoneEnd("center") }
+    // The live elements beside a capsule's workspace pills, by side; none on
+    // any other bar style.
+    readonly property var liveElements: appearance.liveElements || { left: [], right: [] }
+    // On a capsule, its pill row past its row: the workspace pills with the
+    // live elements beside them (CapsulePlacement.pillRow), which stays as it
+    // is while a change replaces the row; null on any other bar style.
+    readonly property var pillRow: BarProfileModel.capsule(appearance)
+        ? CapsulePlacement.pillRow(layoutBar, {
+            centre: (rowSpan.start + rowSpan.end) / 2,
+            spacing: appearance.spacing,
+            pills: workspacePillsLength,
+            left: liveElements.left.map(liveEntry),
+            right: liveElements.right.map(liveEntry)
+        })
+        : null
+    // How much deeper the live elements make the pill row than the pills
+    // alone, which is all a capsule reserves.
+    readonly property real pillRowExtra: pillRow ? pillRow.depth - BarPlacement.workspacePillDepth : 0
+    // On a capsule, where the capsule is drawn around its row and its pill
+    // row past it; null on any other bar style.
+    readonly property var capsulePlace: pillRow
+        ? CapsulePlacement.surface(layoutBar, CapsulePlacement.span(rowSpan, pillRow),
+            appearance.horizontalPadding, pillRow.depth + appearance.spacing)
         : null
     // Where a change the capsule shows starts along the bar: centred, as its
     // row would be.
@@ -116,9 +138,22 @@ Item {
         return BarProfileModel.elementEnabled(appearance.barElements, element);
     }
 
+    // A live element fading out is still visible but no longer shown.
     function elementShown(element) {
         const item = elementItem(element);
-        return item !== null && item.visible && BarLayout.itemLength(layoutBar, item) > 0;
+        return item !== null && (item.shown !== undefined ? item.shown : item.visible)
+            && BarLayout.itemLength(layoutBar, item) > 0;
+    }
+
+    // A live element as CapsulePlacement.pillRow takes it.
+    function liveEntry(element) {
+        const item = elementItem(element);
+        return {
+            id: element,
+            length: item ? BarLayout.itemLength(layoutBar, item) : 0,
+            depth: item ? item.height : 0,
+            shown: elementShown(element)
+        };
     }
 
     // Positions within a zone, relative to its start, and one background per
@@ -147,8 +182,11 @@ Item {
     }
 
     // Where an element goes, { x, y }: at its place along the bar, centred
-    // across it.
+    // across it; a live element at its place in the pill row.
     function elementPlace(element) {
+        if (pillRow && pillRow.elements[element])
+            return pillRow.elements[element];
+
         const zone = BarProfileModel.elementZone(appearance.barElements, element);
         const position = elementPosition(element);
         return BarLayout.place(layoutBar, zoneStart(zone) + (position ? position.start : 0),
@@ -259,24 +297,27 @@ Item {
         z: -1
     }
 
-    // Keeps the row inside the capsule while the capsule grows or shrinks:
-    // bar elements that join an expanding row appear at once where they end
-    // up, so they are cut to the capsule as drawn, mid-animation, instead of
-    // spilling past it. On any other bar style it cuts nothing.
+    // Keeps the row and the live elements inside the capsule while the
+    // capsule grows or shrinks: bar elements that join an expanding row
+    // appear at once where they end up, so they are cut to the capsule as
+    // drawn, mid-animation, instead of spilling past it. On any other bar
+    // style it cuts nothing.
     Item {
         id: rowClip
 
         readonly property bool cutting: root.capsulePlace !== null
 
         x: cutting ? capsuleSurface.x : 0
+        y: cutting ? capsuleSurface.y : 0
         width: cutting ? capsuleSurface.width : root.width
-        height: root.height
+        height: cutting ? capsuleSurface.height : root.height
         clip: cutting
 
         // As large as the bar content and where it is, so what is inside
         // keeps its places.
         Item {
             x: -rowClip.x
+            y: -rowClip.y
             width: root.width
             height: root.height
 

@@ -78,6 +78,12 @@ Variants {
                     change: panel.showingChange,
                     capsuleElements: bar.appearance.barProfileValue(panel.profileName, "capsuleElements")
                 })
+                // On a capsule, the live elements beside its workspace pills,
+                // by side (see CapsuleElements.liveElements); none otherwise.
+                property var liveElements: CapsuleElements.liveElements({
+                    barStyle: panel.barAppearance.barStyle,
+                    barElements: bar.appearance.barProfileValue(panel.profileName, "barElements")
+                })
                 // Whether this window's capsule is expanded (see panel.capsuleExpanded).
                 property bool capsuleExpanded: panel.capsuleExpanded
                 // Global, not part of the bar profile.
@@ -146,11 +152,12 @@ Variants {
             exclusiveZone: barThickness
             // Only the size across the bar counts: the compositor stretches the
             // window between the two anchors it has along the bar. A capsule's
-            // window grows away from its edge to hold a popup inside, past
-            // what it reserves.
+            // window grows away from its edge to hold a popup inside, and a
+            // pill row deepened by its live elements, past what it reserves.
             implicitWidth: barThickness
             implicitHeight: barThickness
-                + (BarProfileModel.capsule(panel.barAppearance) ? capsuleWindowHold.held : 0)
+                + (BarProfileModel.capsule(panel.barAppearance)
+                    ? capsuleWindowHold.held + barContent.pillRowExtra : 0)
 
             anchors {
                 top: panel.windowAnchors.top
@@ -265,6 +272,7 @@ Variants {
                     systemMonitor: panel.systemMonitor
                     workspaceService: panel.workspaceService
                     capsuleChange: panel.showingChange ? capsuleChange.change : null
+                    workspacePillsLength: workspaceRow.width
 
                     onConfigRequested: function(screen) {
                         bar.configRequested(screen, panel);
@@ -278,16 +286,16 @@ Variants {
                 }
             }
 
-            // A capsule's workspace pills, inside the capsule past its row
-            // (CapsulePlacement.workspacePills), so they take clicks with it.
+            // A capsule's workspace pills, inside the capsule past its row,
+            // beside its live elements (CapsulePlacement.pillRow), so they
+            // take clicks with it. They slide to make room for a live element.
             CapsuleWorkspaceRow {
                 id: workspaceRow
 
-                readonly property var place: CapsulePlacement.workspacePills(barContent.layoutBar,
-                    barContent.capsulePlace)
+                readonly property var place: barContent.pillRow ? barContent.pillRow.pills : null
 
-                visible: place !== null
-                x: place ? barContent.x + place.centre - width / 2 : 0
+                visible: place !== null && barContent.capsulePlace.width > 0
+                x: place ? barContent.x + place.x : 0
                 y: place ? barContent.y + place.y : 0
                 workspaceIds: panel.workspaceService.workspacesForScreen(panel.screen,
                     panel.monitors.workspacesFor(panel.monitorDescription))
