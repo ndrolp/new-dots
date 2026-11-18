@@ -117,10 +117,11 @@ function pillRow(content, given) {
 
 // The capsule's span along the bar, { start, end }: round its row of bar
 // elements, `row`, and its pill row, `pills`, as pillRow gives it. With
-// nothing in its row there is still no capsule: the span is the row's.
+// nothing in its row, it is its pill row's: the pills and any live elements
+// they show.
 function span(row, pills) {
     if (row.end <= row.start)
-        return row;
+        return { start: pills.start, end: pills.end };
     return { start: Math.min(row.start, pills.start), end: Math.max(row.end, pills.end) };
 }
 

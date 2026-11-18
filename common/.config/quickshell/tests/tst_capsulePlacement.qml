@@ -140,7 +140,8 @@ TestCase {
     }
 
     // The capsule reaches round its pill row where that is longer than its
-    // row of bar elements; with nothing in its row there is still no capsule.
+    // row of bar elements; with nothing in its row it still wraps its pill
+    // row, the pills and any live element they show.
     function test_theCapsuleReachesRoundItsPillRow_data() {
         return [
             { tag: "longer pill row", row: { start: 450, end: 550 }, pills: { start: 392, end: 608 },
@@ -148,7 +149,9 @@ TestCase {
             { tag: "shorter pill row", row: { start: 380, end: 620 }, pills: { start: 480, end: 520 },
                 span: { start: 380, end: 620 } },
             { tag: "empty row", row: { start: 500, end: 500 }, pills: { start: 392, end: 608 },
-                span: { start: 500, end: 500 } }
+                span: { start: 392, end: 608 } },
+            { tag: "empty row, only the pills", row: { start: 500, end: 500 }, pills: { start: 480, end: 520 },
+                span: { start: 480, end: 520 } }
         ];
     }
 
