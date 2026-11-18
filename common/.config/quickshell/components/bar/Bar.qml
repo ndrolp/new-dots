@@ -95,7 +95,7 @@ Variants {
             // Whether this window's capsule is expanded, held by any of its
             // causes (see CapsuleRouting.expanded); always false on other bar styles,
             // where nothing reads it. Its size changes as the row does,
-            // animated, and the reserved space stays at the collapsed height.
+            // animated, and the reserved space stays as it is collapsed.
             // A popup inside holds it expanded until the popup closes.
             readonly property bool capsuleExpanded: CapsuleRouting.expanded({
                 hover: capsuleHover.expanded,
@@ -150,11 +150,13 @@ Variants {
             readonly property var contentArea: BarPlacement.contentArea(panel.barAppearance,
                 { width: barBackground.width, height: barBackground.height })
 
-            exclusiveZone: barThickness
+            // On a capsule, the live elements it shows collapsed included,
+            // so windows move clear of them as they appear and back as they go.
+            exclusiveZone: BarPlacement.reservedSpace(panel.barAppearance, barContent.activeLiveDepth)
             // Only the size across the bar counts: the compositor stretches the
             // window between the two anchors it has along the bar. A capsule's
             // window grows away from its edge to hold a popup inside, and a
-            // pill row deepened by its live elements, past what it reserves.
+            // pill row deepened by its live elements.
             implicitWidth: barThickness
             implicitHeight: barThickness
                 + (BarProfileModel.capsule(panel.barAppearance)

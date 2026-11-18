@@ -86,8 +86,14 @@ Item {
         })
         : null
     // How much deeper the live elements make the pill row than the pills
-    // alone, which is all a capsule reserves.
+    // alone.
     readonly property real pillRowExtra: pillRow ? pillRow.depth - BarPlacement.workspacePillDepth : 0
+    // How deep the deepest live element active on the capsule is, 0 with
+    // none: what the capsule reserves for them (BarPlacement.reservedSpace),
+    // the same collapsed or expanded, so expanding never moves windows.
+    readonly property real activeLiveDepth: Math.max(0, ...liveElements.left.concat(liveElements.right)
+        .filter(element => barElementItems.liveActive(element) && elementItem(element) !== null)
+        .map(element => elementItem(element).height))
     // On a capsule, where the capsule is drawn around its row and its pill
     // row past it; null on any other bar style.
     readonly property var capsulePlace: pillRow

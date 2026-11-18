@@ -6,7 +6,7 @@ and schema migrations (`config/SchemaMigrations.js`), among them the one that
 turns the two bar style switches into one bar style and keeps each saved
 profile's look (`tst_barStyleMigration.qml`). They also cover where
 the bar sits on its screen: the edges its window is anchored to, the space it
-reserves, where the margin goes and where its content sits, against its edge
+reserves (on a capsule, with the live elements it shows collapsed), where the margin goes and where its content sits, against its edge
 however tall a capsule's window grows, for every bar style on each Bar position
 (`components/bar/BarPlacement.js`; `Bar.qml` itself is a Quickshell window and
 isn't tested here), and where the toasts and desktop widgets sit in the area
