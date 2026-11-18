@@ -145,11 +145,11 @@ Item {
         return BarProfileModel.elementEnabled(appearance.barElements, element);
     }
 
-    // A live element fading out is still visible but no longer shown.
+    // Whether an element is drawn and takes room. A live element fading out
+    // still is, until its fade-out ends (LiveCapableItem.takesRoom).
     function elementShown(element) {
         const item = elementItem(element);
-        return item !== null && (item.shown !== undefined ? item.shown : item.visible)
-            && BarLayout.itemLength(layoutBar, item) > 0;
+        return item !== null && item.visible && BarLayout.itemLength(layoutBar, item) > 0;
     }
 
     // A live element as CapsulePlacement.pillRow takes it.

@@ -76,6 +76,20 @@ TestCase {
         verify(item.opacity > 0);
     }
 
+    // It keeps its room beside the pills until its fade-out ends, so the
+    // pills and the capsule close up as it disappears instead of cutting
+    // its fade-out short.
+    function test_aLiveElementKeepsItsRoomUntilItHasFadedOut() {
+        profile.motion = { medium: 200, long: 200, easing: 0 };
+        const item = createTemporaryObject(media, this);
+        verify(item.takesRoom);
+
+        bar.mediaShown = false;
+        verify(item.takesRoom);
+        tryCompare(item, "takesRoom", false, 2000);
+        compare(item.opacity, 0);
+    }
+
     // With reduce motion it goes at once.
     function test_aLiveElementGoesAtOnceWithReduceMotion() {
         profile.motion = { medium: 0, long: 0, easing: 0 };
@@ -83,6 +97,7 @@ TestCase {
 
         bar.mediaShown = false;
         tryCompare(item, "visible", false, 100);
+        verify(!item.takesRoom);
     }
 
     // Anywhere else it is hidden at once.
