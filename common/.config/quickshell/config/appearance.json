@@ -130,8 +130,10 @@
                         "joinPrevious": true
                     }
                 ],
-                "left": [],
-                "right": []
+                "left": [
+                ],
+                "right": [
+                ]
             },
             "barHeight": 30,
             "barOpacity": 55,
@@ -298,17 +300,21 @@
         "presentation": {
             "activeWorkspaceHorizontalPadding": 5,
             "archButtonHorizontalPadding": 5,
-            "barBorder": false,
+            "barBorder": true,
             "barElements": {
                 "center": [
                     {
-                        "enabled": true,
+                        "enabled": false,
                         "id": "currentApp"
+                    },
+                    {
+                        "enabled": false,
+                        "id": "appMenu"
                     }
                 ],
                 "left": [
                     {
-                        "enabled": false,
+                        "enabled": true,
                         "id": "arch"
                     },
                     {
@@ -316,10 +322,19 @@
                         "id": "systemMonitor"
                     },
                     {
-                        "enabled": false,
+                        "enabled": true,
                         "id": "media",
                         "options": {
                             "titleVisible": true
+                        }
+                    },
+                    {
+                        "enabled": false,
+                        "id": "cava",
+                        "options": {
+                            "barCount": 12,
+                            "barWidth": 3,
+                            "color": "blue"
                         }
                     },
                     {
@@ -358,7 +373,7 @@
                 ],
                 "right": [
                     {
-                        "enabled": false,
+                        "enabled": true,
                         "id": "audio",
                         "options": {
                             "meterVisible": false
@@ -370,14 +385,14 @@
                     },
                     {
                         "enabled": true,
+                        "id": "clock"
+                    },
+                    {
+                        "enabled": true,
                         "id": "battery",
                         "options": {
                             "percentageVisible": true
                         }
-                    },
-                    {
-                        "enabled": true,
-                        "id": "clock"
                     },
                     {
                         "enabled": true,
@@ -391,23 +406,35 @@
                         "id": "recording"
                     },
                     {
-                        "enabled": false,
+                        "enabled": true,
+                        "id": "keepAwake"
+                    },
+                    {
+                        "enabled": true,
                         "id": "bluetooth"
                     },
                     {
-                        "enabled": false,
+                        "enabled": true,
                         "id": "tray"
                     }
                 ]
             },
             "barHeight": 30,
-            "barOpacity": 90,
-            "barStyle": "docked",
+            "barOpacity": 70,
+            "barPosition": "top",
+            "barStyle": "capsule",
+            "capsuleElements": [
+                "arch",
+                "clock",
+                "notifications",
+                "battery"
+            ],
             "elementBorder": false,
             "elementVerticalPadding": 8,
             "groupBorder": false,
             "groupHorizontalPadding": 4,
             "groupRadius": 8,
+            "groupVerticalPadding": 0,
             "horizontalPadding": 8,
             "iconSize": 13,
             "pillVerticalPadding": 2,
@@ -637,5 +664,10 @@
     "nightLightTemperature": 3800,
     "notificationPopupLocation": "top-right",
     "reduceMotion": false,
+    "scanSettings": {
+        "format": "pdf",
+        "mode": "color",
+        "resolution": 300
+    },
     "schemaVersion": 16
 }

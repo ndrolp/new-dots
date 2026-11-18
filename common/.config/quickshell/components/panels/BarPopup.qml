@@ -5,7 +5,9 @@ import QtQuick
 // popup is open.
 PopupFrame {
     required property var popups
-    readonly property var placement: open ? {
+    // Reported once it is shown, so the bar grows round it (a capsule, a
+    // docked zone) as it reveals.
+    readonly property var placement: shown ? {
         popup: popup,
         edge: edge,
         start: placedStart,

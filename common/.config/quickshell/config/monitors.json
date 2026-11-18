@@ -23,7 +23,7 @@
     },
     "displaySettings": {
         "AOC CU34G4 2SES7HA013005": {
-            "barProfile": "minimal",
+            "barProfile": "presentation",
             "barVisible": true
         },
         "AOC Q27G42XE 2S6S1HA031479": {
@@ -128,7 +128,7 @@
             }
         },
         "Samsung Display Corp. ATNA40HQ01-0": {
-            "barProfile": "minimal",
+            "barProfile": "presentation",
             "barVisible": true,
             "desktopWidgets": {
                 "backgroundClock": {
