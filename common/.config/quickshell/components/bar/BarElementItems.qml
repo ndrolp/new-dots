@@ -124,6 +124,8 @@ Item {
     // the pills. None on any other bar style.
     readonly property var liveIds: LiveElements.ids(appearance.liveElements)
 
+    // Whether `element` is one of this capsule's live elements, drawn beside
+    // its workspace pills; never on any other bar style.
     function live(element) {
         return liveIds.indexOf(element) !== -1;
     }
