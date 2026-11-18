@@ -26,13 +26,15 @@ function idsByPlace(capsulePlaces) {
 const zoneNames = ["left", "center", "right"];
 
 // The capsule's row: the profile's bar elements as one centre zone, in the
-// profile's order (left, centre, right), with only `shownIds` enabled. Every
+// profile's order (left, centre, right), with only `shownIds` enabled and
+// `liveIds` the live elements. Every
 // other element stays listed, switched off, with its options. Groups keep to
 // the zone they were made in: a zone's first element never joins the zone
 // before. A live element leaves its group, which carries on without it: when
 // it starts the group, the element after it starts it instead.
 // Returns new bar elements { left: [], center: [...], right: [] }.
-function collapsedRow(barElements, shownIds) {
+function collapsedRow(barElements, shownIds, liveIds) {
+    const live = liveIds || [];
     const center = [];
 
     for (const zone of zoneNames) {
@@ -43,7 +45,7 @@ function collapsedRow(barElements, shownIds) {
             });
             if (startsGroup)
                 item.joinPrevious = false;
-            startsGroup = liveSides[element.id] !== undefined && item.joinPrevious !== true;
+            startsGroup = live.indexOf(element.id) !== -1 && item.joinPrevious !== true;
             center.push(item);
         });
     }
@@ -61,11 +63,12 @@ function collapsedRow(barElements, shownIds) {
 function drawnElements(bar) {
     if (!BarProfileModel.capsule(bar))
         return bar.barElements;
-    if (bar.change === true)
-        return collapsedRow(bar.barElements, []);
-
     const ids = idsByPlace(bar.capsulePlaces);
-    return collapsedRow(bar.barElements, bar.expanded ? ids.hidden.concat(ids.shown) : ids.shown);
+    const liveIds = ids.liveLeft.concat(ids.liveRight);
+    if (bar.change === true)
+        return collapsedRow(bar.barElements, [], liveIds);
+    return collapsedRow(bar.barElements, bar.expanded ? ids.hidden.concat(ids.shown) : ids.shown,
+        liveIds);
 }
 
 // The live elements a capsule draws beside its workspace pills, by side,
