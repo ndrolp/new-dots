@@ -516,7 +516,8 @@ TestCase {
         built.appearance.barStyle = "capsule";
         built.appearance.barElements = {
             left: [{ id: "workspaces", enabled: true }],
-            center: [{ id: "recording", enabled: true }, { id: "media", enabled: true }],
+            center: [{ id: "recording", enabled: true }, { id: "media", enabled: true },
+                { id: "keepAwake", enabled: true }],
             right: [{ id: "clock", enabled: true }]
         };
 
@@ -529,6 +530,7 @@ TestCase {
         compare(labels("Workspaces"), []);
         compare(labels("Recording indicator"), all);
         compare(labels("Media"), all);
+        compare(labels("Keep-awake"), all);
         compare(labels("Clock & pomodoro"), ["Hidden", "Shown"]);
     }
 

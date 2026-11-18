@@ -55,7 +55,8 @@ const elementOptionDefaults = {
 
 // The bar elements that can be live elements (see GLOSSARY.md): a capsule can
 // show them beside its workspace pills, collapsed only while they are active.
-const liveElementIds = ["recording", "media"];
+// Keep-awake is live only if a profile places it so: by default it is hidden.
+const liveElementIds = ["recording", "media", "keepAwake"];
 
 function canBeLive(id) {
     return liveElementIds.indexOf(id) !== -1;

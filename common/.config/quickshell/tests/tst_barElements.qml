@@ -354,11 +354,13 @@ TestCase {
         compare(BarProfileModel.elementEnabled(barElements, "keepAwake"), true);
     }
 
-    // Keep-awake has something to show while off too: the outline cup that
-    // opens its popup.
+    // Keep-awake has something to show while off too, the outline cup that
+    // opens its popup (see CapsuleElements.hasKeepAwake), so nothing else
+    // going on hides it.
     function test_keepAwakeIsShownWhileOff() {
         const barElements = BarProfileModel.normalizeBarElements(minimalElements());
-        const nothingGoingOn = { hasPlayer: false, hasBattery: false, recording: false, cavaSilent: true };
+        const nothingGoingOn = { hasPlayer: false, hasBattery: false, recording: false, cavaSilent: true,
+            keepAwake: true };
 
         compare(BarElementItems.itemVisible("keepAwake", barElements, nothingGoingOn), true);
     }
@@ -370,14 +372,16 @@ TestCase {
             { tag: "recording", element: "recording", status: { recording: true }, shown: true },
             { tag: "not recording", element: "recording", status: { recording: false }, shown: false },
             { tag: "media playing", element: "media", status: { hasPlayer: true }, shown: true },
-            { tag: "no media", element: "media", status: { hasPlayer: false }, shown: false }
+            { tag: "no media", element: "media", status: { hasPlayer: false }, shown: false },
+            { tag: "keep-awake on", element: "keepAwake", status: { keepAwake: true }, shown: true },
+            { tag: "keep-awake off", element: "keepAwake", status: { keepAwake: false }, shown: false }
         ];
     }
 
     function test_aLiveElementShowsThoughItsRowLeavesItOff(data) {
-        const barElements = { left: [], right: [],
-            center: [{ id: "recording", enabled: false }, { id: "media", enabled: false }] };
-        const status = Object.assign({ live: ["recording", "media"] }, data.status);
+        const barElements = { left: [], right: [], center: [{ id: "recording", enabled: false },
+            { id: "media", enabled: false }, { id: "keepAwake", enabled: false }] };
+        const status = Object.assign({ live: ["recording", "media", "keepAwake"] }, data.status);
 
         compare(BarElementItems.itemVisible(data.element, barElements, status), data.shown);
     }

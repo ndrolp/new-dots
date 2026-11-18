@@ -214,6 +214,7 @@ TestCase {
         compare(profile.capsulePlaces.notifications, "hidden");
         compare(profile.capsulePlaces.media, "liveLeft");
         compare(profile.capsulePlaces.recording, "liveRight");
+        compare(profile.capsulePlaces.keepAwake, "hidden");
         compare(profile.capsulePlaces.workspaces, undefined);
         compare(profile.capsuleElements, undefined);
     }
@@ -242,6 +243,7 @@ TestCase {
     function test_choosingACollapsedPlace() {
         const places = BarProfileModel.completeCapsulePlaces(undefined);
 
+        compare(BarProfileModel.setCapsulePlace(places, "keepAwake", "liveLeft").keepAwake, "liveLeft");
         compare(BarProfileModel.setCapsulePlace(places, "media", "liveRight").media, "liveRight");
         compare(BarProfileModel.setCapsulePlace(places, "battery", "shown").battery, "shown");
         compare(BarProfileModel.setCapsulePlace(places, "battery", "liveLeft").battery, "hidden");
@@ -250,15 +252,15 @@ TestCase {
     }
 
     // Every bar element but the workspaces offers Hidden and Shown; only the
-    // ones that can be live, the recording indicator and media, also offer
-    // Live left and Live right.
+    // ones that can be live, the recording indicator, media and keep-awake,
+    // also offer Live left and Live right.
     function test_onlyElementsThatCanBeLiveOfferTheLivePlaces_data() {
         const all = ["Hidden", "Shown", "Live left", "Live right"];
         return [
             { tag: "recording", id: "recording", labels: all },
             { tag: "media", id: "media", labels: all },
             { tag: "clock", id: "clock", labels: ["Hidden", "Shown"] },
-            { tag: "keepAwake", id: "keepAwake", labels: ["Hidden", "Shown"] },
+            { tag: "keepAwake", id: "keepAwake", labels: all },
             { tag: "workspaces", id: "workspaces", labels: [] }
         ];
     }

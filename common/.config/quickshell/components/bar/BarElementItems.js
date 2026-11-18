@@ -8,8 +8,9 @@
 // of a capsule's `live` elements (CapsuleElements.liveElements), which its
 // row lists switched off, and the ones that can have nothing to show are
 // hidden then. `status` says what there is: `live`, `hasPlayer`,
-// `hasBattery`, `recording` and `cavaSilent`. Every other element,
-// keep-awake among them, is always shown when enabled.
+// `hasBattery`, `recording`, `cavaSilent` and `keepAwake` (whether it has
+// something to show, CapsuleElements.hasKeepAwake). Every other element is
+// always shown when enabled.
 function itemVisible(element, barElements, status) {
     if (!BarProfileModel.elementEnabled(barElements, element) && (status.live || []).indexOf(element) === -1)
         return false;
@@ -21,6 +22,8 @@ function itemVisible(element, barElements, status) {
         return status.recording;
     if (element === "cava")
         return !status.cavaSilent;
+    if (element === "keepAwake")
+        return status.keepAwake;
     return true;
 }
 

@@ -11,8 +11,8 @@
 // row, or live beside the pills, left or right; a profile without them takes
 // the default ones. A capsule never draws a live one in its row but beside
 // its pills: collapsed only while active (the recording indicator while
-// recording, media while a track plays, see hasMedia), expanded as on any
-// other bar style.
+// recording, media while a track plays, see hasMedia, keep-awake while on,
+// see hasKeepAwake), expanded as on any other bar style.
 
 // The ids with each collapsed place, { place: [ids] }, from `capsulePlaces`.
 function idsByPlace(capsulePlaces) {
@@ -98,6 +98,16 @@ function hasMedia(bar, player, expanded) {
     if (!player)
         return false;
     return !BarProfileModel.capsule(bar) || expanded === true || player.isPlaying === true;
+}
+
+// Whether keep-awake has something to show, given a capsule's live elements
+// by side, { left, right } (see liveElements; none on any other bar style),
+// and whether keep-awake is `on`: always, off too, but as a live element of
+// a collapsed capsule only while it is on; an `expanded` capsule shows it as
+// any other bar style does.
+function hasKeepAwake(live, on, expanded) {
+    const ids = live ? live.left.concat(live.right) : [];
+    return ids.indexOf("keepAwake") === -1 || expanded === true || on === true;
 }
 
 // How large a live element is beside the workspace pills, as a share of the

@@ -333,6 +333,30 @@ TestCase {
         compare(CapsuleElements.hasMedia({ barStyle: "capsule" }, data.player, true), data.shown);
     }
 
+    // Keep-awake shows while off too, but as a live element a collapsed
+    // capsule shows it only while it is on; expanded, it shows as on a bar.
+    function test_aLiveKeepAwakeShowsCollapsedOnlyWhileOn_data() {
+        const live = { keepAwake: "liveRight" };
+        return [
+            { tag: "live, on", barStyle: "capsule", places: live, on: true, shown: true },
+            { tag: "live, off", barStyle: "capsule", places: live, on: false, shown: false },
+            { tag: "live, off, expanded", barStyle: "capsule", places: live, on: false, expanded: true, shown: true },
+            { tag: "live left, off", barStyle: "capsule", places: { keepAwake: "liveLeft" }, on: false, shown: false },
+            { tag: "shown in the row, off", barStyle: "capsule", places: { keepAwake: "shown" }, on: false, shown: true },
+            { tag: "hidden, off, expanded", barStyle: "capsule", places: { keepAwake: "hidden" }, on: false, expanded: true, shown: true },
+            { tag: "opaque, off", barStyle: "opaque", places: live, on: false, shown: true }
+        ];
+    }
+
+    function test_aLiveKeepAwakeShowsCollapsedOnlyWhileOn(data) {
+        const elements = barElements();
+        elements.right.push(element("keepAwake"));
+        const bar = { barStyle: data.barStyle, barElements: elements, capsulePlaces: places(data.places) };
+
+        compare(CapsuleElements.hasKeepAwake(CapsuleElements.liveElements(bar), data.on, data.expanded === true),
+            data.shown);
+    }
+
     // A capsule profile with the given text and icon sizes; its bar elements
     // are 20 + 3 * 2 = 26 px thick.
     function sizedProfile(textSize, iconSize) {

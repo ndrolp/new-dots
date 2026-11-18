@@ -15,10 +15,12 @@ Rectangle {
     required property var keepAwake
     // Whether the element sits in a group, which draws its background.
     property bool grouped: false
+    // The sizes it is drawn at, { iconSize, thickness }: the profile's, or a
+    // live element's (CapsuleElements.elementSizes).
+    property var sizes: ({ iconSize: appearance.iconSize, thickness: BarLayout.elementThickness(appearance) })
     signal popupRequested()
 
-    readonly property var size: BarLayout.size(appearance, keepAwakeIcon.width + 16,
-        BarLayout.elementThickness(appearance))
+    readonly property var size: BarLayout.size(appearance, keepAwakeIcon.width + 16, sizes.thickness)
 
     width: size.width
     height: size.height
@@ -65,7 +67,7 @@ Rectangle {
         horizontalAlignment: Text.AlignHCenter
         text: KeepAwakeState.cup(root.keepAwake.on)
         color: root.keepAwake.on ? theme.green : theme.textMuted
-        font.pixelSize: root.appearance.iconSize
+        font.pixelSize: root.sizes.iconSize
         font.bold: true
     }
 

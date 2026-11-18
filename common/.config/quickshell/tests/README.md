@@ -70,7 +70,8 @@ profile shows but the workspaces and the live ones by
 (all but the workspaces and the live ones, with their groups), which are its
 live elements and on which side of the workspace pills (media left, shown
 collapsed only while a track plays and expanded while any player exists, the
-recording indicator right), never in its row, at 80% of the profile's sizes
+recording indicator right, keep-awake hidden unless chosen, then shown
+collapsed only while on), never in its row, at 80% of the profile's sizes
 and out of any group, whose rest keeps one background
 (`components/bar/CapsuleElements.js`, `BarElementItems.js`), that only the
 pointer over the capsule itself counts as hovering it, where the capsule sits

@@ -144,7 +144,10 @@ Item {
             hasPlayer: CapsuleElements.hasMedia(appearance, player, appearance.capsuleExpanded),
             hasBattery: hasBattery,
             recording: RecordingIndicator.shown(recordings),
-            cavaSilent: cava.silent
+            cavaSilent: cava.silent,
+            // As a live element, keep-awake shows collapsed only while on.
+            keepAwake: CapsuleElements.hasKeepAwake(appearance.liveElements, keepAwake.on,
+                appearance.capsuleExpanded)
         });
     }
 
@@ -300,10 +303,23 @@ Item {
 
         appearance: root.appearance
         keepAwake: root.keepAwake
+        // Whether it is shown; as a live element it stays visible while it
+        // fades out.
+        readonly property bool shown: root.itemVisible("keepAwake")
+
         grouped: root.elementGrouped("keepAwake")
-        visible: root.itemVisible("keepAwake")
+        sizes: root.sizes("keepAwake")
+        visible: shown || opacity > 0
+        opacity: shown ? 1 : 0
         x: root.elementX("keepAwake")
         y: root.elementY("keepAwake")
+
+        Behavior on opacity {
+            enabled: root.live("keepAwake")
+            NumberAnimation { duration: root.appearance.motion.medium; easing.type: root.appearance.motion.easing }
+        }
+
+        AlongBarBehavior on x { appearance: root.appearance; enabled: root.live("keepAwake") }
         onPopupRequested: root.popupRequested("keepAwake")
     }
 
