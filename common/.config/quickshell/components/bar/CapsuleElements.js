@@ -23,17 +23,21 @@ const zoneNames = ["left", "center", "right"];
 // profile's order (left, centre, right), with only `shownIds` enabled. Every
 // other element stays listed, switched off, with its options. Groups keep to
 // the zone they were made in: a zone's first element never joins the zone
-// before. Returns new bar elements { left: [], center: [...], right: [] }.
+// before. A live element leaves its group, which carries on without it: when
+// it starts the group, the element after it starts it instead.
+// Returns new bar elements { left: [], center: [...], right: [] }.
 function collapsedRow(barElements, shownIds) {
     const center = [];
 
     for (const zone of zoneNames) {
-        ((barElements || {})[zone] || []).forEach((element, index) => {
+        let startsGroup = true;
+        ((barElements || {})[zone] || []).forEach(element => {
             const item = Object.assign({}, element, {
                 enabled: element.enabled !== false && shownIds.indexOf(element.id) !== -1
             });
-            if (index === 0)
+            if (startsGroup)
                 item.joinPrevious = false;
+            startsGroup = liveSides[element.id] !== undefined && item.joinPrevious !== true;
             center.push(item);
         });
     }

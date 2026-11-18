@@ -197,6 +197,32 @@ TestCase {
         verify(shown.indexOf("clock") !== -1);
     }
 
+    // A live element in a group leaves it, since a group can't reach the
+    // pills: the rest of the group keeps one shared background in the
+    // expanded row, and joins no group before it.
+    function test_aLiveElementLeavesItsGroup_data() {
+        return [
+            { tag: "first of its group", right: [element("media"), element("audio", { joinPrevious: true }),
+                element("clock", { joinPrevious: true })], groups: [["battery"], ["audio", "clock"]] },
+            { tag: "inside its group", right: [element("audio"), element("media", { joinPrevious: true }),
+                element("clock", { joinPrevious: true })], groups: [["battery"], ["audio", "clock"]] },
+            { tag: "last of its group", right: [element("audio"), element("clock", { joinPrevious: true }),
+                element("recording", { joinPrevious: true })], groups: [["battery"], ["audio", "clock"]] },
+            { tag: "alone in its group", right: [element("media"), element("clock", { joinPrevious: true })],
+                groups: [["battery"], ["clock"]] },
+            { tag: "both live", right: [element("media"), element("recording", { joinPrevious: true }),
+                element("audio", { joinPrevious: true }), element("clock", { joinPrevious: true })],
+                groups: [["battery"], ["audio", "clock"]] }
+        ];
+    }
+
+    function test_aLiveElementLeavesItsGroup(data) {
+        const elements = { left: [], center: [element("workspaces"), element("battery")], right: data.right };
+        const drawn = CapsuleElements.drawnElements({ barStyle: "capsule", barElements: elements, expanded: true });
+
+        compare(BarProfileModel.zoneGroups(drawn, "center"), data.groups);
+    }
+
     // So a collapsed capsule's row is just what its profile chose.
     function test_aCollapsedCapsulesRowIsWhatItsProfileChose() {
         const drawn = CapsuleElements.drawnElements({
