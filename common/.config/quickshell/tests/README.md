@@ -23,7 +23,8 @@ row with no room round it (`components/panels/PopupPlacement.js`), the outline o
 on each of them (`PopupOutline.js`), the surface every popup draws on, how
 it reveals away from the bar, that inside a capsule it draws only its
 contents, and that it ignores input while closing (`PopupSurface.qml`; `PopupFrame.qml` itself is a Quickshell window and isn't
-tested here), what a popup's focus grab holds
+tested here), that a popup's reveal waits for its freshly mapped window's
+first frames (`PopupWarmUp.qml`), what a popup's focus grab holds
 (`PopupGrab.js`), which bar elements close the open popup when pressed
 (`BarPopupCloser.qml`), the shared popup parts (`PopupTitle`,
 `PopupHeader`, `PopupRow`…), the control center's tiles and sliders,

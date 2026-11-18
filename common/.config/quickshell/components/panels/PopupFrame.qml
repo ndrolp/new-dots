@@ -89,11 +89,17 @@ PopupWindow {
     readonly property real surfaceWidth: surface.width
     readonly property real surfaceHeight: surface.height
     default property alias contents: surface.contents
+    // Open and revealing: from the window's first frames on (PopupWarmUp),
+    // so the reveal, and what the bar draws round the popup, start together
+    // and smoothly.
+    readonly property bool shown: warmUp.ready
     // Closed from outside while still open: a click outside it and its bar,
     // another grab taking over, or its bar hiding.
     signal dismissed()
 
-    visible: reveal > 0
+    // Mapped as soon as it opens, still transparent, so it has drawn its
+    // first frames by the time the reveal starts.
+    visible: open || reveal > 0
     onVisibleChanged: {
         if (!visible && open)
             dismissed();
@@ -104,6 +110,13 @@ PopupWindow {
     color: "transparent"
 
     implicitHeight: Math.max(restingHeight, heldHeight + surface.padding * 2 + room.top + room.bottom)
+
+    PopupWarmUp {
+        id: warmUp
+
+        open: frame.open
+        mapped: frame.backingWindowVisible
+    }
 
     HyprlandFocusGrab {
         id: focusGrab
@@ -130,7 +143,7 @@ PopupWindow {
         anchors.bottomMargin: frame.room.bottom
         height: implicitHeight
         barPosition: frame.barPosition
-        open: frame.open
+        open: frame.shown
         attached: frame.attached
         inside: frame.inside
         joinRadius: frame.joinRadius
