@@ -9,25 +9,23 @@
 // collapsed only while active (see activeRules), expanded as on any other
 // bar style.
 
-const zoneNames = ["left", "center", "right"];
-
 // The live elements a capsule draws beside its workspace pills, by side,
 // { left: [ids], right: [ids] }, in the profile's order: those its profile
 // enables and places live on that side. None on any other bar style. Takes
 // { barStyle, barElements, capsulePlaces }.
 function liveElements(bar) {
-    const sides = { left: [], right: [] };
     if (!BarProfileModel.capsule(bar))
-        return sides;
+        return { left: [], right: [] };
 
-    const places = BarProfileModel.completeCapsulePlaces(bar.capsulePlaces);
-    for (const zone of zoneNames)
-        ((bar.barElements || {})[zone] || []).forEach(element => {
-            const side = BarProfileModel.liveSide(places[element.id]);
-            if (element.enabled !== false && side !== "")
-                sides[side].push(element.id);
-        });
-    return sides;
+    const live = BarProfileModel.capsulePlaceIds(bar.barElements, bar.capsulePlaces).live;
+    const enabled = id => BarProfileModel.elementEnabled(bar.barElements, id);
+    return { left: live.left.filter(enabled), right: live.right.filter(enabled) };
+}
+
+// The ids of the live elements by side, `sides` as liveElements gives them
+// (or null for none), as one list: the left ones, then the right ones.
+function ids(sides) {
+    return sides ? sides.left.concat(sides.right) : [];
 }
 
 // When each bar element that can be live (BarProfileModel.liveElementIds) is

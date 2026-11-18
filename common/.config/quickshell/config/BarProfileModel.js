@@ -117,6 +117,25 @@ function completeCapsulePlaces(places) {
     return complete;
 }
 
+// The ids of the bar elements `barElements` lists in each collapsed place
+// of `places` (completed, see completeCapsulePlaces), in the profile's order,
+// enabled or not: { hidden, shown, live: { left, right } }. The workspaces,
+// which take no place, are in none.
+function capsulePlaceIds(barElements, places) {
+    const complete = completeCapsulePlaces(places);
+    const ids = { hidden: [], shown: [], live: { left: [], right: [] } };
+
+    for (const zoneName of zoneNames)
+        ((barElements || {})[zoneName] || []).forEach(element => {
+            const place = complete[element.id];
+            if (liveSide(place) !== "")
+                ids.live[liveSide(place)].push(element.id);
+            else if (place !== undefined)
+                ids[place].push(element.id);
+        });
+    return ids;
+}
+
 // What a capsule's every place for `id` is offered as: [{ label, value }],
 // none for an element without places.
 function capsulePlaceChoices(id) {

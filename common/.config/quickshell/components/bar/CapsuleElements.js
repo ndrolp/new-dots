@@ -1,5 +1,6 @@
 .pragma library
 .import "../../config/BarProfileModel.js" as BarProfileModel
+.import "LiveElements.js" as LiveElements
 
 // The capsule bar style's bar elements: which ones a capsule draws, collapsed
 // or expanded, in its row or beside its workspace pills. Pure functions over
@@ -10,15 +11,6 @@
 // row, or live beside the pills, left or right; a profile without them takes
 // the default ones. A capsule never draws a live one in its row: see
 // LiveElements.js for the ones beside its pills.
-
-// The ids with each collapsed place, { place: [ids] }, from `capsulePlaces`.
-function idsByPlace(capsulePlaces) {
-    const places = BarProfileModel.completeCapsulePlaces(capsulePlaces);
-    const ids = { hidden: [], shown: [], liveLeft: [], liveRight: [] };
-    for (const id in places)
-        ids[places[id]].push(id);
-    return ids;
-}
 
 const zoneNames = ["left", "center", "right"];
 
@@ -60,8 +52,8 @@ function collapsedRow(barElements, shownIds, liveIds) {
 function drawnElements(bar) {
     if (!BarProfileModel.capsule(bar))
         return bar.barElements;
-    const ids = idsByPlace(bar.capsulePlaces);
-    const liveIds = ids.liveLeft.concat(ids.liveRight);
+    const ids = BarProfileModel.capsulePlaceIds(bar.barElements, bar.capsulePlaces);
+    const liveIds = LiveElements.ids(ids.live);
     if (bar.change === true)
         return collapsedRow(bar.barElements, [], liveIds);
     return collapsedRow(bar.barElements, bar.expanded ? ids.hidden.concat(ids.shown) : ids.shown,

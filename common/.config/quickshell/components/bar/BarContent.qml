@@ -8,6 +8,7 @@ import "BarElementItems.js" as BarElementItemsModel
 import "BarLayout.js" as BarLayout
 import "BarPlacement.js" as BarPlacement
 import "CapsulePlacement.js" as CapsulePlacement
+import "LiveElements.js" as LiveElements
 
 Item {
     id: root
@@ -91,7 +92,7 @@ Item {
     // How deep the deepest live element active on the capsule is, 0 with
     // none: what the capsule reserves for them (BarPlacement.reservedSpace),
     // the same collapsed or expanded, so expanding never moves windows.
-    readonly property real activeLiveDepth: Math.max(0, ...liveElements.left.concat(liveElements.right)
+    readonly property real activeLiveDepth: Math.max(0, ...LiveElements.ids(liveElements)
         .filter(element => barElementItems.liveActive(element) && elementItem(element) !== null)
         .map(element => elementItem(element).height))
     // On a capsule, where the capsule is drawn around its row and its pill

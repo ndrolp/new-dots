@@ -251,6 +251,22 @@ TestCase {
         compare(places.media, "liveLeft");
     }
 
+    // The elements in each collapsed place follow the profile's order, the
+    // live ones by side, disabled ones too; the workspaces are in none.
+    function test_theElementsInEachCollapsedPlaceFollowTheProfilesOrder() {
+        const barElements = {
+            left: [{ id: "clock", enabled: true }, { id: "recording", enabled: false }],
+            center: [{ id: "workspaces", enabled: true }],
+            right: [{ id: "keepAwake", enabled: true }, { id: "arch", enabled: true },
+                { id: "media", enabled: true }]
+        };
+        const places = Object.assign(BarProfileModel.completeCapsulePlaces(undefined),
+            { clock: "shown", arch: "shown", keepAwake: "liveRight", media: "liveRight" });
+
+        compare(BarProfileModel.capsulePlaceIds(barElements, places),
+            { hidden: [], shown: ["clock", "arch"], live: { left: [], right: ["recording", "keepAwake", "media"] } });
+    }
+
     // Every bar element but the workspaces offers Hidden and Shown; only the
     // ones that can be live, the recording indicator, media and keep-awake,
     // also offer Live left and Live right.

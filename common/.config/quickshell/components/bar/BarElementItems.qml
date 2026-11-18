@@ -122,8 +122,7 @@ Item {
     // On a capsule, its live elements, beside its workspace pills
     // (LiveElements.liveElements): they fade in and out and slide with
     // the pills. None on any other bar style.
-    readonly property var liveIds: appearance.liveElements
-        ? appearance.liveElements.left.concat(appearance.liveElements.right) : []
+    readonly property var liveIds: LiveElements.ids(appearance.liveElements)
 
     function live(element) {
         return liveIds.indexOf(element) !== -1;
