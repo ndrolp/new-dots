@@ -568,12 +568,32 @@ function singleBarStyle(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
+// Step 17: a capsule profile's list of the bar elements its collapsed capsule
+// shows becomes a collapsed place for each bar element: the elements it
+// listed stay shown, media goes live left and the recording indicator live
+// right, as they were drawn, and every other element is hidden. A profile
+// with no list, or one that isn't a list, gets the default places when it
+// loads, which are what its capsule showed without one.
+function capsulePlacesFromShownElements(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+    for (const profileName in migrated.barProfiles || {}) {
+        const profile = migrated.barProfiles[profileName];
+        if (profile.capsuleElements === undefined)
+            continue;
+        if (profile.capsulePlaces === undefined && Array.isArray(profile.capsuleElements))
+            profile.capsulePlaces = BarProfileModel.capsulePlacesShowing(profile.capsuleElements);
+        delete profile.capsuleElements;
+    }
+
+    return { appearance: migrated, monitors: monitors };
+}
+
 const migrationSteps = [
     migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
     migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles, explicitMonitorEntries,
     moveOptionsOntoElements, renameElementVerticalPadding, seedControlCenterTiles,
     seedWorkspaceRadius, splitBarBorder, seedWorkspaceVerticalPadding,
-    seedIconSize, seedGroupPadding, singleBarStyle
+    seedIconSize, seedGroupPadding, singleBarStyle, capsulePlacesFromShownElements
 ];
 const schemaVersion = migrationSteps.length;
 

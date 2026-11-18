@@ -1,6 +1,7 @@
 import QtQuick
 import QtTest
 import "../config/BarProfileModel.js" as BarProfileModel
+import "../config/SchemaMigrations.js" as SchemaMigrations
 
 TestCase {
     name: "BarProfileModel"
@@ -200,13 +201,20 @@ TestCase {
         compare(places.workspaces, undefined);
     }
 
+    // Bar profiles of schema version 16, which listed the bar elements a
+    // collapsed capsule shows, brought to the current schema.
+    function migratedProfiles(profiles) {
+        return SchemaMigrations.migrate({ schemaVersion: 16, barProfiles: profiles }, {})
+            .appearance.barProfiles;
+    }
+
     // A profile saved before collapsed places keeps what its collapsed
     // capsule showed: the elements its list named stay shown, media and the
     // recording indicator stay live where they were drawn, the rest hidden.
     // The list itself is dropped.
     function test_aProfileSavedWithAListOfShownElementsMigrates() {
-        const profile = BarProfileModel.completeProfile({ barStyle: "capsule",
-            capsuleElements: ["battery", "clock", "media", "workspaces"] });
+        const profile = migratedProfiles({ saved: { barStyle: "capsule",
+            capsuleElements: ["battery", "clock", "media", "workspaces"] } }).saved;
 
         compare(profile.capsulePlaces.battery, "shown");
         compare(profile.capsulePlaces.clock, "shown");
@@ -216,6 +224,23 @@ TestCase {
         compare(profile.capsulePlaces.recording, "liveRight");
         compare(profile.capsulePlaces.keepAwake, "hidden");
         compare(profile.capsulePlaces.workspaces, undefined);
+        compare(profile.capsuleElements, undefined);
+    }
+
+    // A profile that saved no list gets the default places when it loads,
+    // which are what its collapsed capsule showed without one.
+    function test_aProfileSavedWithoutAListGetsTheDefaultPlaces() {
+        const profile = migratedProfiles({ saved: { barStyle: "capsule" } }).saved;
+
+        compare(profile.capsulePlaces, undefined);
+        compare(BarProfileModel.completeProfile(profile).capsulePlaces, BarProfileModel.defaultCapsulePlaces);
+    }
+
+    // Once migrated, completing a profile never reads a list again.
+    function test_aListLeftInAProfileIsIgnored() {
+        const profile = BarProfileModel.completeProfile({ barStyle: "capsule", capsuleElements: ["battery"] });
+
+        compare(profile.capsulePlaces, BarProfileModel.defaultCapsulePlaces);
         compare(profile.capsuleElements, undefined);
     }
 

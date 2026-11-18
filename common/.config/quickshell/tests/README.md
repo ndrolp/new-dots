@@ -4,7 +4,9 @@ Tests for the pure JS models behind the settings: bar profiles, with a name
 to ask a profile for each bar style (`config/BarProfileModel.js`), desktop widgets (`config/DesktopWidgetsModel.js`)
 and schema migrations (`config/SchemaMigrations.js`), among them the one that
 turns the two bar style switches into one bar style and keeps each saved
-profile's look (`tst_barStyleMigration.qml`). They also cover where
+profile's look (`tst_barStyleMigration.qml`), and the one that turns a capsule
+profile's list of shown bar elements into collapsed places
+(`tst_barProfileModel.qml`). They also cover where
 the bar sits on its screen: the edges its window is anchored to, the space it
 reserves (on a capsule, with the live elements it shows collapsed), where the margin goes and where its content sits, against its edge
 however tall a capsule's window grows, for every bar style on each Bar position
