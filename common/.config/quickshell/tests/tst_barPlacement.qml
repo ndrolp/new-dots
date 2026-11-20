@@ -191,6 +191,27 @@ TestCase {
         ];
     }
 
+    // A capsule's vertical padding is room inside it on both sides of its
+    // contents: it reserves twice that more, and its contents sit that much
+    // further from its screen edge, as deep as before. Other bar styles have
+    // no such room.
+    function test_aCapsulesVerticalPaddingIsRoomOnBothSidesOfItsContents_data() {
+        return [
+            { tag: "capsule", values: { barStyle: "capsule", capsuleVerticalPadding: 5 }, thickness: 54,
+                window: { width: 1920, height: 54 }, area: { x: 12, y: 11, width: 1896, height: 30 } },
+            { tag: "capsule at the bottom", values: { barStyle: "capsule", barPosition: "bottom",
+                capsuleVerticalPadding: 5 }, thickness: 54,
+                window: { width: 1920, height: 54 }, area: { x: 12, y: 13, width: 1896, height: 30 } },
+            { tag: "opaque", values: { capsuleVerticalPadding: 5 }, thickness: 30,
+                window: { width: 1920, height: 30 }, area: { x: 12, y: 0, width: 1896, height: 30 } }
+        ];
+    }
+
+    function test_aCapsulesVerticalPaddingIsRoomOnBothSidesOfItsContents(data) {
+        compare(BarPlacement.thickness(bar(data.values)), data.thickness);
+        compare(BarPlacement.contentArea(bar(data.values), data.window), data.area);
+    }
+
     function test_aCapsulesWorkspacePillsReachPastItsRow_data() {
         return [
             { tag: "capsule", values: { barStyle: "capsule" }, strip: 8 },

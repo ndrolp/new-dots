@@ -77,6 +77,21 @@ TestCase {
         compare(CapsulePlacement.surface(content, { start: 420, end: 580 }, 12, 8), data.place);
     }
 
+    // Its vertical padding reaches past its contents on both sides: towards
+    // its screen edge and past its workspace pills.
+    function test_theCapsulesVerticalPaddingSurroundsItsContents_data() {
+        return [
+            { tag: "top", barPosition: "top", place: { x: 408, y: -5, width: 184, height: 48, radius: 24 } },
+            { tag: "bottom", barPosition: "bottom", place: { x: 408, y: -13, width: 184, height: 48, radius: 24 } }
+        ];
+    }
+
+    function test_theCapsulesVerticalPaddingSurroundsItsContents(data) {
+        const content = { barPosition: data.barPosition, width: 1000, height: 30 };
+
+        compare(CapsulePlacement.surface(content, { start: 420, end: 580 }, 12, 8, 5), data.place);
+    }
+
     // A capsule's pill row: media 100 px long and recording 60 px, both 24 px
     // deep, beside 40 px of pills, 8 px apart, on a capsule centred at 500.
     function pillRowGiven(media, recording) {

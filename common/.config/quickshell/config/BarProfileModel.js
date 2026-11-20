@@ -297,6 +297,9 @@ const defaultProfile = {
     elementVerticalPadding: 5,
     pillsTransparent: false,
     transparentBarTopMargin: 0,
+    // The room inside a capsule across the bar, on both sides of its
+    // contents (BarPlacement.capsulePadding).
+    capsuleVerticalPadding: 0,
     groupRadius: 8,
     // The room inside a group's background: between its edges and its first
     // and last element along the bar, and from the bar's edges across it.
