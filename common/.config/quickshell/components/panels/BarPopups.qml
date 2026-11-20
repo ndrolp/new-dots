@@ -16,8 +16,10 @@ Item {
     // The control center module (modules/ControlCenter.qml): its services,
     // stage and the panels its tiles open, handed to its popup as one.
     required property var controlCenter
-    // The wallpapers, for the wallpaper picker (WallpaperPopup.qml).
-    required property var wallpapers
+    // The features that open inside a capsule instead of full-screen
+    // (modules/CapsuleFeature.qml), handed to their popups: { wallpapers,
+    // launcher, clipboard, unifiedSearch }.
+    required property var capsuleFeatures
     property string activePopup: ""
     // Which of the app menu's menus its Popup shows (AppMenuPopup.menuId).
     property string appMenuId: ""
@@ -94,6 +96,21 @@ Item {
 
     WallpaperPopup {
         popups: root
-        wallpapers: root.wallpapers
+        feature: root.capsuleFeatures.wallpapers
+    }
+
+    ApplicationLauncherPopup {
+        popups: root
+        feature: root.capsuleFeatures.launcher
+    }
+
+    ClipboardSelectorPopup {
+        popups: root
+        feature: root.capsuleFeatures.clipboard
+    }
+
+    UnifiedSearchPopup {
+        popups: root
+        feature: root.capsuleFeatures.unifiedSearch
     }
 }

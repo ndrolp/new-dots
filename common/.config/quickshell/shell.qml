@@ -216,7 +216,10 @@ ShellRoot {
     }
 
     Modules.ApplicationLauncher {
+        id: applicationLauncher
+
         appearance: appearance
+        bar: bar
         launcherHistory: launcherHistory
         plugins: plugins
     }
@@ -231,6 +234,7 @@ ShellRoot {
         id: clipboardSelector
 
         appearance: appearance
+        bar: bar
         clipboardHistory: clipboardHistory
         plugins: plugins
     }
@@ -245,6 +249,7 @@ ShellRoot {
         id: unifiedSearch
 
         appearance: appearance
+        bar: bar
         bookmarks: bookmarks
         clipboardHistory: clipboardHistory
         monitors: monitors
@@ -392,6 +397,11 @@ ShellRoot {
         monitorSetups: monitorSetups
         settings: settings
         osd: osd
-        wallpapers: wallpapers
+        capsuleFeatures: ({
+            wallpapers: wallpaperSelector,
+            launcher: applicationLauncher,
+            clipboard: clipboardSelector,
+            unifiedSearch: unifiedSearch
+        })
     }
 }

@@ -2,7 +2,9 @@ import Quickshell.Io
 import QtQuick
 import "../components/panels" as Panels
 
-Feature {
+// Unified search: full-screen, or inside the capsule on a monitor whose bar
+// is one (components/panels/UnifiedSearchPopup.qml).
+CapsuleFeature {
     id: root
 
     required property var appearance
@@ -22,6 +24,7 @@ Feature {
     property string query: ""
 
     available: plugins.unifiedSearchEnabled
+    popupName: "unifiedSearch"
 
     Panels.UnifiedSearch {
         appearance: root.appearance
@@ -54,9 +57,12 @@ Feature {
             if (!root.available)
                 return;
 
-            const close = root.open && root.query === ":";
+            const close = root.shown && root.query === ":";
             root.query = ":";
-            root.open = !close;
+            if (close)
+                root.hide();
+            else
+                root.show();
         }
     }
 }

@@ -13,7 +13,9 @@ import "." as Panels
 BarPopup {
     id: root
 
-    required property var wallpapers
+    // The wallpaper picker module (modules/WallpaperSelector.qml).
+    required property var feature
+    readonly property var wallpapers: feature.wallpapers
 
     readonly property var monitor: barWindow.screen ? Hyprland.monitorFor(barWindow.screen) : null
     readonly property string monitorDescription: monitor ? monitor.description : ""
