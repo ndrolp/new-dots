@@ -29,7 +29,7 @@ curl -fsSL https://raw.githubusercontent.com/ndrolp/new-dots/main/bootstrap.sh |
 | `--minimal` | Skip the apps package group |
 | `--stow-only` | Only link the config files, install nothing |
 | `--no-system` | Skip enabling services and changing the login shell |
-| `--spicetify` | Also install spicetify |
+| `--spicetify` | Also install spicetify and theme Spotify with the active colorscheme (open Spotify once first) |
 | `--help` | Show this help |
 
 The clone's `origin` is switched to SSH, so add an SSH key to GitHub before you push.
