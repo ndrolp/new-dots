@@ -89,12 +89,16 @@ Item {
     Rectangle {
         id: face
 
+        objectName: "cardFace"
         width: root.width
         height: content.implicitHeight + 24
         radius: root.appearance.radius
         opacity: swipe.swipeOpacity
         color: cardHover.hovered ? theme.surfaceHover
-            : root.highlighted ? Qt.rgba(theme.accent.r, theme.accent.g, theme.accent.b, 0.12)
+            // The accent tints the card's own colour, so it stays opaque: in
+            // an app stack nothing behind it shows through.
+            : root.highlighted ? Qt.tint(theme.backgroundSecondary,
+                Qt.rgba(theme.accent.r, theme.accent.g, theme.accent.b, 0.12))
             : theme.backgroundSecondary
         border.width: 1
         border.color: root.highlighted
