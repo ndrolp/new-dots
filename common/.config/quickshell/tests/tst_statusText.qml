@@ -64,16 +64,32 @@ TestCase {
         return { state: states[state], percentage: percentage };
     }
 
-    function test_batteryIconFallsWithTheCharge() {
-        compare(StatusText.batteryIcon(battery("Discharging", 0.9), states), "󰁹");
-        compare(StatusText.batteryIcon(battery("Discharging", 0.7), states), "󰁾");
-        compare(StatusText.batteryIcon(battery("Discharging", 0.4), states), "󰁻");
-        compare(StatusText.batteryIcon(battery("Discharging", 0.15), states), "󰂃");
+    // A glyph by its codepoint, so the tests name them unambiguously.
+    function glyph(codepoint) {
+        return String.fromCodePoint(codepoint);
     }
 
-    function test_batteryIconShowsChargingWhateverTheCharge() {
-        compare(StatusText.batteryIcon(battery("Charging", 0.1), states), "󰂄");
-        compare(StatusText.batteryIcon(battery("PendingCharge", 0.9), states), "󰂄");
+    // The icon shows the charge in steps of 10%, to the nearest step; at 10%
+    // or less it warns.
+    function test_batteryIconFollowsTheChargeInTenSteps() {
+        compare(StatusText.batteryIcon(battery("Discharging", 1), states), glyph(0xF0079));
+        compare(StatusText.batteryIcon(battery("Discharging", 0.96), states), glyph(0xF0079));
+        compare(StatusText.batteryIcon(battery("Discharging", 0.9), states), glyph(0xF0082));
+        compare(StatusText.batteryIcon(battery("Discharging", 0.72), states), glyph(0xF0080));
+        compare(StatusText.batteryIcon(battery("Discharging", 0.5), states), glyph(0xF007E));
+        compare(StatusText.batteryIcon(battery("Discharging", 0.2), states), glyph(0xF007B));
+        compare(StatusText.batteryIcon(battery("Discharging", 0.1), states), glyph(0xF0083));
+        compare(StatusText.batteryIcon(battery("Discharging", 0.03), states), glyph(0xF0083));
+    }
+
+    // Charging, it still shows how full it is, with the charging bolt.
+    function test_batteryIconShowsTheChargeWhileCharging() {
+        compare(StatusText.batteryIcon(battery("Charging", 0.05), states), glyph(0xF089C));
+        compare(StatusText.batteryIcon(battery("Charging", 0.1), states), glyph(0xF089C));
+        compare(StatusText.batteryIcon(battery("Charging", 0.5), states), glyph(0xF089D));
+        compare(StatusText.batteryIcon(battery("Charging", 0.72), states), glyph(0xF089E));
+        compare(StatusText.batteryIcon(battery("PendingCharge", 0.9), states), glyph(0xF008B));
+        compare(StatusText.batteryIcon(battery("Charging", 1), states), glyph(0xF0085));
     }
 
     function test_noBatteryHasItsOwnIconAndLabel() {

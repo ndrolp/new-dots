@@ -687,7 +687,8 @@ Item {
             appearance: root.appearance
             icon: StatusText.batteryIcon(root.battery, UPowerDeviceState)
             iconColor: theme.yellow
-            iconSize: root.appearance.iconSize
+            // The battery glyphs are narrow: a little bigger, they read at a glance.
+            iconSize: root.appearance.iconSize + 4
             valueSize: root.appearance.textSize
             value: Math.round(root.battery.percentage * 100) + "%"
             iconVisible: root.shown("battery").icon
