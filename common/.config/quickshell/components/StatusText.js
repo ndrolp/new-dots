@@ -55,20 +55,26 @@ function connectedNetworkName(networks) {
     return "";
 }
 
+// The battery glyphs by charge, 10% to 100% in steps of 10%: discharging,
+// and charging (with the bolt). Codepoints, as the glyphs look alike.
+const batteryLevelGlyphs = [0xF007A, 0xF007B, 0xF007C, 0xF007D, 0xF007E, 0xF007F, 0xF0080, 0xF0081, 0xF0082, 0xF0079].map(codepoint => String.fromCodePoint(codepoint));
+const batteryChargingGlyphs = [0xF089C, 0xF0086, 0xF0087, 0xF0088, 0xF089D, 0xF0089, 0xF089E, 0xF008A, 0xF008B, 0xF0085].map(codepoint => String.fromCodePoint(codepoint));
+const batteryLowGlyph = String.fromCodePoint(0xF0083);
+
 // The battery is UPower's display device, or null without one. `states` is
-// UPower's UPowerDeviceState, which plain JS can't see on its own.
+// UPower's UPowerDeviceState, which plain JS can't see on its own. The icon
+// shows the charge to the nearest 10%, charging or not; discharging at 10%
+// or less it warns.
 function batteryIcon(battery, states) {
     if (!battery)
         return "󰂑";
+
+    const step = Math.max(1, Math.min(10, Math.round(battery.percentage * 10)));
     if (battery.state === states.Charging || battery.state === states.PendingCharge)
-        return "󰂄";
-    if (battery.percentage <= 0.15)
-        return "󰂃";
-    if (battery.percentage <= 0.4)
-        return "󰁻";
-    if (battery.percentage <= 0.7)
-        return "󰁾";
-    return "󰁹";
+        return batteryChargingGlyphs[step - 1];
+    if (battery.percentage <= 0.1)
+        return batteryLowGlyph;
+    return batteryLevelGlyphs[step - 1];
 }
 
 function batteryStateLabel(battery, states) {

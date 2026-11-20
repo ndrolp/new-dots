@@ -10,20 +10,22 @@
 // Where the capsule is drawn in the bar content, { x, y, width, height,
 // radius }: around its row's { start, end } along the bar, with `padding` at
 // both ends, as deep as the content and `strip` past it, away from the screen
-// edge, for its workspace pills (BarPlacement.workspaceStrip), and with fully
-// round ends. Takes the bar content as BarLayout measures it,
+// edge, for its workspace pills (BarPlacement.workspaceStrip), `across` more
+// on both sides for its vertical padding (BarPlacement.capsulePadding), and
+// with fully round ends. Takes the bar content as BarLayout measures it,
 // { barPosition, width, height }. With nothing in the row there is no
 // capsule: it has no size.
-function surface(content, span, padding, strip) {
+function surface(content, span, padding, strip, across) {
     if (span.end <= span.start)
         return { x: span.start, y: 0, width: 0, height: 0, radius: 0 };
 
     const sideBar = BarPosition.sideBar(content.barPosition);
     const depth = sideBar ? content.width : content.height;
-    const reach = depth + (strip || 0);
+    const room = across || 0;
+    const reach = depth + (strip || 0) + room * 2;
     const rect = BarPosition.area(content.barPosition, {
         along: span.start - padding,
-        away: 0,
+        away: -room,
         length: span.end - span.start + padding * 2,
         depth: reach
     }, depth);

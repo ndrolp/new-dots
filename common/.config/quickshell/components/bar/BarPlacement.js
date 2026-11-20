@@ -22,10 +22,17 @@ function workspaceStrip(bar) {
     return BarProfileModel.capsule(bar) ? workspacePillDepth + bar.spacing : 0;
 }
 
+// The room a capsule keeps inside it across the bar, on both sides of its
+// contents: between its screen-side edge and its row, and past its workspace
+// pills. Nothing on any other bar style.
+function capsulePadding(bar) {
+    return BarProfileModel.capsule(bar) ? (bar.capsuleVerticalPadding || 0) : 0;
+}
+
 // The space the bar takes from its screen edge inwards: on a capsule, its
-// workspace pills included.
+// workspace pills and its vertical padding included.
 function thickness(bar) {
-    return bar.barHeight + margin(bar) + workspaceStrip(bar);
+    return bar.barHeight + margin(bar) + workspaceStrip(bar) + capsulePadding(bar) * 2;
 }
 
 // The space the bar reserves from its screen edge, so windows stay clear of
@@ -49,12 +56,13 @@ function windowAnchors(barPosition) {
 }
 
 // The room around the bar content in the bar's window: the margin on the
-// screen's edge, nothing away from it and the padding at the bar's two ends,
-// which a docked bar's zones reach. Returns { top, right, bottom, left }.
+// screen's edge (on a capsule with its vertical padding), nothing away from
+// it and the padding at the bar's two ends, which a docked bar's zones reach.
+// Returns { top, right, bottom, left }.
 function contentMargins(bar) {
     const padding = BarProfileModel.docked(bar) ? 0 : bar.horizontalPadding;
 
-    return BarPosition.sides(bar.barPosition, margin(bar), 0, padding);
+    return BarPosition.sides(bar.barPosition, margin(bar) + capsulePadding(bar), 0, padding);
 }
 
 // Where the bar content sits in the bar window, { x, y, width, height }:
@@ -64,8 +72,9 @@ function contentMargins(bar) {
 // content where it was. Takes the bar window's { width, height }.
 function contentArea(bar, window) {
     const margins = contentMargins(bar);
-    // A capsule's workspace pills are past its row, outside the bar content.
-    const depth = thickness(bar) - workspaceStrip(bar);
+    // A capsule's workspace pills, and its padding past them, are past its
+    // row, outside the bar content.
+    const depth = thickness(bar) - workspaceStrip(bar) - capsulePadding(bar);
 
     if (BarPosition.sideBar(bar.barPosition)) {
         const width = depth - margins.left - margins.right;

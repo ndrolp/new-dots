@@ -404,16 +404,18 @@ function explicitMonitorEntries(appearance, monitors) {
 }
 
 // Former flat profile settings that are options of one bar element:
-// key -> [element id, option].
+// key -> [element id, option...], named as the options are now: media's title
+// and the battery's percentage became Show text, on the bar and at rest
+// (see step 18).
 const legacyElementOptionKeys = {
     "workspaceGlyphsEnabled": ["workspaces", "glyphsEnabled"],
     "workspaceGlyphs": ["workspaces", "glyphs"],
     "hideEmptyWorkspaces": ["workspaces", "hideEmpty"],
     "workspaceAppCountVisible": ["workspaces", "appCountVisible"],
     "notificationBadgeVisible": ["notifications", "badgeVisible"],
-    "mediaTitleVisible": ["media", "titleVisible"],
+    "mediaTitleVisible": ["media", "textVisible", "restTextVisible"],
     "audioMeterVisible": ["audio", "meterVisible"],
-    "batteryPercentageVisible": ["battery", "percentageVisible"]
+    "batteryPercentageVisible": ["battery", "textVisible", "restTextVisible"]
 };
 
 // Step 8: each bar element keeps its own options in `barElements` instead of
@@ -429,8 +431,9 @@ function moveOptionsOntoElements(appearance, monitors) {
             if (profile[key] === undefined)
                 continue;
             const target = legacyElementOptionKeys[key];
-            barElements = BarProfileModel.setElementOption(barElements, target[0], target[1],
-                profile[key]);
+            for (const option of target.slice(1))
+                barElements = BarProfileModel.setElementOption(barElements, target[0], option,
+                    profile[key]);
             delete profile[key];
         }
 
@@ -588,12 +591,37 @@ function capsulePlacesFromShownElements(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
+// Step 18: media's "title visible" and battery's "percentage visible" become
+// their Show text option, both on the bar and in a capsule at rest, so they
+// look as they did; the old options are dropped.
+const legacyTextOptions = { media: "titleVisible", battery: "percentageVisible" };
+
+function textVisibleFromLegacyOptions(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+    for (const profileName in migrated.barProfiles || {}) {
+        const barElements = migrated.barProfiles[profileName].barElements || {};
+        for (const zoneName of zoneNames) {
+            for (const entry of barElements[zoneName] || []) {
+                const legacy = legacyTextOptions[entry.id];
+                if (!legacy || !entry.options || entry.options[legacy] === undefined)
+                    continue;
+                entry.options.textVisible = entry.options[legacy];
+                entry.options.restTextVisible = entry.options[legacy];
+                delete entry.options[legacy];
+            }
+        }
+    }
+
+    return { appearance: migrated, monitors: monitors };
+}
+
 const migrationSteps = [
     migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
     migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles, explicitMonitorEntries,
     moveOptionsOntoElements, renameElementVerticalPadding, seedControlCenterTiles,
     seedWorkspaceRadius, splitBarBorder, seedWorkspaceVerticalPadding,
-    seedIconSize, seedGroupPadding, singleBarStyle, capsulePlacesFromShownElements
+    seedIconSize, seedGroupPadding, singleBarStyle, capsulePlacesFromShownElements,
+    textVisibleFromLegacyOptions
 ];
 const schemaVersion = migrationSteps.length;
 

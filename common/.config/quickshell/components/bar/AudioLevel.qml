@@ -12,6 +12,9 @@ ElementStack {
     property real volume: 0
     property bool muted: true
     property bool meterVisible: true
+    // The bar element's Show icon and Show text (the meter or the percentage).
+    property bool iconVisible: true
+    property bool textVisible: true
 
     spacing: sideBar ? 3 : 7
 
@@ -38,6 +41,7 @@ ElementStack {
     ShellText {
         id: icon
 
+        visible: root.iconVisible
         width: Math.ceil(Math.max(mutedIcon.advanceWidth, unmutedIcon.advanceWidth))
         horizontalAlignment: Text.AlignHCenter
         text: root.muted ? mutedIcon.text : unmutedIcon.text
@@ -49,7 +53,7 @@ ElementStack {
     // As high as the icon beside it, so the meter stays centred on the pixel
     // an anchor puts it on. Across a side bar it fits the bar element.
     Item {
-        visible: root.meterVisible
+        visible: root.textVisible && root.meterVisible
         width: root.sideBar ? Math.min(34, BarLayout.elementThickness(root.appearance) - 6) : 34
         height: root.sideBar ? 4 : icon.height
 
@@ -72,7 +76,7 @@ ElementStack {
     // As high as the icon beside it, so the percentage stays centred on it
     // when the icon is bigger than the text.
     Item {
-        visible: !root.meterVisible
+        visible: root.textVisible && !root.meterVisible
         width: percentage.width
         height: root.sideBar ? percentage.height : icon.height
 

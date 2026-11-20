@@ -35,6 +35,10 @@ Row {
     readonly property string terminalGlyph: terminal ? terminalIconGlyph(windowTitle) : ""
     readonly property real activeTitleMaximumWidth: monitorScreen
         ? Math.max(120, Math.min(320, BarLayout.screenLength(appearance, monitorScreen) * 0.14)) : 320
+    // Whether it shows the app's icon and the window's title
+    // (BarProfileModel.iconTextShown).
+    readonly property var shown: BarProfileModel.iconTextShown(appearance.barElements, "currentApp",
+        BarProfileModel.resting(appearance))
     readonly property real thickness: BarLayout.elementThickness(appearance)
     readonly property real length: appContent.implicitWidth + 16
     readonly property var size: BarLayout.size(appearance, visible ? length : 0, thickness)
@@ -139,7 +143,7 @@ Row {
 
                 anchors.verticalCenter: parent.verticalCenter
                 rotation: -parent.rotation
-                visible: root.activeToplevel !== null
+                visible: root.activeToplevel !== null && root.shown.icon
                 width: visible ? root.appearance.workspaceButtonSize - 8 : 0
                 height: width
 
@@ -190,6 +194,7 @@ Row {
 
                 property string displayedLabel: root.label
 
+                visible: root.shown.text
                 // Centers the capital letters, not the line box (which also
                 // holds descender space).
                 anchors.verticalCenter: parent.verticalCenter

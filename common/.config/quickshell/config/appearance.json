@@ -10,7 +10,8 @@
                         "enabled": true,
                         "id": "media",
                         "options": {
-                            "titleVisible": true
+                            "restTextVisible": true,
+                            "textVisible": true
                         }
                     },
                     {
@@ -98,7 +99,8 @@
                         "id": "battery",
                         "joinPrevious": true,
                         "options": {
-                            "percentageVisible": true
+                            "restTextVisible": true,
+                            "textVisible": true
                         }
                     },
                     {
@@ -226,7 +228,8 @@
                         "enabled": true,
                         "id": "media",
                         "options": {
-                            "titleVisible": true
+                            "restTextVisible": true,
+                            "textVisible": true
                         }
                     },
                     {
@@ -248,7 +251,8 @@
                         "enabled": true,
                         "id": "battery",
                         "options": {
-                            "percentageVisible": true
+                            "restTextVisible": true,
+                            "textVisible": true
                         }
                     },
                     {
@@ -305,7 +309,13 @@
                 "center": [
                     {
                         "enabled": false,
-                        "id": "currentApp"
+                        "id": "currentApp",
+                        "options": {
+                            "iconVisible": true,
+                            "restIconVisible": true,
+                            "restTextVisible": true,
+                            "textVisible": true
+                        }
                     },
                     {
                         "enabled": false,
@@ -319,13 +329,22 @@
                     },
                     {
                         "enabled": false,
-                        "id": "systemMonitor"
+                        "id": "systemMonitor",
+                        "options": {
+                            "iconVisible": true,
+                            "restIconVisible": true,
+                            "restTextVisible": true,
+                            "textVisible": true
+                        }
                     },
                     {
                         "enabled": true,
                         "id": "media",
                         "options": {
-                            "titleVisible": true
+                            "iconVisible": true,
+                            "restIconVisible": true,
+                            "restTextVisible": true,
+                            "textVisible": true
                         }
                     },
                     {
@@ -376,7 +395,11 @@
                         "enabled": true,
                         "id": "audio",
                         "options": {
-                            "meterVisible": false
+                            "iconVisible": true,
+                            "meterVisible": false,
+                            "restIconVisible": true,
+                            "restTextVisible": true,
+                            "textVisible": true
                         }
                     },
                     {
@@ -385,13 +408,22 @@
                     },
                     {
                         "enabled": true,
-                        "id": "clock"
+                        "id": "clock",
+                        "options": {
+                            "iconVisible": true,
+                            "restIconVisible": false,
+                            "restTextVisible": true,
+                            "textVisible": true
+                        }
                     },
                     {
                         "enabled": true,
                         "id": "battery",
                         "options": {
-                            "percentageVisible": true
+                            "iconVisible": true,
+                            "restIconVisible": true,
+                            "restTextVisible": false,
+                            "textVisible": true
                         }
                     },
                     {
@@ -403,7 +435,13 @@
                     },
                     {
                         "enabled": true,
-                        "id": "recording"
+                        "id": "recording",
+                        "options": {
+                            "iconVisible": true,
+                            "restIconVisible": true,
+                            "restTextVisible": true,
+                            "textVisible": true
+                        }
                     },
                     {
                         "enabled": true,
@@ -425,7 +463,7 @@
             "barStyle": "capsule",
             "capsulePlaces": {
                 "appMenu": "hidden",
-                "arch": "shown",
+                "arch": "hidden",
                 "audio": "hidden",
                 "battery": "shown",
                 "bluetooth": "hidden",
@@ -434,7 +472,7 @@
                 "currentApp": "hidden",
                 "keepAwake": "hidden",
                 "media": "hidden",
-                "network": "hidden",
+                "network": "shown",
                 "notifications": "hidden",
                 "recording": "liveRight",
                 "systemMonitor": "hidden",
@@ -527,7 +565,8 @@
                         "enabled": true,
                         "id": "media",
                         "options": {
-                            "titleVisible": true
+                            "restTextVisible": true,
+                            "textVisible": true
                         }
                     },
                     {
@@ -553,7 +592,8 @@
                         "id": "battery",
                         "joinPrevious": true,
                         "options": {
-                            "percentageVisible": true
+                            "restTextVisible": true,
+                            "textVisible": true
                         }
                     },
                     {
@@ -680,5 +720,5 @@
         "mode": "color",
         "resolution": 300
     },
-    "schemaVersion": 17
+    "schemaVersion": 18
 }

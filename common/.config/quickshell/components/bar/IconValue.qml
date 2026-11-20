@@ -7,6 +7,7 @@ ElementStack {
 
     property string icon: ""
     property string value: ""
+    property bool iconVisible: true
     property bool valueVisible: true
     property color iconColor: "white"
     property color valueColor: iconColor
@@ -19,6 +20,7 @@ ElementStack {
     ShellText {
         id: iconText
 
+        visible: root.iconVisible
         text: root.icon
         color: root.iconColor
         font.pixelSize: root.iconSize

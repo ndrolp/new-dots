@@ -570,6 +570,23 @@ TestCase {
         compare(built.appearance.calls, [["option", "audio", "meterVisible", false]]);
     }
 
+    // An element with an icon and text can show either; a capsule profile
+    // also sets what it shows at rest, collapsed.
+    function test_anElementWithIconAndTextOffersThemAndAtRestOnlyOnACapsule() {
+        const built = make();
+        mouseClick(textOf(elementRow(built.item, "Clock & pomodoro"), "Clock & pomodoro"));
+
+        verify(switchRow(built.item, "Show icon"));
+        verify(switchRow(built.item, "Show text"));
+        verify(!switchRow(built.item, "Show text at rest"));
+
+        built.appearance.barStyle = "capsule";
+        tryVerify(() => switchRow(built.item, "Show text at rest") !== null);
+        verify(switchRow(built.item, "Show icon at rest"));
+        switchRow(built.item, "Show text at rest").toggled();
+        compare(built.appearance.calls, [["option", "clock", "restTextVisible", true]]);
+    }
+
     function test_shortOptionsSitTwoPerLine() {
         const built = make();
 

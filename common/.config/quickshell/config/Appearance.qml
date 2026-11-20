@@ -72,6 +72,7 @@ QtObject {
     readonly property int groupRadius: editedBarProfile.groupRadius
     readonly property int groupHorizontalPadding: editedBarProfile.groupHorizontalPadding
     readonly property int groupVerticalPadding: editedBarProfile.groupVerticalPadding
+    readonly property int capsuleVerticalPadding: editedBarProfile.capsuleVerticalPadding
     readonly property var barElements: editedBarProfile.barElements
     readonly property var capsulePlaces: editedBarProfile.capsulePlaces
     readonly property bool barBorder: editedBarProfile.barBorder

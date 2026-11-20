@@ -204,8 +204,10 @@ TestCase {
     function test_migrationStoresElementOptionsOnTheirElements() {
         const minimal = fixtures.migrated().appearance.barProfiles.minimal;
 
-        compare(element(minimal.barElements, "audio").options, { meterVisible: false });
-        compare(element(minimal.barElements, "battery").options, { percentageVisible: true });
+        compare(element(minimal.barElements, "audio").options.meterVisible, false);
+        compare(element(minimal.barElements, "battery").options.textVisible, true);
+        compare(element(minimal.barElements, "battery").options.restTextVisible, true);
+        verify(!("percentageVisible" in element(minimal.barElements, "battery").options));
         compare(element(minimal.barElements, "workspaces").options.appCountVisible, false);
         compare(element(minimal.barElements, "workspaces").options.hideEmpty, false);
         compare(element(minimal.barElements, "workspaces").options.glyphs.length, 20);
@@ -227,7 +229,7 @@ TestCase {
             right: [{ id: "battery", enabled: true }]
         });
 
-        compare(BarProfileModel.elementOption(barElements, "battery", "percentageVisible"), true);
+        compare(BarProfileModel.elementOption(barElements, "battery", "textVisible"), true);
         compare(BarProfileModel.elementOption(barElements, "workspaces", "hideEmpty"), false);
     }
 
@@ -235,10 +237,10 @@ TestCase {
         const barElements = BarProfileModel.editedProfile(fixtures.startedBarState()).barElements;
 
         const updated = BarProfileModel.setElementOption(barElements, "battery",
-            "percentageVisible", false);
+            "textVisible", false);
 
-        compare(BarProfileModel.elementOption(updated, "battery", "percentageVisible"), false);
-        compare(BarProfileModel.elementOption(barElements, "battery", "percentageVisible"), true);
+        compare(BarProfileModel.elementOption(updated, "battery", "textVisible"), false);
+        compare(BarProfileModel.elementOption(barElements, "battery", "textVisible"), true);
         compare(element(updated, "audio"), element(barElements, "audio"));
     }
 

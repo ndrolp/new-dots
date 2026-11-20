@@ -99,7 +99,8 @@ Item {
     // row past it; null on any other bar style.
     readonly property var capsulePlace: pillRow
         ? CapsulePlacement.surface(layoutBar, CapsulePlacement.span(rowSpan, pillRow),
-            appearance.horizontalPadding, pillRow.depth + appearance.spacing)
+            appearance.horizontalPadding, pillRow.depth + appearance.spacing,
+            BarPlacement.capsulePadding(appearance))
         : null
     // Where a change the capsule shows starts along the bar: centred, as its
     // row would be.

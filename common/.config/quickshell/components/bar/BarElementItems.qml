@@ -66,6 +66,15 @@ Item {
     property string sharingShown: ""
     readonly property real itemHeight: BarLayout.elementThickness(appearance)
 
+    // Whether the bar is a capsule at rest, where the elements show their
+    // at-rest icon and text.
+    readonly property bool resting: BarProfileModel.resting(appearance)
+
+    // Whether element `id` shows its icon and its text, { icon, text }.
+    function shown(id) {
+        return BarProfileModel.iconTextShown(appearance.barElements, id, resting);
+    }
+
     Config.Theme {
         id: theme
     }
@@ -265,6 +274,8 @@ Item {
                 iconColor: theme.red
                 iconSize: recordingItem.sizes.iconSize
                 textSize: recordingItem.sizes.textSize
+                iconVisible: root.shown("recording").icon
+                textVisible: root.shown("recording").text
                 elapsed: RecordingIndicator.elapsedSince(root.recordings, root.recordingNow)
                 sharing: root.sharingShown
                 maximumLength: root.longTextMaximumLength
@@ -360,6 +371,7 @@ Item {
                 ShellText {
                     anchors.verticalCenter: parent.verticalCenter
                     rotation: -parent.rotation
+                    visible: root.shown("media").icon
                     text: "󰎈"
                     color: theme.green
                     font.pixelSize: mediaItem.sizes.iconSize
@@ -372,7 +384,7 @@ Item {
                     property string displayedLabel: root.displayedPlayerLabel
 
                     anchors.verticalCenter: parent.verticalCenter
-                    visible: BarProfileModel.elementOption(root.appearance.barElements, "media", "titleVisible")
+                    visible: root.shown("media").text
                     width: Math.min(root.longTextMaximumLength, implicitWidth)
                     text: displayedLabel
                     color: theme.green
@@ -512,6 +524,8 @@ Item {
             volume: root.volumeLevel
             muted: !root.audio || root.audio.muted
             meterVisible: BarProfileModel.elementOption(root.appearance.barElements, "audio", "meterVisible")
+            iconVisible: root.shown("audio").icon
+            textVisible: root.shown("audio").text
         }
 
         MouseArea {
@@ -673,10 +687,12 @@ Item {
             appearance: root.appearance
             icon: StatusText.batteryIcon(root.battery, UPowerDeviceState)
             iconColor: theme.yellow
-            iconSize: root.appearance.iconSize
+            // The battery glyphs are narrow: a little bigger, they read at a glance.
+            iconSize: root.appearance.iconSize + 4
             valueSize: root.appearance.textSize
             value: Math.round(root.battery.percentage * 100) + "%"
-            valueVisible: BarProfileModel.elementOption(root.appearance.barElements, "battery", "percentageVisible")
+            iconVisible: root.shown("battery").icon
+            valueVisible: root.shown("battery").text
         }
 
         MouseArea {
@@ -758,6 +774,8 @@ Item {
             Clock {
                 appearance: root.appearance
                 color: theme.orange
+                iconVisible: root.shown("clock").icon
+                valueVisible: root.shown("clock").text
             }
         }
 

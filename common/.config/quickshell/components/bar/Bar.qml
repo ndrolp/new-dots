@@ -69,6 +69,7 @@ Variants {
                 property int groupRadius: bar.appearance.barProfileValue(panel.profileName, "groupRadius")
                 property int groupHorizontalPadding: bar.appearance.barProfileValue(panel.profileName, "groupHorizontalPadding")
                 property int groupVerticalPadding: bar.appearance.barProfileValue(panel.profileName, "groupVerticalPadding")
+                property int capsuleVerticalPadding: bar.appearance.barProfileValue(panel.profileName, "capsuleVerticalPadding")
                 property bool barBorder: bar.appearance.barProfileValue(panel.profileName, "barBorder")
                 property bool elementBorder: bar.appearance.barProfileValue(panel.profileName, "elementBorder")
                 property bool groupBorder: bar.appearance.barProfileValue(panel.profileName, "groupBorder")

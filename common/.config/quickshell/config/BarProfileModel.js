@@ -31,6 +31,16 @@ const defaultElementZones = {
 // profile does not list them yet.
 const disabledElementIds = ["cava", "appMenu"];
 
+// The elements with both an icon and text (a value, a title, a time), which
+// can show either or both: on the bar, and separately in a capsule at rest
+// (collapsed), where room is short. An element never shows neither: with both
+// off it keeps its icon (iconTextShown).
+const iconTextElementIds = ["systemMonitor", "currentApp", "recording", "media", "audio",
+    "battery", "clock"];
+const iconTextOptionDefaults = Object.freeze({
+    iconVisible: true, textVisible: true, restIconVisible: true, restTextVisible: true
+});
+
 // The options of the elements that have any, with their defaults.
 const elementOptionDefaults = {
     "workspaces": {
@@ -46,12 +56,26 @@ const elementOptionDefaults = {
         verticalPadding: 5
     },
     "notifications": { badgeVisible: true },
-    "media": { titleVisible: true },
     // `color` names one of the theme's colors, so it follows the theme.
     "cava": { barCount: 12, barWidth: 3, color: "blue" },
-    "audio": { meterVisible: true },
-    "battery": { percentageVisible: true }
+    "audio": { meterVisible: true }
 };
+for (const id of iconTextElementIds)
+    elementOptionDefaults[id] = Object.assign({}, elementOptionDefaults[id] || {}, iconTextOptionDefaults);
+
+// Whether element `id` shows its icon and its text, { icon, text }: by its
+// bar options, or its at-rest ones while `resting` (a collapsed capsule).
+// With both off it keeps its icon, so it never disappears. An element without
+// these options shows both.
+function iconTextShown(barElements, id, resting) {
+    if (iconTextElementIds.indexOf(id) === -1)
+        return { icon: true, text: true };
+
+    const options = elementOptions(barElements, id);
+    const icon = resting ? options.restIconVisible : options.iconVisible;
+    const text = resting ? options.restTextVisible : options.textVisible;
+    return { icon: icon || !text, text: text };
+}
 
 // The bar elements that can be live elements (see GLOSSARY.md): a capsule can
 // show them beside its workspace pills, collapsed only while they are active.
@@ -236,6 +260,13 @@ function docked(bar) {
     return bar.barStyle === "docked";
 }
 
+// Whether the bar is a capsule at rest (collapsed), where the elements show
+// their at-rest icon and text (iconTextShown). Takes { barStyle,
+// capsuleExpanded }.
+function resting(bar) {
+    return capsule(bar) && !bar.capsuleExpanded;
+}
+
 function capsule(bar) {
     return bar.barStyle === "capsule";
 }
@@ -266,6 +297,9 @@ const defaultProfile = {
     elementVerticalPadding: 5,
     pillsTransparent: false,
     transparentBarTopMargin: 0,
+    // The room inside a capsule across the bar, on both sides of its
+    // contents (BarPlacement.capsulePadding).
+    capsuleVerticalPadding: 0,
     groupRadius: 8,
     // The room inside a group's background: between its edges and its first
     // and last element along the bar, and from the bar's edges across it.
