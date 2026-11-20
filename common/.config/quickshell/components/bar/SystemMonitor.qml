@@ -13,6 +13,15 @@ Rectangle {
 
     signal clicked()
 
+    // Whether it shows its icons and its values (BarProfileModel.iconTextShown).
+    readonly property var shown: BarProfileModel.iconTextShown(appearance.barElements, "systemMonitor",
+        BarProfileModel.resting(appearance))
+
+    // One reading as it shows: its icon, its value, or both.
+    function reading(icon, value) {
+        return [shown.icon ? icon : "", shown.text ? value : ""].filter(part => part !== "").join(" ");
+    }
+
     readonly property var size: BarLayout.size(appearance,
         BarLayout.itemLength(appearance, { width: metrics.implicitWidth, height: metrics.implicitHeight }) + 16,
         BarLayout.elementThickness(appearance))
@@ -44,7 +53,7 @@ Rectangle {
 
         ElementText {
             appearance: root.appearance
-            value: "󰍛 " + Math.round(root.systemMonitor.cpuUsage) + "%"
+            value: root.reading("󰍛", Math.round(root.systemMonitor.cpuUsage) + "%")
             color: theme.blue
             font.pixelSize: root.appearance.textSize - 1
             font.bold: true
@@ -52,7 +61,7 @@ Rectangle {
 
         ElementText {
             appearance: root.appearance
-            value: "󰘚 " + Math.round(root.systemMonitor.memoryUsage) + "%"
+            value: root.reading("󰘚", Math.round(root.systemMonitor.memoryUsage) + "%")
             color: theme.yellow
             font.pixelSize: root.appearance.textSize - 1
             font.bold: true
@@ -60,7 +69,7 @@ Rectangle {
 
         ElementText {
             appearance: root.appearance
-            value: " " + (root.systemMonitor.temperature > 0
+            value: root.reading("", root.systemMonitor.temperature > 0
                 ? Math.round(root.systemMonitor.temperature) + "°" : "--")
             color: theme.orange
             font.pixelSize: root.appearance.textSize - 1

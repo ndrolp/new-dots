@@ -17,6 +17,9 @@ Item {
     property string elapsed: ""
     // Which apps share the screen; empty shows the time.
     property string sharing: ""
+    // The bar element's Show icon and Show text (the elapsed time or the apps).
+    property bool iconVisible: true
+    property bool textVisible: true
     // How long the apps' text may get running sideways.
     property real maximumLength: 260
     readonly property bool sideways: BarPosition.sideBar(appearance.barPosition) && sharing !== ""
@@ -32,6 +35,8 @@ Item {
         appearance: root.appearance
         gap: 5
         icon: "󰑋"
+        iconVisible: root.iconVisible
+        valueVisible: root.textVisible
         iconColor: root.iconColor
         iconSize: root.iconSize
         value: root.sharing !== "" ? root.sharing : root.elapsed
@@ -49,6 +54,7 @@ Item {
         ShellText {
             anchors.verticalCenter: parent.verticalCenter
             rotation: -parent.rotation
+            visible: root.iconVisible
             text: value.icon
             color: root.iconColor
             font.pixelSize: root.iconSize
@@ -57,6 +63,7 @@ Item {
 
         ShellText {
             anchors.verticalCenter: parent.verticalCenter
+            visible: root.textVisible
             width: Math.min(root.maximumLength, implicitWidth)
             text: root.sharing
             color: root.iconColor

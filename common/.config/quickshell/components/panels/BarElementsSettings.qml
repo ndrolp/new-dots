@@ -55,15 +55,29 @@ Column {
             { label: "Vertical padding", option: "verticalPadding" }
         ],
         "notifications": [{ label: "Show unread badge", option: "badgeVisible" }],
-        "media": [{ label: "Show track title", option: "titleVisible" }],
         "cava": [
             { label: "Bars", option: "barCount" },
             { label: "Bar width", option: "barWidth" },
             { label: "Color", option: "color" }
         ],
-        "audio": [{ label: "Show volume meter", option: "meterVisible" }],
-        "battery": [{ label: "Show percentage", option: "percentageVisible" }]
+        "audio": [{ label: "Show volume meter", option: "meterVisible" }]
     })
+
+    // The elements with an icon and text show either or both; a capsule
+    // profile also sets what they show at rest, collapsed
+    // (BarProfileModel.iconTextShown).
+    function iconTextOptions(element) {
+        if (BarProfileModel.iconTextElementIds.indexOf(element) === -1)
+            return [];
+        const options = [
+            { label: "Show icon", option: "iconVisible" },
+            { label: "Show text", option: "textVisible" }
+        ];
+        if (BarProfileModel.capsule(appearance))
+            options.push({ label: "Show icon at rest", option: "restIconVisible" },
+                { label: "Show text at rest", option: "restTextVisible" });
+        return options;
+    }
 
     // How an option is edited ({ kind: "switch" }, { kind: "number", from, to }
     // or { kind: "choice", choices: [{ label, value }] }); the model's, which
@@ -75,7 +89,7 @@ Column {
     property var elementHints: ({})
 
     function optionsFor(element) {
-        return (elementOptions[element] || []).map(entry => Object.assign({ "element": element },
+        return iconTextOptions(element).concat(elementOptions[element] || []).map(entry => Object.assign({ "element": element },
             optionField(element, entry.option), entry));
     }
 

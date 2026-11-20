@@ -201,6 +201,49 @@ TestCase {
         compare(places.workspaces, undefined);
     }
 
+    // The elements with an icon and text show both by default, on the bar and
+    // in a capsule at rest; the at-rest options apply only while resting.
+    function test_anElementShowsItsIconAndTextByDefaultAndAtRestByItsOwnOptions() {
+        let barElements = BarProfileModel.normalizeBarElements({ right: [{ id: "battery", enabled: true }] });
+
+        compare(BarProfileModel.iconTextShown(barElements, "battery", false), { icon: true, text: true });
+        barElements = BarProfileModel.setElementOption(barElements, "battery", "restTextVisible", false);
+        compare(BarProfileModel.iconTextShown(barElements, "battery", false), { icon: true, text: true });
+        compare(BarProfileModel.iconTextShown(barElements, "battery", true), { icon: true, text: false });
+        barElements = BarProfileModel.setElementOption(barElements, "battery", "iconVisible", false);
+        compare(BarProfileModel.iconTextShown(barElements, "battery", false), { icon: false, text: true });
+    }
+
+    // Hiding both would leave an empty element: it keeps its icon.
+    function test_anElementWithIconAndTextOffKeepsItsIcon() {
+        let barElements = BarProfileModel.normalizeBarElements({ right: [{ id: "clock", enabled: true }] });
+        barElements = BarProfileModel.setElementOption(barElements, "clock", "iconVisible", false);
+        barElements = BarProfileModel.setElementOption(barElements, "clock", "textVisible", false);
+
+        compare(BarProfileModel.iconTextShown(barElements, "clock", false), { icon: true, text: false });
+    }
+
+    // Icon-only elements have no such options and always show their icon.
+    function test_anIconOnlyElementHasNoIconOrTextOptions() {
+        const barElements = BarProfileModel.normalizeBarElements({ right: [{ id: "network", enabled: true }] });
+
+        compare(BarProfileModel.elementOptions(barElements, "network"), {});
+        compare(BarProfileModel.iconTextShown(barElements, "network", true), { icon: true, text: true });
+    }
+
+    // Media's title and the battery's percentage switches become Show text,
+    // on the bar and at rest, so they look as they did.
+    function test_theOldTitleAndPercentageSwitchesBecomeShowText() {
+        const migrated = SchemaMigrations.migrate({ schemaVersion: 17, barProfiles: { saved: {
+            barElements: { left: [], center: [], right: [
+                { id: "media", enabled: true, options: { titleVisible: false } },
+                { id: "battery", enabled: true, options: { percentageVisible: true } }
+            ] } } } }, {}).appearance.barProfiles.saved.barElements.right;
+
+        compare(migrated[0].options, { textVisible: false, restTextVisible: false });
+        compare(migrated[1].options, { textVisible: true, restTextVisible: true });
+    }
+
     // Bar profiles of schema version 16, which listed the bar elements a
     // collapsed capsule shows, brought to the current schema.
     function migratedProfiles(profiles) {
