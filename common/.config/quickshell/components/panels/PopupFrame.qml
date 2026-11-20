@@ -38,6 +38,12 @@ PopupWindow {
         width: anchorProvider.capsulePlace.width,
         height: anchorProvider.capsulePlace.height
     } : null
+    // The popup's own width; each popup sets it. The window is as wide, except
+    // inside a capsule whose row is wider: there the popup stretches to the
+    // row, seamless, so the capsule round it leaves no room beside it.
+    property real popupWidth: 300
+    readonly property real fittedWidth: inside && capsule !== null
+        ? Math.max(popupWidth, capsule.width) : popupWidth
     // Room around a floating surface inside the window.
     readonly property real inset: 12
     // How far the curved corners joining an attached popup to the bar reach.
@@ -109,6 +115,7 @@ PopupWindow {
     anchor.rect.y: placed.y
     color: "transparent"
 
+    implicitWidth: fittedWidth
     implicitHeight: Math.max(restingHeight, heldHeight + surface.padding * 2 + room.top + room.bottom)
 
     PopupWarmUp {

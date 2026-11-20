@@ -10,7 +10,7 @@ BarPopup {
     id: root
 
     popup: "audio"
-    implicitWidth: 440
+    popupWidth: 440
 
     // Binds the outputs, so their descriptions and default are known.
     Config.Theme {

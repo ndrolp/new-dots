@@ -10,7 +10,7 @@ BarPopup {
     required property var pomodoro
 
     popup: "pomodoro"
-    implicitWidth: 320
+    popupWidth: 320
 
     Config.Theme {
         id: theme

@@ -37,7 +37,7 @@ BarPopup {
     }
 
     popup: "network"
-    implicitWidth: Math.min(420, Math.max(300,
+    popupWidth: Math.min(420, Math.max(300,
         root.barWindow.screen.width - root.appearance.horizontalPadding * 2))
 
     onRevealChanged: {

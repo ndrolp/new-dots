@@ -15,7 +15,7 @@ BarPopup {
     readonly property bool charging: !!battery && battery.state === UPowerDeviceState.Charging
 
     popup: "battery"
-    implicitWidth: 340
+    popupWidth: 340
 
     Config.Theme {
         id: theme

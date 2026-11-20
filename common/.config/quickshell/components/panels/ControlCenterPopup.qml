@@ -21,7 +21,7 @@ BarPopup {
     required property var controlCenter
 
     popup: Names.controlCenter.popup
-    implicitWidth: 424
+    popupWidth: 424
 
     // Switching stages while open grows or shrinks the control center to
     // its new height instead of jumping, showing what has unfolded so far.

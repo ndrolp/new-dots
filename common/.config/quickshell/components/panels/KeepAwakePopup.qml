@@ -7,7 +7,7 @@ BarPopup {
     required property var keepAwake
 
     popup: "keepAwake"
-    implicitWidth: 320
+    popupWidth: 320
 
     KeepAwakePopupBody {
         width: parent.width

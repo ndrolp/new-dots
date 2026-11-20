@@ -11,7 +11,7 @@ BarPopup {
 
     popup: "system"
     edge: "left"
-    implicitWidth: 360
+    popupWidth: 360
 
     Config.Theme {
         id: theme
