@@ -302,7 +302,9 @@ Variants {
 
                 readonly property var place: barContent.pillRow ? barContent.pillRow.pills : null
 
-                visible: place !== null && barContent.capsulePlace.width > 0
+                // The pill row can arrive a moment before the capsule's place.
+                visible: place !== null && barContent.capsulePlace !== null
+                    && barContent.capsulePlace.width > 0
                 x: place ? barContent.x + place.x : 0
                 y: place ? barContent.y + place.y : 0
                 workspaceIds: panel.workspaceService.workspacesForScreen(panel.screen,
