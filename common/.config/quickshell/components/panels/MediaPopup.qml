@@ -6,16 +6,63 @@ import "." as Panels
 import "../StatusText.js" as StatusText
 
 // The media popup: what plays now, how far along it is and the playback controls.
-// It follows the player that is playing, or the first one when none is.
+// It follows the player that is playing, or the first one when none is. When
+// the player can seek, clicking the progress bar, or dragging along it and
+// letting go, moves playback there. With more than one player, "N more
+// players" expands a list of the others; choosing one makes the popup follow
+// it until the popup closes.
 BarPopup {
     id: root
 
     property var player: null
     property real mediaPosition: 0
     property string mediaTrackKey: ""
+    // While the progress bar is dragged, the fraction under the pointer; -1
+    // otherwise. The bar and the time follow it, and playback moves on release.
+    property real dragFraction: -1
+    readonly property bool seekable: !!player && player.canSeek && player.length > 0
+    readonly property real shownPosition: dragFraction >= 0 && player
+        ? dragFraction * player.length : mediaPosition
+
+    // Moves playback to `target` seconds. A player that can't take a position
+    // may still seek by an offset (Mpris docs).
+    function seekTo(target) {
+        if (!seekable)
+            return;
+
+        const clamped = Math.max(0, Math.min(player.length, target));
+        if (player.positionSupported)
+            player.position = clamped;
+        else
+            player.seek(clamped - mediaPosition);
+        mediaPosition = clamped;
+    }
+
+    // The player chosen from the list, followed until the popup closes; null
+    // follows the one that is playing.
+    property var chosenPlayer: null
+    // Whether the list of the other players is expanded.
+    property bool showingPlayers: false
+    readonly property var otherPlayers: Mpris.players.values.filter(candidate => candidate !== player)
+
+    function choosePlayer(chosen) {
+        chosenPlayer = chosen;
+        showingPlayers = false;
+        updatePlayer();
+    }
+
+    onOpenChanged: {
+        if (open)
+            return;
+        chosenPlayer = null;
+        showingPlayers = false;
+        updatePlayer();
+    }
 
     function activePlayer() {
         const players = Mpris.players.values;
+        if (chosenPlayer && players.indexOf(chosenPlayer) !== -1)
+            return chosenPlayer;
 
         for (let index = 0; index < players.length; index++) {
             if (players[index].isPlaying)
@@ -56,135 +103,319 @@ BarPopup {
         onTriggered: root.updatePlayer()
     }
 
-    Row {
+    Column {
         width: parent.width
-        spacing: 12
+        spacing: 10
 
-        Rectangle {
-            id: mediaArt
+        Row {
+            width: parent.width
+            spacing: 12
 
-            width: 112
-            height: 112
-            radius: root.appearance.radius
-            color: theme.backgroundSecondary
-            clip: true
+            Rectangle {
+                id: mediaArt
 
-            Image {
-                id: mediaArtImage
+                width: 112
+                height: 112
+                radius: root.appearance.radius
+                color: theme.backgroundSecondary
+                clip: true
 
-                anchors.fill: parent
-                source: root.player ? root.player.trackArtUrl : ""
-                fillMode: Image.PreserveAspectCrop
-            }
+                Image {
+                    id: mediaArtImage
 
-            Panels.ShellText {
-                anchors.centerIn: parent
-                visible: mediaArtImage.status !== Image.Ready
-                text: "󰎈"
-                color: theme.textMuted
-                font.pixelSize: 32
-            }
-        }
+                    anchors.fill: parent
+                    source: root.player ? root.player.trackArtUrl : ""
+                    fillMode: Image.PreserveAspectCrop
+                }
 
-        Column {
-            width: parent.width - mediaArt.width - parent.spacing
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 4
-
-            PopupTitle {
-                appearance: root.appearance
-                width: parent.width
-                text: root.player
-                    ? (root.player.trackTitle || root.player.identity)
-                    : "Nothing playing"
-            }
-
-            Panels.ShellText {
-                width: parent.width
-                visible: text !== ""
-                text: root.player ? root.player.trackArtist : ""
-                color: theme.textMuted
-                elide: Text.ElideRight
-                font.pixelSize: root.appearance.textSize - 1
-            }
-
-            PopupLabel {
-                appearance: root.appearance
-                width: parent.width
-                visible: !!root.player && root.player.identity !== ""
-                text: root.player ? root.player.identity : ""
-            }
-
-            Item {
-                width: 1
-                height: 4
+                Panels.ShellText {
+                    anchors.centerIn: parent
+                    visible: mediaArtImage.status !== Image.Ready
+                    text: "󰎈"
+                    color: theme.textMuted
+                    font.pixelSize: 32
+                }
             }
 
             Column {
-                width: parent.width
-                visible: !!root.player && root.player.lengthSupported
+                width: parent.width - mediaArt.width - parent.spacing
+                anchors.verticalCenter: parent.verticalCenter
                 spacing: 4
 
-                PopupProgress {
+                PopupTitle {
                     appearance: root.appearance
                     width: parent.width
-                    fraction: root.player && root.player.length > 0
-                        ? root.mediaPosition / root.player.length : 0
+                    text: root.player
+                        ? (root.player.trackTitle || root.player.identity)
+                        : "Nothing playing"
+                }
+
+                Panels.ShellText {
+                    width: parent.width
+                    visible: text !== ""
+                    text: root.player ? root.player.trackArtist : ""
+                    color: theme.textMuted
+                    elide: Text.ElideRight
+                    font.pixelSize: root.appearance.textSize - 1
+                }
+
+                PopupLabel {
+                    appearance: root.appearance
+                    width: parent.width
+                    visible: !!root.player && root.player.identity !== ""
+                    text: root.player ? root.player.identity : ""
                 }
 
                 Item {
+                    width: 1
+                    height: 4
+                }
+
+                Column {
                     width: parent.width
-                    height: currentTime.implicitHeight
+                    visible: !!root.player && root.player.lengthSupported
+                    spacing: 4
 
-                    PopupLabel {
-                        id: currentTime
+                    Item {
+                        id: seekBar
 
-                        appearance: root.appearance
-                        anchors.left: parent.left
-                        text: StatusText.duration(root.mediaPosition)
+                        readonly property bool active: seekArea.containsMouse || root.dragFraction >= 0
+
+                        width: parent.width
+                        // Taller than the bar, so it is easy to hit.
+                        height: 14
+
+                        PopupProgress {
+                            id: progress
+
+                            appearance: root.appearance
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width
+                            height: seekBar.active && root.seekable ? 6 : 4
+                            radius: height / 2
+                            fraction: root.player && root.player.length > 0
+                                ? root.shownPosition / root.player.length : 0
+
+                            Behavior on height {
+                                NumberAnimation { duration: root.appearance.motion.short }
+                            }
+                        }
+
+                        Rectangle {
+                            visible: seekBar.active && root.seekable
+                            width: 12
+                            height: 12
+                            radius: 6
+                            anchors.verticalCenter: parent.verticalCenter
+                            x: Math.max(0, Math.min(parent.width - width,
+                                parent.width * progress.fraction - width / 2))
+                            color: theme.accent
+                        }
+
+                        MouseArea {
+                            id: seekArea
+
+                            function fractionAt(x) {
+                                return Math.max(0, Math.min(1, x / width));
+                            }
+
+                            anchors.fill: parent
+                            enabled: root.seekable
+                            hoverEnabled: true
+                            cursorShape: root.seekable ? Qt.PointingHandCursor : Qt.ArrowCursor
+                            preventStealing: true
+
+                            onPressed: mouse => root.dragFraction = fractionAt(mouse.x)
+                            onPositionChanged: mouse => {
+                                if (pressed)
+                                    root.dragFraction = fractionAt(mouse.x);
+                            }
+                            onReleased: mouse => {
+                                const fraction = fractionAt(mouse.x);
+                                root.dragFraction = -1;
+                                root.seekTo(fraction * root.player.length);
+                            }
+                            onCanceled: root.dragFraction = -1
+                        }
                     }
 
-                    PopupLabel {
+                    Item {
+                        width: parent.width
+                        height: currentTime.implicitHeight
+
+                        PopupLabel {
+                            id: currentTime
+
+                            appearance: root.appearance
+                            anchors.left: parent.left
+                            text: StatusText.duration(root.shownPosition)
+                        }
+
+                        PopupLabel {
+                            appearance: root.appearance
+                            anchors.right: parent.right
+                            text: StatusText.duration(root.player ? root.player.length : 0)
+                        }
+                    }
+                }
+
+                Row {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 4
+
+                    PopupButton {
                         appearance: root.appearance
-                        anchors.right: parent.right
-                        text: StatusText.duration(root.player ? root.player.length : 0)
+                        width: 32
+                        height: 32
+                        label: "󰒮"
+                        labelSize: 16
+                        interactive: !!root.player && root.player.canGoPrevious
+                        onActivated: root.player.previous()
+                    }
+
+                    PopupButton {
+                        appearance: root.appearance
+                        width: 36
+                        height: 32
+                        label: root.player && root.player.isPlaying ? "󰏤" : "󰐊"
+                        labelColor: theme.accent
+                        labelSize: 20
+                        interactive: !!root.player && root.player.canTogglePlaying
+                        onActivated: root.player.togglePlaying()
+                    }
+
+                    PopupButton {
+                        appearance: root.appearance
+                        width: 32
+                        height: 32
+                        label: "󰒭"
+                        labelSize: 16
+                        interactive: !!root.player && root.player.canGoNext
+                        onActivated: root.player.next()
                     }
                 }
             }
+        }
 
-            Row {
-                anchors.horizontalCenter: parent.horizontalCenter
-                spacing: 4
+        // The other players, behind "N more players".
+        PopupButton {
+            appearance: root.appearance
+            width: parent.width
+            height: 26
+            visible: root.otherPlayers.length > 0
+            label: (root.showingPlayers ? "󰅃  " : "󰅀  ") + root.otherPlayers.length
+                + (root.otherPlayers.length === 1 ? " more player" : " more players")
+            labelColor: theme.textMuted
+            labelSize: root.appearance.textSize - 2
+            onActivated: root.showingPlayers = !root.showingPlayers
+        }
 
-                PopupButton {
-                    appearance: root.appearance
-                    width: 32
-                    height: 32
-                    label: "󰒮"
-                    labelSize: 16
-                    interactive: !!root.player && root.player.canGoPrevious
-                    onActivated: root.player.previous()
-                }
+        Column {
+            width: parent.width
+            visible: root.showingPlayers && root.otherPlayers.length > 0
+            spacing: 4
 
-                PopupButton {
-                    appearance: root.appearance
-                    width: 36
-                    height: 32
-                    label: root.player && root.player.isPlaying ? "󰏤" : "󰐊"
-                    labelColor: theme.accent
-                    labelSize: 20
-                    interactive: !!root.player && root.player.canTogglePlaying
-                    onActivated: root.player.togglePlaying()
-                }
+            Repeater {
+                model: root.showingPlayers ? root.otherPlayers : []
 
-                PopupButton {
-                    appearance: root.appearance
-                    width: 32
-                    height: 32
-                    label: "󰒭"
-                    labelSize: 16
-                    interactive: !!root.player && root.player.canGoNext
-                    onActivated: root.player.next()
+                delegate: Rectangle {
+                    id: playerRow
+
+                    required property var modelData
+
+                    width: parent.width
+                    height: 48
+                    radius: root.appearance.radius
+                    color: rowHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
+
+                    HoverHandler {
+                        id: rowHover
+                    }
+
+                    TapHandler {
+                        // A tap on its play button is the button's.
+                        onTapped: eventPoint => {
+                            const point = playerRow.mapToItem(rowToggle,
+                                eventPoint.position.x, eventPoint.position.y);
+                            if (!rowToggle.contains(point))
+                                root.choosePlayer(playerRow.modelData);
+                        }
+                    }
+
+                    Rectangle {
+                        id: rowArt
+
+                        x: 8
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 34
+                        height: 34
+                        radius: Math.max(4, root.appearance.radius / 2)
+                        color: theme.surface
+                        clip: true
+
+                        Image {
+                            id: rowArtImage
+
+                            anchors.fill: parent
+                            source: playerRow.modelData.trackArtUrl || ""
+                            sourceSize.width: 68
+                            sourceSize.height: 68
+                            fillMode: Image.PreserveAspectCrop
+                            asynchronous: true
+                        }
+
+                        Panels.ShellText {
+                            anchors.centerIn: parent
+                            visible: rowArtImage.status !== Image.Ready
+                            text: "󰎈"
+                            color: theme.textMuted
+                            font.pixelSize: 16
+                        }
+                    }
+
+                    Column {
+                        anchors.left: rowArt.right
+                        anchors.leftMargin: 10
+                        anchors.right: rowToggle.left
+                        anchors.rightMargin: 8
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 2
+
+                        Panels.ShellText {
+                            width: parent.width
+                            text: playerRow.modelData.identity || "Player"
+                            color: theme.text
+                            elide: Text.ElideRight
+                            font.bold: true
+                            font.pixelSize: root.appearance.textSize - 1
+                        }
+
+                        Panels.ShellText {
+                            width: parent.width
+                            visible: text !== ""
+                            text: [playerRow.modelData.trackTitle, playerRow.modelData.trackArtist]
+                                .filter(part => !!part).join("  ·  ")
+                            color: theme.textMuted
+                            elide: Text.ElideRight
+                            font.pixelSize: root.appearance.textSize - 2
+                        }
+                    }
+
+                    PopupButton {
+                        id: rowToggle
+
+                        appearance: root.appearance
+                        anchors.right: parent.right
+                        anchors.rightMargin: 8
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 30
+                        height: 30
+                        label: playerRow.modelData.isPlaying ? "󰏤" : "󰐊"
+                        labelColor: theme.accent
+                        labelSize: 16
+                        interactive: playerRow.modelData.canTogglePlaying
+                        onActivated: playerRow.modelData.togglePlaying()
+                    }
                 }
             }
         }
