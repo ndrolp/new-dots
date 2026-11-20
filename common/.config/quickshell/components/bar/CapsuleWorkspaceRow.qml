@@ -4,7 +4,9 @@ import "../../config" as Config
 
 // The capsule's workspace pills, inside the capsule past its row of bar
 // elements: one small pill per workspace of its monitor, with no label. The
-// active workspace's pill is twice as long and highlighted; a click on a pill
+// active workspace's pill is twice as long and highlighted; the others tell
+// what the bar's workspaces do (Workspaces.qml): one asking for attention is
+// red, one with windows bright and an empty one dim. A click on a pill
 // switches to its workspace.
 Row {
     id: root
@@ -15,7 +17,9 @@ Row {
     // (services/WorkspaceService.qml).
     required property var workspaceService
     property color activeColor: theme.accent
-    property color idleColor: Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.35)
+    property color urgentColor: theme.red
+    property color occupiedColor: Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.7)
+    property color emptyColor: Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.2)
     // The bar's appearance: its spacing and motion.
     required property var appearance
     readonly property real pillDepth: BarPlacement.workspacePillDepth
@@ -40,11 +44,14 @@ Row {
             required property var modelData
             readonly property int workspaceId: modelData
             readonly property bool active: root.workspaceService.isActive(workspaceId)
+            readonly property bool urgent: !active && root.workspaceService.isUrgent(workspaceId)
+            readonly property bool occupied: root.workspaceService.isOccupied(workspaceId)
 
             width: root.pillDepth * (active ? 4 : 2)
             height: root.pillDepth
             radius: height / 2
-            color: active ? root.activeColor : root.idleColor
+            color: active ? root.activeColor : urgent ? root.urgentColor
+                : occupied ? root.occupiedColor : root.emptyColor
 
             AlongBarBehavior on width { appearance: root.appearance }
 

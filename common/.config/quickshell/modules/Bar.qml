@@ -32,8 +32,9 @@ Scope {
     required property var osd
     // The control center module (modules/ControlCenter.qml).
     required property var controlCenter
-    // The wallpapers, for the wallpaper picker inside a capsule.
-    required property var wallpapers
+    // The features that open inside a capsule instead of full-screen
+    // (CapsuleFeature.qml): { wallpapers, launcher, clipboard, unifiedSearch }.
+    required property var capsuleFeatures
 
     property var openPopup: OpenPopup.none
 
@@ -97,7 +98,7 @@ Scope {
         systemMonitor: root.systemMonitor
         workspaceService: root.workspaceService
         monitorSetups: root.monitorSetups
-        wallpapers: root.wallpapers
+        capsuleFeatures: root.capsuleFeatures
 
         onConfigRequested: function(screen, panelWindow) {
             root.settings.toggleOn(screen, panelWindow);

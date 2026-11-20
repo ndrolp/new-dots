@@ -30,8 +30,8 @@ Variants {
     required property var systemMonitor
     required property var workspaceService
     required property var monitorSetups
-    // The wallpapers, for the wallpaper picker inside a capsule.
-    required property var wallpapers
+    // The features that open inside a capsule (BarPopups.capsuleFeatures).
+    required property var capsuleFeatures
 
     signal configRequested(var screen, var panelWindow)
     signal panelReady(var screen, var panelWindow)
@@ -325,7 +325,7 @@ Variants {
                 appMenu: panel.appMenu
                 systemMonitor: panel.systemMonitor
                 controlCenter: bar.controlCenter
-                wallpapers: bar.wallpapers
+                capsuleFeatures: bar.capsuleFeatures
 
                 onPopupClosed: function(popup) {
                     bar.popupClosed(popup, panel);
