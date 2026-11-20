@@ -1,3 +1,4 @@
+import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick
@@ -28,10 +29,47 @@ QtObject {
         if (monitorDescription === "")
             return;
 
-        const localWallpaperPath = localPath(path);
+        assign(monitorDescription, path);
+        apply(monitorDescription, localPath(path));
+    }
+
+    // Makes `path` the monitor's wallpaper without showing it again: the
+    // capsule's wallpaper picker keeps the one it is previewing.
+    function assign(monitorDescription, path) {
+        if (monitorDescription === "")
+            return;
+
         assignments = WallpaperModel.withAssignment(
-            assignments, monitorDescription, localWallpaperPath);
-        apply(monitorDescription, localWallpaperPath);
+            assignments, monitorDescription, localPath(path));
+    }
+
+    // Shows `path` on the monitor without making it its wallpaper: the
+    // capsule's wallpaper picker previews each one it moves to. A quick fade,
+    // and each preview its own awww call, so moving fast never waits on the
+    // one before.
+    function preview(monitorDescription, path) {
+        const output = outputFor(monitorDescription);
+        const localWallpaperPath = localPath(path);
+        if (output === "" || localWallpaperPath === "")
+            return;
+
+        Quickshell.execDetached(["awww", "img", "-o", output, localWallpaperPath,
+            "--transition-type", "fade", "--transition-duration", "0.4"]);
+    }
+
+    // Shows the monitor's own wallpaper again after a preview.
+    function restore(monitorDescription) {
+        preview(monitorDescription, pathFor(monitorDescription));
+    }
+
+    // The Hyprland output name of the monitor, or "" when it isn't connected.
+    function outputFor(monitorDescription) {
+        const monitors = Hyprland.monitors.values;
+        for (let index = 0; index < monitors.length; index++) {
+            if (monitors[index].description === monitorDescription)
+                return monitors[index].name;
+        }
+        return "";
     }
 
     function isPortraitMonitor(monitor) {

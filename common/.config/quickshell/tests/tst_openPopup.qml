@@ -121,6 +121,29 @@ TestCase {
         const open = OpenPopup.requested(OpenPopup.none, "battery", leftBar);
         compare(OpenPopup.toggledOnFocusedBar(open, "controlCenter", [], "AOC"), open);
     }
+    // The wallpaper picker opens inside the focused capsule, and full-screen
+    // on any other bar.
+    function test_theFocusedBarIsTheCapsuleWhenItIsOne() {
+        const capsules = [
+            { window: leftBar, monitor: "Philips", visible: true, capsule: false },
+            { window: rightBar, monitor: "AOC", visible: true, capsule: true }
+        ];
+        compare(OpenPopup.focusedCapsule(capsules, "AOC"), rightBar);
+        compare(OpenPopup.focusedCapsule(capsules, "Philips"), null);
+    }
+
+    function test_aHiddenCapsuleIsNotTheOneIpcUses() {
+        const hidden = [
+            { window: leftBar, monitor: "Philips", visible: true, capsule: false },
+            { window: rightBar, monitor: "AOC", visible: false, capsule: true }
+        ];
+        compare(OpenPopup.focusedCapsule(hidden, "AOC"), null);
+    }
+
+    function test_withNoShownBarThereIsNoCapsule() {
+        compare(OpenPopup.focusedCapsule([], "AOC"), null);
+    }
+
     // SUPER+C asks for "expanded", SUPER+N for "collapsed". Closed, the
     // shortcut opens the control center at its stage on the focused bar.
     function test_aShortcutOpensTheClosedControlCenterAtItsStage() {

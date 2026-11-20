@@ -26,7 +26,7 @@ BarPopup {
 
     popup: "appMenu"
     edge: "left"
-    implicitWidth: 260
+    popupWidth: 260
 
     Components.AppMenuSource {
         id: source

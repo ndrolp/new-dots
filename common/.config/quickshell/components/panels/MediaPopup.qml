@@ -43,7 +43,7 @@ BarPopup {
     Component.onCompleted: updatePlayer()
 
     popup: "media"
-    implicitWidth: 440
+    popupWidth: 440
 
     Config.Theme {
         id: theme

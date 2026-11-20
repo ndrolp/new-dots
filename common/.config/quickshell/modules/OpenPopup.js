@@ -32,6 +32,16 @@ function focusedBar(bars, focusedMonitor) {
     return bar ? bar.window : null;
 }
 
+// The bar IPC opens popups on (focusedBar), when it is a capsule; else null.
+// A feature with a full-screen panel of its own, like the wallpaper picker,
+// opens inside that capsule instead. `bars` are { window, monitor, visible,
+// capsule }, as modules/Bar.qml lists them.
+function focusedCapsule(bars, focusedMonitor) {
+    const window = focusedBar(bars, focusedMonitor);
+    const bar = bars.find(candidate => candidate.window === window);
+    return bar && bar.capsule ? window : null;
+}
+
 // IPC toggles a popup (e.g. `notifications toggle`): it opens on the focused
 // bar, or closes if it was open there. Its element missing from that bar is
 // fine: the popup then opens at the bar's edge (PopupPlacement.js).

@@ -17,7 +17,7 @@ BarPopup {
     property var pairRequests: ({})
 
     popup: "bluetooth"
-    implicitWidth: 380
+    popupWidth: 380
 
     // Scan for devices while the popup is open and Bluetooth is on.
     onVisibleChanged: {

@@ -206,6 +206,7 @@ ShellRoot {
 
         appearance: appearance
         wallpapers: wallpapers
+        bar: bar
     }
 
     Modules.ThemeSelector {
@@ -391,5 +392,6 @@ ShellRoot {
         monitorSetups: monitorSetups
         settings: settings
         osd: osd
+        wallpapers: wallpapers
     }
 }

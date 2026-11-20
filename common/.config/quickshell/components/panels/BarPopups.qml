@@ -16,6 +16,8 @@ Item {
     // The control center module (modules/ControlCenter.qml): its services,
     // stage and the panels its tiles open, handed to its popup as one.
     required property var controlCenter
+    // The wallpapers, for the wallpaper picker (WallpaperPopup.qml).
+    required property var wallpapers
     property string activePopup: ""
     // Which of the app menu's menus its Popup shows (AppMenuPopup.menuId).
     property string appMenuId: ""
@@ -88,5 +90,10 @@ Item {
 
     NetworkPopup {
         popups: root
+    }
+
+    WallpaperPopup {
+        popups: root
+        wallpapers: root.wallpapers
     }
 }

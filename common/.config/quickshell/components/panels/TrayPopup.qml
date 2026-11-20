@@ -33,7 +33,7 @@ BarPopup {
         menuStack = [];
     }
     popup: "tray"
-    implicitWidth: 220
+    popupWidth: 220
 
     Config.Theme {
         id: theme
