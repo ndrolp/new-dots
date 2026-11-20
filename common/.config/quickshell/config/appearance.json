@@ -423,12 +423,23 @@
             "barOpacity": 70,
             "barPosition": "top",
             "barStyle": "capsule",
-            "capsuleElements": [
-                "arch",
-                "clock",
-                "notifications",
-                "battery"
-            ],
+            "capsulePlaces": {
+                "appMenu": "hidden",
+                "arch": "shown",
+                "audio": "hidden",
+                "battery": "shown",
+                "bluetooth": "hidden",
+                "cava": "hidden",
+                "clock": "shown",
+                "currentApp": "hidden",
+                "keepAwake": "hidden",
+                "media": "hidden",
+                "network": "hidden",
+                "notifications": "hidden",
+                "recording": "liveRight",
+                "systemMonitor": "hidden",
+                "tray": "hidden"
+            },
             "elementBorder": false,
             "elementVerticalPadding": 8,
             "groupBorder": false,
@@ -669,5 +680,5 @@
         "mode": "color",
         "resolution": 300
     },
-    "schemaVersion": 16
+    "schemaVersion": 17
 }

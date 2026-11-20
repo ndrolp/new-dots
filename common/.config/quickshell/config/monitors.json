@@ -24,7 +24,59 @@
     "displaySettings": {
         "AOC CU34G4 2SES7HA013005": {
             "barProfile": "presentation",
-            "barVisible": true
+            "barVisible": true,
+            "desktopWidgets": {
+                "backgroundClock": {
+                    "calendarEnabled": true,
+                    "dateFormat": "full",
+                    "enabled": true,
+                    "opacity": 100,
+                    "position": "bottom-right",
+                    "size": 119
+                },
+                "calendar": {
+                    "enabled": false,
+                    "position": "top-left"
+                },
+                "cava": {
+                    "barCount": 80,
+                    "color": "white",
+                    "enabled": true,
+                    "height": 175,
+                    "mediaInfo": true,
+                    "position": "bottom-left",
+                    "progress": "bars",
+                    "progressColor": "accent",
+                    "shadow": true,
+                    "width": 837
+                },
+                "edgePadding": 28,
+                "media": {
+                    "enabled": false,
+                    "position": "bottom-left"
+                },
+                "network": {
+                    "enabled": false,
+                    "position": "bottom-right"
+                },
+                "order": [
+                    "media",
+                    "system",
+                    "calendar",
+                    "network",
+                    "weather",
+                    "cava"
+                ],
+                "system": {
+                    "enabled": false,
+                    "position": "top-right"
+                },
+                "weather": {
+                    "enabled": false,
+                    "location": "Ourense, ES",
+                    "position": "top-center"
+                }
+            }
         },
         "AOC Q27G42XE 2S6S1HA031479": {
             "barProfile": "minimal",
