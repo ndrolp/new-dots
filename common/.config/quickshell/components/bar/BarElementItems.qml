@@ -180,11 +180,18 @@ Item {
 
     onPlayerLabelChanged: mediaLabelTransition.restart()
 
+    // A Wi-Fi device shows its connected network's signal.
     function networkIcon() {
-        return StatusText.networkIcon(Networking.devices.values.map(device => ({
-            connected: device.connected,
-            wifi: DeviceType.toString(device.type) === "Wifi"
-        })));
+        return StatusText.networkIcon(Networking.devices.values.map(device => {
+            const wifi = DeviceType.toString(device.type) === "Wifi";
+            const network = wifi && device.networks
+                ? device.networks.values.find(candidate => candidate.connected) : null;
+            return {
+                connected: device.connected,
+                wifi: wifi,
+                signalStrength: network ? network.signalStrength : 0
+            };
+        }));
     }
 
     Rectangle {
@@ -644,7 +651,8 @@ Item {
             anchors.centerIn: parent
             text: root.networkIcon()
             color: theme.purple
-            font.pixelSize: root.appearance.iconSize
+            // A little bigger, like the battery, so the signal reads at a glance.
+            font.pixelSize: root.appearance.iconSize + 4
             font.bold: true
         }
 
