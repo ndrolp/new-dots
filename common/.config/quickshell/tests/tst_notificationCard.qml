@@ -104,6 +104,15 @@ TestCase {
         return item;
     }
 
+    // An unread card is tinted with the accent but stays opaque: in an app
+    // stack, the card peeking out under it must not show through.
+    function test_aHighlightedCardIsOpaque() {
+        const item = makeCard({});
+        item.highlighted = true;
+        const face = find(item, child => child.objectName === "cardFace");
+        tryCompare(face.color, "a", 1);
+    }
+
     function test_tappingACardRunsItsDefaultActionRemovesItAndClosesTheControlCenter() {
         const defaultAction = action("default", "Open");
         const item = makeCard({ notification: { actions: [defaultAction] } });
