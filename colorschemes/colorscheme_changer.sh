@@ -240,11 +240,28 @@ apply_quickshell() {
   recolour_quickshell
 }
 
+# Spotify's colours come from spicetify's Dotfiles theme, whose color.ini links through the active
+# colorscheme (bootstrap.sh --spicetify sets it up). spicetify bakes them into Spotify's files, so it is
+# asked to refresh them. Spotify only reads them when it starts, so a running Spotify is restarted, in
+# the background, and resumed if it was playing (restart_spotify.sh). No spicetify, or one using another
+# theme, is not a failure. The changer runs from the shell, whose PATH may not hold ~/.spicetify.
+apply_spotify() {
+  local spicetify resume="" config="${SPICETIFY_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/spicetify}/config-xpui.ini"
+  spicetify="$(command -v spicetify || echo "$HOME/.spicetify/spicetify")"
+  [ -x "$spicetify" ] && [ -f "$config" ] || return 0
+  grep -qE '^current_theme[[:space:]]*=[[:space:]]*Dotfiles[[:space:]]*$' "$config" || return 0
+  "$spicetify" refresh
+  pgrep -x -u "$(id -u)" spotify >/dev/null || return 0
+  [ "$(playerctl -p spotify status 2>/dev/null)" = Playing ] && resume=--resume
+  setsid -f "$COLORSCHEMES/restart_spotify.sh" $resume >/dev/null 2>&1
+}
+
 step hyprland apply_hyprland
 step kitty apply_kitty
 step nvim apply_nvim
 step vscode apply_vscode
 step gtk apply_gtk
 step quickshell apply_quickshell
+step spotify apply_spotify
 
 report_failed_steps

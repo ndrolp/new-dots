@@ -44,7 +44,7 @@ changer_home() {
     for app in hypr rofi nvim quickshell kitty Code; do
         ln -s "../.dotfiles/common/.config/$app" "$HOME_DIR/.config/$app"
     done
-    for tool in hyprctl pkill quickshell gsettings rofi node notify-send; do
+    for tool in hyprctl pkill quickshell gsettings rofi node notify-send spicetify; do
         cat >"$bin/$tool" <<SHIM
 #!/bin/sh
 echo "$tool \$*" >>"\$HOME/calls"
@@ -52,6 +52,33 @@ case " $failing " in *" $tool "*) exit 1 ;; esac
 exit 0
 SHIM
     done
+    # Spotify is running while $HOME/spotify-running exists (pkill -x spotify removes it), and playerctl
+    # reports the status in $HOME/spotify-status. setsid runs its command in the foreground, so a test
+    # sees what it did.
+    cat >"$bin/pgrep" <<'SHIM'
+#!/bin/sh
+echo "pgrep $*" >>"$HOME/calls"
+[ -e "$HOME/spotify-running" ]
+SHIM
+    cat >"$bin/pkill" <<SHIM
+#!/bin/sh
+echo "pkill \$*" >>"\$HOME/calls"
+case " \$* " in *" spotify "*) rm -f "\$HOME/spotify-running" ;; esac
+case " $failing " in *" pkill "*) exit 1 ;; esac
+exit 0
+SHIM
+    cat >"$bin/playerctl" <<'SHIM'
+#!/bin/sh
+echo "playerctl $*" >>"$HOME/calls"
+[ "$*" = "-p spotify status" ] || exit 0
+[ -e "$HOME/spotify-status" ] && cat "$HOME/spotify-status"
+SHIM
+    cat >"$bin/setsid" <<'SHIM'
+#!/bin/sh
+echo "setsid $*" >>"$HOME/calls"
+[ "$1" = -f ] && shift
+"$@"
+SHIM
     chmod +x "$bin"/*
     CALLS="$HOME_DIR/calls"
     : >"$CALLS"

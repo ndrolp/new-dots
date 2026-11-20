@@ -25,7 +25,7 @@ The colorscheme Hyprland and Quickshell are showing right now. It is the active 
 _Avoid_: Preview theme, displayed theme
 
 **Apply** (a colorscheme):
-Make a colorscheme the active one everywhere at once: Hyprland, Quickshell, nvim, GTK, kitty, VS Code and rofi. Only applying changes which colorscheme is active.
+Make a colorscheme the active one everywhere at once: Hyprland, Quickshell, nvim, GTK, kitty, VS Code, rofi and Spotify (through spicetify). Only applying changes which colorscheme is active.
 _Avoid_: Switch, set (for this)
 
 **Colorscheme preview**:
