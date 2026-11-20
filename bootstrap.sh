@@ -11,7 +11,7 @@ Usage: bootstrap.sh [options]
   --minimal       Skip the apps package group
   --stow-only     Only link the config files (skip installing anything)
   --no-system     Skip enabling services and changing the login shell
-  --spicetify     Also install spicetify
+  --spicetify     Also install spicetify and theme Spotify with the active colorscheme
   --help          Show this help
 EOF
 }
@@ -150,8 +150,9 @@ main() {
         steps=(preflight packages paru aur hardware shell node)
         # Building GTK themes needs sassc, from the apps group.
         [[ "$DOTFILES_MINIMAL" == true ]] || steps+=(gtk-themes vscode-themes)
-        [[ "$DOTFILES_SPICETIFY" == true ]] && steps+=(spicetify)
         steps+=(stow colorscheme)
+        # After colorscheme: Spotify's theme takes its colours through the active colorscheme.
+        [[ "$DOTFILES_SPICETIFY" == true ]] && steps+=(spicetify)
         steps+=(nsswitch services)
     fi
 

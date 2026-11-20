@@ -531,6 +531,108 @@ test_a_gtk_theme_without_gtk4_still_applies_gtk3_and_fails_the_gtk_step() {
         || fail "the GTK4 links were touched"
 }
 
+# spicetify_uses <theme>: writes spicetify's config in the scratch HOME naming <theme> as its theme.
+spicetify_uses() {
+    mkdir -p "$HOME_DIR/.config/spicetify"
+    printf '[Setting]\ncurrent_theme          = %s\ncolor_scheme           = base\n' "$1" \
+        >"$HOME_DIR/.config/spicetify/config-xpui.ini"
+}
+
+test_applying_refreshes_spotifys_colours_when_spicetify_uses_the_dotfiles_theme() {
+    changer_home
+    spicetify_uses Dotfiles
+    run_changer nord
+    grep -qx "spicetify refresh" "$CALLS" || fail "spicetify was not asked to refresh"
+    ! grep -qE "^spicetify .*(apply|restart)" "$CALLS" || fail "spicetify applied or restarted Spotify"
+}
+
+test_applying_does_not_restart_a_spotify_that_is_not_running() {
+    changer_home
+    spicetify_uses Dotfiles
+    run_changer nord
+    ! grep -q "spotify" <(grep -E "^(pkill|setsid|hyprctl dispatch hl.dsp.exec_cmd)" "$CALLS") || fail "touched a Spotify that was not running"
+}
+
+test_applying_restarts_a_running_spotify_so_it_shows_the_new_colours() {
+    changer_home
+    spicetify_uses Dotfiles
+    touch "$HOME_DIR/spotify-running"
+    echo Paused >"$HOME_DIR/spotify-status"
+    run_changer nord
+    grep -qx "pkill -x -u $(id -u) spotify" "$CALLS" || fail "Spotify was not stopped"
+    grep -qxF 'hyprctl dispatch hl.dsp.exec_cmd("spotify")' "$CALLS" || fail "Spotify was not started again"
+    [[ "$(grep -n '^spicetify refresh$' "$CALLS" | cut -d: -f1)" -lt "$(grep -n '^pkill .*spotify' "$CALLS" | cut -d: -f1)" ]] \
+        || fail "restarted before refreshing the colours"
+    ! grep -q "^playerctl -p spotify play$" "$CALLS" || fail "resumed a paused Spotify"
+}
+
+test_a_restarted_spotify_that_was_playing_plays_again() {
+    changer_home
+    spicetify_uses Dotfiles
+    touch "$HOME_DIR/spotify-running"
+    echo Playing >"$HOME_DIR/spotify-status"
+    run_changer nord
+    grep -qx "playerctl -p spotify play" "$CALLS" || fail "playback was not resumed"
+    [[ "$(grep -nF 'hyprctl dispatch hl.dsp.exec_cmd("spotify")' "$CALLS" | cut -d: -f1)" -lt "$(grep -n '^playerctl -p spotify play$' "$CALLS" | cut -d: -f1)" ]] \
+        || fail "resumed before Spotify was started again"
+}
+
+test_the_spotify_restart_is_detached_from_the_changer() {
+    changer_home
+    spicetify_uses Dotfiles
+    touch "$HOME_DIR/spotify-running"
+    run_changer nord
+    grep -q "^setsid -f .*/restart_spotify.sh" "$CALLS" || fail "the restart was not detached"
+}
+
+test_applying_leaves_spicetify_alone_when_it_uses_another_theme() {
+    changer_home
+    spicetify_uses Sleek
+    run_changer nord
+    [[ "$(calls_to spicetify)" -eq 0 ]] || fail "spicetify was run for another theme"
+}
+
+test_applying_without_spicetify_set_up_does_not_fail() {
+    change_colorscheme nord
+    [[ "$(calls_to spicetify)" -eq 0 ]] || fail "spicetify was run with no config"
+    [[ -z "$NOTIFICATIONS" ]] || fail "notified: $NOTIFICATIONS"
+}
+
+test_a_failing_spicetify_refresh_fails_the_spotify_step() {
+    changer_home --failing spicetify
+    spicetify_uses Dotfiles
+    run_changer nord
+    grep -q "^notify-send .*spotify" "$CALLS" || fail "the spotify step did not fail"
+}
+
+test_previewing_does_not_refresh_spotify() {
+    changer_home
+    spicetify_uses Dotfiles
+    run_changer --preview nord
+    [[ "$(calls_to spicetify)" -eq 0 ]] || fail "a preview refreshed Spotify"
+}
+
+test_every_colorscheme_gives_spotify_every_colour() {
+    changer_home
+    local scheme ini key
+    for scheme in $(bash "$HOME_DIR/.dotfiles/colorschemes/colorscheme_changer.sh" --list); do
+        ini="$COLORSCHEMES/$scheme/spicetify/color.ini"
+        [[ -f "$ini" && ! -L "$ini" ]] || fail "$scheme has no spicetify/color.ini of its own"
+        grep -qx "\[base\]" "$ini" || fail "$scheme's color.ini has no [base] section"
+        for key in text subtext main main-elevated highlight highlight-elevated sidebar player card shadow \
+            selected-row button button-active button-disabled tab-active notification notification-error misc; do
+            grep -qE "^$key[[:space:]]*=[[:space:]]*[0-9a-f]{6}$" "$ini" || fail "$scheme's color.ini has no hex $key"
+        done
+    done
+}
+
+test_the_dotfiles_spotify_theme_takes_its_colours_through_the_active_colorscheme() {
+    local theme="$COLORSCHEMES/../common/spicetify/Themes/Dotfiles"
+    [[ "$(readlink "$theme/color.ini")" == ../../../../colorschemes/active/spicetify/color.ini ]] \
+        || fail "color.ini does not link through the active colorscheme: $(readlink "$theme/color.ini")"
+    [[ -f "$theme/user.css" ]] || fail "the theme has no user.css"
+}
+
 for t in $(declare -F | awk '{print $3}' | grep "^test_.*${1:-}"); do
     echo "$t"
     ( set -e; "$t" )

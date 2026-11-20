@@ -5,7 +5,7 @@ set -uo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 SCRATCH="$(mktemp -d)"
-trap 'rm -rf "$SCRATCH"' EXIT
+trap 'chmod -R u+w "$SCRATCH"; rm -rf "$SCRATCH"' EXIT
 PASSED=0
 FAILED=0
 
@@ -49,6 +49,13 @@ test_with_the_flag_spicetify_runs() {
     grep -q "^step spicetify$" "$CALLS" || fail "spicetify did not run with --spicetify"
 }
 
+# Spotify's theme takes its colours through the active colorscheme, which the colorscheme step sets up.
+test_spicetify_runs_after_the_colorscheme_step() {
+    run_bootstrap_with_stub_steps --spicetify
+    [[ "$(grep -n '^step colorscheme$' "$CALLS" | cut -d: -f1)" -lt "$(grep -n '^step spicetify$' "$CALLS" | cut -d: -f1)" ]] \
+        || fail "spicetify ran before the colorscheme step"
+}
+
 # The system's commands minus the faked ones, so the real curl, sudo or spicetify is unreachable.
 SYS_BIN="$SCRATCH/sysbin"
 mkdir -p "$SYS_BIN"
@@ -71,13 +78,27 @@ setup_fakes() {
     SPOTIFY="$FAKE/spotify"
     mkdir -p "$FAKE_BIN" "$FAKE/home/.config/spotify" "$SPOTIFY/Apps"
     touch "$FAKE/home/.config/spotify/prefs"
+    # Like the real install, Spotify's files are not writable until the step makes them so.
+    chmod 555 "$SPOTIFY" "$SPOTIFY/Apps"
     : >"$CALLS"
     export FAKE
     shim sudo 'echo "sudo $*" >>"$FAKE/calls"; "$@"'
     # The spicetify release tarball holds this fake spicetify.
+    # Like the real one, `spicetify config <key> <value>...` writes the keys into config-xpui.ini.
     cat >"$FAKE/spicetify" <<'EOF'
 #!/usr/bin/env bash
 echo "spicetify $*" >>"$FAKE/calls"
+if [[ "$1" == config ]]; then
+    shift
+    config="$HOME/.config/spicetify/config-xpui.ini"
+    mkdir -p "${config%/*}"
+    touch "$config"
+    while [[ $# -ge 2 ]]; do
+        sed -i "/^$1[[:space:]]*=/d" "$config"
+        echo "$1 = $2" >>"$config"
+        shift 2
+    done
+fi
 EOF
     chmod +x "$FAKE/spicetify"
     # curl serves the latest-release JSON, the release tarball and the marketplace installer.
@@ -163,6 +184,7 @@ test_a_second_run_installs_nothing_and_says_so() {
 
 test_without_spotify_installs_nothing_and_says_why() {
     setup_fakes
+    chmod -R u+w "$SPOTIFY"
     rm -rf "$SPOTIFY"
     run_spicetify_step
     [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
@@ -188,6 +210,44 @@ test_before_spotify_was_opened_installs_spicetify_but_waits_to_apply() {
     ! grep -q "releases/download" "$CALLS" || fail "downloaded spicetify again"
     grep -q "^spicetify backup apply$" "$CALLS" || fail "did not apply once Spotify had been opened"
     grep -q "^marketplace-installer$" "$CALLS" || fail "did not install the marketplace"
+}
+
+THEME_CONFIG="spicetify config current_theme Dotfiles color_scheme base inject_css 1 replace_colors 1"
+
+test_themes_spotify_with_the_dotfiles_theme_before_applying() {
+    setup_fakes
+    run_spicetify_step
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    [[ "$(readlink "$FAKE/home/.config/spicetify/Themes/Dotfiles")" == "$REPO/common/spicetify/Themes/Dotfiles" ]] \
+        || fail "Themes/Dotfiles does not lead to the repo's theme"
+    grep -qx "$THEME_CONFIG" "$CALLS" || fail "spicetify was not set to the Dotfiles theme"
+    [[ "$(grep -nx "$THEME_CONFIG" "$CALLS" | cut -d: -f1)" -lt "$(grep -n '^spicetify backup apply$' "$CALLS" | cut -d: -f1)" ]] \
+        || fail "applied before setting the theme"
+    grep -q "^installed	spicetify theme Dotfiles$" <<<"$SUMMARY" || fail "summary does not list the theme: $SUMMARY"
+}
+
+# A machine that ran --spicetify before the theme existed gets the theme on its next run.
+test_an_install_without_the_theme_gets_it_and_is_applied_again() {
+    setup_fakes
+    run_spicetify_step
+    rm -rf "$FAKE/home/.config/spicetify/Themes" "$FAKE/home/.config/spicetify/config-xpui.ini"
+    : >"$CALLS"
+    run_spicetify_step
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    [[ -L "$FAKE/home/.config/spicetify/Themes/Dotfiles" ]] || fail "the theme was not linked"
+    grep -qx "$THEME_CONFIG" "$CALLS" || fail "spicetify was not set to the Dotfiles theme"
+    grep -q "^spicetify apply$" "$CALLS" || fail "the theme was not applied"
+    ! grep -qE "releases/download|^spicetify backup|^marketplace-installer" "$CALLS" \
+        || fail "downloaded, backed up or reinstalled the marketplace again"
+}
+
+test_an_already_writable_spotify_needs_no_sudo() {
+    setup_fakes
+    chmod -R u+w "$SPOTIFY"
+    run_spicetify_step
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    ! grep -q "^sudo" "$CALLS" || fail "ran sudo for a writable Spotify"
+    grep -q "^spicetify backup apply$" "$CALLS" || fail "did not apply"
 }
 
 for t in $(declare -F | awk '{print $3}' | grep "^test_.*${1:-}"); do

@@ -1,0 +1,49 @@
+/* The Dotfiles spicetify theme: Spotify in the active colorscheme's colours. The colours themselves
+ * are in color.ini, which links through the active colorscheme, so applying a colorscheme changes
+ * them; spicetify turns them into the --spice-* variables used here. replace_colors already swaps
+ * Spotify's own colours for those variables; this maps the encore variables newer Spotify builds
+ * read instead, so every surface follows them too. */
+
+.encore-dark-theme,
+.encore-dark-theme .encore-base-set,
+.encore-dark-theme .encore-inverted-dark-set {
+    --background-base: var(--spice-main);
+    --background-highlight: var(--spice-highlight);
+    --background-press: var(--spice-highlight-elevated);
+    --background-elevated-base: var(--spice-main-elevated);
+    --background-elevated-highlight: var(--spice-highlight-elevated);
+    --background-elevated-press: var(--spice-highlight-elevated);
+    --background-tinted-base: rgba(var(--spice-rgb-text), 0.07);
+    --background-tinted-highlight: rgba(var(--spice-rgb-text), 0.1);
+    --background-tinted-press: rgba(var(--spice-rgb-text), 0.04);
+    --text-base: var(--spice-text);
+    --text-subdued: var(--spice-subtext);
+    --text-bright-accent: var(--spice-button);
+    --text-positive: var(--spice-button);
+    --text-negative: var(--spice-notification-error);
+    --text-announcement: var(--spice-notification);
+    --essential-base: var(--spice-text);
+    --essential-subdued: var(--spice-misc);
+    --essential-bright-accent: var(--spice-button);
+    --essential-negative: var(--spice-notification-error);
+    --essential-announcement: var(--spice-notification);
+    --decorative-base: var(--spice-text);
+    --decorative-subdued: var(--spice-misc);
+}
+
+.encore-bright-accent-set {
+    --background-base: var(--spice-button);
+    --background-highlight: var(--spice-button-active);
+    --background-press: var(--spice-button-active);
+    --text-base: var(--spice-main);
+}
+
+/* The sidebar, the right panel and the now-playing bar. */
+.Root__nav-bar,
+.Root__right-sidebar {
+    background-color: var(--spice-sidebar);
+}
+
+.Root__now-playing-bar {
+    background-color: var(--spice-player);
+}
