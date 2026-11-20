@@ -3,7 +3,7 @@ import QtTest
 import "../config/BarProfileModel.js" as BarProfileModel
 import "../config/SchemaMigrations.js" as SchemaMigrations
 
-// Duplicating and deleting bar profiles from the panel.
+// Duplicating, renaming and deleting bar profiles from the panel.
 TestCase {
     name: "DuplicateDelete"
 
@@ -60,6 +60,51 @@ TestCase {
 
         compare(after.editingBarProfile, "talks");
         compare(BarProfileModel.duplicateNameError(after, " talks"), "exists");
+    }
+
+    // Renaming moves the profile, settings and all, to the new name and keeps
+    // editing it; the old name is gone.
+    function test_renamingMovesTheProfileToItsNewNameAndKeepsEditingIt() {
+        const state = started().appearance;
+        const editing = BarProfileModel.editProfile(state, "presentation");
+        const before = fixtures.withChanges(state, editing);
+
+        const after = fixtures.withChanges(before,
+            BarProfileModel.renameProfile(before, "presentation", "  talks "));
+
+        compare(after.editingBarProfile, "talks");
+        compare(after.barProfiles.talks, before.barProfiles.presentation);
+        compare(after.barProfiles.presentation, undefined);
+        verify(!BarProfileModel.isModified(after));
+    }
+
+    // Renaming a profile other than the edited one leaves the editing alone.
+    function test_renamingAnotherProfileKeepsTheEditedOne() {
+        const state = started().appearance;
+
+        const after = fixtures.withChanges(state, BarProfileModel.renameProfile(state, "media", "music"));
+
+        compare(after.editingBarProfile, state.editingBarProfile);
+        compare(after.barProfiles.music, state.barProfiles.media);
+    }
+
+    // A new name must be given, unused, and different from the current one.
+    function test_aRenameToAnEmptyTakenOrSameNameIsRefused() {
+        const state = started().appearance;
+
+        compare(BarProfileModel.renameNameError(state, "work", " "), "empty");
+        compare(BarProfileModel.renameNameError(state, "work", "media"), "exists");
+        compare(BarProfileModel.renameNameError(state, "work", " work "), "same");
+        compare(BarProfileModel.renameNameError(state, "work", "office"), "");
+        compare(BarProfileModel.renameProfile(state, "work", "media"), null);
+        compare(BarProfileModel.renameProfile(state, "work", "work"), null);
+        compare(BarProfileModel.renameProfile(state, "nowhere", "office"), null);
+    }
+
+    function test_renamingIsUnavailableWithPendingChanges() {
+        const state = fixtures.edited(started().appearance, { barHeight: 44 });
+
+        compare(BarProfileModel.renameProfile(state, state.editingBarProfile, "office"), null);
     }
 
     function test_duplicatingIsUnavailableWithPendingChanges() {

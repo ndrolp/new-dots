@@ -498,6 +498,39 @@ function duplicateProfile(state, profileName, newName) {
     return { barProfiles: profiles, editingBarProfile: newName, pendingProfile: null };
 }
 
+// Why `newName` cannot be `profileName`'s new name: "empty", "same" (its
+// current name), "exists" (another profile has it), or "" if it can. Names are
+// trimmed.
+function renameNameError(state, profileName, newName) {
+    const name = String(newName || "").trim();
+
+    if (name.length === 0)
+        return "empty";
+    if (name === profileName)
+        return "same";
+    return state.barProfiles[name] !== undefined ? "exists" : "";
+}
+
+// Changes that move the saved `profileName` to `newName` (trimmed), keeping
+// it edited if it was. Rejected (null) with pending changes, an unknown
+// profile or a name renameNameError refuses. The monitors drawing it name it
+// in monitors.json, which the caller updates (monitorsUsingProfile).
+function renameProfile(state, profileName, newName) {
+    if (!canDuplicateOrDelete(state) || !state.barProfiles[profileName]
+            || renameNameError(state, profileName, newName) !== "")
+        return null;
+
+    newName = String(newName).trim();
+    const profiles = cloneValue(state.barProfiles);
+    profiles[newName] = profiles[profileName];
+    delete profiles[profileName];
+
+    const changes = { barProfiles: profiles, pendingProfile: null };
+    if (state.editingBarProfile === profileName)
+        changes.editingBarProfile = newName;
+    return changes;
+}
+
 // The monitors that draw `profileName`.
 function monitorsUsingProfile(displaySettings, profileName) {
     return Object.keys(displaySettings || {}).filter(monitorName =>

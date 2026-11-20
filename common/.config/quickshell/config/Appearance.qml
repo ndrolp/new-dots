@@ -126,6 +126,17 @@ QtObject {
         applyChanges(BarProfileModel.duplicateProfile(barProfileState, editingBarProfile, newName));
     }
 
+    // Renames the edited profile to `newName`. Ignored with pending changes or
+    // a name renameNameError refuses; the monitors drawing it are the caller's
+    // to move (BarProfileModel.renameProfile).
+    function renameBarProfile(newName) {
+        applyChanges(BarProfileModel.renameProfile(barProfileState, editingBarProfile, newName));
+    }
+
+    function renameNameError(newName) {
+        return BarProfileModel.renameNameError(barProfileState, editingBarProfile, newName);
+    }
+
     // Removes `profileName` unless deleteBarProfileRejection refuses;
     // `displaySettings` comes from monitors.json.
     function deleteBarProfile(profileName, displaySettings) {

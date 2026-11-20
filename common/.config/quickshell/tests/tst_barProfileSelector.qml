@@ -66,6 +66,15 @@ TestCase {
                     calls = calls.concat([call]);
                 }
 
+                function renameNameError(name) {
+                    return name.trim() === "" ? "empty" : name.trim() === editingBarProfile ? "same"
+                        : barProfiles[name.trim()] ? "exists" : "";
+                }
+
+                function renameBarProfile(name) {
+                    record(["rename", name]);
+                }
+
                 function duplicateNameError(name) {
                     return name.trim() === "" ? "empty" : barProfiles[name.trim()] ? "exists" : "";
                 }
@@ -99,10 +108,26 @@ TestCase {
                 }
             }
 
+            // Stands in for Config.Monitors: two monitors draw "work".
+            QtObject {
+                id: monitors
+
+                property var displaySettings: ({
+                    "AOC": { barProfile: "work" },
+                    "Philips": { barProfile: "media" },
+                    "Laptop": { barProfile: "work" }
+                })
+
+                function setDisplaySetting(monitor, setting, value) {
+                    appearance.record(["monitor", monitor, setting, value]);
+                }
+            }
+
             Panels.BarProfileSelector {
                 id: selector
 
                 appearance: appearance
+                monitors: monitors
             }
         }
     }
@@ -170,6 +195,34 @@ TestCase {
 
         verify(textOf(built.item, "A profile with that name already exists."));
         button(built.item, "Create").activated();
+        compare(built.appearance.calls, []);
+    }
+
+    // Renaming asks for the new name, starting from the current one, and
+    // moves every monitor drawing the profile to it.
+    function test_renamingAsksForANameAndMovesItsMonitorsToIt() {
+        const built = make();
+
+        button(built.item, "Rename").activated();
+        const field = all(built.item, child => child instanceof TextInput && child.visible)[0];
+        compare(field.text, "work");
+        verify(!button(built.item, "Rename profile").enabled);
+
+        field.text = "office";
+        button(built.item, "Rename profile").activated();
+        compare(built.appearance.calls, [["rename", "office"],
+            ["monitor", "AOC", "barProfile", "office"], ["monitor", "Laptop", "barProfile", "office"]]);
+    }
+
+    function test_renamingToAnExistingNameIsRefused() {
+        const built = make();
+
+        button(built.item, "Rename").activated();
+        const field = all(built.item, child => child instanceof TextInput && child.visible)[0];
+        field.text = "media";
+
+        verify(textOf(built.item, "A profile with that name already exists."));
+        button(built.item, "Rename profile").activated();
         compare(built.appearance.calls, []);
     }
 

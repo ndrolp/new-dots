@@ -4,8 +4,9 @@ import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 
 // The bar profile being edited, as a choice between the bar profiles, its
-// "modified" indicator, Save/Discard and Duplicate/Delete. While there are
-// pending changes the choice is locked and Duplicate and Delete are hidden.
+// "modified" indicator, Save/Discard and Duplicate/Rename/Delete. While there
+// are pending changes the choice is locked and Duplicate, Rename and Delete
+// are hidden.
 Column {
     id: root
 
@@ -16,10 +17,15 @@ Column {
     readonly property var profileChoices: BarProfileModel.profileChoices(appearance.barProfiles)
     readonly property var displaySettings: monitors ? monitors.displaySettings : ({})
 
-    // "" (none), "duplicate" (naming the copy) or "delete" (confirming or
-    // explaining why the edited profile cannot be deleted).
+    // "" (none), "duplicate" (naming the copy), "rename" (naming the edited
+    // profile anew) or "delete" (confirming or explaining why the edited
+    // profile cannot be deleted).
     property string action: ""
     readonly property string duplicateError: appearance.duplicateNameError(duplicateName.text)
+    // Why the name typed can't be used for the open action: Duplicate's or
+    // Rename's check ("empty", "exists", Rename's "same"), "" if it can.
+    readonly property string nameError: action === "rename"
+        ? appearance.renameNameError(duplicateName.text) : duplicateError
     readonly property string deleteRejection: appearance.deleteBarProfileRejection(
         appearance.editingBarProfile, displaySettings)
 
@@ -35,6 +41,33 @@ Column {
             return;
         appearance.duplicateBarProfile(duplicateName.text);
         action = "";
+    }
+
+    function startRename() {
+        duplicateName.text = appearance.editingBarProfile;
+        action = "rename";
+        duplicateName.forceActiveFocus();
+        duplicateName.selectAll();
+    }
+
+    // Renames the edited profile and moves the monitors drawing it to the new
+    // name, so they keep drawing it.
+    function confirmRename() {
+        if (nameError !== "")
+            return;
+        const newName = duplicateName.text.trim();
+        const drawing = BarProfileModel.monitorsUsingProfile(displaySettings, appearance.editingBarProfile);
+        appearance.renameBarProfile(newName);
+        for (const monitor of drawing)
+            monitors.setDisplaySetting(monitor, "barProfile", newName);
+        action = "";
+    }
+
+    function confirmName() {
+        if (action === "rename")
+            confirmRename();
+        else
+            confirmDuplicate();
     }
 
     function confirmDelete() {
@@ -120,6 +153,13 @@ Column {
             Panels.SettingsButton {
                 visible: !root.modified
                 appearance: root.appearance
+                label: "Rename"
+                onActivated: root.action === "rename" ? root.action = "" : root.startRename()
+            }
+
+            Panels.SettingsButton {
+                visible: !root.modified
+                appearance: root.appearance
                 label: "Delete"
                 labelColor: theme.red
                 onActivated: root.action = root.action === "delete" ? "" : "delete"
@@ -143,7 +183,7 @@ Column {
     }
 
     Row {
-        visible: root.action === "duplicate"
+        visible: root.action === "duplicate" || root.action === "rename"
         width: parent.width
         spacing: 4
 
@@ -153,7 +193,7 @@ Column {
             width: parent.width - createButton.width - cancelDuplicate.width - parent.spacing * 2 - 8
             appearance: root.appearance
             placeholderText: "New profile name"
-            onAccepted: root.confirmDuplicate()
+            onAccepted: root.confirmName()
             Keys.onEscapePressed: root.action = ""
         }
 
@@ -166,10 +206,10 @@ Column {
             id: createButton
 
             appearance: root.appearance
-            label: "Create"
+            label: root.action === "rename" ? "Rename profile" : "Create"
             labelColor: theme.accent
-            enabled: root.duplicateError === ""
-            onActivated: root.confirmDuplicate()
+            enabled: root.nameError === ""
+            onActivated: root.confirmName()
         }
 
         Panels.SettingsButton {
@@ -181,12 +221,14 @@ Column {
         }
     }
 
+    // An unchanged name needs no word: Rename is simply off.
     Panels.SettingsHint {
-        visible: root.action === "duplicate" && root.duplicateError !== ""
+        visible: (root.action === "duplicate" || root.action === "rename")
+            && root.nameError !== "" && root.nameError !== "same"
         width: parent.width
         appearance: root.appearance
-        text: root.duplicateError === "empty"
-            ? "Enter a name for the copy."
+        text: root.nameError === "empty"
+            ? (root.action === "rename" ? "Enter the new name." : "Enter a name for the copy.")
             : "A profile with that name already exists."
         color: theme.red
     }

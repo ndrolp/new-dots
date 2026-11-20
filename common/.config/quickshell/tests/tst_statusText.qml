@@ -32,13 +32,16 @@ TestCase {
         compare(StatusText.audioOutputIcon({}), "󰓃");
     }
 
-    function test_wifiIconHasFourSignalSteps() {
-        compare(StatusText.wifiIcon({ signalStrength: 90 }), "󰤨");
-        compare(StatusText.wifiIcon({ signalStrength: 75 }), "󰤨");
-        compare(StatusText.wifiIcon({ signalStrength: 74 }), "󰤥");
-        compare(StatusText.wifiIcon({ signalStrength: 50 }), "󰤥");
-        compare(StatusText.wifiIcon({ signalStrength: 30 }), "󰤢");
-        compare(StatusText.wifiIcon({ signalStrength: 10 }), "󰤟");
+    // Quickshell gives the signal strength from 0 to 1: five steps, from no
+    // bars to four, every 20%.
+    function test_wifiIconHasFiveSignalSteps() {
+        compare(StatusText.wifiIcon({ signalStrength: 1 }), String.fromCodePoint(0xF0928));
+        compare(StatusText.wifiIcon({ signalStrength: 0.8 }), String.fromCodePoint(0xF0928));
+        compare(StatusText.wifiIcon({ signalStrength: 0.79 }), String.fromCodePoint(0xF0925));
+        compare(StatusText.wifiIcon({ signalStrength: 0.6 }), String.fromCodePoint(0xF0925));
+        compare(StatusText.wifiIcon({ signalStrength: 0.45 }), String.fromCodePoint(0xF0922));
+        compare(StatusText.wifiIcon({ signalStrength: 0.25 }), String.fromCodePoint(0xF091F));
+        compare(StatusText.wifiIcon({ signalStrength: 0.1 }), String.fromCodePoint(0xF092F));
     }
 
     function test_connectedNetworkNameIsTheConnectedOne() {
@@ -106,15 +109,24 @@ TestCase {
         compare(StatusText.batteryStateLabel(battery("Unknown", 0.5), states), "Discharging");
     }
 
+    // The first connected device decides it: Wi-Fi shows its network's
+    // signal, a cable the cable.
     function test_networkIconShowsTheFirstConnectedDevice() {
         compare(StatusText.networkIcon([
-            { connected: false, wifi: true },
-            { connected: true, wifi: true }
-        ]), "󰤨");
+            { connected: false, wifi: true, signalStrength: 1 },
+            { connected: true, wifi: true, signalStrength: 0.5 }
+        ]), String.fromCodePoint(0xF0922));
         compare(StatusText.networkIcon([
             { connected: true, wifi: false },
-            { connected: true, wifi: true }
+            { connected: true, wifi: true, signalStrength: 1 }
         ]), "󰈀");
+    }
+
+    function test_networkIconFollowsTheWifiSignal() {
+        compare(StatusText.networkIcon([{ connected: true, wifi: true, signalStrength: 0.9 }]),
+            String.fromCodePoint(0xF0928));
+        compare(StatusText.networkIcon([{ connected: true, wifi: true, signalStrength: 0.3 }]),
+            String.fromCodePoint(0xF091F));
     }
 
     function test_networkIconShowsDisconnectedWithoutAConnection() {

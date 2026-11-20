@@ -34,15 +34,16 @@ function audioOutputIcon(output) {
     return "󰓃";
 }
 
-// The icon of a Wi-Fi network, by its signal strength (0 to 100).
+// The Wi-Fi glyphs by signal, from no bars to four. Codepoints, as the glyphs
+// look alike.
+const wifiSignalGlyphs = [0xF092F, 0xF091F, 0xF0922, 0xF0925, 0xF0928]
+    .map(codepoint => String.fromCodePoint(codepoint));
+
+// The icon of a Wi-Fi network, by its signal strength, from 0 to 1 as
+// Quickshell gives it: a bar every 20%.
 function wifiIcon(network) {
-    if (network.signalStrength >= 75)
-        return "󰤨";
-    if (network.signalStrength >= 50)
-        return "󰤥";
-    if (network.signalStrength >= 25)
-        return "󰤢";
-    return "󰤟";
+    const bars = Math.max(0, Math.min(4, Math.floor((network.signalStrength || 0) * 5)));
+    return wifiSignalGlyphs[bars];
 }
 
 // The name of the network that is connected, or "" when none is.
@@ -92,11 +93,12 @@ function batteryStateLabel(battery, states) {
 }
 
 // The network bar element's icon. `devices` are the network devices as
-// `{ connected, wifi }`; the first connected one decides it.
+// `{ connected, wifi, signalStrength }`, the strength of a Wi-Fi device's
+// connected network; the first connected one decides it.
 function networkIcon(devices) {
     for (let index = 0; index < devices.length; index++) {
         if (devices[index].connected)
-            return devices[index].wifi ? "󰤨" : "󰈀";
+            return devices[index].wifi ? wifiIcon(devices[index]) : "󰈀";
     }
 
     return "󰤭";
