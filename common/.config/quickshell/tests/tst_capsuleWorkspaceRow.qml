@@ -3,8 +3,9 @@ import QtTest
 import "../components/bar"
 
 // The capsule's workspace pills: one small pill per workspace of its monitor,
-// with no label, the active one wider and highlighted; a click on a pill
-// switches to its workspace.
+// with no label, the active one wider and highlighted, like the bar's
+// workspaces: an urgent one red, an occupied one bright and an empty one dim;
+// a click on a pill switches to its workspace.
 TestCase {
     name: "CapsuleWorkspaceRow"
     width: 300
@@ -17,10 +18,20 @@ TestCase {
         id: workspaces
 
         property int focused: 2
+        property var occupied: [1]
+        property var urgent: []
         property var switchedTo: []
 
         function isActive(id) {
             return id === focused;
+        }
+
+        function isOccupied(id) {
+            return occupied.indexOf(id) !== -1;
+        }
+
+        function isUrgent(id) {
+            return urgent.indexOf(id) !== -1;
         }
 
         function switchTo(id) {
@@ -45,7 +56,9 @@ TestCase {
                 y: 10
                 workspaceIds: [1, 2, 3]
                 workspaceService: workspaces
-                idleColor: "#ff0000"
+                occupiedColor: "#ff0000"
+                emptyColor: "#0000ff"
+                urgentColor: "#ffff00"
                 activeColor: "#00ff00"
                 appearance: ({
                     spacing: 4,
@@ -57,6 +70,8 @@ TestCase {
 
     function init() {
         workspaces.focused = 2;
+        workspaces.occupied = [1];
+        workspaces.urgent = [];
         workspaces.switchedTo = [];
     }
 
@@ -87,11 +102,25 @@ TestCase {
     function test_theActiveWorkspaceIsHighlightedAndFollowsChanges() {
         const built = createTemporaryObject(area, this);
 
-        compare(colorAt(built, 10 + 4, 10 + 2), { r: 1, g: 0, b: 0 });
         compare(colorAt(built, 10 + 20, 10 + 2), { r: 0, g: 1, b: 0 });
         workspaces.focused = 3;
         tryCompare(built.row.pills[2], "active", true);
         compare(built.row.pills[1].active, false);
+    }
+
+    // Like the bar's workspaces: one with windows stands out from an empty
+    // one, and one asking for attention is red until it is active.
+    function test_occupiedEmptyAndUrgentWorkspacesLookDifferent() {
+        const built = createTemporaryObject(area, this);
+
+        compare(colorAt(built, 10 + 4, 10 + 2), { r: 1, g: 0, b: 0 });
+        compare(colorAt(built, 10 + 36, 10 + 2), { r: 0, g: 0, b: 1 });
+        workspaces.urgent = [3];
+        tryCompare(built.row.pills[2], "urgent", true);
+        compare(colorAt(built, 10 + 36, 10 + 2), { r: 1, g: 1, b: 0 });
+        workspaces.focused = 3;
+        tryCompare(built.row.pills[2], "urgent", false);
+        compare(colorAt(built, 10 + 32, 10 + 2), { r: 0, g: 1, b: 0 });
     }
 
     // The pills are small, so each takes clicks a little past its edges.
