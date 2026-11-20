@@ -97,11 +97,12 @@ Variants {
             // causes (see CapsuleRouting.expanded); always false on other bar styles,
             // where nothing reads it. Its size changes as the row does,
             // animated, and the reserved space stays as it is collapsed.
-            // A popup inside holds it expanded until the popup closes.
+            // A popup inside doesn't hold it: like a dynamic island, the
+            // capsule then fits the popup and the row at rest, and hovering
+            // the row still expands it to switch popups.
             readonly property bool capsuleExpanded: CapsuleRouting.expanded({
                 hover: capsuleHover.expanded,
-                toggled: capsuleToggle.toggled,
-                popupInside: panel.activePopup !== ""
+                toggled: capsuleToggle.toggled
             })
             // Whether this window's capsule shows a change instead of its row:
             // for a moment after one (see CapsuleChange.qml), unless a popup
