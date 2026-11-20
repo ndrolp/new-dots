@@ -32,6 +32,8 @@ Scope {
     required property var osd
     // The control center module (modules/ControlCenter.qml).
     required property var controlCenter
+    // The wallpapers, for the wallpaper picker inside a capsule.
+    required property var wallpapers
 
     property var openPopup: OpenPopup.none
 
@@ -95,6 +97,7 @@ Scope {
         systemMonitor: root.systemMonitor
         workspaceService: root.workspaceService
         monitorSetups: root.monitorSetups
+        wallpapers: root.wallpapers
 
         onConfigRequested: function(screen, panelWindow) {
             root.settings.toggleOn(screen, panelWindow);
