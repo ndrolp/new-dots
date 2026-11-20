@@ -1,5 +1,353 @@
 {
     "barProfiles": {
+        "Bar": {
+            "activeWorkspaceHorizontalPadding": 5,
+            "archButtonHorizontalPadding": 6,
+            "barBorder": true,
+            "barElements": {
+                "center": [
+                    {
+                        "enabled": true,
+                        "id": "workspaces",
+                        "options": {
+                            "appCountVisible": false,
+                            "glyphs": [
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                ""
+                            ],
+                            "glyphsEnabled": false,
+                            "hideEmpty": false,
+                            "radius": 3,
+                            "verticalPadding": 10
+                        }
+                    }
+                ],
+                "left": [
+                    {
+                        "enabled": true,
+                        "id": "arch"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "systemMonitor"
+                    },
+                    {
+                        "enabled": false,
+                        "id": "currentApp"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "appMenu"
+                    }
+                ],
+                "right": [
+                    {
+                        "enabled": true,
+                        "id": "cava",
+                        "options": {
+                            "barCount": 15,
+                            "barWidth": 4,
+                            "color": "green"
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "media",
+                        "options": {
+                            "restTextVisible": true,
+                            "textVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "audio",
+                        "options": {
+                            "meterVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "bluetooth"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "network"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "battery",
+                        "options": {
+                            "restTextVisible": true,
+                            "textVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "clock"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "notifications",
+                        "options": {
+                            "badgeVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "recording"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "keepAwake"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "tray"
+                    }
+                ]
+            },
+            "barHeight": 36,
+            "barOpacity": 80,
+            "barPosition": "top",
+            "barStyle": "opaque",
+            "elementBorder": false,
+            "elementVerticalPadding": 8,
+            "groupBorder": false,
+            "groupHorizontalPadding": 4,
+            "groupRadius": 3,
+            "groupVerticalPadding": 0,
+            "horizontalPadding": 8,
+            "iconSize": 13,
+            "pillVerticalPadding": 2,
+            "pillsTransparent": false,
+            "radius": 3,
+            "spacing": 4,
+            "textSize": 13,
+            "transparentBarTopMargin": 7,
+            "workspaceButtonSize": 18,
+            "workspacePadding": 3
+        },
+        "island": {
+            "activeWorkspaceHorizontalPadding": 5,
+            "archButtonHorizontalPadding": 5,
+            "barBorder": true,
+            "barElements": {
+                "center": [
+                ],
+                "left": [
+                ],
+                "right": [
+                    {
+                        "enabled": true,
+                        "id": "audio",
+                        "options": {
+                            "iconVisible": true,
+                            "meterVisible": false,
+                            "restIconVisible": true,
+                            "restTextVisible": true,
+                            "textVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "network",
+                        "joinPrevious": true
+                    },
+                    {
+                        "enabled": true,
+                        "id": "clock",
+                        "joinPrevious": true,
+                        "options": {
+                            "iconVisible": true,
+                            "restIconVisible": true,
+                            "restTextVisible": true,
+                            "textVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "battery",
+                        "joinPrevious": true,
+                        "options": {
+                            "iconVisible": true,
+                            "restIconVisible": true,
+                            "restTextVisible": false,
+                            "textVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "notifications",
+                        "joinPrevious": true,
+                        "options": {
+                            "badgeVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "recording",
+                        "joinPrevious": true,
+                        "options": {
+                            "iconVisible": true,
+                            "restIconVisible": true,
+                            "restTextVisible": true,
+                            "textVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "keepAwake",
+                        "joinPrevious": true
+                    },
+                    {
+                        "enabled": true,
+                        "id": "bluetooth",
+                        "joinPrevious": true
+                    },
+                    {
+                        "enabled": true,
+                        "id": "workspaces",
+                        "joinPrevious": true,
+                        "options": {
+                            "appCountVisible": false,
+                            "glyphs": [
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                ""
+                            ],
+                            "glyphsEnabled": false,
+                            "hideEmpty": false,
+                            "radius": 8,
+                            "verticalPadding": 4
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "cava",
+                        "options": {
+                            "barCount": 12,
+                            "barWidth": 3,
+                            "color": "blue"
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "media",
+                        "options": {
+                            "iconVisible": true,
+                            "restIconVisible": true,
+                            "restTextVisible": true,
+                            "textVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "systemMonitor",
+                        "options": {
+                            "iconVisible": true,
+                            "restIconVisible": true,
+                            "restTextVisible": true,
+                            "textVisible": true
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "id": "arch"
+                    },
+                    {
+                        "enabled": false,
+                        "id": "currentApp",
+                        "options": {
+                            "iconVisible": true,
+                            "restIconVisible": true,
+                            "restTextVisible": true,
+                            "textVisible": true
+                        }
+                    },
+                    {
+                        "enabled": false,
+                        "id": "appMenu"
+                    },
+                    {
+                        "enabled": true,
+                        "id": "tray"
+                    }
+                ]
+            },
+            "barHeight": 28,
+            "barOpacity": 68,
+            "barPosition": "top",
+            "barStyle": "capsule",
+            "capsulePlaces": {
+                "appMenu": "hidden",
+                "arch": "hidden",
+                "audio": "hidden",
+                "battery": "shown",
+                "bluetooth": "hidden",
+                "cava": "hidden",
+                "clock": "shown",
+                "currentApp": "hidden",
+                "keepAwake": "hidden",
+                "media": "hidden",
+                "network": "shown",
+                "notifications": "hidden",
+                "recording": "liveRight",
+                "systemMonitor": "hidden",
+                "tray": "hidden"
+            },
+            "capsuleVerticalPadding": 0,
+            "elementBorder": false,
+            "elementVerticalPadding": 8,
+            "groupBorder": false,
+            "groupHorizontalPadding": 4,
+            "groupRadius": 8,
+            "groupVerticalPadding": 0,
+            "horizontalPadding": 14,
+            "iconSize": 13,
+            "pillVerticalPadding": 0,
+            "pillsTransparent": true,
+            "radius": 8,
+            "spacing": 4,
+            "textSize": 13,
+            "transparentBarTopMargin": 8,
+            "workspaceButtonSize": 18,
+            "workspacePadding": 3
+        },
         "media": {
             "activeWorkspaceHorizontalPadding": 6,
             "archButtonHorizontalPadding": 6,
@@ -153,345 +501,6 @@
             "spacing": 4,
             "textSize": 13,
             "transparentBarTopMargin": 10,
-            "workspaceButtonSize": 18,
-            "workspacePadding": 3
-        },
-        "minimal": {
-            "activeWorkspaceHorizontalPadding": 5,
-            "archButtonHorizontalPadding": 6,
-            "barBorder": true,
-            "barElements": {
-                "center": [
-                    {
-                        "enabled": true,
-                        "id": "workspaces",
-                        "options": {
-                            "appCountVisible": false,
-                            "glyphs": [
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                ""
-                            ],
-                            "glyphsEnabled": false,
-                            "hideEmpty": false,
-                            "radius": 3,
-                            "verticalPadding": 10
-                        }
-                    }
-                ],
-                "left": [
-                    {
-                        "enabled": true,
-                        "id": "arch"
-                    },
-                    {
-                        "enabled": true,
-                        "id": "systemMonitor"
-                    },
-                    {
-                        "enabled": false,
-                        "id": "currentApp"
-                    },
-                    {
-                        "enabled": true,
-                        "id": "appMenu"
-                    }
-                ],
-                "right": [
-                    {
-                        "enabled": true,
-                        "id": "cava",
-                        "options": {
-                            "barCount": 15,
-                            "barWidth": 4,
-                            "color": "green"
-                        }
-                    },
-                    {
-                        "enabled": true,
-                        "id": "media",
-                        "options": {
-                            "restTextVisible": true,
-                            "textVisible": true
-                        }
-                    },
-                    {
-                        "enabled": true,
-                        "id": "audio",
-                        "options": {
-                            "meterVisible": true
-                        }
-                    },
-                    {
-                        "enabled": true,
-                        "id": "bluetooth"
-                    },
-                    {
-                        "enabled": true,
-                        "id": "network"
-                    },
-                    {
-                        "enabled": true,
-                        "id": "battery",
-                        "options": {
-                            "restTextVisible": true,
-                            "textVisible": true
-                        }
-                    },
-                    {
-                        "enabled": true,
-                        "id": "clock"
-                    },
-                    {
-                        "enabled": true,
-                        "id": "notifications",
-                        "options": {
-                            "badgeVisible": true
-                        }
-                    },
-                    {
-                        "enabled": true,
-                        "id": "recording"
-                    },
-                    {
-                        "enabled": true,
-                        "id": "keepAwake"
-                    },
-                    {
-                        "enabled": true,
-                        "id": "tray"
-                    }
-                ]
-            },
-            "barHeight": 36,
-            "barOpacity": 80,
-            "barPosition": "top",
-            "barStyle": "opaque",
-            "elementBorder": false,
-            "elementVerticalPadding": 8,
-            "groupBorder": false,
-            "groupHorizontalPadding": 4,
-            "groupRadius": 3,
-            "groupVerticalPadding": 0,
-            "horizontalPadding": 8,
-            "iconSize": 13,
-            "pillVerticalPadding": 2,
-            "pillsTransparent": false,
-            "radius": 3,
-            "spacing": 4,
-            "textSize": 13,
-            "transparentBarTopMargin": 7,
-            "workspaceButtonSize": 18,
-            "workspacePadding": 3
-        },
-        "presentation": {
-            "activeWorkspaceHorizontalPadding": 5,
-            "archButtonHorizontalPadding": 5,
-            "barBorder": true,
-            "barElements": {
-                "center": [
-                    {
-                        "enabled": false,
-                        "id": "currentApp",
-                        "options": {
-                            "iconVisible": true,
-                            "restIconVisible": true,
-                            "restTextVisible": true,
-                            "textVisible": true
-                        }
-                    },
-                    {
-                        "enabled": false,
-                        "id": "appMenu"
-                    }
-                ],
-                "left": [
-                    {
-                        "enabled": true,
-                        "id": "arch"
-                    },
-                    {
-                        "enabled": false,
-                        "id": "systemMonitor",
-                        "options": {
-                            "iconVisible": true,
-                            "restIconVisible": true,
-                            "restTextVisible": true,
-                            "textVisible": true
-                        }
-                    },
-                    {
-                        "enabled": true,
-                        "id": "media",
-                        "options": {
-                            "iconVisible": true,
-                            "restIconVisible": true,
-                            "restTextVisible": true,
-                            "textVisible": true
-                        }
-                    },
-                    {
-                        "enabled": false,
-                        "id": "cava",
-                        "options": {
-                            "barCount": 12,
-                            "barWidth": 3,
-                            "color": "blue"
-                        }
-                    },
-                    {
-                        "enabled": true,
-                        "id": "workspaces",
-                        "options": {
-                            "appCountVisible": false,
-                            "glyphs": [
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                "",
-                                ""
-                            ],
-                            "glyphsEnabled": false,
-                            "hideEmpty": false,
-                            "radius": 8,
-                            "verticalPadding": 4
-                        }
-                    }
-                ],
-                "right": [
-                    {
-                        "enabled": true,
-                        "id": "audio",
-                        "options": {
-                            "iconVisible": true,
-                            "meterVisible": false,
-                            "restIconVisible": true,
-                            "restTextVisible": true,
-                            "textVisible": true
-                        }
-                    },
-                    {
-                        "enabled": true,
-                        "id": "network"
-                    },
-                    {
-                        "enabled": true,
-                        "id": "clock",
-                        "options": {
-                            "iconVisible": true,
-                            "restIconVisible": false,
-                            "restTextVisible": true,
-                            "textVisible": true
-                        }
-                    },
-                    {
-                        "enabled": true,
-                        "id": "battery",
-                        "options": {
-                            "iconVisible": true,
-                            "restIconVisible": true,
-                            "restTextVisible": false,
-                            "textVisible": true
-                        }
-                    },
-                    {
-                        "enabled": true,
-                        "id": "notifications",
-                        "options": {
-                            "badgeVisible": true
-                        }
-                    },
-                    {
-                        "enabled": true,
-                        "id": "recording",
-                        "options": {
-                            "iconVisible": true,
-                            "restIconVisible": true,
-                            "restTextVisible": true,
-                            "textVisible": true
-                        }
-                    },
-                    {
-                        "enabled": true,
-                        "id": "keepAwake"
-                    },
-                    {
-                        "enabled": true,
-                        "id": "bluetooth"
-                    },
-                    {
-                        "enabled": true,
-                        "id": "tray"
-                    }
-                ]
-            },
-            "barHeight": 30,
-            "barOpacity": 70,
-            "barPosition": "top",
-            "barStyle": "capsule",
-            "capsulePlaces": {
-                "appMenu": "hidden",
-                "arch": "hidden",
-                "audio": "hidden",
-                "battery": "shown",
-                "bluetooth": "hidden",
-                "cava": "hidden",
-                "clock": "shown",
-                "currentApp": "hidden",
-                "keepAwake": "hidden",
-                "media": "hidden",
-                "network": "shown",
-                "notifications": "hidden",
-                "recording": "liveRight",
-                "systemMonitor": "hidden",
-                "tray": "hidden"
-            },
-            "elementBorder": false,
-            "elementVerticalPadding": 8,
-            "groupBorder": false,
-            "groupHorizontalPadding": 4,
-            "groupRadius": 8,
-            "groupVerticalPadding": 0,
-            "horizontalPadding": 8,
-            "iconSize": 13,
-            "pillVerticalPadding": 2,
-            "pillsTransparent": true,
-            "radius": 8,
-            "spacing": 4,
-            "textSize": 13,
-            "transparentBarTopMargin": 8,
             "workspaceButtonSize": 18,
             "workspacePadding": 3
         },
