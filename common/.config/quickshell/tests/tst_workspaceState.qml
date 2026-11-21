@@ -149,4 +149,20 @@ TestCase {
         compare(WorkspaceState.scrollTarget([1, 3, 7], 8, 1), null);
         compare(WorkspaceState.scrollTarget([], 1, 1), null);
     }
+
+    // A scroll step switches the service to the target from the workspace
+    // the screen's monitor shows; past either end it switches nowhere.
+    function test_aScrollStepSwitchesFromTheShownWorkspace() {
+        const switched = [];
+        const service = {
+            activeWorkspaceIdForScreen: screen => screen === "screen" ? 3 : -1,
+            switchTo: id => switched.push(id)
+        };
+
+        WorkspaceState.scroll(service, "screen", [1, 3, 7], 1);
+        WorkspaceState.scroll(service, "screen", [1, 3, 7], -1);
+        WorkspaceState.scroll(service, "screen", [3], 1);
+
+        compare(switched, [7, 1]);
+    }
 }

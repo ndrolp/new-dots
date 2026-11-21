@@ -41,12 +41,8 @@ Row {
     // The pills take a scroll a little past their edges, as they take clicks.
     Components.WheelStepHandler {
         margin: root.spacing / 2
-        onStepped: step => {
-            const target = WorkspaceState.scrollTarget(root.workspaceIds,
-                root.workspaceService.activeWorkspaceIdForScreen(root.monitorScreen), step);
-            if (target !== null)
-                root.workspaceService.switchTo(target);
-        }
+        onStepped: step => WorkspaceState.scroll(root.workspaceService, root.monitorScreen,
+            root.workspaceIds, step)
     }
 
     Repeater {

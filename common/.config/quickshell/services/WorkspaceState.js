@@ -53,6 +53,17 @@ function scrollTarget(shown, current, step) {
     return ahead.length === 0 ? null : step > 0 ? ahead[0] : ahead[ahead.length - 1];
 }
 
+// A scroll step (1 or -1) over a monitor's workspaces carried out: from the
+// workspace `screen`'s monitor shows, `workspaceService` (WorkspaceService.qml,
+// or anything with activeWorkspaceIdForScreen and switchTo) switches to the
+// scrollTarget among `shown`; past either end nothing happens. The bar's
+// workspaces element and the capsule's pills both scroll through this.
+function scroll(workspaceService, screen, shown, step) {
+    const target = scrollTarget(shown, workspaceService.activeWorkspaceIdForScreen(screen), step);
+    if (target !== null)
+        workspaceService.switchTo(target);
+}
+
 function focusWorkspaceDispatch(workspace) {
     return "hl.dsp.focus({ workspace = " + workspace + " })";
 }

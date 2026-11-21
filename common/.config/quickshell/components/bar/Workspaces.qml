@@ -63,12 +63,8 @@ Rectangle {
     // Scrolling goes to the next or previous workspace it shows, at most one
     // per touchpad gesture, stopping at either end.
     Components.WheelStepHandler {
-        onStepped: step => {
-            const target = WorkspaceState.scrollTarget(root.shownWorkspaceIds,
-                root.workspaceService.activeWorkspaceIdForScreen(root.monitorScreen), step);
-            if (target !== null)
-                root.workspaceService.switchTo(target);
-        }
+        onStepped: step => WorkspaceState.scroll(root.workspaceService, root.monitorScreen,
+            root.shownWorkspaceIds, step)
     }
 
     ElementStack {

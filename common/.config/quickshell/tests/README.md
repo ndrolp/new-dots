@@ -165,7 +165,8 @@ rotation (`components/panels/WorkspaceOverview.js`; `WorkspaceOverview.qml`,
 `WorkspaceMiniature.qml` and `MiniatureWindow.qml` need Quickshell and aren't
 tested here), which windows a miniature shows and what focusing, moving a window
 and creating a workspace dispatch, where a scroll over a monitor's workspaces
-goes (`services/WorkspaceState.js`;
+goes and the switch one step makes, shared by the bar's workspaces element
+and the capsule's pills (`services/WorkspaceState.js`;
 `WorkspaceService.qml` needs Quickshell and isn't tested here), a monitor's
 heading and when its + shows (`components/panels/WorkspaceMonitorHeader.qml`),
 what dropping a window on the new workspace slot and clicking it do
