@@ -51,3 +51,15 @@ var elementsWithoutPopup = Object.freeze(["arch", "workspaces", "currentApp", "r
 function opensPopup(element) {
     return !elementsWithoutPopup.includes(element);
 }
+
+// Scrolling over the media element: a step (WheelSteps.take) forward skips
+// the player it shows to the next track, one back to the previous one, where
+// the player can.
+function skipTrack(player, step) {
+    if (!player)
+        return;
+    if (step > 0 && player.canGoNext)
+        player.next();
+    else if (step < 0 && player.canGoPrevious)
+        player.previous();
+}

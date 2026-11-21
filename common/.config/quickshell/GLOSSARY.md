@@ -44,6 +44,10 @@ _Avoid_: Wallpaper picker, carrusel
 El bar element que muestra el uso de CPU y memoria. No confundir con el desktop widget *System*.
 _Avoid_: System (para el elemento de la barra)
 
+**Media** (elemento de media):
+El bar element que muestra el título de lo que suena en el reproductor que sigue (el que suena, o si no el primero). Pulsarlo abre su popup; hacer scroll sobre él pasa a la pista siguiente (hacia abajo) o a la anterior (hacia arriba) de ese reproductor, con cualquier estilo de barra y también como live element. Como mucho una pista por gesto: una muesca de la rueda o un deslizamiento del touchpad, por largo que sea y con su inercia, salta una sola pista. No confundir con la *media card* del control center ni con la *media info* del desktop widget de cava.
+_Avoid_: Now playing, reproductor (para el elemento de la barra)
+
 **Cava**:
 El bar element que dibuja lo que suena por la audio output actual como barras de frecuencia que se mueven con lo que suena. Se oculta mientras no suena nada y vuelve a aparecer en cuanto hay sonido. No confundir con el bar element *audio*, que muestra y cambia el volumen.
 _Avoid_: Visualizer, waveform, espectro

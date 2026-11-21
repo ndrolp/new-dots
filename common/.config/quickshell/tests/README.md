@@ -56,7 +56,11 @@ on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
 (`components/VolumeText.js`), what the popups and bar elements show for the
 media position, audio outputs, Wi-Fi, the battery and the network
 and how a value stands on a side bar (`components/StatusText.js`) and what the audio bar element shows and how
-wide it is (`components/bar/AudioLevel.qml`), how the Cava bar element
+wide it is (`components/bar/AudioLevel.qml`), how scrolling turns into
+steps, at most one per wheel notch or touchpad swipe, its momentum and a
+touchpad with no scroll phases included (`components/bar/WheelSteps.js`),
+and that a step over the media bar element skips its player to the next or
+previous track where it can (`BarElementItems.skipTrack`), how the Cava bar element
 reads cava and tries it again when it fails (`services/CavaOutput.js`) and
 what it draws, from the bottom or from the side, and the track progress painted on its bars (`components/bar/CavaBars.qml`), what the Cava desktop widget shows of the player: the media info, the progress line and when they show (`components/widgets/CavaMedia.js`, `CavaMediaInfo.qml`), how a docked bar zone hangs
 from the screen edge the bar sits on and keeps its sides on the screen's edge
