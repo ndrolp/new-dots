@@ -3,7 +3,7 @@ import QtTest
 import "../components/panels/OsdChange.js" as OsdChange
 import "../services/KeepAwakeState.js" as KeepAwakeState
 
-// The six changes the OSD shows, and the focused monitor's capsule instead of
+// The changes the OSD shows, and the focused monitor's capsule instead of
 // it: what each one shows, the same in both.
 TestCase {
     name: "OsdChange"
@@ -56,7 +56,13 @@ TestCase {
                     level: null, highlighted: true, compact: true } },
             { tag: "keep-awake off", change: OsdChange.keepAwake(false, 60),
                 shown: { icon: KeepAwakeState.cup(false), tone: "muted", label: "Keep-awake off",
-                    level: null, highlighted: false, compact: true } }
+                    level: null, highlighted: false, compact: true } },
+            { tag: "do not disturb on", change: OsdChange.doNotDisturb(true),
+                shown: { icon: "󰂛", tone: "muted", label: "Do Not Disturb on", level: null,
+                    highlighted: true, compact: true } },
+            { tag: "do not disturb off", change: OsdChange.doNotDisturb(false),
+                shown: { icon: "󰂚", tone: "muted", label: "Do Not Disturb off", level: null,
+                    highlighted: false, compact: true } }
         ];
     }
 
