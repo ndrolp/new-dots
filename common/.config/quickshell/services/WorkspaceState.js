@@ -28,6 +28,21 @@ function windowSelector(address) {
     return "address:" + (address.startsWith("0x") ? address : "0x" + address);
 }
 
+// Where scrolling over a monitor's workspaces goes: the workspace after
+// `current` in `shown` for a step of 1, the one before it for -1. `shown` is
+// what the monitor shows, in ascending order; from a workspace it doesn't
+// show, the nearest shown one that way. Null past either end.
+function scrollTarget(shown, current, step) {
+    const index = shown.indexOf(current);
+    if (index !== -1) {
+        const target = index + step;
+        return target >= 0 && target < shown.length ? shown[target] : null;
+    }
+
+    const ahead = shown.filter(id => step > 0 ? id > current : id < current);
+    return ahead.length === 0 ? null : step > 0 ? ahead[0] : ahead[ahead.length - 1];
+}
+
 function focusWorkspaceDispatch(workspace) {
     return "hl.dsp.focus({ workspace = " + workspace + " })";
 }

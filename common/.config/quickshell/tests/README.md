@@ -101,8 +101,11 @@ capsule and above the row of a bottom one, centred on it, how it grows round a p
 inside it (`CapsulePlacement.js`), that its window grows at once for a popup inside and
 never shrinks back (`CapsuleWindowHold.qml`), that the
 pills are small and unlabelled, one per workspace in order, highlight the
-active one as it changes and switch workspace on a click
-(`CapsuleWorkspaceRow.qml`), and that a capsule sits only at the top or
+active one as it changes, switch workspace on a click and go to the next or
+previous one on a scroll, as the bar's workspaces element does, stopping at
+either end (`CapsuleWorkspaceRow.qml`, `Workspaces.qml`), that a mouse wheel
+steps once per notch and a touchpad gesture at most once
+(`components/WheelSteps.js`; `WheelStepHandler.qml` feeds it), and that a capsule sits only at the top or
 bottom, where zones, bar elements, group backgrounds and popup
 triggers sit along either axis of the bar, to the pixel the anchors they
 replaced put them at (`components/bar/BarLayout.js`; `BarContent.qml` itself
@@ -124,7 +127,8 @@ bind to it, and where a window sits in its miniature at any monitor scale or
 rotation (`components/panels/WorkspaceOverview.js`; `WorkspaceOverview.qml`,
 `WorkspaceMiniature.qml` and `MiniatureWindow.qml` need Quickshell and aren't
 tested here), which windows a miniature shows and what focusing, moving a window
-and creating a workspace dispatch (`services/WorkspaceState.js`;
+and creating a workspace dispatch, where a scroll over a monitor's workspaces
+goes (`services/WorkspaceState.js`;
 `WorkspaceService.qml` needs Quickshell and isn't tested here), a monitor's
 heading and when its + shows (`components/panels/WorkspaceMonitorHeader.qml`),
 what dropping a window on the new workspace slot and clicking it do

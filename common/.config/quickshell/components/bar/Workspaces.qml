@@ -3,6 +3,8 @@ import "../BarPosition.js" as BarPosition
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 import "BarLayout.js" as BarLayout
+import "../../services/WorkspaceState.js" as WorkspaceState
+import ".." as Components
 
 Rectangle {
     id: root
@@ -16,6 +18,16 @@ Rectangle {
 
     readonly property bool ownPill: !BarProfileModel.opaque(appearance) && !grouped
     readonly property var options: BarProfileModel.elementOptions(appearance.barElements, "workspaces")
+
+    // The workspaces it shows on its monitor, in order: all of them, or with
+    // hideEmpty only those active, with windows or asking for attention.
+    readonly property var shownWorkspaceIds: workspaceService.workspacesForScreen(
+        monitorScreen,
+        monitors.workspacesFor(workspaceService.monitorDescriptionForScreen(monitorScreen))
+    ).filter(workspaceId => !options.hideEmpty
+        || workspaceService.isActive(workspaceId)
+        || workspaceService.isOccupied(workspaceId)
+        || workspaceService.isUrgent(workspaceId))
 
     readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
     // How thick the buttons are across the bar: on an opaque bar they fill it
@@ -48,6 +60,17 @@ Rectangle {
     AlongBarBehavior on width { appearance: root.appearance }
     AlongBarBehavior on height { appearance: root.appearance }
 
+    // Scrolling goes to the next or previous workspace it shows, at most one
+    // per touchpad gesture, stopping at either end.
+    Components.WheelStepHandler {
+        onStepped: step => {
+            const target = WorkspaceState.scrollTarget(root.shownWorkspaceIds,
+                root.workspaceService.activeWorkspaceIdForScreen(root.monitorScreen), step);
+            if (target !== null)
+                root.workspaceService.switchTo(target);
+        }
+    }
+
     ElementStack {
         id: workspaceStack
 
@@ -64,13 +87,7 @@ Rectangle {
         }
 
         Repeater {
-            model: root.workspaceService.workspacesForScreen(
-                root.monitorScreen,
-                root.monitors.workspacesFor(root.workspaceService.monitorDescriptionForScreen(root.monitorScreen))
-            ).filter(workspaceId => !root.options.hideEmpty
-                || root.workspaceService.isActive(workspaceId)
-                || root.workspaceService.isOccupied(workspaceId)
-                || root.workspaceService.isUrgent(workspaceId))
+            model: root.shownWorkspaceIds
 
             delegate: Rectangle {
                 id: workspaceButton

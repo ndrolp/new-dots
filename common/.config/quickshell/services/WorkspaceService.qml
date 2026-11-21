@@ -72,6 +72,12 @@ QtObject {
         return workspaceIds;
     }
 
+    // The id of the workspace a screen's monitor shows, focused or not, or -1.
+    function activeWorkspaceIdForScreen(screen) {
+        const monitor = screen ? Hyprland.monitorFor(screen) : null;
+        return monitor?.activeWorkspace?.id ?? -1;
+    }
+
     function workspaceFor(id) {
         const workspaces = Hyprland.workspaces.values;
 

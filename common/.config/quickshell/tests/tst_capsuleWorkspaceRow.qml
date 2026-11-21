@@ -21,6 +21,12 @@ TestCase {
         property var occupied: [1]
         property var urgent: []
         property var switchedTo: []
+        // The workspace the row's monitor shows, which need not be focused.
+        property int shownOnMonitor: 2
+
+        function activeWorkspaceIdForScreen(screen) {
+            return screen === "monitor" ? shownOnMonitor : -1;
+        }
 
         function isActive(id) {
             return id === focused;
@@ -56,6 +62,7 @@ TestCase {
                 y: 10
                 workspaceIds: [1, 2, 3]
                 workspaceService: workspaces
+                monitorScreen: "monitor"
                 occupiedColor: "#ff0000"
                 emptyColor: "#0000ff"
                 urgentColor: "#ffff00"
@@ -73,6 +80,7 @@ TestCase {
         workspaces.occupied = [1];
         workspaces.urgent = [];
         workspaces.switchedTo = [];
+        workspaces.shownOnMonitor = 2;
     }
 
     function colorAt(item, x, y) {
@@ -131,5 +139,36 @@ TestCase {
         compare(workspaces.switchedTo, [3]);
         mouseClick(built.row.pills[0], 4, -1);
         compare(workspaces.switchedTo, [3, 1]);
+    }
+
+    // Down goes to the next workspace the monitor shows, up to the previous
+    // one, from the one it shows even while another monitor has focus.
+    function test_scrollingOverThePillsGoesToTheNextOrPreviousWorkspace() {
+        const built = createTemporaryObject(area, this);
+
+        workspaces.focused = 7;
+        mouseWheel(built.row, 20, 2, 0, -120);
+        compare(workspaces.switchedTo, [3]);
+        mouseWheel(built.row, 20, 2, 0, 120);
+        compare(workspaces.switchedTo, [3, 1]);
+    }
+
+    function test_scrollingPastEitherEndDoesNothing() {
+        const built = createTemporaryObject(area, this);
+
+        workspaces.shownOnMonitor = 3;
+        mouseWheel(built.row, 20, 2, 0, -120);
+        workspaces.shownOnMonitor = 1;
+        mouseWheel(built.row, 20, 2, 0, 120);
+        compare(workspaces.switchedTo, []);
+    }
+
+    // The pills are small, so they take a scroll a little past their edges,
+    // as they take clicks.
+    function test_scrollingJustPastThePillsStillCounts() {
+        const built = createTemporaryObject(area, this);
+
+        mouseWheel(built.row, 20, -1, 0, -120);
+        compare(workspaces.switchedTo, [3]);
     }
 }
