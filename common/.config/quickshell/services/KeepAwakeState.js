@@ -86,6 +86,18 @@ function timeLeftLabel(seconds) {
     return minutes + ":" + pad(secs);
 }
 
+// `seconds` left as a capsule's live element shows it beside the cup, in
+// whole minutes so it changes once a minute: "1h 12m", "42m", or "<1m" in
+// the last minute.
+function coarseTimeLeft(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 1)
+        return "<1m";
+    if (minutes < 60)
+        return minutes + "m";
+    return Math.floor(minutes / 60) + "h " + minutes % 60 + "m";
+}
+
 // What the OSD says when the keybind toggles keep-awake: off, on, or on with
 // the selected duration as the popup names it ("Keep-awake on · 1 h").
 function osdLabel(on, duration) {
