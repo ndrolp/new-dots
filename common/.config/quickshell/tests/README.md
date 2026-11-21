@@ -7,8 +7,9 @@ turns the two bar style switches into one bar style and keeps each saved
 profile's look (`tst_barStyleMigration.qml`), and the one that turns a capsule
 profile's list of shown bar elements into collapsed places
 (`tst_barProfileModel.qml`), and the one that splits the pomodoro out of the
-clock, right after it, in its group, on or off and placed in a capsule as the
-clock was (`tst_barElements.qml`). They also cover where
+clock, right after it, in its group and on or off as the clock was, and the
+one that places it live right in a capsule, after the recording indicator
+(`tst_barElements.qml`). They also cover where
 the bar sits on its screen: the edges its window is anchored to, the space it
 reserves (on a capsule, with the live elements it shows collapsed), where the margin goes and where its content sits, against its edge
 however tall a capsule's window grows, for every bar style on each Bar position
@@ -71,16 +72,17 @@ drawn, grows for an attached popup, keeps up with one that resizes and meets
 its joins on every Bar position
 (`components/bar/DockedSurface.qml`,
 `DockedZones.js`), which bar elements a collapsed capsule shows in its one
-row (the ones its profile chose, in the profile's order, else Arch, the clock,
-the pomodoro and the control center; the choice is kept with the profile by
+row (the ones its profile chose, in the profile's order, else Arch, the clock
+and the control center; the choice is kept with the profile by
 `BarProfileModel.js` and offered, on a capsule profile, for the elements the
 profile shows but the workspaces and the live ones by
 `BarElementsSettings.qml`, and a saved choice of those is ignored), which ones it shows expanded
 (all but the workspaces and the live ones, with their groups), which are its
 live elements and on which side of the workspace pills (media left, shown
 collapsed only while a track plays and expanded while any player exists, the
-recording indicator right, keep-awake hidden unless chosen, then shown
-collapsed only while on), never in its row, at 80% of the profile's sizes
+recording indicator then the pomodoro right, the pomodoro shown collapsed
+only while started, paused included, keep-awake hidden unless chosen, then
+shown collapsed only while on), never in its row, at 80% of the profile's sizes
 and out of any group, whose rest keeps one background
 (`components/bar/CapsuleElements.js` for the row, `LiveElements.js` for the
 live elements, `BarElementItems.js`), that only the

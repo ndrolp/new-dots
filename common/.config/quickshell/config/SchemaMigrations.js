@@ -660,13 +660,29 @@ function seedCapsuleNotifications(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
+// Step 21: the pomodoro can be a live element, and a capsule shows it live
+// right of the workspace pills, after the recording indicator where the
+// profile lists that before it. A profile without collapsed places gets the
+// defaults when it loads, which already place it there.
+function pomodoroLiveRight(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+    for (const profileName in migrated.barProfiles || {}) {
+        const places = migrated.barProfiles[profileName].capsulePlaces;
+        if (places && typeof places === "object")
+            places.pomodoro = "liveRight";
+    }
+
+    return { appearance: migrated, monitors: monitors };
+}
+
 const migrationSteps = [
     migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
     migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles, explicitMonitorEntries,
     moveOptionsOntoElements, renameElementVerticalPadding, seedControlCenterTiles,
     seedWorkspaceRadius, splitBarBorder, seedWorkspaceVerticalPadding,
     seedIconSize, seedGroupPadding, singleBarStyle, capsulePlacesFromShownElements,
-    textVisibleFromLegacyOptions, pomodoroBesideTheClock, seedCapsuleNotifications
+    textVisibleFromLegacyOptions, pomodoroBesideTheClock, seedCapsuleNotifications,
+    pomodoroLiveRight
 ];
 const schemaVersion = migrationSteps.length;
 

@@ -128,7 +128,7 @@ Item {
         "network": networkButton,
         "battery": batteryButton,
         "clock": clockButton,
-        "pomodoro": pomodoroButton
+        "pomodoro": pomodoroItem
     })
 
     // On a capsule, its live elements, beside its workspace pills
@@ -764,48 +764,54 @@ Item {
     }
 
     // The pomodoro's countdown, shown only while one is started: green while
-    // it runs, muted while paused. It opens the same popup as the clock.
-    Rectangle {
-        id: pomodoroButton
+    // it runs, muted while paused. It opens the same popup as the clock. As
+    // a capsule's live element it shows while started, paused included.
+    LiveCapableItem {
+        id: pomodoroItem
 
-        readonly property var size: root.sizeAround(pomodoroContent)
+        appearance: root.appearance
+        element: "pomodoro"
+        items: root
 
-        visible: root.itemVisible("pomodoro")
-        x: root.elementX("pomodoro")
-        y: root.elementY("pomodoro")
-        width: size.width
-        height: size.height
-        radius: root.appearance.radius
-        color: pomodoroHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("pomodoro") || root.appearance.pillsTransparent
-                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+        Rectangle {
+            id: pomodoroButton
 
-        border.width: root.appearance.elementBorder && !root.elementGrouped("pomodoro") ? 1 : 0
-        border.color: root.appearance.elementBorder ? theme.border : "transparent"
+            readonly property var size: root.sizeAround(pomodoroContent, pomodoroItem.sizes.thickness)
 
-        Behavior on color {
-            ColorAnimation { duration: root.appearance.motion.short }
-        }
+            width: size.width
+            height: size.height
+            radius: root.appearance.radius
+            color: pomodoroHover.hovered ? theme.surfaceHover
+                : root.elementGrouped("pomodoro") || root.appearance.pillsTransparent
+                    || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
 
-        HoverHandler {
-            id: pomodoroHover
-        }
+            border.width: root.appearance.elementBorder && !root.elementGrouped("pomodoro") ? 1 : 0
+            border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
-        IconValue {
-            id: pomodoroContent
+            Behavior on color {
+                ColorAnimation { duration: root.appearance.motion.short }
+            }
 
-            anchors.centerIn: parent
-            appearance: root.appearance
-            icon: "󰔟"
-            iconColor: root.pomodoro.running ? theme.green : theme.textMuted
-            iconSize: root.appearance.iconSize
-            valueSize: root.appearance.textSize
-            value: root.pomodoro.remainingLabel
-        }
+            HoverHandler {
+                id: pomodoroHover
+            }
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked: root.popupRequested("pomodoro")
+            IconValue {
+                id: pomodoroContent
+
+                anchors.centerIn: parent
+                appearance: root.appearance
+                icon: "󰔟"
+                iconColor: root.pomodoro.running ? theme.green : theme.textMuted
+                iconSize: pomodoroItem.sizes.iconSize
+                valueSize: pomodoroItem.sizes.textSize
+                value: root.pomodoro.remainingLabel
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: root.popupRequested("pomodoro")
+            }
         }
     }
 }

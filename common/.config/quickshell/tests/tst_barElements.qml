@@ -448,14 +448,21 @@ TestCase {
             { tag: "no player, expanded", element: "media", status: { expanded: true }, shown: false },
             { tag: "keep-awake on", element: "keepAwake", status: { keepAwakeOn: true }, shown: true },
             { tag: "keep-awake off", element: "keepAwake", status: {}, shown: false },
-            { tag: "keep-awake off, expanded", element: "keepAwake", status: { expanded: true }, shown: true }
+            { tag: "keep-awake off, expanded", element: "keepAwake", status: { expanded: true }, shown: true },
+            { tag: "pomodoro running or paused", element: "pomodoro", status: { pomodoroStarted: true },
+                shown: true },
+            { tag: "pomodoro cancelled or completed", element: "pomodoro", status: {}, shown: false },
+            { tag: "pomodoro not started, expanded", element: "pomodoro", status: { expanded: true },
+                shown: false }
         ];
     }
 
     function test_aLiveElementShowsCollapsedOnlyWhileActive(data) {
         const barElements = { left: [], right: [], center: [{ id: "recording", enabled: false },
-            { id: "media", enabled: false }, { id: "keepAwake", enabled: false }] };
-        const status = nothingGoingOn(Object.assign({ live: ["recording", "media", "keepAwake"] }, data.status));
+            { id: "media", enabled: false }, { id: "keepAwake", enabled: false },
+            { id: "pomodoro", enabled: false }] };
+        const status = nothingGoingOn(Object.assign({ live: ["recording", "media", "keepAwake", "pomodoro"] },
+            data.status));
 
         compare(BarElementItems.itemVisible(data.element, barElements, status), data.shown);
     }
@@ -825,28 +832,60 @@ TestCase {
         compare(groupedZone(profile.barElements, "left"), ["-clock", "-pomodoro"]);
     }
 
-    // A capsule shows the pomodoro collapsed wherever it showed the clock.
-    function test_migratingGivesThePomodoroTheClocksCollapsedPlace_data() {
+    // A profile of schema version 20, before the pomodoro could be live,
+    // brought to the current schema.
+    function migratedFromVersion20(profile) {
+        return SchemaMigrations.migrate({ schemaVersion: 20, barProfiles: { saved: profile } }, {})
+            .appearance.barProfiles.saved;
+    }
+
+    // A migrated capsule shows the pomodoro live right of the workspace
+    // pills, wherever it showed the clock; the other places stay.
+    function test_migratingPlacesThePomodoroLiveRight_data() {
         return [
-            { tag: "shown", place: "shown" },
-            { tag: "hidden", place: "hidden" }
+            { tag: "clock shown, from version 18", place: "shown", migrate: migratedFromVersion18 },
+            { tag: "clock hidden, from version 18", place: "hidden", migrate: migratedFromVersion18 },
+            { tag: "pomodoro shown, from version 20", place: "shown", migrate: migratedFromVersion20 },
+            { tag: "pomodoro hidden, from version 20", place: "hidden", migrate: migratedFromVersion20 }
         ];
     }
 
-    function test_migratingGivesThePomodoroTheClocksCollapsedPlace(data) {
-        const profile = migratedFromVersion18({ barStyle: "capsule",
-            capsulePlaces: { clock: data.place, battery: "shown" } });
+    function test_migratingPlacesThePomodoroLiveRight(data) {
+        const profile = data.migrate({ barStyle: "capsule",
+            capsulePlaces: { clock: data.place, pomodoro: data.place, recording: "liveRight", battery: "shown" } });
 
-        compare(profile.capsulePlaces.pomodoro, data.place);
+        compare(profile.capsulePlaces.pomodoro, "liveRight");
+        compare(profile.capsulePlaces.clock, data.place);
+        compare(profile.capsulePlaces.recording, "liveRight");
         compare(profile.capsulePlaces.battery, "shown");
     }
 
     // A profile that saved no places, or no bar elements, takes the defaults
-    // when it loads, which already place the pomodoro beside the clock.
-    function test_migratingLeavesAProfileWithoutPlacesOrElementsToTheDefaults() {
-        const profile = migratedFromVersion18({ barStyle: "capsule" });
+    // when it loads, which already place the pomodoro beside the clock and
+    // live right in a capsule.
+    function test_migratingLeavesAProfileWithoutPlacesOrElementsToTheDefaults_data() {
+        return [
+            { tag: "from version 18", migrate: migratedFromVersion18 },
+            { tag: "from version 20", migrate: migratedFromVersion20 }
+        ];
+    }
+
+    function test_migratingLeavesAProfileWithoutPlacesOrElementsToTheDefaults(data) {
+        const profile = data.migrate({ barStyle: "capsule" });
 
         compare(profile.capsulePlaces, undefined);
         compare(profile.barElements, undefined);
+    }
+
+    // A migrated default capsule shows, right of the pills from them
+    // outward, the recording indicator then the pomodoro.
+    function test_aMigratedCapsuleShowsThePomodoroAfterTheRecordingIndicator() {
+        const profile = migratedFromVersion18({ barStyle: "capsule",
+            barElements: { left: [], center: [{ id: "workspaces", enabled: true }], right: [
+                { id: "recording", enabled: true }, { id: "clock", enabled: true }] },
+            capsulePlaces: { clock: "shown", recording: "liveRight" } });
+
+        compare(BarProfileModel.capsulePlaceIds(profile.barElements, profile.capsulePlaces).live.right,
+            ["recording", "pomodoro"]);
     }
 }
