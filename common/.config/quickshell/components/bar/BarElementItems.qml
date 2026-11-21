@@ -13,10 +13,14 @@ import "BarElementItems.js" as BarElementItems
 import "BarLayout.js" as BarLayout
 import "LiveElements.js" as LiveElements
 import "../panels/ControlCenterNames.js" as Names
+import "../panels/MediaCard.js" as MediaCard
 import "RecordingIndicator.js" as RecordingIndicator
+import "PrivacyIndicator.js" as PrivacyIndicator
+import ".." as Components
 
 // The bar elements that need no component of their own (notifications,
-// recording, keep-awake, media, cava, audio, bluetooth, tray, network, battery and clock),
+// recording, privacy, keep-awake, media, cava, audio, bluetooth, tray, network, battery, clock
+// and pomodoro),
 // placed by the bar's single walk per zone (see BarContent).
 Item {
     id: root
@@ -31,6 +35,8 @@ Item {
     // The screens other apps share, with their start times
     // (services/ScreenShares.qml).
     required property var screenShares
+    // The apps using the microphone or a camera (services/DeviceCaptures.qml).
+    required property var deviceCaptures
     // The shared cava process (services/Cava.qml).
     required property var cava
     // Whether the bar holding these elements is shown on its monitor.
@@ -117,6 +123,7 @@ Item {
     readonly property var items: ({
         "notifications": notificationButton,
         "recording": recordingItem,
+        "privacy": privacyItem,
         "keepAwake": keepAwakeItem,
         "media": mediaItem,
         "cava": cavaElement,
@@ -125,7 +132,8 @@ Item {
         "tray": trayButton,
         "network": networkButton,
         "battery": batteryButton,
-        "clock": pomodoroButton
+        "clock": clockButton,
+        "pomodoro": pomodoroItem
     })
 
     // On a capsule, its live elements, beside its workspace pills
@@ -153,11 +161,13 @@ Item {
         recordings: recordings,
         keepAwakeOn: keepAwake.on,
         hasBattery: hasBattery,
-        cavaSilent: cava.silent
+        cavaSilent: cava.silent,
+        pomodoroStarted: pomodoro.started,
+        captures: deviceCaptures.captures
     })
 
-    // Enabled elements with nothing to show (no player, battery, recording
-    // or sound) are hidden, and so are live elements of a collapsed capsule
+    // Enabled elements with nothing to show (no player, battery, recording,
+    // sound or pomodoro started) are hidden, and so are live elements of a collapsed capsule
     // while they aren't active; see BarElementItems.js.
     function itemVisible(element) {
         return BarElementItems.itemVisible(element, appearance.barElements, elementStatus);
@@ -317,6 +327,59 @@ Item {
         }
     }
 
+    // The privacy indicator: the mic icon, the camera icon or both while an
+    // app uses them, hidden otherwise. It opens the popup listing the apps.
+    LiveCapableItem {
+        id: privacyItem
+
+        appearance: root.appearance
+        element: "privacy"
+        items: root
+
+        Rectangle {
+            id: privacyButton
+
+            readonly property var icons: PrivacyIndicator.icons(root.deviceCaptures.captures)
+            readonly property var size: root.sizeAround(privacyContent, privacyItem.sizes.thickness)
+
+            width: size.width
+            height: size.height
+            radius: root.appearance.radius
+            color: privacyHover.hovered ? theme.surfaceHover
+                : root.elementGrouped("privacy") || root.appearance.pillsTransparent
+                    || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+            border.width: root.appearance.elementBorder && !root.elementGrouped("privacy") ? 1 : 0
+            border.color: root.appearance.elementBorder ? theme.border : "transparent"
+
+            Behavior on color {
+                ColorAnimation { duration: root.appearance.motion.short }
+            }
+
+            HoverHandler {
+                id: privacyHover
+            }
+
+            // The mic and the camera, one after the other along the bar.
+            IconValue {
+                id: privacyContent
+
+                anchors.centerIn: parent
+                appearance: root.appearance
+                icon: privacyButton.icons[0] || ""
+                iconColor: theme.orange
+                iconSize: privacyItem.sizes.iconSize
+                value: privacyButton.icons[1] || ""
+                valueVisible: privacyButton.icons.length > 1
+                valueSize: privacyItem.sizes.iconSize
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: root.popupRequested("privacy")
+            }
+        }
+    }
+
     LiveCapableItem {
         id: keepAwakeItem
 
@@ -331,6 +394,7 @@ Item {
             keepAwake: root.keepAwake
             grouped: root.elementGrouped("keepAwake")
             sizes: keepAwakeItem.sizes
+            live: keepAwakeItem.live
             onPopupRequested: root.popupRequested("keepAwake")
         }
     }
@@ -434,6 +498,12 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 onClicked: root.popupRequested("media")
+
+                // Scrolling skips the player shown to the next or previous
+                // track, at most one per notch or touchpad gesture.
+                Components.WheelStepHandler {
+                    onStepped: step => MediaCard.skipTrack(root.player, step)
+                }
             }
         }
     }
@@ -709,8 +779,9 @@ Item {
         }
     }
 
+    // The clock opens the pomodoro's popup, where a pomodoro is started.
     Rectangle {
-        id: pomodoroButton
+        id: clockButton
 
         readonly property var size: root.sizeAround(clockContent)
 
@@ -735,61 +806,71 @@ Item {
             id: clockHover
         }
 
-        ElementStack {
+        Clock {
             id: clockContent
 
             anchors.centerIn: parent
             appearance: root.appearance
-            spacing: sideBar && !root.pomodoro.started ? 0 : 7
-
-            // Opens along the bar when a pomodoro starts.
-            Item {
-                id: pomodoroIndicator
-
-                readonly property var openSize: BarLayout.size(root.appearance,
-                    root.pomodoro.started
-                        ? BarLayout.itemLength(root.appearance, { width: pomodoroText.implicitWidth, height: pomodoroText.implicitHeight })
-                        : 0,
-                    clockContent.sideBar ? pomodoroText.width : pomodoroText.implicitHeight)
-
-                width: openSize.width
-                height: openSize.height
-                clip: true
-
-                AlongBarBehavior on width { appearance: root.appearance }
-                AlongBarBehavior on height { appearance: root.appearance }
-
-                ElementText {
-                    id: pomodoroText
-
-                    anchors.verticalCenter: clockContent.sideBar ? undefined : parent.verticalCenter
-                    appearance: root.appearance
-                    value: "󰔟  " + root.pomodoro.remainingLabel
-                    color: root.pomodoro.running ? theme.green : theme.textMuted
-                    opacity: root.pomodoro.started ? 1 : 0
-                    font.pixelSize: root.appearance.textSize
-                    font.bold: true
-
-                    Behavior on opacity {
-                        NumberAnimation {
-                            duration: root.appearance.motion.short
-                            easing.type: root.appearance.motion.easing
-                        }
-                    }
-                }
-            }
-
-            Clock {
-                appearance: root.appearance
-                color: theme.orange
-                iconVisible: root.shown("clock").icon
-                valueVisible: root.shown("clock").text
-            }
+            color: theme.orange
+            iconVisible: root.shown("clock").icon
+            valueVisible: root.shown("clock").text
         }
 
         MouseArea {
             anchors.fill: parent
             onClicked: root.popupRequested("pomodoro")
+        }
+    }
+
+    // The pomodoro's countdown, shown only while one is started: green while
+    // it runs, muted while paused. It opens the same popup as the clock. As
+    // a capsule's live element it shows while started, paused included.
+    LiveCapableItem {
+        id: pomodoroItem
+
+        appearance: root.appearance
+        element: "pomodoro"
+        items: root
+
+        Rectangle {
+            id: pomodoroButton
+
+            readonly property var size: root.sizeAround(pomodoroContent, pomodoroItem.sizes.thickness)
+
+            width: size.width
+            height: size.height
+            radius: root.appearance.radius
+            color: pomodoroHover.hovered ? theme.surfaceHover
+                : root.elementGrouped("pomodoro") || root.appearance.pillsTransparent
+                    || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+
+            border.width: root.appearance.elementBorder && !root.elementGrouped("pomodoro") ? 1 : 0
+            border.color: root.appearance.elementBorder ? theme.border : "transparent"
+
+            Behavior on color {
+                ColorAnimation { duration: root.appearance.motion.short }
+            }
+
+            HoverHandler {
+                id: pomodoroHover
+            }
+
+            IconValue {
+                id: pomodoroContent
+
+                anchors.centerIn: parent
+                appearance: root.appearance
+                icon: "󰔟"
+                iconColor: root.pomodoro.running ? theme.green : theme.textMuted
+                iconSize: pomodoroItem.sizes.iconSize
+                valueSize: pomodoroItem.sizes.textSize
+                value: root.pomodoro.remainingLabel
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: root.popupRequested("pomodoro")
+            }
         }
     }
 }

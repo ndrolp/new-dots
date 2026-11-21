@@ -26,6 +26,7 @@ Variants {
     required property var keepAwake
     required property var appMenu
     required property var screenShares
+    required property var deviceCaptures
     required property var cava
     required property var systemMonitor
     required property var workspaceService
@@ -39,6 +40,9 @@ Variants {
     signal popupClosed(string popup, var panelWindow)
     signal popupCloseRequested()
     signal audioOutputSelected(var output)
+    // A capsule hands back the notifications it can't show any more, to show
+    // as toasts (CapsuleNotifications.released).
+    signal notificationsReleased(var notifications)
 
     model: Quickshell.screens
 
@@ -74,6 +78,7 @@ Variants {
                 property bool elementBorder: bar.appearance.barProfileValue(panel.profileName, "elementBorder")
                 property bool groupBorder: bar.appearance.barProfileValue(panel.profileName, "groupBorder")
                 property int barOpacity: bar.appearance.barProfileValue(panel.profileName, "barOpacity")
+                property bool capsuleNotifications: bar.appearance.barProfileValue(panel.profileName, "capsuleNotifications")
                 // On a capsule, only the row it shows (see CapsuleElements.drawnElements).
                 property var barElements: CapsuleElements.drawnElements({
                     barStyle: panel.barAppearance.barStyle,
@@ -111,6 +116,35 @@ Variants {
             // for a moment after one (see CapsuleChange.qml), unless a popup
             // is inside, which a change never interrupts.
             readonly property bool showingChange: capsuleChange.showing && panel.activePopup === ""
+            // Whether this window's capsule is hidden, while its monitor's
+            // focused workspace has a real fullscreen window (see
+            // CapsuleRouting.hidden); always false on other bar styles. It
+            // fades out, takes no clicks and keeps its reserved space;
+            // modules/Bar.qml lists it so changes go to the OSD instead.
+            readonly property bool capsuleHidden: CapsuleRouting.hidden({
+                capsule: BarProfileModel.capsule(panel.barAppearance),
+                fullscreen: bar.workspaceService.hasFullscreenOn(panel.modelData)
+            })
+            // Whether this window's capsule can show new notifications (see
+            // CapsuleRouting.holdsNotifications, which
+            // CapsuleRouting.notificationTarget asks too). Once it can't,
+            // those it holds show as toasts.
+            readonly property bool holdsNotifications: CapsuleRouting.holdsNotifications({
+                visible: panel.visible,
+                capsule: BarProfileModel.capsule(panel.barAppearance),
+                capsuleHidden: panel.capsuleHidden,
+                popupInside: panel.activePopup !== "",
+                capsuleNotifications: panel.barAppearance.capsuleNotifications
+            })
+            onHoldsNotificationsChanged: {
+                if (!panel.holdsNotifications)
+                    capsuleNotifications.release();
+            }
+            // A popup inside the capsule closes with it.
+            onCapsuleHiddenChanged: {
+                if (panel.capsuleHidden && panel.activePopup !== "")
+                    bar.popupClosed(panel.activePopup, panel);
+            }
             property bool configOpen: bar.configOpen
             property string activePopup: bar.activePopupWindow === panel
                 ? bar.activePopup : ""
@@ -121,6 +155,7 @@ Variants {
             property var keepAwake: bar.keepAwake
             property var appMenu: bar.appMenu
             property var screenShares: bar.screenShares
+            property var deviceCaptures: bar.deviceCaptures
             property var cava: bar.cava
             property var systemMonitor: bar.systemMonitor
             property var workspaceService: bar.workspaceService
@@ -137,8 +172,10 @@ Variants {
             color: "transparent"
             // The whole window takes clicks, except on a capsule: only the
             // capsule does, a popup inside included, so clicks beside it reach
-            // the windows below.
-            readonly property var inputRegion: barContent.capsuleShape
+            // the windows below; none while it is hidden for fullscreen.
+            readonly property var inputRegion: panel.capsuleHidden
+                ? { x: 0, y: 0, width: 0, height: 0 }
+                : barContent.capsuleShape
                 ? CapsulePlacement.inputRegion(barContent.capsuleShape, { left: barContent.x, top: barContent.y })
                 : { x: 0, y: 0, width: panel.width, height: panel.height }
             mask: Region {
@@ -214,6 +251,30 @@ Variants {
                 capsuleChange.show(change);
             }
 
+            // The notifications this window's capsule shows; Do Not Disturb
+            // drops them, as it hides toasts.
+            CapsuleNotifications {
+                id: capsuleNotifications
+
+                onReleased: notifications => bar.notificationsReleased(notifications)
+            }
+
+            Connections {
+                target: bar.appearance
+
+                function onDoNotDisturbChanged() {
+                    if (bar.appearance.doNotDisturb)
+                        capsuleNotifications.clear();
+                }
+            }
+
+            // Shows a new notification in this window's capsule instead of as
+            // a toast; modules/Notifications.qml calls it on the focused
+            // monitor's (see CapsuleRouting.notificationTarget).
+            function showNotification(notification) {
+                capsuleNotifications.show(notification);
+            }
+
             // Expands this window's capsule, or collapses it if SUPER+I
             // expanded it; modules/Bar.qml calls it on the focused monitor's.
             function toggleCapsule() {
@@ -224,6 +285,7 @@ Variants {
                 id: barBackground
 
                 anchors.fill: parent
+                opacity: panel.capsuleHidden ? 0 : 1
                 color: !BarProfileModel.opaque(panel.barAppearance)
                     ? "transparent" : Qt.rgba(theme.background.r, theme.background.g,
                         theme.background.b, panel.barAppearance.barOpacity / 100)
@@ -231,6 +293,13 @@ Variants {
                 Behavior on color {
                     ColorAnimation {
                         duration: panel.barAppearance.motion.long
+                        easing.type: panel.barAppearance.motion.easing
+                    }
+                }
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: panel.barAppearance.motion.short
                         easing.type: panel.barAppearance.motion.easing
                     }
                 }
@@ -275,6 +344,7 @@ Variants {
                     keepAwake: panel.keepAwake
                     appMenu: panel.appMenu
                     screenShares: panel.screenShares
+                    deviceCaptures: panel.deviceCaptures
                     cava: panel.cava
                     barVisible: panel.visible
                     systemMonitor: panel.systemMonitor
@@ -305,11 +375,13 @@ Variants {
                 // The pill row can arrive a moment before the capsule's place.
                 visible: place !== null && barContent.capsulePlace !== null
                     && barContent.capsulePlace.width > 0
+                opacity: barBackground.opacity
                 x: place ? barContent.x + place.x : 0
                 y: place ? barContent.y + place.y : 0
                 workspaceIds: panel.workspaceService.workspacesForScreen(panel.screen,
                     panel.monitors.workspacesFor(panel.monitorDescription))
                 workspaceService: panel.workspaceService
+                monitorScreen: panel.screen
                 appearance: panel.barAppearance
 
                 AlongBarBehavior on x { appearance: panel.barAppearance }
@@ -325,10 +397,12 @@ Variants {
                 activePopup: panel.activePopup
                 pomodoro: panel.pomodoro
                 keepAwake: panel.keepAwake
+                deviceCaptures: panel.deviceCaptures
                 appMenu: panel.appMenu
                 systemMonitor: panel.systemMonitor
                 controlCenter: bar.controlCenter
                 capsuleFeatures: bar.capsuleFeatures
+                capsuleNotifications: capsuleNotifications
 
                 onPopupClosed: function(popup) {
                     bar.popupClosed(popup, panel);

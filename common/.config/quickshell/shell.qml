@@ -87,6 +87,10 @@ ShellRoot {
         id: screenShares
     }
 
+    Services.DeviceCaptures {
+        id: deviceCaptures
+    }
+
     Services.MonitorSetups {
         id: monitorSetups
 
@@ -170,6 +174,10 @@ ShellRoot {
         osd: osd
     }
 
+    Modules.PowerWatch {
+        osd: osd
+    }
+
     Modules.BarProfiles {
         id: barProfiles
 
@@ -187,6 +195,7 @@ ShellRoot {
         workspaceService: workspaceService
         notificationHistory: notificationHistory
         controlCenter: controlCenter
+        bar: bar
     }
 
     Panels.BackgroundClock {
@@ -391,6 +400,7 @@ ShellRoot {
         appMenu: appMenu
         controlCenter: controlCenter
         screenShares: screenShares
+        deviceCaptures: deviceCaptures
         cava: cava
         systemMonitor: systemMonitor
         workspaceService: workspaceService

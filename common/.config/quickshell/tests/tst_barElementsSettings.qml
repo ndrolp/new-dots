@@ -291,6 +291,42 @@ TestCase {
         verify(elementRow(built.item, "Keep-awake"));
     }
 
+    // The privacy indicator is listed by its name and, in a capsule, can be
+    // live left or right of the workspace pills.
+    function test_thePrivacyIndicatorIsListedByItsNameAndCanBeLive() {
+        const built = make();
+        built.appearance.barStyle = "capsule";
+        built.appearance.barElements = {
+            left: [], right: [],
+            center: [{ id: "recording", enabled: true }, { id: "privacy", enabled: true }]
+        };
+        const privacy = elementRow(built.item, "Privacy indicator");
+
+        verify(privacy);
+        compare(placeChoice(privacy).options.map(option => option.label),
+            ["Hidden", "Shown", "Live left", "Live right"]);
+    }
+
+    // The pomodoro is a bar element of its own, apart from the clock: it is
+    // listed, turned on or off and grouped like any other and, in a capsule,
+    // can also be live left or right of the workspace pills.
+    function test_thePomodoroIsListedApartFromTheClock() {
+        const built = make();
+        built.appearance.barStyle = "capsule";
+        built.appearance.barElements = {
+            left: [], right: [],
+            center: [{ id: "clock", enabled: true }, { id: "pomodoro", enabled: true }]
+        };
+        const pomodoro = elementRow(built.item, "Pomodoro");
+        const pomodoroSwitch = all(pomodoro, child => child.checked !== undefined && child.toggled === undefined)[0];
+
+        verify(elementRow(built.item, "Clock"));
+        compare(placeChoice(pomodoro).options.map(option => option.label),
+            ["Hidden", "Shown", "Live left", "Live right"]);
+        mouseClick(pomodoroSwitch);
+        compare(built.appearance.calls, [["enabled", "pomodoro", false]]);
+    }
+
     // The bell opens the control center, so it is labelled after it; bar
     // profiles still store it as `notifications`.
     function test_theBellIsListedAsTheControlCenterAndSavedAsNotifications() {
@@ -405,7 +441,7 @@ TestCase {
         built.appearance.barPosition = data.position;
 
         compare(zoneHeadings(built.item), data.names);
-        compare(zoneChoice(elementRow(built.item, "Clock & pomodoro")).options.map(option => option.label),
+        compare(zoneChoice(elementRow(built.item, "Clock")).options.map(option => option.label),
             data.shorts);
     }
 
@@ -427,7 +463,7 @@ TestCase {
         const built = make();
 
         built.appearance.barPosition = "left";
-        const choice = zoneChoice(elementRow(built.item, "Clock & pomodoro"));
+        const choice = zoneChoice(elementRow(built.item, "Clock"));
 
         compare(choice.options.map(option => option.value), ["left", "center", "right"]);
         compare(choice.value, "center");
@@ -449,7 +485,7 @@ TestCase {
 
     function test_theZoneChoiceMarksTheZoneAndMovesTheElement() {
         const built = make();
-        const choice = zoneChoice(elementRow(built.item, "Clock & pomodoro"));
+        const choice = zoneChoice(elementRow(built.item, "Clock"));
 
         compare(choice.value, "center");
         choice.chosen("left");
@@ -503,9 +539,9 @@ TestCase {
         const built = make();
         built.appearance.barStyle = "capsule";
 
-        const offered = ["Arch icon", "Clock & pomodoro", "Audio", "Battery", "Cava"]
+        const offered = ["Arch icon", "Clock", "Audio", "Battery", "Cava"]
             .filter(label => placeChoice(elementRow(built.item, label)) !== null);
-        compare(offered, ["Arch icon", "Clock & pomodoro", "Audio"]);
+        compare(offered, ["Arch icon", "Clock", "Audio"]);
     }
 
     // Every element but the workspaces, which the workspace row shows, offers
@@ -531,7 +567,7 @@ TestCase {
         compare(labels("Recording indicator"), all);
         compare(labels("Media"), all);
         compare(labels("Keep-awake"), all);
-        compare(labels("Clock & pomodoro"), ["Hidden", "Shown"]);
+        compare(labels("Clock"), ["Hidden", "Shown"]);
     }
 
     // The choice marks each element's place and saves a change to the profile.
@@ -574,7 +610,7 @@ TestCase {
     // also sets what it shows at rest, collapsed.
     function test_anElementWithIconAndTextOffersThemAndAtRestOnlyOnACapsule() {
         const built = make();
-        mouseClick(textOf(elementRow(built.item, "Clock & pomodoro"), "Clock & pomodoro"));
+        mouseClick(textOf(elementRow(built.item, "Clock"), "Clock"));
 
         verify(switchRow(built.item, "Show icon"));
         verify(switchRow(built.item, "Show text"));

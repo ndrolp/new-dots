@@ -20,8 +20,8 @@ const zoneNames = ["left", "center", "right"];
 // zone in defaultElementZones, the rest to the right.
 const elementIds = [
     "arch", "systemMonitor", "currentApp", "appMenu", "workspaces",
-    "notifications", "recording", "keepAwake", "media", "cava", "audio", "bluetooth", "tray",
-    "network", "battery", "clock"
+    "notifications", "recording", "privacy", "keepAwake", "media", "cava", "audio", "bluetooth", "tray",
+    "network", "battery", "clock", "pomodoro"
 ];
 const defaultElementZones = {
     "arch": "left", "systemMonitor": "left", "currentApp": "left", "appMenu": "left",
@@ -81,7 +81,7 @@ function iconTextShown(barElements, id, resting) {
 // show them beside its workspace pills, collapsed only while they are active.
 // Keep-awake is live only if a profile places it so: by default it is hidden.
 // Each one says when it is active in LiveElements.activeRules.
-const liveElementIds = ["recording", "media", "keepAwake"];
+const liveElementIds = ["recording", "media", "keepAwake", "pomodoro", "privacy"];
 
 // Whether bar element `id` can be a live element, so a capsule profile can
 // place it live left or right of the workspace pills.
@@ -112,11 +112,14 @@ function liveSide(place) {
     return livePlaceSides[place] || "";
 }
 
-// The collapsed places a profile starts with: media live left and the
-// recording indicator live right, `shown` in the row (by default Arch, the
-// clock and the control center), every other element hidden.
+// The collapsed places a profile starts with: media live left, the
+// recording indicator, the privacy indicator and the pomodoro live right
+// (from the pills outward, in the order elementIds lists them), `shown` in
+// the row (by default Arch, the clock and the control center), every other
+// element hidden.
 function capsulePlacesShowing(shown) {
-    const livePlaces = { media: "liveLeft", recording: "liveRight" };
+    const livePlaces = { media: "liveLeft", recording: "liveRight", privacy: "liveRight",
+        pomodoro: "liveRight" };
     const places = {};
 
     for (const id of elementIds) {
@@ -127,7 +130,8 @@ function capsulePlacesShowing(shown) {
     return places;
 }
 
-const defaultCapsulePlaces = Object.freeze(capsulePlacesShowing(["arch", "clock", "notifications"]));
+const defaultCapsulePlaces = Object.freeze(capsulePlacesShowing(["arch", "clock",
+    "notifications"]));
 
 // `places` with a collapsed place for every element that takes one, as a
 // fresh object: missing or unknown places, or ones the element can't take,
@@ -309,6 +313,9 @@ const defaultProfile = {
     elementBorder: false,
     groupBorder: false,
     barOpacity: 100,
+    // On a capsule, whether new notifications show inside the focused
+    // monitor's capsule instead of as toasts (CapsuleRouting.notificationTarget).
+    capsuleNotifications: false,
     barElements: defaultBarElements([]),
     // Each bar element's collapsed place, by id (see capsulePlacesFor), when
     // the profile enables it; they show in the profile's order.

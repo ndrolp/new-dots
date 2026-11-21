@@ -10,6 +10,8 @@ Item {
     required property var pomodoro
     // The shell's keep-awake (services/KeepAwake.qml).
     required property var keepAwake
+    // The apps using the microphone or a camera (services/DeviceCaptures.qml).
+    required property var deviceCaptures
     // The app menu module (modules/AppMenu.qml).
     required property var appMenu
     required property var systemMonitor
@@ -20,6 +22,9 @@ Item {
     // (modules/CapsuleFeature.qml), handed to their popups: { wallpapers,
     // launcher, clipboard, unifiedSearch }.
     required property var capsuleFeatures
+    // The notifications this bar's capsule shows, with notifications in the
+    // capsule on (components/bar/CapsuleNotifications.qml); null elsewhere.
+    property var capsuleNotifications: null
     property string activePopup: ""
     // Which of the app menu's menus its Popup shows (AppMenuPopup.menuId).
     property string appMenuId: ""
@@ -61,6 +66,11 @@ Item {
     KeepAwakePopup {
         popups: root
         keepAwake: root.keepAwake
+    }
+
+    PrivacyPopup {
+        popups: root
+        deviceCaptures: root.deviceCaptures
     }
 
     AppMenuPopup {
@@ -112,5 +122,12 @@ Item {
     UnifiedSearchPopup {
         popups: root
         feature: root.capsuleFeatures.unifiedSearch
+    }
+
+    CapsuleNotificationPopup {
+        popups: root
+        notification: root.capsuleNotifications ? root.capsuleNotifications.shown : null
+        waiting: root.capsuleNotifications ? root.capsuleNotifications.waiting : 0
+        onEnded: notification => root.capsuleNotifications.end(notification)
     }
 }

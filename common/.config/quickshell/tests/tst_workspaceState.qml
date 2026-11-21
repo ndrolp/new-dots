@@ -104,4 +104,65 @@ TestCase {
     function test_aWorkspaceIsNeverCreatedFromSomethingThatIsNotAMonitor() {
         compare(WorkspaceState.createCommand(7, 'DP-1" }) ; reload'), null);
     }
+
+    // A workspace has a fullscreen window only for Hyprland's real fullscreen
+    // (fullscreen mode 2, or 3 when maximized too), not a maximized one (1).
+    function test_aWorkspaceHasAFullscreenWindowOnlyForRealFullscreen_data() {
+        return [
+            { tag: "none", mode: 0, fullscreen: false },
+            { tag: "maximized", mode: 1, fullscreen: false },
+            { tag: "fullscreen", mode: 2, fullscreen: true },
+            { tag: "fullscreen and maximized", mode: 3, fullscreen: true }
+        ];
+    }
+
+    function test_aWorkspaceHasAFullscreenWindowOnlyForRealFullscreen(data) {
+        const windows = [windowOn(2), windowOn(2, { fullscreen: data.mode })];
+
+        compare(WorkspaceState.hasFullscreen(windows, 2), data.fullscreen);
+    }
+
+    // A fullscreen window on another workspace doesn't count, nor one
+    // Hyprland hasn't described yet.
+    function test_onlyTheWorkspacesOwnWindowsCount() {
+        verify(!WorkspaceState.hasFullscreen([windowOn(3, { fullscreen: 2 }), { fullscreen: 2 }, {}], 2));
+        verify(!WorkspaceState.hasFullscreen([], 2));
+    }
+
+    // Scrolling over a monitor's workspaces goes to the next or previous one
+    // it shows, in the order it shows them, and stops at either end.
+    function test_scrollingGoesToTheNextOrPreviousShownWorkspace() {
+        compare(WorkspaceState.scrollTarget([1, 3, 7], 3, 1), 7);
+        compare(WorkspaceState.scrollTarget([1, 3, 7], 3, -1), 1);
+    }
+
+    function test_scrollingStopsAtEitherEnd() {
+        compare(WorkspaceState.scrollTarget([1, 3, 7], 7, 1), null);
+        compare(WorkspaceState.scrollTarget([1, 3, 7], 1, -1), null);
+    }
+
+    // From a workspace the monitor doesn't show (an empty one its workspaces
+    // element hides), scrolling goes to the nearest shown one that way.
+    function test_scrollingFromAWorkspaceNotShownGoesToTheNearestThatWay() {
+        compare(WorkspaceState.scrollTarget([1, 3, 7], 5, 1), 7);
+        compare(WorkspaceState.scrollTarget([1, 3, 7], 5, -1), 3);
+        compare(WorkspaceState.scrollTarget([1, 3, 7], 8, 1), null);
+        compare(WorkspaceState.scrollTarget([], 1, 1), null);
+    }
+
+    // A scroll step switches the service to the target from the workspace
+    // the screen's monitor shows; past either end it switches nowhere.
+    function test_aScrollStepSwitchesFromTheShownWorkspace() {
+        const switched = [];
+        const service = {
+            activeWorkspaceIdForScreen: screen => screen === "screen" ? 3 : -1,
+            switchTo: id => switched.push(id)
+        };
+
+        WorkspaceState.scroll(service, "screen", [1, 3, 7], 1);
+        WorkspaceState.scroll(service, "screen", [1, 3, 7], -1);
+        WorkspaceState.scroll(service, "screen", [3], 1);
+
+        compare(switched, [7, 1]);
+    }
 }

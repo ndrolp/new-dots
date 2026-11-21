@@ -1,5 +1,7 @@
 import QtQuick
 import "BarPlacement.js" as BarPlacement
+import "../../services/WorkspaceState.js" as WorkspaceState
+import ".." as Components
 import "../../config" as Config
 
 // The capsule's workspace pills, inside the capsule past its row of bar
@@ -7,7 +9,8 @@ import "../../config" as Config
 // active workspace's pill is twice as long and highlighted; the others tell
 // what the bar's workspaces do (Workspaces.qml): one asking for attention is
 // red, one with windows bright and an empty one dim. A click on a pill
-// switches to its workspace.
+// switches to its workspace; scrolling over the pills goes to the next or
+// previous one, at most one per touchpad gesture, stopping at either end.
 Row {
     id: root
 
@@ -16,6 +19,8 @@ Row {
     // Tells which workspace is active and switches to one
     // (services/WorkspaceService.qml).
     required property var workspaceService
+    // The screen of its monitor, whose shown workspace scrolling starts from.
+    required property var monitorScreen
     property color activeColor: theme.accent
     property color urgentColor: theme.red
     property color occupiedColor: Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.7)
@@ -32,6 +37,13 @@ Row {
     }
 
     spacing: appearance.spacing
+
+    // The pills take a scroll a little past their edges, as they take clicks.
+    Components.WheelStepHandler {
+        margin: root.spacing / 2
+        onStepped: step => WorkspaceState.scroll(root.workspaceService, root.monitorScreen,
+            root.workspaceIds, step)
+    }
 
     Repeater {
         id: pillRepeater

@@ -36,6 +36,12 @@ TestCase {
         readonly property var motion: Motion.motion(true)
     }
 
+    Component {
+        id: spy
+
+        SignalSpy {}
+    }
+
     // Stands in for services/KeepAwake.qml.
     Component {
         id: fakeKeepAwake
@@ -134,6 +140,80 @@ TestCase {
 
         verify(offWidth > 16);
         compare(item.width, offWidth);
+    }
+
+    // A timed keep-awake, `secondsLeft` from running out, drawn as a
+    // capsule's live element or not.
+    function makeTimedElement(live, secondsLeft) {
+        const service = keepAwake(true);
+        service.timed = true;
+        service.secondsLeft = secondsLeft;
+        return createTemporaryObject(element, this, { keepAwake: service, live: live });
+    }
+
+    function test_asALiveElementACountdownShowsItsTimeLeftBesideTheCup() {
+        const item = makeTimedElement(true, 42 * 60 + 30);
+        const label = shownText(item, "42m");
+
+        verify(label);
+        verify(label.mapToItem(item, 0, 0).x >= cupOf(item).mapToItem(item, 0, 0).x + cupOf(item).width);
+        verify(label.mapToItem(item, 0, 0).x + label.width <= item.width);
+    }
+
+    function test_asALiveElementTheTimeLeftShowsHoursAndTheLastMinute() {
+        const item = makeTimedElement(true, 3600 + 12 * 60);
+
+        verify(shownText(item, "1h 12m"));
+
+        item.keepAwake.secondsLeft = 30;
+        verify(shownText(item, "<1m"));
+    }
+
+    function test_theTimeLeftChangesOncePerMinuteNotEverySecond() {
+        const item = makeTimedElement(true, 42 * 60 + 59);
+        const label = shownText(item, "42m");
+
+        item.keepAwake.secondsLeft = 42 * 60 + 1;
+        compare(label.text, "42m");
+
+        item.keepAwake.secondsLeft = 41 * 60 + 59;
+        compare(label.text, "41m");
+    }
+
+    // What the label is worked out from changes only with the minutes, so
+    // the countdown's every second doesn't work it out again.
+    function test_theMinutesLeftChangeOncePerMinute() {
+        const item = makeTimedElement(true, 42 * 60 + 59);
+        const changes = createTemporaryObject(spy, this, { target: item, signalName: "minutesLeftChanged" });
+
+        compare(item.minutesLeft, 42);
+        for (let seconds = 42 * 60 + 58; seconds >= 41 * 60 + 59; seconds--)
+            item.keepAwake.secondsLeft = seconds;
+
+        compare(item.minutesLeft, 41);
+        compare(changes.count, 1);
+    }
+
+    function test_theTimeLeftWidensTheLiveElement() {
+        const item = makeTimedElement(true, 42 * 60);
+        const timedWidth = item.width;
+
+        item.keepAwake.timed = false;
+
+        verify(item.width < timedWidth);
+    }
+
+    function test_untilTurnedOffALiveElementShowsOnlyTheCup() {
+        const item = createTemporaryObject(element, this, { keepAwake: keepAwake(true), live: true });
+
+        compare(shownText(item, "<1m"), null);
+        compare(shownText(item, "0m"), null);
+    }
+
+    function test_onOtherBarStylesTheElementShowsNoTimeLeft() {
+        const item = makeTimedElement(false, 42 * 60);
+
+        compare(shownText(item, "42m"), null);
     }
 
     // The popup's on/off switch.

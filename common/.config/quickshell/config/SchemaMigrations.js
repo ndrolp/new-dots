@@ -615,13 +615,108 @@ function textVisibleFromLegacyOptions(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
+// A new bar element `id` placed right after `anchorId` in a profile's saved
+// `barElements`, in place: in the anchor's group if it is in one (it joins
+// the previous element, or the next one joins it), and on if the anchor is.
+// Nothing changes without the anchor, or when the profile already lists `id`
+// in any zone.
+function insertAfter(barElements, anchorId, id) {
+    const lists = zoneNames.map(zoneName => (barElements || {})[zoneName] || []);
+    if (lists.some(list => list.some(element => element.id === id)))
+        return;
+
+    for (const list of lists) {
+        const index = list.findIndex(element => element.id === anchorId);
+        if (index === -1)
+            continue;
+        const anchor = list[index];
+        const next = list[index + 1];
+        const element = { id: id, enabled: anchor.enabled !== false };
+        if (anchor.joinPrevious === true || (next !== undefined && next.joinPrevious === true))
+            element.joinPrevious = true;
+        list.splice(index + 1, 0, element);
+    }
+}
+
+// Step 19: the pomodoro's countdown, part of the clock until now, becomes a
+// bar element of its own, right after the clock and in the clock's group if
+// it is in one (it joins the previous element, or the next one joins it), so
+// the bar looks as it did. It is on if the clock is, and a capsule shows it
+// collapsed wherever it showed the clock. A profile without bar elements or
+// collapsed places gets the defaults when it loads, which already have it
+// beside the clock.
+function pomodoroBesideTheClock(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+    for (const profileName in migrated.barProfiles || {}) {
+        const profile = migrated.barProfiles[profileName];
+        const places = profile.capsulePlaces;
+        if (places && typeof places === "object" && places.clock !== undefined)
+            places.pomodoro = places.clock;
+
+        insertAfter(profile.barElements, "clock", "pomodoro");
+    }
+
+    return { appearance: migrated, monitors: monitors };
+}
+
+// Step 20: profiles get notifications in the capsule, off, so new
+// notifications stay toasts until a capsule profile turns it on.
+function seedCapsuleNotifications(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+    for (const profileName in migrated.barProfiles || {}) {
+        const profile = migrated.barProfiles[profileName];
+        if (profile.capsuleNotifications === undefined)
+            profile.capsuleNotifications = false;
+    }
+
+    return { appearance: migrated, monitors: monitors };
+}
+
+// Step 21: the pomodoro can be a live element, and a capsule shows it live
+// right of the workspace pills, after the recording indicator where the
+// profile lists that before it. A profile without collapsed places gets the
+// defaults when it loads, which already place it there.
+function pomodoroLiveRight(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+    for (const profileName in migrated.barProfiles || {}) {
+        const places = migrated.barProfiles[profileName].capsulePlaces;
+        if (places && typeof places === "object")
+            places.pomodoro = "liveRight";
+    }
+
+    return { appearance: migrated, monitors: monitors };
+}
+
+// Step 22: the privacy indicator, a new bar element for the apps using the
+// microphone or a camera, goes right after the recording indicator, in its
+// group if it is in one (it joins the previous element, or the next one
+// joins it), on if the recording indicator is. A capsule shows it live right
+// of the workspace pills, so from the pills outward the recording indicator,
+// the privacy indicator, then the pomodoro. A profile without bar elements
+// or collapsed places gets the defaults when it loads, which already place
+// it there.
+function privacyAfterRecording(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+    for (const profileName in migrated.barProfiles || {}) {
+        const profile = migrated.barProfiles[profileName];
+        const places = profile.capsulePlaces;
+        if (places && typeof places === "object")
+            places.privacy = "liveRight";
+
+        insertAfter(profile.barElements, "recording", "privacy");
+    }
+
+    return { appearance: migrated, monitors: monitors };
+}
+
 const migrationSteps = [
     migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
     migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles, explicitMonitorEntries,
     moveOptionsOntoElements, renameElementVerticalPadding, seedControlCenterTiles,
     seedWorkspaceRadius, splitBarBorder, seedWorkspaceVerticalPadding,
     seedIconSize, seedGroupPadding, singleBarStyle, capsulePlacesFromShownElements,
-    textVisibleFromLegacyOptions
+    textVisibleFromLegacyOptions, pomodoroBesideTheClock, seedCapsuleNotifications,
+    pomodoroLiveRight, privacyAfterRecording
 ];
 const schemaVersion = migrationSteps.length;
 

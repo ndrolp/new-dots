@@ -2,10 +2,14 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 import QtQuick.Effects
-import "../../config" as Config
-import "../IconSource.js" as IconSource
+import "." as Panels
 import "NotificationPlacement.js" as NotificationPlacement
 
+// The toasts: each new notification shows here as a card
+// (NewNotificationCard) for its timeout, unless Do Not Disturb is on or it shows inside the capsule
+// instead (CapsuleRouting.notificationTarget). Those a capsule hands back,
+// when a popup opens inside it or it hides for a fullscreen window, show here
+// afresh.
 PanelWindow {
     id: root
 
@@ -24,8 +28,33 @@ PanelWindow {
         radius: appearance.barProfileValue(profileName, "radius"),
         textSize: appearance.barProfileValue(profileName, "textSize")
     })
+    // What a card takes: those sizes and the motion.
+    readonly property var cardAppearance: ({
+        radius: toastSizes.radius,
+        textSize: toastSizes.textSize,
+        motion: appearance.motion
+    })
     readonly property var placement: NotificationPlacement.place(
         appearance.notificationPopupLocation, toastSizes)
+    // New notifications the capsule shows instead: their toasts don't show.
+    property var inCapsule: []
+    // The card whose inline reply is being written, which takes the keyboard.
+    property var replyingCard: null
+
+    // `notification` shows inside the capsule, not as a toast; called before
+    // the server tracks it, so its toast is decided with it.
+    function leaveToCapsule(notification) {
+        inCapsule = inCapsule.concat([notification]);
+    }
+
+    // Shows `notifications` as toasts afresh: the capsule handed them back.
+    function showToasts(notifications) {
+        for (let index = 0; index < toasts.count; index++) {
+            const toast = toasts.itemAt(index);
+            if (toast && notifications.indexOf(toast.modelData) !== -1)
+                toast.showAgain();
+        }
+    }
 
     screen: Quickshell.screens.values.length > 0 ? Quickshell.screens.values[0] : null
     color: "transparent"
@@ -35,6 +64,8 @@ PanelWindow {
     implicitHeight: notificationList.implicitHeight + 24
 
     WlrLayershell.namespace: "ndro-shell-notifications"
+    // Only while an inline reply is written, from the press on its field.
+    WlrLayershell.keyboardFocus: replyingCard !== null ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     mask: Region {
         item: notificationList
     }
@@ -53,10 +84,6 @@ PanelWindow {
         left: root.placement.margins.left
     }
 
-    Config.Theme {
-        id: theme
-    }
-
     Column {
         id: notificationList
 
@@ -68,35 +95,39 @@ PanelWindow {
         // One delegate per notification the server keeps, i.e. per card in
         // the control center; only the toasts still showing are visible.
         Repeater {
+            id: toasts
+
             model: root.notificationServer.trackedNotifications
 
-            delegate: Rectangle {
-                id: notificationCard
+            delegate: Item {
+                id: toast
 
                 required property var modelData
                 // A toast shows when its notification arrives, unless do not
-                // disturb is on or it was only sent again after a reload. It
-                // hides when it times out, is tapped or closed, or do not
-                // disturb turns on; the notification lives on in the control
-                // center until its card leaves the history.
+                // disturb is on, it shows inside the capsule or it was only
+                // sent again after a reload. It hides when its card ends or
+                // do not disturb turns on; the notification lives on in the
+                // control center until its card leaves the history.
                 property bool toastShown: !root.appearance.doNotDisturb
-                    && !modelData.lastGeneration
+                    && !modelData.lastGeneration && root.inCapsule.indexOf(modelData) === -1
                 property real reveal: 0
-                readonly property int timeout: modelData.expireTimeout > 0
-                    ? modelData.expireTimeout : 5000
-                property real lifetimeProgress: 1
 
                 function hide() {
                     toastShown = false;
+                    card.stopReplying();
+                }
+
+                // Handed back by the capsule: shows with its whole timeout.
+                function showAgain() {
+                    if (root.appearance.doNotDisturb)
+                        return;
+                    card.lifetimeProgress = 1;
+                    toastShown = true;
                 }
 
                 visible: toastShown
                 width: parent.width
-                height: content.implicitHeight + 28
-                radius: root.toastSizes.radius
-                color: theme.surface
-                border.color: theme.border
-                border.width: 1
+                height: card.implicitHeight
                 opacity: reveal
 
                 layer.enabled: true
@@ -108,12 +139,13 @@ PanelWindow {
                 }
 
                 transform: Translate {
-                    y: -16 * (1 - notificationCard.reveal)
+                    y: -16 * (1 - toast.reveal)
                 }
 
                 Component.onCompleted: {
                     // Breaks the binding: the toast's fate is decided once.
                     toastShown = toastShown;
+                    root.inCapsule = root.inCapsule.filter(notification => notification !== modelData);
                     reveal = 1;
                 }
 
@@ -122,7 +154,7 @@ PanelWindow {
 
                     function onDoNotDisturbChanged() {
                         if (root.appearance.doNotDisturb)
-                            notificationCard.hide();
+                            toast.hide();
                     }
                 }
 
@@ -133,131 +165,24 @@ PanelWindow {
                     }
                 }
 
-                Timer {
-                    interval: 50
-                    running: notificationCard.toastShown
-                    repeat: true
-                    onTriggered: {
-                        notificationCard.lifetimeProgress = Math.max(0,
-                            notificationCard.lifetimeProgress - interval / notificationCard.timeout);
+                Panels.NewNotificationCard {
+                    id: card
 
-                        if (notificationCard.lifetimeProgress === 0)
-                            notificationCard.hide();
+                    width: parent.width
+                    appearance: root.cardAppearance
+                    notification: toast.modelData
+                    running: toast.toastShown
+                    onEnded: toast.hide()
+                    onReplyingChanged: {
+                        if (replying)
+                            root.replyingCard = card;
+                        else if (root.replyingCard === card)
+                            root.replyingCard = null;
                     }
-                }
-
-                Row {
-                    id: content
-
-                    anchors.fill: parent
-                    anchors.margins: 14
-                    spacing: 12
-
-                    Rectangle {
-                        width: 76
-                        height: 76
-                        radius: root.toastSizes.radius
-                        color: theme.accent
-
-                        Image {
-                            anchors.fill: parent
-                            anchors.margins: 2
-                            source: notificationCard.modelData.image !== ""
-                                ? notificationCard.modelData.image
-                                : notificationCard.modelData.appIcon !== ""
-                                    ? IconSource.forName(notificationCard.modelData.appIcon) : ""
-                            fillMode: Image.PreserveAspectCrop
-                        }
-
-                        ShellText {
-                            anchors.centerIn: parent
-                            visible: parent.children[0].status !== Image.Ready
-                            text: "󰂚"
-                            color: theme.background
-                            font.pixelSize: 20
-                            font.bold: true
-                        }
+                    Component.onDestruction: {
+                        if (root.replyingCard === card)
+                            root.replyingCard = null;
                     }
-
-                    Column {
-                        width: parent.width - 116
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: 3
-
-                        ShellText {
-                            width: parent.width
-                            text: notificationCard.modelData.appName
-                            color: theme.textMuted
-                            elide: Text.ElideRight
-                            font.pixelSize: root.toastSizes.textSize - 2
-                            font.bold: true
-                        }
-
-                        ShellText {
-                            width: parent.width
-                            text: notificationCard.modelData.summary
-                            color: theme.text
-                            elide: Text.ElideRight
-                            font.pixelSize: root.toastSizes.textSize + 1
-                            font.bold: true
-                        }
-
-                        ShellText {
-                            width: parent.width
-                            visible: text !== ""
-                            text: notificationCard.modelData.body
-                            color: theme.textMuted
-                            textFormat: Text.PlainText
-                            wrapMode: Text.WordWrap
-                            maximumLineCount: 3
-                            elide: Text.ElideRight
-                            font.pixelSize: root.toastSizes.textSize - 1
-                            font.bold: true
-                        }
-                    }
-                }
-
-                Rectangle {
-                    anchors.top: parent.top
-                    anchors.right: parent.right
-                    anchors.margins: 10
-                    width: 24
-                    height: 24
-                    radius: root.toastSizes.radius
-                    color: closeHover.hovered ? theme.surfaceHover : theme.backgroundSecondary
-
-                    Behavior on color {
-                        ColorAnimation { duration: root.appearance.motion.short }
-                    }
-
-                    HoverHandler {
-                        id: closeHover
-                    }
-
-                    ShellText {
-                        anchors.centerIn: parent
-                        text: "󰅖"
-                        color: theme.textMuted
-                        font.pixelSize: 15
-                        font.bold: true
-                    }
-
-                    TapHandler {
-                        onTapped: notificationCard.hide()
-                    }
-                }
-
-                TapHandler {
-                    onTapped: notificationCard.hide()
-                }
-
-                Rectangle {
-                    anchors.left: parent.left
-                    anchors.bottom: parent.bottom
-                    width: parent.width * notificationCard.lifetimeProgress
-                    height: 3
-                    radius: root.toastSizes.radius
-                    color: theme.accent
                 }
             }
         }

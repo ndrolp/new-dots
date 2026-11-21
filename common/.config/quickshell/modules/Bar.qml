@@ -24,6 +24,8 @@ Scope {
     // The app menu module (modules/AppMenu.qml), for its bar element and Popup.
     required property var appMenu
     required property var screenShares
+    // The apps using the microphone or a camera (services/DeviceCaptures.qml).
+    required property var deviceCaptures
     required property var cava
     required property var systemMonitor
     required property var workspaceService
@@ -40,6 +42,10 @@ Scope {
 
     // A bar element was clicked and its popup is about to open.
     signal barElementOpening(string popup)
+    // A capsule hands back new notifications it can't show any more (a popup
+    // opened inside it, or it hid for a fullscreen window): they show as
+    // toasts (modules/Notifications.qml).
+    signal capsuleNotificationsReleased(var notifications)
 
     function closePopup() {
         root.openPopup = OpenPopup.none;
@@ -56,7 +62,13 @@ Scope {
                 screen: panel.screen,
                 visible: panel.visible,
                 capsule: BarProfileModel.capsule(panel.barAppearance),
-                popupInside: root.openPopup.window === panel
+                popupInside: root.openPopup.window === panel,
+                // Hidden while its monitor shows a fullscreen window
+                // (CapsuleRouting.hidden): changes go to the OSD instead.
+                capsuleHidden: panel.capsuleHidden,
+                // Its profile shows new notifications in the capsule
+                // (CapsuleRouting.notificationTarget).
+                capsuleNotifications: panel.barAppearance.capsuleNotifications
             });
         }
         return bars;
@@ -94,6 +106,7 @@ Scope {
         keepAwake: root.keepAwake
         appMenu: root.appMenu
         screenShares: root.screenShares
+        deviceCaptures: root.deviceCaptures
         cava: root.cava
         systemMonitor: root.systemMonitor
         workspaceService: root.workspaceService
@@ -126,6 +139,10 @@ Scope {
 
         onAudioOutputSelected: function(output) {
             root.osd.showAudioOutput(output);
+        }
+
+        onNotificationsReleased: function(notifications) {
+            root.capsuleNotificationsReleased(notifications);
         }
     }
 }

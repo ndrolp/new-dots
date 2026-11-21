@@ -213,6 +213,27 @@ TestCase {
         compare(places.workspaces, undefined);
     }
 
+    // A new capsule shows the pomodoro live right of the workspace pills;
+    // it can take every live place.
+    function test_aProfileWithoutCollapsedPlacesShowsThePomodoroLiveRight() {
+        const places = BarProfileModel.completeProfile({ barStyle: "capsule" }).capsulePlaces;
+
+        compare(places.pomodoro, "liveRight");
+        compare(BarProfileModel.capsulePlacesFor("pomodoro"), ["hidden", "shown", "liveLeft", "liveRight"]);
+        verify(BarProfileModel.canBeLive("pomodoro"));
+    }
+
+    // A new capsule shows the privacy indicator live right of the workspace
+    // pills, between the recording indicator and the pomodoro.
+    function test_aProfileWithoutCollapsedPlacesShowsThePrivacyIndicatorLiveRight() {
+        const profile = BarProfileModel.completeProfile({ barStyle: "capsule" });
+
+        compare(profile.capsulePlaces.privacy, "liveRight");
+        verify(BarProfileModel.canBeLive("privacy"));
+        compare(BarProfileModel.capsulePlaceIds(profile.barElements, profile.capsulePlaces).live.right,
+            ["recording", "privacy", "pomodoro"]);
+    }
+
     // The elements with an icon and text show both by default, on the bar and
     // in a capsule at rest; the at-rest options apply only while resting.
     function test_anElementShowsItsIconAndTextByDefaultAndAtRestByItsOwnOptions() {

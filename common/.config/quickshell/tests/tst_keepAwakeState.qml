@@ -127,6 +127,28 @@ TestCase {
         compare(KeepAwakeState.timeLeftLabel(3600 + 61), "1:01:01");
     }
 
+    // A live element's time left: whole minutes, counted down like the
+    // popup's minutes, so it changes once a minute.
+    function test_theMinutesLeftAreRoundedDown() {
+        compare(KeepAwakeState.minutesLeft(42 * 60 + 59), 42);
+        compare(KeepAwakeState.minutesLeft(42 * 60), 42);
+        compare(KeepAwakeState.minutesLeft(3600 - 1), 59);
+        compare(KeepAwakeState.minutesLeft(59), 0);
+        compare(KeepAwakeState.minutesLeft(0), 0);
+    }
+
+    function test_theCoarseTimeLeftReadsAsHoursAndMinutesOrMinutes() {
+        compare(KeepAwakeState.coarseTimeLeft(72), "1h 12m");
+        compare(KeepAwakeState.coarseTimeLeft(120), "2h 0m");
+        compare(KeepAwakeState.coarseTimeLeft(42), "42m");
+        compare(KeepAwakeState.coarseTimeLeft(59), "59m");
+        compare(KeepAwakeState.coarseTimeLeft(1), "1m");
+    }
+
+    function test_theCoarseTimeLeftIsLessThanAMinuteInTheLastMinute() {
+        compare(KeepAwakeState.coarseTimeLeft(0), "<1m");
+    }
+
     function test_theKeybindOsdSaysKeepAwakeIsOffWhenTurnedOff() {
         compare(KeepAwakeState.osdLabel(false, 60), "Keep-awake off");
     }

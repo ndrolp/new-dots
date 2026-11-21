@@ -3,7 +3,7 @@ import QtTest
 import "../components/panels/OsdChange.js" as OsdChange
 import "../services/KeepAwakeState.js" as KeepAwakeState
 
-// The six changes the OSD shows, and the focused monitor's capsule instead of
+// The changes the OSD shows, and the focused monitor's capsule instead of
 // it: what each one shows, the same in both.
 TestCase {
     name: "OsdChange"
@@ -56,6 +56,32 @@ TestCase {
                     level: null, highlighted: true, compact: true } },
             { tag: "keep-awake off", change: OsdChange.keepAwake(false, 60),
                 shown: { icon: KeepAwakeState.cup(false), tone: "muted", label: "Keep-awake off",
+                    level: null, highlighted: false, compact: true } },
+            { tag: "do not disturb on", change: OsdChange.doNotDisturb(true),
+                shown: { icon: "󰂛", tone: "muted", label: "Do Not Disturb on", level: null,
+                    highlighted: true, compact: true } },
+            { tag: "do not disturb off", change: OsdChange.doNotDisturb(false),
+                shown: { icon: "󰂚", tone: "muted", label: "Do Not Disturb off", level: null,
+                    highlighted: false, compact: true } },
+            { tag: "bluetooth device connected with its battery",
+                change: OsdChange.bluetooth({ deviceName: "WH-1000XM4", address: "AA:BB:CC:DD:EE:FF",
+                    connected: true, batteryAvailable: true, battery: 0.8 }),
+                shown: { icon: "󰂱", tone: "blue", label: "WH-1000XM4 · Connected · 80%",
+                    level: null, highlighted: false, compact: true } },
+            { tag: "bluetooth device connected without a battery",
+                change: OsdChange.bluetooth({ deviceName: "MX Keys", address: "AA:BB:CC:DD:EE:01",
+                    connected: true, batteryAvailable: false, battery: 0 }),
+                shown: { icon: "󰂱", tone: "blue", label: "MX Keys · Connected",
+                    level: null, highlighted: false, compact: true } },
+            { tag: "bluetooth device disconnected",
+                change: OsdChange.bluetooth({ deviceName: "WH-1000XM4", address: "AA:BB:CC:DD:EE:FF",
+                    connected: false, batteryAvailable: true, battery: 0.8 }),
+                shown: { icon: "󰂲", tone: "muted", label: "WH-1000XM4 · Disconnected",
+                    level: null, highlighted: false, compact: true } },
+            { tag: "unnamed bluetooth device",
+                change: OsdChange.bluetooth({ name: "AA:BB:CC:DD:EE:02", address: "AA:BB:CC:DD:EE:02",
+                    connected: true }),
+                shown: { icon: "󰂱", tone: "blue", label: "Unnamed device · Connected",
                     level: null, highlighted: false, compact: true } }
         ];
     }

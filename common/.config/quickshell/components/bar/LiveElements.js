@@ -1,6 +1,7 @@
 .pragma library
 .import "../../config/BarProfileModel.js" as BarProfileModel
 .import "BarLayout.js" as BarLayout
+.import "PrivacyIndicator.js" as PrivacyIndicator
 
 // A capsule's live elements (see GLOSSARY.md): which of its bar elements it
 // draws beside its workspace pills, on which side, when each has something
@@ -31,12 +32,16 @@ function ids(sides) {
 // When each bar element that can be live (BarProfileModel.liveElementIds) is
 // active, by id: what a collapsed capsule shows it beside its pills for.
 // Each rule takes what there is to show, { player (the Mpris player media
-// follows, or null), recordings (RecordingIndicator.recordings), keepAwakeOn }.
+// follows, or null), recordings (RecordingIndicator.recordings), keepAwakeOn,
+// pomodoroStarted (running or paused), captures (the apps using the
+// microphone or a camera, PrivacyIndicator.captures) }.
 // A new live element needs its rule here and its id in liveElementIds.
 const activeRules = Object.freeze({
     recording: status => status.recordings.length > 0,
     media: status => !!status.player && status.player.isPlaying === true,
-    keepAwake: status => status.keepAwakeOn === true
+    keepAwake: status => status.keepAwakeOn === true,
+    pomodoro: status => status.pomodoroStarted === true,
+    privacy: status => PrivacyIndicator.capturing(status.captures)
 });
 
 // Whether bar element `id` is active, given what there is to show (see
