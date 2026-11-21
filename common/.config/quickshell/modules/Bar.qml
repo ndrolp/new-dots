@@ -40,6 +40,10 @@ Scope {
 
     // A bar element was clicked and its popup is about to open.
     signal barElementOpening(string popup)
+    // A capsule hands back new notifications it can't show any more (a popup
+    // opened inside it, or it hid for a fullscreen window): they show as
+    // toasts (modules/Notifications.qml).
+    signal capsuleNotificationsReleased(var notifications)
 
     function closePopup() {
         root.openPopup = OpenPopup.none;
@@ -59,7 +63,10 @@ Scope {
                 popupInside: root.openPopup.window === panel,
                 // Hidden while its monitor shows a fullscreen window
                 // (CapsuleRouting.hidden): changes go to the OSD instead.
-                capsuleHidden: panel.capsuleHidden
+                capsuleHidden: panel.capsuleHidden,
+                // Its profile shows new notifications in the capsule
+                // (CapsuleRouting.notificationTarget).
+                capsuleNotifications: panel.barAppearance.capsuleNotifications
             });
         }
         return bars;
@@ -129,6 +136,10 @@ Scope {
 
         onAudioOutputSelected: function(output) {
             root.osd.showAudioOutput(output);
+        }
+
+        onNotificationsReleased: function(notifications) {
+            root.capsuleNotificationsReleased(notifications);
         }
     }
 }

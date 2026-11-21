@@ -99,6 +99,10 @@ PopupWindow {
     // so the reveal, and what the bar draws round the popup, start together
     // and smoothly.
     readonly property bool shown: warmUp.ready
+    // Whether, while open, it holds a focus grab: takes the keyboard and
+    // closes on a click outside. A notification inside the capsule holds one
+    // only while its inline reply is written.
+    property bool grabsFocus: true
     // Closed from outside while still open: a click outside it and its bar,
     // another grab taking over, or its bar hiding.
     signal dismissed()
@@ -131,7 +135,7 @@ PopupWindow {
         windows: PopupGrab.windows(frame, frame.barWindow, focusGrab.active)
         // Not `visible`, which turns true before the popup has a surface: the
         // grab would start with nothing to hold, and never activate.
-        active: frame.open && frame.backingWindowVisible
+        active: frame.open && frame.backingWindowVisible && frame.grabsFocus
         onCleared: frame.dismissed()
     }
 
