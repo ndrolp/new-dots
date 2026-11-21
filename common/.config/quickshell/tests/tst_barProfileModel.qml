@@ -213,6 +213,15 @@ TestCase {
         compare(places.workspaces, undefined);
     }
 
+    // The pomodoro's countdown used to be part of the clock, so a new capsule
+    // shows it in the row with the clock.
+    function test_aProfileWithoutCollapsedPlacesShowsThePomodoroWithTheClock() {
+        const places = BarProfileModel.completeProfile({ barStyle: "capsule" }).capsulePlaces;
+
+        compare(places.pomodoro, "shown");
+        compare(BarProfileModel.capsulePlacesFor("pomodoro"), ["hidden", "shown"]);
+    }
+
     // The elements with an icon and text show both by default, on the bar and
     // in a capsule at rest; the at-rest options apply only while resting.
     function test_anElementShowsItsIconAndTextByDefaultAndAtRestByItsOwnOptions() {

@@ -6,7 +6,9 @@ and schema migrations (`config/SchemaMigrations.js`), among them the one that
 turns the two bar style switches into one bar style and keeps each saved
 profile's look (`tst_barStyleMigration.qml`), and the one that turns a capsule
 profile's list of shown bar elements into collapsed places
-(`tst_barProfileModel.qml`). They also cover where
+(`tst_barProfileModel.qml`), and the one that splits the pomodoro out of the
+clock, right after it, in its group, on or off and placed in a capsule as the
+clock was (`tst_barElements.qml`). They also cover where
 the bar sits on its screen: the edges its window is anchored to, the space it
 reserves (on a capsule, with the live elements it shows collapsed), where the margin goes and where its content sits, against its edge
 however tall a capsule's window grows, for every bar style on each Bar position
@@ -65,8 +67,8 @@ drawn, grows for an attached popup, keeps up with one that resizes and meets
 its joins on every Bar position
 (`components/bar/DockedSurface.qml`,
 `DockedZones.js`), which bar elements a collapsed capsule shows in its one
-row (the ones its profile chose, in the profile's order, else Arch, the clock
-and the control center; the choice is kept with the profile by
+row (the ones its profile chose, in the profile's order, else Arch, the clock,
+the pomodoro and the control center; the choice is kept with the profile by
 `BarProfileModel.js` and offered, on a capsule profile, for the elements the
 profile shows but the workspaces and the live ones by
 `BarElementsSettings.qml`, and a saved choice of those is ignored), which ones it shows expanded
@@ -197,6 +199,7 @@ what the keybind's OSD says (`services/KeepAwakeState.js`),
 which popup is open across the bars and which bar IPC opens one on
 (`modules/OpenPopup.js`), one part of the shell opening another in its
 place unless its plugin is off (`modules/SwitchTo.js`), which bar element a popup opens under
+and that the pomodoro shows only while one is started
 (`components/bar/BarElementItems.js`), the notifications in the control
 center: marking them read on open, highlighting the ones that arrived since
 you last looked, Clear all, that ongoing notifications stay out of

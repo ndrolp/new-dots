@@ -11,10 +11,11 @@
 // while it is active (LiveElements.active). Otherwise, the ones that can have
 // nothing to show are hidden then: media without a player, the battery
 // without one, the recording indicator while it isn't active and cava while
-// silent; every other element is always shown when enabled. `status` says
-// what there is: `live`, `expanded` (whether the capsule is), `player`,
-// `recordings`, `keepAwakeOn` (see LiveElements.activeRules), `hasBattery`
-// and `cavaSilent`.
+// silent, and the pomodoro while none is started (running or paused); every
+// other element is always shown when enabled. `status` says what there is:
+// `live`, `expanded` (whether the capsule is), `player`, `recordings`,
+// `keepAwakeOn` (see LiveElements.activeRules), `hasBattery`, `cavaSilent`
+// and `pomodoroStarted`.
 function itemVisible(element, barElements, status) {
     const live = (status.live || []).indexOf(element) !== -1;
     if (!BarProfileModel.elementEnabled(barElements, element) && !live)
@@ -29,6 +30,8 @@ function itemVisible(element, barElements, status) {
         return LiveElements.active(element, status);
     if (element === "cava")
         return !status.cavaSilent;
+    if (element === "pomodoro")
+        return status.pomodoroStarted === true;
     return true;
 }
 
