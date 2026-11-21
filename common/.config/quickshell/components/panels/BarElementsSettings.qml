@@ -40,7 +40,8 @@ Column {
             "tray": "System tray",
             "network": "Network",
             "battery": "Battery",
-            "clock": "Clock & pomodoro"
+            "clock": "Clock",
+            "pomodoro": "Pomodoro"
         };
         return labels[element] || element;
     }

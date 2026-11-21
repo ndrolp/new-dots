@@ -1,10 +1,13 @@
 .pragma library
 .import "AudioOutputs.js" as AudioOutputs
+.import "BluetoothDevices.js" as BluetoothDevices
 .import "../../services/KeepAwakeState.js" as KeepAwakeState
+.import "../StatusText.js" as StatusText
 
 // The changes the OSD shows (volume, brightness, Caps Lock, audio output,
-// bar profile, keep-awake and Do Not Disturb), and what each shows: the OSD
-// and the focused monitor's capsule, in its place, show the same. Pure, no Quickshell.
+// bar profile, keep-awake, Do Not Disturb, Bluetooth connections and power),
+// and what each shows: the OSD and the focused monitor's capsule, in its
+// place, show the same. Pure, no Quickshell.
 
 // The volume, 0 to 1, as it is now; muted shows as none.
 function volume(level, muted) {
@@ -42,9 +45,45 @@ function keepAwake(on, duration) {
     return { kind: "keepAwake", on: on === true, label: KeepAwakeState.osdLabel(on, duration) };
 }
 
+// A power change event (see services/PowerChange.js): { kind: "charging",
+// "battery" or "low", percentage }. Its icon is the battery bar element's:
+// charging or not, at its charge, and low the low-battery warning.
+function power(event) {
+    const charging = event.kind === "charging";
+    const low = event.kind === "low";
+    const name = charging ? "Charging" : low ? "Battery low" : "On battery";
+    // Low shows the warning StatusText keeps for 10% or less.
+    const battery = { percentage: low ? Math.min(event.percentage, 0.1) : event.percentage,
+        state: charging ? "charging" : "discharging" };
+    return {
+        kind: "power",
+        low: low,
+        label: name + " · " + Math.round(event.percentage * 100) + "%",
+        icon: StatusText.batteryIcon(battery, { Charging: "charging" }),
+        tone: charging ? "accent" : "muted"
+    };
+}
+
 // Do Not Disturb turned on or off.
 function doNotDisturb(on) {
     return { kind: "doNotDisturb", on: on === true };
+}
+
+// A Bluetooth device connected or disconnected: a BluetoothDevice or anything
+// with its naming fields, `connected`, `batteryAvailable` and `battery` (0 to 1).
+function bluetooth(device) {
+    return {
+        kind: "bluetooth",
+        name: BluetoothDevices.label(device),
+        connected: device.connected === true,
+        battery: device.connected && device.batteryAvailable ? Math.round(device.battery * 100) : null
+    };
+}
+
+function bluetoothLabel(change) {
+    if (!change.connected)
+        return change.name + " · Disconnected";
+    return change.name + " · Connected" + (change.battery !== null ? " · " + change.battery + "%" : "");
 }
 
 // The theme colour of a change's `tone` (see display), from `theme`
@@ -71,8 +110,8 @@ function audioOutputIcon(type) {
 // What a change shows: { icon, tone, label, level, highlighted, compact }.
 // `tone` is the icon's theme colour ("blue", "yellow", "accent" or "muted"),
 // `level` is 0 to 1 for volume and brightness and null otherwise,
-// `highlighted` (Caps Lock, keep-awake or Do Not Disturb on) puts the icon on
-// the accent, and `compact` ones show just their icon and label.
+// `highlighted` (Caps Lock, keep-awake or Do Not Disturb on, battery low) puts
+// the icon on the accent, and `compact` ones show just their icon and label.
 function display(change) {
     const level = Math.max(0, Math.min(1, change.level || 0));
 
@@ -96,6 +135,12 @@ function display(change) {
     case "profile":
         return { icon: "󰘳", tone: "accent", label: change.name + " bar profile", level: null,
             highlighted: false, compact: false };
+    case "bluetooth":
+        return { icon: change.connected ? "󰂱" : "󰂲", tone: change.connected ? "blue" : "muted",
+            label: bluetoothLabel(change), level: null, highlighted: false, compact: true };
+    case "power":
+        return { icon: change.icon, tone: change.tone, label: change.label, level: null,
+            highlighted: change.low, compact: true };
     default:
         return { icon: KeepAwakeState.cup(change.on), tone: "muted", label: change.label,
             level: null, highlighted: change.on, compact: true };

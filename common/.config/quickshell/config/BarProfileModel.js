@@ -21,7 +21,7 @@ const zoneNames = ["left", "center", "right"];
 const elementIds = [
     "arch", "systemMonitor", "currentApp", "appMenu", "workspaces",
     "notifications", "recording", "keepAwake", "media", "cava", "audio", "bluetooth", "tray",
-    "network", "battery", "clock"
+    "network", "battery", "clock", "pomodoro"
 ];
 const defaultElementZones = {
     "arch": "left", "systemMonitor": "left", "currentApp": "left", "appMenu": "left",
@@ -114,7 +114,8 @@ function liveSide(place) {
 
 // The collapsed places a profile starts with: media live left and the
 // recording indicator live right, `shown` in the row (by default Arch, the
-// clock and the control center), every other element hidden.
+// clock, the pomodoro beside it and the control center), every other element
+// hidden.
 function capsulePlacesShowing(shown) {
     const livePlaces = { media: "liveLeft", recording: "liveRight" };
     const places = {};
@@ -127,7 +128,8 @@ function capsulePlacesShowing(shown) {
     return places;
 }
 
-const defaultCapsulePlaces = Object.freeze(capsulePlacesShowing(["arch", "clock", "notifications"]));
+const defaultCapsulePlaces = Object.freeze(capsulePlacesShowing(["arch", "clock", "pomodoro",
+    "notifications"]));
 
 // `places` with a collapsed place for every element that takes one, as a
 // fresh object: missing or unknown places, or ones the element can't take,

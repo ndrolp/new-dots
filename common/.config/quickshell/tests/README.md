@@ -6,7 +6,9 @@ and schema migrations (`config/SchemaMigrations.js`), among them the one that
 turns the two bar style switches into one bar style and keeps each saved
 profile's look (`tst_barStyleMigration.qml`), and the one that turns a capsule
 profile's list of shown bar elements into collapsed places
-(`tst_barProfileModel.qml`). They also cover where
+(`tst_barProfileModel.qml`), and the one that splits the pomodoro out of the
+clock, right after it, in its group, on or off and placed in a capsule as the
+clock was (`tst_barElements.qml`). They also cover where
 the bar sits on its screen: the edges its window is anchored to, the space it
 reserves (on a capsule, with the live elements it shows collapsed), where the margin goes and where its content sits, against its edge
 however tall a capsule's window grows, for every bar style on each Bar position
@@ -57,9 +59,9 @@ on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
 media position, audio outputs, Wi-Fi, the battery and the network
 and how a value stands on a side bar (`components/StatusText.js`) and what the audio bar element shows and how
 wide it is (`components/bar/AudioLevel.qml`), how scrolling turns into
-steps, at most one per wheel notch or touchpad swipe, its momentum and a
-touchpad with no scroll phases included (`components/bar/WheelSteps.js`),
-and that a step over the media bar element skips its player to the next or
+steps, at most one per wheel notch or touchpad gesture, its momentum and a
+touchpad with no scroll phases included (`components/WheelSteps.js`,
+`WheelStepHandler.qml` feeds it), and that a step over the media bar element skips its player to the next or
 previous track where it can (`BarElementItems.skipTrack`), how the Cava bar element
 reads cava and tries it again when it fails (`services/CavaOutput.js`) and
 what it draws, from the bottom or from the side, and the track progress painted on its bars (`components/bar/CavaBars.qml`), what the Cava desktop widget shows of the player: the media info, the progress line and when they show (`components/widgets/CavaMedia.js`, `CavaMediaInfo.qml`), how a docked bar zone hangs
@@ -69,8 +71,8 @@ drawn, grows for an attached popup, keeps up with one that resizes and meets
 its joins on every Bar position
 (`components/bar/DockedSurface.qml`,
 `DockedZones.js`), which bar elements a collapsed capsule shows in its one
-row (the ones its profile chose, in the profile's order, else Arch, the clock
-and the control center; the choice is kept with the profile by
+row (the ones its profile chose, in the profile's order, else Arch, the clock,
+the pomodoro and the control center; the choice is kept with the profile by
 `BarProfileModel.js` and offered, on a capsule profile, for the elements the
 profile shows but the workspaces and the live ones by
 `BarElementsSettings.qml`, and a saved choice of those is ignored), which ones it shows expanded
@@ -91,8 +93,8 @@ that hovering it expands it only after a moment and collapses it a while after
 the pointer leaves (`CapsuleHover.qml`), that SUPER+I holds it expanded until
 pressed again or until the pointer leaves it (`CapsuleToggle.qml`), that a
 change (volume, brightness, Caps Lock, audio output, bar profile,
-keep-awake or Do Not Disturb) goes to the focused monitor's capsule instead
-of the OSD, nowhere
+keep-awake, Do Not Disturb, a Bluetooth connection or power) goes to the focused
+monitor's capsule instead of the OSD, nowhere
 while a popup is inside it, and otherwise to the OSD on the focused monitor's
 screen, also while its capsule is hidden because its focused workspace has a
 real fullscreen window, which only a capsule does and SUPER+I then leaves
@@ -100,7 +102,12 @@ alone (`CapsuleRouting.js`; whether a workspace has one, not just a maximized
 window, is `WorkspaceState.hasFullscreen`), and that the capsule then shows that change
 and no bar element (`CapsuleElements.js`), for about 1.5 s from the latest one (`CapsuleChange.qml`),
 what each change shows, the same in the OSD and the capsule
-(`components/panels/OsdChange.js`), in the same tone colours and with the
+(`components/panels/OsdChange.js`), which Bluetooth devices connected or
+disconnected since the last read, none of those connected at start
+(`services/BluetoothConnections.js`), which power change event a battery
+reading makes: plugging in, unplugging, and "Battery low" once at 15% while
+discharging, re-armed like the notification, none at startup or without a
+battery (`services/PowerChange.js`, `tst_powerChange.qml`), in the same tone colours and with the
 same level bar and percent, under the bar in the OSD and beside it in the
 capsule (`OsdChange.toneColor`, `ChangeLevel.qml`), that Do Not Disturb
 shows each time it is turned on or off but not as the shell starts
@@ -122,8 +129,11 @@ capsule and above the row of a bottom one, centred on it, how it grows round a p
 inside it (`CapsulePlacement.js`), that its window grows at once for a popup inside and
 never shrinks back (`CapsuleWindowHold.qml`), that the
 pills are small and unlabelled, one per workspace in order, highlight the
-active one as it changes and switch workspace on a click
-(`CapsuleWorkspaceRow.qml`), and that a capsule sits only at the top or
+active one as it changes, switch workspace on a click and go to the next or
+previous one on a scroll, as the bar's workspaces element does, stopping at
+either end (`CapsuleWorkspaceRow.qml`, `Workspaces.qml`), that a mouse wheel
+steps once per notch and a touchpad gesture at most once
+(`components/WheelSteps.js`; `WheelStepHandler.qml` feeds it), and that a capsule sits only at the top or
 bottom, where zones, bar elements, group backgrounds and popup
 triggers sit along either axis of the bar, to the pixel the anchors they
 replaced put them at (`components/bar/BarLayout.js`; `BarContent.qml` itself
@@ -145,7 +155,8 @@ bind to it, and where a window sits in its miniature at any monitor scale or
 rotation (`components/panels/WorkspaceOverview.js`; `WorkspaceOverview.qml`,
 `WorkspaceMiniature.qml` and `MiniatureWindow.qml` need Quickshell and aren't
 tested here), which windows a miniature shows and what focusing, moving a window
-and creating a workspace dispatch (`services/WorkspaceState.js`;
+and creating a workspace dispatch, where a scroll over a monitor's workspaces
+goes (`services/WorkspaceState.js`;
 `WorkspaceService.qml` needs Quickshell and isn't tested here), a monitor's
 heading and when its + shows (`components/panels/WorkspaceMonitorHeader.qml`),
 what dropping a window on the new workspace slot and clicking it do
@@ -220,6 +231,7 @@ what the keybind's OSD says (`services/KeepAwakeState.js`),
 which popup is open across the bars and which bar IPC opens one on
 (`modules/OpenPopup.js`), one part of the shell opening another in its
 place unless its plugin is off (`modules/SwitchTo.js`), which bar element a popup opens under
+and that the pomodoro shows only while one is started
 (`components/bar/BarElementItems.js`), the notifications in the control
 center: marking them read on open, highlighting the ones that arrived since
 you last looked, Clear all, that ongoing notifications stay out of

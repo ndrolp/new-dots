@@ -1,94 +1,127 @@
 import QtQuick
 import QtTest
-import "../components/bar/WheelSteps.js" as WheelSteps
+import "../components/WheelSteps.js" as WheelSteps
 
-// How scrolling turns into steps, at most one per gesture: one per wheel
-// notch, one per touchpad swipe however long it runs.
+// What a run of wheel events steps through: a mouse wheel one step per notch,
+// a touchpad gesture at most one step however far it goes. Scrolling down
+// steps forward (1), up back (-1).
 TestCase {
     name: "WheelSteps"
 
-    // A wheel event as QML's WheelEvent gives it: angleDelta.y, pixelDelta.y
-    // and Qt's scroll phase (0 none, 1 begin, 2 update, 3 end, 4 momentum).
-    function wheel(angle, pixel, phase) {
-        return { angleDelta: { x: 0, y: angle }, pixelDelta: { x: 0, y: pixel || 0 }, phase: phase || 0 };
-    }
+    // Feeds the scrolls in order and gives the steps they make, without the
+    // zeroes.
+    function steps(scrolls) {
+        let state = WheelSteps.start();
+        const made = [];
 
-    // The steps a run of [event, time] pairs takes, in order.
-    function steps(events) {
-        let state = WheelSteps.initial();
-        const taken = [];
-        for (const [event, now] of events) {
-            const result = WheelSteps.take(state, event, now);
+        for (const scroll of scrolls) {
+            const result = WheelSteps.next(state, Object.assign({
+                angleDelta: 0, pixelDelta: 0, phase: Qt.NoScrollPhase, time: 0
+            }, scroll));
             state = result.state;
             if (result.step !== 0)
-                taken.push(result.step);
+                made.push(result.step);
         }
-        return taken;
+
+        return made;
     }
 
     function test_aWheelNotchDownStepsForwardAndUpStepsBack() {
-        compare(steps([[wheel(-120), 0]]), [1]);
-        compare(steps([[wheel(120), 0]]), [-1]);
+        compare(steps([{ angleDelta: -120 }]), [1]);
+        compare(steps([{ angleDelta: 120 }]), [-1]);
     }
 
-    function test_aHighResolutionWheelStepsOncePerWholeNotch() {
-        const eighths = [];
-        for (let index = 0; index < 12; index++)
-            eighths.push([wheel(-15), index * 10]);
+    function test_eachWheelNotchStepsOnceEvenInQuickSuccession() {
+        compare(steps([
+            { angleDelta: -120, time: 0 },
+            { angleDelta: -120, time: 20 },
+            { angleDelta: -120, time: 40 }
+        ]), [1, 1, 1]);
+    }
 
-        compare(steps(eighths.slice(0, 7)), []);
-        compare(steps(eighths), [1]);
+    // A high-resolution wheel sends a notch in parts.
+    function test_partsOfANotchAddUpToOneStep() {
+        compare(steps([
+            { angleDelta: -40, time: 0 },
+            { angleDelta: -40, time: 10 },
+            { angleDelta: -40, time: 20 }
+        ]), [1]);
+        compare(steps([{ angleDelta: -60 }]), []);
+    }
+
+    // Leftovers from long ago don't add to a new scroll.
+    function test_partsOfANotchFarApartDontAddUp() {
+        compare(steps([
+            { angleDelta: -60, time: 0 },
+            { angleDelta: -60, time: 2000 }
+        ]), []);
+    }
+
+    function test_aTouchpadGestureStepsAtMostOnce() {
+        const updates = [];
+        for (let index = 1; index <= 20; index++)
+            updates.push({ angleDelta: -60, pixelDelta: -30, phase: Qt.ScrollUpdate, time: index * 10 });
+
+        compare(steps([{ phase: Qt.ScrollBegin }].concat(updates,
+            [{ phase: Qt.ScrollEnd, time: 300 }, { angleDelta: -60, phase: Qt.ScrollMomentum, time: 310 }])), [1]);
+    }
+
+    function test_aShortTouchpadGestureDoesNotStep() {
+        compare(steps([
+            { phase: Qt.ScrollBegin },
+            { angleDelta: -30, pixelDelta: -15, phase: Qt.ScrollUpdate, time: 10 },
+            { phase: Qt.ScrollEnd, time: 20 }
+        ]), []);
+    }
+
+    function test_eachTouchpadGestureStepsOnce() {
+        const gesture = (time, delta) => [
+            { phase: Qt.ScrollBegin, time: time },
+            { angleDelta: delta, pixelDelta: delta / 2, phase: Qt.ScrollUpdate, time: time + 10 },
+            { angleDelta: delta, pixelDelta: delta / 2, phase: Qt.ScrollUpdate, time: time + 20 },
+            { phase: Qt.ScrollEnd, time: time + 30 }
+        ];
+
+        compare(steps(gesture(0, -120).concat(gesture(100, -120), gesture(200, 120))), [1, 1, -1]);
+    }
+
+    // A touchpad that reports no gesture phases: its gesture ends once it has
+    // been still for a moment.
+    function test_aTouchpadWithoutPhasesStepsOncePerGesture() {
+        const gesture = time => [0, 10, 20, 30, 40].map(offset =>
+            ({ angleDelta: -60, pixelDelta: -30, time: time + offset }));
+
+        compare(steps(gesture(0)), [1]);
+        compare(steps(gesture(0).concat(gesture(1000))), [1, 1]);
     }
 
     function test_oneEventNeverStepsMoreThanOnce() {
-        compare(steps([[wheel(-360), 0]]), [1]);
+        compare(steps([{ angleDelta: -360 }]), [1]);
     }
 
-    // A touchpad swipe: begin, `updates` updates of `angle` each, 10 ms
-    // apart from `start`, then end.
-    function swipe(angle, updates, start) {
-        const events = [[wheel(0, 0, 1), start]];
-        for (let index = 1; index <= updates; index++)
-            events.push([wheel(angle, angle / 2, 2), start + index * 10]);
-        events.push([wheel(0, 0, 3), start + (updates + 1) * 10]);
-        return events;
+    // A long touchpad gesture, either way, still steps once.
+    function test_aLongTouchpadGestureStepsOnceEitherWay() {
+        const gesture = delta => {
+            const scrolls = [{ phase: Qt.ScrollBegin }];
+            for (let index = 1; index <= 30; index++)
+                scrolls.push({ angleDelta: delta, pixelDelta: delta / 2, phase: Qt.ScrollUpdate, time: index * 10 });
+            return scrolls.concat([{ phase: Qt.ScrollEnd, time: 310 }]);
+        };
+
+        compare(steps(gesture(-60)), [1]);
+        compare(steps(gesture(60)), [-1]);
     }
 
-    function test_aLongTouchpadSwipeStepsOnce() {
-        compare(steps(swipe(-60, 30, 0)), [1]);
-        compare(steps(swipe(60, 30, 0)), [-1]);
-    }
-
-    function test_aShortTouchpadSwipeDoesntStep() {
-        compare(steps(swipe(-30, 3, 0)), []);
-    }
-
-    function test_eachTouchpadSwipeStepsOnce() {
-        compare(steps(swipe(-60, 30, 0).concat(swipe(-60, 30, 400))), [1, 1]);
-    }
-
-    function test_theMomentumAfterASwipeDoesntStepAgain() {
-        const momentum = [];
+    // However far the momentum after a gesture coasts, it doesn't step.
+    function test_theMomentumAfterAGestureDoesntStepAgain() {
+        const scrolls = [
+            { phase: Qt.ScrollBegin },
+            { angleDelta: -120, pixelDelta: -60, phase: Qt.ScrollUpdate, time: 10 },
+            { phase: Qt.ScrollEnd, time: 20 }
+        ];
         for (let index = 0; index < 20; index++)
-            momentum.push([wheel(-200, -100, 4), 400 + index * 10]);
+            scrolls.push({ angleDelta: -200, pixelDelta: -100, phase: Qt.ScrollMomentum, time: 30 + index * 10 });
 
-        compare(steps(swipe(-60, 30, 0).concat(momentum)), [1]);
-    }
-
-    // A touchpad swipe with no phases, only pixel deltas.
-    function unphasedSwipe(angle, updates, start) {
-        const events = [];
-        for (let index = 0; index < updates; index++)
-            events.push([wheel(angle, angle / 2), start + index * 10]);
-        return events;
-    }
-
-    function test_aTouchpadWithNoPhasesStepsOncePerSwipe() {
-        compare(steps(unphasedSwipe(-60, 30, 0)), [1]);
-        compare(steps(unphasedSwipe(-60, 30, 0).concat(unphasedSwipe(-60, 30, 800))), [1, 1]);
-    }
-
-    function test_eachNotchStepsOnceEvenInQuickSuccession() {
-        compare(steps([[wheel(-120), 0], [wheel(-120), 20], [wheel(-120), 40]]), [1, 1, 1]);
+        compare(steps(scrolls), [1]);
     }
 }

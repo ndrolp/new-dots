@@ -128,4 +128,25 @@ TestCase {
         verify(!WorkspaceState.hasFullscreen([windowOn(3, { fullscreen: 2 }), { fullscreen: 2 }, {}], 2));
         verify(!WorkspaceState.hasFullscreen([], 2));
     }
+
+    // Scrolling over a monitor's workspaces goes to the next or previous one
+    // it shows, in the order it shows them, and stops at either end.
+    function test_scrollingGoesToTheNextOrPreviousShownWorkspace() {
+        compare(WorkspaceState.scrollTarget([1, 3, 7], 3, 1), 7);
+        compare(WorkspaceState.scrollTarget([1, 3, 7], 3, -1), 1);
+    }
+
+    function test_scrollingStopsAtEitherEnd() {
+        compare(WorkspaceState.scrollTarget([1, 3, 7], 7, 1), null);
+        compare(WorkspaceState.scrollTarget([1, 3, 7], 1, -1), null);
+    }
+
+    // From a workspace the monitor doesn't show (an empty one its workspaces
+    // element hides), scrolling goes to the nearest shown one that way.
+    function test_scrollingFromAWorkspaceNotShownGoesToTheNearestThatWay() {
+        compare(WorkspaceState.scrollTarget([1, 3, 7], 5, 1), 7);
+        compare(WorkspaceState.scrollTarget([1, 3, 7], 5, -1), 3);
+        compare(WorkspaceState.scrollTarget([1, 3, 7], 8, 1), null);
+        compare(WorkspaceState.scrollTarget([], 1, 1), null);
+    }
 }

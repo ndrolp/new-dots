@@ -13,7 +13,7 @@ TestCase {
     // Every saved profile gets the setting, off, so nothing changes until it
     // is turned on.
     function test_migratedProfilesHaveNotificationsInTheCapsuleOff() {
-        const profiles = SchemaMigrations.migrate({ schemaVersion: 18, barProfiles: {
+        const profiles = SchemaMigrations.migrate({ schemaVersion: 19, barProfiles: {
             island: { barStyle: "capsule" },
             work: { barStyle: "opaque" }
         } }, {}).appearance.barProfiles;

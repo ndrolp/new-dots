@@ -615,7 +615,39 @@ function textVisibleFromLegacyOptions(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
-// Step 19: profiles get notifications in the capsule, off, so new
+// Step 19: the pomodoro's countdown, part of the clock until now, becomes a
+// bar element of its own, right after the clock and in the clock's group if
+// it is in one (it joins the previous element, or the next one joins it), so
+// the bar looks as it did. It is on if the clock is, and a capsule shows it
+// collapsed wherever it showed the clock. A profile without bar elements or
+// collapsed places gets the defaults when it loads, which already have it
+// beside the clock.
+function pomodoroBesideTheClock(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+    for (const profileName in migrated.barProfiles || {}) {
+        const profile = migrated.barProfiles[profileName];
+        const places = profile.capsulePlaces;
+        if (places && typeof places === "object" && places.clock !== undefined)
+            places.pomodoro = places.clock;
+
+        for (const zoneName of zoneNames) {
+            const list = (profile.barElements || {})[zoneName] || [];
+            const index = list.findIndex(element => element.id === "clock");
+            if (index === -1)
+                continue;
+            const clock = list[index];
+            const next = list[index + 1];
+            const pomodoro = { id: "pomodoro", enabled: clock.enabled !== false };
+            if (clock.joinPrevious === true || (next !== undefined && next.joinPrevious === true))
+                pomodoro.joinPrevious = true;
+            list.splice(index + 1, 0, pomodoro);
+        }
+    }
+
+    return { appearance: migrated, monitors: monitors };
+}
+
+// Step 20: profiles get notifications in the capsule, off, so new
 // notifications stay toasts until a capsule profile turns it on.
 function seedCapsuleNotifications(appearance, monitors) {
     const migrated = cloneValue(appearance);
@@ -634,7 +666,7 @@ const migrationSteps = [
     moveOptionsOntoElements, renameElementVerticalPadding, seedControlCenterTiles,
     seedWorkspaceRadius, splitBarBorder, seedWorkspaceVerticalPadding,
     seedIconSize, seedGroupPadding, singleBarStyle, capsulePlacesFromShownElements,
-    textVisibleFromLegacyOptions, seedCapsuleNotifications
+    textVisibleFromLegacyOptions, pomodoroBesideTheClock, seedCapsuleNotifications
 ];
 const schemaVersion = migrationSteps.length;
 

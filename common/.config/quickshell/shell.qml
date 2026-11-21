@@ -170,6 +170,10 @@ ShellRoot {
         osd: osd
     }
 
+    Modules.PowerChanges {
+        osd: osd
+    }
+
     Modules.BarProfiles {
         id: barProfiles
 

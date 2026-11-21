@@ -36,6 +36,9 @@ so the service asks for one on each `fullscreen` event. A move or
 a new workspace that doesn't exist yet takes a second step, sending the workspace
 to the monitor it was meant for, because Hyprland makes it on the focused monitor
 or the one a rule names.
+Where scrolling over a monitor's workspaces goes, from the one that monitor
+shows (`activeWorkspaceIdForScreen`) to the next or previous one it lists, is
+`WorkspaceState.scrollTarget`.
 
 ## Monitor setups
 
@@ -123,6 +126,30 @@ its window is shown and the control center hides its window when closed. The
 `keep-awake toggle` IPC call (`modules/KeepAwake.qml`, bound to ALT+SHIFT+I)
 toggles it too and is the only toggle that shows the OSD, labelled by
 `KeepAwakeState.osdLabel`.
+
+## Bluetooth connections
+
+`BluetoothConnections.js` turns Bluetooth devices connecting and
+disconnecting into change events. `modules/Osd.qml` reads Quickshell's
+`Bluetooth.devices` whenever one is listed, dropped, connects or disconnects,
+and `read` tells which devices' connection changed since the last read. A
+device is only told once it has been seen, so the ones connected when the
+shell starts, or listed by BlueZ already connected, show nothing.
+`OsdChange.bluetooth` names it ("WH-1000XM4 · Connected · 80%" with the
+battery the device reports at that moment, "… · Disconnected").
+
+## Power changes
+
+`PowerChange.js` decides which power change event a reading of UPower's
+display device makes (`reading`, `next`): plugging the charger in
+(charging, waiting to charge or full) shows "Charging", unplugging
+(discharging or empty) "On battery", and reaching 15% while discharging,
+unplugging included, "Battery low" once, until the battery has been above
+15% or plugged in, like `modules/LowBattery.qml`'s notification. An unknown
+or waiting-to-discharge state says nothing about the charger. The first
+reading, and one after a battery appears, is how it already was and shows
+nothing; without a battery nothing shows. `modules/PowerChanges.qml` feeds
+it and shows each event as `OsdChange.power`.
 
 ## Night light
 

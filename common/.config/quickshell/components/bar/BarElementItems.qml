@@ -14,10 +14,11 @@ import "BarLayout.js" as BarLayout
 import "LiveElements.js" as LiveElements
 import "../panels/ControlCenterNames.js" as Names
 import "RecordingIndicator.js" as RecordingIndicator
-import "WheelSteps.js" as WheelSteps
+import ".." as Components
 
 // The bar elements that need no component of their own (notifications,
-// recording, keep-awake, media, cava, audio, bluetooth, tray, network, battery and clock),
+// recording, keep-awake, media, cava, audio, bluetooth, tray, network, battery, clock
+// and pomodoro),
 // placed by the bar's single walk per zone (see BarContent).
 Item {
     id: root
@@ -126,7 +127,8 @@ Item {
         "tray": trayButton,
         "network": networkButton,
         "battery": batteryButton,
-        "clock": pomodoroButton
+        "clock": clockButton,
+        "pomodoro": pomodoroButton
     })
 
     // On a capsule, its live elements, beside its workspace pills
@@ -154,11 +156,12 @@ Item {
         recordings: recordings,
         keepAwakeOn: keepAwake.on,
         hasBattery: hasBattery,
-        cavaSilent: cava.silent
+        cavaSilent: cava.silent,
+        pomodoroStarted: pomodoro.started
     })
 
-    // Enabled elements with nothing to show (no player, battery, recording
-    // or sound) are hidden, and so are live elements of a collapsed capsule
+    // Enabled elements with nothing to show (no player, battery, recording,
+    // sound or pomodoro started) are hidden, and so are live elements of a collapsed capsule
     // while they aren't active; see BarElementItems.js.
     function itemVisible(element) {
         return BarElementItems.itemVisible(element, appearance.barElements, elementStatus);
@@ -434,16 +437,13 @@ Item {
             }
 
             MouseArea {
-                // Scrolling skips the player shown to the next or previous
-                // track, at most one per notch or swipe (WheelSteps).
-                property var wheelSteps: WheelSteps.initial()
-
                 anchors.fill: parent
                 onClicked: root.popupRequested("media")
-                onWheel: wheel => {
-                    const taken = WheelSteps.take(wheelSteps, wheel, Date.now());
-                    wheelSteps = taken.state;
-                    BarElementItems.skipTrack(root.player, taken.step);
+
+                // Scrolling skips the player shown to the next or previous
+                // track, at most one per notch or touchpad gesture.
+                Components.WheelStepHandler {
+                    onStepped: step => BarElementItems.skipTrack(root.player, step)
                 }
             }
         }
@@ -720,8 +720,9 @@ Item {
         }
     }
 
+    // The clock opens the pomodoro's popup, where a pomodoro is started.
     Rectangle {
-        id: pomodoroButton
+        id: clockButton
 
         readonly property var size: root.sizeAround(clockContent)
 
@@ -746,56 +747,60 @@ Item {
             id: clockHover
         }
 
-        ElementStack {
+        Clock {
             id: clockContent
 
             anchors.centerIn: parent
             appearance: root.appearance
-            spacing: sideBar && !root.pomodoro.started ? 0 : 7
+            color: theme.orange
+            iconVisible: root.shown("clock").icon
+            valueVisible: root.shown("clock").text
+        }
 
-            // Opens along the bar when a pomodoro starts.
-            Item {
-                id: pomodoroIndicator
+        MouseArea {
+            anchors.fill: parent
+            onClicked: root.popupRequested("pomodoro")
+        }
+    }
 
-                readonly property var openSize: BarLayout.size(root.appearance,
-                    root.pomodoro.started
-                        ? BarLayout.itemLength(root.appearance, { width: pomodoroText.implicitWidth, height: pomodoroText.implicitHeight })
-                        : 0,
-                    clockContent.sideBar ? pomodoroText.width : pomodoroText.implicitHeight)
+    // The pomodoro's countdown, shown only while one is started: green while
+    // it runs, muted while paused. It opens the same popup as the clock.
+    Rectangle {
+        id: pomodoroButton
 
-                width: openSize.width
-                height: openSize.height
-                clip: true
+        readonly property var size: root.sizeAround(pomodoroContent)
 
-                AlongBarBehavior on width { appearance: root.appearance }
-                AlongBarBehavior on height { appearance: root.appearance }
+        visible: root.itemVisible("pomodoro")
+        x: root.elementX("pomodoro")
+        y: root.elementY("pomodoro")
+        width: size.width
+        height: size.height
+        radius: root.appearance.radius
+        color: pomodoroHover.hovered ? theme.surfaceHover
+            : root.elementGrouped("pomodoro") || root.appearance.pillsTransparent
+                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
 
-                ElementText {
-                    id: pomodoroText
+        border.width: root.appearance.elementBorder && !root.elementGrouped("pomodoro") ? 1 : 0
+        border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
-                    anchors.verticalCenter: clockContent.sideBar ? undefined : parent.verticalCenter
-                    appearance: root.appearance
-                    value: "󰔟  " + root.pomodoro.remainingLabel
-                    color: root.pomodoro.running ? theme.green : theme.textMuted
-                    opacity: root.pomodoro.started ? 1 : 0
-                    font.pixelSize: root.appearance.textSize
-                    font.bold: true
+        Behavior on color {
+            ColorAnimation { duration: root.appearance.motion.short }
+        }
 
-                    Behavior on opacity {
-                        NumberAnimation {
-                            duration: root.appearance.motion.short
-                            easing.type: root.appearance.motion.easing
-                        }
-                    }
-                }
-            }
+        HoverHandler {
+            id: pomodoroHover
+        }
 
-            Clock {
-                appearance: root.appearance
-                color: theme.orange
-                iconVisible: root.shown("clock").icon
-                valueVisible: root.shown("clock").text
-            }
+        IconValue {
+            id: pomodoroContent
+
+            anchors.centerIn: parent
+            appearance: root.appearance
+            icon: "󰔟"
+            iconColor: root.pomodoro.running ? theme.green : theme.textMuted
+            iconSize: root.appearance.iconSize
+            valueSize: root.appearance.textSize
+            value: root.pomodoro.remainingLabel
         }
 
         MouseArea {
