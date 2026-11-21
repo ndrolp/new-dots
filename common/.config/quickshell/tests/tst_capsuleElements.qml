@@ -250,7 +250,7 @@ TestCase {
             barElements: BarProfileModel.defaultProfile.barElements
         });
 
-        compare(shownIds(drawn, "center"), ["arch", "notifications", "clock"]);
+        compare(shownIds(drawn, "center"), ["arch", "notifications", "clock", "pomodoro"]);
     }
 
     // Any other bar style draws the live-capable elements in its zones like

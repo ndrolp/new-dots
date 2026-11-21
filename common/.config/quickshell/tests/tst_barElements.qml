@@ -159,7 +159,7 @@ TestCase {
             center: [{ id: "clock", enabled: false }]
         });
 
-        compare(zone(normalized, "left"), ["clock"]);
+        compare(zone(normalized, "left"), ["clock", "pomodoro"]);
         compare(zone(normalized, "center"), []);
         compare(zone(normalized, "right"), ["arch", "systemMonitor", "currentApp", "-appMenu", "workspaces",
             "notifications", "recording", "keepAwake", "media", "-cava", "audio", "bluetooth",
@@ -356,11 +356,48 @@ TestCase {
         compare(BarProfileModel.elementEnabled(barElements, "keepAwake"), true);
     }
 
+    function test_thePomodoroIsInEveryDefaultProfileRightAfterTheClock() {
+        const profiles = BarProfileModel.defaultBarProfiles();
+
+        for (const name in profiles) {
+            const barElements = profiles[name].barElements;
+            const zoneName = BarProfileModel.elementZone(barElements, "clock");
+            const ids = zone(barElements, zoneName).map(id => id.replace("-", ""));
+            compare(ids.indexOf("pomodoro"), ids.indexOf("clock") + 1, name);
+            compare(BarProfileModel.elementEnabled(barElements, "pomodoro"), true, name);
+        }
+    }
+
     // What there is to show when nothing is going on: no player, battery,
-    // recording or sound, and keep-awake off.
+    // recording or sound, keep-awake off and no pomodoro started.
     function nothingGoingOn(values) {
         return Object.assign({ live: [], expanded: false, player: null, recordings: [], hasBattery: false,
-            cavaSilent: true, keepAwakeOn: false }, values);
+            cavaSilent: true, keepAwakeOn: false, pomodoroStarted: false }, values);
+    }
+
+    // The pomodoro shows its countdown only while one is started, running
+    // or paused, on every bar style.
+    function test_thePomodoroShowsOnlyWhileStarted_data() {
+        return [
+            { tag: "started", status: { pomodoroStarted: true }, shown: true },
+            { tag: "not started", status: {}, shown: false },
+            { tag: "started, capsule expanded", status: { pomodoroStarted: true, expanded: true }, shown: true },
+            { tag: "not started, capsule expanded", status: { expanded: true }, shown: false }
+        ];
+    }
+
+    function test_thePomodoroShowsOnlyWhileStarted(data) {
+        const barElements = BarProfileModel.normalizeBarElements(minimalElements());
+
+        compare(BarElementItems.itemVisible("pomodoro", barElements, nothingGoingOn(data.status)), data.shown);
+    }
+
+    function test_aDisabledPomodoroStaysHiddenWhileStarted() {
+        const barElements = BarProfileModel.setElementEnabled(
+            BarProfileModel.normalizeBarElements(minimalElements()), "pomodoro", false);
+
+        compare(BarElementItems.itemVisible("pomodoro", barElements,
+            nothingGoingOn({ pomodoroStarted: true })), false);
     }
 
     // Keep-awake has something to show while off too, the outline cup that
@@ -445,7 +482,8 @@ TestCase {
         const beforeSystemMonitor = BarProfileModel.normalizeBarElements({
             center: [{ id: "clock", enabled: true }, { id: "systemMonitor", enabled: true }]
         });
-        compare(zone(beforeSystemMonitor, "center").slice(0, 3), ["clock", "arch", "systemMonitor"]);
+        compare(zone(beforeSystemMonitor, "center").slice(0, 4), ["clock", "pomodoro", "arch",
+            "systemMonitor"]);
     }
 
     function test_aProfileThatListsCavaKeepsItEnabled() {
@@ -574,8 +612,15 @@ TestCase {
 
     function test_everyOtherBarElementOpensAPopup() {
         for (const element of ["systemMonitor", "appMenu", "notifications", "keepAwake", "media",
-            "audio", "bluetooth", "tray", "network", "battery", "clock"])
+            "audio", "bluetooth", "tray", "network", "battery", "clock", "pomodoro"])
             verify(BarElementItems.opensPopup(element), element);
+    }
+
+    // The pomodoro opens the popup it is controlled from, which a pomodoro is
+    // started from through the clock, so it opens under the clock.
+    function test_thePomodoroOpensThePopupItIsControlledFrom() {
+        verify(BarElementItems.opensPopup("pomodoro"));
+        compare(BarElementItems.popupElement("pomodoro"), "clock");
     }
 
     function test_workspacesHaveARadiusOption() {
@@ -725,5 +770,83 @@ TestCase {
             compare(profile.groupHorizontalPadding, profile.spacing, name);
             compare(profile.groupVerticalPadding, 0, name);
         }
+    }
+
+    // A profile of schema version 18, whose clock still showed the pomodoro,
+    // brought to the current schema.
+    function migratedFromVersion18(profile) {
+        return SchemaMigrations.migrate({ schemaVersion: 18, barProfiles: { saved: profile } }, {})
+            .appearance.barProfiles.saved;
+    }
+
+    // A zone as ids in order, an element that joins the previous one
+    // prefixed with "+", a disabled one with "-".
+    function groupedZone(barElements, zoneName) {
+        return barElements[zoneName].map(element =>
+            (element.joinPrevious ? "+" : "") + (element.enabled ? "" : "-") + element.id);
+    }
+
+    function test_migratingPutsThePomodoroRightAfterTheClock() {
+        const profile = migratedFromVersion18({ barElements: { left: [], center: [], right: [
+            { id: "battery", enabled: true }, { id: "clock", enabled: true },
+            { id: "notifications", enabled: true }
+        ] } });
+
+        compare(groupedZone(profile.barElements, "right"), ["battery", "clock", "pomodoro", "notifications"]);
+    }
+
+    // In the clock's group, wherever the clock sits in it, the pomodoro
+    // stays in it; outside one it joins nothing.
+    function test_migratingPutsThePomodoroInTheClocksGroup_data() {
+        const battery = { id: "battery", enabled: true };
+        const notifications = { id: "notifications", enabled: true };
+        return [
+            { tag: "last of its group", right: [battery, { id: "clock", enabled: true, joinPrevious: true },
+                notifications], zone: ["battery", "+clock", "+pomodoro", "notifications"] },
+            { tag: "first of its group", right: [battery, { id: "clock", enabled: true },
+                { id: "notifications", enabled: true, joinPrevious: true }],
+                zone: ["battery", "clock", "+pomodoro", "+notifications"] },
+            { tag: "alone, last of its zone", right: [battery, { id: "clock", enabled: true }],
+                zone: ["battery", "clock", "pomodoro"] }
+        ];
+    }
+
+    function test_migratingPutsThePomodoroInTheClocksGroup(data) {
+        const profile = migratedFromVersion18({ barElements: { left: [], center: [], right: data.right } });
+
+        compare(groupedZone(profile.barElements, "right"), data.zone);
+    }
+
+    // A clock that was off showed no countdown either.
+    function test_migratingTurnsThePomodoroOffWithTheClock() {
+        const profile = migratedFromVersion18({ barElements: { left: [{ id: "clock", enabled: false }],
+            center: [], right: [] } });
+
+        compare(groupedZone(profile.barElements, "left"), ["-clock", "-pomodoro"]);
+    }
+
+    // A capsule shows the pomodoro collapsed wherever it showed the clock.
+    function test_migratingGivesThePomodoroTheClocksCollapsedPlace_data() {
+        return [
+            { tag: "shown", place: "shown" },
+            { tag: "hidden", place: "hidden" }
+        ];
+    }
+
+    function test_migratingGivesThePomodoroTheClocksCollapsedPlace(data) {
+        const profile = migratedFromVersion18({ barStyle: "capsule",
+            capsulePlaces: { clock: data.place, battery: "shown" } });
+
+        compare(profile.capsulePlaces.pomodoro, data.place);
+        compare(profile.capsulePlaces.battery, "shown");
+    }
+
+    // A profile that saved no places, or no bar elements, takes the defaults
+    // when it loads, which already place the pomodoro beside the clock.
+    function test_migratingLeavesAProfileWithoutPlacesOrElementsToTheDefaults() {
+        const profile = migratedFromVersion18({ barStyle: "capsule" });
+
+        compare(profile.capsulePlaces, undefined);
+        compare(profile.barElements, undefined);
     }
 }
