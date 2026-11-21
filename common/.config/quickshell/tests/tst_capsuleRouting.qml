@@ -160,4 +160,56 @@ TestCase {
     function test_otherwiseANotificationIsAToast(data) {
         compare(CapsuleRouting.notificationTarget(notificationBars(), data.monitor), null);
     }
+
+    // Do Not Disturb, and a kept notification sent again after a reload, keep
+    // a notification out of the capsule (and quiet): it goes to the history
+    // only, through the toasts, which stay hidden.
+    function test_aQuietNotificationNeverShowsInTheCapsule_data() {
+        return [
+            { tag: "do not disturb", arrival: { doNotDisturb: true, lastGeneration: false } },
+            { tag: "sent again after a reload", arrival: { doNotDisturb: false, lastGeneration: true } }
+        ];
+    }
+
+    function test_aQuietNotificationNeverShowsInTheCapsule(data) {
+        compare(CapsuleRouting.notificationTarget(notificationBars(), "Middle", data.arrival), null);
+    }
+
+    function test_aNotificationIsAnnouncedUnlessQuiet_data() {
+        return [
+            { tag: "a new one", arrival: { doNotDisturb: false, lastGeneration: false }, announced: true },
+            { tag: "do not disturb", arrival: { doNotDisturb: true, lastGeneration: false }, announced: false },
+            { tag: "sent again after a reload", arrival: { doNotDisturb: false, lastGeneration: true },
+                announced: false }
+        ];
+    }
+
+    function test_aNotificationIsAnnouncedUnlessQuiet(data) {
+        compare(CapsuleRouting.announced(data.arrival), data.announced);
+    }
+
+    // Whether a bar's capsule can hold notifications, which a bar window
+    // asks of itself to hand those it holds back as toasts once it can't:
+    // the same answer notificationTarget gives for the focused monitor.
+    function test_aCapsuleHoldsNotificationsWhereTheyWouldShow_data() {
+        return notificationBars().map(bar => ({ tag: bar.monitor, bar: bar,
+            holds: bar.monitor === "Middle" }));
+    }
+
+    function test_aCapsuleHoldsNotificationsWhereTheyWouldShow(data) {
+        compare(CapsuleRouting.holdsNotifications(data.bar), data.holds);
+    }
+
+    // A capsule is available, to SUPER+I, a change and a new notification,
+    // while it is shown and not hidden for a fullscreen window; a popup inside
+    // doesn't change that.
+    function test_aCapsuleIsAvailableWhileShownAndNotHidden_data() {
+        return notificationBars().map(bar => ({ tag: bar.monitor, bar: bar,
+            available: ["Middle", "Off", "Busy"].indexOf(bar.monitor) !== -1 }))
+            .concat([{ tag: "no bar", bar: undefined, available: false }]);
+    }
+
+    function test_aCapsuleIsAvailableWhileShownAndNotHidden(data) {
+        compare(CapsuleRouting.capsuleAvailable(data.bar), data.available);
+    }
 }

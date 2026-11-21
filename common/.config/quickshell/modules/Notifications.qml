@@ -39,8 +39,12 @@ Scope {
 
         onNotification: notification => {
             // Decided before it is tracked, which is when its toast is.
-            const capsule = !root.appearance.doNotDisturb && !notification.lastGeneration
-                ? CapsuleRouting.notificationTarget(root.bar.bars(), root.bar.focusedMonitor()) : null;
+            const arrival = {
+                doNotDisturb: root.appearance.doNotDisturb,
+                lastGeneration: notification.lastGeneration
+            };
+            const capsule = CapsuleRouting.notificationTarget(root.bar.bars(), root.bar.focusedMonitor(),
+                arrival);
             if (capsule !== null)
                 toasts.leaveToCapsule(notification);
             notification.tracked = true;
@@ -59,7 +63,7 @@ Scope {
 
             // Kept notifications sent again after a reload rebuild the
             // history quietly.
-            if (!root.appearance.doNotDisturb && !notification.lastGeneration)
+            if (CapsuleRouting.announced(arrival))
                 notificationSound.exec(["pw-play", "/usr/share/sounds/freedesktop/stereo/message.oga"]);
         }
     }

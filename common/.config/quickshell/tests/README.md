@@ -121,7 +121,10 @@ capsule on (a profile setting, off in new and migrated profiles, offered in the
 settings panel only for a capsule: `tst_capsuleNotifications.qml`,
 `BarSizeStyleSettings.qml`) a new notification goes to the focused monitor's
 capsule and is a toast with the setting off, a popup or panel inside, the
-capsule hidden for fullscreen or no capsule (`CapsuleRouting.notificationTarget`),
+capsule hidden for fullscreen or no capsule, and nowhere new with Do Not
+Disturb or after a reload, which also keep it quiet
+(`CapsuleRouting.notificationTarget`, `holdsNotifications`, `announced`, all
+on one `capsuleAvailable` that SUPER+I and a change share),
 that the newest shows with the others waiting as "+N", the next showing as
 one ends and all handed back oldest first as toasts
 (`CapsuleNotificationQueue.js`), and the card a new notification shows as,

@@ -125,14 +125,17 @@ Variants {
                 capsule: BarProfileModel.capsule(panel.barAppearance),
                 fullscreen: bar.workspaceService.hasFullscreenOn(panel.modelData)
             })
-            // Whether this window's capsule can show new notifications: with
-            // notifications in the capsule on, while it is shown, not hidden
-            // for a fullscreen window and has no popup or panel inside (as
-            // CapsuleRouting.notificationTarget). Once it can't, those it
-            // holds show as toasts.
-            readonly property bool holdsNotifications: BarProfileModel.capsule(panel.barAppearance)
-                && panel.barAppearance.capsuleNotifications && panel.visible
-                && !panel.capsuleHidden && panel.activePopup === ""
+            // Whether this window's capsule can show new notifications (see
+            // CapsuleRouting.holdsNotifications, which
+            // CapsuleRouting.notificationTarget asks too). Once it can't,
+            // those it holds show as toasts.
+            readonly property bool holdsNotifications: CapsuleRouting.holdsNotifications({
+                visible: panel.visible,
+                capsule: BarProfileModel.capsule(panel.barAppearance),
+                capsuleHidden: panel.capsuleHidden,
+                popupInside: panel.activePopup !== "",
+                capsuleNotifications: panel.barAppearance.capsuleNotifications
+            })
             onHoldsNotificationsChanged: {
                 if (!panel.holdsNotifications)
                     capsuleNotifications.release();

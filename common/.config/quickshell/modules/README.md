@@ -69,7 +69,8 @@ adding or editing one file here.
   `notifications` IPC call (SUPER+N, the control center's collapsed
   shortcut). With notifications in the capsule on, a new notification shows
   inside the focused monitor's capsule instead of as a toast
-  (`CapsuleRouting.notificationTarget`, tested; the queue with its "+N" is
+  (`CapsuleRouting.notificationTarget`, which also decides with Do Not
+  Disturb and after a reload, tested; the queue with its "+N" is
   `CapsuleNotificationQueue.js`, tested); those the capsule hands back, when
   a popup opens inside it or it hides for fullscreen, show as toasts. Both
   use one card (`ToastCard.qml`, tested): actions, inline reply, and a
