@@ -4,8 +4,9 @@
 .import "../../services/KeepAwakeState.js" as KeepAwakeState
 
 // The changes the OSD shows (volume, brightness, Caps Lock, audio output,
-// bar profile, keep-awake and Bluetooth connections), and what each shows: the OSD and the focused
-// monitor's capsule, in its place, show the same. Pure, no Quickshell.
+// bar profile, keep-awake, Do Not Disturb and Bluetooth connections), and
+// what each shows: the OSD and the focused monitor's capsule, in its place,
+// show the same. Pure, no Quickshell.
 
 // The volume, 0 to 1, as it is now; muted shows as none.
 function volume(level, muted) {
@@ -41,6 +42,11 @@ function barProfile(name) {
 // Keep-awake turned on, for `duration` minutes, or off.
 function keepAwake(on, duration) {
     return { kind: "keepAwake", on: on === true, label: KeepAwakeState.osdLabel(on, duration) };
+}
+
+// Do Not Disturb turned on or off.
+function doNotDisturb(on) {
+    return { kind: "doNotDisturb", on: on === true };
 }
 
 // A Bluetooth device connected or disconnected: a BluetoothDevice or anything
@@ -84,8 +90,8 @@ function audioOutputIcon(type) {
 // What a change shows: { icon, tone, label, level, highlighted, compact }.
 // `tone` is the icon's theme colour ("blue", "yellow", "accent" or "muted"),
 // `level` is 0 to 1 for volume and brightness and null otherwise,
-// `highlighted` (Caps Lock or keep-awake on) puts the icon on the accent, and
-// `compact` ones show just their icon and label.
+// `highlighted` (Caps Lock, keep-awake or Do Not Disturb on) puts the icon on
+// the accent, and `compact` ones show just their icon and label.
 function display(change) {
     const level = Math.max(0, Math.min(1, change.level || 0));
 
@@ -102,6 +108,10 @@ function display(change) {
     case "audioOutput":
         return { icon: audioOutputIcon(change.type), tone: "accent", label: change.name, level: null,
             highlighted: false, compact: false };
+    case "doNotDisturb":
+        return { icon: change.on ? "󰂛" : "󰂚", tone: "muted",
+            label: change.on ? "Do Not Disturb on" : "Do Not Disturb off",
+            level: null, highlighted: change.on, compact: true };
     case "profile":
         return { icon: "󰘳", tone: "accent", label: change.name + " bar profile", level: null,
             highlighted: false, compact: false };

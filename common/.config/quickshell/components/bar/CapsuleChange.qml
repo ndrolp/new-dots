@@ -1,9 +1,9 @@
 import QtQuick
 
-// The change event a capsule shows instead of the OSD (see
-// components/panels/OsdChange.js), and for how long: about
-// 1.5 s from the latest one, so holding a volume key keeps it open. This is
-// timing, not animation: Reduce motion leaves it as it is.
+// The change a capsule shows instead of the OSD (any of those in
+// components/panels/OsdChange.js), and for how long: about 1.5 s from the
+// latest one, so holding a volume key keeps it open. This is timing, not
+// animation: Reduce motion leaves it as it is.
 Item {
     id: root
 

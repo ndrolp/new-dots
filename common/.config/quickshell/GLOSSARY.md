@@ -68,6 +68,10 @@ _Avoid_: screencast, stream (para esto)
 Mientras está activo, la sesión no pasa a inactiva: no se atenúa ni se apaga la pantalla ni se suspende. Se activa y desactiva desde el control center, desde el popup del bar element keep-awake o con el atajo ALT+SHIFT+I; solo el atajo muestra el OSD («Keep-awake on · 1 h», «Keep-awake on» o «Keep-awake off»). Ese bar element se muestra siempre (salvo como *live element* de la cápsula plegada, que solo se ve mientras está activo): una taza llena en verde mientras está activo y una taza vacía en el color de subtexto mientras no; al pulsarlo se abre su popup, con un interruptor para activarlo o desactivarlo y la elección de duración: *Until turned off* (hasta desactivarlo), 30 min, 1 h o 2 h. Hay una sola duración elegida, y activarlo desde cualquier sitio la usa; elegir otra mientras está activo reinicia la cuenta atrás desde ella, y elegir *Until turned off* la quita y lo deja activo. Mientras corre la cuenta atrás, el popup muestra el tiempo que queda (el bar element no). Al llegar a cero se desactiva solo y envía una notificación «Keep-awake ended»; desactivarlo a mano no envía ninguna. Siempre empieza desactivado y con *Until turned off* al arrancar la shell; la duración no se guarda.
 _Avoid_: Caffeine, idle inhibitor (para la función), no dormir
 
+**Do Not Disturb** (no molestar):
+Mientras está activo, las notificaciones nuevas no se muestran como toast: solo llegan al control center. Se activa y desactiva desde su tile del control center, entre otros sitios, y se guarda en `appearance.json`, fuera de cualquier bar profile. Activarlo o desactivarlo, desde cualquier sitio, es un cambio como el volumen: en el monitor enfocado la cápsula se expande un momento con «Do Not Disturb on» o «Do Not Disturb off», y con otro estilo de barra lo muestra el OSD. Leer el ajuste guardado al arrancar la shell no lo muestra.
+_Avoid_: DND, modo silencio
+
 **Night light** (luz nocturna):
 Mientras está activa, los colores de la pantalla se vuelven más cálidos (los aplica `hyprsunset`). Se activa y desactiva desde el control center, donde un deslizador elige la temperatura (de 2500 K, la más cálida, a 6000 K, neutra), que cambia al momento si está activa. La temperatura se guarda en `appearance.json`; si está activa o no, no: solo cambia al pulsarla, nunca por horario, y empieza desactivada al arrancar la shell. Si falta `hyprsunset`, el control center dice por qué no se puede activar.
 _Avoid_: Blue light filter, filtro de luz azul, modo noche, hyprsunset (para la función)
@@ -94,7 +98,7 @@ Un bar element que en la cápsula se muestra junto a las pills de los workspaces
 _Avoid_: Live activity, capsule element, elemento de cápsula
 
 **Change event** (evento de cambio):
-Algo que cambia y se muestra un momento solo en el monitor enfocado: en su cápsula, expandida y mostrando solo ese cambio, o en el OSD con cualquier otro estilo de barra. Son: volumen, brillo, Bloq Mayús, audio output, bar profile, keep-awake (solo con su atajo) y conexión Bluetooth: conectar o desconectar un dispositivo muestra su nombre y «Connected» (con su batería si la informa, «WH-1000XM4 · Connected · 80%») o «Disconnected»; los dispositivos que ya estaban conectados al arrancar la shell no lo muestran.
+Algo que cambia y se muestra un momento solo en el monitor enfocado: en su cápsula, expandida y mostrando solo ese cambio, o en el OSD con cualquier otro estilo de barra. Son: volumen, brillo, Bloq Mayús, audio output, bar profile, keep-awake (solo con su atajo), Do Not Disturb y conexión Bluetooth: conectar o desconectar un dispositivo muestra su nombre y «Connected» (con su batería si la informa, «WH-1000XM4 · Connected · 80%») o «Disconnected»; los dispositivos que ya estaban conectados al arrancar la shell no lo muestran.
 _Avoid_: Notificación (que es otra cosa), aviso, OSD event
 
 **Bar border** (borde de la barra):

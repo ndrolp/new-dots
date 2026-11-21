@@ -9,8 +9,9 @@ import "../components/panels/OsdChange.js" as OsdChange
 import "../services/BluetoothConnections.js" as BluetoothConnections
 
 // The on-screen display and the change events it shows: IPC sends the volume
-// and brightness keys, it watches Caps Lock and Bluetooth connections itself, and the rest of the shell
-// sends audio outputs, bar profiles and the keep-awake keybind. Each shows on
+// and brightness keys, it watches Caps Lock, Do Not Disturb and Bluetooth
+// connections itself, and the rest of the shell sends audio outputs, bar
+// profiles and the keep-awake keybind. Each shows on
 // the focused monitor only (CapsuleRouting.changeTarget): in its capsule if it has
 // one, else in the OSD on that monitor.
 Scope {
@@ -73,6 +74,12 @@ Scope {
         id: osdPopup
 
         appearance: root.appearance
+    }
+
+    // Do Not Disturb turned on or off, from the control center or anywhere else.
+    Panels.DoNotDisturbWatch {
+        appearance: root.appearance
+        onToggled: change => root.show(change)
     }
 
     Instantiator {
