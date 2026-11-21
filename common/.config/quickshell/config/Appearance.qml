@@ -79,6 +79,7 @@ QtObject {
     readonly property bool elementBorder: editedBarProfile.elementBorder
     readonly property bool groupBorder: editedBarProfile.groupBorder
     readonly property int barOpacity: editedBarProfile.barOpacity
+    readonly property bool capsuleNotifications: editedBarProfile.capsuleNotifications
 
     // Applies changes returned by BarProfileModel: saved profiles go to the
     // file, the edited profile and pending changes stay in memory.

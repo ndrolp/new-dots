@@ -191,6 +191,7 @@ ShellRoot {
         workspaceService: workspaceService
         notificationHistory: notificationHistory
         controlCenter: controlCenter
+        bar: bar
     }
 
     Panels.BackgroundClock {

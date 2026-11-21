@@ -39,6 +39,9 @@ Variants {
     signal popupClosed(string popup, var panelWindow)
     signal popupCloseRequested()
     signal audioOutputSelected(var output)
+    // A capsule hands back the notifications it can't show any more, to show
+    // as toasts (CapsuleNotifications.released).
+    signal notificationsReleased(var notifications)
 
     model: Quickshell.screens
 
@@ -74,6 +77,7 @@ Variants {
                 property bool elementBorder: bar.appearance.barProfileValue(panel.profileName, "elementBorder")
                 property bool groupBorder: bar.appearance.barProfileValue(panel.profileName, "groupBorder")
                 property int barOpacity: bar.appearance.barProfileValue(panel.profileName, "barOpacity")
+                property bool capsuleNotifications: bar.appearance.barProfileValue(panel.profileName, "capsuleNotifications")
                 // On a capsule, only the row it shows (see CapsuleElements.drawnElements).
                 property var barElements: CapsuleElements.drawnElements({
                     barStyle: panel.barAppearance.barStyle,
@@ -120,6 +124,18 @@ Variants {
                 capsule: BarProfileModel.capsule(panel.barAppearance),
                 fullscreen: bar.workspaceService.hasFullscreenOn(panel.modelData)
             })
+            // Whether this window's capsule can show new notifications: with
+            // notifications in the capsule on, while it is shown, not hidden
+            // for a fullscreen window and has no popup or panel inside (as
+            // CapsuleRouting.notificationTarget). Once it can't, those it
+            // holds show as toasts.
+            readonly property bool holdsNotifications: BarProfileModel.capsule(panel.barAppearance)
+                && panel.barAppearance.capsuleNotifications && panel.visible
+                && !panel.capsuleHidden && panel.activePopup === ""
+            onHoldsNotificationsChanged: {
+                if (!panel.holdsNotifications)
+                    capsuleNotifications.release();
+            }
             // A popup inside the capsule closes with it.
             onCapsuleHiddenChanged: {
                 if (panel.capsuleHidden && panel.activePopup !== "")
@@ -228,6 +244,30 @@ Variants {
             // CapsuleRouting.changeTarget).
             function showChange(change) {
                 capsuleChange.show(change);
+            }
+
+            // The notifications this window's capsule shows; Do Not Disturb
+            // drops them, as it hides toasts.
+            CapsuleNotifications {
+                id: capsuleNotifications
+
+                onReleased: notifications => bar.notificationsReleased(notifications)
+            }
+
+            Connections {
+                target: bar.appearance
+
+                function onDoNotDisturbChanged() {
+                    if (bar.appearance.doNotDisturb)
+                        capsuleNotifications.clear();
+                }
+            }
+
+            // Shows a new notification in this window's capsule instead of as
+            // a toast; modules/Notifications.qml calls it on the focused
+            // monitor's (see CapsuleRouting.notificationTarget).
+            function showNotification(notification) {
+                capsuleNotifications.show(notification);
             }
 
             // Expands this window's capsule, or collapses it if SUPER+I
@@ -355,6 +395,7 @@ Variants {
                 systemMonitor: panel.systemMonitor
                 controlCenter: bar.controlCenter
                 capsuleFeatures: bar.capsuleFeatures
+                capsuleNotifications: capsuleNotifications
 
                 onPopupClosed: function(popup) {
                     bar.popupClosed(popup, panel);

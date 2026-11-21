@@ -311,6 +311,9 @@ const defaultProfile = {
     elementBorder: false,
     groupBorder: false,
     barOpacity: 100,
+    // On a capsule, whether new notifications show inside the focused
+    // monitor's capsule instead of as toasts (CapsuleRouting.notificationTarget).
+    capsuleNotifications: false,
     barElements: defaultBarElements([]),
     // Each bar element's collapsed place, by id (see capsulePlacesFor), when
     // the profile enables it; they show in the profile's order.
