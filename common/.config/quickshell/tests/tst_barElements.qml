@@ -847,6 +847,24 @@ TestCase {
         compare(groupedZone(profile.barElements, "right"), data.zone);
     }
 
+    // A profile that already lists the pomodoro, in the clock's zone or
+    // another, keeps it where it is and gets no second one.
+    function test_migratingKeepsAPomodoroAlreadyThere_data() {
+        return [
+            { tag: "beside the clock", left: [], right: [{ id: "clock", enabled: true },
+                { id: "pomodoro", enabled: false }], zone: ["clock", "-pomodoro"], leftZone: [] },
+            { tag: "in another zone", left: [{ id: "pomodoro", enabled: true }],
+                right: [{ id: "clock", enabled: true }], zone: ["clock"], leftZone: ["pomodoro"] }
+        ];
+    }
+
+    function test_migratingKeepsAPomodoroAlreadyThere(data) {
+        const profile = migratedFromVersion18({ barElements: { left: data.left, center: [], right: data.right } });
+
+        compare(groupedZone(profile.barElements, "right"), data.zone);
+        compare(groupedZone(profile.barElements, "left"), data.leftZone);
+    }
+
     // A clock that was off showed no countdown either.
     function test_migratingTurnsThePomodoroOffWithTheClock() {
         const profile = migratedFromVersion18({ barElements: { left: [{ id: "clock", enabled: false }],
@@ -942,6 +960,25 @@ TestCase {
         const profile = migratedFromVersion21({ barElements: { left: [], center: [], right: data.right } });
 
         compare(groupedZone(profile.barElements, "right"), data.zone);
+    }
+
+    // A profile that already lists the privacy indicator, in the recording
+    // indicator's zone or another, keeps it where it is and gets no second
+    // one.
+    function test_migratingKeepsAPrivacyIndicatorAlreadyThere_data() {
+        return [
+            { tag: "beside the recording indicator", left: [], right: [{ id: "recording", enabled: true },
+                { id: "privacy", enabled: false }], zone: ["recording", "-privacy"], leftZone: [] },
+            { tag: "in another zone", left: [{ id: "privacy", enabled: true }],
+                right: [{ id: "recording", enabled: true }], zone: ["recording"], leftZone: ["privacy"] }
+        ];
+    }
+
+    function test_migratingKeepsAPrivacyIndicatorAlreadyThere(data) {
+        const profile = migratedFromVersion21({ barElements: { left: data.left, center: [], right: data.right } });
+
+        compare(groupedZone(profile.barElements, "right"), data.zone);
+        compare(groupedZone(profile.barElements, "left"), data.leftZone);
     }
 
     // A migrated capsule shows it live right, between the recording

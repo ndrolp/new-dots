@@ -615,6 +615,29 @@ function textVisibleFromLegacyOptions(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
+// A new bar element `id` placed right after `anchorId` in a profile's saved
+// `barElements`, in place: in the anchor's group if it is in one (it joins
+// the previous element, or the next one joins it), and on if the anchor is.
+// Nothing changes without the anchor, or when the profile already lists `id`
+// in any zone.
+function insertAfter(barElements, anchorId, id) {
+    const lists = zoneNames.map(zoneName => (barElements || {})[zoneName] || []);
+    if (lists.some(list => list.some(element => element.id === id)))
+        return;
+
+    for (const list of lists) {
+        const index = list.findIndex(element => element.id === anchorId);
+        if (index === -1)
+            continue;
+        const anchor = list[index];
+        const next = list[index + 1];
+        const element = { id: id, enabled: anchor.enabled !== false };
+        if (anchor.joinPrevious === true || (next !== undefined && next.joinPrevious === true))
+            element.joinPrevious = true;
+        list.splice(index + 1, 0, element);
+    }
+}
+
 // Step 19: the pomodoro's countdown, part of the clock until now, becomes a
 // bar element of its own, right after the clock and in the clock's group if
 // it is in one (it joins the previous element, or the next one joins it), so
@@ -630,18 +653,7 @@ function pomodoroBesideTheClock(appearance, monitors) {
         if (places && typeof places === "object" && places.clock !== undefined)
             places.pomodoro = places.clock;
 
-        for (const zoneName of zoneNames) {
-            const list = (profile.barElements || {})[zoneName] || [];
-            const index = list.findIndex(element => element.id === "clock");
-            if (index === -1)
-                continue;
-            const clock = list[index];
-            const next = list[index + 1];
-            const pomodoro = { id: "pomodoro", enabled: clock.enabled !== false };
-            if (clock.joinPrevious === true || (next !== undefined && next.joinPrevious === true))
-                pomodoro.joinPrevious = true;
-            list.splice(index + 1, 0, pomodoro);
-        }
+        insertAfter(profile.barElements, "clock", "pomodoro");
     }
 
     return { appearance: migrated, monitors: monitors };
@@ -691,18 +703,7 @@ function privacyAfterRecording(appearance, monitors) {
         if (places && typeof places === "object")
             places.privacy = "liveRight";
 
-        for (const zoneName of zoneNames) {
-            const list = (profile.barElements || {})[zoneName] || [];
-            const index = list.findIndex(element => element.id === "recording");
-            if (index === -1 || list.some(element => element.id === "privacy"))
-                continue;
-            const recording = list[index];
-            const next = list[index + 1];
-            const privacy = { id: "privacy", enabled: recording.enabled !== false };
-            if (recording.joinPrevious === true || (next !== undefined && next.joinPrevious === true))
-                privacy.joinPrevious = true;
-            list.splice(index + 1, 0, privacy);
-        }
+        insertAfter(profile.barElements, "recording", "privacy");
     }
 
     return { appearance: migrated, monitors: monitors };

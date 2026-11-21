@@ -11,7 +11,8 @@ clock, right after it, in its group and on or off as the clock was, and the
 one that places it live right in a capsule, after the recording indicator,
 and the one that puts the privacy indicator right after the recording
 indicator, in its group and on or off as it is, live right between it and
-the pomodoro (`tst_barElements.qml`). They also cover where
+the pomodoro, neither added twice to a profile that already lists it
+(`tst_barElements.qml`). They also cover where
 the bar sits on its screen: the edges its window is anchored to, the space it
 reserves (on a capsule, with the live elements it shows collapsed), where the margin goes and where its content sits, against its edge
 however tall a capsule's window grows, for every bar style on each Bar position
