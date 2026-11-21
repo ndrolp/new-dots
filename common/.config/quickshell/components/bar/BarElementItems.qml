@@ -331,6 +331,7 @@ Item {
             keepAwake: root.keepAwake
             grouped: root.elementGrouped("keepAwake")
             sizes: keepAwakeItem.sizes
+            live: keepAwakeItem.live
             onPopupRequested: root.popupRequested("keepAwake")
         }
     }

@@ -192,10 +192,12 @@ device* section: the QR code, the pairing code fields filled from mDNS
 (`components/panels/AndroidPairingSection.qml`; `AndroidDevicesPanel.qml`
 and the services' `.qml` files need Quickshell and aren't tested here;
 `android-pairing.sh`, below, runs `services/AndroidPairing.qml`),
-what the keep-awake bar element shows and its popup's switch, duration choice
+what the keep-awake bar element shows, with a countdown's time left only as a
+capsule's live element, and its popup's switch, duration choice
 and time left (`components/bar/KeepAwakeElement.qml`,
 `components/panels/KeepAwakePopupBody.qml`), keep-awake's duration and
-countdown: starting, restarting, running out and turning off by hand, and
+countdown: starting, restarting, running out and turning off by hand, the
+coarse time left a live element shows, and
 what the keybind's OSD says (`services/KeepAwakeState.js`),
 which popup is open across the bars and which bar IPC opens one on
 (`modules/OpenPopup.js`), one part of the shell opening another in its
