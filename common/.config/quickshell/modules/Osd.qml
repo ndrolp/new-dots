@@ -8,7 +8,8 @@ import "../components/panels/OsdChange.js" as OsdChange
 
 // The on-screen display and the six changes it shows: IPC sends the volume
 // and brightness keys, it watches Caps Lock itself, and the rest of the shell
-// sends audio outputs, bar profiles and the keep-awake keybind. Each shows on
+// sends audio outputs, bar profiles, the keep-awake keybind and power changes
+// (PowerChanges.qml). Each shows on
 // the focused monitor only (CapsuleRouting.changeTarget): in its capsule if it has
 // one, else in the OSD on that monitor.
 Scope {

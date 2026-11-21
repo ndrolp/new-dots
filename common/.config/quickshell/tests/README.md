@@ -91,8 +91,11 @@ keep-awake) goes to the focused monitor's capsule instead of the OSD, nowhere
 while a popup is inside it, and otherwise to the OSD on the focused monitor's
 screen (`CapsuleRouting.js`), and that the capsule then shows that change
 and no bar element (`CapsuleElements.js`), for about 1.5 s from the latest one (`CapsuleChange.qml`),
-what each of the six changes shows, the same in the OSD and the capsule
-(`components/panels/OsdChange.js`), in the same tone colours and with the
+what each of the changes shows, the same in the OSD and the capsule
+(`components/panels/OsdChange.js`), which power change event a battery
+reading makes: plugging in, unplugging, and "Battery low" once at 15% while
+discharging, re-armed like the notification, none at startup or without a
+battery (`services/PowerChange.js`, `tst_powerChange.qml`), in the same tone colours and with the
 same level bar and percent, under the bar in the OSD and beside it in the
 capsule (`OsdChange.toneColor`, `ChangeLevel.qml`), how it is
 drawn with its fill and bar border (`CapsuleSurface.qml`), that it reaches past its row for its

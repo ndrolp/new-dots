@@ -70,8 +70,15 @@ adding or editing one file here.
   watching, and where each change shows: on the focused monitor only, in its
   capsule if it has one, else in the OSD on that monitor
   (`CapsuleRouting.changeTarget`, tested).
+- `PowerChanges.qml`: watches UPower's display device and shows the power
+  change events through `Osd.qml`: "Charging · 64%" and "On battery · 64%"
+  on plugging the charger in or out, and "Battery low · 15%" once on reaching
+  15% while discharging, re-armed like the low-battery notification. Nothing
+  shows without a battery or for the first reading at startup
+  (`services/PowerChange.js`, tested).
 - `Lock.qml` (the one lock screen and the `lock` IPC call) and
-  `LowBattery.qml`.
+  `LowBattery.qml` (the low-battery notification, which stays alongside the
+  "Battery low" change event).
 
 These files import Quickshell, so they can't be loaded under the tests; what
 they decide that is more than wiring lives in plain JS.
