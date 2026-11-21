@@ -335,6 +335,7 @@ Variants {
                 workspaceIds: panel.workspaceService.workspacesForScreen(panel.screen,
                     panel.monitors.workspacesFor(panel.monitorDescription))
                 workspaceService: panel.workspaceService
+                monitorScreen: panel.screen
                 appearance: panel.barAppearance
 
                 AlongBarBehavior on x { appearance: panel.barAppearance }

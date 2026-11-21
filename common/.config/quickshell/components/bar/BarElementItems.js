@@ -52,7 +52,7 @@ function opensPopup(element) {
     return !elementsWithoutPopup.includes(element);
 }
 
-// Scrolling over the media element: a step (WheelSteps.take) forward skips
+// Scrolling over the media element: a step (components/WheelSteps.js) forward skips
 // the player it shows to the next track, one back to the previous one, where
 // the player can.
 function skipTrack(player, step) {

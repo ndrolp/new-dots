@@ -36,6 +36,9 @@ so the service asks for one on each `fullscreen` event. A move or
 a new workspace that doesn't exist yet takes a second step, sending the workspace
 to the monitor it was meant for, because Hyprland makes it on the focused monitor
 or the one a rule names.
+Where scrolling over a monitor's workspaces goes, from the one that monitor
+shows (`activeWorkspaceIdForScreen`) to the next or previous one it lists, is
+`WorkspaceState.scrollTarget`.
 
 ## Monitor setups
 
