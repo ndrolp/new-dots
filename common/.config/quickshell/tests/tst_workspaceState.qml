@@ -104,4 +104,28 @@ TestCase {
     function test_aWorkspaceIsNeverCreatedFromSomethingThatIsNotAMonitor() {
         compare(WorkspaceState.createCommand(7, 'DP-1" }) ; reload'), null);
     }
+
+    // A workspace has a fullscreen window only for Hyprland's real fullscreen
+    // (fullscreen mode 2, or 3 when maximized too), not a maximized one (1).
+    function test_aWorkspaceHasAFullscreenWindowOnlyForRealFullscreen_data() {
+        return [
+            { tag: "none", mode: 0, fullscreen: false },
+            { tag: "maximized", mode: 1, fullscreen: false },
+            { tag: "fullscreen", mode: 2, fullscreen: true },
+            { tag: "fullscreen and maximized", mode: 3, fullscreen: true }
+        ];
+    }
+
+    function test_aWorkspaceHasAFullscreenWindowOnlyForRealFullscreen(data) {
+        const windows = [windowOn(2), windowOn(2, { fullscreen: data.mode })];
+
+        compare(WorkspaceState.hasFullscreen(windows, 2), data.fullscreen);
+    }
+
+    // A fullscreen window on another workspace doesn't count, nor one
+    // Hyprland hasn't described yet.
+    function test_onlyTheWorkspacesOwnWindowsCount() {
+        verify(!WorkspaceState.hasFullscreen([windowOn(3, { fullscreen: 2 }), { fullscreen: 2 }, {}], 2));
+        verify(!WorkspaceState.hasFullscreen([], 2));
+    }
 }

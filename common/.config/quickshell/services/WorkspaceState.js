@@ -20,6 +20,16 @@ function isShownOn(window, workspace, focused) {
         && (!window.pinned || workspace === focused);
 }
 
+// Hyprland's fullscreen mode is a bit set: 1 maximized, 2 fullscreen.
+const fullscreenMode = 2;
+
+// Whether a workspace has a real fullscreen window, not just a maximized one.
+// `windows` are what Hyprland reports for them, as isShownOn takes them.
+function hasFullscreen(windows, workspace) {
+    return (windows || []).some(window => window.workspace?.id === workspace
+        && ((window.fullscreen || 0) & fullscreenMode) !== 0);
+}
+
 // How Hyprland is told which window, or null for anything but an address.
 function windowSelector(address) {
     if (!/^(?:0x)?[0-9a-f]+$/i.test(address))
