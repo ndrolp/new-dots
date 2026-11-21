@@ -86,11 +86,15 @@ function timeLeftLabel(seconds) {
     return minutes + ":" + pad(secs);
 }
 
-// `seconds` left as a capsule's live element shows it beside the cup, in
-// whole minutes so it changes once a minute: "1h 12m", "42m", or "<1m" in
-// the last minute.
-function coarseTimeLeft(seconds) {
-    const minutes = Math.floor(seconds / 60);
+// The whole minutes in `seconds` left, rounded down: what a capsule's live
+// element counts, so it changes once a minute.
+function minutesLeft(seconds) {
+    return Math.floor(seconds / 60);
+}
+
+// Whole `minutes` left (see minutesLeft) as a capsule's live element shows
+// them beside the cup: "1h 12m", "42m", or "<1m" in the last minute.
+function coarseTimeLeft(minutes) {
     if (minutes < 1)
         return "<1m";
     if (minutes < 60)

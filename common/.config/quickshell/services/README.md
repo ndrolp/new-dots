@@ -116,7 +116,7 @@ shows a filled cup while it is on. Turning it on uses the duration chosen
 in the popup (until turned off, 30 min, 1 h or 2 h); choosing one while on
 restarts the countdown, and the popup shows `secondsLeft`; as a capsule's
 live element, the bar element shows it too beside the cup, coarsely and
-changing once a minute (`KeepAwakeState.coarseTimeLeft`: "1h 12m", "42m",
+changing once a minute (`KeepAwakeState.minutesLeft`, then `coarseTimeLeft`: "1h 12m", "42m",
 "<1m"). When a countdown
 runs out it turns off and sends a "Keep-awake ended" notification through
 `notify-send`; turning it off by hand sends none. Those decisions live in

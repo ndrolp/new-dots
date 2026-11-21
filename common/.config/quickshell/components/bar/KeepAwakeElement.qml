@@ -25,6 +25,9 @@ Rectangle {
     // Whether the time left shows beside the cup: only on a live element
     // while a countdown runs, never "until turned off".
     readonly property bool timeLeftShown: live && keepAwake.timed
+    // The whole minutes left on the countdown: the time left's label
+    // depends on these, which change once a minute, not on secondsLeft.
+    readonly property int minutesLeft: KeepAwakeState.minutesLeft(keepAwake.secondsLeft)
     signal popupRequested()
 
     readonly property var size: BarLayout.size(appearance, content.width + 16, sizes.thickness)
@@ -90,15 +93,15 @@ Rectangle {
             font.bold: true
         }
 
-        // Its text changes only when the minutes do, though secondsLeft
-        // ticks every second.
+        // Worked out from minutesLeft, so only once a minute, though
+        // secondsLeft ticks every second.
         ShellText {
             id: timeLeft
 
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             visible: root.timeLeftShown
-            text: root.timeLeftShown ? KeepAwakeState.coarseTimeLeft(root.keepAwake.secondsLeft) : ""
+            text: root.timeLeftShown ? KeepAwakeState.coarseTimeLeft(root.minutesLeft) : ""
             color: theme.green
             font.pixelSize: root.sizes.textSize
             font.bold: true

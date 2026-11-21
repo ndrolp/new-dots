@@ -36,6 +36,12 @@ TestCase {
         readonly property var motion: Motion.motion(true)
     }
 
+    Component {
+        id: spy
+
+        SignalSpy {}
+    }
+
     // Stands in for services/KeepAwake.qml.
     Component {
         id: fakeKeepAwake
@@ -172,6 +178,20 @@ TestCase {
 
         item.keepAwake.secondsLeft = 41 * 60 + 59;
         compare(label.text, "41m");
+    }
+
+    // What the label is worked out from changes only with the minutes, so
+    // the countdown's every second doesn't work it out again.
+    function test_theMinutesLeftChangeOncePerMinute() {
+        const item = makeTimedElement(true, 42 * 60 + 59);
+        const changes = createTemporaryObject(spy, this, { target: item, signalName: "minutesLeftChanged" });
+
+        compare(item.minutesLeft, 42);
+        for (let seconds = 42 * 60 + 58; seconds >= 41 * 60 + 59; seconds--)
+            item.keepAwake.secondsLeft = seconds;
+
+        compare(item.minutesLeft, 41);
+        compare(changes.count, 1);
     }
 
     function test_theTimeLeftWidensTheLiveElement() {
