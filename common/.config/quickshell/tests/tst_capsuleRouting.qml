@@ -117,4 +117,47 @@ TestCase {
     function test_otherwiseTheOsdShowsItOnTheFocusedScreen(data) {
         compare(CapsuleRouting.changeTarget(changeBars(), data.monitor), data.target);
     }
+
+    // The bars as modules/Bar.qml lists them for a new notification: whether
+    // their profile turns notifications in the capsule on.
+    function notificationBars() {
+        return [
+            { window: "left window", monitor: "Left", visible: true, capsule: false,
+                capsuleNotifications: true },
+            { window: "middle window", monitor: "Middle", visible: true, capsule: true,
+                capsuleNotifications: true },
+            { window: "off window", monitor: "Off", visible: true, capsule: true,
+                capsuleNotifications: false },
+            { window: "busy window", monitor: "Busy", visible: true, capsule: true,
+                capsuleNotifications: true, popupInside: true },
+            { window: "hidden window", monitor: "Hidden", visible: false, capsule: true,
+                capsuleNotifications: true },
+            { window: "fullscreen window", monitor: "Fullscreen", visible: true, capsule: true,
+                capsuleNotifications: true, capsuleHidden: true }
+        ];
+    }
+
+    // With notifications in the capsule on, a new notification shows in the
+    // focused monitor's capsule.
+    function test_aNotificationShowsInTheFocusedMonitorsCapsule() {
+        compare(CapsuleRouting.notificationTarget(notificationBars(), "Middle"), "middle window");
+    }
+
+    // Otherwise it is a toast (null): with the setting off, on another bar
+    // style, with a popup or panel inside the capsule, with the capsule
+    // hidden for a fullscreen window, or without a bar on the focused monitor.
+    function test_otherwiseANotificationIsAToast_data() {
+        return [
+            { tag: "the setting off", monitor: "Off" },
+            { tag: "a normal bar", monitor: "Left" },
+            { tag: "a popup inside", monitor: "Busy" },
+            { tag: "a hidden bar", monitor: "Hidden" },
+            { tag: "a capsule hidden for fullscreen", monitor: "Fullscreen" },
+            { tag: "no bar", monitor: "Elsewhere" }
+        ];
+    }
+
+    function test_otherwiseANotificationIsAToast(data) {
+        compare(CapsuleRouting.notificationTarget(notificationBars(), data.monitor), null);
+    }
 }

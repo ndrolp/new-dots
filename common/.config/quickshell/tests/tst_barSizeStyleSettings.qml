@@ -10,6 +10,7 @@ TestCase {
     name: "BarSizeStyleSettings"
     width: 800
     height: 1200
+    visible: true
     when: windowShown
 
     Config.Theme {
@@ -72,6 +73,7 @@ TestCase {
                 property bool elementBorder: false
                 property bool groupBorder: false
                 property bool pillsTransparent: false
+                property bool capsuleNotifications: false
                 property string matchingDensityPreset: "balanced"
                 property var motion: ({ short: 0 })
                 property var saved: []
@@ -277,6 +279,27 @@ TestCase {
         verify(numberCell(built.item, "Bar thickness"));
         verify(margin);
         compare(margin.value, 8);
+    }
+
+    function shownSwitchRow(item, label) {
+        const row = switchRow(item, label);
+        return row && row.visible ? row : null;
+    }
+
+    // Notifications in the capsule is a capsule profile's setting only, off
+    // by default; toggling it saves it.
+    function test_notificationsInTheCapsuleShowOnlyForACapsule() {
+        const built = make();
+
+        verify(!shownSwitchRow(built.item, "Notifications in the capsule"));
+
+        built.appearance.barStyle = "capsule";
+        const row = shownSwitchRow(built.item, "Notifications in the capsule");
+        verify(row);
+        compare(row.checked, false);
+
+        row.toggled();
+        compare(built.appearance.saved, [["capsuleNotifications", true]]);
     }
 
     function test_nothingInTheseGroupsIsBold() {

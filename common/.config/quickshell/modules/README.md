@@ -43,6 +43,9 @@ adding or editing one file here.
   A capsule hides while its monitor's focused workspace has a real fullscreen
   window, not a maximized one; `bars()` lists that as `capsuleHidden`
   (`CapsuleRouting.hidden`, tested), and SUPER+I does nothing on it.
+  `bars()` also lists whether a profile shows new notifications in the
+  capsule (`capsuleNotifications`); a capsule that can't show them any more
+  hands them back through `capsuleNotificationsReleased`.
 - `ControlCenter.qml`: not a `Feature`: the control center is the bell's
   popup. The module owns its state and is handed, as one object, through
   the bar to the popup and its controls: the services they show,
@@ -64,7 +67,13 @@ adding or editing one file here.
   menu and opens the Desktop menu's panel in its place.
 - `Notifications.qml`: the notification server, toasts and sound, and the
   `notifications` IPC call (SUPER+N, the control center's collapsed
-  shortcut).
+  shortcut). With notifications in the capsule on, a new notification shows
+  inside the focused monitor's capsule instead of as a toast
+  (`CapsuleRouting.notificationTarget`, tested; the queue with its "+N" is
+  `CapsuleNotificationQueue.js`, tested); those the capsule hands back, when
+  a popup opens inside it or it hides for fullscreen, show as toasts. Both
+  use one card (`ToastCard.qml`, tested): actions, inline reply, and a
+  critical one stays until dismissed.
 - `BarProfiles.qml`: the default bar profile for new monitors and the
   `bar-profiles` IPC calls.
 - `KeepAwake.qml`: the `keep-awake` IPC call the keybind runs, which toggles

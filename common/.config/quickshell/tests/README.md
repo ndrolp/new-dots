@@ -104,7 +104,18 @@ what each change shows, the same in the OSD and the capsule
 same level bar and percent, under the bar in the OSD and beside it in the
 capsule (`OsdChange.toneColor`, `ChangeLevel.qml`), that Do Not Disturb
 shows each time it is turned on or off but not as the shell starts
-(`components/panels/DoNotDisturbWatch.qml`), how it is
+(`components/panels/DoNotDisturbWatch.qml`), that with notifications in the
+capsule on (a profile setting, off in new and migrated profiles, offered in the
+settings panel only for a capsule: `tst_capsuleNotifications.qml`,
+`BarSizeStyleSettings.qml`) a new notification goes to the focused monitor's
+capsule and is a toast with the setting off, a popup or panel inside, the
+capsule hidden for fullscreen or no capsule (`CapsuleRouting.notificationTarget`),
+that the newest shows with the others waiting as "+N", the next showing as
+one ends and all handed back oldest first as toasts
+(`CapsuleNotificationQueue.js`), and the card a new notification shows as,
+toast or in the capsule: its timeout, a critical one staying, its actions,
+inline reply and "+N" (`components/panels/ToastCard.qml`,
+`NotificationCard.toastTimeout`), how it is
 drawn with its fill and bar border (`CapsuleSurface.qml`), that it reaches past its row for its
 workspace pills, and where they sit inside it, under the row of a top
 capsule and above the row of a bottom one, centred on it, how it grows round a popup

@@ -47,3 +47,14 @@ function changeTarget(bars, focusedMonitor) {
         return { osd: bar.screen };
     return bar.popupInside ? {} : { capsule: bar.window };
 }
+
+// Where a new notification shows: the focused monitor's capsule window, when
+// its profile turns notifications in the capsule on and it is shown, not
+// hidden for a fullscreen window and has no popup or panel inside; else null,
+// a toast. `bars` are { window, monitor, visible, capsule, popupInside,
+// capsuleHidden, capsuleNotifications }, as modules/Bar.qml lists them.
+function notificationTarget(bars, focusedMonitor) {
+    const bar = barOnMonitor(bars, focusedMonitor);
+    return bar && bar.visible && bar.capsule && bar.capsuleNotifications === true
+        && !bar.capsuleHidden && !bar.popupInside ? bar.window : null;
+}

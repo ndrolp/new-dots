@@ -140,4 +140,19 @@ Column {
             }
         }
     }
+
+    // A capsule's own: new notifications show inside it instead of as toasts.
+    Panels.SettingsGrid {
+        rowSpacing: 4
+        visible: BarProfileModel.capsule(root.appearance)
+
+        Panels.SettingsSwitchRow {
+            width: parent.cellWidth
+            appearance: root.appearance
+            label: "Notifications in the capsule"
+            checked: root.appearance.capsuleNotifications
+            onToggled: root.appearance.setBarSetting("capsuleNotifications",
+                !root.appearance.capsuleNotifications)
+        }
+    }
 }
