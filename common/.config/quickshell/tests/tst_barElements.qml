@@ -761,37 +761,6 @@ TestCase {
         compare(BarProfileModel.completeProfile(profiles.work).groupVerticalPadding, 0);
     }
 
-    // A player as Mpris gives it, recording which tracks it was asked for.
-    function player(canGoNext, canGoPrevious) {
-        return {
-            canGoNext: canGoNext,
-            canGoPrevious: canGoPrevious,
-            asked: [],
-            next() { this.asked.push("next"); },
-            previous() { this.asked.push("previous"); }
-        };
-    }
-
-    function test_scrollingOverMediaSkipsToTheNextOrPreviousTrack() {
-        const shown = player(true, true);
-
-        BarElementItems.skipTrack(shown, 1);
-        BarElementItems.skipTrack(shown, -1);
-        BarElementItems.skipTrack(shown, 0);
-
-        compare(shown.asked, ["next", "previous"]);
-    }
-
-    function test_scrollingOverMediaSkipsOnlyWhereThePlayerCan() {
-        const atTheEnds = player(false, false);
-
-        BarElementItems.skipTrack(atTheEnds, 1);
-        BarElementItems.skipTrack(atTheEnds, -1);
-        BarElementItems.skipTrack(null, 1);
-
-        compare(atTheEnds.asked, []);
-    }
-
     function test_aNewProfilesGroupsKeepThePaddingTheyFollowed() {
         const profiles = BarProfileModel.defaultBarProfiles();
 

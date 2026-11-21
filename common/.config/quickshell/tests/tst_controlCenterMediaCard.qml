@@ -147,4 +147,35 @@ TestCase {
         verify(!find(item, "nextButton").interactive);
         verify(find(item, "previousButton").interactive);
     }
+
+    // A player as Mpris gives it, recording which tracks it was asked for.
+    function mprisPlayer(canGoNext, canGoPrevious) {
+        return {
+            canGoNext: canGoNext,
+            canGoPrevious: canGoPrevious,
+            asked: [],
+            next() { this.asked.push("next"); },
+            previous() { this.asked.push("previous"); }
+        };
+    }
+
+    function test_scrollingOverMediaSkipsToTheNextOrPreviousTrack() {
+        const shown = mprisPlayer(true, true);
+
+        MediaCard.skipTrack(shown, 1);
+        MediaCard.skipTrack(shown, -1);
+        MediaCard.skipTrack(shown, 0);
+
+        compare(shown.asked, ["next", "previous"]);
+    }
+
+    function test_scrollingOverMediaSkipsOnlyWhereThePlayerCan() {
+        const atTheEnds = mprisPlayer(false, false);
+
+        MediaCard.skipTrack(atTheEnds, 1);
+        MediaCard.skipTrack(atTheEnds, -1);
+        MediaCard.skipTrack(null, 1);
+
+        compare(atTheEnds.asked, []);
+    }
 }

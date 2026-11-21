@@ -13,6 +13,7 @@ import "BarElementItems.js" as BarElementItems
 import "BarLayout.js" as BarLayout
 import "LiveElements.js" as LiveElements
 import "../panels/ControlCenterNames.js" as Names
+import "../panels/MediaCard.js" as MediaCard
 import "RecordingIndicator.js" as RecordingIndicator
 import "PrivacyIndicator.js" as PrivacyIndicator
 import ".." as Components
@@ -501,7 +502,7 @@ Item {
                 // Scrolling skips the player shown to the next or previous
                 // track, at most one per notch or touchpad gesture.
                 Components.WheelStepHandler {
-                    onStepped: step => BarElementItems.skipTrack(root.player, step)
+                    onStepped: step => MediaCard.skipTrack(root.player, step)
                 }
             }
         }

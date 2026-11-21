@@ -66,7 +66,7 @@ wide it is (`components/bar/AudioLevel.qml`), how scrolling turns into
 steps, at most one per wheel notch or touchpad gesture, its momentum and a
 touchpad with no scroll phases included (`components/WheelSteps.js`,
 `WheelStepHandler.qml` feeds it), and that a step over the media bar element skips its player to the next or
-previous track where it can (`BarElementItems.skipTrack`), how the Cava bar element
+previous track where it can (`MediaCard.skipTrack`), how the Cava bar element
 reads cava and tries it again when it fails (`services/CavaOutput.js`) and
 what it draws, from the bottom or from the side, and the track progress painted on its bars (`components/bar/CavaBars.qml`), what the Cava desktop widget shows of the player: the media info, the progress line and when they show (`components/widgets/CavaMedia.js`, `CavaMediaInfo.qml`), how a docked bar zone hangs
 from the screen edge the bar sits on and keeps its sides on the screen's edge
