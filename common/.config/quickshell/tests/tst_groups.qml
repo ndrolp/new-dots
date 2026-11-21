@@ -103,7 +103,7 @@ TestCase {
             fixtures.read("monitors.json"));
 
         compare(groups(migrated.appearance.barProfiles.media.barElements, "center"),
-            ["arch+workspaces+audio+network+battery+clock+pomodoro+notifications+recording"]);
+            ["arch+workspaces+audio+network+battery+clock+pomodoro+notifications+recording+privacy"]);
         verify(!("statusIsland" in migrated.appearance.barProfiles.media));
         compare(SchemaMigrations.migrate(migrated.appearance, migrated.monitors), migrated);
     }

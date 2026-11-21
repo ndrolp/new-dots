@@ -14,10 +14,11 @@ import "BarLayout.js" as BarLayout
 import "LiveElements.js" as LiveElements
 import "../panels/ControlCenterNames.js" as Names
 import "RecordingIndicator.js" as RecordingIndicator
+import "PrivacyIndicator.js" as PrivacyIndicator
 import ".." as Components
 
 // The bar elements that need no component of their own (notifications,
-// recording, keep-awake, media, cava, audio, bluetooth, tray, network, battery, clock
+// recording, privacy, keep-awake, media, cava, audio, bluetooth, tray, network, battery, clock
 // and pomodoro),
 // placed by the bar's single walk per zone (see BarContent).
 Item {
@@ -33,6 +34,8 @@ Item {
     // The screens other apps share, with their start times
     // (services/ScreenShares.qml).
     required property var screenShares
+    // The apps using the microphone or a camera (services/DeviceCaptures.qml).
+    required property var deviceCaptures
     // The shared cava process (services/Cava.qml).
     required property var cava
     // Whether the bar holding these elements is shown on its monitor.
@@ -119,6 +122,7 @@ Item {
     readonly property var items: ({
         "notifications": notificationButton,
         "recording": recordingItem,
+        "privacy": privacyItem,
         "keepAwake": keepAwakeItem,
         "media": mediaItem,
         "cava": cavaElement,
@@ -157,7 +161,8 @@ Item {
         keepAwakeOn: keepAwake.on,
         hasBattery: hasBattery,
         cavaSilent: cava.silent,
-        pomodoroStarted: pomodoro.started
+        pomodoroStarted: pomodoro.started,
+        captures: deviceCaptures.captures
     })
 
     // Enabled elements with nothing to show (no player, battery, recording,
@@ -317,6 +322,59 @@ Item {
                         sharingShownTimer.restart();
                     }
                 }
+            }
+        }
+    }
+
+    // The privacy indicator: the mic icon, the camera icon or both while an
+    // app uses them, hidden otherwise. It opens the popup listing the apps.
+    LiveCapableItem {
+        id: privacyItem
+
+        appearance: root.appearance
+        element: "privacy"
+        items: root
+
+        Rectangle {
+            id: privacyButton
+
+            readonly property var icons: PrivacyIndicator.icons(root.deviceCaptures.captures)
+            readonly property var size: root.sizeAround(privacyContent, privacyItem.sizes.thickness)
+
+            width: size.width
+            height: size.height
+            radius: root.appearance.radius
+            color: privacyHover.hovered ? theme.surfaceHover
+                : root.elementGrouped("privacy") || root.appearance.pillsTransparent
+                    || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+            border.width: root.appearance.elementBorder && !root.elementGrouped("privacy") ? 1 : 0
+            border.color: root.appearance.elementBorder ? theme.border : "transparent"
+
+            Behavior on color {
+                ColorAnimation { duration: root.appearance.motion.short }
+            }
+
+            HoverHandler {
+                id: privacyHover
+            }
+
+            // The mic and the camera, one after the other along the bar.
+            IconValue {
+                id: privacyContent
+
+                anchors.centerIn: parent
+                appearance: root.appearance
+                icon: privacyButton.icons[0] || ""
+                iconColor: theme.orange
+                iconSize: privacyItem.sizes.iconSize
+                value: privacyButton.icons[1] || ""
+                valueVisible: privacyButton.icons.length > 1
+                valueSize: privacyItem.sizes.iconSize
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: root.popupRequested("privacy")
             }
         }
     }

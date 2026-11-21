@@ -162,7 +162,7 @@ TestCase {
         compare(zone(normalized, "left"), ["clock", "pomodoro"]);
         compare(zone(normalized, "center"), []);
         compare(zone(normalized, "right"), ["arch", "systemMonitor", "currentApp", "-appMenu", "workspaces",
-            "notifications", "recording", "keepAwake", "media", "-cava", "audio", "bluetooth",
+            "notifications", "recording", "privacy", "keepAwake", "media", "-cava", "audio", "bluetooth",
             "tray", "network", "battery"]);
         const once = BarProfileModel.normalizeBarElements(minimalElements());
         compare(BarProfileModel.normalizeBarElements(once), once);
@@ -335,24 +335,28 @@ TestCase {
         compare(BarProfileModel.elementEnabled(moved, "recording"), true);
     }
 
-    function test_keepAwakeIsInEveryDefaultProfileEnabledAfterTheRecordingIndicator() {
+    // The recording indicator, then the privacy indicator, then keep-awake.
+    function test_keepAwakeIsInEveryDefaultProfileEnabledAfterTheRecordingAndPrivacyIndicators() {
         const profiles = BarProfileModel.defaultBarProfiles();
 
         for (const name in profiles) {
             const barElements = profiles[name].barElements;
             const zoneName = BarProfileModel.elementZone(barElements, "recording");
             const ids = zone(barElements, zoneName).map(id => id.replace("-", ""));
-            compare(ids.indexOf("keepAwake"), ids.indexOf("recording") + 1, name);
+            compare(ids.indexOf("privacy"), ids.indexOf("recording") + 1, name);
+            compare(ids.indexOf("keepAwake"), ids.indexOf("recording") + 2, name);
+            compare(BarProfileModel.elementEnabled(barElements, "privacy"), true, name);
             compare(BarProfileModel.elementEnabled(barElements, "keepAwake"), true, name);
         }
     }
 
-    function test_aProfileWithoutKeepAwakeGetsItEnabledAfterTheRecordingIndicator() {
+    function test_aProfileWithoutKeepAwakeOrPrivacyGetsThemEnabledAfterTheRecordingIndicator() {
         const barElements = BarProfileModel.normalizeBarElements({
             center: [{ id: "recording", enabled: true }, { id: "clock", enabled: true }]
         });
 
-        compare(zone(barElements, "center").slice(0, 2), ["recording", "keepAwake"]);
+        compare(zone(barElements, "center").slice(0, 3), ["recording", "privacy", "keepAwake"]);
+        compare(BarProfileModel.elementEnabled(barElements, "privacy"), true);
         compare(BarProfileModel.elementEnabled(barElements, "keepAwake"), true);
     }
 
@@ -372,7 +376,8 @@ TestCase {
     // recording or sound, keep-awake off and no pomodoro started.
     function nothingGoingOn(values) {
         return Object.assign({ live: [], expanded: false, player: null, recordings: [], hasBattery: false,
-            cavaSilent: true, keepAwakeOn: false, pomodoroStarted: false }, values);
+            cavaSilent: true, keepAwakeOn: false, pomodoroStarted: false,
+            captures: { microphone: [], camera: [] } }, values);
     }
 
     // The pomodoro shows its countdown only while one is started, running
@@ -419,13 +424,19 @@ TestCase {
             { tag: "recording", element: "recording", status: { recordings: [{ app: "obs" }] }, shown: true },
             { tag: "not recording", element: "recording", status: {}, shown: false },
             { tag: "keep-awake off", element: "keepAwake", status: {}, shown: true },
-            { tag: "keep-awake on", element: "keepAwake", status: { keepAwakeOn: true }, shown: true }
+            { tag: "keep-awake on", element: "keepAwake", status: { keepAwakeOn: true }, shown: true },
+            { tag: "microphone in use", element: "privacy",
+                status: { captures: { microphone: ["Discord"], camera: [] } }, shown: true },
+            { tag: "camera in use", element: "privacy",
+                status: { captures: { microphone: [], camera: ["obs"] } }, shown: true },
+            { tag: "nothing captured", element: "privacy", status: {}, shown: false },
+            { tag: "nothing captured, expanded", element: "privacy", status: { expanded: true }, shown: false }
         ];
     }
 
     function test_theElementsThatCanBeLiveShowAsOnAnyBar(data) {
         const barElements = { left: [], right: [], center: [{ id: "recording", enabled: true },
-            { id: "media", enabled: true }, { id: "keepAwake", enabled: true }] };
+            { id: "media", enabled: true }, { id: "keepAwake", enabled: true }, { id: "privacy", enabled: true }] };
 
         compare(BarElementItems.itemVisible(data.element, barElements, nothingGoingOn(data.status)), data.shown);
     }
@@ -453,15 +464,20 @@ TestCase {
                 shown: true },
             { tag: "pomodoro cancelled or completed", element: "pomodoro", status: {}, shown: false },
             { tag: "pomodoro not started, expanded", element: "pomodoro", status: { expanded: true },
-                shown: false }
+                shown: false },
+            { tag: "microphone and camera in use", element: "privacy",
+                status: { captures: { microphone: ["Firefox"], camera: ["Firefox"] } }, shown: true },
+            { tag: "nothing captured", element: "privacy", status: {}, shown: false },
+            { tag: "nothing captured, expanded", element: "privacy", status: { expanded: true }, shown: false }
         ];
     }
 
     function test_aLiveElementShowsCollapsedOnlyWhileActive(data) {
         const barElements = { left: [], right: [], center: [{ id: "recording", enabled: false },
             { id: "media", enabled: false }, { id: "keepAwake", enabled: false },
-            { id: "pomodoro", enabled: false }] };
-        const status = nothingGoingOn(Object.assign({ live: ["recording", "media", "keepAwake", "pomodoro"] },
+            { id: "pomodoro", enabled: false }, { id: "privacy", enabled: false }] };
+        const status = nothingGoingOn(Object.assign({ live: ["recording", "media", "keepAwake", "pomodoro",
+            "privacy"] },
             data.status));
 
         compare(BarElementItems.itemVisible(data.element, barElements, status), data.shown);
@@ -619,8 +635,15 @@ TestCase {
 
     function test_everyOtherBarElementOpensAPopup() {
         for (const element of ["systemMonitor", "appMenu", "notifications", "keepAwake", "media",
-            "audio", "bluetooth", "tray", "network", "battery", "clock", "pomodoro"])
+            "audio", "bluetooth", "tray", "network", "battery", "clock", "pomodoro", "privacy"])
             verify(BarElementItems.opensPopup(element), element);
+    }
+
+    // The privacy indicator opens its own popup, listing the apps that use
+    // the microphone or a camera.
+    function test_thePrivacyIndicatorOpensItsOwnPopup() {
+        verify(BarElementItems.opensPopup("privacy"));
+        compare(BarElementItems.popupElement("privacy"), "privacy");
     }
 
     // The pomodoro opens the popup it is controlled from, which a pomodoro is
@@ -886,6 +909,64 @@ TestCase {
             capsulePlaces: { clock: "shown", recording: "liveRight" } });
 
         compare(BarProfileModel.capsulePlaceIds(profile.barElements, profile.capsulePlaces).live.right,
-            ["recording", "pomodoro"]);
+            ["recording", "privacy", "pomodoro"]);
+    }
+
+    // A profile of schema version 21, before the privacy indicator, brought
+    // to the current schema.
+    function migratedFromVersion21(profile) {
+        return SchemaMigrations.migrate({ schemaVersion: 21, barProfiles: { saved: profile } }, {})
+            .appearance.barProfiles.saved;
+    }
+
+    // The privacy indicator goes right after the recording indicator, in
+    // its group if it is in one, and on if the recording indicator is.
+    function test_migratingPutsThePrivacyIndicatorRightAfterTheRecordingIndicator_data() {
+        const notifications = { id: "notifications", enabled: true };
+        const keepAwake = { id: "keepAwake", enabled: true };
+        return [
+            { tag: "alone", right: [notifications, { id: "recording", enabled: true }, keepAwake],
+                zone: ["notifications", "recording", "privacy", "keepAwake"] },
+            { tag: "last of its group", right: [notifications,
+                { id: "recording", enabled: true, joinPrevious: true }, keepAwake],
+                zone: ["notifications", "+recording", "+privacy", "keepAwake"] },
+            { tag: "first of its group", right: [notifications, { id: "recording", enabled: true },
+                { id: "keepAwake", enabled: true, joinPrevious: true }],
+                zone: ["notifications", "recording", "+privacy", "+keepAwake"] },
+            { tag: "off", right: [notifications, { id: "recording", enabled: false }],
+                zone: ["notifications", "-recording", "-privacy"] }
+        ];
+    }
+
+    function test_migratingPutsThePrivacyIndicatorRightAfterTheRecordingIndicator(data) {
+        const profile = migratedFromVersion21({ barElements: { left: [], center: [], right: data.right } });
+
+        compare(groupedZone(profile.barElements, "right"), data.zone);
+    }
+
+    // A migrated capsule shows it live right, between the recording
+    // indicator and the pomodoro; the other places stay.
+    function test_migratingPlacesThePrivacyIndicatorLiveRightBetweenRecordingAndPomodoro() {
+        const profile = migratedFromVersion21({ barStyle: "capsule",
+            barElements: { left: [], center: [{ id: "workspaces", enabled: true }], right: [
+                { id: "recording", enabled: true }, { id: "clock", enabled: true },
+                { id: "pomodoro", enabled: true }] },
+            capsulePlaces: { recording: "liveRight", clock: "shown", pomodoro: "liveRight", battery: "hidden" } });
+
+        compare(profile.capsulePlaces.privacy, "liveRight");
+        compare(profile.capsulePlaces.clock, "shown");
+        compare(profile.capsulePlaces.battery, "hidden");
+        compare(BarProfileModel.capsulePlaceIds(profile.barElements, profile.capsulePlaces).live.right,
+            ["recording", "privacy", "pomodoro"]);
+    }
+
+    // A profile that saved no places, or no bar elements, takes the
+    // defaults when it loads, which already place it there.
+    function test_migratingLeavesAProfileWithoutPlacesOrElementsToTheDefaultsForPrivacy() {
+        const profile = migratedFromVersion21({ barStyle: "capsule" });
+
+        compare(profile.capsulePlaces, undefined);
+        compare(profile.barElements, undefined);
+        compare(BarProfileModel.completeProfile(profile).capsulePlaces.privacy, "liveRight");
     }
 }

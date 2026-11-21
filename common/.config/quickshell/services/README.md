@@ -174,6 +174,16 @@ are a shared screen (not a camera or a virtual camera) and the start times
 are decided in `components/bar/RecordingIndicator.js`, tested without
 Quickshell.
 
+## Device captures
+
+`DeviceCaptures.qml` is the shell's one reader of the apps using the
+microphone or a camera through PipeWire, read from the same graph the same
+way (`captures`, `{ microphone: [apps], camera: [apps] }`), and every bar's
+privacy indicator and its popup show them. Which streams count (a recording
+stream linked to an audio source or a camera, not cava, a level meter, the
+shell itself or a filter's own capture) is decided in
+`components/bar/PrivacyIndicator.js`, tested without Quickshell.
+
 ## Web apps
 
 `WebApps.qml` is the shell's one view of the web apps on this machine, for

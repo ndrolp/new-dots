@@ -8,8 +8,10 @@ profile's look (`tst_barStyleMigration.qml`), and the one that turns a capsule
 profile's list of shown bar elements into collapsed places
 (`tst_barProfileModel.qml`), and the one that splits the pomodoro out of the
 clock, right after it, in its group and on or off as the clock was, and the
-one that places it live right in a capsule, after the recording indicator
-(`tst_barElements.qml`). They also cover where
+one that places it live right in a capsule, after the recording indicator,
+and the one that puts the privacy indicator right after the recording
+indicator, in its group and on or off as it is, live right between it and
+the pomodoro (`tst_barElements.qml`). They also cover where
 the bar sits on its screen: the edges its window is anchored to, the space it
 reserves (on a capsule, with the live elements it shows collapsed), where the margin goes and where its content sits, against its edge
 however tall a capsule's window grows, for every bar style on each Bar position
@@ -80,7 +82,8 @@ profile shows but the workspaces and the live ones by
 (all but the workspaces and the live ones, with their groups), which are its
 live elements and on which side of the workspace pills (media left, shown
 collapsed only while a track plays and expanded while any player exists, the
-recording indicator then the pomodoro right, the pomodoro shown collapsed
+recording indicator, the privacy indicator (shown only while an app uses the
+microphone or a camera) then the pomodoro right, the pomodoro shown collapsed
 only while started, paused included, keep-awake hidden unless chosen, then
 shown collapsed only while on), never in its row, at 80% of the profile's sizes
 and out of any group, whose rest keeps one background
@@ -223,6 +226,12 @@ device* section: the QR code, the pairing code fields filled from mDNS
 (`components/panels/AndroidPairingSection.qml`; `AndroidDevicesPanel.qml`
 and the services' `.qml` files need Quickshell and aren't tested here;
 `android-pairing.sh`, below, runs `services/AndroidPairing.qml`),
+which apps the privacy indicator sees using the microphone or a camera in
+the PipeWire graph, not counting cava, level meters, the shell itself, a
+filter's own capture or a screen share, the icons it shows and what its
+popup lists under each device kind (`components/bar/PrivacyIndicator.js`,
+`components/panels/PrivacyPopupBody.qml`; `services/DeviceCaptures.qml`
+needs Quickshell and isn't tested here),
 what the keep-awake bar element shows, with a countdown's time left only as a
 capsule's live element, and its popup's switch, duration choice
 and time left (`components/bar/KeepAwakeElement.qml`,

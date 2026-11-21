@@ -24,6 +24,8 @@ Scope {
     // The app menu module (modules/AppMenu.qml), for its bar element and Popup.
     required property var appMenu
     required property var screenShares
+    // The apps using the microphone or a camera (services/DeviceCaptures.qml).
+    required property var deviceCaptures
     required property var cava
     required property var systemMonitor
     required property var workspaceService
@@ -104,6 +106,7 @@ Scope {
         keepAwake: root.keepAwake
         appMenu: root.appMenu
         screenShares: root.screenShares
+        deviceCaptures: root.deviceCaptures
         cava: root.cava
         systemMonitor: root.systemMonitor
         workspaceService: root.workspaceService

@@ -223,6 +223,17 @@ TestCase {
         verify(BarProfileModel.canBeLive("pomodoro"));
     }
 
+    // A new capsule shows the privacy indicator live right of the workspace
+    // pills, between the recording indicator and the pomodoro.
+    function test_aProfileWithoutCollapsedPlacesShowsThePrivacyIndicatorLiveRight() {
+        const profile = BarProfileModel.completeProfile({ barStyle: "capsule" });
+
+        compare(profile.capsulePlaces.privacy, "liveRight");
+        verify(BarProfileModel.canBeLive("privacy"));
+        compare(BarProfileModel.capsulePlaceIds(profile.barElements, profile.capsulePlaces).live.right,
+            ["recording", "privacy", "pomodoro"]);
+    }
+
     // The elements with an icon and text show both by default, on the bar and
     // in a capsule at rest; the at-rest options apply only while resting.
     function test_anElementShowsItsIconAndTextByDefaultAndAtRestByItsOwnOptions() {

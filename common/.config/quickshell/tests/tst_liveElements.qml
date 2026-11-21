@@ -27,12 +27,12 @@ TestCase {
     }
 
     // On a capsule, media sits left of the workspace pills and, right of
-    // them from the pills outward, the recording indicator then the
-    // pomodoro, while the profile enables them.
-    function test_mediaSitsLeftOfThePillsAndRecordingThenPomodoroRight() {
+    // them from the pills outward, the recording indicator, the privacy
+    // indicator then the pomodoro, while the profile enables them.
+    function test_mediaSitsLeftOfThePillsAndRecordingPrivacyThenPomodoroRight() {
         compare(LiveElements.liveElements({ barStyle: "capsule",
             barElements: BarProfileModel.defaultProfile.barElements }),
-            { left: ["media"], right: ["recording", "pomodoro"] });
+            { left: ["media"], right: ["recording", "privacy", "pomodoro"] });
     }
 
     // A live element whose place is Shown is drawn in the row, not beside
@@ -40,7 +40,7 @@ TestCase {
     function test_aLiveElementShownInTheRowIsNotBesideThePills() {
         compare(LiveElements.liveElements({ barStyle: "capsule",
             barElements: BarProfileModel.defaultProfile.barElements, capsulePlaces: places({ media: "shown" }) }),
-            { left: [], right: ["recording", "pomodoro"] });
+            { left: [], right: ["recording", "privacy", "pomodoro"] });
     }
 
     // A hidden one isn't beside the pills either.
@@ -48,7 +48,7 @@ TestCase {
         compare(LiveElements.liveElements({ barStyle: "capsule",
             barElements: BarProfileModel.defaultProfile.barElements,
             capsulePlaces: places({ recording: "hidden" }) }),
-            { left: ["media"], right: ["pomodoro"] });
+            { left: ["media"], right: ["privacy", "pomodoro"] });
     }
 
     // Live right puts media right of the pills, after the recording
@@ -87,7 +87,8 @@ TestCase {
 
     // When each bar element that can be live is active: the recording
     // indicator while recording, media while a track plays, keep-awake
-    // while on. An element that can't be live never is.
+    // while on, the privacy indicator while an app uses the microphone or a
+    // camera. An element that can't be live never is.
     function test_whenEachLiveElementIsActive_data() {
         return [
             { tag: "recording", id: "recording", status: { recordings: [{ app: "obs" }] }, active: true },
@@ -99,6 +100,12 @@ TestCase {
             { tag: "keep-awake off", id: "keepAwake", status: { keepAwakeOn: false }, active: false },
             { tag: "pomodoro started", id: "pomodoro", status: { pomodoroStarted: true }, active: true },
             { tag: "pomodoro not started", id: "pomodoro", status: { pomodoroStarted: false }, active: false },
+            { tag: "microphone in use", id: "privacy", status: { captures: { microphone: ["Discord"], camera: [] } },
+                active: true },
+            { tag: "camera in use", id: "privacy", status: { captures: { microphone: [], camera: ["obs"] } },
+                active: true },
+            { tag: "nothing captured", id: "privacy", status: { captures: { microphone: [], camera: [] } },
+                active: false },
             { tag: "clock", id: "clock", status: {}, active: false }
         ];
     }

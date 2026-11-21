@@ -26,6 +26,7 @@ Variants {
     required property var keepAwake
     required property var appMenu
     required property var screenShares
+    required property var deviceCaptures
     required property var cava
     required property var systemMonitor
     required property var workspaceService
@@ -151,6 +152,7 @@ Variants {
             property var keepAwake: bar.keepAwake
             property var appMenu: bar.appMenu
             property var screenShares: bar.screenShares
+            property var deviceCaptures: bar.deviceCaptures
             property var cava: bar.cava
             property var systemMonitor: bar.systemMonitor
             property var workspaceService: bar.workspaceService
@@ -339,6 +341,7 @@ Variants {
                     keepAwake: panel.keepAwake
                     appMenu: panel.appMenu
                     screenShares: panel.screenShares
+                    deviceCaptures: panel.deviceCaptures
                     cava: panel.cava
                     barVisible: panel.visible
                     systemMonitor: panel.systemMonitor
@@ -391,6 +394,7 @@ Variants {
                 activePopup: panel.activePopup
                 pomodoro: panel.pomodoro
                 keepAwake: panel.keepAwake
+                deviceCaptures: panel.deviceCaptures
                 appMenu: panel.appMenu
                 systemMonitor: panel.systemMonitor
                 controlCenter: bar.controlCenter
