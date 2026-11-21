@@ -23,8 +23,7 @@ function toggledBar(bars, focusedMonitor) {
     return bar && bar.visible && bar.capsule ? bar.window : null;
 }
 
-// Where a change (volume, brightness, Caps Lock, audio output, bar profile or
-// keep-awake) shows, on the focused monitor only: { capsule: window } when it
+// Where a change event (see components/panels/OsdChange.js) shows, on the focused monitor only: { capsule: window } when it
 // has a capsule shown, which expands to show it instead of the OSD; {} while a
 // popup is inside that capsule, when it shows nowhere; else { osd: screen },
 // the OSD on the focused monitor's screen, or on the first screen (null) when

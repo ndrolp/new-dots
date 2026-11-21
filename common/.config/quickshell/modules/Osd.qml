@@ -1,13 +1,15 @@
 import Quickshell
+import Quickshell.Bluetooth
 import Quickshell.Io
 import Quickshell.Services.Pipewire
 import QtQuick
 import "../components/bar/CapsuleRouting.js" as CapsuleRouting
 import "../components/panels" as Panels
 import "../components/panels/OsdChange.js" as OsdChange
+import "../services/BluetoothConnections.js" as BluetoothConnections
 
-// The on-screen display and the six changes it shows: IPC sends the volume
-// and brightness keys, it watches Caps Lock itself, and the rest of the shell
+// The on-screen display and the change events it shows: IPC sends the volume
+// and brightness keys, it watches Caps Lock and Bluetooth connections itself, and the rest of the shell
 // sends audio outputs, bar profiles and the keep-awake keybind. Each shows on
 // the focused monitor only (CapsuleRouting.changeTarget): in its capsule if it has
 // one, else in the OSD on that monitor.
@@ -48,6 +50,18 @@ Scope {
         }
     }
 
+    // Bluetooth connections as change events (services/BluetoothConnections.js):
+    // each device's connection as last read, by address.
+    property var bluetoothKnown: ({})
+
+    function readBluetooth() {
+        const read = BluetoothConnections.read(root.bluetoothKnown, Bluetooth.devices.values);
+
+        root.bluetoothKnown = read.known;
+        for (const device of read.changed)
+            show(OsdChange.bluetooth(device));
+    }
+
     function readCaps(on) {
         if (root.capsRead && on !== root.capsLocked)
             show(OsdChange.capsLock(on));
@@ -59,6 +73,19 @@ Scope {
         id: osdPopup
 
         appearance: root.appearance
+    }
+
+    Instantiator {
+        model: Bluetooth.devices
+        onObjectAdded: root.readBluetooth()
+        onObjectRemoved: root.readBluetooth()
+
+        delegate: QtObject {
+            required property var modelData
+            readonly property bool connected: modelData.connected
+
+            onConnectedChanged: root.readBluetooth()
+        }
     }
 
     PwObjectTracker {

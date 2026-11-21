@@ -86,13 +86,15 @@ SUPER+I acts only on the focused monitor's capsule (`CapsuleRouting.js`),
 that hovering it expands it only after a moment and collapses it a while after
 the pointer leaves (`CapsuleHover.qml`), that SUPER+I holds it expanded until
 pressed again or until the pointer leaves it (`CapsuleToggle.qml`), that a
-change (volume, brightness, Caps Lock, audio output, bar profile or
-keep-awake) goes to the focused monitor's capsule instead of the OSD, nowhere
+change (volume, brightness, Caps Lock, audio output, bar profile,
+keep-awake or a Bluetooth connection) goes to the focused monitor's capsule instead of the OSD, nowhere
 while a popup is inside it, and otherwise to the OSD on the focused monitor's
 screen (`CapsuleRouting.js`), and that the capsule then shows that change
 and no bar element (`CapsuleElements.js`), for about 1.5 s from the latest one (`CapsuleChange.qml`),
-what each of the six changes shows, the same in the OSD and the capsule
-(`components/panels/OsdChange.js`), in the same tone colours and with the
+what each change shows, the same in the OSD and the capsule
+(`components/panels/OsdChange.js`), which Bluetooth devices connected or
+disconnected since the last read, none of those connected at start
+(`services/BluetoothConnections.js`), in the same tone colours and with the
 same level bar and percent, under the bar in the OSD and beside it in the
 capsule (`OsdChange.toneColor`, `ChangeLevel.qml`), how it is
 drawn with its fill and bar border (`CapsuleSurface.qml`), that it reaches past its row for its
