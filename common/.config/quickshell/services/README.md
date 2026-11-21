@@ -135,6 +135,19 @@ shell starts, or listed by BlueZ already connected, show nothing.
 `OsdChange.bluetooth` names it ("WH-1000XM4 · Connected · 80%" with the
 battery the device reports at that moment, "… · Disconnected").
 
+## Power changes
+
+`PowerChange.js` decides which power change event a reading of UPower's
+display device makes (`reading`, `next`): plugging the charger in
+(charging, waiting to charge or full) shows "Charging", unplugging
+(discharging or empty) "On battery", and reaching 15% while discharging,
+unplugging included, "Battery low" once, until the battery has been above
+15% or plugged in, like `modules/LowBattery.qml`'s notification. An unknown
+or waiting-to-discharge state says nothing about the charger. The first
+reading, and one after a battery appears, is how it already was and shows
+nothing; without a battery nothing shows. `modules/PowerChanges.qml` feeds
+it and shows each event as `OsdChange.power`.
+
 ## Night light
 
 `NightLight.qml` is the shell's one night light, driven from the control

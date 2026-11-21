@@ -11,7 +11,8 @@ import "../services/BluetoothConnections.js" as BluetoothConnections
 // The on-screen display and the change events it shows: IPC sends the volume
 // and brightness keys, it watches Caps Lock, Do Not Disturb and Bluetooth
 // connections itself, and the rest of the shell sends audio outputs, bar
-// profiles and the keep-awake keybind. Each shows on
+// profiles, the keep-awake keybind and power changes (PowerChanges.qml).
+// Each shows on
 // the focused monitor only (CapsuleRouting.changeTarget): in its capsule if it has
 // one, else in the OSD on that monitor.
 Scope {
