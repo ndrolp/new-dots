@@ -70,8 +70,9 @@ adding or editing one file here.
 - `KeepAwake.qml`: the `keep-awake` IPC call the keybind runs, which toggles
   keep-awake and shows the OSD.
 - `Osd.qml`: the `osd` IPC calls (the volume and brightness keys), Caps Lock
-  watching, and where each change shows: on the focused monitor only, in its
-  capsule if it has one and it isn't hidden for fullscreen, else in the OSD
+  and Bluetooth connection watching (`services/BluetoothConnections.js`,
+  tested), and where each change event shows: on the focused monitor only, in
+  its capsule if it has one and it isn't hidden for fullscreen, else in the OSD
   on that monitor (`CapsuleRouting.changeTarget`, tested).
 - `Lock.qml` (the one lock screen and the `lock` IPC call) and
   `LowBattery.qml`.

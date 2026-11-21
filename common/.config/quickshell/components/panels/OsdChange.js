@@ -1,10 +1,12 @@
 .pragma library
 .import "AudioOutputs.js" as AudioOutputs
+.import "BluetoothDevices.js" as BluetoothDevices
 .import "../../services/KeepAwakeState.js" as KeepAwakeState
 
 // The changes the OSD shows (volume, brightness, Caps Lock, audio output,
-// bar profile, keep-awake and Do Not Disturb), and what each shows: the OSD
-// and the focused monitor's capsule, in its place, show the same. Pure, no Quickshell.
+// bar profile, keep-awake, Do Not Disturb and Bluetooth connections), and
+// what each shows: the OSD and the focused monitor's capsule, in its place,
+// show the same. Pure, no Quickshell.
 
 // The volume, 0 to 1, as it is now; muted shows as none.
 function volume(level, muted) {
@@ -45,6 +47,23 @@ function keepAwake(on, duration) {
 // Do Not Disturb turned on or off.
 function doNotDisturb(on) {
     return { kind: "doNotDisturb", on: on === true };
+}
+
+// A Bluetooth device connected or disconnected: a BluetoothDevice or anything
+// with its naming fields, `connected`, `batteryAvailable` and `battery` (0 to 1).
+function bluetooth(device) {
+    return {
+        kind: "bluetooth",
+        name: BluetoothDevices.label(device),
+        connected: device.connected === true,
+        battery: device.connected && device.batteryAvailable ? Math.round(device.battery * 100) : null
+    };
+}
+
+function bluetoothLabel(change) {
+    if (!change.connected)
+        return change.name + " · Disconnected";
+    return change.name + " · Connected" + (change.battery !== null ? " · " + change.battery + "%" : "");
 }
 
 // The theme colour of a change's `tone` (see display), from `theme`
@@ -96,6 +115,9 @@ function display(change) {
     case "profile":
         return { icon: "󰘳", tone: "accent", label: change.name + " bar profile", level: null,
             highlighted: false, compact: false };
+    case "bluetooth":
+        return { icon: change.connected ? "󰂱" : "󰂲", tone: change.connected ? "blue" : "muted",
+            label: bluetoothLabel(change), level: null, highlighted: false, compact: true };
     default:
         return { icon: KeepAwakeState.cup(change.on), tone: "muted", label: change.label,
             level: null, highlighted: change.on, compact: true };

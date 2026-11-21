@@ -124,6 +124,17 @@ its window is shown and the control center hides its window when closed. The
 toggles it too and is the only toggle that shows the OSD, labelled by
 `KeepAwakeState.osdLabel`.
 
+## Bluetooth connections
+
+`BluetoothConnections.js` turns Bluetooth devices connecting and
+disconnecting into change events. `modules/Osd.qml` reads Quickshell's
+`Bluetooth.devices` whenever one is listed, dropped, connects or disconnects,
+and `read` tells which devices' connection changed since the last read. A
+device is only told once it has been seen, so the ones connected when the
+shell starts, or listed by BlueZ already connected, show nothing.
+`OsdChange.bluetooth` names it ("WH-1000XM4 · Connected · 80%" with the
+battery the device reports at that moment, "… · Disconnected").
+
 ## Night light
 
 `NightLight.qml` is the shell's one night light, driven from the control
