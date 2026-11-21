@@ -43,6 +43,18 @@ TestCase {
         compare(BarProfileModel.profileChoices(undefined), []);
     }
 
+    // The profile keybinds pick by position in that same order, so a renamed
+    // profile keeps a keybind.
+    function test_profileAtCountsFromOneInNameOrder() {
+        const profiles = { minimal: {}, laptop: {}, presentation: {} };
+
+        compare(BarProfileModel.profileAt(profiles, 1), "laptop");
+        compare(BarProfileModel.profileAt(profiles, 3), "presentation");
+        compare(BarProfileModel.profileAt(profiles, 0), "");
+        compare(BarProfileModel.profileAt(profiles, 4), "");
+        compare(BarProfileModel.profileAt(undefined, 1), "");
+    }
+
     function test_editingAProfileShowsItsSavedValues() {
         const state = fixtures.startedBarState();
 

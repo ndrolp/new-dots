@@ -79,18 +79,13 @@ hl.bind(
 hl.bind(mainMod .. " + g", hl.dsp.exec_cmd(qs .. "quick-search toggle"), { description = "Toggle quick search" })
 hl.bind(mainMod .. " + f", hl.dsp.exec_cmd(qs .. "unified-search toggle"), { description = "Toggle unified search" })
 hl.bind(win .. " + period", hl.dsp.exec_cmd(qs .. "unified-search emoji"), { description = "Pick an emoji" })
-hl.bind(
-	mainMod .. " + CTRL + 1",
-	hl.dsp.exec_cmd(qs .. "bar-profiles minimal"),
-	{ description = "Bar profile: minimal" }
-)
-hl.bind(mainMod .. " + CTRL + 2", hl.dsp.exec_cmd(qs .. "bar-profiles work"), { description = "Bar profile: work" })
-hl.bind(mainMod .. " + CTRL + 3", hl.dsp.exec_cmd(qs .. "bar-profiles media"), { description = "Bar profile: media" })
-hl.bind(
-	mainMod .. " + CTRL + 4",
-	hl.dsp.exec_cmd(qs .. "bar-profiles presentation"),
-	{ description = "Bar profile: presentation" }
-)
+for i = 1, 4 do
+	hl.bind(
+		mainMod .. " + CTRL + " .. i,
+		hl.dsp.exec_cmd(qs .. "bar-profiles select " .. i),
+		{ description = "Bar profile " .. i .. " (in name order)" }
+	)
+end
 hl.bind(mainMod .. " + d", hl.dsp.exec_cmd(qs .. "launcher toggle"), { description = "Toggle app launcher" })
 hl.bind(mainMod .. " + v", hl.dsp.exec_cmd(qs .. "clipboard toggle"), { description = "Toggle clipboard history" })
 hl.bind(mainMod .. " + p", hl.dsp.exec_cmd(qs .. "config toggle"), { description = "Toggle shell settings" })
