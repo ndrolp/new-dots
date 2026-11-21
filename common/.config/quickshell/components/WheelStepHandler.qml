@@ -7,8 +7,8 @@ import "WheelSteps.js" as WheelSteps
 WheelHandler {
     id: root
 
-    // The scroll so far, between events.
-    property var scroll: WheelSteps.start()
+    // What WheelSteps keeps of the scroll so far, between wheel events.
+    property var wheelState: WheelSteps.start()
 
     signal stepped(int step)
 
@@ -16,13 +16,13 @@ WheelHandler {
     acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
 
     onWheel: event => {
-        const result = WheelSteps.next(root.scroll, {
+        const result = WheelSteps.next(root.wheelState, {
             angleDelta: event.angleDelta.y,
             pixelDelta: event.pixelDelta.y,
             phase: event.phase,
             time: Date.now()
         });
-        root.scroll = result.state;
+        root.wheelState = result.state;
         if (result.step !== 0)
             root.stepped(result.step);
     }

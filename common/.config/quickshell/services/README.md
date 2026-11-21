@@ -148,7 +148,7 @@ unplugging included, "Battery low" once, until the battery has been above
 15% or plugged in, like `modules/LowBattery.qml`'s notification. An unknown
 or waiting-to-discharge state says nothing about the charger. The first
 reading, and one after a battery appears, is how it already was and shows
-nothing; without a battery nothing shows. `modules/PowerChanges.qml` feeds
+nothing; without a battery nothing shows. `modules/PowerWatch.qml` feeds
 it and shows each event as `OsdChange.power`.
 
 ## Night light

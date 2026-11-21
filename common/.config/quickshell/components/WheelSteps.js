@@ -18,27 +18,27 @@ function start() {
     return { travel: 0, stepped: false, last: -Infinity };
 }
 
-// { state, step }: the state to pass with the next event, and the step this
-// event makes (1, -1 or 0).
-function next(state, scroll) {
+// { state, step }: the state to pass with the next event, and the step
+// `event` makes (1, -1 or 0). `updated` is `state` once `event` is counted.
+function next(state, event) {
     // A gesture with phases runs from its begin to its end, however still
     // it stays in between.
-    const quiet = scroll.phase === Qt.NoScrollPhase && scroll.time - state.last > quietGap;
-    const now = quiet ? Object.assign(start(), { last: scroll.time })
-        : Object.assign({}, state, { last: scroll.time });
+    const quiet = event.phase === Qt.NoScrollPhase && event.time - state.last > quietGap;
+    const updated = quiet ? Object.assign(start(), { last: event.time })
+        : Object.assign({}, state, { last: event.time });
 
-    if (scroll.phase === Qt.ScrollBegin || scroll.phase === Qt.ScrollEnd)
-        return { state: Object.assign(start(), { last: scroll.time }), step: 0 };
-    if (scroll.phase === Qt.ScrollMomentum || now.stepped)
-        return { state: now, step: 0 };
+    if (event.phase === Qt.ScrollBegin || event.phase === Qt.ScrollEnd)
+        return { state: Object.assign(start(), { last: event.time }), step: 0 };
+    if (event.phase === Qt.ScrollMomentum || updated.stepped)
+        return { state: updated, step: 0 };
 
-    now.travel += scroll.angleDelta;
-    if (Math.abs(now.travel) < notch)
-        return { state: now, step: 0 };
+    updated.travel += event.angleDelta;
+    if (Math.abs(updated.travel) < notch)
+        return { state: updated, step: 0 };
 
-    const step = now.travel < 0 ? 1 : -1;
+    const step = updated.travel < 0 ? 1 : -1;
     // A gesture, with phases or from a touchpad without them, steps once; a
     // wheel steps again on its next notch.
-    const gesture = scroll.phase === Qt.ScrollUpdate || scroll.pixelDelta !== 0;
-    return { state: Object.assign(now, { travel: 0, stepped: gesture }), step: step };
+    const gesture = event.phase === Qt.ScrollUpdate || event.pixelDelta !== 0;
+    return { state: Object.assign(updated, { travel: 0, stepped: gesture }), step: step };
 }

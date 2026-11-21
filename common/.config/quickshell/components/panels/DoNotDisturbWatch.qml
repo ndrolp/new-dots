@@ -12,19 +12,19 @@ QtObject {
     property var appearance: null
     readonly property bool loaded: appearance ? appearance.loaded === true : false
     readonly property bool doNotDisturb: appearance ? appearance.doNotDisturb === true : false
-    // Do Not Disturb as last read, and whether it has been read once.
-    property bool last: false
-    property bool read: false
+    // Do Not Disturb as last seen, and whether it has been seen once.
+    property bool lastSeen: false
+    property bool seenOnce: false
 
     signal toggled(var change)
 
     function check() {
         if (!loaded)
             return;
-        if (read && doNotDisturb !== last)
+        if (seenOnce && doNotDisturb !== lastSeen)
             toggled(OsdChange.doNotDisturb(doNotDisturb));
-        last = doNotDisturb;
-        read = true;
+        lastSeen = doNotDisturb;
+        seenOnce = true;
     }
 
     onLoadedChanged: check()

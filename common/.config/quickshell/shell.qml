@@ -174,7 +174,7 @@ ShellRoot {
         osd: osd
     }
 
-    Modules.PowerChanges {
+    Modules.PowerWatch {
         osd: osd
     }
 

@@ -84,7 +84,7 @@ adding or editing one file here.
   tested), and where each change event shows: on the focused monitor only, in
   its capsule if it has one and it isn't hidden for fullscreen, else in the OSD
   on that monitor (`CapsuleRouting.changeTarget`, tested).
-- `PowerChanges.qml`: watches UPower's display device and shows the power
+- `PowerWatch.qml`: watches UPower's display device and shows the power
   change events through `Osd.qml`: "Charging · 64%" and "On battery · 64%"
   on plugging the charger in or out, and "Battery low · 15%" once on reaching
   15% while discharging, re-armed like the low-battery notification. Nothing
