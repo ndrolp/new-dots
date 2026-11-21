@@ -57,10 +57,16 @@ const shellBinaries = ["quickshell", "qs"];
 function isRecording(node) {
     const properties = node.properties || {};
     return node.isStream === true
-        && properties["stream.capture.sink"] !== true
-        && properties["stream.monitor"] !== true
+        && !isSet(properties["stream.capture.sink"])
+        && !isSet(properties["stream.monitor"])
         && !properties["node.link-group"]
         && shellBinaries.indexOf(properties["application.process.binary"]) === -1;
+}
+
+// Whether a PipeWire flag is on: PipeWire gives its properties as strings
+// ("true"), pw-dump as booleans.
+function isSet(flag) {
+    return flag === true || flag === "true";
 }
 
 // An app's name: its own, else its binary's, else its stream's.

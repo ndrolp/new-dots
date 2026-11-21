@@ -71,6 +71,34 @@ TestCase {
         compare(PrivacyIndicator.captures(data.nodes, [data.link]), { microphone: [], camera: [] });
     }
 
+    // PipeWire hands its properties over as strings: cava's
+    // stream.capture.sink and a level meter's stream.monitor read "true".
+    function test_monitoringFlagsGivenAsStringsDoNotUseTheMicrophone_data() {
+        return [
+            { tag: "cava", property: "stream.capture.sink" },
+            { tag: "a level meter", property: "stream.monitor" }
+        ];
+    }
+
+    function test_monitoringFlagsGivenAsStringsDoNotUseTheMicrophone(data) {
+        const properties = { "media.class": "Stream/Input/Audio", "application.name": "pavucontrol",
+            "application.process.binary": "pavucontrol" };
+        properties[data.property] = "true";
+        const stream = { id: 170, isStream: true, properties: properties };
+
+        compare(PrivacyIndicator.captures([mic, stream], [{ source: 67, target: 170 }]),
+            { microphone: [], camera: [] });
+    }
+
+    // A flag PipeWire sets to "false" doesn't make a recording a monitor.
+    function test_aMonitoringFlagSetToFalseStillRecords() {
+        const properties = { "media.class": "Stream/Input/Audio", "application.name": "Discord",
+            "stream.monitor": "false" };
+
+        compare(PrivacyIndicator.captures([mic, { id: 171, isStream: true, properties: properties }],
+            [{ source: 67, target: 171 }]), { microphone: ["Discord"], camera: [] });
+    }
+
     readonly property var camera: ({
         id: 97,
         isStream: false,
