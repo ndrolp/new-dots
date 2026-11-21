@@ -20,7 +20,7 @@ const zoneNames = ["left", "center", "right"];
 // zone in defaultElementZones, the rest to the right.
 const elementIds = [
     "arch", "systemMonitor", "currentApp", "appMenu", "workspaces",
-    "notifications", "recording", "keepAwake", "media", "cava", "audio", "bluetooth", "tray",
+    "notifications", "recording", "privacy", "keepAwake", "media", "cava", "audio", "bluetooth", "tray",
     "network", "battery", "clock", "pomodoro"
 ];
 const defaultElementZones = {
@@ -81,7 +81,7 @@ function iconTextShown(barElements, id, resting) {
 // show them beside its workspace pills, collapsed only while they are active.
 // Keep-awake is live only if a profile places it so: by default it is hidden.
 // Each one says when it is active in LiveElements.activeRules.
-const liveElementIds = ["recording", "media", "keepAwake", "pomodoro"];
+const liveElementIds = ["recording", "media", "keepAwake", "pomodoro", "privacy"];
 
 // Whether bar element `id` can be a live element, so a capsule profile can
 // place it live left or right of the workspace pills.
@@ -113,11 +113,13 @@ function liveSide(place) {
 }
 
 // The collapsed places a profile starts with: media live left, the
-// recording indicator and the pomodoro live right, `shown` in the row (by
-// default Arch, the clock and the control center), every other element
-// hidden.
+// recording indicator, the privacy indicator and the pomodoro live right
+// (from the pills outward, in the order elementIds lists them), `shown` in
+// the row (by default Arch, the clock and the control center), every other
+// element hidden.
 function capsulePlacesShowing(shown) {
-    const livePlaces = { media: "liveLeft", recording: "liveRight", pomodoro: "liveRight" };
+    const livePlaces = { media: "liveLeft", recording: "liveRight", privacy: "liveRight",
+        pomodoro: "liveRight" };
     const places = {};
 
     for (const id of elementIds) {

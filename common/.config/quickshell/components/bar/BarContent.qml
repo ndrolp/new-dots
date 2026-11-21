@@ -26,6 +26,8 @@ Item {
     required property var appMenu
     // The screens other apps share (services/ScreenShares.qml).
     required property var screenShares
+    // The apps using the microphone or a camera (services/DeviceCaptures.qml).
+    required property var deviceCaptures
     required property var cava
     property bool barVisible: true
     // Where the open popup sits in the bar, as BarPopups reports it, or null.
@@ -459,6 +461,7 @@ Item {
                 screenCapture: root.screenCapture
                 keepAwake: root.keepAwake
                 screenShares: root.screenShares
+                deviceCaptures: root.deviceCaptures
                 cava: root.cava
                 barVisible: root.barVisible
                 elementX: element => root.elementX(element)

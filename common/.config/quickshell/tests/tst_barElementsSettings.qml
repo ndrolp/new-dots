@@ -291,6 +291,22 @@ TestCase {
         verify(elementRow(built.item, "Keep-awake"));
     }
 
+    // The privacy indicator is listed by its name and, in a capsule, can be
+    // live left or right of the workspace pills.
+    function test_thePrivacyIndicatorIsListedByItsNameAndCanBeLive() {
+        const built = make();
+        built.appearance.barStyle = "capsule";
+        built.appearance.barElements = {
+            left: [], right: [],
+            center: [{ id: "recording", enabled: true }, { id: "privacy", enabled: true }]
+        };
+        const privacy = elementRow(built.item, "Privacy indicator");
+
+        verify(privacy);
+        compare(placeChoice(privacy).options.map(option => option.label),
+            ["Hidden", "Shown", "Live left", "Live right"]);
+    }
+
     // The pomodoro is a bar element of its own, apart from the clock: it is
     // listed, turned on or off and grouped like any other and, in a capsule,
     // can also be live left or right of the workspace pills.

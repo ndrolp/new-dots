@@ -87,6 +87,10 @@ ShellRoot {
         id: screenShares
     }
 
+    Services.DeviceCaptures {
+        id: deviceCaptures
+    }
+
     Services.MonitorSetups {
         id: monitorSetups
 
@@ -396,6 +400,7 @@ ShellRoot {
         appMenu: appMenu
         controlCenter: controlCenter
         screenShares: screenShares
+        deviceCaptures: deviceCaptures
         cava: cava
         systemMonitor: systemMonitor
         workspaceService: workspaceService

@@ -32,6 +32,7 @@ Column {
             "workspaces": "Workspaces",
             "notifications": "Control center",
             "recording": "Recording indicator",
+            "privacy": "Privacy indicator",
             "keepAwake": "Keep-awake",
             "media": "Media",
             "cava": "Cava",

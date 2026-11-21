@@ -10,6 +10,8 @@ Item {
     required property var pomodoro
     // The shell's keep-awake (services/KeepAwake.qml).
     required property var keepAwake
+    // The apps using the microphone or a camera (services/DeviceCaptures.qml).
+    required property var deviceCaptures
     // The app menu module (modules/AppMenu.qml).
     required property var appMenu
     required property var systemMonitor
@@ -64,6 +66,11 @@ Item {
     KeepAwakePopup {
         popups: root
         keepAwake: root.keepAwake
+    }
+
+    PrivacyPopup {
+        popups: root
+        deviceCaptures: root.deviceCaptures
     }
 
     AppMenuPopup {

@@ -675,6 +675,39 @@ function pomodoroLiveRight(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
+// Step 22: the privacy indicator, a new bar element for the apps using the
+// microphone or a camera, goes right after the recording indicator, in its
+// group if it is in one (it joins the previous element, or the next one
+// joins it), on if the recording indicator is. A capsule shows it live right
+// of the workspace pills, so from the pills outward the recording indicator,
+// the privacy indicator, then the pomodoro. A profile without bar elements
+// or collapsed places gets the defaults when it loads, which already place
+// it there.
+function privacyAfterRecording(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+    for (const profileName in migrated.barProfiles || {}) {
+        const profile = migrated.barProfiles[profileName];
+        const places = profile.capsulePlaces;
+        if (places && typeof places === "object")
+            places.privacy = "liveRight";
+
+        for (const zoneName of zoneNames) {
+            const list = (profile.barElements || {})[zoneName] || [];
+            const index = list.findIndex(element => element.id === "recording");
+            if (index === -1 || list.some(element => element.id === "privacy"))
+                continue;
+            const recording = list[index];
+            const next = list[index + 1];
+            const privacy = { id: "privacy", enabled: recording.enabled !== false };
+            if (recording.joinPrevious === true || (next !== undefined && next.joinPrevious === true))
+                privacy.joinPrevious = true;
+            list.splice(index + 1, 0, privacy);
+        }
+    }
+
+    return { appearance: migrated, monitors: monitors };
+}
+
 const migrationSteps = [
     migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
     migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles, explicitMonitorEntries,
@@ -682,7 +715,7 @@ const migrationSteps = [
     seedWorkspaceRadius, splitBarBorder, seedWorkspaceVerticalPadding,
     seedIconSize, seedGroupPadding, singleBarStyle, capsulePlacesFromShownElements,
     textVisibleFromLegacyOptions, pomodoroBesideTheClock, seedCapsuleNotifications,
-    pomodoroLiveRight
+    pomodoroLiveRight, privacyAfterRecording
 ];
 const schemaVersion = migrationSteps.length;
 
