@@ -58,7 +58,11 @@ on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
 (`components/VolumeText.js`), what the popups and bar elements show for the
 media position, audio outputs, Wi-Fi, the battery and the network
 and how a value stands on a side bar (`components/StatusText.js`) and what the audio bar element shows and how
-wide it is (`components/bar/AudioLevel.qml`), how the Cava bar element
+wide it is (`components/bar/AudioLevel.qml`), how scrolling turns into
+steps, at most one per wheel notch or touchpad gesture, its momentum and a
+touchpad with no scroll phases included (`components/WheelSteps.js`,
+`WheelStepHandler.qml` feeds it), and that a step over the media bar element skips its player to the next or
+previous track where it can (`BarElementItems.skipTrack`), how the Cava bar element
 reads cava and tries it again when it fails (`services/CavaOutput.js`) and
 what it draws, from the bottom or from the side, and the track progress painted on its bars (`components/bar/CavaBars.qml`), what the Cava desktop widget shows of the player: the media info, the progress line and when they show (`components/widgets/CavaMedia.js`, `CavaMediaInfo.qml`), how a docked bar zone hangs
 from the screen edge the bar sits on and keeps its sides on the screen's edge
@@ -88,23 +92,37 @@ SUPER+I acts only on the focused monitor's capsule (`CapsuleRouting.js`),
 that hovering it expands it only after a moment and collapses it a while after
 the pointer leaves (`CapsuleHover.qml`), that SUPER+I holds it expanded until
 pressed again or until the pointer leaves it (`CapsuleToggle.qml`), that a
-change (volume, brightness, Caps Lock, audio output, bar profile or
-keep-awake) goes to the focused monitor's capsule instead of the OSD, nowhere
+change (volume, brightness, Caps Lock, audio output, bar profile,
+keep-awake, Do Not Disturb, a Bluetooth connection or power) goes to the focused
+monitor's capsule instead of the OSD, nowhere
 while a popup is inside it, and otherwise to the OSD on the focused monitor's
-screen (`CapsuleRouting.js`), and that the capsule then shows that change
+screen, also while its capsule is hidden because its focused workspace has a
+real fullscreen window, which only a capsule does and SUPER+I then leaves
+alone (`CapsuleRouting.js`; whether a workspace has one, not just a maximized
+window, is `WorkspaceState.hasFullscreen`), and that the capsule then shows that change
 and no bar element (`CapsuleElements.js`), for about 1.5 s from the latest one (`CapsuleChange.qml`),
-what each of the six changes shows, the same in the OSD and the capsule
-(`components/panels/OsdChange.js`), in the same tone colours and with the
+what each change shows, the same in the OSD and the capsule
+(`components/panels/OsdChange.js`), which Bluetooth devices connected or
+disconnected since the last read, none of those connected at start
+(`services/BluetoothConnections.js`), which power change event a battery
+reading makes: plugging in, unplugging, and "Battery low" once at 15% while
+discharging, re-armed like the notification, none at startup or without a
+battery (`services/PowerChange.js`, `tst_powerChange.qml`), in the same tone colours and with the
 same level bar and percent, under the bar in the OSD and beside it in the
-capsule (`OsdChange.toneColor`, `ChangeLevel.qml`), how it is
+capsule (`OsdChange.toneColor`, `ChangeLevel.qml`), that Do Not Disturb
+shows each time it is turned on or off but not as the shell starts
+(`components/panels/DoNotDisturbWatch.qml`), how it is
 drawn with its fill and bar border (`CapsuleSurface.qml`), that it reaches past its row for its
 workspace pills, and where they sit inside it, under the row of a top
 capsule and above the row of a bottom one, centred on it, how it grows round a popup
 inside it (`CapsulePlacement.js`), that its window grows at once for a popup inside and
 never shrinks back (`CapsuleWindowHold.qml`), that the
 pills are small and unlabelled, one per workspace in order, highlight the
-active one as it changes and switch workspace on a click
-(`CapsuleWorkspaceRow.qml`), and that a capsule sits only at the top or
+active one as it changes, switch workspace on a click and go to the next or
+previous one on a scroll, as the bar's workspaces element does, stopping at
+either end (`CapsuleWorkspaceRow.qml`, `Workspaces.qml`), that a mouse wheel
+steps once per notch and a touchpad gesture at most once
+(`components/WheelSteps.js`; `WheelStepHandler.qml` feeds it), and that a capsule sits only at the top or
 bottom, where zones, bar elements, group backgrounds and popup
 triggers sit along either axis of the bar, to the pixel the anchors they
 replaced put them at (`components/bar/BarLayout.js`; `BarContent.qml` itself
@@ -126,7 +144,8 @@ bind to it, and where a window sits in its miniature at any monitor scale or
 rotation (`components/panels/WorkspaceOverview.js`; `WorkspaceOverview.qml`,
 `WorkspaceMiniature.qml` and `MiniatureWindow.qml` need Quickshell and aren't
 tested here), which windows a miniature shows and what focusing, moving a window
-and creating a workspace dispatch (`services/WorkspaceState.js`;
+and creating a workspace dispatch, where a scroll over a monitor's workspaces
+goes (`services/WorkspaceState.js`;
 `WorkspaceService.qml` needs Quickshell and isn't tested here), a monitor's
 heading and when its + shows (`components/panels/WorkspaceMonitorHeader.qml`),
 what dropping a window on the new workspace slot and clicking it do
@@ -191,10 +210,12 @@ device* section: the QR code, the pairing code fields filled from mDNS
 (`components/panels/AndroidPairingSection.qml`; `AndroidDevicesPanel.qml`
 and the services' `.qml` files need Quickshell and aren't tested here;
 `android-pairing.sh`, below, runs `services/AndroidPairing.qml`),
-what the keep-awake bar element shows and its popup's switch, duration choice
+what the keep-awake bar element shows, with a countdown's time left only as a
+capsule's live element, and its popup's switch, duration choice
 and time left (`components/bar/KeepAwakeElement.qml`,
 `components/panels/KeepAwakePopupBody.qml`), keep-awake's duration and
-countdown: starting, restarting, running out and turning off by hand, and
+countdown: starting, restarting, running out and turning off by hand, the
+coarse time left a live element shows, and
 what the keybind's OSD says (`services/KeepAwakeState.js`),
 which popup is open across the bars and which bar IPC opens one on
 (`modules/OpenPopup.js`), one part of the shell opening another in its

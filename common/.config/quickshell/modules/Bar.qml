@@ -56,7 +56,10 @@ Scope {
                 screen: panel.screen,
                 visible: panel.visible,
                 capsule: BarProfileModel.capsule(panel.barAppearance),
-                popupInside: root.openPopup.window === panel
+                popupInside: root.openPopup.window === panel,
+                // Hidden while its monitor shows a fullscreen window
+                // (CapsuleRouting.hidden): changes go to the OSD instead.
+                capsuleHidden: panel.capsuleHidden
             });
         }
         return bars;

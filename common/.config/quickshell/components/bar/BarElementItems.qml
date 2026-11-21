@@ -14,6 +14,7 @@ import "BarLayout.js" as BarLayout
 import "LiveElements.js" as LiveElements
 import "../panels/ControlCenterNames.js" as Names
 import "RecordingIndicator.js" as RecordingIndicator
+import ".." as Components
 
 // The bar elements that need no component of their own (notifications,
 // recording, keep-awake, media, cava, audio, bluetooth, tray, network, battery, clock
@@ -334,6 +335,7 @@ Item {
             keepAwake: root.keepAwake
             grouped: root.elementGrouped("keepAwake")
             sizes: keepAwakeItem.sizes
+            live: keepAwakeItem.live
             onPopupRequested: root.popupRequested("keepAwake")
         }
     }
@@ -437,6 +439,12 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 onClicked: root.popupRequested("media")
+
+                // Scrolling skips the player shown to the next or previous
+                // track, at most one per notch or touchpad gesture.
+                Components.WheelStepHandler {
+                    onStepped: step => BarElementItems.skipTrack(root.player, step)
+                }
             }
         }
     }

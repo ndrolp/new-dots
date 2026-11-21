@@ -5,8 +5,10 @@ import "BarLayout.js" as BarLayout
 import "../../config/BarProfileModel.js" as BarProfileModel
 
 // The keep-awake bar element: a cup, filled and green while keep-awake is on,
-// an outline in the subtext color while it is off. A click asks for the
-// keep-awake popup.
+// an outline in the subtext color while it is off. As a capsule's live
+// element, a countdown's time left shows beside the cup, coarsely and once a
+// minute (KeepAwakeState.coarseTimeLeft); on any other bar style it doesn't.
+// A click asks for the keep-awake popup.
 Rectangle {
     id: root
 
@@ -17,10 +19,15 @@ Rectangle {
     property bool grouped: false
     // The sizes it is drawn at, { iconSize, thickness }: the profile's, or a
     // live element's (LiveElements.elementSizes).
-    property var sizes: ({ iconSize: appearance.iconSize, thickness: BarLayout.elementThickness(appearance) })
+    property var sizes: ({ iconSize: appearance.iconSize, textSize: appearance.textSize, thickness: BarLayout.elementThickness(appearance) })
+    // Whether it is drawn as a capsule's live element, beside the pills.
+    property bool live: false
+    // Whether the time left shows beside the cup: only on a live element
+    // while a countdown runs, never "until turned off".
+    readonly property bool timeLeftShown: live && keepAwake.timed
     signal popupRequested()
 
-    readonly property var size: BarLayout.size(appearance, keepAwakeIcon.width + 16, sizes.thickness)
+    readonly property var size: BarLayout.size(appearance, content.width + 16, sizes.thickness)
 
     width: size.width
     height: size.height
@@ -57,18 +64,45 @@ Rectangle {
         text: KeepAwakeState.cups.off
     }
 
-    ShellText {
-        id: keepAwakeIcon
+    // The cup, and the time left after it when shown. Its width is worked
+    // out here rather than by a Row, whose layout lags behind.
+    Item {
+        id: content
+
+        readonly property int gap: 6
 
         anchors.centerIn: parent
-        // As wide as the wider cup, so turning keep-awake on or off doesn't
-        // move the elements next to it.
-        width: Math.ceil(Math.max(onCup.advanceWidth, offCup.advanceWidth))
-        horizontalAlignment: Text.AlignHCenter
-        text: KeepAwakeState.cup(root.keepAwake.on)
-        color: root.keepAwake.on ? theme.green : theme.textMuted
-        font.pixelSize: root.sizes.iconSize
-        font.bold: true
+        width: keepAwakeIcon.width + (root.timeLeftShown ? gap + timeLeft.implicitWidth : 0)
+        height: Math.max(keepAwakeIcon.height, timeLeft.height)
+
+        ShellText {
+            id: keepAwakeIcon
+
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            // As wide as the wider cup, so turning keep-awake on or off doesn't
+            // move the elements next to it.
+            width: Math.ceil(Math.max(onCup.advanceWidth, offCup.advanceWidth))
+            horizontalAlignment: Text.AlignHCenter
+            text: KeepAwakeState.cup(root.keepAwake.on)
+            color: root.keepAwake.on ? theme.green : theme.textMuted
+            font.pixelSize: root.sizes.iconSize
+            font.bold: true
+        }
+
+        // Its text changes only when the minutes do, though secondsLeft
+        // ticks every second.
+        ShellText {
+            id: timeLeft
+
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.timeLeftShown
+            text: root.timeLeftShown ? KeepAwakeState.coarseTimeLeft(root.keepAwake.secondsLeft) : ""
+            color: theme.green
+            font.pixelSize: root.sizes.textSize
+            font.bold: true
+        }
     }
 
     MouseArea {

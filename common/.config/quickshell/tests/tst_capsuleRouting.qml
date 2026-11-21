@@ -22,12 +22,28 @@ TestCase {
         compare(CapsuleRouting.expanded(data.causes), data.expanded);
     }
 
+    // A capsule hides while its monitor's focused workspace has a fullscreen
+    // window; other bar styles never do.
+    function test_aCapsuleHidesForAFullscreenWindow_data() {
+        return [
+            { tag: "capsule, fullscreen", capsule: true, fullscreen: true, hidden: true },
+            { tag: "capsule", capsule: true, fullscreen: false, hidden: false },
+            { tag: "other bar style, fullscreen", capsule: false, fullscreen: true, hidden: false }
+        ];
+    }
+
+    function test_aCapsuleHidesForAFullscreenWindow(data) {
+        compare(CapsuleRouting.hidden({ capsule: data.capsule, fullscreen: data.fullscreen }), data.hidden);
+    }
+
     // The bars as modules/Bar.qml lists them: one per monitor, each a window.
     function capsuleBars() {
         return [
             { window: "left window", monitor: "Left", visible: true, capsule: false },
             { window: "middle window", monitor: "Middle", visible: true, capsule: true },
-            { window: "hidden window", monitor: "Hidden", visible: false, capsule: true }
+            { window: "hidden window", monitor: "Hidden", visible: false, capsule: true },
+            { window: "fullscreen window", monitor: "Fullscreen", visible: true, capsule: true,
+                capsuleHidden: true }
         ];
     }
 
@@ -42,6 +58,7 @@ TestCase {
         return [
             { tag: "a normal bar", monitor: "Left" },
             { tag: "a hidden bar", monitor: "Hidden" },
+            { tag: "a capsule hidden for fullscreen", monitor: "Fullscreen" },
             { tag: "no bar", monitor: "Elsewhere" }
         ];
     }
@@ -62,8 +79,16 @@ TestCase {
             { window: "busy window", monitor: "Busy", screen: "busy screen", visible: true,
                 capsule: true, popupInside: true },
             { window: "hidden window", monitor: "Hidden", screen: "hidden screen", visible: false,
-                capsule: true, popupInside: false }
+                capsule: true, popupInside: false },
+            { window: "fullscreen window", monitor: "Fullscreen", screen: "fullscreen screen",
+                visible: true, capsule: true, popupInside: false, capsuleHidden: true }
         ];
+    }
+
+    // While the focused monitor's capsule is hidden for a fullscreen window,
+    // the OSD shows the change on that monitor's screen instead.
+    function test_aChangeShowsInTheOsdWhileTheCapsuleIsHiddenForFullscreen() {
+        compare(CapsuleRouting.changeTarget(changeBars(), "Fullscreen"), { osd: "fullscreen screen" });
     }
 
     // A change on a focused monitor with a capsule expands that capsule; the
