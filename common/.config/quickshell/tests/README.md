@@ -89,7 +89,10 @@ pressed again or until the pointer leaves it (`CapsuleToggle.qml`), that a
 change (volume, brightness, Caps Lock, audio output, bar profile or
 keep-awake) goes to the focused monitor's capsule instead of the OSD, nowhere
 while a popup is inside it, and otherwise to the OSD on the focused monitor's
-screen (`CapsuleRouting.js`), and that the capsule then shows that change
+screen, also while its capsule is hidden because its focused workspace has a
+real fullscreen window, which only a capsule does and SUPER+I then leaves
+alone (`CapsuleRouting.js`; whether a workspace has one, not just a maximized
+window, is `WorkspaceState.hasFullscreen`), and that the capsule then shows that change
 and no bar element (`CapsuleElements.js`), for about 1.5 s from the latest one (`CapsuleChange.qml`),
 what each of the six changes shows, the same in the OSD and the capsule
 (`components/panels/OsdChange.js`), in the same tone colours and with the

@@ -28,8 +28,11 @@ carries the decisions out, so they are tested without Quickshell.
 
 `WorkspaceService.qml` is what the shell knows of Hyprland's workspaces and
 windows, and how it acts on them. Which workspaces are listed (1 to 21), which
-windows a workspace shows and the `hyprctl` commands that focus, move and create
-are plain functions in `WorkspaceState.js`, tested without Quickshell. A move or
+windows a workspace shows, whether it has a real fullscreen window (Hyprland's
+fullscreen mode, not maximized; the capsule hides for one) and the `hyprctl`
+commands that focus, move and create are plain functions in `WorkspaceState.js`,
+tested without Quickshell. A window's fullscreen mode is only read on a refresh,
+so the service asks for one on each `fullscreen` event. A move or
 a new workspace that doesn't exist yet takes a second step, sending the workspace
 to the monitor it was meant for, because Hyprland makes it on the focused monitor
 or the one a rule names.

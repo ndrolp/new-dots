@@ -40,6 +40,9 @@ adding or editing one file here.
   `bars()`, `focusedMonitor()` and `closePopup()`. Its `capsule toggle`
   IPC call (SUPER+I) expands the focused monitor's capsule, or collapses it
   again; on a normal bar it does nothing (`CapsuleRouting.toggledBar`, tested).
+  A capsule hides while its monitor's focused workspace has a real fullscreen
+  window, not a maximized one; `bars()` lists that as `capsuleHidden`
+  (`CapsuleRouting.hidden`, tested), and SUPER+I does nothing on it.
 - `ControlCenter.qml`: not a `Feature`: the control center is the bell's
   popup. The module owns its state and is handed, as one object, through
   the bar to the popup and its controls: the services they show,
@@ -68,8 +71,8 @@ adding or editing one file here.
   keep-awake and shows the OSD.
 - `Osd.qml`: the `osd` IPC calls (the volume and brightness keys), Caps Lock
   watching, and where each change shows: on the focused monitor only, in its
-  capsule if it has one, else in the OSD on that monitor
-  (`CapsuleRouting.changeTarget`, tested).
+  capsule if it has one and it isn't hidden for fullscreen, else in the OSD
+  on that monitor (`CapsuleRouting.changeTarget`, tested).
 - `Lock.qml` (the one lock screen and the `lock` IPC call) and
   `LowBattery.qml`.
 

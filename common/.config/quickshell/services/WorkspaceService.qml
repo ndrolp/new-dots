@@ -72,6 +72,35 @@ QtObject {
         return workspaceIds;
     }
 
+    // Whether the focused workspace of the screen's monitor has a real
+    // fullscreen window, not just a maximized one (WorkspaceState.hasFullscreen).
+    // Each window's workspace is Quickshell's own, which follows a move at
+    // once; its fullscreen mode is read on a refresh (see fullscreenEvents).
+    function hasFullscreenOn(screen) {
+        const monitor = screen ? Hyprland.monitorFor(screen) : null;
+        const workspace = monitor !== null ? monitor.activeWorkspace : null;
+
+        if (workspace === null)
+            return false;
+
+        const windows = Hyprland.toplevels.values.map(toplevel => ({
+            workspace: toplevel.workspace !== null ? { id: toplevel.workspace.id } : null,
+            fullscreen: toplevel.lastIpcObject ? toplevel.lastIpcObject.fullscreen : 0
+        }));
+        return WorkspaceState.hasFullscreen(windows, workspace.id);
+    }
+
+    // Hyprland's fullscreen mode of a window is only read on a refresh, so one
+    // is asked for whenever a window enters or leaves fullscreen.
+    property var fullscreenEvents: Connections {
+        target: Hyprland
+
+        function onRawEvent(event) {
+            if (event.name === "fullscreen")
+                Hyprland.refreshToplevels();
+        }
+    }
+
     function workspaceFor(id) {
         const workspaces = Hyprland.workspaces.values;
 

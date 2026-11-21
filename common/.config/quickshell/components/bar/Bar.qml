@@ -111,6 +111,20 @@ Variants {
             // for a moment after one (see CapsuleChange.qml), unless a popup
             // is inside, which a change never interrupts.
             readonly property bool showingChange: capsuleChange.showing && panel.activePopup === ""
+            // Whether this window's capsule is hidden, while its monitor's
+            // focused workspace has a real fullscreen window (see
+            // CapsuleRouting.hidden); always false on other bar styles. It
+            // fades out, takes no clicks and keeps its reserved space;
+            // modules/Bar.qml lists it so changes go to the OSD instead.
+            readonly property bool capsuleHidden: CapsuleRouting.hidden({
+                capsule: BarProfileModel.capsule(panel.barAppearance),
+                fullscreen: bar.workspaceService.hasFullscreenOn(panel.modelData)
+            })
+            // A popup inside the capsule closes with it.
+            onCapsuleHiddenChanged: {
+                if (panel.capsuleHidden && panel.activePopup !== "")
+                    bar.popupClosed(panel.activePopup, panel);
+            }
             property bool configOpen: bar.configOpen
             property string activePopup: bar.activePopupWindow === panel
                 ? bar.activePopup : ""
@@ -137,8 +151,10 @@ Variants {
             color: "transparent"
             // The whole window takes clicks, except on a capsule: only the
             // capsule does, a popup inside included, so clicks beside it reach
-            // the windows below.
-            readonly property var inputRegion: barContent.capsuleShape
+            // the windows below; none while it is hidden for fullscreen.
+            readonly property var inputRegion: panel.capsuleHidden
+                ? { x: 0, y: 0, width: 0, height: 0 }
+                : barContent.capsuleShape
                 ? CapsulePlacement.inputRegion(barContent.capsuleShape, { left: barContent.x, top: barContent.y })
                 : { x: 0, y: 0, width: panel.width, height: panel.height }
             mask: Region {
@@ -224,6 +240,7 @@ Variants {
                 id: barBackground
 
                 anchors.fill: parent
+                opacity: panel.capsuleHidden ? 0 : 1
                 color: !BarProfileModel.opaque(panel.barAppearance)
                     ? "transparent" : Qt.rgba(theme.background.r, theme.background.g,
                         theme.background.b, panel.barAppearance.barOpacity / 100)
@@ -231,6 +248,13 @@ Variants {
                 Behavior on color {
                     ColorAnimation {
                         duration: panel.barAppearance.motion.long
+                        easing.type: panel.barAppearance.motion.easing
+                    }
+                }
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: panel.barAppearance.motion.short
                         easing.type: panel.barAppearance.motion.easing
                     }
                 }
@@ -305,6 +329,7 @@ Variants {
                 // The pill row can arrive a moment before the capsule's place.
                 visible: place !== null && barContent.capsulePlace !== null
                     && barContent.capsulePlace.width > 0
+                opacity: barBackground.opacity
                 x: place ? barContent.x + place.x : 0
                 y: place ? barContent.y + place.y : 0
                 workspaceIds: panel.workspaceService.workspacesForScreen(panel.screen,
