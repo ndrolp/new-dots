@@ -14,6 +14,7 @@ import "BarLayout.js" as BarLayout
 import "LiveElements.js" as LiveElements
 import "../panels/ControlCenterNames.js" as Names
 import "RecordingIndicator.js" as RecordingIndicator
+import "WheelSteps.js" as WheelSteps
 
 // The bar elements that need no component of their own (notifications,
 // recording, keep-awake, media, cava, audio, bluetooth, tray, network, battery and clock),
@@ -432,8 +433,17 @@ Item {
             }
 
             MouseArea {
+                // Scrolling skips the player shown to the next or previous
+                // track, at most one per notch or swipe (WheelSteps).
+                property var wheelSteps: WheelSteps.initial()
+
                 anchors.fill: parent
                 onClicked: root.popupRequested("media")
+                onWheel: wheel => {
+                    const taken = WheelSteps.take(wheelSteps, wheel, Date.now());
+                    wheelSteps = taken.state;
+                    BarElementItems.skipTrack(root.player, taken.step);
+                }
             }
         }
     }
