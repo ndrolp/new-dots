@@ -213,13 +213,14 @@ TestCase {
         compare(places.workspaces, undefined);
     }
 
-    // The pomodoro's countdown used to be part of the clock, so a new capsule
-    // shows it in the row with the clock.
-    function test_aProfileWithoutCollapsedPlacesShowsThePomodoroWithTheClock() {
+    // A new capsule shows the pomodoro live right of the workspace pills;
+    // it can take every live place.
+    function test_aProfileWithoutCollapsedPlacesShowsThePomodoroLiveRight() {
         const places = BarProfileModel.completeProfile({ barStyle: "capsule" }).capsulePlaces;
 
-        compare(places.pomodoro, "shown");
-        compare(BarProfileModel.capsulePlacesFor("pomodoro"), ["hidden", "shown"]);
+        compare(places.pomodoro, "liveRight");
+        compare(BarProfileModel.capsulePlacesFor("pomodoro"), ["hidden", "shown", "liveLeft", "liveRight"]);
+        verify(BarProfileModel.canBeLive("pomodoro"));
     }
 
     // The elements with an icon and text show both by default, on the bar and

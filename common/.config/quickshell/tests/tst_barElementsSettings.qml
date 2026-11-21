@@ -292,8 +292,8 @@ TestCase {
     }
 
     // The pomodoro is a bar element of its own, apart from the clock: it is
-    // listed, turned on or off, grouped and, in a capsule, shown or hidden
-    // collapsed like any other.
+    // listed, turned on or off and grouped like any other and, in a capsule,
+    // can also be live left or right of the workspace pills.
     function test_thePomodoroIsListedApartFromTheClock() {
         const built = make();
         built.appearance.barStyle = "capsule";
@@ -305,7 +305,8 @@ TestCase {
         const pomodoroSwitch = all(pomodoro, child => child.checked !== undefined && child.toggled === undefined)[0];
 
         verify(elementRow(built.item, "Clock"));
-        compare(placeChoice(pomodoro).options.map(option => option.label), ["Hidden", "Shown"]);
+        compare(placeChoice(pomodoro).options.map(option => option.label),
+            ["Hidden", "Shown", "Live left", "Live right"]);
         mouseClick(pomodoroSwitch);
         compare(built.appearance.calls, [["enabled", "pomodoro", false]]);
     }
