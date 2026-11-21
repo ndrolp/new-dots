@@ -46,22 +46,9 @@ function keepAwake(on, duration) {
 }
 
 // A power change event (see services/PowerChange.js): { kind: "charging",
-// "battery" or "low", percentage }. Its icon is the battery bar element's:
-// charging or not, at its charge, and low the low-battery warning.
+// "battery" or "low", percentage }, kept as its `power` kind.
 function power(event) {
-    const charging = event.kind === "charging";
-    const low = event.kind === "low";
-    const name = charging ? "Charging" : low ? "Battery low" : "On battery";
-    // Low shows the warning StatusText keeps for 10% or less.
-    const battery = { percentage: low ? Math.min(event.percentage, 0.1) : event.percentage,
-        state: charging ? "charging" : "discharging" };
-    return {
-        kind: "power",
-        low: low,
-        label: name + " · " + Math.round(event.percentage * 100) + "%",
-        icon: StatusText.batteryIcon(battery, { Charging: "charging" }),
-        tone: charging ? "accent" : "muted"
-    };
+    return { kind: "power", power: event.kind, percentage: event.percentage };
 }
 
 // Do Not Disturb turned on or off.
@@ -99,6 +86,21 @@ function toneColor(tone, theme) {
     default:
         return theme.textMuted;
     }
+}
+
+function powerLabel(change) {
+    const name = change.power === "charging" ? "Charging" : change.power === "low" ? "Battery low" : "On battery";
+    return name + " · " + Math.round(change.percentage * 100) + "%";
+}
+
+// A power change's icon is the battery bar element's: charging or not, at
+// its charge, and low the low-battery warning StatusText keeps for 10% or
+// less.
+function powerIcon(change) {
+    const low = change.power === "low";
+    const battery = { percentage: low ? Math.min(change.percentage, 0.1) : change.percentage,
+        state: change.power === "charging" ? "charging" : "discharging" };
+    return StatusText.batteryIcon(battery, { Charging: "charging" });
 }
 
 function audioOutputIcon(type) {
@@ -139,8 +141,8 @@ function display(change) {
         return { icon: change.connected ? "󰂱" : "󰂲", tone: change.connected ? "blue" : "muted",
             label: bluetoothLabel(change), level: null, highlighted: false, compact: true };
     case "power":
-        return { icon: change.icon, tone: change.tone, label: change.label, level: null,
-            highlighted: change.low, compact: true };
+        return { icon: powerIcon(change), tone: change.power === "charging" ? "accent" : "muted",
+            label: powerLabel(change), level: null, highlighted: change.power === "low", compact: true };
     default:
         return { icon: KeepAwakeState.cup(change.on), tone: "muted", label: change.label,
             level: null, highlighted: change.on, compact: true };
