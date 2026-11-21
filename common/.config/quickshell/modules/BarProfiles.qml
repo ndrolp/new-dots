@@ -2,6 +2,7 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick
+import "../config/BarProfileModel.js" as BarProfileModel
 import "../config/SchemaMigrations.js" as SchemaMigrations
 
 // Which bar profile each monitor gets: a new monitor gets the default one,
@@ -78,20 +79,12 @@ Scope {
     IpcHandler {
         target: "bar-profiles"
 
-        function minimal() {
-            root.setBarProfile("minimal");
-        }
-
-        function work() {
-            root.setBarProfile("work");
-        }
-
-        function media() {
-            root.setBarProfile("media");
-        }
-
-        function presentation() {
-            root.setBarProfile("presentation");
+        // The profile at `position`, counted from 1 in name order, the order
+        // the profile selector shows; a position with no profile does nothing.
+        function select(position: int): void {
+            const profileName = BarProfileModel.profileAt(root.appearance.barProfiles, position);
+            if (profileName !== "")
+                root.setBarProfile(profileName);
         }
     }
 }

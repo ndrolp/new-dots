@@ -402,6 +402,13 @@ function profileChoices(barProfiles) {
         .map(name => ({ label: profileDisplayName(name), value: name }));
 }
 
+// The name of the profile at `position`, counted from 1 in name order (the
+// order profileChoices offers), or "" if there is none there.
+function profileAt(barProfiles, position) {
+    const choice = profileChoices(barProfiles)[position - 1];
+    return choice ? choice.value : "";
+}
+
 // The saved values of `profileName`, completed.
 function savedProfile(state, profileName) {
     return completeProfile(state.barProfiles && state.barProfiles[profileName]);
