@@ -31,12 +31,14 @@ function ids(sides) {
 // When each bar element that can be live (BarProfileModel.liveElementIds) is
 // active, by id: what a collapsed capsule shows it beside its pills for.
 // Each rule takes what there is to show, { player (the Mpris player media
-// follows, or null), recordings (RecordingIndicator.recordings), keepAwakeOn }.
+// follows, or null), recordings (RecordingIndicator.recordings), keepAwakeOn,
+// pomodoroStarted (running or paused) }.
 // A new live element needs its rule here and its id in liveElementIds.
 const activeRules = Object.freeze({
     recording: status => status.recordings.length > 0,
     media: status => !!status.player && status.player.isPlaying === true,
-    keepAwake: status => status.keepAwakeOn === true
+    keepAwake: status => status.keepAwakeOn === true,
+    pomodoro: status => status.pomodoroStarted === true
 });
 
 // Whether bar element `id` is active, given what there is to show (see

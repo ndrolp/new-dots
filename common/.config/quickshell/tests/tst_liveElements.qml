@@ -26,12 +26,13 @@ TestCase {
         };
     }
 
-    // On a capsule, media sits left of the workspace pills and the recording
-    // indicator right of them, while the profile enables them.
-    function test_mediaSitsLeftOfThePillsAndRecordingRight() {
+    // On a capsule, media sits left of the workspace pills and, right of
+    // them from the pills outward, the recording indicator then the
+    // pomodoro, while the profile enables them.
+    function test_mediaSitsLeftOfThePillsAndRecordingThenPomodoroRight() {
         compare(LiveElements.liveElements({ barStyle: "capsule",
             barElements: BarProfileModel.defaultProfile.barElements }),
-            { left: ["media"], right: ["recording"] });
+            { left: ["media"], right: ["recording", "pomodoro"] });
     }
 
     // A live element whose place is Shown is drawn in the row, not beside
@@ -39,7 +40,7 @@ TestCase {
     function test_aLiveElementShownInTheRowIsNotBesideThePills() {
         compare(LiveElements.liveElements({ barStyle: "capsule",
             barElements: BarProfileModel.defaultProfile.barElements, capsulePlaces: places({ media: "shown" }) }),
-            { left: [], right: ["recording"] });
+            { left: [], right: ["recording", "pomodoro"] });
     }
 
     // A hidden one isn't beside the pills either.
@@ -47,7 +48,7 @@ TestCase {
         compare(LiveElements.liveElements({ barStyle: "capsule",
             barElements: BarProfileModel.defaultProfile.barElements,
             capsulePlaces: places({ recording: "hidden" }) }),
-            { left: ["media"], right: [] });
+            { left: ["media"], right: ["pomodoro"] });
     }
 
     // Live right puts media right of the pills, after the recording
@@ -96,6 +97,8 @@ TestCase {
             { tag: "no player", id: "media", status: { player: null }, active: false },
             { tag: "keep-awake on", id: "keepAwake", status: { keepAwakeOn: true }, active: true },
             { tag: "keep-awake off", id: "keepAwake", status: { keepAwakeOn: false }, active: false },
+            { tag: "pomodoro started", id: "pomodoro", status: { pomodoroStarted: true }, active: true },
+            { tag: "pomodoro not started", id: "pomodoro", status: { pomodoroStarted: false }, active: false },
             { tag: "clock", id: "clock", status: {}, active: false }
         ];
     }
