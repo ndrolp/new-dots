@@ -31,14 +31,14 @@ function toggledBar(bars, focusedMonitor) {
     return bar && bar.visible && bar.capsule && !bar.capsuleHidden ? bar.window : null;
 }
 
-// Where a change (volume, brightness, Caps Lock, audio output, bar profile or
-// keep-awake) shows, on the focused monitor only: { capsule: window } when it
-// has a capsule shown, which expands to show it instead of the OSD; {} while a
-// popup is inside that capsule, when it shows nowhere; else { osd: screen },
-// the OSD on the focused monitor's screen, also while its capsule is hidden
-// for a fullscreen window, or on the first screen (null) when no bar is on
-// it. `bars` are { window, monitor, screen, visible, capsule, popupInside,
-// capsuleHidden }, as modules/Bar.qml lists them.
+// Where a change (any of those in components/panels/OsdChange.js) shows, on
+// the focused monitor only: { capsule: window } when it has a capsule shown,
+// which expands to show it instead of the OSD; {} while a popup is inside
+// that capsule, when it shows nowhere; else { osd: screen }, the OSD on the
+// focused monitor's screen, also while its capsule is hidden for a fullscreen
+// window, or on the first screen (null) when no bar is on it. `bars` are
+// { window, monitor, screen, visible, capsule, popupInside, capsuleHidden },
+// as modules/Bar.qml lists them.
 function changeTarget(bars, focusedMonitor) {
     const bar = barOnMonitor(bars, focusedMonitor);
     if (!bar)
