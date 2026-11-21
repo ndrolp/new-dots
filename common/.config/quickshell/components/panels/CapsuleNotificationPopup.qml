@@ -2,8 +2,8 @@ import QtQuick
 import "." as Panels
 
 // A new notification inside the capsule, with notifications in the capsule
-// on: the same card as a toast (ToastCard), in the capsule past its row as a
-// popup inside it is, and the "+N" of the ones waiting. It shows while no
+// on: the same card as a toast (NewNotificationCard), in the capsule past its
+// row as a popup inside it is, and the "+N" of the ones waiting. It shows while no
 // other popup is inside; the capsule hands its notifications back as toasts
 // before one opens. It takes no focus, so it doesn't take the keyboard, until
 // its inline reply is written.
@@ -49,7 +49,7 @@ PopupFrame {
     onDismissed: card.stopReplying()
     onPlacementChanged: popups.popupPlaced(popup, placement)
 
-    Panels.ToastCard {
+    Panels.NewNotificationCard {
         id: card
 
         width: parent.width

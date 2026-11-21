@@ -5,8 +5,8 @@ import QtQuick.Effects
 import "." as Panels
 import "NotificationPlacement.js" as NotificationPlacement
 
-// The toasts: each new notification shows here as a card (ToastCard) for the
-// toast timeout, unless Do Not Disturb is on or it shows inside the capsule
+// The toasts: each new notification shows here as a card
+// (NewNotificationCard) for its timeout, unless Do Not Disturb is on or it shows inside the capsule
 // instead (CapsuleRouting.notificationTarget). Those a capsule hands back,
 // when a popup opens inside it or it hides for a fullscreen window, show here
 // afresh.
@@ -165,7 +165,7 @@ PanelWindow {
                     }
                 }
 
-                Panels.ToastCard {
+                Panels.NewNotificationCard {
                     id: card
 
                     width: parent.width

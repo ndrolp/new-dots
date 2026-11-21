@@ -27,7 +27,7 @@ function defaultAction(actions) {
 // capsule, in ms: the timeout its app asks for, else 5 s; 0 for a critical
 // one, which stays until it is dismissed. `notification` is
 // { expireTimeout, critical }.
-function toastTimeout(notification) {
+function newNotificationTimeout(notification) {
     if (notification.critical === true)
         return 0;
     return notification.expireTimeout > 0 ? notification.expireTimeout : 5000;

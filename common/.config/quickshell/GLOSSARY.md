@@ -110,7 +110,7 @@ Un bar element que en la cápsula se muestra junto a las pills de los workspaces
 _Avoid_: Live activity, capsule element, elemento de cápsula
 
 **Change event** (evento de cambio):
-Algo que cambia y se muestra un momento solo en el monitor enfocado: en su cápsula, expandida y mostrando solo ese cambio, o en el OSD con cualquier otro estilo de barra. Son: volumen, brillo, Bloq Mayús, audio output, bar profile, keep-awake (solo con su atajo), Do Not Disturb, conexión Bluetooth y energía. Conectar o desconectar un dispositivo muestra su nombre y «Connected» (con su batería si la informa, «WH-1000XM4 · Connected · 80%») o «Disconnected»; los dispositivos que ya estaban conectados al arrancar la shell no lo muestran. La energía: al enchufar o desenchufar el cargador, «Charging · 64%» u «On battery · 64%», y al llegar la batería al 15% descargándose, «Battery low · 15%» una sola vez, que vuelve a mostrarse solo después de haber estado por encima o enchufada, como la notificación de batería baja (que sigue enviándose). Sin batería no se muestran los de energía, y al arrancar la shell no se muestra ninguno: lo primero que lee es cómo ya estaba.
+Algo que cambia y se muestra un momento solo en el monitor enfocado: en su cápsula, expandida y mostrando solo ese cambio, o en el OSD con cualquier otro estilo de barra. Son: volumen, brillo, Bloq Mayús, audio output, bar profile, keep-awake (solo con su atajo), Do Not Disturb, conexión Bluetooth y energía. Conectar o desconectar un dispositivo muestra su nombre y «Connected» (con su batería si la informa, «WH-1000XM4 · Connected · 80%») o «Disconnected»; los dispositivos que ya estaban conectados al arrancar la shell no lo muestran. La energía: al enchufar o desenchufar el cargador, «Charging · 64%» u «On battery · 64%», y al llegar la batería al 15% descargándose, también al desenchufar con un 15% o menos (en lugar de «On battery»), «Battery low · 15%» una sola vez, que vuelve a mostrarse solo después de haber estado por encima o enchufada, como la notificación de batería baja (que sigue enviándose). Sin batería no se muestran los de energía, y al arrancar la shell no se muestra ninguno: lo primero que lee es cómo ya estaba.
 _Avoid_: Notificación (que es otra cosa), aviso, OSD event
 
 **Bar border** (borde de la barra):
@@ -151,6 +151,14 @@ _Avoid_: Toggle, botón rápido, quick setting
 **Notification card** (tarjeta de notificación):
 Cómo se muestra una notificación en el control center: icono o imagen de la app, título, cuerpo (desplegable con su chevron) y botones de acción. Pulsarla ejecuta su acción por defecto, la quita y cierra el control center; deslizarla de lado la descarta. Las de una misma app se apilan: se ve la más reciente con «+N more», y al pulsar la pila se despliega.
 _Avoid_: Entrada, item, toast (que es la notificación que aparece sola en pantalla)
+
+**Toast**:
+Una notificación nueva que aparece sola en pantalla, fuera del control center, en el área que la barra deja libre, como una *new notification card*: sus acciones y su respuesta en línea funcionan, y una crítica se queda hasta descartarla; las demás duran lo que pide su app, o 5 s. Así es siempre, también con *Notifications in the capsule* desactivado. Do Not Disturb las suprime. La notificación sigue en el control center.
+_Avoid_: Popup de notificación, banner, notification card (que es la del control center)
+
+**New notification card** (tarjeta de notificación nueva):
+La tarjeta con la que se muestra una notificación nueva, la misma como *toast* o dentro de la cápsula: icono o imagen, app, título y cuerpo, sus botones de acción, la respuesta en línea si su app la pide, una línea al pie con lo que le queda y, en la cápsula, «+N» de las que esperan. Pulsarla ejecuta su acción por defecto; × solo la quita de la pantalla.
+_Avoid_: Toast card (sirve también dentro de la cápsula), notification card (que es la del control center)
 
 **Ongoing notification** (notificación en curso):
 Una notificación con la marca `resident`, o la tarjeta de media mientras algo suena, que va fijada arriba del todo en el control center y que *Clear all* no quita.

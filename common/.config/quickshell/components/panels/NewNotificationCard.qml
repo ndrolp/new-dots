@@ -7,8 +7,8 @@ import "../IconSource.js" as IconSource
 // The card a new notification shows as: a toast, or inside the capsule with
 // notifications in the capsule on. Icon or image, app, summary and body, its
 // actions as buttons and, when its app asks for one, an inline reply. It
-// shows for the toast timeout (NotificationCard.toastTimeout), its progress
-// as a line along its foot; a critical one stays until it is dismissed.
+// shows for its timeout (NotificationCard.newNotificationTimeout), its
+// progress as a line along its foot; a critical one stays until it is dismissed.
 // Tapping it runs its default action; × only ends it. The notification itself
 // lives on in the control center.
 Item {
@@ -27,7 +27,7 @@ Item {
     // is its surface.
     property bool framed: true
     // Its timeout, in ms; 0 when it stays until dismissed.
-    readonly property int timeout: NotificationCard.toastTimeout({
+    readonly property int timeout: NotificationCard.newNotificationTimeout({
         expireTimeout: notification ? notification.expireTimeout : -1,
         // NotificationUrgency.Critical.
         critical: !!notification && notification.urgency === 2

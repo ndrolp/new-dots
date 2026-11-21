@@ -10,7 +10,7 @@ import "../config/Motion.js" as Motion
 // Pointer events don't reach items under qmltestrunner offscreen, so taps are
 // given to the card through the functions its handlers call.
 TestCase {
-    name: "ToastCard"
+    name: "NewNotificationCard"
     width: 500
     height: 400
     visible: true
@@ -28,7 +28,7 @@ TestCase {
     }
 
     function test_howLongAToastShows(data) {
-        compare(NotificationCard.toastTimeout(data.notification), data.timeout);
+        compare(NotificationCard.newNotificationTimeout(data.notification), data.timeout);
     }
 
     // Stands in for a Quickshell NotificationAction.
@@ -73,7 +73,7 @@ TestCase {
     Component {
         id: card
 
-        Panels.ToastCard {
+        Panels.NewNotificationCard {
             width: 380
             appearance: ({ radius: 8, textSize: 13, motion: Motion.motion(true) })
         }

@@ -130,8 +130,8 @@ that the newest shows with the others waiting as "+N", the next showing as
 one ends and all handed back oldest first as toasts
 (`CapsuleNotificationQueue.js`), and the card a new notification shows as,
 toast or in the capsule: its timeout, a critical one staying, its actions,
-inline reply and "+N" (`components/panels/ToastCard.qml`,
-`NotificationCard.toastTimeout`), how it is
+inline reply and "+N" (`components/panels/NewNotificationCard.qml`,
+`NotificationCard.newNotificationTimeout`), how it is
 drawn with its fill and bar border (`CapsuleSurface.qml`), that it reaches past its row for its
 workspace pills, and where they sit inside it, under the row of a top
 capsule and above the row of a bottom one, centred on it, how it grows round a popup

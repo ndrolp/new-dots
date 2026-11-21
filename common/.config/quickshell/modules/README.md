@@ -73,7 +73,7 @@ adding or editing one file here.
   Disturb and after a reload, tested; the queue with its "+N" is
   `CapsuleNotificationQueue.js`, tested); those the capsule hands back, when
   a popup opens inside it or it hides for fullscreen, show as toasts. Both
-  use one card (`ToastCard.qml`, tested): actions, inline reply, and a
+  use one card (`NewNotificationCard.qml`, tested): actions, inline reply, and a
   critical one stays until dismissed.
 - `BarProfiles.qml`: the default bar profile for new monitors and the
   `bar-profiles` IPC calls.
