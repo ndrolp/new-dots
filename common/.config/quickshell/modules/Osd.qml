@@ -6,10 +6,10 @@ import "../components/bar/CapsuleRouting.js" as CapsuleRouting
 import "../components/panels" as Panels
 import "../components/panels/OsdChange.js" as OsdChange
 
-// The on-screen display and the six changes it shows: IPC sends the volume
-// and brightness keys, it watches Caps Lock itself, and the rest of the shell
-// sends audio outputs, bar profiles, the keep-awake keybind and power changes
-// (PowerChanges.qml). Each shows on
+// The on-screen display and the changes it shows: IPC sends the volume and
+// brightness keys, it watches Caps Lock and Do Not Disturb itself, and the
+// rest of the shell sends audio outputs, bar profiles, the keep-awake keybind
+// and power changes (PowerChanges.qml). Each shows on
 // the focused monitor only (CapsuleRouting.changeTarget): in its capsule if it has
 // one, else in the OSD on that monitor.
 Scope {
@@ -60,6 +60,12 @@ Scope {
         id: osdPopup
 
         appearance: root.appearance
+    }
+
+    // Do Not Disturb turned on or off, from the control center or anywhere else.
+    Panels.DoNotDisturbWatch {
+        appearance: root.appearance
+        onToggled: change => root.show(change)
     }
 
     PwObjectTracker {

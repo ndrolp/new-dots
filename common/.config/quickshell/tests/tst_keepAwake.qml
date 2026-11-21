@@ -136,6 +136,66 @@ TestCase {
         compare(item.width, offWidth);
     }
 
+    // A timed keep-awake, `secondsLeft` from running out, drawn as a
+    // capsule's live element or not.
+    function makeTimedElement(live, secondsLeft) {
+        const service = keepAwake(true);
+        service.timed = true;
+        service.secondsLeft = secondsLeft;
+        return createTemporaryObject(element, this, { keepAwake: service, live: live });
+    }
+
+    function test_asALiveElementACountdownShowsItsTimeLeftBesideTheCup() {
+        const item = makeTimedElement(true, 42 * 60 + 30);
+        const label = shownText(item, "42m");
+
+        verify(label);
+        verify(label.mapToItem(item, 0, 0).x >= cupOf(item).mapToItem(item, 0, 0).x + cupOf(item).width);
+        verify(label.mapToItem(item, 0, 0).x + label.width <= item.width);
+    }
+
+    function test_asALiveElementTheTimeLeftShowsHoursAndTheLastMinute() {
+        const item = makeTimedElement(true, 3600 + 12 * 60);
+
+        verify(shownText(item, "1h 12m"));
+
+        item.keepAwake.secondsLeft = 30;
+        verify(shownText(item, "<1m"));
+    }
+
+    function test_theTimeLeftChangesOncePerMinuteNotEverySecond() {
+        const item = makeTimedElement(true, 42 * 60 + 59);
+        const label = shownText(item, "42m");
+
+        item.keepAwake.secondsLeft = 42 * 60 + 1;
+        compare(label.text, "42m");
+
+        item.keepAwake.secondsLeft = 41 * 60 + 59;
+        compare(label.text, "41m");
+    }
+
+    function test_theTimeLeftWidensTheLiveElement() {
+        const item = makeTimedElement(true, 42 * 60);
+        const timedWidth = item.width;
+
+        item.keepAwake.timed = false;
+
+        verify(item.width < timedWidth);
+    }
+
+    function test_untilTurnedOffALiveElementShowsOnlyTheCup() {
+        const item = createTemporaryObject(element, this, { keepAwake: keepAwake(true), live: true });
+
+        compare(shownText(item, "<1m"), null);
+        compare(shownText(item, "0m"), null);
+    }
+
+    function test_onOtherBarStylesTheElementShowsNoTimeLeft() {
+        const item = makeTimedElement(false, 42 * 60);
+
+        compare(shownText(item, "42m"), null);
+    }
+
     // The popup's on/off switch.
     function switchOf(item) {
         if (item.checked !== undefined && item.toggled !== undefined)
