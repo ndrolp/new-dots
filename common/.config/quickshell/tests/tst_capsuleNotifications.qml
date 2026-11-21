@@ -14,11 +14,11 @@ TestCase {
     // is turned on.
     function test_migratedProfilesHaveNotificationsInTheCapsuleOff() {
         const profiles = SchemaMigrations.migrate({ schemaVersion: 19, barProfiles: {
-            island: { barStyle: "capsule" },
+            evening: { barStyle: "capsule" },
             work: { barStyle: "opaque" }
         } }, {}).appearance.barProfiles;
 
-        compare(profiles.island.capsuleNotifications, false);
+        compare(profiles.evening.capsuleNotifications, false);
         compare(profiles.work.capsuleNotifications, false);
     }
 
