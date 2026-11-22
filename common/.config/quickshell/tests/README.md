@@ -56,7 +56,7 @@ panel's Control center section that edits it (`ControlCenterSettings.qml`),
 the settings panel's own parts (`SettingsNumber`,
 `SettingsSwitchRow`, `SettingsChoice`, `SettingsGrid`…: a long label wraps instead of
 eliding, and a grid too narrow for two cells side by side is one column; `SettingsCard`:
-the hairline-bordered card, one step lighter than the panel and without hover,
+the hairline-bordered card, half transparent, one step lighter than the panel and without hover,
 that holds a headed group), the one
 hover they share (`SettingsHoverFill`: a faint fill that stands out from the card they sit on, a pointing hand, an accent border on bordered
 controls, a growing slider thumb, a brighter switch, instant under reduce

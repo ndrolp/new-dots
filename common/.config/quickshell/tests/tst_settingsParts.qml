@@ -726,10 +726,10 @@ TestCase {
 
     // A headed group sits in a card: a hairline border, a fill one step
     // lighter than the panel, its heading inside at the top, 16px padding.
-    function test_aCardIsAHairlineBorderedLighterFill() {
+    function test_aCardIsAHairlineBorderedHalfTransparentLighterFill() {
         const item = make(card);
 
-        compare(item.color, theme.surfaceHover);
+        compare(item.color, Qt.rgba(theme.surfaceHover.r, theme.surfaceHover.g, theme.surfaceHover.b, 0.5));
         compare(item.border.color, theme.border);
         compare(item.border.width, 1);
         compare(item.radius, 12);
