@@ -115,7 +115,7 @@ Scope {
         capsuleFeatures: root.capsuleFeatures
 
         onConfigRequested: function(screen, panelWindow) {
-            root.settings.toggleOn(screen, panelWindow);
+            root.settings.toggleOn(panelWindow);
         }
 
         onPanelReady: function(screen, panelWindow) {

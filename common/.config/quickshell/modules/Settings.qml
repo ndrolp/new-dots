@@ -52,8 +52,8 @@ Feature {
     // Where it is now, as SettingsPlace.js takes it.
     function place() {
         if (popupOpen)
-            return { where: "inside", window: bar.openPopup.window };
-        return { where: open ? "centered" : "closed", window: window };
+            return { where: SettingsPlace.where.inside, window: bar.openPopup.window };
+        return { where: open ? SettingsPlace.where.centered : SettingsPlace.where.closed, window: window };
     }
 
     // Moves it to `next` (a SettingsPlace.js place).
@@ -63,8 +63,8 @@ Feature {
             window = next.window;
         if (window)
             screen = window.screen;
-        open = next.where === "centered";
-        if (next.where === "inside")
+        open = next.where === SettingsPlace.where.centered;
+        if (next.where === SettingsPlace.where.inside)
             bar.openPopup = { popup: OpenPopup.settings, window: next.window };
         else if (popupOpen)
             bar.closePopup();
@@ -90,16 +90,16 @@ Feature {
 
     // The settings button on a bar: closes the panel if it is open on that
     // bar, otherwise opens it there.
-    function toggleOn(barScreen, panelWindow) {
+    function toggleOn(panelWindow) {
         go(SettingsPlace.toggledOn(place(), panelWindow, bar.bars()));
     }
 
     // Opens the panel on that bar at `section`, or shows `section` if it is
     // already open there.
-    function openSectionOn(section, barScreen, panelWindow) {
+    function openSectionOn(section, panelWindow) {
         root.view = Object.assign({}, root.view, { section: section, scroll: 0 });
         panelWindowItem.openSection(section);
-        go(SettingsPlace.openedOn(place(), panelWindow, bar.bars()));
+        go(SettingsPlace.openedOn(panelWindow, bar.bars()));
         sectionRequested(section);
     }
 
