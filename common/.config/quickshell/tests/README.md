@@ -61,7 +61,7 @@ that holds a headed group), the one
 hover they share (`SettingsHoverFill`: a faint fill that stands out from the card they sit on, a pointing hand, an accent border on bordered
 controls, a growing slider thumb, a brighter switch, instant under reduce
 motion), its frame
-(`ConfigPanel.qml`: each section's title and description from its entry in
+(`ConfigPanel.qml`: the colorscheme's surface at 85% opacity as its fill, each section's title and description from its entry in
 the sections list, the header's title, search and Done at the panel's
 margins, the selected sidebar section's fill, accent bar and accent text, its
 view (section, search text, scroll position) that another panel picks up, and

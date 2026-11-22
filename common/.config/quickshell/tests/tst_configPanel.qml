@@ -63,6 +63,17 @@ TestCase {
         verify(textOf(item, "Settings"));
     }
 
+    // Centered, the panel is the colorscheme's surface at 85% opacity, so
+    // the blurred desktop shows through it (and its half-transparent cards).
+    function test_thePanelIsTheSurfaceAt85PercentOpacity() {
+        const item = createTemporaryObject(panel, this);
+
+        fuzzyCompare(item.color.r, theme.surface.r, 0.005);
+        fuzzyCompare(item.color.g, theme.surface.g, 0.005);
+        fuzzyCompare(item.color.b, theme.surface.b, 0.005);
+        fuzzyCompare(item.color.a, 0.85, 0.005);
+    }
+
     function test_everySectionFitsInTheSidebarWithoutScrolling() {
         const item = createTemporaryObject(panel, this);
         const sections = item.sections.map(section => section.label);
