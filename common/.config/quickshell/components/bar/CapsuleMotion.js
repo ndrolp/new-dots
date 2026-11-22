@@ -7,8 +7,8 @@
 //   NumberAnimation that moves it (CapsuleSurface.qml moves the capsule's
 //   size, place and corner radius with it).
 // - contents(motion, elapsed, incoming): how contents look `elapsed` ms
-//   into their half of a crossfade, { opacity, scale }.
-// - contentsLength(motion, incoming): how long that half runs.
+//   into a crossfade, { opacity, scale }, incoming or outgoing.
+// - contentsLength(motion): how long a crossfade runs.
 // CapsuleContentTransition.qml runs a keyed crossfade with these; a popup
 // inside the capsule (components/panels/PopupSurface.qml) drives them from
 // its reveal.
@@ -29,8 +29,8 @@ function eased(elapsed, length) {
     return 1 - Math.pow(1 - t, 3);
 }
 
-// How the capsule's contents look `elapsed` ms into their half of a
-// crossfade, { opacity, scale }. Incoming, they wait `contentsDelay` (a third
+// How the capsule's contents look `elapsed` ms into a crossfade, counted
+// from when the shape starts moving, { opacity, scale }. Incoming, they wait `contentsDelay` (a third
 // of the shape's spring) at `contentsScale` and transparent, then fade and
 // grow to 1 over `contentsIn`. Outgoing, they fade and shrink to
 // `contentsScale` over `contentsOut`, starting at once.
@@ -45,8 +45,9 @@ function contents(motion, elapsed, incoming) {
     return { opacity: 1 - t, scale: 1 - shrink * t };
 }
 
-// How long, in ms, the incoming or outgoing half of a crossfade runs.
-function contentsLength(motion, incoming) {
+// How long, in ms, a crossfade runs: both halves start together, as the
+// shape starts moving, and it ends once the incoming contents are fully in.
+function contentsLength(motion) {
     const capsule = motion.capsule;
-    return incoming ? capsule.contentsDelay + capsule.contentsIn : capsule.contentsOut;
+    return Math.max(capsule.contentsOut, capsule.contentsDelay + capsule.contentsIn);
 }
