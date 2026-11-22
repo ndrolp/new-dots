@@ -144,10 +144,10 @@ TestCase {
         return [
             { tag: "Style", settings: ["Bar style", "Bar position"] },
             { tag: "Bar", settings: ["Density preset", "Bar thickness", "Bar opacity", "Corner radius",
-                "Horizontal padding", "Vertical padding", "Bar border", "Edge margin"] },
+                "Horizontal padding", "Bar border", "Edge margin"] },
             { tag: "Groups", settings: ["Group radius", "Group horizontal padding", "Group vertical padding",
                 "Group border"] },
-            { tag: "Elements", settings: ["Icon size", "Pill vertical padding", "Workspace bar padding",
+            { tag: "Elements", settings: ["Icon size", "Pill vertical padding",
                 "Component spacing", "Element border", "Transparent pills"] },
             { tag: "Capsule", settings: ["Capsule vertical padding", "Notifications in the capsule"] }
         ];
@@ -159,6 +159,49 @@ TestCase {
 
         verify(found, data.tag + " is not shown");
         compare(settingsIn(found), data.settings);
+    }
+
+    // Only the settings the bar uses on its style show; the rest are hidden.
+    function test_eachBarStyleShowsOnlyTheSettingsItsBarUses_data() {
+        return [
+            { tag: "opaque", style: "opaque",
+                bar: ["Density preset", "Bar thickness", "Bar opacity", "Corner radius", "Horizontal padding",
+                    "Vertical padding", "Bar border"],
+                elements: ["Icon size", "Component spacing", "Element border", "Transparent pills"] },
+            { tag: "transparent", style: "transparent",
+                bar: ["Density preset", "Bar thickness", "Bar opacity", "Corner radius", "Horizontal padding",
+                    "Edge margin"],
+                elements: ["Icon size", "Pill vertical padding", "Component spacing", "Element border",
+                    "Transparent pills"] },
+            { tag: "docked", style: "docked",
+                bar: ["Density preset", "Bar thickness", "Bar opacity", "Corner radius", "Horizontal padding",
+                    "Bar border"],
+                elements: ["Icon size", "Pill vertical padding", "Component spacing", "Element border"] }
+        ];
+    }
+
+    function test_eachBarStyleShowsOnlyTheSettingsItsBarUses(data) {
+        const built = make(data.style);
+
+        compare(settingsIn(card(built.item, "Bar")), data.bar);
+        compare(settingsIn(card(built.item, "Elements")), data.elements);
+    }
+
+    // Switching bar style shows and hides settings straight away.
+    function test_switchingBarStyleUpdatesTheShownSettingsAtOnce() {
+        const built = make("opaque");
+
+        built.appearance.barStyle = "capsule";
+        waitForRendering(built.item);
+        compare(settingsIn(card(built.item, "Bar")), ["Density preset", "Bar thickness", "Bar opacity",
+            "Corner radius", "Horizontal padding", "Bar border", "Edge margin"]);
+        verify(card(built.item, "Capsule"));
+
+        built.appearance.barStyle = "opaque";
+        waitForRendering(built.item);
+        compare(settingsIn(card(built.item, "Bar")), ["Density preset", "Bar thickness", "Bar opacity",
+            "Corner radius", "Horizontal padding", "Vertical padding", "Bar border"]);
+        compare(card(built.item, "Capsule"), null);
     }
 
     // The element list follows the Elements card's settings, inside it.

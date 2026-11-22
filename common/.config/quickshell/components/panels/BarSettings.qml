@@ -1,6 +1,5 @@
 import QtQuick
 import "." as Panels
-import "../../config/BarProfileModel.js" as BarProfileModel
 
 // The Bar section, one scroll of cards for the edited bar profile: Profile,
 // Style, Bar, Groups, Elements and, on a capsule profile, Capsule.
@@ -29,12 +28,15 @@ Column {
     }
 
     // A capsule's own: new notifications show inside it instead of as toasts.
+    // Hidden whole on a bar style that uses none of its settings.
     Panels.SettingsCard {
-        visible: BarProfileModel.capsule(root.appearance)
+        visible: !capsuleSettings.empty
         appearance: root.appearance
         title: "Capsule"
 
         Panels.BarSettingsGrid {
+            id: capsuleSettings
+
             appearance: root.appearance
             settings: [
                 { label: "Capsule vertical padding", from: 0, to: 16, propertyName: "capsuleVerticalPadding" },

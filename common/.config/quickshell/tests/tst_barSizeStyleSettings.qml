@@ -272,9 +272,10 @@ TestCase {
 
     // Both keep their saved keys: thickness and the gap from the screen edge
     // (the edge margin, stored as the transparent bar margin) read the same
-    // on every Bar position.
+    // on every Bar position. A transparent bar keeps that gap.
     function test_theBarSizesAreNamedForEveryBarPosition() {
         const built = make();
+        built.appearance.barStyle = "transparent";
         const margin = numberCell(built.item, "Edge margin");
 
         verify(numberCell(built.item, "Bar thickness"));
