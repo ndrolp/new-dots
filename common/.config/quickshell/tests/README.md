@@ -136,6 +136,8 @@ capsule and on its pill row with equal padding at both ends, the square
 network, Bluetooth and tray elements padded like the others unless they draw
 their own pill (`tst_capsuleRestingRow.qml`, `BarElementItems.elementLength`), that any one cause holds it expanded and that
 SUPER+I acts only on the focused monitor's capsule (`CapsuleRouting.js`),
+that hovering one of its live elements doesn't expand it, so a click there
+opens the element's popup straight from rest (`CapsuleRouting.hoverExpands`),
 that hovering it expands it only after a moment and collapses it a while after
 the pointer leaves (`CapsuleHover.qml`), that SUPER+I holds it expanded until
 pressed again or until the pointer leaves it (`CapsuleToggle.qml`), that a

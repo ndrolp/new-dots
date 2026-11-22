@@ -216,11 +216,12 @@ Variants {
                 id: theme
             }
 
-            // Hovering the capsule expands it after a moment.
+            // Hovering the capsule expands it after a moment; not over a live
+            // element, whose click opens its popup straight from rest.
             CapsuleHover {
                 id: capsuleHover
 
-                hovering: barContent.capsuleHovered
+                hovering: barContent.capsuleHoverExpands
             }
 
             // How much taller a capsule's window is for the popups inside it.

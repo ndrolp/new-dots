@@ -22,6 +22,22 @@ TestCase {
         compare(CapsuleRouting.expanded(data.causes), data.expanded);
     }
 
+    // Hovering the capsule expands it, but not over a live element: there a
+    // click opens the element's popup inside the capsule straight from rest,
+    // with no expanded row first.
+    function test_hoveringALiveElementDoesNotExpandTheCapsule_data() {
+        return [
+            { tag: "away", pointer: { overCapsule: false, overLiveElement: false }, expands: false },
+            { tag: "over the capsule", pointer: { overCapsule: true, overLiveElement: false }, expands: true },
+            { tag: "over a live element", pointer: { overCapsule: true, overLiveElement: true }, expands: false },
+            { tag: "nothing known", pointer: undefined, expands: false }
+        ];
+    }
+
+    function test_hoveringALiveElementDoesNotExpandTheCapsule(data) {
+        compare(CapsuleRouting.hoverExpands(data.pointer), data.expands);
+    }
+
     // A capsule hides while its monitor's focused workspace has a fullscreen
     // window; other bar styles never do.
     function test_aCapsuleHidesForAFullscreenWindow_data() {
