@@ -1,23 +1,15 @@
 import QtQuick
 import "." as Panels
 
-// The Session section's actions as quiet buttons, two per line, each with
+// The Session section's actions card: quiet buttons, two per line, each with
 // what it does underneath. A button only asks for its command: the section
 // runs it.
-Column {
+Panels.SettingsCard {
     id: root
 
-    required property var appearance
     signal requested(var command)
 
-    width: parent ? parent.width : 0
-    spacing: 14
-
-    Panels.SettingsHeading {
-        appearance: root.appearance
-        text: "Actions"
-        topPadding: 8
-    }
+    title: "Actions"
 
     Panels.SettingsGrid {
         Repeater {

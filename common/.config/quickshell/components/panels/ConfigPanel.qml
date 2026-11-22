@@ -381,6 +381,7 @@ Rectangle {
 
                         Loader {
                             id: sectionLoader
+                            objectName: "sectionContent"
 
                             width: sectionScroll.availableWidth - 12
                             height: item ? item.implicitHeight : 0

@@ -138,10 +138,10 @@ TestCase {
         compare(built.appearance.saved, [["workspaces", "glyphsEnabled", false]]);
     }
 
-    function test_noFilledCardsAndNothingBold() {
+    function test_onlyTheCardsAreFilledAndNothingBold() {
         const built = make();
         const bold = all(built.item, child => child.font !== undefined && child.font.bold);
-        const filled = all(built.item, child => child instanceof Rectangle && child.radius > 0
+        const filled = all(built.item, child => child instanceof Rectangle && !(child instanceof Panels.SettingsCard) && child.radius > 0
             && child.color.a > 0 && child.height >= 32);
 
         compare(bold.length, 0);

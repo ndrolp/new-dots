@@ -11,7 +11,7 @@ Column {
     property var bookmarks
 
     width: parent ? parent.width : 0
-    spacing: 14
+    spacing: 12
 
     Config.Theme {
         id: theme
@@ -132,99 +132,95 @@ Column {
         }
     }
 
-    Panels.SettingsHeading {
-        width: parent.width
+    Panels.SettingsCard {
         appearance: root.appearance
-        text: "Bookmarks"
-        topPadding: 4
-    }
+        title: "Bookmarks"
 
-    Panels.SettingsHint {
-        width: parent.width
-        appearance: root.appearance
-        text: "Configure the links shown in the Alt+G quick-search panel."
-    }
+        Panels.SettingsHint {
+            width: parent.width
+            appearance: root.appearance
+            text: "Configure the links shown in the Alt+G quick-search panel."
+        }
 
-    Column {
-        width: parent.width
-        spacing: 2
+        Column {
+            width: parent.width
+            spacing: 2
 
-        Repeater {
-            model: root.bookmarks.items
+            Repeater {
+                model: root.bookmarks.items
 
-            delegate: LinkRow {
-                required property var modelData
-                required property int index
+                delegate: LinkRow {
+                    required property var modelData
+                    required property int index
 
-                glyph: modelData.glyph
-                name: modelData.label
-                link: modelData.url
-                linkKey: "url"
-                linkLabel: "URL"
-                linkPlaceholder: "https://example.com"
-                canMoveUp: index > 0
-                canMoveDown: index < root.bookmarks.items.length - 1
-                onEdited: (key, value) => root.bookmarks.update(index, key, value)
-                onMovedUp: root.bookmarks.move(index, index - 1)
-                onMovedDown: root.bookmarks.move(index, index + 1)
-                onRemoved: root.bookmarks.remove(index)
+                    glyph: modelData.glyph
+                    name: modelData.label
+                    link: modelData.url
+                    linkKey: "url"
+                    linkLabel: "URL"
+                    linkPlaceholder: "https://example.com"
+                    canMoveUp: index > 0
+                    canMoveDown: index < root.bookmarks.items.length - 1
+                    onEdited: (key, value) => root.bookmarks.update(index, key, value)
+                    onMovedUp: root.bookmarks.move(index, index - 1)
+                    onMovedDown: root.bookmarks.move(index, index + 1)
+                    onRemoved: root.bookmarks.remove(index)
+                }
             }
+        }
+
+        Panels.SettingsButton {
+            appearance: root.appearance
+            label: "󰐕  Add bookmark"
+            labelColor: theme.accent
+            onActivated: root.bookmarks.add()
         }
     }
 
-    Panels.SettingsButton {
+    Panels.SettingsCard {
         appearance: root.appearance
-        label: "󰐕  Add bookmark"
-        labelColor: theme.accent
-        onActivated: root.bookmarks.add()
-    }
+        title: "Search engines"
 
-    Panels.SettingsHeading {
-        width: parent.width
-        appearance: root.appearance
-        text: "Search engines"
-        topPadding: 8
-    }
+        Panels.SettingsHint {
+            width: parent.width
+            appearance: root.appearance
+            text: "Choose the fallback engine in quick search. Use %s where the query belongs."
+        }
 
-    Panels.SettingsHint {
-        width: parent.width
-        appearance: root.appearance
-        text: "Choose the fallback engine in quick search. Use %s where the query belongs."
-    }
+        Column {
+            width: parent.width
+            spacing: 2
 
-    Column {
-        width: parent.width
-        spacing: 2
+            Repeater {
+                model: root.bookmarks.searchEngines
 
-        Repeater {
-            model: root.bookmarks.searchEngines
+                delegate: LinkRow {
+                    required property var modelData
+                    required property int index
 
-            delegate: LinkRow {
-                required property var modelData
-                required property int index
-
-                glyph: modelData.glyph
-                name: modelData.label
-                link: modelData.searchUrl
-                linkKey: "searchUrl"
-                linkLabel: "Search URL"
-                linkPlaceholder: "https://example.com/search?q=%s"
-                canMoveUp: index > 0
-                canMoveDown: index < root.bookmarks.searchEngines.length - 1
-                // Quick search always needs an engine to fall back on.
-                canRemove: root.bookmarks.searchEngines.length > 1
-                onEdited: (key, value) => root.bookmarks.updateSearchEngine(index, key, value)
-                onMovedUp: root.bookmarks.moveSearchEngine(index, index - 1)
-                onMovedDown: root.bookmarks.moveSearchEngine(index, index + 1)
-                onRemoved: root.bookmarks.removeSearchEngine(index)
+                    glyph: modelData.glyph
+                    name: modelData.label
+                    link: modelData.searchUrl
+                    linkKey: "searchUrl"
+                    linkLabel: "Search URL"
+                    linkPlaceholder: "https://example.com/search?q=%s"
+                    canMoveUp: index > 0
+                    canMoveDown: index < root.bookmarks.searchEngines.length - 1
+                    // Quick search always needs an engine to fall back on.
+                    canRemove: root.bookmarks.searchEngines.length > 1
+                    onEdited: (key, value) => root.bookmarks.updateSearchEngine(index, key, value)
+                    onMovedUp: root.bookmarks.moveSearchEngine(index, index - 1)
+                    onMovedDown: root.bookmarks.moveSearchEngine(index, index + 1)
+                    onRemoved: root.bookmarks.removeSearchEngine(index)
+                }
             }
         }
-    }
 
-    Panels.SettingsButton {
-        appearance: root.appearance
-        label: "󰐕  Add search engine"
-        labelColor: theme.accent
-        onActivated: root.bookmarks.addSearchEngine()
+        Panels.SettingsButton {
+            appearance: root.appearance
+            label: "󰐕  Add search engine"
+            labelColor: theme.accent
+            onActivated: root.bookmarks.addSearchEngine()
+        }
     }
 }

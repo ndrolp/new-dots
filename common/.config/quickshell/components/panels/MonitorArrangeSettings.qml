@@ -21,75 +21,84 @@ Column {
     readonly property var selectedModes: selected !== null ? monitorSetups.modesOf(selected.port) : []
 
     width: parent ? parent.width : 0
-    spacing: 16
+    spacing: 12
 
-    Item {
-        width: parent.width
-        height: Math.max(identifyButton.height, monitorChoices.implicitHeight)
+    Panels.SettingsCard {
+        appearance: root.appearance
+        title: "Arrangement"
 
-        Panels.SettingsChoiceList {
-            id: monitorChoices
+        Item {
+            width: parent.width
+            height: Math.max(identifyButton.height, monitorChoices.implicitHeight)
 
-            anchors.left: parent.left
-            anchors.right: identifyButton.left
-            anchors.rightMargin: 12
+            Panels.SettingsChoiceList {
+                id: monitorChoices
+
+                anchors.left: parent.left
+                anchors.right: identifyButton.left
+                anchors.rightMargin: 12
+                appearance: root.appearance
+                options: root.entries.map(entry => ({
+                    label: MonitorEntries.numberOf(root.entries, entry.port) + " " + entry.description, value: entry.port
+                }))
+                value: root.selected !== null ? root.selected.port : ""
+                onChosen: port => root.selectedPort = port
+            }
+
+            Panels.SettingsButton {
+                id: identifyButton
+
+                anchors.right: parent.right
+                appearance: root.appearance
+                label: "Identify"
+                onActivated: root.monitorSetups.identify()
+            }
+        }
+
+        Panels.MonitorArrangeCanvas {
+            width: parent.width
             appearance: root.appearance
-            options: root.entries.map(entry => ({
-                label: MonitorEntries.numberOf(root.entries, entry.port) + " " + entry.description, value: entry.port
-            }))
-            value: root.selected !== null ? root.selected.port : ""
-            onChosen: port => root.selectedPort = port
+            selectedId: root.selected !== null ? root.selected.port : ""
+            monitors: MonitorEntries.rectangles(root.entries).map(rect => {
+                const entry = root.entries.filter(candidate => candidate.port === rect.id)[0];
+                return Object.assign({ number: MonitorEntries.numberOf(root.entries, entry.port), label: entry.description }, rect);
+            })
+            onSelected: id => root.selectedPort = id
+            onDropped: (id, x, y) => root.monitorSetups.apply(MonitorEntries.moved(root.entries, id, x, y))
         }
+    }
 
-        Panels.SettingsButton {
-            id: identifyButton
+    Panels.SettingsCard {
+        appearance: root.appearance
+        title: root.selected !== null ? root.selected.description : ""
+        visible: root.selected !== null
 
-            anchors.right: parent.right
+        Panels.MonitorControls {
+            width: parent.width
             appearance: root.appearance
-            label: "Identify"
-            onActivated: root.monitorSetups.identify()
+            entry: root.selected
+            modes: root.selectedModes
+            canTurnOff: root.selected !== null && MonitorEntries.canTurnOff(root.entries, root.selected.port)
+            onOnOffAsked: {
+                const port = root.selected.port;
+                root.monitorSetups.apply(root.selected.disabled
+                    ? MonitorEntries.turnedOn(root.entries, port, root.selectedModes)
+                    : MonitorEntries.turnedOff(root.entries, port));
+            }
+            onResolutionChosen: (width, height) => root.monitorSetups.apply(MonitorEntries.withResolution(root.entries,
+                root.selected.port, root.selectedModes, width, height))
+            onRefreshChosen: refresh => root.monitorSetups.apply(MonitorEntries.withRefresh(root.entries, root.selected.port, refresh))
+            onScaleChosen: scale => root.monitorSetups.apply(MonitorEntries.withScale(root.entries, root.selected.port, scale))
+            onRotationChosen: transform => root.monitorSetups.apply(MonitorEntries.withRotation(root.entries, root.selected.port,
+                transform))
         }
-    }
 
-    Panels.MonitorArrangeCanvas {
-        width: parent.width
-        appearance: root.appearance
-        selectedId: root.selected !== null ? root.selected.port : ""
-        monitors: MonitorEntries.rectangles(root.entries).map(rect => {
-            const entry = root.entries.filter(candidate => candidate.port === rect.id)[0];
-            return Object.assign({ number: MonitorEntries.numberOf(root.entries, entry.port), label: entry.description }, rect);
-        })
-        onSelected: id => root.selectedPort = id
-        onDropped: (id, x, y) => root.monitorSetups.apply(MonitorEntries.moved(root.entries, id, x, y))
-    }
-
-    Panels.MonitorControls {
-        width: parent.width
-        visible: root.selected !== null
-        appearance: root.appearance
-        entry: root.selected
-        modes: root.selectedModes
-        canTurnOff: root.selected !== null && MonitorEntries.canTurnOff(root.entries, root.selected.port)
-        onOnOffAsked: {
-            const port = root.selected.port;
-            root.monitorSetups.apply(root.selected.disabled
-                ? MonitorEntries.turnedOn(root.entries, port, root.selectedModes)
-                : MonitorEntries.turnedOff(root.entries, port));
+        Panels.MonitorDisplaySettings {
+            width: parent.width
+            appearance: root.appearance
+            monitors: root.monitors
+            monitorDescription: root.selected !== null ? root.selected.description : ""
         }
-        onResolutionChosen: (width, height) => root.monitorSetups.apply(MonitorEntries.withResolution(root.entries,
-            root.selected.port, root.selectedModes, width, height))
-        onRefreshChosen: refresh => root.monitorSetups.apply(MonitorEntries.withRefresh(root.entries, root.selected.port, refresh))
-        onScaleChosen: scale => root.monitorSetups.apply(MonitorEntries.withScale(root.entries, root.selected.port, scale))
-        onRotationChosen: transform => root.monitorSetups.apply(MonitorEntries.withRotation(root.entries, root.selected.port,
-            transform))
-    }
-
-    Panels.MonitorDisplaySettings {
-        width: parent.width
-        visible: root.selected !== null
-        appearance: root.appearance
-        monitors: root.monitors
-        monitorDescription: root.selected !== null ? root.selected.description : ""
     }
 
     Panels.MonitorSavedSetups {

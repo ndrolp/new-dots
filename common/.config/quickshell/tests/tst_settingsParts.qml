@@ -214,6 +214,21 @@ TestCase {
     }
 
     Component {
+        id: card
+
+        Panels.SettingsCard {
+            width: 400
+            title: "Animations"
+
+            Panels.SettingsSwitchRow {
+                width: parent.width
+                appearance: barAppearance
+                label: "Reduce motion"
+            }
+        }
+    }
+
+    Component {
         id: button
 
         Panels.SettingsButton {
@@ -687,6 +702,41 @@ TestCase {
 
         compare(item.opacity, 0.4);
         verify(!tap.enabled);
+    }
+
+    // A headed group sits in a card: a hairline border, a fill one step
+    // lighter than the panel, its heading inside at the top, 16px padding.
+    function test_aCardIsAHairlineBorderedLighterFill() {
+        const item = make(card);
+
+        compare(item.color, theme.surfaceHover);
+        compare(item.border.color, theme.border);
+        compare(item.border.width, 1);
+        compare(item.radius, 12);
+    }
+
+    function test_aCardHasItsHeadingInsideAtTheTopAndItsContentPaddedBelow() {
+        const item = make(card);
+        const cardHeading = textOf(item, "Animations");
+        const content = textOf(item, "Reduce motion").parent;
+        const headingTop = cardHeading.mapToItem(item, 0, 0);
+        const contentTop = content.mapToItem(item, 0, 0);
+
+        compare(cardHeading.font.capitalization, Font.AllUppercase);
+        compare(headingTop.x, 16);
+        compare(headingTop.y, 16);
+        compare(contentTop.x, 16);
+        verify(contentTop.y >= headingTop.y + cardHeading.height);
+        compare(content.width, 400 - 32);
+        compare(item.height, contentTop.y + content.height + 16);
+    }
+
+    // The card itself has no hover; only the controls in it react.
+    function test_aCardHasNoHover() {
+        const item = make(card);
+
+        compare(item.data.filter(child => child instanceof HoverHandler).length, 0);
+        compare(item.hovered, undefined);
     }
 
     // Every clickable part of the panel answers the pointer the same way: a

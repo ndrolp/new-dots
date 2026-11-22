@@ -8,16 +8,12 @@ Column {
     required property var appearance
 
     width: parent ? parent.width : 0
-    spacing: 14
+    spacing: 12
 
-    Panels.SettingsHeading {
+    Panels.SettingsCard {
         appearance: root.appearance
-        text: "Animations"
-        topPadding: 4
-    }
-
-    Column {
-        width: parent.width
+        title: "Animations"
+        spacing: 0
 
         Panels.SettingsSwitchRow {
             width: parent.width
