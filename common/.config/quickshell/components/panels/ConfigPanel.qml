@@ -24,7 +24,7 @@ Rectangle {
         {
             // Old section names and terms stay as keywords so searches still land here.
             label: "Bar", icon: "󰔉", section: "Bar",
-            keywords: "bar appearance bar widgets profile duplicate delete save discard density preset compact balanced spacious size spacing height padding style transparent opacity island docked pills group radius join elements data modules widgets order zone arch workspaces system monitor current app notifications badge battery clock media audio network tray bluetooth recording",
+            keywords: "bar appearance bar widgets profile duplicate delete save discard density preset compact balanced spacious size spacing height padding style transparent opacity island docked pills group radius join elements data modules widgets order zone arch workspaces system monitor current app notifications badge battery clock media audio network tray bluetooth recording groups capsule edge margin border thickness icon",
             title: "Bar",
             description: "Edit a bar profile: its sizes, style and elements."
         },

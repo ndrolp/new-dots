@@ -4,7 +4,8 @@ import "." as Panels
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
 
-// The Bar section's bar elements list: every bar element of the edited bar
+// The Bar section's Elements card: the settings every element shares, then
+// every bar element of the edited bar
 // profile, zone by zone, in full width rows that stay transparent until
 // hovered. A row turns its element on or off, picks its zone, orders it and
 // joins it with the one above; elements with options open them below:
@@ -110,6 +111,19 @@ Column {
         appearance: root.appearance
         title: "Elements"
         spacing: 6
+
+        // What every element shares, before the list of them.
+        Panels.BarSettingsGrid {
+            appearance: root.appearance
+            settings: [
+                { label: "Icon size", from: 8, to: 32, propertyName: "iconSize" },
+                { label: "Pill vertical padding", from: 0, to: 8, propertyName: "pillVerticalPadding" },
+                { label: "Workspace bar padding", from: 0, to: 10, propertyName: "workspacePadding" },
+                { label: "Component spacing", from: 0, to: 24, propertyName: "spacing" },
+                { label: "Element border", propertyName: "elementBorder" },
+                { label: "Transparent pills", propertyName: "pillsTransparent" }
+            ]
+        }
 
         Panels.SettingsHint {
             width: parent.width

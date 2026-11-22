@@ -129,6 +129,26 @@ TestCase {
         compare(item.filteredSections.map(section => section.label), ["Motion"]);
     }
 
+    // The Bar section's card names and its edge margin find it.
+    function test_searchingTheBarSectionsCardsFindsIt_data() {
+        return ["edge margin", "profile", "style", "groups", "elements", "capsule"].map(query => ({
+            tag: query, query: query
+        }));
+    }
+
+    function test_searchingTheBarSectionsCardsFindsIt(data) {
+        const item = createTemporaryObject(panel, this, { sectionQuery: data.query });
+
+        verify(item.filteredSections.some(section => section.label === "Bar"),
+            "\"" + data.query + "\" doesn't find the Bar section");
+    }
+
+    function test_searchingForTheEdgeMarginFindsOnlyTheBarSection() {
+        const item = createTemporaryObject(panel, this, { sectionQuery: "Edge Margin" });
+
+        compare(item.filteredSections.map(section => section.label), ["Bar"]);
+    }
+
     // A search that matches no section says so as a hint, like the hints in
     // the sections.
     function test_aSearchMatchingNothingSaysSoAsAHint() {

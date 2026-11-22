@@ -78,6 +78,12 @@ TestCase {
                 property int textSize: 13
                 property string barPosition: "top"
                 property string barStyle: "opaque"
+                property int iconSize: 13
+                property int pillVerticalPadding: 4
+                property int workspacePadding: 4
+                property int spacing: 8
+                property bool elementBorder: false
+                property bool pillsTransparent: false
                 property var capsulePlaces: ({ arch: "shown", clock: "shown", battery: "shown",
                     audio: "hidden", media: "liveLeft", recording: "liveRight" })
                 property var barElements: ({
@@ -164,6 +170,12 @@ TestCase {
 
                 property int radius: 12
                 property int textSize: 13
+                property int iconSize: 13
+                property int pillVerticalPadding: 4
+                property int workspacePadding: 4
+                property int spacing: 8
+                property bool elementBorder: false
+                property bool pillsTransparent: false
                 property var barElements: ({
                     left: [],
                     center: [{ id: "media", enabled: true }],
