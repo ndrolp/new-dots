@@ -281,6 +281,39 @@ function barPositionsFor(barStyle) {
     return barStyle === "capsule" ? ["top", "bottom"] : barPositions;
 }
 
+// The bar styles whose bar draws something with each Bar section setting
+// that not every bar style uses, judged from the bar code: the element
+// thickness comes from the vertical padding on an opaque bar and from the
+// pill vertical padding on the others (BarLayout.elementThickness); the
+// edge margin keeps a floating bar or a capsule off its edge
+// (BarPlacement.margin); the bar border outlines an opaque bar's edge, the
+// docked zones and the capsule, but a transparent bar has no outline; a
+// docked bar's pills are always see-through; and nothing reads the
+// workspace bar padding any more. Settings not listed show for every style.
+const barSettingStyles = {
+    elementVerticalPadding: ["opaque"],
+    pillVerticalPadding: ["transparent", "docked", "capsule"],
+    transparentBarTopMargin: ["transparent", "capsule"],
+    barBorder: ["opaque", "docked", "capsule"],
+    pillsTransparent: ["opaque", "transparent", "capsule"],
+    workspacePadding: [],
+    capsuleVerticalPadding: ["capsule"],
+    capsuleNotifications: ["capsule"]
+};
+
+// Whether the Bar section shows the setting stored under `key` for a bar
+// profile of this bar style: only when its bar uses it.
+function barSettingShown(barStyle, key) {
+    const styles = barSettingStyles[key];
+    return styles === undefined || styles.indexOf(barStyle) !== -1;
+}
+
+// The entries of a Bar section settings list, each { propertyName, ... },
+// that show for this bar style, in their order.
+function barSettingsShown(barStyle, settings) {
+    return settings.filter(setting => barSettingShown(barStyle, setting.propertyName));
+}
+
 // Every setting a bar profile stores, with the value a profile that lacks it
 // gets.
 const defaultProfile = {
