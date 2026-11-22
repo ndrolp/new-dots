@@ -48,7 +48,7 @@ Panels.SettingsRow {
         anchors.verticalCenter: parent.verticalCenter
         appearance: row.appearance
         checked: row.checked
-        hovered: row.hovered
+        hovering: row.hovering
     }
 
     TapHandler {

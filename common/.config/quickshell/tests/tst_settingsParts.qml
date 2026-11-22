@@ -337,7 +337,7 @@ TestCase {
 
         compare(item.color, Qt.rgba(0, 0, 0, 0));
         compare(item.radius, 12);
-        verify(!item.hovered);
+        verify(!item.hovering);
         verify(textOf(item, "Bar"));
     }
 
@@ -347,7 +347,7 @@ TestCase {
         const item = make(switchRow);
 
         compare(item.radius, 12);
-        verify(item.hovered !== undefined);
+        verify(item.hovering !== undefined);
     }
 
     // A switch row is transparent until hovered, its label on the left and a
@@ -758,7 +758,7 @@ TestCase {
         const hoveredButton = textOf(item, "Done").parent;
         const chosen = textOf(item, "Compact").parent;
 
-        hoveredButton.hovered = true;
+        hoveredButton.hovering = true;
         verify(!Qt.colorEqual(hoveredButton.color, item.color),
                "hovered button fill " + hoveredButton.color + " is the card's " + item.color);
         verify(!Qt.colorEqual(chosen.color, item.color),
@@ -770,7 +770,7 @@ TestCase {
         const item = make(card);
 
         compare(item.data.filter(child => child instanceof HoverHandler).length, 0);
-        compare(item.hovered, undefined);
+        compare(item.hovering, undefined);
     }
 
     // Every clickable part of the panel answers the pointer the same way: a
@@ -778,7 +778,7 @@ TestCase {
     function test_aHoveredRowTakesTheFaintFill() {
         const item = make(row, { appearance: reducedAppearance });
 
-        item.hovered = true;
+        item.hovering = true;
         compare(item.color, theme.cardHover);
     }
 
@@ -799,7 +799,7 @@ TestCase {
     function test_aHoveredButtonTakesTheFaintFillAndAPointingHand() {
         const item = make(button, { appearance: reducedAppearance });
 
-        item.hovered = true;
+        item.hovering = true;
         compare(item.color, theme.cardHover);
         compare(hoverOf(item).cursorShape, Qt.PointingHandCursor);
     }
@@ -810,9 +810,9 @@ TestCase {
         const item = make(choice, { appearance: reducedAppearance, value: "compact" });
         const option = textOf(item, "Spacious").parent;
 
-        item.hovered = true;
+        item.hovering = true;
         compare(item.border.color, theme.accent);
-        option.hovered = true;
+        option.hovering = true;
         compare(option.color, theme.cardHover);
         compare(hoverOf(option).cursorShape, Qt.PointingHandCursor);
     }
@@ -824,7 +824,7 @@ TestCase {
         const chip = textOf(item, "Bravo").parent;
 
         compare(chip.border.color, theme.border);
-        chip.hovered = true;
+        chip.hovering = true;
         compare(chip.color, theme.cardHover);
         compare(chip.border.color, theme.accent);
         compare(hoverOf(chip).cursorShape, Qt.PointingHandCursor);
@@ -857,9 +857,9 @@ TestCase {
         const offBorder = String(off.switchItem.border.color);
         const onFill = String(on.switchItem.color);
 
-        off.hovered = true;
-        on.hovered = true;
-        verify(off.switchItem.hovered);
+        off.hovering = true;
+        on.hovering = true;
+        verify(off.switchItem.hovering);
         verify(!Qt.colorEqual(off.switchItem.border.color, offBorder));
         verify(!Qt.colorEqual(on.switchItem.color, onFill));
         compare(on.switchItem.color, theme.accentHover);
@@ -870,7 +870,7 @@ TestCase {
     function test_aHoverEasesInUnlessMotionIsReduced() {
         const item = make(button);
 
-        item.hovered = true;
+        item.hovering = true;
         verify(!Qt.colorEqual(item.color, theme.cardHover));
         tryCompare(item, "color", theme.cardHover, 500);
     }

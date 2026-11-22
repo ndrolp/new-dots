@@ -24,33 +24,22 @@ Flow {
     Repeater {
         model: control.options
 
-        delegate: Rectangle {
+        delegate: Panels.SettingsHoverFill {
             id: option
 
             required property var modelData
             readonly property bool isChosen: control.value === modelData.value
-            // Follows the pointer; settable so its look can be checked without one.
-            property bool hovered: optionHover.hovered
 
+            appearance: control.appearance
             width: Math.min(optionLabel.implicitWidth + 20, control.width)
             height: 30
             radius: control.appearance.radius
-            color: isChosen || hovered ? theme.cardHover : "transparent"
-            border.color: hovered ? theme.accent : theme.border
+            color: isChosen || hovering ? theme.cardHover : "transparent"
+            border.color: hovering ? theme.accent : theme.border
             border.width: 1
-
-            Behavior on color {
-                ColorAnimation { duration: control.appearance.motion.short }
-            }
 
             Behavior on border.color {
                 ColorAnimation { duration: control.appearance.motion.short }
-            }
-
-            HoverHandler {
-                id: optionHover
-
-                cursorShape: Qt.PointingHandCursor
             }
 
             Panels.ShellText {

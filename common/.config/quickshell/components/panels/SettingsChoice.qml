@@ -15,13 +15,13 @@ Rectangle {
     property var options: []
     property var value
     // Follows the pointer; settable so its look can be checked without one.
-    property bool hovered: controlHover.hovered
+    property bool hovering: controlHover.hovered
     signal chosen(var value)
 
     height: 32
     radius: appearance.radius
     color: "transparent"
-    border.color: hovered ? theme.accent : theme.border
+    border.color: hovering ? theme.accent : theme.border
     border.width: 1
 
     Behavior on border.color {
@@ -43,27 +43,17 @@ Rectangle {
         Repeater {
             model: control.options
 
-            delegate: Rectangle {
+            delegate: Panels.SettingsHoverFill {
                 id: option
 
                 required property var modelData
                 readonly property bool isChosen: control.value === modelData.value
-                property bool hovered: optionHover.hovered
 
+                appearance: control.appearance
                 width: parent.width / control.options.length
                 height: parent.height
                 radius: Math.max(0, control.radius - control.border.width)
-                color: isChosen || hovered ? theme.cardHover : "transparent"
-
-                Behavior on color {
-                    ColorAnimation { duration: control.appearance.motion.short }
-                }
-
-                HoverHandler {
-                    id: optionHover
-
-                    cursorShape: Qt.PointingHandCursor
-                }
+                color: isChosen || hovering ? theme.cardHover : "transparent"
 
                 Panels.ShellText {
                     anchors.centerIn: parent
