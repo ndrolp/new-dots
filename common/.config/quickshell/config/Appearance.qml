@@ -65,7 +65,6 @@ QtObject {
     readonly property int archButtonHorizontalPadding: editedBarProfile.archButtonHorizontalPadding
     readonly property int activeWorkspaceHorizontalPadding: editedBarProfile.activeWorkspaceHorizontalPadding
     readonly property int pillVerticalPadding: editedBarProfile.pillVerticalPadding
-    readonly property int workspacePadding: editedBarProfile.workspacePadding
     readonly property int elementVerticalPadding: editedBarProfile.elementVerticalPadding
     readonly property bool pillsTransparent: editedBarProfile.pillsTransparent
     readonly property int transparentBarTopMargin: editedBarProfile.transparentBarTopMargin
@@ -225,11 +224,11 @@ QtObject {
         }
     }
 
-    // Replaces the file with a migrated state (see SchemaMigration) in a
+    // Replaces the file with migrated text (see SchemaMigration) in a
     // single write, which the adapter then loads; per-property writes would
     // race with reloads.
-    function applyMigratedState(state) {
-        settingsFile.setText(JSON.stringify(state, null, 4));
+    function replaceText(text) {
+        settingsFile.setText(text);
     }
 
     property var settingsFile: FileView {

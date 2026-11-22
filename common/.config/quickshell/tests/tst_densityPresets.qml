@@ -76,4 +76,33 @@ TestCase {
         compare(migrated.barProfiles.work.densityPreset, undefined);
         compare(migrated.barProfiles.work.barHeight, 40);
     }
+
+    // Nothing reads the workspace padding, so presets no longer set it and the
+    // migration drops it from every saved profile.
+    function test_presetsDoNotSetTheWorkspacePadding() {
+        for (const preset of ["compact", "balanced", "spacious"])
+            compare(BarProfileModel.densityPresetChanges(preset).workspacePadding, undefined, preset);
+    }
+
+    function test_migrationDropsTheWorkspacePaddingFromEveryProfile() {
+        const version22 = { schemaVersion: 22, barProfiles: {
+            work: { workspacePadding: 3, barHeight: 34 },
+            media: { workspacePadding: 5 }
+        } };
+
+        const profiles = SchemaMigrations.migrate(version22, {}).appearance.barProfiles;
+
+        compare(profiles.work.workspacePadding, undefined);
+        compare(profiles.work.barHeight, 34);
+        compare(profiles.media.workspacePadding, undefined);
+    }
+
+    function test_migratedFixtureHasNoWorkspacePadding() {
+        const migrated = SchemaMigrations.migrate(fixtures.read("appearance.json"),
+            fixtures.read("monitors.json")).appearance;
+
+        compare(migrated.workspacePadding, undefined);
+        for (const name in migrated.barProfiles)
+            compare(migrated.barProfiles[name].workspacePadding, undefined, name);
+    }
 }

@@ -2,7 +2,6 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
 import QtQuick
-import Qt.labs.folderlistmodel
 import "../../config" as Config
 import "../../config/WallpaperModel.js" as WallpaperModel
 
@@ -79,13 +78,10 @@ Variants {
             }
         }
 
-        FolderListModel {
+        Config.WallpaperFiles {
             id: selectorWallpapers
 
-            folder: selector.wallpaperFolder === ""
-                ? "" : Qt.resolvedUrl(selector.wallpaperFolder)
-            nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp"]
-            showDirs: false
+            path: selector.wallpaperFolder
         }
 
         Config.Theme {
@@ -97,7 +93,7 @@ Variants {
         }
 
         function pathAt(index) {
-            return selector.wallpaperFolder + "/" + selectorWallpapers.get(index, "fileName");
+            return selectorWallpapers.pathAt(index);
         }
 
         // `direction` is the side the hero slides in from: 1 for the right,
@@ -316,7 +312,7 @@ Variants {
                     delegate: Rectangle {
                         id: thumbnail
 
-                        required property string fileName
+                        required property string filePath
                         required property int index
                         readonly property bool selected: ListView.isCurrentItem
 
@@ -339,12 +335,9 @@ Variants {
                             clip: true
                             color: "transparent"
 
-                            Image {
-                                anchors.fill: parent
-                                source: "file://" + selector.wallpaperFolder + "/" + thumbnail.fileName
-                                sourceSize.height: selector.thumbnailDecodeHeight
-                                fillMode: Image.PreserveAspectCrop
-                                asynchronous: true
+                            WallpaperThumbnail {
+                                filePath: thumbnail.filePath
+                                decodeHeight: selector.thumbnailDecodeHeight
                             }
                         }
 

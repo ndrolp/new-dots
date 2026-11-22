@@ -1,6 +1,5 @@
 import Quickshell.Hyprland
 import QtQuick
-import Qt.labs.folderlistmodel
 import "../../config" as Config
 import "." as Panels
 
@@ -38,7 +37,7 @@ BarPopup {
         + (thumbnailsAcross - 1) * thumbnailSpacing + 24)
 
     function pathAt(index) {
-        return folder + "/" + wallpaperFiles.get(index, "fileName");
+        return wallpaperFiles.pathAt(index);
     }
 
     // Selects the monitor's own wallpaper, or the first, without a preview.
@@ -126,12 +125,10 @@ BarPopup {
         onTriggered: root.previewSelected()
     }
 
-    FolderListModel {
+    Config.WallpaperFiles {
         id: wallpaperFiles
 
-        folder: root.folder === "" ? "" : Qt.resolvedUrl(root.folder)
-        nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp"]
-        showDirs: false
+        path: root.folder
 
         onCountChanged: {
             if (root.open && strip.currentIndex < 0)
@@ -209,7 +206,7 @@ BarPopup {
                 delegate: Rectangle {
                     id: thumbnail
 
-                    required property string fileName
+                    required property string filePath
                     required property int index
                     readonly property bool selected: ListView.isCurrentItem
 
@@ -231,12 +228,9 @@ BarPopup {
                         clip: true
                         color: "transparent"
 
-                        Image {
-                            anchors.fill: parent
-                            source: "file://" + root.folder + "/" + thumbnail.fileName
-                            sourceSize.height: root.thumbnailDecodeHeight
-                            fillMode: Image.PreserveAspectCrop
-                            asynchronous: true
+                        Panels.WallpaperThumbnail {
+                            filePath: thumbnail.filePath
+                            decodeHeight: root.thumbnailDecodeHeight
                         }
                     }
 

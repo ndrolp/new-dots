@@ -12,7 +12,10 @@ one that places it live right in a capsule, after the recording indicator,
 and the one that puts the privacy indicator right after the recording
 indicator, in its group and on or off as it is, live right between it and
 the pomodoro, neither added twice to a profile that already lists it
-(`tst_barElements.qml`). They also cover where
+(`tst_barElements.qml`), and the one that drops the unread workspace padding
+from every saved profile (`tst_densityPresets.qml`). That a migration writes
+both files ending in a newline, as the adapters do, is in
+`tst_schemaMigrationFiles.qml`. They also cover where
 the bar sits on its screen: the edges its window is anchored to, the space it
 reserves (on a capsule, with the live elements it shows collapsed), where the margin goes and where its content sits, against its edge
 however tall a capsule's window grows, for every bar style on each Bar position
@@ -333,7 +336,7 @@ unlock, and telling a fallback or an unreadable file once
 `modules/MonitorToast.qml` needs Quickshell and isn't tested here).
 `monitor-notices.sh` runs `services/monitor-notices.sh` on a scratch folder, to
 show that a backup is told once and never replaces another.
-They run with QtTest outside of `qs`:
+They run with QtTest outside of `qs`, also from `scripts/test-all`:
 
 ```sh
 common/.config/quickshell/tests/run.sh
@@ -355,7 +358,10 @@ common/.config/quickshell/tests/run.sh
   `fixtures.read("appearance.json")`. It also gives the fixtures migrated to
   the current schema (`migrated()`), the in-memory bar profile state Quickshell
   starts with (`startedBarState()`), and helpers to apply the changes the
-  model returns (`withChanges`, `edited`).
+  model returns (`withChanges`, `edited`). `fixtures/wallpapers/` holds a
+  horizontal and a vertical wallpaper folder for `tst_wallpaperFiles.qml`: a
+  folder switched while the first is still being listed never gives a
+  thumbnail a file that isn't there.
 - The script uses the Qt 6 `qmltestrunner` (`/usr/lib/qt6/bin/qmltestrunner`;
   override with `QMLTESTRUNNER`). Extra arguments go to `qmltestrunner`, e.g.
   `run.sh test_savingUnderANewNameAddsAProfile`.

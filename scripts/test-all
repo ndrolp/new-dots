@@ -18,6 +18,7 @@ suites=(
     common/.config/hypr/tests/monitor-setups.sh
     common/.config/hypr/tests/layer-rules.sh
     colorschemes/colorscheme_changer_tests.sh
+    common/.config/quickshell/tests/run.sh
     common/.config/quickshell/tests/state-files.sh
     common/.config/quickshell/tests/startup.sh
     common/.config/quickshell/tests/app-menu-bridge.sh
