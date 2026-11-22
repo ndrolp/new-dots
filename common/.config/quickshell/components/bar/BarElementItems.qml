@@ -92,12 +92,24 @@ Item {
         return BarLayout.size(appearance, length, thickness === undefined ? itemHeight : thickness);
     }
 
-    // The size of an element around its content, with the padding along the bar.
-    function sizeAround(content, thickness) {
-        return elementSize(BarLayout.itemLength(appearance, {
+    // How long `content` is along the bar.
+    function contentLength(content) {
+        return BarLayout.itemLength(appearance, {
             width: content.implicitWidth,
             height: content.implicitHeight
-        }) + 16, thickness);
+        });
+    }
+
+    // The size of an element around its content, with the padding along the bar.
+    function sizeAround(content, thickness) {
+        return elementSize(contentLength(content) + BarElementItems.elementPadding * 2, thickness);
+    }
+
+    // The size of a square element (network, Bluetooth, tray) around its
+    // glyph, `content` (see BarElementItems.elementLength).
+    function squareSize(element, content) {
+        return elementSize(BarElementItems.elementLength(element, contentLength(content), appearance,
+            id => itemVisible(id)));
     }
 
     PwObjectTracker {
@@ -614,7 +626,9 @@ Item {
     Rectangle {
         id: bluetoothButton
 
-        readonly property var size: root.elementSize(root.appearance.workspaceButtonSize)
+        // Square while it draws its own pill, padded like the others when
+        // not (BarElementItems.elementLength).
+        readonly property var size: root.squareSize("bluetooth", bluetoothGlyph)
 
         visible: root.itemVisible("bluetooth")
         x: root.elementX("bluetooth")
@@ -638,6 +652,8 @@ Item {
         }
 
         ShellText {
+            id: bluetoothGlyph
+
             anchors.centerIn: parent
             text: root.bluetoothAdapter && root.bluetoothAdapter.enabled ? "󰂯" : "󰂲"
             color: theme.blue
@@ -654,7 +670,9 @@ Item {
     Rectangle {
         id: trayButton
 
-        readonly property var size: root.elementSize(root.appearance.workspaceButtonSize)
+        // Square while it draws its own pill, padded like the others when
+        // not (BarElementItems.elementLength).
+        readonly property var size: root.squareSize("tray", trayGlyph)
 
         visible: root.itemVisible("tray")
         x: root.elementX("tray")
@@ -678,6 +696,8 @@ Item {
         }
 
         ShellText {
+            id: trayGlyph
+
             anchors.centerIn: parent
             text: StatusText.trayIcon(root.appearance.barPosition, root.activePopup === "tray")
             color: theme.green
@@ -694,7 +714,9 @@ Item {
     Rectangle {
         id: networkButton
 
-        readonly property var size: root.elementSize(root.appearance.workspaceButtonSize)
+        // Square while it draws its own pill, padded like the others when
+        // not (BarElementItems.elementLength).
+        readonly property var size: root.squareSize("network", networkGlyph)
 
         visible: root.itemVisible("network")
         x: root.elementX("network")
@@ -718,6 +740,8 @@ Item {
         }
 
         ShellText {
+            id: networkGlyph
+
             anchors.centerIn: parent
             text: root.networkIcon()
             color: theme.purple
