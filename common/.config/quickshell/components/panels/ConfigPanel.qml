@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import "../../config" as Config
 
 Rectangle {
@@ -23,49 +24,73 @@ Rectangle {
         {
             // Old section names and terms stay as keywords so searches still land here.
             label: "Bar", icon: "󰔉", section: "Bar",
-            keywords: "bar appearance bar widgets profile duplicate delete save discard density preset compact balanced spacious size spacing height padding style transparent opacity island docked pills group radius join elements data modules widgets order zone arch workspaces system monitor current app notifications badge battery clock media audio network tray bluetooth recording"
+            keywords: "bar appearance bar widgets profile duplicate delete save discard density preset compact balanced spacious size spacing height padding style transparent opacity island docked pills group radius join elements data modules widgets order zone arch workspaces system monitor current app notifications badge battery clock media audio network tray bluetooth recording",
+            title: "Bar",
+            description: "Edit a bar profile: its sizes, style and elements."
         },
         {
             label: "Notifications", icon: "󰂚", section: "Notifications",
-            keywords: "notification popup location position"
+            keywords: "notification popup location position",
+            title: "Notifications",
+            description: "Choose where notification popups appear."
         },
         {
             label: "Control center", icon: "󰒓", section: "ControlCenter",
-            keywords: "tiles quick settings order collapsed row expanded hide show"
+            keywords: "tiles quick settings order collapsed row expanded hide show",
+            title: "Control center",
+            description: "Choose the control center's tiles and their order."
         },
         {
             label: "Motion", icon: "󰑮", section: "Motion",
-            keywords: "animations reduce motion speed instant"
+            keywords: "animations reduce motion speed instant",
+            title: "Motion",
+            description: "Choose how the shell animates."
         },
         {
             label: "Displays", icon: "󰍹", section: "Monitors",
-            keywords: "monitor screen workspace range bar profile"
+            keywords: "monitor screen workspace range bar profile",
+            title: "Displays",
+            description: "Set workspace ranges and shell visibility for each monitor."
         },
         {
             label: "Workspace Labels", icon: "󰌌", section: "Labels",
-            keywords: "workspace names icons"
+            keywords: "workspace names icons",
+            title: "Workspace Labels",
+            description: "Choose labels for workspaces 1 through 20."
         },
         {
             label: "Quick Search", icon: "󰍉", section: "Bookmarks",
-            keywords: "bookmarks links search engines"
+            keywords: "bookmarks links search engines",
+            title: "Quick Search",
+            description: "Manage quick-search bookmarks and search engines."
         },
         {
             label: "Plugins", icon: "󰏗", section: "Plugins",
-            keywords: "launcher clipboard search command capture control center"
+            keywords: "launcher clipboard search command capture control center",
+            title: "Plugins",
+            description: "Enable shell integrations and tune their behavior."
         },
         {
             label: "Desktop Widgets", icon: "󰖕", section: "Widgets",
-            keywords: "media calendar system network weather background clock monitor"
+            keywords: "media calendar system network weather background clock monitor",
+            title: "Desktop Widgets",
+            description: "Enable desktop widgets and choose their placement."
         },
         {
             label: "Session", icon: "󰌾", section: "Session",
-            keywords: "idle lock power"
+            keywords: "idle lock power",
+            title: "Session",
+            description: "Control the active session and review idle behavior."
         },
         {
             label: "Wallpapers", icon: "󰸉", section: "Wallpapers",
-            keywords: "background image monitor"
+            keywords: "background image monitor",
+            title: "Wallpapers",
+            description: "Choose a wallpaper for each display."
         }
     ]
+    readonly property var currentEntry: sections.find(entry => entry.section === currentSection)
+        || sections[sections.length - 1]
     readonly property var filteredSections: {
         const query = sectionQuery.trim().toLowerCase();
         return sections.filter(section => query === ""
@@ -154,26 +179,22 @@ Rectangle {
         anchors.margins: 20
         spacing: 12
 
-        Row {
+        RowLayout {
             width: parent.width
+            spacing: 16
 
             ShellText {
-                id: title
-
                 text: "Settings"
                 color: theme.text
                 font.pixelSize: 20
-            }
-
-            Item {
-                width: parent.width - title.implicitWidth - sectionSearch.width - doneButton.width - 16
-                height: 1
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
             }
 
             SettingsInput {
-                id: sectionSearch
-
-                width: 244
+                Layout.preferredWidth: 244
+                Layout.preferredHeight: 32
+                Layout.alignment: Qt.AlignTop
                 appearance: root.appearance
                 placeholderText: "Search settings"
                 text: root.sectionQuery
@@ -185,14 +206,8 @@ Rectangle {
                 }
             }
 
-            Item {
-                width: 16
-                height: 1
-            }
-
             SettingsButton {
-                id: doneButton
-
+                Layout.alignment: Qt.AlignTop
                 appearance: root.appearance
                 label: "Done"
                 onActivated: root.closeRequested()
@@ -311,41 +326,14 @@ Rectangle {
                     spacing: 8
 
                     ShellText {
-                        text: root.currentSection === "Bar" ? "Bar"
-                            : root.currentSection === "Notifications" ? "Notifications"
-                            : root.currentSection === "ControlCenter" ? "Control center"
-                            : root.currentSection === "Monitors" ? "Displays"
-                                : root.currentSection === "Labels" ? "Workspace Labels"
-                                    : root.currentSection === "Bookmarks" ? "Quick Search"
-                                    : root.currentSection === "Plugins" ? "Plugins"
-                                        : root.currentSection === "Widgets" ? "Desktop Widgets"
-                                        : root.currentSection === "Session" ? "Session"
-                                            : "Wallpapers"
+                        text: root.currentEntry.title
                         color: theme.text
                         font.pixelSize: 18
                         font.bold: true
                     }
 
                     ShellText {
-                        text: root.currentSection === "Bar"
-                            ? "Edit a bar profile: its sizes, style and elements."
-                            : root.currentSection === "Notifications"
-                                ? "Choose where notification popups appear."
-                            : root.currentSection === "ControlCenter"
-                                ? "Choose the control center's tiles and their order."
-                            : root.currentSection === "Monitors"
-                                ? "Set workspace ranges and shell visibility for each monitor."
-                                : root.currentSection === "Labels"
-                                    ? "Choose labels for workspaces 1 through 20."
-                                    : root.currentSection === "Bookmarks"
-                                        ? "Manage quick-search bookmarks and search engines."
-                                    : root.currentSection === "Plugins"
-                                        ? "Enable shell integrations and tune their behavior."
-                                    : root.currentSection === "Widgets"
-                                        ? "Enable desktop widgets and choose their placement."
-                                    : root.currentSection === "Session"
-                                        ? "Control the active session and review idle behavior."
-                                        : "Choose a wallpaper for each display."
+                        text: root.currentEntry.description
                         color: theme.textMuted
                         font.pixelSize: root.appearance.textSize
                     }

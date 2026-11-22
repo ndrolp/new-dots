@@ -56,7 +56,10 @@ the settings panel's own parts (`SettingsNumber`,
 `SettingsSwitchRow`, `SettingsChoice`, `SettingsGrid`…) and the one hover they share (a
 faint fill, a pointing hand, an accent border on bordered controls, a growing
 slider thumb, a brighter switch, instant under reduce motion), its frame
-(`ConfigPanel.qml`, with its selected sidebar section: fill, accent bar, accent text) and the settings panel sections built from them, among
+(`ConfigPanel.qml`: each section's title and description from its entry in
+the sections list, the header's title, search and Done at the panel's
+margins, and the selected sidebar section's fill, accent bar and accent text)
+and the settings panel sections built from them, among
 them the four Bar positions and the zone names of a side bar, which keep their
 saved keys, and the bar style as one choice of every style the profile model lists (`BarSizeStyleSettings.qml`, `BarElementsSettings.qml`), the Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
