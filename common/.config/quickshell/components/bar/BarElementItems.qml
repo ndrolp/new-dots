@@ -5,6 +5,7 @@ import Quickshell.Services.Mpris
 import Quickshell.Services.Pipewire
 import Quickshell.Services.SystemTray
 import Quickshell.Services.UPower
+import Quickshell.Widgets
 import QtQuick
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
@@ -457,10 +458,33 @@ Item {
                 // The title runs sideways on a side bar, the note stays upright.
                 rotation: BarLayout.turn(root.appearance)
 
+                // Live, beside a capsule's pills, the art stands in for the
+                // note, as a small rounded thumbnail, once it loads.
+                ClippingRectangle {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: mediaItem.live && mediaThumbnail.status === Image.Ready
+                    width: mediaItem.sizes.iconSize + 4
+                    height: width
+                    radius: Math.max(3, width / 4)
+                    color: "transparent"
+
+                    Image {
+                        id: mediaThumbnail
+
+                        anchors.fill: parent
+                        source: mediaItem.live && root.player ? root.player.trackArtUrl : ""
+                        sourceSize.width: 48
+                        sourceSize.height: 48
+                        fillMode: Image.PreserveAspectCrop
+                        asynchronous: true
+                    }
+                }
+
                 ShellText {
                     anchors.verticalCenter: parent.verticalCenter
                     rotation: -parent.rotation
                     visible: root.shown("media").icon
+                        && !(mediaItem.live && mediaThumbnail.status === Image.Ready)
                     text: "󰎈"
                     color: theme.green
                     font.pixelSize: mediaItem.sizes.iconSize
@@ -484,6 +508,22 @@ Item {
                     transform: Translate {
                         id: mediaLabelTranslation
                     }
+                }
+
+                // Live, moving bars follow: cava's, or an equaliser when cava
+                // can't run (MediaCard.liveBars).
+                MediaLiveBars {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: mediaItem.live
+                    height: Math.round(mediaItem.sizes.iconSize * 0.8)
+                    width: implicitWidth
+                    barCount: 4
+                    barWidth: 2
+                    cava: root.cava
+                    playing: !!root.player && root.player.isPlaying
+                    drawing: mediaItem.live && root.liveActive("media") && root.barVisible
+                    smoothing: bars.source === "cava" ? root.appearance.motion.frame
+                        : Math.min(root.appearance.motion.frame * 3, equaliserInterval)
                 }
 
                 SequentialAnimation {
