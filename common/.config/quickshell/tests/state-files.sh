@@ -50,7 +50,8 @@ test_quickshell_creates_missing_state_files() {
     mkdir -p "$cfg/services" "$cfg/config" "$SCRATCH/run"
     chmod 700 "$SCRATCH/run"
     cp "$QS_DIR/services/LauncherHistory.qml" "$cfg/services/"
-    cp "$QS_DIR/config/Wallpapers.qml" "$QS_DIR/config/WallpaperModel.js" "$cfg/config/"
+    cp "$QS_DIR/config/Wallpapers.qml" "$QS_DIR/config/WallpaperModel.js" \
+        "$QS_DIR/config/WallpaperFiles.qml" "$cfg/config/"
     cp "$QS_DIR/services/AndroidDevices.qml" "$QS_DIR/services/AndroidDevices.js" \
         "$QS_DIR/services/Assign.js" "$cfg/services/"
     cat >"$cfg/shell.qml" <<'QML'

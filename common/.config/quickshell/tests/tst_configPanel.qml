@@ -63,6 +63,17 @@ TestCase {
         verify(textOf(item, "Settings"));
     }
 
+    // Centered, the panel is the colorscheme's surface at 85% opacity, so
+    // the blurred desktop shows through it (and its half-transparent cards).
+    function test_thePanelIsTheSurfaceAt85PercentOpacity() {
+        const item = createTemporaryObject(panel, this);
+
+        fuzzyCompare(item.color.r, theme.surface.r, 0.005);
+        fuzzyCompare(item.color.g, theme.surface.g, 0.005);
+        fuzzyCompare(item.color.b, theme.surface.b, 0.005);
+        fuzzyCompare(item.color.a, 0.85, 0.005);
+    }
+
     function test_everySectionFitsInTheSidebarWithoutScrolling() {
         const item = createTemporaryObject(panel, this);
         const sections = item.sections.map(section => section.label);
@@ -176,7 +187,7 @@ TestCase {
         compare(item.currentSection, "ControlCenter");
         verify(all(item, child => child.text === "Control center" && child.font !== undefined
             && child.font.bold)[0], "its title");
-        verify(all(item, child => child.tileLabel === "Night light")[0], "its tiles");
+        verify(all(item, child => child.label === "Night light")[0], "its tiles");
     }
 
     // Each section's title and description come from its entry in the
@@ -321,5 +332,37 @@ TestCase {
                         entry.section + ": the gap above card " + i);
             }
         }
+    }
+
+    SignalSpy {
+        id: closeSpy
+
+        signalName: "closeRequested"
+    }
+
+    // Escape closes the panel, the same as Done: on the panel itself and
+    // while typing in its search field.
+    function test_escapeClosesThePanel() {
+        const item = createTemporaryObject(panel, this);
+        closeSpy.target = item;
+        closeSpy.clear();
+        item.forceActiveFocus();
+
+        keyClick(Qt.Key_Escape);
+
+        compare(closeSpy.count, 1);
+    }
+
+    function test_escapeInTheSearchFieldClosesThePanel() {
+        const item = createTemporaryObject(panel, this);
+        closeSpy.target = item;
+        closeSpy.clear();
+        const search = all(item, child => child.placeholderText === "Search settings")[0];
+        search.forceActiveFocus();
+        keyClick(Qt.Key_W);
+
+        keyClick(Qt.Key_Escape);
+
+        compare(closeSpy.count, 1);
     }
 }

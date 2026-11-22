@@ -160,6 +160,10 @@ _Avoid_: Entrada, item, toast (que es la notificación que aparece sola en panta
 Una notificación nueva que aparece sola en pantalla, fuera del control center, en el área que la barra deja libre, como una *new notification card*: sus acciones y su respuesta en línea funcionan, y una crítica se queda hasta descartarla; las demás duran lo que pide su app, o 5 s. Así es siempre, también con *Notifications in the capsule* desactivado. Do Not Disturb las suprime. La notificación sigue en el control center.
 _Avoid_: Popup de notificación, banner, notification card (que es la del control center)
 
+**Failed reload notice** (aviso de recarga fallida):
+La notificación crítica que muestra la shell cuando la recarga en vivo de Quickshell falla (por ejemplo, un merge que la adelanta y deja un tipo QML sin encontrar): dice que no pudo cargar la configuración, que sigue funcionando con la anterior, y la primera línea del error. Un nuevo fallo la sustituye en lugar de añadir otra, y la siguiente recarga correcta la retira.
+_Avoid_: Reload popup (el aviso propio de Quickshell, apagado con `QS_NO_RELOAD_POPUP=1` en start.sh para no repetirlo), error de configuración
+
 **New notification card** (tarjeta de notificación nueva):
 La tarjeta con la que se muestra una notificación nueva, la misma como *toast* o dentro de la cápsula: icono o imagen, app, título y cuerpo, sus botones de acción, la respuesta en línea si su app la pide, una línea al pie con lo que le queda y, en la cápsula, «+N» de las que esperan. Pulsarla ejecuta su acción por defecto; × solo la quita de la pantalla.
 _Avoid_: Toast card (sirve también dentro de la cápsula), notification card (que es la del control center)
@@ -177,7 +181,7 @@ Un destino al que se puede enviar el sonido del sistema: auriculares, altavoces,
 _Avoid_: Sink, dispositivo, device
 
 **Settings panel** (panel de ajustes):
-La ventana que se abre desde la shell para editar toda su configuración, dividida en secciones. No es un popup: no pertenece a ningún bar element. En un monitor con cápsula se abre dentro de ella, como el lanzador o el portapapeles; con cualquier otro estilo de barra se abre centrada en la pantalla.
+La ventana que se abre desde la shell para editar toda su configuración, dividida en secciones. No es un popup: no pertenece a ningún bar element. En un monitor con cápsula se abre dentro de ella, como el lanzador o el portapapeles; con cualquier otro estilo de barra se abre centrada en la pantalla. Su búsqueda encuentra secciones y ajustes sueltos por su nombre (solo los que el estilo de barra del perfil editado usa); cada ajuste encontrado aparece bajo su sección en la barra lateral, y al elegirlo se abre la sección, se desplaza hasta él y se resalta un momento.
 _Avoid_: Config panel, settings window, preferencias
 
 **Section** (sección):

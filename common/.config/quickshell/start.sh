@@ -17,6 +17,10 @@ if [ -n "$icon_theme" ]; then
   export QS_ICON_THEME="$icon_theme"
 fi
 
+# A failed reload is told by the shell's own notice (modules/FailedReload.qml);
+# Quickshell's reload popup would say the same again.
+export QS_NO_RELOAD_POPUP=1
+
 runtime_dir=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
 # Has text in it while the session is locked: see components/lock/Lock.qml.
 locked_marker=$runtime_dir/quickshell-locked

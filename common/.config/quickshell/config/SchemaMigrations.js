@@ -709,6 +709,16 @@ function privacyAfterRecording(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
+// Step 23: nothing reads the workspace padding any more, so saved profiles
+// drop it.
+function dropWorkspacePadding(appearance, monitors) {
+    const migrated = cloneValue(appearance);
+    for (const profileName in migrated.barProfiles || {})
+        delete migrated.barProfiles[profileName].workspacePadding;
+
+    return { appearance: migrated, monitors: monitors };
+}
+
 const migrationSteps = [
     migrateDesktopWidgetsPerMonitor, migrateBarElementOrder, assignActiveProfileToMonitors,
     migrateBarGroups, dropDensityPreset, foldLiveSettingsIntoProfiles, explicitMonitorEntries,
@@ -716,7 +726,7 @@ const migrationSteps = [
     seedWorkspaceRadius, splitBarBorder, seedWorkspaceVerticalPadding,
     seedIconSize, seedGroupPadding, singleBarStyle, capsulePlacesFromShownElements,
     textVisibleFromLegacyOptions, pomodoroBesideTheClock, seedCapsuleNotifications,
-    pomodoroLiveRight, privacyAfterRecording
+    pomodoroLiveRight, privacyAfterRecording, dropWorkspacePadding
 ];
 const schemaVersion = migrationSteps.length;
 

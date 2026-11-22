@@ -27,16 +27,16 @@ TestCase {
     function rows(item) {
         // A changed list rebuilds the rows; wait until the Column has laid them out.
         wait(0);
-        return all(item, child => child.tileLabel !== undefined && child.visible)
+        return all(item, child => child.label !== undefined && child.clickable !== undefined && child.visible)
             .sort((a, b) => yOf(a) - yOf(b));
     }
 
     function row(item, label) {
-        return rows(item).find(candidate => candidate.tileLabel === label) || null;
+        return rows(item).find(candidate => candidate.label === label) || null;
     }
 
     function labels(item) {
-        return rows(item).map(candidate => candidate.tileLabel);
+        return rows(item).map(candidate => candidate.label);
     }
 
     function switchOf(rowItem) {

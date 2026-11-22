@@ -12,7 +12,12 @@ one that places it live right in a capsule, after the recording indicator,
 and the one that puts the privacy indicator right after the recording
 indicator, in its group and on or off as it is, live right between it and
 the pomodoro, neither added twice to a profile that already lists it
-(`tst_barElements.qml`). They also cover where
+(`tst_barElements.qml`), and the one that drops the unread workspace padding
+from every saved profile (`tst_densityPresets.qml`). That a migration writes
+both files ending in a newline, as the adapters do, and that the tracked
+`config/appearance.json` and `monitors.json` are committed already migrated,
+so the shell's first run leaves the checkout clean, is in
+`tst_schemaMigrationFiles.qml`. They also cover where
 the bar sits on its screen: the edges its window is anchored to, the space it
 reserves (on a capsule, with the live elements it shows collapsed), where the margin goes and where its content sits, against its edge
 however tall a capsule's window grows, for every bar style on each Bar position
@@ -61,11 +66,23 @@ that holds a headed group), the one
 hover they share (`SettingsHoverFill`: a faint fill that stands out from the card they sit on, a pointing hand, an accent border on bordered
 controls, a growing slider thumb, a brighter switch, instant under reduce
 motion), its frame
-(`ConfigPanel.qml`: each section's title and description from its entry in
+(`ConfigPanel.qml`: the colorscheme's surface at 85% opacity as its fill, each section's title and description from its entry in
 the sections list, the header's title, search and Done at the panel's
 margins, the selected sidebar section's fill, accent bar and accent text, its
-view (section, search text, scroll position) that another panel picks up, and
-every section's content in cards 12px apart, its text inside their padding)
+view (section, search text, scroll position) that another panel picks up,
+every section's content in cards 12px apart, its text inside their padding,
+and Escape closing it like Done, on the panel and while typing in its search
+field),
+its search landing on a setting (`tst_settingsSearch.qml`, `SettingsSearch.js`:
+a setting's label lists it in the sidebar under its section, only when the
+edited profile's bar style shows it; choosing it, or Enter on the first
+match, opens its section, scrolls it into view and flashes it with the accent;
+section-only matches still list just the section; a Wallpapers setting of
+another view (Schedule) switches the section to that view first; and the
+sections list's index of setting labels matches what each section shows on
+every bar style, every section included: those that need Quickshell through
+the parts they are built from, `DesktopWidgetsMonitorSettings.qml`,
+`SessionActions.qml` and each view of `WallpaperSettingsBody.qml`)
 and the settings panel sections built from them, among
 them the four Bar positions and the zone names of a side bar, which keep their
 saved keys, the bar style as one choice of every style the profile model lists, and the Bar section as one scroll of cards in order (Profile, Style, Bar, Groups, Elements, and Capsule only for a capsule), each with only the settings the bar uses on the edited profile's bar style, shown or hidden as soon as the style changes and a card with none of them hidden whole (`tst_barSettingStyles.qml` covers which settings each bar style shows, `BarProfileModel.barSettingShown`), no workspace bar padding (nothing on the bar reads it), Edge margin (stored under `transparentBarTopMargin`) keeping its stored value, and searching its card names landing on it (`BarSettings.qml`, `BarSizeStyleSettings.qml`, `BarElementsSettings.qml`, `ConfigPanel.qml`), the Bluetooth device list and turning Bluetooth
@@ -256,6 +273,16 @@ and time left (`components/bar/KeepAwakeElement.qml`,
 countdown: starting, restarting, running out and turning off by hand, the
 coarse time left a live element shows, and
 what the keybind's OSD says (`services/KeepAwakeState.js`),
+the failed reload notice: what a failed live reload shows (critical, the first
+error line, as text), a repeat failure replacing it and the next successful
+reload withdrawing it (`modules/FailedReload.js`; `FailedReload.qml` needs
+Quickshell and isn't tested here),
+the wallpapers of a folder as the wallpaper popup, the selector and the
+Wallpapers section list them: each row and thumbnail is the file it was
+listed from, never the folder plus its name, so a folder switched while the
+first is still being listed never gives a thumbnail a file that isn't there
+(`config/WallpaperFiles.qml`, `WallpaperThumbnail.qml`; `tst_wallpaperFiles.qml`,
+and `tst_wallpaperSettings.qml` for the section's tiles),
 which popup is open across the bars and which bar IPC opens one on
 (`modules/OpenPopup.js`), where the settings panel opens: inside the capsule of the bar it is
 asked from, or of the focused monitor's for IPC and other panels, centered on any other bar and
@@ -323,7 +350,7 @@ unlock, and telling a fallback or an unreadable file once
 `modules/MonitorToast.qml` needs Quickshell and isn't tested here).
 `monitor-notices.sh` runs `services/monitor-notices.sh` on a scratch folder, to
 show that a backup is told once and never replaces another.
-They run with QtTest outside of `qs`:
+They run with QtTest outside of `qs`, also from `scripts/test-all`:
 
 ```sh
 common/.config/quickshell/tests/run.sh
@@ -345,7 +372,10 @@ common/.config/quickshell/tests/run.sh
   `fixtures.read("appearance.json")`. It also gives the fixtures migrated to
   the current schema (`migrated()`), the in-memory bar profile state Quickshell
   starts with (`startedBarState()`), and helpers to apply the changes the
-  model returns (`withChanges`, `edited`).
+  model returns (`withChanges`, `edited`). `fixtures/wallpapers/` holds a
+  horizontal and a vertical wallpaper folder for `tst_wallpaperFiles.qml`: a
+  folder switched while the first is still being listed never gives a
+  thumbnail a file that isn't there.
 - The script uses the Qt 6 `qmltestrunner` (`/usr/lib/qt6/bin/qmltestrunner`;
   override with `QMLTESTRUNNER`). Extra arguments go to `qmltestrunner`, e.g.
   `run.sh test_savingUnderANewNameAddsAProfile`.
@@ -399,7 +429,9 @@ common/.config/quickshell/tests/android-pairing.sh
 ```
 
 `startup.sh` checks that `start.sh` creates the machine-local colorscheme links
-(`colorschemes/active` and `shown`) before Quickshell starts, through the
+(`colorschemes/active` and `shown`) before Quickshell starts, and starts it
+with Quickshell's own reload popup off (`QS_NO_RELOAD_POPUP=1`; the failed
+reload notice says it instead), through the
 colorscheme changer's harness, so no live session is touched:
 
 ```sh

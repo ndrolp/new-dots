@@ -27,6 +27,15 @@ QtObject {
     readonly property color textMuted: colorscheme.colours.textMuted
     readonly property color textDisabled: colorscheme.colours.textDisabled
 
+    // The surface at 85% opacity, for a panel over a desktop the compositor
+    // blurs behind it (a Hyprland layer rule on its namespace). The text keeps
+    // its full colour, so it stays as readable as on the opaque surface.
+    readonly property color translucentSurface: Qt.rgba(surface.r, surface.g, surface.b, 0.85)
+
+    // The fill under a briefly highlighted item, e.g. the setting a settings
+    // search lands on: a faint wash of the accent, with the accent as its border.
+    readonly property color highlightFill: Qt.rgba(accent.r, accent.g, accent.b, 0.16)
+
     // The faint fill a control on a settings card takes while hovered or
     // chosen. The card is filled with surfaceHover at half opacity, so this is
     // surfaceHover, opaque and tinted a fifth of the way toward the accent, to

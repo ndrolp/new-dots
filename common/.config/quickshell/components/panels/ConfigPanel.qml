@@ -2,6 +2,9 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import "../../config" as Config
+import "SettingsSearch.js" as SettingsSearch
+import "../../config/ControlCenterTiles.js" as ControlCenterTiles
+import "../../config/DesktopWidgetsModel.js" as DesktopWidgetsModel
 
 Rectangle {
     id: root
@@ -17,46 +20,99 @@ Rectangle {
 
     property string currentSection: "Bar"
     property string pendingSection: ""
+    // The label of the setting to scroll to and flash once its section shows.
+    property string pendingSetting: ""
     property string wallpaperView: "Selection"
     property string selectedWallpaperMonitor: ""
     property string sectionQuery: ""
+    // How long the flash over a setting the search went to holds, in ms:
+    // long enough to be seen, and not from the motion speeds, so reduce
+    // motion's instant fades keep it (a pause, not a movement).
+    readonly property int flashHold: 700
+    // The sections, in sidebar order. Each lists the settings the search
+    // offers by label, `settings`, as they are labelled in the section; a
+    // Bar setting not every bar style shows names its profile key, `key`
+    // (BarProfileModel.barSettingShown), and a Wallpapers setting shown in
+    // only one of its views names it, `view`. Where a section already lists
+    // its labels (control center tiles, desktop widgets) the index is built
+    // from that list. tst_settingsSearch checks each label against the
+    // section, and that every labelled setting is listed.
     readonly property var sections: [
         {
             // Old section names and terms stay as keywords so searches still land here.
             label: "Bar", icon: "󰔉", section: "Bar",
             keywords: "bar appearance bar widgets profile duplicate delete save discard density preset compact balanced spacious size spacing height padding style transparent opacity island docked pills group radius join elements data modules widgets order zone arch workspaces system monitor current app notifications badge battery clock media audio network tray bluetooth recording groups capsule edge margin border thickness icon",
             title: "Bar",
-            description: "Edit a bar profile: its sizes, style and elements."
+            description: "Edit a bar profile: its sizes, style and elements.",
+            settings: [
+                { label: "Bar style" },
+                { label: "Bar position" },
+                { label: "Density preset" },
+                { label: "Bar thickness", key: "barHeight" },
+                { label: "Bar opacity", key: "barOpacity" },
+                { label: "Corner radius", key: "radius" },
+                { label: "Horizontal padding", key: "horizontalPadding" },
+                { label: "Vertical padding", key: "elementVerticalPadding" },
+                { label: "Bar border", key: "barBorder" },
+                { label: "Edge margin", key: "transparentBarTopMargin" },
+                { label: "Group radius", key: "groupRadius" },
+                { label: "Group horizontal padding", key: "groupHorizontalPadding" },
+                { label: "Group vertical padding", key: "groupVerticalPadding" },
+                { label: "Group border", key: "groupBorder" },
+                { label: "Icon size", key: "iconSize" },
+                { label: "Pill vertical padding", key: "pillVerticalPadding" },
+                { label: "Component spacing", key: "spacing" },
+                { label: "Element border", key: "elementBorder" },
+                { label: "Transparent pills", key: "pillsTransparent" },
+                { label: "Capsule vertical padding", key: "capsuleVerticalPadding" },
+                { label: "Notifications in the capsule", key: "capsuleNotifications" }
+            ]
         },
         {
             label: "Notifications", icon: "󰂚", section: "Notifications",
             keywords: "notification popup location position",
             title: "Notifications",
-            description: "Choose where notification popups appear."
+            description: "Choose where notification popups appear.",
+            settings: [{ label: "Notification location" }]
         },
         {
             label: "Control center", icon: "󰒓", section: "ControlCenter",
             keywords: "tiles quick settings order collapsed row expanded hide show",
             title: "Control center",
-            description: "Choose the control center's tiles and their order."
+            description: "Choose the control center's tiles and their order.",
+            // Each tile, by the name the section gives it.
+            settings: ControlCenterTiles.tileIds.map(id => ({ label: ControlCenterTiles.tileLabels[id] }))
         },
         {
             label: "Motion", icon: "󰑮", section: "Motion",
             keywords: "animations reduce motion speed instant",
             title: "Motion",
-            description: "Choose how the shell animates."
+            description: "Choose how the shell animates.",
+            settings: [{ label: "Reduce motion" }]
         },
         {
             label: "Displays", icon: "󰍹", section: "Monitors",
             keywords: "monitor screen workspace range bar profile",
             title: "Displays",
-            description: "Set workspace ranges and shell visibility for each monitor."
+            description: "Set workspace ranges and shell visibility for each monitor.",
+            settings: [
+                { label: "On" },
+                { label: "Resolution" },
+                { label: "Refresh rate" },
+                { label: "Scale" },
+                { label: "Rotation" },
+                { label: "First workspace" },
+                { label: "Last workspace" },
+                { label: "Show bar" },
+                { label: "Bar profile" }
+            ]
         },
         {
             label: "Workspace Labels", icon: "󰌌", section: "Labels",
             keywords: "workspace names icons",
             title: "Workspace Labels",
-            description: "Choose labels for workspaces 1 through 20."
+            description: "Choose labels for workspaces 1 through 20.",
+            settings: [{ label: "Use workspace glyphs" }]
         },
         {
             label: "Quick Search", icon: "󰍉", section: "Bookmarks",
@@ -68,34 +124,73 @@ Rectangle {
             label: "Plugins", icon: "󰏗", section: "Plugins",
             keywords: "launcher clipboard search command capture control center",
             title: "Plugins",
-            description: "Enable shell integrations and tune their behavior."
+            description: "Enable shell integrations and tune their behavior.",
+            settings: [
+                { label: "Application launcher" },
+                { label: "Clipboard history" },
+                { label: "Quick search" },
+                { label: "Unified search" },
+                { label: "Quick settings" },
+                { label: "Command launcher" },
+                { label: "Screen capture" },
+                { label: "Control center" },
+                { label: "Web app maker" },
+                { label: "Printers" },
+                { label: "Android devices" },
+                { label: "Launcher recent apps" },
+                { label: "Clipboard image previews" }
+            ]
         },
         {
             label: "Desktop Widgets", icon: "󰖕", section: "Widgets",
             keywords: "media calendar system network weather background clock monitor",
             title: "Desktop Widgets",
-            description: "Enable desktop widgets and choose their placement."
+            description: "Enable desktop widgets and choose their placement.",
+            settings: [
+                { label: "Edge padding" },
+                { label: "Background clock" },
+                { label: "Clock position" },
+                { label: "Clock size" },
+                { label: "Clock opacity" },
+                { label: "Clock calendar" },
+                { label: "Date format" }
+            ].concat(Object.keys(DesktopWidgetsModel.widgetLabels).reduce((settings, widget) => {
+                // Each widget's switch and placement, then its own settings.
+                const label = DesktopWidgetsModel.widgetLabels[widget];
+                const own = {
+                    cava: ["Cava width", "Cava height", "Cava bars", "Cava color", "Cava shadow",
+                        "Cava media info", "Cava progress", "Cava progress color"],
+                    weather: ["Location"]
+                }[widget] || [];
+                return settings.concat([label, label + " position"].concat(own).map(setting => ({ label: setting })));
+            }, []))
         },
         {
             label: "Session", icon: "󰌾", section: "Session",
             keywords: "idle lock power",
             title: "Session",
-            description: "Control the active session and review idle behavior."
+            description: "Control the active session and review idle behavior.",
+            settings: [
+                { label: "Lock now" },
+                { label: "Turn displays off" },
+                { label: "Suspend" }
+            ]
         },
         {
             label: "Wallpapers", icon: "󰸉", section: "Wallpapers",
-            keywords: "background image monitor",
+            keywords: "background image monitor folders locations schedule dynamic advance",
             title: "Wallpapers",
-            description: "Choose a wallpaper for each display."
+            description: "Choose a wallpaper for each display.",
+            settings: [
+                { label: "Enable scheduled rotation", view: "Schedule" },
+                { label: "Interval (minutes)", view: "Schedule" }
+            ]
         }
     ]
     readonly property var currentEntry: sections.find(entry => entry.section === currentSection)
         || sections[sections.length - 1]
-    readonly property var filteredSections: {
-        const query = sectionQuery.trim().toLowerCase();
-        return sections.filter(section => query === ""
-            || (section.label + " " + section.keywords).toLowerCase().includes(query));
-    }
+    // The sections the search finds, each with its matching settings.
+    readonly property var filteredSections: SettingsSearch.search(sections, sectionQuery, appearance.barStyle)
 
     // What it shows, as another panel takes it (restoreView): its section,
     // search text, scroll position and Wallpapers view. The settings panel
@@ -109,6 +204,10 @@ Rectangle {
     })
 
     signal closeRequested()
+
+    // Escape closes it, the same as Done, unless a control inside takes it
+    // first (a selector closing, say).
+    Keys.onEscapePressed: closeRequested()
 
     // Shows `view` (another panel's `view`), without the transition.
     function restoreView(view) {
@@ -185,10 +284,83 @@ Rectangle {
         sectionTransition.start();
     }
 
+    // Opens `section` at the view that shows `setting` (an entry of its
+    // `settings`), then scrolls the setting into view and flashes it.
+    function selectSetting(section, setting) {
+        if (sectionTransition.running)
+            return;
+
+        pendingSetting = setting.label;
+        if (setting.view !== undefined)
+            showWallpaperView(setting.view);
+        if (section === currentSection)
+            Qt.callLater(revealPendingSetting);
+        else
+            selectSection(section);
+    }
+
+    // Where Enter on the search goes: the first setting listed under the
+    // first section found, or that section.
+    function chooseFirstMatch() {
+        const match = SettingsSearch.firstMatch(filteredSections);
+        if (match === null)
+            return;
+        if (match.setting !== null)
+            selectSetting(match.section, match.setting);
+        else
+            selectSection(match.section);
+    }
+
+    // Shows the Wallpapers `view`: in the Wallpapers section if it is shown,
+    // and whenever it is opened next.
+    function showWallpaperView(view) {
+        wallpaperView = view;
+        if (currentSection === "Wallpapers" && sectionLoader.item)
+            sectionLoader.item.wallpaperView = view;
+    }
+
+    // The shown item labelled `label` inside `item`, or null.
+    function findSetting(item, label) {
+        if (!item.visible)
+            return null;
+        if (item.label === label)
+            return item;
+        for (let i = 0; i < item.children.length; i++) {
+            const found = findSetting(item.children[i], label);
+            if (found)
+                return found;
+        }
+        return null;
+    }
+
+    // Scrolls the pending setting into the middle of the section's scroll
+    // area, as far as the section scrolls, and flashes it.
+    function revealPendingSetting() {
+        const label = pendingSetting;
+        pendingSetting = "";
+        const setting = label !== "" && sectionLoader.item ? findSetting(sectionLoader.item, label) : null;
+        if (!setting)
+            return;
+
+        const at = setting.mapToItem(sectionContent, 0, 0);
+        const scroll = sectionScroll.contentItem;
+        const room = sectionScroll.height;
+        const top = at.y - Math.max(0, (room - setting.height) / 2);
+        scroll.contentY = Math.max(0, Math.min(top, sectionContent.height - room));
+
+        settingHighlight.x = at.x - 4;
+        settingHighlight.y = at.y - 4;
+        settingHighlight.width = setting.width + 8;
+        settingHighlight.height = setting.height + 8;
+        settingFlash.restart();
+    }
+
     implicitWidth: 980
     implicitHeight: 560
     radius: appearance.radius
-    color: theme.surface
+    // Translucent: centered, the blurred desktop shows through. Inside a
+    // capsule the popup's surface replaces it (SettingsPopup.qml).
+    color: theme.translucentSurface
     border.color: theme.border
     border.width: 1
 
@@ -223,8 +395,7 @@ Rectangle {
 
                 onTextEdited: root.sectionQuery = text
                 onAccepted: {
-                    if (root.filteredSections.length > 0)
-                        root.selectSection(root.filteredSections[0].section);
+                    root.chooseFirstMatch();
                 }
             }
 
@@ -259,67 +430,113 @@ Rectangle {
                     Repeater {
                         model: root.filteredSections
 
-                        // The selected section has a fill, an accent bar on its left and
-                        // accent text; the others are filled only while hovered.
-                        delegate: SettingsRow {
-                            id: sectionRow
+                        // A section's row, then a row for each of its settings the
+                        // search found.
+                        delegate: Column {
+                            id: sectionEntry
 
                             required property var modelData
-                            readonly property bool selected: root.currentSection === sectionRow.modelData.section
 
                             width: parent.width
-                            height: 38
-                            appearance: root.appearance
-                            clickable: true
-                            color: selected || hovering ? theme.surfaceHover : "transparent"
+                            spacing: 2
 
-                            Rectangle {
-                                anchors.left: parent.left
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: 3
-                                height: parent.height - 16
-                                radius: width / 2
-                                color: theme.accent
-                                opacity: sectionRow.selected ? 1 : 0
+                            // The selected section has a fill, an accent bar on its left and
+                            // accent text; the others are filled only while hovered.
+                            SettingsRow {
+                                id: sectionRow
 
-                                Behavior on opacity {
-                                    NumberAnimation {
-                                        duration: root.appearance.motion.short
-                                        easing.type: root.appearance.motion.easing
+                                readonly property var modelData: sectionEntry.modelData
+                                readonly property bool selected: root.currentSection === sectionRow.modelData.section
+
+                                width: parent.width
+                                height: 38
+                                appearance: root.appearance
+                                clickable: true
+                                color: selected || hovering ? theme.surfaceHover : "transparent"
+
+                                Rectangle {
+                                    anchors.left: parent.left
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: 3
+                                    height: parent.height - 16
+                                    radius: width / 2
+                                    color: theme.accent
+                                    opacity: sectionRow.selected ? 1 : 0
+
+                                    Behavior on opacity {
+                                        NumberAnimation {
+                                            duration: root.appearance.motion.short
+                                            easing.type: root.appearance.motion.easing
+                                        }
                                     }
+                                }
+
+                                Row {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 12
+                                    spacing: 10
+
+                                    ShellText {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: sectionRow.modelData.icon
+                                        color: sectionRow.selected ? theme.accent : theme.textMuted
+                                        font.pixelSize: 16
+
+                                        Behavior on color {
+                                            ColorAnimation { duration: root.appearance.motion.short }
+                                        }
+                                    }
+
+                                    ShellText {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: sectionRow.modelData.label
+                                        color: sectionRow.selected ? theme.accent : theme.text
+                                        font.pixelSize: root.appearance.textSize
+
+                                        Behavior on color {
+                                            ColorAnimation { duration: root.appearance.motion.short }
+                                        }
+                                    }
+                                }
+
+                                TapHandler {
+                                    onTapped: root.selectSection(sectionRow.modelData.section)
                                 }
                             }
 
-                            Row {
-                                anchors.fill: parent
-                                anchors.leftMargin: 12
-                                spacing: 10
+                            // A found setting, indented under its section's label.
+                            Repeater {
+                                model: sectionEntry.modelData.settings
 
-                                ShellText {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: sectionRow.modelData.icon
-                                    color: sectionRow.selected ? theme.accent : theme.textMuted
-                                    font.pixelSize: 16
+                                delegate: SettingsRow {
+                                    id: settingRow
 
-                                    Behavior on color {
-                                        ColorAnimation { duration: root.appearance.motion.short }
+                                    required property var modelData
+
+                                    width: parent.width
+                                    height: Math.max(30, settingLabel.height + 12)
+                                    appearance: root.appearance
+                                    clickable: true
+
+                                    ShellText {
+                                        id: settingLabel
+
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 38
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: 8
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: settingRow.modelData.label
+                                        color: theme.textMuted
+                                        wrapMode: Text.Wrap
+                                        font.pixelSize: root.appearance.textSize - 1
+                                    }
+
+                                    TapHandler {
+                                        onTapped: root.selectSetting(sectionEntry.modelData.section,
+                                            settingRow.modelData)
                                     }
                                 }
-
-                                ShellText {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: sectionRow.modelData.label
-                                    color: sectionRow.selected ? theme.accent : theme.text
-                                    font.pixelSize: root.appearance.textSize
-
-                                    Behavior on color {
-                                        ColorAnimation { duration: root.appearance.motion.short }
-                                    }
-                                }
-                            }
-
-                            TapHandler {
-                                onTapped: root.selectSection(sectionRow.modelData.section)
                             }
                         }
                     }
@@ -379,12 +596,35 @@ Rectangle {
                             }
                         }
 
-                        Loader {
-                            id: sectionLoader
-                            objectName: "sectionContent"
+                        Item {
+                            id: sectionContent
 
                             width: sectionScroll.availableWidth - 12
-                            height: item ? item.implicitHeight : 0
+                            height: sectionLoader.height
+                            implicitWidth: width
+                            implicitHeight: height
+
+                            Loader {
+                                id: sectionLoader
+                                objectName: "sectionContent"
+
+                                width: parent.width
+                                height: item ? item.implicitHeight : 0
+                            }
+
+                            // The accent flash over a setting the search went to:
+                            // it comes up, holds a moment and fades away.
+                            Rectangle {
+                                id: settingHighlight
+
+                                objectName: "settingHighlight"
+                                radius: root.appearance.radius
+                                color: theme.highlightFill
+                                border.color: theme.accent
+                                border.width: 2
+                                opacity: 0
+                                visible: opacity > 0
+                            }
                         }
                     }
                 }
@@ -407,6 +647,8 @@ Rectangle {
             script: {
                 root.currentSection = root.pendingSection;
                 root.loadCurrentSection();
+                if (root.pendingSetting !== "")
+                    Qt.callLater(root.revealPendingSetting);
             }
         }
 
@@ -415,6 +657,31 @@ Rectangle {
             property: "opacity"
             to: 1
             duration: root.appearance.motion.medium
+            easing.type: root.appearance.motion.easing
+        }
+    }
+
+    SequentialAnimation {
+        id: settingFlash
+
+        NumberAnimation {
+            target: settingHighlight
+            property: "opacity"
+            from: 0
+            to: 1
+            duration: root.appearance.motion.short
+            easing.type: root.appearance.motion.easing
+        }
+
+        PauseAnimation {
+            duration: root.flashHold
+        }
+
+        NumberAnimation {
+            target: settingHighlight
+            property: "opacity"
+            to: 0
+            duration: root.appearance.motion.long
             easing.type: root.appearance.motion.easing
         }
     }
