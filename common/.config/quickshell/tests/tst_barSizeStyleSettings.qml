@@ -3,7 +3,7 @@ import QtTest
 import "../components/panels" as Panels
 import "../config" as Config
 
-// The Bar section's Size & spacing and Style groups, built from the settings
+// The Bar section's Style, Bar and Groups cards, built from the settings
 // parts: number settings and switches two per line, paired by meaning, and
 // the density presets, the Bar position and the bar style as segmented choices.
 TestCase {
@@ -111,8 +111,8 @@ TestCase {
         const built = make();
         const pairs = [
             ["Bar thickness", "Bar opacity"],
-            ["Corner radius", "Group radius"],
-            ["Horizontal padding", "Component spacing"]
+            ["Corner radius", "Horizontal padding"],
+            ["Group radius", "Group horizontal padding"]
         ];
 
         for (const pair of pairs) {
@@ -147,25 +147,25 @@ TestCase {
         compare(built.appearance.saved, [["groupRadius", 17]]);
     }
 
-    function test_styleSwitchesSitTwoPerLineAndSaveWhenToggled() {
+    // A switch shares a line with the number before it.
+    function test_borderSwitchesSitBesideANumberAndSaveWhenToggled() {
         const built = make();
-        const pills = switchRow(built.item, "Transparent pills");
         const border = switchRow(built.item, "Bar border");
-        const elementBorder = switchRow(built.item, "Element border");
         const groupBorder = switchRow(built.item, "Group border");
 
-        verify(sameLine(built.item, pills, border));
-        verify(sameLine(built.item, elementBorder, groupBorder));
-        compare(pills.color, Qt.rgba(0, 0, 0, 0));
+        verify(sameLine(built.item, numberCell(built.item, "Vertical padding"), border));
+        verify(sameLine(built.item, numberCell(built.item, "Group vertical padding"), groupBorder));
+        compare(border.color, Qt.rgba(0, 0, 0, 0));
 
-        pills.toggled();
+        border.toggled();
         groupBorder.toggled();
-        compare(built.appearance.saved, [["pillsTransparent", true], ["groupBorder", true]]);
+        compare(built.appearance.saved, [["barBorder", true], ["groupBorder", true]]);
     }
 
     function test_theMatchingDensityPresetIsMarkedAndChoosingOneFillsInTheSizes() {
         const built = make();
-        const choice = all(built.item, child => child.options !== undefined && child.chosen !== undefined)[0];
+        const field = all(built.item, child => child.label === "Density preset" && child.small !== undefined)[0];
+        const choice = all(field, child => child.options !== undefined && child.chosen !== undefined)[0];
 
         compare(choice.value, "balanced");
         compare(textOf(choice, "Balanced").color, theme.accent);
@@ -271,35 +271,16 @@ TestCase {
     }
 
     // Both keep their saved keys: thickness and the gap from the screen edge
-    // read the same on every Bar position.
+    // (the edge margin, stored as the transparent bar margin) read the same
+    // on every Bar position.
     function test_theBarSizesAreNamedForEveryBarPosition() {
         const built = make();
-        const margin = numberCell(built.item, "Transparent bar margin");
+        const margin = numberCell(built.item, "Edge margin");
 
         verify(numberCell(built.item, "Bar thickness"));
+        verify(!numberCell(built.item, "Transparent bar margin"));
         verify(margin);
         compare(margin.value, 8);
-    }
-
-    function shownSwitchRow(item, label) {
-        const row = switchRow(item, label);
-        return row && row.visible ? row : null;
-    }
-
-    // Notifications in the capsule is a capsule profile's setting only, off
-    // by default; toggling it saves it.
-    function test_notificationsInTheCapsuleShowOnlyForACapsule() {
-        const built = make();
-
-        verify(!shownSwitchRow(built.item, "Notifications in the capsule"));
-
-        built.appearance.barStyle = "capsule";
-        const row = shownSwitchRow(built.item, "Notifications in the capsule");
-        verify(row);
-        compare(row.checked, false);
-
-        row.toggled();
-        compare(built.appearance.saved, [["capsuleNotifications", true]]);
     }
 
     function test_nothingInTheseGroupsIsBold() {

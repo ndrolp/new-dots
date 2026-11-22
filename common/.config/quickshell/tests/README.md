@@ -68,7 +68,7 @@ view (section, search text, scroll position) that another panel picks up, and
 every section's content in cards 12px apart, its text inside their padding)
 and the settings panel sections built from them, among
 them the four Bar positions and the zone names of a side bar, which keep their
-saved keys, and the bar style as one choice of every style the profile model lists (`BarSizeStyleSettings.qml`, `BarElementsSettings.qml`), the Bluetooth device list and turning Bluetooth
+saved keys, the bar style as one choice of every style the profile model lists, and the Bar section as one scroll of cards in order (Profile, Style, Bar, Groups, Elements, and Capsule only for a capsule), each with its settings, the edge margin stored as the transparent bar margin it was, and searching its card names landing on it (`BarSettings.qml`, `BarSizeStyleSettings.qml`, `BarElementsSettings.qml`, `ConfigPanel.qml`), the Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
 (`AudioOutputs.js`), how the volume is shown as text
 (`components/VolumeText.js`), what the popups and bar elements show for the
@@ -132,7 +132,7 @@ shows each time it is turned on or off but not as the shell starts
 (`components/panels/DoNotDisturbWatch.qml`), that with notifications in the
 capsule on (a profile setting, off in new and migrated profiles, offered in the
 settings panel only for a capsule: `tst_capsuleNotifications.qml`,
-`BarSizeStyleSettings.qml`) a new notification goes to the focused monitor's
+`BarSettings.qml`) a new notification goes to the focused monitor's
 capsule and is a toast with the setting off, a popup or panel inside, the
 capsule hidden for fullscreen or no capsule, and nowhere new with Do Not
 Disturb or after a reload, which also keep it quiet
