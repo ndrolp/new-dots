@@ -141,8 +141,13 @@ real fullscreen window, which only a capsule does and SUPER+I then leaves
 alone (`CapsuleRouting.js`; whether a workspace has one, not just a maximized
 window, is `WorkspaceState.hasFullscreen`), and that the capsule then shows that change
 and no bar element (`CapsuleElements.js`), for about 1.5 s from the latest one (`CapsuleChange.qml`),
-what each change shows, the same in the OSD and the capsule
-(`components/panels/OsdChange.js`), which Bluetooth devices connected or
+what each change shows in the OSD (`components/panels/OsdChange.js`), and
+in the capsule (`OsdChange.capsuleLook`, `levelIcon`): volume and brightness
+as a wide fill bar with a glyph that follows the level (muted, the
+struck-through speaker and an empty grey bar) and bounces on each change but
+not under reduce motion, battery and Bluetooth as a glance card with one line
+and a small ring of the battery level, the device's own for Bluetooth when it
+reports one (`CapsuleChangeView.qml`, `tst_capsuleChangeView.qml`), which Bluetooth devices connected or
 disconnected since the last read, none of those connected at start
 (`services/BluetoothConnections.js`), which power change event a battery
 reading makes: plugging in, unplugging, and "Battery low" once at 15% while

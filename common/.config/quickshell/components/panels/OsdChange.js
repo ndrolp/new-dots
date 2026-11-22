@@ -148,3 +148,45 @@ function display(change) {
             level: null, highlighted: change.on, compact: true };
     }
 }
+
+// The glyph a volume or brightness change shows in the capsule for its level:
+// low under a third, medium under two thirds, high from there. Muted volume
+// is the struck-through speaker, whatever its level.
+function levelIcon(change) {
+    const level = Math.max(0, Math.min(1, change.level || 0));
+    const step = level < 1 / 3 ? 0 : level < 2 / 3 ? 1 : 2;
+    if (change.kind === "brightness")
+        return ["󰃞", "󰃟", "󰃠"][step];
+    if (change.muted)
+        return "󰖁";
+    return ["󰕿", "󰖀", "󰕾"][step];
+}
+
+// What a change shows in the capsule, by `card`:
+// - "level" (volume, brightness): { icon (levelIcon), tone, level, percent };
+//   muted volume is an empty bar in the muted tone.
+// - "glance" (battery, Bluetooth): { icon, tone, text, ring, highlighted }:
+//   one line of text and `ring`, the battery level 0 to 1 for a small ring
+//   (the device's own for Bluetooth), or null when there is none.
+// - "row": any other change, shown as `display` gives it.
+function capsuleLook(change) {
+    switch (change.kind) {
+    case "volume":
+    case "brightness": {
+        const shown = display(change);
+        const muted = change.muted === true;
+        return { card: "level", icon: levelIcon(change), tone: muted ? "muted" : shown.tone,
+            level: shown.level, percent: Math.round(shown.level * 100) + "%" };
+    }
+    case "power":
+    case "bluetooth": {
+        const shown = display(change);
+        const ring = change.kind === "power" ? change.percentage
+            : change.connected && change.battery !== null ? change.battery / 100 : null;
+        return { card: "glance", icon: shown.icon, tone: shown.tone, text: shown.label,
+            ring: ring === null ? null : Math.max(0, Math.min(1, ring)), highlighted: shown.highlighted };
+    }
+    default:
+        return { card: "row" };
+    }
+}

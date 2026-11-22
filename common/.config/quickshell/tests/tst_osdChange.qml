@@ -100,4 +100,68 @@ TestCase {
         compare(OsdChange.display(OsdChange.volume(1.3, false)).level, 1);
         compare(OsdChange.display(OsdChange.brightness(-0.2)).level, 0);
     }
+
+    // In the capsule, volume and brightness show a glyph for their level:
+    // low under a third, medium under two thirds, high from there; muted
+    // volume the struck-through speaker, whatever its level.
+    function test_inTheCapsuleTheIconFollowsTheLevel_data() {
+        return [
+            { tag: "silent volume", change: OsdChange.volume(0, false), icon: "󰕿" },
+            { tag: "low volume", change: OsdChange.volume(0.3, false), icon: "󰕿" },
+            { tag: "medium volume", change: OsdChange.volume(0.5, false), icon: "󰖀" },
+            { tag: "high volume", change: OsdChange.volume(0.7, false), icon: "󰕾" },
+            { tag: "full volume", change: OsdChange.volume(1, false), icon: "󰕾" },
+            { tag: "muted volume", change: OsdChange.volume(0.9, true), icon: "󰖁" },
+            { tag: "dim", change: OsdChange.brightness(0.1), icon: "󰃞" },
+            { tag: "half bright", change: OsdChange.brightness(0.5), icon: "󰃟" },
+            { tag: "bright", change: OsdChange.brightness(0.9), icon: "󰃠" }
+        ];
+    }
+
+    function test_inTheCapsuleTheIconFollowsTheLevel(data) {
+        compare(OsdChange.levelIcon(data.change), data.icon);
+    }
+
+    // In the capsule, volume and brightness are a fill bar with the icon and
+    // percentage (muted, an empty grey one); battery and Bluetooth a glance
+    // card: icon, one line and a small ring of the battery level, the
+    // device's own for Bluetooth when it reports one; any other change the
+    // OSD's row.
+    function test_inTheCapsuleEachChangeShowsItsCard_data() {
+        return [
+            { tag: "volume", change: OsdChange.volume(0.42, false),
+                look: { card: "level", icon: "󰖀", tone: "blue", level: 0.42, percent: "42%" } },
+            { tag: "muted volume", change: OsdChange.volume(0.42, true),
+                look: { card: "level", icon: "󰖁", tone: "muted", level: 0, percent: "0%" } },
+            { tag: "brightness", change: OsdChange.brightness(0.8),
+                look: { card: "level", icon: "󰃠", tone: "yellow", level: 0.8, percent: "80%" } },
+            { tag: "charging", change: OsdChange.power({ kind: "charging", percentage: 0.55 }),
+                look: { card: "glance", icon: String.fromCodePoint(0xF0089), tone: "accent", text: "Charging · 55%",
+                    ring: 0.55, highlighted: false } },
+            { tag: "battery low", change: OsdChange.power({ kind: "low", percentage: 0.08 }),
+                look: { card: "glance", icon: "󰂃", tone: "muted", text: "Battery low · 8%",
+                    ring: 0.08, highlighted: true } },
+            { tag: "bluetooth with its battery",
+                change: OsdChange.bluetooth({ deviceName: "WH-1000XM4", connected: true,
+                    batteryAvailable: true, battery: 0.8 }),
+                look: { card: "glance", icon: "󰂱", tone: "blue", text: "WH-1000XM4 · Connected · 80%",
+                    ring: 0.8, highlighted: false } },
+            { tag: "bluetooth without a battery",
+                change: OsdChange.bluetooth({ deviceName: "MX Keys", connected: true,
+                    batteryAvailable: false, battery: 0 }),
+                look: { card: "glance", icon: "󰂱", tone: "blue", text: "MX Keys · Connected",
+                    ring: null, highlighted: false } },
+            { tag: "bluetooth disconnected",
+                change: OsdChange.bluetooth({ deviceName: "WH-1000XM4", connected: false,
+                    batteryAvailable: true, battery: 0.8 }),
+                look: { card: "glance", icon: "󰂲", tone: "muted", text: "WH-1000XM4 · Disconnected",
+                    ring: null, highlighted: false } },
+            { tag: "caps lock", change: OsdChange.capsLock(true), look: { card: "row" } },
+            { tag: "bar profile", change: OsdChange.barProfile("work"), look: { card: "row" } }
+        ];
+    }
+
+    function test_inTheCapsuleEachChangeShowsItsCard(data) {
+        compare(OsdChange.capsuleLook(data.change), data.look);
+    }
 }
