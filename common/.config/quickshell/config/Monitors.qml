@@ -117,10 +117,10 @@ QtObject {
         }
     }
 
-    // Replaces the file with a migrated state in a single write.
-    function applyMigratedState(state) {
+    // Replaces the file with migrated text in a single write.
+    function replaceText(text) {
         reloadPending = true;
-        settingsFile.setText(JSON.stringify(state, null, 4));
+        settingsFile.setText(text);
     }
 
     property var settingsFile: FileView {

@@ -224,11 +224,11 @@ QtObject {
         }
     }
 
-    // Replaces the file with a migrated state (see SchemaMigration) in a
+    // Replaces the file with migrated text (see SchemaMigration) in a
     // single write, which the adapter then loads; per-property writes would
     // race with reloads.
-    function applyMigratedState(state) {
-        settingsFile.setText(JSON.stringify(state, null, 4));
+    function replaceText(text) {
+        settingsFile.setText(text);
     }
 
     property var settingsFile: FileView {

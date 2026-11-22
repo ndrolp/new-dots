@@ -13,7 +13,9 @@ and the one that puts the privacy indicator right after the recording
 indicator, in its group and on or off as it is, live right between it and
 the pomodoro, neither added twice to a profile that already lists it
 (`tst_barElements.qml`), and the one that drops the unread workspace padding
-from every saved profile (`tst_densityPresets.qml`). They also cover where
+from every saved profile (`tst_densityPresets.qml`). That a migration writes
+both files ending in a newline, as the adapters do, is in
+`tst_schemaMigrationFiles.qml`. They also cover where
 the bar sits on its screen: the edges its window is anchored to, the space it
 reserves (on a capsule, with the live elements it shows collapsed), where the margin goes and where its content sits, against its edge
 however tall a capsule's window grows, for every bar style on each Bar position
