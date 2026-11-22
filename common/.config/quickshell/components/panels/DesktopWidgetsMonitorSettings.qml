@@ -13,10 +13,7 @@ Column {
 
     readonly property var desktop: monitors.desktopWidgetsFor(monitorName)
     readonly property var widgetOrder: monitors.desktopWidgetOrder(monitorName)
-    readonly property var widgetLabels: ({
-        media: "Media", system: "System", calendar: "Calendar", network: "Network", weather: "Weather",
-        cava: "Cava"
-    })
+    readonly property var widgetLabels: DesktopWidgetsModel.widgetLabels
     // The glyph before each desktop widget's settings.
     readonly property var widgetIcons: ({
         media: "󰝚", system: "󰻠", calendar: "󰃭", network: "󰤨",

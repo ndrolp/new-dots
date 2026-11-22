@@ -3,6 +3,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import "../../config" as Config
 import "SettingsSearch.js" as SettingsSearch
+import "../../config/ControlCenterTiles.js" as ControlCenterTiles
+import "../../config/DesktopWidgetsModel.js" as DesktopWidgetsModel
 
 Rectangle {
     id: root
@@ -23,11 +25,18 @@ Rectangle {
     property string wallpaperView: "Selection"
     property string selectedWallpaperMonitor: ""
     property string sectionQuery: ""
+    // How long the flash over a setting the search went to holds, in ms:
+    // long enough to be seen, and not from the motion speeds, so reduce
+    // motion's instant fades keep it (a pause, not a movement).
+    readonly property int flashHold: 700
     // The sections, in sidebar order. Each lists the settings the search
     // offers by label, `settings`, as they are labelled in the section; a
     // Bar setting not every bar style shows names its profile key, `key`
-    // (BarProfileModel.barSettingShown). tst_settingsSearch checks each label
-    // against the section, and that every labelled setting is listed.
+    // (BarProfileModel.barSettingShown), and a Wallpapers setting shown in
+    // only one of its views names it, `view`. Where a section already lists
+    // its labels (control center tiles, desktop widgets) the index is built
+    // from that list. tst_settingsSearch checks each label against the
+    // section, and that every labelled setting is listed.
     readonly property var sections: [
         {
             // Old section names and terms stay as keywords so searches still land here.
@@ -70,7 +79,9 @@ Rectangle {
             label: "Control center", icon: "󰒓", section: "ControlCenter",
             keywords: "tiles quick settings order collapsed row expanded hide show",
             title: "Control center",
-            description: "Choose the control center's tiles and their order."
+            description: "Choose the control center's tiles and their order.",
+            // Each tile, by the name the section gives it.
+            settings: ControlCenterTiles.tileIds.map(id => ({ label: ControlCenterTiles.tileLabels[id] }))
         },
         {
             label: "Motion", icon: "󰑮", section: "Motion",
@@ -85,6 +96,11 @@ Rectangle {
             title: "Displays",
             description: "Set workspace ranges and shell visibility for each monitor.",
             settings: [
+                { label: "On" },
+                { label: "Resolution" },
+                { label: "Refresh rate" },
+                { label: "Scale" },
+                { label: "Rotation" },
                 { label: "First workspace" },
                 { label: "Last workspace" },
                 { label: "Show bar" },
@@ -138,19 +154,37 @@ Rectangle {
                 { label: "Clock opacity" },
                 { label: "Clock calendar" },
                 { label: "Date format" }
-            ]
+            ].concat(Object.keys(DesktopWidgetsModel.widgetLabels).reduce((settings, widget) => {
+                // Each widget's switch and placement, then its own settings.
+                const label = DesktopWidgetsModel.widgetLabels[widget];
+                const own = {
+                    cava: ["Cava width", "Cava height", "Cava bars", "Cava color", "Cava shadow",
+                        "Cava media info", "Cava progress", "Cava progress color"],
+                    weather: ["Location"]
+                }[widget] || [];
+                return settings.concat([label, label + " position"].concat(own).map(setting => ({ label: setting })));
+            }, []))
         },
         {
             label: "Session", icon: "󰌾", section: "Session",
             keywords: "idle lock power",
             title: "Session",
-            description: "Control the active session and review idle behavior."
+            description: "Control the active session and review idle behavior.",
+            settings: [
+                { label: "Lock now" },
+                { label: "Turn displays off" },
+                { label: "Suspend" }
+            ]
         },
         {
             label: "Wallpapers", icon: "󰸉", section: "Wallpapers",
-            keywords: "background image monitor",
+            keywords: "background image monitor folders locations schedule dynamic advance",
             title: "Wallpapers",
-            description: "Choose a wallpaper for each display."
+            description: "Choose a wallpaper for each display.",
+            settings: [
+                { label: "Enable scheduled rotation", view: "Schedule" },
+                { label: "Interval (minutes)", view: "Schedule" }
+            ]
         }
     ]
     readonly property var currentEntry: sections.find(entry => entry.section === currentSection)
@@ -250,13 +284,15 @@ Rectangle {
         sectionTransition.start();
     }
 
-    // Opens `section`, then scrolls the setting labelled `label` into view
-    // and flashes it.
-    function selectSetting(section, label) {
+    // Opens `section` at the view that shows `setting` (an entry of its
+    // `settings`), then scrolls the setting into view and flashes it.
+    function selectSetting(section, setting) {
         if (sectionTransition.running)
             return;
 
-        pendingSetting = label;
+        pendingSetting = setting.label;
+        if (setting.view !== undefined)
+            showWallpaperView(setting.view);
         if (section === currentSection)
             Qt.callLater(revealPendingSetting);
         else
@@ -269,10 +305,18 @@ Rectangle {
         const match = SettingsSearch.firstMatch(filteredSections);
         if (match === null)
             return;
-        if (match.setting !== "")
+        if (match.setting !== null)
             selectSetting(match.section, match.setting);
         else
             selectSection(match.section);
+    }
+
+    // Shows the Wallpapers `view`: in the Wallpapers section if it is shown,
+    // and whenever it is opened next.
+    function showWallpaperView(view) {
+        wallpaperView = view;
+        if (currentSection === "Wallpapers" && sectionLoader.item)
+            sectionLoader.item.wallpaperView = view;
     }
 
     // The shown item labelled `label` inside `item`, or null.
@@ -490,7 +534,7 @@ Rectangle {
 
                                     TapHandler {
                                         onTapped: root.selectSetting(sectionEntry.modelData.section,
-                                            settingRow.modelData.label)
+                                            settingRow.modelData)
                                     }
                                 }
                             }
@@ -575,7 +619,7 @@ Rectangle {
 
                                 objectName: "settingHighlight"
                                 radius: root.appearance.radius
-                                color: Qt.rgba(theme.accent.r, theme.accent.g, theme.accent.b, 0.16)
+                                color: theme.highlightFill
                                 border.color: theme.accent
                                 border.width: 2
                                 opacity: 0
@@ -629,10 +673,8 @@ Rectangle {
             easing.type: root.appearance.motion.easing
         }
 
-        // Held long enough to be seen, even with reduce motion's instant
-        // fades: it is a pause, not a movement.
         PauseAnimation {
-            duration: 700
+            duration: root.flashHold
         }
 
         NumberAnimation {

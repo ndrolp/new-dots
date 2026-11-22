@@ -5,6 +5,7 @@ import "../components/panels/SettingsSearch.js" as SettingsSearch
 import "../config" as Config
 import "../config/Motion.js" as Motion
 import "../config/ControlCenterTiles.js" as ControlCenterTiles
+import "../config/DesktopWidgetsModel.js" as DesktopWidgetsModel
 
 // Settings search lands on the setting: it matches setting labels as well as
 // section keywords, lists the matching settings under their section in the
@@ -74,12 +75,32 @@ TestCase {
         property bool clipboardImagePreviewsEnabled: false
     }
 
+    // What the Displays section reads: one monitor and its setup.
+    QtObject {
+        id: fakeMonitors
+
+        function rangeFor(description) { return { from: 1, to: 5 }; }
+        function displaySettingsFor(description) { return { barVisible: true, barProfile: "work" }; }
+    }
+
+    QtObject {
+        id: fakeSetups
+
+        property var entries: [{ description: "AOC", port: "DP-2", mode: "2560x1440@143.91", position: "0x0",
+            scale: 1, transform: 0, disabled: false, mirror: "" }]
+        property var savedSetups: []
+        property bool counting: false
+
+        function modesOf(port) { return [{ width: 2560, height: 1440, refresh: 143.91 }]; }
+    }
+
     Component {
         id: panel
 
         Panels.ConfigPanel {
             appearance: fakeAppearance
-            monitors: null
+            monitors: fakeMonitors
+            monitorSetups: fakeSetups
             wallpapers: null
             bookmarks: null
             plugins: null
@@ -278,13 +299,17 @@ TestCase {
         tryVerify(() => highlightOf(item).opacity > 0, 1000, "the setting isn't highlighted");
     }
 
-    // The labels of the settings shown in the section shown: a field or a
-    // switch row with a label.
+    // The labels of the settings shown in the section shown.
     function labelledSettingsShown(item) {
-        const content = all(item, child => child.objectName === "sectionContent")[0].item;
+        return labelledSettingsIn(all(item, child => child.objectName === "sectionContent")[0].item);
+    }
+
+    // The labels of the settings shown in `content`: whatever shown carries a
+    // label (a field, a switch row, a tile's row, a session action) but a
+    // button, which does something rather than set something.
+    function labelledSettingsIn(content) {
         return all(content, child => child.visible && typeof child.label === "string" && child.label !== ""
-            && (child.small !== undefined || child.switchItem !== undefined)
-            && ancestorsVisible(child, content))
+            && child.labelColor === undefined && ancestorsVisible(child, content))
             .map(setting => setting.label);
     }
 
@@ -296,9 +321,9 @@ TestCase {
         return true;
     }
 
-    // Sections that need Quickshell or a monitor to show their settings;
-    // their labels are checked by hand.
-    readonly property var unbuiltSections: ["Monitors", "Widgets", "Session", "Wallpapers"]
+    // Sections that need Quickshell to show their settings; the parts that
+    // show them are checked on their own below.
+    readonly property var unbuiltSections: ["Widgets", "Session", "Wallpapers"]
 
     // The search's index of settings matches what each section shows, on
     // every bar style: every setting offered is shown under its label, and
@@ -324,5 +349,135 @@ TestCase {
             for (const label of shown.filter(label => !/^Workspace \d+$/.test(label)))
                 verify(offered.includes(label), entry.section + ": \"" + label + "\" isn't offered by the search");
         }
+    }
+
+    // What the sections that need Quickshell are built from, with fakes.
+    Component {
+        id: widgetsPart
+
+        Panels.DesktopWidgetsMonitorSettings {
+            width: 700
+            appearance: fakeAppearance
+            monitors: QtObject {
+                // The Cava progress line on, so its color shows too.
+                property var displaySettings: DesktopWidgetsModel.setDesktopWidgetSetting(
+                    {}, "AOC", "cava", "progress", "line")
+
+                function desktopWidgetsFor(monitorName) {
+                    return DesktopWidgetsModel.desktopWidgetsFor(displaySettings, monitorName);
+                }
+
+                function desktopWidgetOrder(monitorName) {
+                    return DesktopWidgetsModel.desktopWidgetOrder(desktopWidgetsFor(monitorName));
+                }
+            }
+            monitorName: "AOC"
+        }
+    }
+
+    Component {
+        id: sessionPart
+
+        Panels.SessionActions {
+            width: 700
+            appearance: fakeAppearance
+        }
+    }
+
+    Component {
+        id: wallpapersPart
+
+        Panels.WallpaperSettingsBody {
+            width: 700
+            appearance: fakeAppearance
+            wallpapers: QtObject {
+                property string horizontalFolder: "/walls/h"
+                property string verticalFolder: "/walls/v"
+                property bool dynamicEnabled: false
+                property int dynamicIntervalMinutes: 30
+                property var horizontalWallpapers: []
+                property var verticalWallpapers: []
+
+                function pathFor(description) { return ""; }
+            }
+            displays: [{ description: "AOC", name: "Q27G2", portrait: false }]
+            selectedWallpaperMonitor: "AOC"
+        }
+    }
+
+    // The index matches what the sections that need Quickshell show, through
+    // the parts they are built from: every setting offered is shown in the
+    // view it names (one of Wallpapers' views; none, the first view), and
+    // every labelled setting shown in a view is offered for it.
+    function test_theIndexMatchesWhatTheUnbuiltSectionsShow_data() {
+        return [
+            { tag: "Widgets", component: widgetsPart, views: [""] },
+            { tag: "Session", component: sessionPart, views: [""] },
+            { tag: "Wallpapers", component: wallpapersPart, views: ["Selection", "Locations", "Schedule"] }
+        ];
+    }
+
+    function test_theIndexMatchesWhatTheUnbuiltSectionsShow(data) {
+        const item = createTemporaryObject(panel, this);
+        const entry = item.sections.find(entry => entry.section === data.tag);
+        const part = createTemporaryObject(data.component, this);
+        const offered = SettingsSearch.offeredSettings(entry, fakeAppearance.barStyle);
+
+        for (const view of data.views) {
+            if (view !== "")
+                part.wallpaperView = view;
+            waitForRendering(part);
+            const shown = labelledSettingsIn(part);
+            const offeredHere = offered
+                .filter(setting => (setting.view || data.views[0]) === view)
+                .map(setting => setting.label);
+
+            for (const label of offeredHere)
+                verify(shown.includes(label), data.tag + " " + view + " doesn't show \"" + label + "\"");
+            for (const label of shown)
+                verify(offeredHere.includes(label), data.tag + " " + view + ": \"" + label + "\" isn't offered by the search");
+        }
+    }
+
+    function test_aWallpapersScheduleSettingIsListed() {
+        const item = createTemporaryObject(panel, this, { sectionQuery: "scheduled rotation" });
+
+        compare(listed(item), [["Wallpapers", "Enable scheduled rotation"]]);
+    }
+
+    // Choosing a Wallpapers setting of a view not shown switches to that view
+    // first, so there is something to scroll to.
+    function test_choosingASettingOfAnotherWallpapersViewSwitchesToIt() {
+        const item = createTemporaryObject(panel, this, { sectionQuery: "interval", wallpaperView: "Selection" });
+        mouseClick(sidebarRowOf(item, "Interval (minutes)"));
+
+        tryCompare(item, "currentSection", "Wallpapers", 1000);
+        compare(item.wallpaperView, "Schedule");
+    }
+
+    function test_enterOnASettingOfAnotherWallpapersViewSwitchesToIt() {
+        const item = createTemporaryObject(panel, this, { wallpaperView: "Locations" });
+        const search = all(item, child => child.placeholderText === "Search settings")[0];
+        item.sectionQuery = "scheduled rotation";
+        search.forceActiveFocus();
+
+        keyClick(Qt.Key_Return);
+
+        tryCompare(item, "currentSection", "Wallpapers", 1000);
+        compare(item.wallpaperView, "Schedule");
+    }
+
+    // A tile of the control center is found by the name the section gives it.
+    function test_aControlCenterTileIsListed() {
+        const item = createTemporaryObject(panel, this, { sectionQuery: "night light" });
+
+        compare(listed(item), [["Control center", "Night light"]]);
+    }
+
+    // Enter on a search that finds only sections goes to the section, with no setting.
+    function test_firstMatchOfASectionOnlySearchHasNoSetting() {
+        const item = createTemporaryObject(panel, this, { sectionQuery: "animations" });
+
+        compare(SettingsSearch.firstMatch(item.filteredSections), { section: "Motion", setting: null });
     }
 }

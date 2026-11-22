@@ -187,7 +187,7 @@ TestCase {
         compare(item.currentSection, "ControlCenter");
         verify(all(item, child => child.text === "Control center" && child.font !== undefined
             && child.font.bold)[0], "its title");
-        verify(all(item, child => child.tileLabel === "Night light")[0], "its tiles");
+        verify(all(item, child => child.label === "Night light")[0], "its tiles");
     }
 
     // Each section's title and description come from its entry in the

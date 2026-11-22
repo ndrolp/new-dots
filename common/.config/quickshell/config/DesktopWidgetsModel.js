@@ -13,6 +13,13 @@ function cloneValue(value) {
 
 const desktopWidgetNames = ["media", "system", "calendar", "network", "weather", "cava"];
 
+// What the settings call each desktop widget: its switch, and "<label>
+// position" for its placement.
+const widgetLabels = {
+    media: "Media", system: "System", calendar: "Calendar", network: "Network", weather: "Weather",
+    cava: "Cava"
+};
+
 // The colors the Cava desktop widget's bars can take: white, or one of the
 // theme's named colors, which follow the colorscheme.
 const cavaColors = ["white", "accent", "blue", "green", "yellow", "orange", "red", "purple", "text"];
