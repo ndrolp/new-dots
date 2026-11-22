@@ -12,8 +12,8 @@ Rectangle {
     property color labelColor: theme.text
     signal activated()
 
-    width: buttonLabel.implicitWidth + 28
-    height: 32
+    implicitWidth: buttonLabel.implicitWidth + 28
+    implicitHeight: 32
     radius: appearance.radius
     color: buttonHover.hovered && enabled ? theme.surfaceHover : "transparent"
     opacity: enabled ? 1 : 0.4

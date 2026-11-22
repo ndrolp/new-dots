@@ -118,4 +118,40 @@ TestCase {
             && child.font.bold)[0], "its title");
         verify(all(item, child => child.tileLabel === "Night light")[0], "its tiles");
     }
+
+    // Each section's title and description come from its entry in the
+    // sections list, next to its label, icon and keywords.
+    function test_eachSectionShowsTheTitleAndDescriptionOfItsEntry() {
+        const item = createTemporaryObject(panel, this);
+        const displays = item.sections.find(section => section.section === "Monitors");
+        compare(displays.title, "Displays");
+        compare(displays.description, "Set workspace ranges and shell visibility for each monitor.");
+
+        for (const entry of item.sections) {
+            item.openSection(entry.section);
+            verify(entry.description.length > 0, entry.section + " has no description");
+            verify(all(item, child => child.text === entry.title && child.font !== undefined
+                && child.font.bold)[0], entry.section + " shows its title");
+            verify(textOf(item, entry.description), entry.section + " shows its description");
+        }
+    }
+
+    // The header keeps the title on the left and search then Done on the
+    // right, at the panel's margins, whatever the panel's width.
+    function test_theHeaderSitsTitleLeftAndSearchAndDoneRight() {
+        for (const width of [980, 760]) {
+            const item = createTemporaryObject(panel, this, { width: width });
+            const title = textOf(item, "Settings");
+            const search = all(item, child => child.placeholderText === "Search settings")[0];
+            const done = all(item, child => child.label === "Done")[0];
+            const x = child => child.mapToItem(item, 0, 0).x;
+            tryVerify(() => x(done) + done.width === width - 20, 1000, "Done ends at " + (x(done) + done.width));
+
+            compare(x(title), 20);
+            compare(x(done) + done.width, width - 20);
+            compare(x(search) + search.width, x(done) - 16);
+            compare(search.width, 244);
+            verify(x(title) + title.width < x(search), "the title runs into the search");
+        }
+    }
 }
