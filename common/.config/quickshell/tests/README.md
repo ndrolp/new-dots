@@ -34,7 +34,8 @@ contents, and that it ignores input while closing (`PopupSurface.qml`; `PopupFra
 tested here), that a popup's reveal waits for its freshly mapped window's
 first frames (`PopupWarmUp.qml`), what a popup's focus grab holds
 (`PopupGrab.js`), which bar elements close the open popup when pressed
-(`BarPopupCloser.qml`), the shared popup parts (`PopupTitle`,
+(`BarPopupCloser.qml`), and that the settings button's press leaves the settings panel inside
+a capsule to its own click (`OpenPopup.pressedWithoutPopup`), the shared popup parts (`PopupTitle`,
 `PopupHeader`, `PopupRow`…), the control center's tiles and sliders,
 active, muted, disabled and icon-only (`ControlTile.qml`, `ControlSlider.qml`;
 `ControlCenterBody.qml` itself needs Quickshell's services and isn't tested
@@ -56,11 +57,15 @@ the settings panel's own parts (`SettingsNumber`,
 `SettingsSwitchRow`, `SettingsChoice`, `SettingsGrid`…: a long label wraps instead of
 eliding, and a grid too narrow for two cells side by side is one column; `SettingsCard`:
 the hairline-bordered card, one step lighter than the panel and without hover,
-that holds a headed group), its frame
+that holds a headed group), the one
+hover they share (a faint fill, a pointing hand, an accent border on bordered
+controls, a growing slider thumb, a brighter switch, instant under reduce
+motion), its frame
 (`ConfigPanel.qml`: each section's title and description from its entry in
 the sections list, the header's title, search and Done at the panel's
-margins, and every section's content in cards 12px apart, its text inside
-their padding) and the settings panel sections built from them, among
+margins, the selected sidebar section's fill, accent bar and accent text, and
+every section's content in cards 12px apart, its text inside their padding)
+and the settings panel sections built from them, among
 them the four Bar positions and the zone names of a side bar, which keep their
 saved keys, and the bar style as one choice of every style the profile model lists (`BarSizeStyleSettings.qml`, `BarElementsSettings.qml`), the Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
@@ -251,7 +256,11 @@ countdown: starting, restarting, running out and turning off by hand, the
 coarse time left a live element shows, and
 what the keybind's OSD says (`services/KeepAwakeState.js`),
 which popup is open across the bars and which bar IPC opens one on
-(`modules/OpenPopup.js`), one part of the shell opening another in its
+(`modules/OpenPopup.js`), where the settings panel opens: inside the capsule of the bar it is
+asked from, or of the focused monitor's for IPC and other panels, centered on any other bar and
+while that capsule is hidden for a fullscreen window, and which of those closes it
+(`modules/SettingsPlace.js`; the popup inside, `SettingsPopup.qml`, is a Quickshell window and isn't
+tested here), one part of the shell opening another in its
 place unless its plugin is off (`modules/SwitchTo.js`), which bar element a popup opens under
 and that the pomodoro shows only while one is started
 (`components/bar/BarElementItems.js`), the notifications in the control

@@ -84,6 +84,45 @@ TestCase {
         verify(sidebar.mapToItem(item, 0, sidebar.height).y <= item.height - 20);
     }
 
+    // The sidebar row of `section`.
+    function sidebarRow(item, section) {
+        return all(item, child => child.modelData !== undefined && child.selected !== undefined
+            && child.modelData.section === section)[0];
+    }
+
+    // The accent bar on the left of a sidebar row, shown or not.
+    function accentBarOf(row) {
+        return all(row, child => child instanceof Rectangle && child !== row && child.width <= 4
+            && Qt.colorEqual(child.color, theme.accent))[0];
+    }
+
+    // The selected section stands out three ways: a fill, an accent bar on
+    // its left and accent text. The others are plain until hovered.
+    function test_theSelectedSectionHasAFillAnAccentBarAndAccentText() {
+        const item = createTemporaryObject(panel, this);
+        const selected = sidebarRow(item, "Notifications");
+        const other = sidebarRow(item, "Motion");
+        const bar = accentBarOf(selected);
+
+        tryCompare(selected, "color", theme.surfaceHover, 500);
+        verify(bar, "no accent bar");
+        tryCompare(bar, "opacity", 1, 500);
+        compare(bar.mapToItem(selected, 0, 0).x, 0);
+        verify(bar.height > 0 && bar.height < selected.height);
+        compare(all(selected, child => child.text === "Notifications")[0].color, theme.accent);
+
+        compare(other.color, Qt.rgba(0, 0, 0, 0));
+        compare(accentBarOf(other).opacity, 0);
+        compare(all(other, child => child.text === "Motion")[0].color, theme.text);
+    }
+
+    // A sidebar row is clicked to open its section: it shows a pointing hand.
+    function test_aSidebarRowIsClicked() {
+        const item = createTemporaryObject(panel, this);
+
+        verify(sidebarRow(item, "Motion").clickable);
+    }
+
     function test_searchingForAnimationsFindsTheMotionSection() {
         const item = createTemporaryObject(panel, this, { sectionQuery: "animation" });
 

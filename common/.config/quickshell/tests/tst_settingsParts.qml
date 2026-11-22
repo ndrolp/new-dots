@@ -105,6 +105,15 @@ TestCase {
     }
 
     Component {
+        id: choiceList
+
+        Panels.SettingsChoiceList {
+            width: 302
+            options: [{ label: "Alpha", value: "a" }, { label: "Bravo", value: "b" }]
+        }
+    }
+
+    Component {
         id: number
 
         Panels.SettingsNumber {
@@ -245,6 +254,11 @@ TestCase {
         return null;
     }
 
+    // The HoverHandler `item` reacts to the pointer with.
+    function hoverOf(item) {
+        return item.data.filter(child => child instanceof HoverHandler)[0];
+    }
+
     function make(component, properties) {
         return createTemporaryObject(component, this, Object.assign({ appearance: barAppearance }, properties || {}));
     }
@@ -264,7 +278,7 @@ TestCase {
         const item = make(input);
 
         item.forceActiveFocus();
-        compare(item.background.border.color, theme.accent);
+        tryCompare(item.background.border, "color", theme.accent, 500);
     }
 
     // Group headings are small, muted and uppercase; setting labels are in
@@ -723,5 +737,106 @@ TestCase {
 
         compare(item.data.filter(child => child instanceof HoverHandler).length, 0);
         compare(item.hovered, undefined);
+    }
+
+    // Every clickable part of the panel answers the pointer the same way: a
+    // faint fill and a pointing hand. A hovered row is no exception.
+    function test_aHoveredRowTakesTheFaintFill() {
+        const item = make(row, { appearance: reducedAppearance });
+
+        item.hovered = true;
+        compare(item.color, theme.surfaceHover);
+    }
+
+    function test_aRowThatIsClickedShowsAPointingHand() {
+        const item = make(row);
+
+        compare(hoverOf(item).cursorShape, Qt.ArrowCursor);
+        item.clickable = true;
+        compare(hoverOf(item).cursorShape, Qt.PointingHandCursor);
+    }
+
+    function test_aSwitchRowIsClicked() {
+        const item = make(switchRow);
+
+        verify(item.clickable);
+    }
+
+    function test_aHoveredButtonTakesTheFaintFillAndAPointingHand() {
+        const item = make(button, { appearance: reducedAppearance });
+
+        item.hovered = true;
+        compare(item.color, theme.surfaceHover);
+        compare(hoverOf(item).cursorShape, Qt.PointingHandCursor);
+    }
+
+    // A bordered control's border turns accent while hovered; the option
+    // under the pointer takes the faint fill.
+    function test_aHoveredChoiceHasAnAccentBorderAndFillsTheOptionUnderThePointer() {
+        const item = make(choice, { appearance: reducedAppearance, value: "compact" });
+        const option = textOf(item, "Spacious").parent;
+
+        item.hovered = true;
+        compare(item.border.color, theme.accent);
+        option.hovered = true;
+        compare(option.color, theme.surfaceHover);
+        compare(hoverOf(option).cursorShape, Qt.PointingHandCursor);
+    }
+
+    // A chip of a longer choice is bordered on its own: hovered, it takes
+    // the faint fill and an accent border.
+    function test_aHoveredChipTakesTheFaintFillAndAnAccentBorder() {
+        const item = make(choiceList, { appearance: reducedAppearance, value: "a" });
+        const chip = textOf(item, "Bravo").parent;
+
+        compare(chip.border.color, theme.border);
+        chip.hovered = true;
+        compare(chip.color, theme.surfaceHover);
+        compare(chip.border.color, theme.accent);
+        compare(hoverOf(chip).cursorShape, Qt.PointingHandCursor);
+    }
+
+    // A number box is bordered too.
+    function test_aHoveredFieldHasAnAccentBorderAndTheFaintFill() {
+        const item = make(input, { appearance: reducedAppearance });
+
+        item.hovering = true;
+        compare(item.background.border.color, theme.accent);
+        compare(item.background.color, theme.surfaceHover);
+    }
+
+    // A slider's thumb grows under the pointer.
+    function test_aHoveredSliderGrowsItsThumb() {
+        const item = make(number, { appearance: reducedAppearance });
+        const rest = item.slider.handle.width;
+
+        item.slider.hovering = true;
+        verify(item.slider.handle.width > rest);
+        compare(item.slider.handle.height, item.slider.handle.width);
+        compare(hoverOf(item.slider).cursorShape, Qt.PointingHandCursor);
+    }
+
+    // A switch brightens while its row is hovered, off or on.
+    function test_aHoveredSwitchRowBrightensItsSwitch() {
+        const off = make(switchRow, { appearance: reducedAppearance });
+        const on = make(switchRow, { appearance: reducedAppearance, checked: true });
+        const offBorder = String(off.switchItem.border.color);
+        const onFill = String(on.switchItem.color);
+
+        off.hovered = true;
+        on.hovered = true;
+        verify(off.switchItem.hovered);
+        verify(!Qt.colorEqual(off.switchItem.border.color, offBorder));
+        verify(!Qt.colorEqual(on.switchItem.color, onFill));
+    }
+
+    // Every hover change eases over with the motion tokens: with reduce
+    // motion it is instant, otherwise it takes a moment.
+    function test_aHoverEasesInUnlessMotionIsReduced() {
+        const item = make(button);
+
+        item.hovered = true;
+        verify(!Qt.colorEqual(item.color, theme.surfaceHover));
+        tryCompare(item, "color", theme.surfaceHover, 500);
     }
 }

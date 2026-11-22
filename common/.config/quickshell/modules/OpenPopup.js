@@ -22,6 +22,17 @@ function closed(open, popup, window) {
     return isOpen(open, popup, window) ? none : open;
 }
 
+// The settings panel's name as a popup, inside a capsule (SettingsPlace.js).
+var settings = "settings";
+
+// A bar element that opens no popup was pressed (BarPopupCloser.qml): the
+// open popup closes, ahead of the element's own click. The settings panel
+// inside a capsule stays when it is the settings button ("arch"): its click
+// closes it.
+function pressedWithoutPopup(open, element) {
+    return open.popup === settings && element === "arch" ? open : none;
+}
+
 // The bar IPC opens popups on: the focused monitor's, or the first shown bar
 // when that monitor's bar is hidden; null when no bar is shown.
 // `bars` is [{ window, monitor (its description), visible }].

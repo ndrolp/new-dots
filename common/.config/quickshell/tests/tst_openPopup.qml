@@ -207,4 +207,19 @@ TestCase {
         compare(OpenPopup.controlCenterShortcut(opened.open, "collapsed", "expanded", bars, "AOC",
             false).open, OpenPopup.none);
     }
+
+    // Pressing a bar element that opens no popup closes the open one.
+    function test_pressingAnElementWithoutAPopupClosesTheOpenOne() {
+        const open = OpenPopup.requested(OpenPopup.none, "battery", leftBar);
+        compare(OpenPopup.pressedWithoutPopup(open, "workspaces"), OpenPopup.none);
+        compare(OpenPopup.pressedWithoutPopup(open, "arch"), OpenPopup.none);
+    }
+
+    // The settings panel inside a capsule stays for the settings button's own
+    // click, which closes it (modules/SettingsPlace.js).
+    function test_pressingTheSettingsButtonLeavesTheSettingsPanelToIt() {
+        const open = OpenPopup.requested(OpenPopup.none, "settings", leftBar);
+        compare(OpenPopup.pressedWithoutPopup(open, "arch"), open);
+        compare(OpenPopup.pressedWithoutPopup(open, "workspaces"), OpenPopup.none);
+    }
 }

@@ -13,7 +13,8 @@ Item {
     // The item of every bar element, by element id.
     required property var elementItems
 
-    signal closeRequested()
+    // `element` is the id of the one pressed.
+    signal closeRequested(string element)
 
     // The element at `position`, in this item's coordinates, or "".
     function elementAt(position) {
@@ -34,7 +35,7 @@ Item {
 
             const element = root.elementAt(point.position);
             if (element !== "" && !BarElementItems.opensPopup(element))
-                root.closeRequested();
+                root.closeRequested(element);
         }
     }
 }
