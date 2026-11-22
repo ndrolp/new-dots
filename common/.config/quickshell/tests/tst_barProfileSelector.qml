@@ -1,5 +1,6 @@
 import QtQuick
 import QtTest
+import "../config/Motion.js" as Motion
 import "../components/panels" as Panels
 import "../config" as Config
 
@@ -56,6 +57,7 @@ TestCase {
 
                 property int radius: 12
                 property int textSize: 13
+                readonly property var motion: Motion.motion(false)
                 property var barProfiles: ({ "work": {}, "media": {}, "minimal": {} })
                 property string editingBarProfile: "work"
                 property bool barProfileModified: false
