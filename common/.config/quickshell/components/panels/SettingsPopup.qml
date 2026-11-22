@@ -57,14 +57,12 @@ BarPopup {
                 border.width: 0
 
                 onCloseRequested: root.close()
-                // Opened again, it comes back at this section.
-                onCurrentSectionChanged: root.feature.section = currentSection
+                // Opened again, or moved to the centered position, it comes
+                // back showing this.
+                onViewChanged: root.feature.view = view
             }
 
-            onLoaded: {
-                if (root.feature.section !== "")
-                    item.openSection(root.feature.section);
-            }
+            onLoaded: item.restoreView(root.feature.view)
         }
 
         // Opened at a section while already open here.

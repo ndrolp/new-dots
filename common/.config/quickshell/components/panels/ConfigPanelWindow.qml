@@ -16,10 +16,17 @@ PanelWindow {
     property var targetWindow
     property real reveal: open ? 1 : 0
 
+    // What its panel shows (ConfigPanel.view).
+    readonly property var view: configPanel.view
+
     signal closeRequested()
 
     function openSection(section) {
         configPanel.openSection(section);
+    }
+
+    function restoreView(view) {
+        configPanel.restoreView(view);
     }
 
     visible: reveal > 0 && targetWindow !== null

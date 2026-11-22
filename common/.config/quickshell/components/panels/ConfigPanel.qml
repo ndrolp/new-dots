@@ -97,7 +97,29 @@ Rectangle {
             || (section.label + " " + section.keywords).toLowerCase().includes(query));
     }
 
+    // What it shows, as another panel takes it (restoreView): its section,
+    // search text, scroll position and Wallpapers view. The settings panel
+    // keeps it across moves between the centered position and a capsule.
+    readonly property var view: ({
+        section: currentSection,
+        query: sectionQuery,
+        scroll: sectionScroll.contentItem.contentY,
+        wallpaperView: wallpaperView,
+        selectedWallpaperMonitor: selectedWallpaperMonitor
+    })
+
     signal closeRequested()
+
+    // Shows `view` (another panel's `view`), without the transition.
+    function restoreView(view) {
+        if (!view || view.section === undefined)
+            return;
+        sectionQuery = view.query || "";
+        wallpaperView = view.wallpaperView || wallpaperView;
+        selectedWallpaperMonitor = view.selectedWallpaperMonitor || selectedWallpaperMonitor;
+        openSection(view.section);
+        sectionScroll.contentItem.contentY = view.scroll || 0;
+    }
 
     function loadCurrentSection() {
         let source;
@@ -341,6 +363,7 @@ Rectangle {
                     ScrollView {
                         id: sectionScroll
 
+                        objectName: "sectionScroll"
                         width: parent.width
                         height: parent.height - 56
                         clip: true

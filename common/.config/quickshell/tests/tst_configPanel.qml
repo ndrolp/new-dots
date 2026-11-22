@@ -193,4 +193,43 @@ TestCase {
             verify(x(title) + title.width < x(search), "the title runs into the search");
         }
     }
+
+    // The section's scroll area.
+    function sectionScrollOf(item) {
+        return all(item, child => child.objectName === "sectionScroll")[0].contentItem;
+    }
+
+    // Moving between the centered position and inside a capsule hands the
+    // panel's view to the other panel: it comes up on the same section, at
+    // the same scroll position, with the same search text.
+    function test_aPanelPicksUpAnotherPanelsView() {
+        const from = createTemporaryObject(panel, this, { height: 300 });
+        from.openSection("ControlCenter");
+        from.sectionQuery = "tiles";
+        const scroll = sectionScrollOf(from);
+        tryVerify(() => scroll.contentHeight > scroll.height + 60, 1000, "the section doesn't scroll");
+        scroll.contentY = 60;
+
+        const to = createTemporaryObject(panel, this, { height: 300 });
+        to.restoreView(from.view);
+
+        compare(to.currentSection, "ControlCenter");
+        compare(to.sectionQuery, "tiles");
+        compare(all(to, child => child.placeholderText === "Search settings")[0].text, "tiles");
+        tryCompare(sectionScrollOf(to), "contentY", 60, 1000);
+    }
+
+    // The view follows the panel as it is used.
+    function test_thePanelsViewFollowsItsSectionSearchAndScroll() {
+        const item = createTemporaryObject(panel, this, { height: 300 });
+        item.openSection("ControlCenter");
+        item.sectionQuery = "tiles";
+        const scroll = sectionScrollOf(item);
+        tryVerify(() => scroll.contentHeight > scroll.height + 40, 1000, "the section doesn't scroll");
+        scroll.contentY = 40;
+
+        compare(item.view.section, "ControlCenter");
+        compare(item.view.query, "tiles");
+        compare(item.view.scroll, 40);
+    }
 }
