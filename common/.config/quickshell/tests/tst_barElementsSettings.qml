@@ -80,7 +80,6 @@ TestCase {
                 property string barStyle: "opaque"
                 property int iconSize: 13
                 property int pillVerticalPadding: 4
-                property int workspacePadding: 4
                 property int spacing: 8
                 property bool elementBorder: false
                 property bool pillsTransparent: false
@@ -172,7 +171,6 @@ TestCase {
                 property int textSize: 13
                 property int iconSize: 13
                 property int pillVerticalPadding: 4
-                property int workspacePadding: 4
                 property int spacing: 8
                 property bool elementBorder: false
                 property bool pillsTransparent: false

@@ -329,7 +329,6 @@ const defaultProfile = {
     archButtonHorizontalPadding: 6,
     activeWorkspaceHorizontalPadding: 6,
     pillVerticalPadding: 3,
-    workspacePadding: 4,
     elementVerticalPadding: 5,
     pillsTransparent: false,
     transparentBarTopMargin: 0,
@@ -369,7 +368,7 @@ function defaultBarProfiles() {
     const compact = {
         barHeight: 30, horizontalPadding: 10, spacing: 4, groupHorizontalPadding: 4, radius: 6,
         workspaceButtonSize: 18, textSize: 13, iconSize: 13, archButtonHorizontalPadding: 5,
-        activeWorkspaceHorizontalPadding: 5, pillVerticalPadding: 2, workspacePadding: 3
+        activeWorkspaceHorizontalPadding: 5, pillVerticalPadding: 2
     };
     const compactOptions = { "workspaces": { hideEmpty: true, appCountVisible: false, radius: 6,
         verticalPadding: 4 } };
@@ -628,15 +627,15 @@ function profileValue(state, profileName, key) {
 const densityPresets = {
     "compact": {
         barHeight: 30, horizontalPadding: 8, spacing: 4,
-        pillVerticalPadding: 2, workspacePadding: 3, textSize: 13, iconSize: 13
+        pillVerticalPadding: 2, textSize: 13, iconSize: 13
     },
     "balanced": {
         barHeight: 34, horizontalPadding: 12, spacing: 8,
-        pillVerticalPadding: 3, workspacePadding: 4, textSize: 14, iconSize: 14
+        pillVerticalPadding: 3, textSize: 14, iconSize: 14
     },
     "spacious": {
         barHeight: 38, horizontalPadding: 16, spacing: 12,
-        pillVerticalPadding: 5, workspacePadding: 5, textSize: 15, iconSize: 15
+        pillVerticalPadding: 5, textSize: 15, iconSize: 15
     }
 };
 

@@ -61,7 +61,6 @@ TestCase {
                 property int barOpacity: 90
                 property int horizontalPadding: 12
                 property int pillVerticalPadding: 4
-                property int workspacePadding: 4
                 property int elementVerticalPadding: 4
                 property int transparentBarTopMargin: 8
                 property int groupRadius: 16

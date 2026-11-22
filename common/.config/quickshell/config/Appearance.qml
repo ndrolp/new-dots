@@ -65,7 +65,6 @@ QtObject {
     readonly property int archButtonHorizontalPadding: editedBarProfile.archButtonHorizontalPadding
     readonly property int activeWorkspaceHorizontalPadding: editedBarProfile.activeWorkspaceHorizontalPadding
     readonly property int pillVerticalPadding: editedBarProfile.pillVerticalPadding
-    readonly property int workspacePadding: editedBarProfile.workspacePadding
     readonly property int elementVerticalPadding: editedBarProfile.elementVerticalPadding
     readonly property bool pillsTransparent: editedBarProfile.pillsTransparent
     readonly property int transparentBarTopMargin: editedBarProfile.transparentBarTopMargin

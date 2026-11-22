@@ -66,7 +66,6 @@ Variants {
                 property int archButtonHorizontalPadding: bar.appearance.barProfileValue(panel.profileName, "archButtonHorizontalPadding")
                 property int activeWorkspaceHorizontalPadding: bar.appearance.barProfileValue(panel.profileName, "activeWorkspaceHorizontalPadding")
                 property int pillVerticalPadding: bar.appearance.barProfileValue(panel.profileName, "pillVerticalPadding")
-                property int workspacePadding: bar.appearance.barProfileValue(panel.profileName, "workspacePadding")
                 property int elementVerticalPadding: bar.appearance.barProfileValue(panel.profileName, "elementVerticalPadding")
                 property bool pillsTransparent: bar.appearance.barProfileValue(panel.profileName, "pillsTransparent")
                 property int transparentBarTopMargin: bar.appearance.barProfileValue(panel.profileName, "transparentBarTopMargin")
