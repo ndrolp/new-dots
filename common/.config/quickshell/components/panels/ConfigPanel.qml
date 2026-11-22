@@ -188,7 +188,9 @@ Rectangle {
     implicitWidth: 980
     implicitHeight: 560
     radius: appearance.radius
-    color: theme.surface
+    // Translucent: centered, the blurred desktop shows through. Inside a
+    // capsule the popup's surface replaces it (SettingsPopup.qml).
+    color: theme.translucentSurface
     border.color: theme.border
     border.width: 1
 

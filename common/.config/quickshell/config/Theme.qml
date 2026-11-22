@@ -27,6 +27,12 @@ QtObject {
     readonly property color textMuted: colorscheme.colours.textMuted
     readonly property color textDisabled: colorscheme.colours.textDisabled
 
+    // The centered settings panel's fill: the surface at 85% opacity, over
+    // the desktop Hyprland blurs behind it (layer rule on
+    // ndro-shell-settings). The text keeps its full colour, so it stays as
+    // readable as on the opaque surface.
+    readonly property color translucentSurface: Qt.rgba(surface.r, surface.g, surface.b, 0.85)
+
     // The faint fill a control on a settings card takes while hovered or
     // chosen. The card is filled with surfaceHover at half opacity, so this is
     // surfaceHover, opaque and tinted a fifth of the way toward the accent, to
