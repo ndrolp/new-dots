@@ -54,10 +54,14 @@ migration that seeds it (`config/ControlCenterTiles.js`), and the settings
 panel's Control center section that edits it (`ControlCenterSettings.qml`),
 the settings panel's own parts (`SettingsNumber`,
 `SettingsSwitchRow`, `SettingsChoice`, `SettingsGrid`…: a long label wraps instead of
-eliding, and a grid too narrow for two cells side by side is one column), its frame
+eliding, and a grid too narrow for two cells side by side is one column), the one
+hover they share (a faint fill, a pointing hand, an accent border on bordered
+controls, a growing slider thumb, a brighter switch, instant under reduce
+motion), its frame
 (`ConfigPanel.qml`: each section's title and description from its entry in
-the sections list, and the header's title, search and Done at the panel's
-margins) and the settings panel sections built from them, among
+the sections list, the header's title, search and Done at the panel's
+margins, and the selected sidebar section's fill, accent bar and accent text)
+and the settings panel sections built from them, among
 them the four Bar positions and the zone names of a side bar, which keep their
 saved keys, and the bar style as one choice of every style the profile model lists (`BarSizeStyleSettings.qml`, `BarElementsSettings.qml`), the Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named

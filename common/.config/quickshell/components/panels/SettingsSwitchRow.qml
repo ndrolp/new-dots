@@ -16,6 +16,7 @@ Panels.SettingsRow {
     signal toggled()
 
     height: Math.max(40, rowLabel.height + 16)
+    clickable: true
 
     Panels.SettingsIcon {
         id: rowIcon
@@ -47,6 +48,7 @@ Panels.SettingsRow {
         anchors.verticalCenter: parent.verticalCenter
         appearance: row.appearance
         checked: row.checked
+        hovered: row.hovered
     }
 
     TapHandler {

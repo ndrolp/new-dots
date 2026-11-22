@@ -237,7 +237,8 @@ Rectangle {
                     Repeater {
                         model: root.filteredSections
 
-                        // The selected section shows in the accent text; only hover fills a row.
+                        // The selected section has a fill, an accent bar on its left and
+                        // accent text; the others are filled only while hovered.
                         delegate: SettingsRow {
                             id: sectionRow
 
@@ -247,6 +248,25 @@ Rectangle {
                             width: parent.width
                             height: 38
                             appearance: root.appearance
+                            clickable: true
+                            color: selected || hovered ? theme.surfaceHover : "transparent"
+
+                            Rectangle {
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 3
+                                height: parent.height - 16
+                                radius: width / 2
+                                color: theme.accent
+                                opacity: sectionRow.selected ? 1 : 0
+
+                                Behavior on opacity {
+                                    NumberAnimation {
+                                        duration: root.appearance.motion.short
+                                        easing.type: root.appearance.motion.easing
+                                    }
+                                }
+                            }
 
                             Row {
                                 anchors.fill: parent
@@ -258,6 +278,10 @@ Rectangle {
                                     text: sectionRow.modelData.icon
                                     color: sectionRow.selected ? theme.accent : theme.textMuted
                                     font.pixelSize: 16
+
+                                    Behavior on color {
+                                        ColorAnimation { duration: root.appearance.motion.short }
+                                    }
                                 }
 
                                 ShellText {
@@ -265,6 +289,10 @@ Rectangle {
                                     text: sectionRow.modelData.label
                                     color: sectionRow.selected ? theme.accent : theme.text
                                     font.pixelSize: root.appearance.textSize
+
+                                    Behavior on color {
+                                        ColorAnimation { duration: root.appearance.motion.short }
+                                    }
                                 }
                             }
 
