@@ -53,7 +53,11 @@ top in both stages (`ControlCenterLayout.qml`): the media card above the
 player it follows, the track and its playback controls
 (`ControlCenterMediaCard.qml`, `MediaCard.js`), the capsule's media: the
 one colour from the art that tints its rich view, the most colourful of the
-art's quantized colours or the accent with no art (`MediaCard.artTint`), and
+art's quantized colours or the accent with no art (`MediaCard.artTint`), the
+colorscheme's background or text, whichever stands out, on that tint
+(`MediaCard.onTint`), what the quantizer reads the art from: local art as it
+is, web art (Spotify's) from its copy in the art cache, named by a hash of its
+URL (`MediaCard.artSource`, `artCacheDir`), and
 the media live element's moving bars: cava's while it works, else an
 equaliser that stops while paused, keeping the shared cava running while
 drawn (`tst_mediaCapsule.qml`, `MediaCard.liveBars`, `MediaLiveBars.qml`;
@@ -95,7 +99,8 @@ them the four Bar positions and the zone names of a side bar, which keep their
 saved keys, the bar style as one choice of every style the profile model lists, and the Bar section as one scroll of cards in order (Profile, Style, Bar, Groups, Elements, and Capsule only for a capsule), each with only the settings the bar uses on the edited profile's bar style, shown or hidden as soon as the style changes and a card with none of them hidden whole (`tst_barSettingStyles.qml` covers which settings each bar style shows, `BarProfileModel.barSettingShown`), no workspace bar padding (nothing on the bar reads it), Edge margin (stored under `transparentBarTopMargin`) keeping its stored value, and searching its card names landing on it (`BarSettings.qml`, `BarSizeStyleSettings.qml`, `BarElementsSettings.qml`, `ConfigPanel.qml`), the Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
 (`AudioOutputs.js`), how the volume is shown as text
-(`components/VolumeText.js`), what the popups and bar elements show for the
+(`components/VolumeText.js`), that a share or level is held between 0 and 1
+(`components/Clamp.js`, `tst_clamp.qml`), what the popups and bar elements show for the
 media position, audio outputs, Wi-Fi, the battery and the network
 and how a value stands on a side bar (`components/StatusText.js`) and what the audio bar element shows and how
 wide it is (`components/bar/AudioLevel.qml`), how scrolling turns into
@@ -156,7 +161,8 @@ as a wide fill bar with a glyph that follows the level (muted, the
 struck-through speaker and an empty grey bar) and bounces on each change but
 not under reduce motion, battery and Bluetooth as a glance card with one line
 and a small ring of the battery level, the device's own for Bluetooth when it
-reports one (`CapsuleChangeView.qml`, `tst_capsuleChangeView.qml`), which Bluetooth devices connected or
+reports one, low battery in the colorscheme's red, charging in the accent
+(`CapsuleChangeView.qml`, `tst_capsuleChangeView.qml`), which Bluetooth devices connected or
 disconnected since the last read, none of those connected at start
 (`services/BluetoothConnections.js`), which power change event a battery
 reading makes: plugging in, unplugging, and "Battery low" once at 15% while
@@ -184,12 +190,23 @@ drawn with its fill and bar border, that it springs to a new size (growing
 overshoots slightly and settles, shrinking doesn't bounce), its corners morph
 on the same spring and reduce motion moves it at once (`CapsuleSurface.qml`),
 which spring a size change takes and how its contents look a given time into a
-crossfade (`CapsuleMotion.js`, `tst_capsuleMotion.qml`), that its contents
-crossfade between views by key, the old one fading and shrinking away before
-the new one shows and fades and grows in (`CapsuleContentTransition.qml`),
-which view its row shows (`CapsuleRouting.rowView`), that a popup inside it
-crossfades its contents on the capsule's timings (`PopupSurface.qml`), how much of the pomodoro's ring, in its ring view and on its live element, is drawn for the time left in the phase, in which colour (work red, a break green) and the phase's name (`PomodoroRing.js`, `tst_pomodoroRing.qml`), the pomodoro's phases, focus then a running break then an unstarted focus, and each phase's length (`services/PomodoroPhases.js`, `tst_pomodoroPhases.qml`), that its corners come down round a
-popup inside (`CapsulePlacement.withPopup`), that it reaches past its row for its
+crossfade, the old contents gone before the new fade in a third of the way
+into the spring (`CapsuleMotion.js`, `tst_capsuleMotion.qml`), that its
+contents crossfade between views by key: the new one shown a frame after the
+change, so the shape moves at once, the old one fading and shrinking away
+while it does and the new one fading and growing in, each as
+`CapsuleMotion.contents` has it at the time elapsed, checked by phase and
+elapsed time, not the clock (`CapsuleContentTransition.qml`,
+`tst_capsuleContentTransition.qml`), which view its row shows
+(`CapsuleRouting.rowView`), that a popup inside it crossfades its contents on
+the capsule's timings (`PopupSurface.qml`), how much of the pomodoro's ring,
+in its ring view and on its live element, is drawn for the time left in the
+phase, in which colour (work red, a break green) and the phase's name
+(`PomodoroRing.js`, `tst_pomodoroRing.qml`), the pomodoro's phases, focus
+then a running break then an unstarted focus, each phase's length and what
+the popup outside a capsule says while one runs or is paused
+(`services/PomodoroPhases.js`, `tst_pomodoroPhases.qml`), that its corners
+come down round a popup inside (`CapsulePlacement.withPopup`), that it reaches past its row for its
 workspace pills, and where they sit inside it, under the row of a top
 capsule and above the row of a bottom one, centred on it, how it grows round a popup
 inside it (`CapsulePlacement.js`), that its window grows at once for a popup inside and

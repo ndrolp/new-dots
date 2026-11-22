@@ -71,11 +71,20 @@ TestCase {
         compare(CapsuleMotion.contents(instant, 0, false), { opacity: 0, scale: 0.95 });
     }
 
-    // How long each half of a contents transition runs: out, or the wait
-    // and in.
-    function test_aContentsTransitionsLength() {
-        compare(CapsuleMotion.contentsLength(motion, false), 110);
-        compare(CapsuleMotion.contentsLength(motion, true), 317);
-        compare(CapsuleMotion.contentsLength(Motion.motion(true), true), 0);
+    // Both halves of a crossfade run from the moment the view changes, while
+    // the capsule's shape springs: the old contents are gone before the new
+    // ones start fading in, a third of the way into the spring.
+    function test_theOldContentsAreGoneBeforeTheNewFadeIn() {
+        const third = motion.capsule.expand.duration / 3;
+
+        compare(CapsuleMotion.contents(motion, Math.floor(third), false).opacity, 0);
+        compare(CapsuleMotion.contents(motion, Math.floor(third), true).opacity, 0);
+        verify(CapsuleMotion.contents(motion, Math.ceil(third) + 20, true).opacity > 0);
+    }
+
+    // How long a crossfade runs: until the new contents are fully in.
+    function test_aCrossfadesLength() {
+        compare(CapsuleMotion.contentsLength(motion), 317);
+        compare(CapsuleMotion.contentsLength(Motion.motion(true)), 0);
     }
 }

@@ -15,11 +15,13 @@ TestCase {
         compare(durations.medium, 180);
         compare(durations.long, 220);
         compare(durations.frame, 50);
+        compare(durations.equaliser, 160);
     }
 
     function test_reduceMotionMakesEveryAnimationInstant() {
         const motion = Motion.motion(true);
-        compare([motion.brief, motion.short, motion.medium, motion.long, motion.frame], [0, 0, 0, 0, 0]);
+        compare([motion.brief, motion.short, motion.medium, motion.long, motion.frame, motion.equaliser],
+            [0, 0, 0, 0, 0, 0]);
     }
 
     function test_aMissingSettingKeepsTheAnimations() {

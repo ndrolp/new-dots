@@ -139,7 +139,7 @@ TestCase {
                 look: { card: "glance", icon: String.fromCodePoint(0xF0089), tone: "accent", text: "Charging · 55%",
                     ring: 0.55, highlighted: false } },
             { tag: "battery low", change: OsdChange.power({ kind: "low", percentage: 0.08 }),
-                look: { card: "glance", icon: "󰂃", tone: "muted", text: "Battery low · 8%",
+                look: { card: "glance", icon: "󰂃", tone: "warning", text: "Battery low · 8%",
                     ring: 0.08, highlighted: true } },
             { tag: "bluetooth with its battery",
                 change: OsdChange.bluetooth({ deviceName: "WH-1000XM4", connected: true,
@@ -163,5 +163,22 @@ TestCase {
 
     function test_inTheCapsuleEachChangeShowsItsCard(data) {
         compare(OsdChange.capsuleLook(data.change), data.look);
+    }
+
+    // Low battery warns in the colorscheme's red; charging keeps the accent
+    // and on battery the muted tone.
+    function test_aBatteryChangeTakesItsColour_data() {
+        return [
+            { tag: "low", kind: "low", colour: "red" },
+            { tag: "charging", kind: "charging", colour: "accent" },
+            { tag: "on battery", kind: "battery", colour: "textMuted" }
+        ];
+    }
+
+    function test_aBatteryChangeTakesItsColour(data) {
+        const theme = { red: "#ff0000", accent: "#00ff00", textMuted: "#888888", blue: "#0000ff",
+            yellow: "#ffff00" };
+        const look = OsdChange.capsuleLook(OsdChange.power({ kind: data.kind, percentage: 0.08 }));
+        compare(OsdChange.toneColor(look.tone, theme), theme[data.colour]);
     }
 }

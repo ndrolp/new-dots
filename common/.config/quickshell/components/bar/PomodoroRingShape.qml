@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
+import "../../config" as Config
 
 // A ring of the time left in a pomodoro's phase: a faint full track and, over
 // it, an arc from the top running clockwise for `fraction` of the way round
@@ -10,7 +11,8 @@ Item {
 
     // How much of the ring is drawn, 0 to 1.
     property real fraction: 1
-    property color color: "white"
+    // The phase's colour; the colorscheme's text until given one.
+    property color color: theme.text
     property color trackColor: Qt.rgba(color.r, color.g, color.b, 0.2)
     property real thickness: 3
     property int size: 16
@@ -19,6 +21,10 @@ Item {
 
     width: size
     height: size
+
+    Config.Theme {
+        id: theme
+    }
 
     Shape {
         anchors.fill: parent

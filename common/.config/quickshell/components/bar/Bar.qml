@@ -79,8 +79,8 @@ Variants {
                 property int barOpacity: bar.appearance.barProfileValue(panel.profileName, "barOpacity")
                 property bool capsuleNotifications: bar.appearance.barProfileValue(panel.profileName, "capsuleNotifications")
                 // On a capsule, only the row it shows (see CapsuleElements.drawnElements):
-                // the view its crossfade shows (rowView), so the old row
-                // stays while it fades out.
+                // the view its crossfade shows (rowView), the new one from
+                // the frame after a change; a capture of the old one fades out.
                 property var barElements: CapsuleElements.drawnElements({
                     barStyle: panel.barAppearance.barStyle,
                     barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
@@ -241,10 +241,12 @@ Variants {
             }
 
             // The capsule's row crossfades between its views, at rest,
-            // expanded or showing a change (CapsuleRouting.rowView): the old
-            // row fades and shrinks away, then the new one is drawn, which
-            // springs the capsule to fit it, and fades and grows in. Always
-            // "rest" on other bar styles, which never crossfade.
+            // expanded or showing a change (CapsuleRouting.rowView): the new
+            // row is drawn a frame after the change, which springs the
+            // capsule to fit it at once; a capture of the old row fades and
+            // shrinks away as it moves (BarContent's rowOutgoing) and the new
+            // one fades and grows in from a third of the way. Always "rest"
+            // on other bar styles, which never crossfade.
             CapsuleContentTransition {
                 id: rowView
 
@@ -369,6 +371,8 @@ Variants {
                     workspaceService: panel.workspaceService
                     capsuleChange: rowView.shownKey === "change" ? capsuleChange.change : null
                     rowContents: ({ opacity: rowView.contentsOpacity, scale: rowView.contentsScale })
+                    rowOutgoing: ({ capturing: rowView.capturing, opacity: rowView.outgoingOpacity,
+                        scale: rowView.outgoingScale })
                     workspacePillsLength: workspaceRow.width
 
                     onConfigRequested: function(screen) {

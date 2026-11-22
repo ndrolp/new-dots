@@ -14,7 +14,10 @@ const normal = {
     // The bar's background and elements moving across it.
     long: 220,
     // Smoothing between two frames the Cava bar element draws.
-    frame: 50
+    frame: 50,
+    // How often the media live element's equaliser steps, when cava can't
+    // run (components/bar/MediaLiveBars.qml); 0 stops it.
+    equaliser: 160
 };
 
 // The capsule's own motion (capsule bar style only; every other bar style and
@@ -23,15 +26,15 @@ const normal = {
 // faster and doesn't bounce; each is { duration, easing, overshoot }, for a
 // NumberAnimation's duration, easing.type and easing.overshoot (pick one with
 // components/bar/CapsuleMotion.js spring). Its contents crossfade with a
-// slight scale: the outgoing fade and shrink to `contentsScale` in
-// `contentsOut` ms; the incoming start at `contentsScale`, wait
-// `contentsDelay` ms (a third of `expand`) into the shape's motion, then fade
-// and grow to 1 in `contentsIn` ms. See components/bar/CapsuleContentTransition.qml.
+// slight scale while the shape moves, both from the moment it starts: the
+// outgoing fade and shrink to `contentsScale` in `contentsOut` ms; the
+// incoming start at `contentsScale`, wait `contentsDelay` ms (a third of
+// `expand`, see motion()) into the shape's motion, then fade and grow to 1 in
+// `contentsIn` ms. See components/bar/CapsuleContentTransition.qml.
 const capsule = {
     expand: { duration: 350, easing: 34 /* Easing.OutBack */, overshoot: 0.9 },
     collapse: { duration: 280, easing: 6 /* Easing.OutCubic */, overshoot: 0 },
     contentsOut: 110,
-    contentsDelay: 117,
     contentsIn: 200,
     contentsScale: 0.95
 };
@@ -53,7 +56,7 @@ function motion(reduceMotion) {
         expand: Object.assign({}, capsule.expand, { duration: time(capsule.expand.duration) }),
         collapse: Object.assign({}, capsule.collapse, { duration: time(capsule.collapse.duration) }),
         contentsOut: time(capsule.contentsOut),
-        contentsDelay: time(capsule.contentsDelay),
+        contentsDelay: time(Math.round(capsule.expand.duration / 3)),
         contentsIn: time(capsule.contentsIn),
         contentsScale: capsule.contentsScale
     };

@@ -4,6 +4,7 @@ import "../../config" as Config
 import "." as Panels
 import "../bar" as Bar
 import "../bar/PomodoroRing.js" as PomodoroRing
+import "../../services/PomodoroPhases.js" as PomodoroPhases
 
 // The pomodoro's popup: the time left, the focus durations and the timer
 // controls. Inside a capsule it is the pomodoro's ring view instead: a ring
@@ -156,8 +157,8 @@ BarPopup {
                 appearance: root.appearance
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
-                text: root.pomodoro.running ? "Focus session in progress"
-                    : root.pomodoro.started ? "Timer paused" : "Choose a focus duration"
+                text: PomodoroPhases.status(root.pomodoro.phase, root.pomodoro.running,
+                    root.pomodoro.started)
             }
 
             Row {

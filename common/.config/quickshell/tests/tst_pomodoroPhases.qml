@@ -31,4 +31,22 @@ TestCase {
     function test_eachPhaseHasItsLength(data) {
         compare(PomodoroPhases.length(data.phase, lengths), data.seconds);
     }
+
+    // What the pomodoro popup outside a capsule says under the time left:
+    // the phase that runs or is paused, or what to do before starting.
+    function test_theStatusSaysWhichPhaseRuns_data() {
+        return [
+            { tag: "focus running", phase: "work", running: true, started: true,
+                status: "Focus session in progress" },
+            { tag: "focus paused", phase: "work", running: false, started: true, status: "Timer paused" },
+            { tag: "break running", phase: "break", running: true, started: true, status: "Break in progress" },
+            { tag: "break paused", phase: "break", running: false, started: true, status: "Break paused" },
+            { tag: "not started", phase: "work", running: false, started: false,
+                status: "Choose a focus duration" }
+        ];
+    }
+
+    function test_theStatusSaysWhichPhaseRuns(data) {
+        compare(PomodoroPhases.status(data.phase, data.running, data.started), data.status);
+    }
 }

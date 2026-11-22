@@ -151,6 +151,18 @@ reading, and one after a battery appears, is how it already was and shows
 nothing; without a battery nothing shows. `modules/PowerWatch.qml` feeds
 it and shows each event as `OsdChange.power`.
 
+## Pomodoro
+
+`Pomodoro.qml` counts the pomodoro down a second at a time through its
+phases: focus (`work`, as long as the duration chosen) and then a break. A
+focus phase running out, or skipped, starts the break at once; a break
+running out, or skipped, leaves focus waiting, unstarted. `PomodoroPhases.js`
+holds those decisions (`next`, `length`) and a table of what each phase is:
+its name, the colorscheme colour its ring is drawn in (read by
+`components/bar/PomodoroRing.js`), which length it lasts and what the popup
+outside a capsule says while it runs or is paused (`status`). Tested without
+Quickshell.
+
 ## Night light
 
 `NightLight.qml` is the shell's one night light, driven from the control
