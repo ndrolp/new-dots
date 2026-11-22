@@ -10,6 +10,14 @@ function expanded(causes) {
     return Object.keys(causes || {}).some(cause => causes[cause] === true);
 }
 
+// Whether the pointer counts as hovering the capsule, the hover that expands
+// it (CapsuleHover.qml): over it, but not over one of its live elements, so a
+// click there opens that element's popup inside the capsule straight from
+// rest, with no expanded row first. Given { overCapsule, overLiveElement }.
+function hoverExpands(pointer) {
+    return !!pointer && pointer.overCapsule === true && pointer.overLiveElement !== true;
+}
+
 // Which view a capsule's row shows: "change" while it shows a change,
 // "expanded" while it is expanded, else "rest". Given { change, expanded }.
 // The row crossfades from one view to the next (CapsuleContentTransition.qml

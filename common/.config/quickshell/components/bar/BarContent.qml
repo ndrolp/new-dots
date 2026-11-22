@@ -8,6 +8,7 @@ import "BarElementItems.js" as BarElementItemsModel
 import "BarLayout.js" as BarLayout
 import "BarPlacement.js" as BarPlacement
 import "CapsulePlacement.js" as CapsulePlacement
+import "CapsuleRouting.js" as CapsuleRouting
 import "LiveElements.js" as LiveElements
 
 Item {
@@ -125,6 +126,20 @@ Item {
     // included, not elsewhere in its bar window.
     readonly property bool capsuleHovered: capsulePlace !== null && pointer.hovered
         && CapsulePlacement.contains(capsulePlace, pointer.point.position)
+    // Whether the pointer is over one of the capsule's live elements shown
+    // beside its pills.
+    readonly property bool liveElementHovered: capsuleHovered
+        && LiveElements.ids(liveElements).some(element => {
+            const item = elementItem(element);
+            return item !== null && item.shown
+                && item.contains(item.mapFromItem(root, pointer.point.position));
+        })
+    // Whether hovering expands the capsule: over it, not over a live element,
+    // whose click opens its popup straight from rest (CapsuleRouting.hoverExpands).
+    readonly property bool capsuleHoverExpands: CapsuleRouting.hoverExpands({
+        overCapsule: capsuleHovered,
+        overLiveElement: liveElementHovered
+    })
 
     HoverHandler {
         id: pointer
