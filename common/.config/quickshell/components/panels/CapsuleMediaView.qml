@@ -31,25 +31,25 @@ Item {
     // Where ColorQuantizer reads the art from (MediaCard.artSource): local art
     // as it is, web art (Spotify's) from its copy in the art cache, once
     // fetched.
-    readonly property var art: MediaCard.artSource(player ? player.trackArtUrl : "",
+    readonly property var artFile: MediaCard.artSource(player ? player.trackArtUrl : "",
         MediaCard.artCacheDir(Quickshell.env("XDG_CACHE_HOME"), Quickshell.env("HOME")))
     // The art the quantizer reads now: web art only once its copy is there.
     property string quantizedArt: ""
 
-    onArtChanged: fetchArt()
+    onArtFileChanged: fetchArt()
     Component.onCompleted: fetchArt()
 
     // Hands the art to the quantizer, fetching web art first; a fetch still
     // running for earlier art fetches this one once it ends.
     function fetchArt() {
-        if (!art.fetch) {
-            quantizedArt = art.source;
+        if (!artFile.fetch) {
+            quantizedArt = artFile.source;
             return;
         }
         quantizedArt = "";
         if (artFetch.running)
             return;
-        artFetch.fetched = art;
+        artFetch.fetched = artFile;
         artFetch.running = true;
     }
 
@@ -81,7 +81,7 @@ Item {
             "art-fetch", fetched ? fetched.url : "", fetched ? fetched.path : ""]
 
         onExited: exitCode => {
-            if (fetched !== root.art)
+            if (fetched !== root.artFile)
                 Qt.callLater(root.fetchArt);
             else if (exitCode === 0)
                 root.quantizedArt = fetched.source;
