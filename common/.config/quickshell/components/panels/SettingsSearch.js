@@ -34,10 +34,11 @@ function search(sections, query, barStyle) {
 
 // Where Enter on the search goes: the first setting listed under the first
 // section found, or that section when none is, as { section, setting } with
-// `setting` "" for a section; null when nothing is found.
+// `setting` the setting's entry, or null for the section; null when nothing
+// is found.
 function firstMatch(found) {
     if (found.length === 0)
         return null;
     const first = found[0];
-    return { section: first.section, setting: first.settings.length > 0 ? first.settings[0].label : "" };
+    return { section: first.section, setting: first.settings.length > 0 ? first.settings[0] : null };
 }

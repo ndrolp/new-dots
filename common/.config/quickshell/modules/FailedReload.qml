@@ -40,7 +40,7 @@ Scope {
         id: raise
 
         stdout: StdioCollector {
-            onStreamFinished: notice.shownId = FailedReload.shownId(text)
+            onStreamFinished: notice.shownId = FailedReload.parseShownId(text)
         }
     }
 

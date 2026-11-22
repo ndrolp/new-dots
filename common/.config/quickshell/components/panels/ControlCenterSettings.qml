@@ -49,8 +49,9 @@ Column {
                     width: parent.width
                     spacing: 2
 
+                    // Labelled, so the settings search finds the tile by its name.
                     Panels.SettingsRow {
-                        readonly property string tileLabel: ControlCenterTiles.tileLabels[tileDelegate.modelData.id]
+                        readonly property string label: ControlCenterTiles.tileLabels[tileDelegate.modelData.id]
                             || tileDelegate.modelData.id
 
                         width: parent.width
@@ -62,7 +63,7 @@ Column {
                             anchors.leftMargin: 12
                             anchors.verticalCenter: parent.verticalCenter
                             appearance: root.appearance
-                            text: parent.tileLabel
+                            text: parent.label
                             color: tileDelegate.tileShown ? theme.text : theme.textMuted
                         }
 

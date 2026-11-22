@@ -142,11 +142,11 @@ Column {
                 id: wallpaperTile
 
                 required property string fileName
-                readonly property string wallpaperPath:
-                    (wallpaperGrid.portrait
-                        ? root.wallpapers.verticalFolder
-                        : root.wallpapers.horizontalFolder)
-                    + "/" + fileName
+                // The file the row was listed from, never the folder plus its
+                // name: a changed folder's old rows can still arrive
+                // (config/WallpaperFiles.qml).
+                required property string filePath
+                readonly property string wallpaperPath: filePath
                 readonly property bool assigned:
                     root.wallpapers.pathFor(root.selectedWallpaperMonitor) === wallpaperPath
 

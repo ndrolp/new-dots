@@ -23,7 +23,7 @@ function escaped(text) {
 
 // The command that shows the notice for a failed reload, replacing the one
 // already shown (`shownId`, 0 for none) instead of stacking another. It
-// prints the notice's id (see shownId).
+// prints the notice's id (see parseShownId).
 function failedCommand(errorString, shownId) {
     const replace = shownId > 0 ? ["-r", String(shownId)] : [];
     return ["notify-send", "-a", "Quickshell", "-u", "critical", "-i", "dialog-error", "-p"]
@@ -32,7 +32,7 @@ function failedCommand(errorString, shownId) {
 }
 
 // The id of the notice shown, from what failedCommand prints; 0 if none.
-function shownId(output) {
+function parseShownId(output) {
     const id = parseInt(String(output || "").trim(), 10);
     return id > 0 ? id : 0;
 }
