@@ -1,4 +1,5 @@
 import Quickshell
+import Quickshell.Io
 import Quickshell.Widgets
 import QtQuick
 import QtQuick.Effects
@@ -24,8 +25,33 @@ Item {
     readonly property real artSize: 88
     readonly property bool artShown: artImage.status === Image.Ready
     readonly property color tint: MediaCard.artTint(quantizer.colors, artShown, theme.accent)
-    // What reads on the tint: dark on a light one, white on a dark one.
-    readonly property color onTint: tint.hslLightness > 0.6 ? "#1a1a1a" : "#ffffff"
+    // What reads on the tint: the colorscheme's background or text, whichever
+    // stands out on it (MediaCard.onTint).
+    readonly property color onTint: MediaCard.onTint(tint, theme)
+    // Where ColorQuantizer reads the art from (MediaCard.artSource): local art
+    // as it is, web art (Spotify's) from its copy in the art cache, once
+    // fetched.
+    readonly property var art: MediaCard.artSource(player ? player.trackArtUrl : "",
+        MediaCard.artCacheDir(Quickshell.env("XDG_CACHE_HOME"), Quickshell.env("HOME")))
+    // The art the quantizer reads now: web art only once its copy is there.
+    property string quantizedArt: ""
+
+    onArtChanged: fetchArt()
+    Component.onCompleted: fetchArt()
+
+    // Hands the art to the quantizer, fetching web art first; a fetch still
+    // running for earlier art fetches this one once it ends.
+    function fetchArt() {
+        if (!art.fetch) {
+            quantizedArt = art.source;
+            return;
+        }
+        quantizedArt = "";
+        if (artFetch.running)
+            return;
+        artFetch.fetched = art;
+        artFetch.running = true;
+    }
 
     implicitHeight: Math.max(artSize, info.implicitHeight)
     height: implicitHeight
@@ -37,9 +63,29 @@ Item {
     ColorQuantizer {
         id: quantizer
 
-        source: root.player && root.player.trackArtUrl ? root.player.trackArtUrl : ""
+        source: root.quantizedArt
         depth: 2
         rescaleSize: 64
+    }
+
+    // Fetches web art into the art cache, unless its copy is already there,
+    // then hands it to the quantizer if it is still the track's art.
+    Process {
+        id: artFetch
+
+        property var fetched: null
+
+        command: ["sh", "-c",
+            "[ -s \"$2\" ] && exit 0; mkdir -p \"$(dirname \"$2\")\" "
+                + "&& curl -sfL --max-time 15 -o \"$2.part\" \"$1\" && mv -f \"$2.part\" \"$2\"",
+            "art-fetch", fetched ? fetched.url : "", fetched ? fetched.path : ""]
+
+        onExited: exitCode => {
+            if (fetched !== root.art)
+                Qt.callLater(root.fetchArt);
+            else if (exitCode === 0)
+                root.quantizedArt = fetched.source;
+        }
     }
 
     // The soft glow behind the art: a blurred halo of the tint round it.

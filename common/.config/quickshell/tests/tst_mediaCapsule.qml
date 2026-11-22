@@ -27,6 +27,73 @@ TestCase {
         compare(MediaCard.artTint([grey], true, accent), grey);
     }
 
+    // What reads on the tint (the play button's glyph): of the
+    // colorscheme's background and text, the one further from the tint in
+    // lightness, so light on a dark tint and dark on a light one.
+    function test_whatReadsOnTheTintIsTheThemesBackgroundOrText_data() {
+        const dark = { r: 0.1, g: 0.1, b: 0.12 };
+        const light = { r: 0.92, g: 0.92, b: 0.9 };
+        return [
+            { tag: "light tint, dark theme", tint: { r: 0.95, g: 0.85, b: 0.4 },
+                colours: { background: dark, text: light }, reads: "background" },
+            { tag: "dark tint, dark theme", tint: { r: 0.2, g: 0.1, b: 0.4 },
+                colours: { background: dark, text: light }, reads: "text" },
+            { tag: "light tint, light theme", tint: { r: 0.95, g: 0.85, b: 0.4 },
+                colours: { background: light, text: dark }, reads: "text" },
+            { tag: "dark tint, light theme", tint: { r: 0.2, g: 0.1, b: 0.4 },
+                colours: { background: light, text: dark }, reads: "background" }
+        ];
+    }
+
+    function test_whatReadsOnTheTintIsTheThemesBackgroundOrText(data) {
+        compare(MediaCard.onTint(data.tint, data.colours), data.colours[data.reads]);
+    }
+
+    // What ColorQuantizer reads the art from: local art as it is; art on the
+    // web (Spotify's) from a copy fetched into the art cache, named by a hash
+    // of its URL so the same art is fetched once.
+    function test_localArtIsQuantizedAsItIs_data() {
+        return [
+            { tag: "file URL", url: "file:///tmp/cover.png" },
+            { tag: "path", url: "/tmp/cover.png" }
+        ];
+    }
+
+    function test_localArtIsQuantizedAsItIs(data) {
+        compare(MediaCard.artSource(data.url, "/home/me/.cache/quickshell/art"),
+            { source: data.url, fetch: null });
+    }
+
+    function test_webArtIsFetchedIntoTheCacheFirst() {
+        const url = "https://i.scdn.co/image/ab67616d0000b273e8b066f70c206551210d902b";
+        const art = MediaCard.artSource(url, "/home/me/.cache/quickshell/art");
+
+        verify(/^\/home\/me\/\.cache\/quickshell\/art\/[0-9a-f]{8,}$/.test(art.fetch.path), art.fetch.path);
+        compare(art.fetch.url, url);
+        compare(art.source, "file://" + art.fetch.path);
+    }
+
+    function test_theSameWebArtIsTheSameCacheFile() {
+        const cache = "/c";
+        const one = MediaCard.artSource("https://i.scdn.co/image/aaa", cache).fetch.path;
+
+        compare(MediaCard.artSource("https://i.scdn.co/image/aaa", cache).fetch.path, one);
+        verify(MediaCard.artSource("https://i.scdn.co/image/aab", cache).fetch.path !== one);
+        verify(MediaCard.artSource("http://i.scdn.co/image/aaa", cache).fetch.path !== one);
+    }
+
+    function test_noArtIsNothingToQuantize() {
+        compare(MediaCard.artSource("", "/c"), { source: "", fetch: null });
+        compare(MediaCard.artSource(undefined, "/c"), { source: "", fetch: null });
+    }
+
+    // Where fetched art is kept: under the user's cache, XDG_CACHE_HOME or
+    // else ~/.cache.
+    function test_theArtCacheIsUnderTheUsersCache() {
+        compare(MediaCard.artCacheDir("/x/cache", "/home/me"), "/x/cache/quickshell/art");
+        compare(MediaCard.artCacheDir("", "/home/me"), "/home/me/.cache/quickshell/art");
+    }
+
     function test_theLiveBarsAreCavasWhileItWorks() {
         compare(MediaCard.liveBars(true, ""), { source: "cava", moving: true });
     }

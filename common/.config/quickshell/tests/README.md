@@ -53,7 +53,11 @@ top in both stages (`ControlCenterLayout.qml`): the media card above the
 player it follows, the track and its playback controls
 (`ControlCenterMediaCard.qml`, `MediaCard.js`), the capsule's media: the
 one colour from the art that tints its rich view, the most colourful of the
-art's quantized colours or the accent with no art (`MediaCard.artTint`), and
+art's quantized colours or the accent with no art (`MediaCard.artTint`), the
+colorscheme's background or text, whichever stands out, on that tint
+(`MediaCard.onTint`), what the quantizer reads the art from: local art as it
+is, web art (Spotify's) from its copy in the art cache, named by a hash of its
+URL (`MediaCard.artSource`, `artCacheDir`), and
 the media live element's moving bars: cava's while it works, else an
 equaliser that stops while paused, keeping the shared cava running while
 drawn (`tst_mediaCapsule.qml`, `MediaCard.liveBars`, `MediaLiveBars.qml`;
