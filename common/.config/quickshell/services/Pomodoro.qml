@@ -1,10 +1,21 @@
 import Quickshell.Io
 import QtQuick
+import "PomodoroPhases.js" as PomodoroPhases
 
+// The pomodoro: a focus phase of the chosen duration, then a short break
+// (PomodoroPhases.js), counted down a second at a time.
 QtObject {
     id: root
 
     property int durationSeconds: 25 * 60
+    property int breakSeconds: 5 * 60
+    // "work" (focus) or "break".
+    property string phase: "work"
+    // How long the current phase is: what its ring is measured against.
+    readonly property int phaseSeconds: PomodoroPhases.length(phase, {
+        durationSeconds: durationSeconds,
+        breakSeconds: breakSeconds
+    })
     property int remainingSeconds: durationSeconds
     property bool running: false
     property bool started: false
@@ -17,6 +28,7 @@ QtObject {
 
     function selectMinutes(minutes) {
         durationSeconds = minutes * 60;
+        phase = "work";
         remainingSeconds = durationSeconds;
         running = false;
         started = false;
@@ -29,7 +41,7 @@ QtObject {
 
     function start() {
         if (remainingSeconds <= 0)
-            remainingSeconds = durationSeconds;
+            remainingSeconds = phaseSeconds;
 
         started = true;
         running = true;
@@ -42,18 +54,31 @@ QtObject {
     function cancel() {
         running = false;
         started = false;
+        phase = "work";
         remainingSeconds = durationSeconds;
     }
 
+    // Moves on to the next phase: from focus to a running break, from a
+    // break back to an unstarted focus.
+    function skip() {
+        const next = PomodoroPhases.next(phase, {
+            durationSeconds: durationSeconds,
+            breakSeconds: breakSeconds
+        });
+        phase = next.phase;
+        remainingSeconds = next.remainingSeconds;
+        started = next.started;
+        running = next.running;
+    }
+
     function complete() {
-        running = false;
-        remainingSeconds = 0;
-        started = false;
+        const wasBreak = phase === "break";
+        skip();
         completionSound.exec(["pw-play", "/usr/share/sounds/freedesktop/stereo/complete.oga"]);
-        completionNotification.exec([
-            "notify-send", "-a", "Pomodoro", "-u", "normal",
-            "Pomodoro complete", "Your focus timer has finished."
-        ]);
+        completionNotification.exec(wasBreak
+            ? ["notify-send", "-a", "Pomodoro", "-u", "normal", "Break over", "Time to focus again."]
+            : ["notify-send", "-a", "Pomodoro", "-u", "normal",
+                "Pomodoro complete", "Your focus timer has finished. Take a break."]);
     }
 
     property var tickTimer: Timer {
