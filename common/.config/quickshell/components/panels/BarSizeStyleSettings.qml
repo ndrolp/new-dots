@@ -80,7 +80,7 @@ Column {
             }
         }
 
-        // The edge margin is still stored as the transparent bar margin.
+        // Edge margin (stored under `transparentBarTopMargin`).
         Panels.BarSettingsGrid {
             appearance: root.appearance
             settings: [
