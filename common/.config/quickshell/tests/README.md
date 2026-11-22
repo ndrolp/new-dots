@@ -348,7 +348,10 @@ common/.config/quickshell/tests/run.sh
   `fixtures.read("appearance.json")`. It also gives the fixtures migrated to
   the current schema (`migrated()`), the in-memory bar profile state Quickshell
   starts with (`startedBarState()`), and helpers to apply the changes the
-  model returns (`withChanges`, `edited`).
+  model returns (`withChanges`, `edited`). `fixtures/wallpapers/` holds a
+  horizontal and a vertical wallpaper folder for `tst_wallpaperFiles.qml`: a
+  folder switched while the first is still being listed never gives a
+  thumbnail a file that isn't there.
 - The script uses the Qt 6 `qmltestrunner` (`/usr/lib/qt6/bin/qmltestrunner`;
   override with `QMLTESTRUNNER`). Extra arguments go to `qmltestrunner`, e.g.
   `run.sh test_savingUnderANewNameAddsAProfile`.

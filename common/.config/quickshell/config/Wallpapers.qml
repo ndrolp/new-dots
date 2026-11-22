@@ -2,7 +2,6 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick
-import Qt.labs.folderlistmodel
 import "WallpaperModel.js" as WallpaperModel
 
 QtObject {
@@ -77,19 +76,19 @@ QtObject {
             monitor.lastIpcObject.transform, monitor.width, monitor.height);
     }
 
-    function nextWallpaper(model, folder, currentPath) {
-        if (model.count < 2 || folder === "")
+    function nextWallpaper(model, currentPath) {
+        if (model.count < 2)
             return "";
 
         let currentIndex = -1;
         for (let index = 0; index < model.count; index++) {
-            if (folder + "/" + model.get(index, "fileName") === currentPath) {
+            if (model.pathAt(index) === currentPath) {
                 currentIndex = index;
                 break;
             }
         }
 
-        return folder + "/" + model.get((currentIndex + 1) % model.count, "fileName");
+        return model.pathAt((currentIndex + 1) % model.count);
     }
 
     function advanceAll() {
@@ -101,9 +100,8 @@ QtObject {
                 continue;
 
             const portrait = isPortraitMonitor(monitor);
-            const folder = portrait ? verticalFolder : horizontalFolder;
             const model = portrait ? verticalWallpapers : horizontalWallpapers;
-            const nextPath = nextWallpaper(model, folder, pathFor(monitor.description));
+            const nextPath = nextWallpaper(model, pathFor(monitor.description));
 
             if (nextPath !== "")
                 setWallpaper(monitor.description, nextPath);
@@ -140,20 +138,16 @@ QtObject {
         }
     }
 
-    property var horizontalWallpapers: FolderListModel {
+    property var horizontalWallpapers: WallpaperFiles {
         id: horizontalWallpapers
 
-        folder: root.horizontalFolder === "" ? "" : Qt.resolvedUrl(root.horizontalFolder)
-        nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp"]
-        showDirs: false
+        path: root.horizontalFolder
     }
 
-    property var verticalWallpapers: FolderListModel {
+    property var verticalWallpapers: WallpaperFiles {
         id: verticalWallpapers
 
-        folder: root.verticalFolder === "" ? "" : Qt.resolvedUrl(root.verticalFolder)
-        nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp"]
-        showDirs: false
+        path: root.verticalFolder
     }
 
     property var dynamicTimer: Timer {
