@@ -7,10 +7,9 @@ import "../../config/BarProfileModel.js" as BarProfileModel
 // "modified" indicator, Save/Discard and Duplicate/Rename/Delete. While there
 // are pending changes the choice is locked and Duplicate, Rename and Delete
 // are hidden.
-Column {
+Panels.SettingsCard {
     id: root
 
-    required property var appearance
     // Config.Monitors: Delete is refused for profiles a monitor draws.
     property var monitors
     readonly property bool modified: appearance.barProfileModified
@@ -92,7 +91,7 @@ Column {
 
     onModifiedChanged: if (modified) action = ""
 
-    width: parent ? parent.width : 0
+    title: "Profile"
     spacing: 10
 
     Config.Theme {

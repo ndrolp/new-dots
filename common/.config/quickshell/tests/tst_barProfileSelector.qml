@@ -256,9 +256,10 @@ TestCase {
         compare(loud.map(child => child.text), []);
     }
 
-    function test_nothingIsAFilledCard() {
+    // The selector is the Bar section's Profile card; nothing in it is filled.
+    function test_onlyItsOwnCardIsFilled() {
         const built = make();
-        const filled = all(built.item, child => child.border !== undefined && child.radius !== undefined
+        const filled = all(built.item, child => child !== built.item && child.border !== undefined && child.radius !== undefined
             && child.color.a > 0 && child.width > 200 && child.visible);
 
         compare(filled.length, 0);

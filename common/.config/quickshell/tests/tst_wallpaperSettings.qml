@@ -219,6 +219,25 @@ TestCase {
         verify(textOf(built.item, "Vertical wallpapers").visible);
     }
 
+    // Each view's groups sit in cards, the view choice too: no text is left
+    // outside one. (The settings panel test can't open this section: it
+    // needs Hyprland's monitors.)
+    function test_everyViewSitsInCards() {
+        const built = make();
+
+        for (const view of ["Selection", "Locations", "Schedule"]) {
+            viewChoice(built.item).chosen(view);
+            const texts = all(built.item, child => child.visible && child.font !== undefined
+                && typeof child.text === "string" && child.text !== "");
+            for (const text of texts) {
+                let card = text.parent;
+                while (card && !(card instanceof Panels.SettingsCard))
+                    card = card.parent;
+                verify(card, view + ": \"" + text.text + "\" is outside every card");
+            }
+        }
+    }
+
     function test_nothingInTheSectionIsBold() {
         const built = make();
         const bold = all(built.item, child => child.font !== undefined && child.font.bold);
@@ -230,7 +249,7 @@ TestCase {
         const built = make();
         const list = all(built.item, child => child instanceof GridView)[0];
 
-        compare(list.width, built.item.width);
+        compare(list.width, built.item.width - 32); // its card's width inside the padding
     }
 
     // A tile decoding the whole file keeps tens of MB per tile in memory.

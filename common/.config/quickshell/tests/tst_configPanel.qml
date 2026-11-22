@@ -11,6 +11,7 @@ TestCase {
     name: "ConfigPanel"
     width: 1000
     height: 600
+    visible: true
     when: windowShown
 
     Config.Theme {
@@ -152,6 +153,75 @@ TestCase {
             compare(x(search) + search.width, x(done) - 16);
             compare(search.width, 244);
             verify(x(title) + title.width < x(search), "the title runs into the search");
+        }
+    }
+
+    // The section shown: what the sidebar row opened, under the title.
+    function sectionShown(item) {
+        return all(item, child => child.objectName === "sectionContent")[0].item;
+    }
+
+    // The sections that need Quickshell (Hyprland's monitors, running a
+    // process) can't be built here; their own tests check their cards.
+    readonly property var quickshellSections: ["Widgets", "Session", "Wallpapers"]
+
+    function cardedSections(item) {
+        return item.sections.filter(entry => !quickshellSections.includes(entry.section));
+    }
+
+    // The card holding `child` inside `section`, or null when it sits outside
+    // every card.
+    function cardOf(child, section) {
+        for (let parent = child.parent; parent && parent !== section; parent = parent.parent) {
+            if (parent instanceof Panels.SettingsCard)
+                return parent;
+        }
+        return null;
+    }
+
+    // Every headed group in every section sits in a card, and nothing is left
+    // outside one but the section's own title and description; the text in
+    // a card stays inside its 16px padding.
+    function test_everythingInEverySectionSitsInACard() {
+        const item = createTemporaryObject(panel, this);
+
+        for (const entry of cardedSections(item)) {
+            item.openSection(entry.section);
+            const section = sectionShown(item);
+            verify(section, entry.section + " is not shown");
+            const texts = all(section, child => child.visible && child.font !== undefined
+                && typeof child.text === "string" && child.text !== "");
+
+            verify(all(section, child => child instanceof Panels.SettingsCard && child.visible).length > 0,
+                entry.section + " has no card");
+            for (const text of texts) {
+                const card = cardOf(text, section);
+                verify(card, entry.section + ": \"" + text.text + "\" is outside every card");
+                const left = text.mapToItem(card, 0, 0).x;
+                verify(left >= 16 && left + text.width <= card.width - 16 + 0.5,
+                    entry.section + ": \"" + text.text + "\" runs past its card's padding");
+            }
+        }
+    }
+
+    // Cards follow one another 12px apart, and a card holds no other card.
+    function test_cardsAreTwelvePixelsApart() {
+        const item = createTemporaryObject(panel, this);
+
+        for (const entry of cardedSections(item)) {
+            item.openSection(entry.section);
+            const section = sectionShown(item);
+            verify(section, entry.section + " is not shown");
+            const cards = all(section, child => child instanceof Panels.SettingsCard && child.visible)
+                .map(card => ({ card: card, y: card.mapToItem(section, 0, 0).y }))
+                .sort((a, b) => a.y - b.y);
+
+            for (let i = 0; i < cards.length; i++) {
+                verify(!cardOf(cards[i].card, section), entry.section + ": a card inside a card");
+                if (i > 0)
+                    compare(cards[i].y - (cards[i - 1].y + cards[i - 1].card.height), 12,
+                        entry.section + ": the gap above card " + i);
+            }
         }
     }
 }

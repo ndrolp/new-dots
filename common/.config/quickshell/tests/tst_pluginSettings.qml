@@ -158,15 +158,15 @@ TestCase {
         compare(previews.checked, true);
     }
 
-    function test_nothingIsBoldAndNoFilledCardsRemain() {
+    function test_nothingIsBoldAndOnlyTheCardsAreFilled() {
         const built = make();
         const bold = all(built.item, child => child.font !== undefined && child.font.bold);
-        // A card is a filled box around a setting; the slider's thin track
+        // Only the settings cards are filled boxes; the slider's thin track
         // and the switches' pills are not.
-        const cards = all(built.item, child => child instanceof Rectangle
+        const filled = all(built.item, child => child instanceof Rectangle && !(child instanceof Panels.SettingsCard)
             && child.height >= 40 && child.color.a > 0);
 
         compare(bold.length, 0);
-        compare(cards.length, 0);
+        compare(filled.length, 0);
     }
 }

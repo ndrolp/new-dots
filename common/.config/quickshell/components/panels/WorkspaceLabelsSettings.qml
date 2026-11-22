@@ -14,58 +14,57 @@ Column {
     readonly property bool glyphsEnabled: appearance.barElementOption("workspaces", "glyphsEnabled")
 
     width: parent ? parent.width : 0
-    spacing: 14
+    spacing: 12
 
-    Panels.SettingsHeading {
+    Panels.SettingsCard {
         appearance: root.appearance
-        text: "Workspace labels"
-        topPadding: 4
-    }
+        title: "Workspace labels"
 
-    Panels.SettingsGrid {
-        Panels.SettingsSwitchRow {
-            width: parent.cellWidth
-            appearance: root.appearance
-            label: "Use workspace glyphs"
-            checked: root.glyphsEnabled
-            onToggled: root.appearance.setBarElementOption("workspaces", "glyphsEnabled", !root.glyphsEnabled)
-        }
-    }
-
-    Panels.SettingsHint {
-        width: parent.width
-        appearance: root.appearance
-        text: "Leave a glyph empty to show its workspace number."
-    }
-
-    // Glyphs are a few characters, so their fields are short, five per line.
-    Grid {
-        width: parent.width
-        columns: 5
-        columnSpacing: 16
-        rowSpacing: 14
-
-        Repeater {
-            model: root.workspaceIds
-
-            delegate: Panels.SettingsField {
-                required property int modelData
-
-                width: (parent.width - parent.columnSpacing * (parent.columns - 1)) / parent.columns
+        Panels.SettingsGrid {
+            Panels.SettingsSwitchRow {
+                width: parent.cellWidth
                 appearance: root.appearance
-                label: "Workspace " + modelData
+                label: "Use workspace glyphs"
+                checked: root.glyphsEnabled
+                onToggled: root.appearance.setBarElementOption("workspaces", "glyphsEnabled", !root.glyphsEnabled)
+            }
+        }
 
-                Panels.SettingsInput {
-                    width: parent.width
+        Panels.SettingsHint {
+            width: parent.width
+            appearance: root.appearance
+            text: "Leave a glyph empty to show its workspace number."
+        }
+
+        // Glyphs are a few characters, so their fields are short, five per line.
+        Grid {
+            width: parent.width
+            columns: 5
+            columnSpacing: 16
+            rowSpacing: 14
+
+            Repeater {
+                model: root.workspaceIds
+
+                delegate: Panels.SettingsField {
+                    required property int modelData
+
+                    width: (parent.width - parent.columnSpacing * (parent.columns - 1)) / parent.columns
                     appearance: root.appearance
-                    text: root.appearance.barElementOption("workspaces", "glyphs")[modelData - 1] || ""
-                    placeholderText: String(modelData)
-                    maximumLength: 4
+                    label: "Workspace " + modelData
 
-                    onEdited: text => {
-                        const glyphs = root.appearance.barElementOption("workspaces", "glyphs").slice();
-                        glyphs[modelData - 1] = text;
-                        root.appearance.setBarElementOption("workspaces", "glyphs", glyphs);
+                    Panels.SettingsInput {
+                        width: parent.width
+                        appearance: root.appearance
+                        text: root.appearance.barElementOption("workspaces", "glyphs")[modelData - 1] || ""
+                        placeholderText: String(modelData)
+                        maximumLength: 4
+
+                        onEdited: text => {
+                            const glyphs = root.appearance.barElementOption("workspaces", "glyphs").slice();
+                            glyphs[modelData - 1] = text;
+                            root.appearance.setBarElementOption("workspaces", "glyphs", glyphs);
+                        }
                     }
                 }
             }

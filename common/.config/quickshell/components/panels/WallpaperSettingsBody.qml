@@ -16,7 +16,7 @@ Column {
     readonly property bool selectedPortrait: isPortraitMonitor(selectedWallpaperMonitor)
 
     width: parent ? parent.width : 0
-    spacing: 10
+    spacing: 12
 
     Config.Theme {
         id: theme
@@ -27,25 +27,25 @@ Column {
         return display !== undefined && display.portrait;
     }
 
-    Panels.SettingsChoice {
-        width: Math.min(parent.width, 360)
+    // Which of the views below is shown.
+    Panels.SettingsCard {
         appearance: root.appearance
-        options: ["Selection", "Locations", "Schedule"].map(view => ({ label: view, value: view }))
-        value: root.wallpaperView
-        onChosen: view => root.wallpaperView = view
+        title: "View"
+
+        Panels.SettingsChoice {
+            width: Math.min(parent.width, 360)
+            appearance: root.appearance
+            options: ["Selection", "Locations", "Schedule"].map(view => ({ label: view, value: view }))
+            value: root.wallpaperView
+            onChosen: view => root.wallpaperView = view
+        }
     }
 
-    Column {
-        width: parent.width
+    Panels.SettingsCard {
+        appearance: root.appearance
+        title: "Wallpaper folders"
         spacing: 8
         visible: root.wallpaperView === "Locations"
-
-        Panels.SettingsHeading {
-            width: parent.width
-            appearance: root.appearance
-            text: "Wallpaper folders"
-            topPadding: 4
-        }
 
         SettingsInput {
             width: parent.width
@@ -64,17 +64,11 @@ Column {
         }
     }
 
-    Column {
-        width: parent.width
+    Panels.SettingsCard {
+        appearance: root.appearance
+        title: "Dynamic wallpapers"
         spacing: 10
         visible: root.wallpaperView === "Schedule"
-
-        Panels.SettingsHeading {
-            width: parent.width
-            appearance: root.appearance
-            text: "Dynamic wallpapers"
-            topPadding: 4
-        }
 
         Panels.SettingsHint {
             width: parent.width
@@ -108,8 +102,11 @@ Column {
         }
     }
 
-    Column {
-        width: parent.width
+    // The chosen monitor's wallpapers, headed by its orientation.
+    Panels.SettingsCard {
+        appearance: root.appearance
+        title: root.selectedWallpaperMonitor === "" ? "Wallpapers"
+            : root.selectedPortrait ? "Vertical wallpapers" : "Horizontal wallpapers"
         spacing: 10
         visible: root.wallpaperView === "Selection"
 
@@ -119,14 +116,6 @@ Column {
             displays: root.displays
             value: root.selectedWallpaperMonitor
             onChosen: description => root.selectedWallpaperMonitor = description
-        }
-
-        Panels.SettingsHeading {
-            width: parent.width
-            appearance: root.appearance
-            text: root.selectedPortrait ? "Vertical wallpapers" : "Horizontal wallpapers"
-            topPadding: 4
-            visible: root.selectedWallpaperMonitor !== ""
         }
 
         Panels.SettingsHint {

@@ -10,22 +10,21 @@ Column {
     required property var appearance
 
     width: parent ? parent.width : 0
-    spacing: 14
+    spacing: 12
 
     Process {
         id: sessionAction
     }
 
-    Panels.SettingsHeading {
+    Panels.SettingsCard {
         appearance: root.appearance
-        text: "Idle"
-        topPadding: 4
-    }
+        title: "Idle"
 
-    Panels.SettingsHint {
-        width: parent.width
-        appearance: root.appearance
-        text: "Hypridle locks after 10 minutes, turns displays off after 10.5 minutes, and suspends after 30 minutes."
+        Panels.SettingsHint {
+            width: parent.width
+            appearance: root.appearance
+            text: "Hypridle locks after 10 minutes, turns displays off after 10.5 minutes, and suspends after 30 minutes."
+        }
     }
 
     Panels.SessionActions {
