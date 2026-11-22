@@ -82,6 +82,16 @@ test_the_links_exist_before_quickshell_starts() {
         || fail "Quickshell started before its colours led anywhere: $(cat "$CALLS")"
 }
 
+# A failed reload is told by the shell's own notice (modules/FailedReload.qml), so Quickshell's
+# reload popup is off: it would say the same twice.
+test_quickshell_starts_without_its_reload_popup() {
+    changer_home
+    cp "$QS_DIR/start.sh" "$HOME_DIR/.dotfiles/common/.config/quickshell/"
+    printf '#!/bin/sh\necho "QS_NO_RELOAD_POPUP=$QS_NO_RELOAD_POPUP" >>"$HOME/calls"\n' >"$HOME_DIR/bin/quickshell"
+    run_start_sh
+    grep -qx "QS_NO_RELOAD_POPUP=1" "$CALLS" || fail "started with: $(grep QS_NO_RELOAD_POPUP "$CALLS")"
+}
+
 test_starting_leaves_an_active_colorscheme_alone() {
     ACTIVE_COLORSCHEME=nord start_quickshell
     [[ "$(readlink "$(colorschemes)/active")" == nord ]] || fail "the active colorscheme changed"

@@ -63,14 +63,14 @@ TestCase {
             ListModel {
                 id: horizontalFiles
 
-                ListElement { fileName: "forest.png" }
-                ListElement { fileName: "lake.jpg" }
+                ListElement { fileName: "forest.png"; filePath: "/walls/h/forest.png" }
+                ListElement { fileName: "lake.jpg"; filePath: "/walls/h/lake.jpg" }
             }
 
             ListModel {
                 id: verticalFiles
 
-                ListElement { fileName: "tower.png" }
+                ListElement { fileName: "tower.png"; filePath: "/walls/v/tower.png" }
             }
 
             QtObject {
@@ -142,6 +142,18 @@ TestCase {
 
         compare(monitorChoice(built.item).value, "Philips");
         compare(tiles(built.item).map(tile => tile.wallpaperPath), ["/walls/v/tower.png"]);
+    }
+
+    // A tile is the file its row was listed from: while a changed folder is
+    // still being listed, the old folder's rows don't become the new folder
+    // plus their names (config/WallpaperFiles.qml).
+    function test_aTileIsTheFileItsRowListsNotTheFolderPlusItsName() {
+        const built = make();
+
+        built.wallpapers.horizontalFolder = "/walls/elsewhere";
+
+        compare(tiles(built.item).map(tile => tile.wallpaperPath).sort(),
+            ["/walls/h/forest.png", "/walls/h/lake.jpg"]);
     }
 
     function test_theViewsAreASegmentedChoiceThatSwitchesWhatIsShown() {

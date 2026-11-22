@@ -104,8 +104,8 @@
                         "id": "clock"
                     },
                     {
-                        "id": "pomodoro",
-                        "enabled": true
+                        "enabled": true,
+                        "id": "pomodoro"
                     },
                     {
                         "enabled": true,
@@ -119,8 +119,8 @@
                         "id": "recording"
                     },
                     {
-                        "id": "privacy",
-                        "enabled": true
+                        "enabled": true,
+                        "id": "privacy"
                     },
                     {
                         "enabled": true,
@@ -136,6 +136,7 @@
             "barOpacity": 80,
             "barPosition": "top",
             "barStyle": "opaque",
+            "capsuleNotifications": false,
             "elementBorder": false,
             "elementVerticalPadding": 8,
             "groupBorder": false,
@@ -150,9 +151,7 @@
             "spacing": 4,
             "textSize": 13,
             "transparentBarTopMargin": 7,
-            "workspaceButtonSize": 18,
-            "workspacePadding": 3,
-            "capsuleNotifications": false
+            "workspaceButtonSize": 18
         },
         "island": {
             "activeWorkspaceHorizontalPadding": 5,
@@ -190,8 +189,8 @@
                         }
                     },
                     {
-                        "id": "pomodoro",
                         "enabled": true,
+                        "id": "pomodoro",
                         "joinPrevious": true
                     },
                     {
@@ -225,8 +224,8 @@
                         }
                     },
                     {
-                        "id": "privacy",
                         "enabled": true,
+                        "id": "privacy",
                         "joinPrevious": true
                     },
                     {
@@ -330,6 +329,7 @@
             "barOpacity": 68,
             "barPosition": "top",
             "barStyle": "capsule",
+            "capsuleNotifications": false,
             "capsulePlaces": {
                 "appMenu": "hidden",
                 "arch": "hidden",
@@ -343,11 +343,11 @@
                 "media": "hidden",
                 "network": "shown",
                 "notifications": "hidden",
+                "pomodoro": "liveRight",
+                "privacy": "liveRight",
                 "recording": "liveRight",
                 "systemMonitor": "hidden",
-                "tray": "hidden",
-                "pomodoro": "liveRight",
-                "privacy": "liveRight"
+                "tray": "hidden"
             },
             "capsuleVerticalPadding": 0,
             "elementBorder": false,
@@ -364,9 +364,7 @@
             "spacing": 4,
             "textSize": 13,
             "transparentBarTopMargin": 8,
-            "workspaceButtonSize": 18,
-            "workspacePadding": 3,
-            "capsuleNotifications": false
+            "workspaceButtonSize": 18
         },
         "media": {
             "activeWorkspaceHorizontalPadding": 6,
@@ -477,8 +475,8 @@
                         "joinPrevious": true
                     },
                     {
-                        "id": "pomodoro",
                         "enabled": true,
+                        "id": "pomodoro",
                         "joinPrevious": true
                     },
                     {
@@ -495,8 +493,8 @@
                         "joinPrevious": true
                     },
                     {
-                        "id": "privacy",
                         "enabled": true,
+                        "id": "privacy",
                         "joinPrevious": true
                     },
                     {
@@ -516,6 +514,7 @@
             "barHeight": 30,
             "barOpacity": 55,
             "barStyle": "transparent",
+            "capsuleNotifications": false,
             "elementBorder": true,
             "elementVerticalPadding": 8,
             "groupBorder": true,
@@ -529,9 +528,7 @@
             "spacing": 4,
             "textSize": 13,
             "transparentBarTopMargin": 10,
-            "workspaceButtonSize": 18,
-            "workspacePadding": 3,
-            "capsuleNotifications": false
+            "workspaceButtonSize": 18
         },
         "work": {
             "activeWorkspaceHorizontalPadding": 5,
@@ -640,8 +637,8 @@
                         "joinPrevious": true
                     },
                     {
-                        "id": "pomodoro",
                         "enabled": true,
+                        "id": "pomodoro",
                         "joinPrevious": true
                     },
                     {
@@ -650,8 +647,8 @@
                         "joinPrevious": true
                     },
                     {
-                        "id": "privacy",
                         "enabled": true,
+                        "id": "privacy",
                         "joinPrevious": true
                     },
                     {
@@ -683,6 +680,7 @@
             "barOpacity": 78,
             "barPosition": "top",
             "barStyle": "transparent",
+            "capsuleNotifications": false,
             "elementBorder": true,
             "elementVerticalPadding": 5,
             "groupBorder": true,
@@ -697,9 +695,7 @@
             "spacing": 4,
             "textSize": 13,
             "transparentBarTopMargin": 10,
-            "workspaceButtonSize": 18,
-            "workspacePadding": 3,
-            "capsuleNotifications": false
+            "workspaceButtonSize": 18
         }
     },
     "controlCenterTiles": [
@@ -769,5 +765,5 @@
         "mode": "color",
         "resolution": 300
     },
-    "schemaVersion": 22
+    "schemaVersion": 23
 }

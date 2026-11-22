@@ -12,6 +12,8 @@ QtObject {
 
     readonly property bool ready: appearance.loaded && monitors.loaded
 
+    // `state` as the file's text: indented by 4 and ending in a newline, as
+    // the adapters write it, so a migration alone changes no formatting.
     function fileText(state) {
         return JSON.stringify(state, null, 4) + "\n";
     }

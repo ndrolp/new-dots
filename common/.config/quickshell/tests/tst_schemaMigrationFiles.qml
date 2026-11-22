@@ -44,6 +44,25 @@ TestCase {
         verify(JSON.parse(appearance.written).schemaVersion > 0);
     }
 
+    function trackedState(name) {
+        const request = new XMLHttpRequest();
+        request.open("GET", Qt.resolvedUrl("../config/" + name), false);
+        request.send();
+        return JSON.parse(request.responseText);
+    }
+
+    // The tracked files are committed already migrated, so the shell's first
+    // run doesn't rewrite them and leave the checkout changed.
+    function test_theTrackedFilesNeedNoMigration() {
+        const appearance = createTemporaryObject(fakeFile, this, { state: trackedState("appearance.json") });
+        const monitors = createTemporaryObject(fakeFile, this, { state: trackedState("monitors.json") });
+
+        createTemporaryObject(migrationComponent, this, { appearance: appearance, monitors: monitors });
+
+        compare(appearance.written, "");
+        compare(monitors.written, "");
+    }
+
     function test_alreadyMigratedFilesAreNotWritten() {
         const current = createTemporaryObject(fakeFile, this, { state: { schemaVersion: 0 } });
         const monitors = createTemporaryObject(fakeFile, this, { state: {} });

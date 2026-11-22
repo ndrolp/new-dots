@@ -44,9 +44,9 @@ TestCase {
     }
 
     function test_theShownNoticeIsTheIdNotifySendPrints() {
-        compare(FailedReload.shownId("17\n"), 17);
-        compare(FailedReload.shownId(""), 0);
-        compare(FailedReload.shownId("not an id"), 0);
+        compare(FailedReload.parseShownId("17\n"), 17);
+        compare(FailedReload.parseShownId(""), 0);
+        compare(FailedReload.parseShownId("not an id"), 0);
     }
 
     function test_aSuccessfulReloadWithdrawsTheShownNotice() {
