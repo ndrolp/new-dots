@@ -326,7 +326,7 @@ unlock, and telling a fallback or an unreadable file once
 `modules/MonitorToast.qml` needs Quickshell and isn't tested here).
 `monitor-notices.sh` runs `services/monitor-notices.sh` on a scratch folder, to
 show that a backup is told once and never replaces another.
-They run with QtTest outside of `qs`:
+They run with QtTest outside of `qs`, also from `scripts/test-all`:
 
 ```sh
 common/.config/quickshell/tests/run.sh
