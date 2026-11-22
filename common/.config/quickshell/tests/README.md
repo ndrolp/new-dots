@@ -61,7 +61,7 @@ that holds a headed group), the one
 hover they share (`SettingsHoverFill`: a faint fill that stands out from the card they sit on, a pointing hand, an accent border on bordered
 controls, a growing slider thumb, a brighter switch, instant under reduce
 motion), its frame
-(`ConfigPanel.qml`: each section's title and description from its entry in
+(`ConfigPanel.qml`: the colorscheme's surface at 85% opacity as its fill, each section's title and description from its entry in
 the sections list, the header's title, search and Done at the panel's
 margins, the selected sidebar section's fill, accent bar and accent text, its
 view (section, search text, scroll position) that another panel picks up, and
@@ -262,6 +262,10 @@ and time left (`components/bar/KeepAwakeElement.qml`,
 countdown: starting, restarting, running out and turning off by hand, the
 coarse time left a live element shows, and
 what the keybind's OSD says (`services/KeepAwakeState.js`),
+the failed reload notice: what a failed live reload shows (critical, the first
+error line, as text), a repeat failure replacing it and the next successful
+reload withdrawing it (`modules/FailedReload.js`; `FailedReload.qml` needs
+Quickshell and isn't tested here),
 which popup is open across the bars and which bar IPC opens one on
 (`modules/OpenPopup.js`), where the settings panel opens: inside the capsule of the bar it is
 asked from, or of the focused monitor's for IPC and other panels, centered on any other bar and
