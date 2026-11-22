@@ -2,7 +2,7 @@ import QtQuick
 import "../../config" as Config
 
 // An on/off pill: a hairline outline while off, filled with the accent while
-// on, brighter while hovered (or while its row is). It only shows `checked`;
+// on, the accent's hover colour while hovered (or while its row is). It only shows `checked`;
 // whoever owns the setting flips it.
 Rectangle {
     id: settingsSwitch
@@ -15,7 +15,7 @@ Rectangle {
     width: 40
     height: 22
     radius: height / 2
-    color: checked ? (hovered ? Qt.lighter(theme.accent, 1.15) : theme.accent) : "transparent"
+    color: checked ? (hovered ? theme.accentHover : theme.accent) : "transparent"
     border.color: checked ? color : hovered ? theme.textMuted : theme.border
     border.width: 1
 

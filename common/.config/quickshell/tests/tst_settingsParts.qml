@@ -862,6 +862,7 @@ TestCase {
         verify(off.switchItem.hovered);
         verify(!Qt.colorEqual(off.switchItem.border.color, offBorder));
         verify(!Qt.colorEqual(on.switchItem.color, onFill));
+        compare(on.switchItem.color, theme.accentHover);
     }
 
     // Every hover change eases over with the motion tokens: with reduce
