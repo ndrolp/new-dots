@@ -74,4 +74,39 @@ TestCase {
         compare(opened.where, "centered");
         compare(opened.window, capsuleBar);
     }
+
+    // The bar style of the profile its bar draws changes live (or a pending
+    // style change is discarded): the panel follows it and stays open.
+    function test_aBarStyleChangeAwayFromCapsuleCentersIt() {
+        const inside = SettingsPlace.openedOn(SettingsPlace.closed, capsuleBar, bars);
+        const restyled = [{ window: capsuleBar, monitor: "AOC", visible: true, capsule: false, capsuleHidden: false }];
+        const followed = SettingsPlace.followed(inside, restyled);
+        compare(followed.where, "centered");
+        compare(followed.window, capsuleBar);
+    }
+
+    function test_aBarStyleChangeBackToCapsulePutsItInsideAgain() {
+        const centered = { where: "centered", window: capsuleBar };
+        const followed = SettingsPlace.followed(centered, bars);
+        compare(followed.where, "inside");
+        compare(followed.window, capsuleBar);
+    }
+
+    function test_closedItStaysClosed() {
+        const last = { where: "closed", window: capsuleBar };
+        compare(SettingsPlace.followed(last, bars).where, "closed");
+    }
+
+    // Centered because the capsule is hidden for a fullscreen window: it
+    // stays centered.
+    function test_aHiddenCapsuleDoesntTakeItInside() {
+        const hidden = [{ window: capsuleBar, monitor: "AOC", visible: true, capsule: true, capsuleHidden: true }];
+        const centered = { where: "centered", window: capsuleBar };
+        compare(SettingsPlace.followed(centered, hidden).where, "centered");
+    }
+
+    function test_onAnotherBarItStaysWhereItIs() {
+        const centered = { where: "centered", window: opaqueBar };
+        compare(SettingsPlace.followed(centered, bars).where, "centered");
+    }
 }

@@ -61,7 +61,8 @@ controls, a growing slider thumb, a brighter switch, instant under reduce
 motion), its frame
 (`ConfigPanel.qml`: each section's title and description from its entry in
 the sections list, the header's title, search and Done at the panel's
-margins, and the selected sidebar section's fill, accent bar and accent text)
+margins, the selected sidebar section's fill, accent bar and accent text, and its
+view (section, search text, scroll position) that another panel picks up)
 and the settings panel sections built from them, among
 them the four Bar positions and the zone names of a side bar, which keep their
 saved keys, and the bar style as one choice of every style the profile model lists (`BarSizeStyleSettings.qml`, `BarElementsSettings.qml`), the Bluetooth device list and turning Bluetooth
@@ -255,7 +256,8 @@ what the keybind's OSD says (`services/KeepAwakeState.js`),
 which popup is open across the bars and which bar IPC opens one on
 (`modules/OpenPopup.js`), where the settings panel opens: inside the capsule of the bar it is
 asked from, or of the focused monitor's for IPC and other panels, centered on any other bar and
-while that capsule is hidden for a fullscreen window, and which of those closes it
+while that capsule is hidden for a fullscreen window, which of those closes it, and
+that it follows a live bar style change on its bar, moving between the two and staying open
 (`modules/SettingsPlace.js`; the popup inside, `SettingsPopup.qml`, is a Quickshell window and isn't
 tested here), one part of the shell opening another in its
 place unless its plugin is off (`modules/SwitchTo.js`), which bar element a popup opens under

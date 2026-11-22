@@ -46,3 +46,19 @@ function toggled(current, bars, focusedMonitor) {
         return { where: "closed", window: current.window };
     return shown(current, bars, focusedMonitor);
 }
+
+// The bar style of the profile its bar draws changed live (or a pending style
+// change was discarded): open inside a capsule that is no longer one, it moves
+// to the centered position; open centered on a bar whose capsule is now
+// available (CapsuleRouting.capsuleAvailable), it moves inside. It stays open
+// either way, and closed it stays closed.
+function followed(current, bars) {
+    if (!isOpen(current))
+        return current;
+    const bar = (bars || []).find(candidate => candidate.window === current.window);
+    if (current.where === "inside" && !(bar && bar.capsule === true))
+        return { where: "centered", window: current.window };
+    if (current.where === "centered" && CapsuleRouting.capsuleAvailable(bar))
+        return { where: "inside", window: current.window };
+    return current;
+}
