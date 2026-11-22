@@ -51,7 +51,14 @@ top in both stages (`ControlCenterLayout.qml`): the media card above the
 `resident` notifications, their highlighting and dismissing one
 (`ControlCenterOngoing.qml`), the media card itself: which
 player it follows, the track and its playback controls
-(`ControlCenterMediaCard.qml`, `MediaCard.js`), its
+(`ControlCenterMediaCard.qml`, `MediaCard.js`), the capsule's media: the
+one colour from the art that tints its rich view, the most colourful of the
+art's quantized colours or the accent with no art (`MediaCard.artTint`), and
+the media live element's moving bars: cava's while it works, else an
+equaliser that stops while paused, keeping the shared cava running while
+drawn (`tst_mediaCapsule.qml`, `MediaCard.liveBars`, `MediaLiveBars.qml`;
+`CapsuleMediaView.qml` needs Quickshell's ColorQuantizer and isn't tested
+here), its
 audio output subpage: opening it in place of the controls, the back arrow,
 the outputs it lists and choosing one (`ControlCenterLayout.qml`,
 `ControlCenterAudioOutputs.qml`), the control center's tile list: its order,
@@ -141,8 +148,13 @@ real fullscreen window, which only a capsule does and SUPER+I then leaves
 alone (`CapsuleRouting.js`; whether a workspace has one, not just a maximized
 window, is `WorkspaceState.hasFullscreen`), and that the capsule then shows that change
 and no bar element (`CapsuleElements.js`), for about 1.5 s from the latest one (`CapsuleChange.qml`),
-what each change shows, the same in the OSD and the capsule
-(`components/panels/OsdChange.js`), which Bluetooth devices connected or
+what each change shows in the OSD (`components/panels/OsdChange.js`), and
+in the capsule (`OsdChange.capsuleLook`, `levelIcon`): volume and brightness
+as a wide fill bar with a glyph that follows the level (muted, the
+struck-through speaker and an empty grey bar) and bounces on each change but
+not under reduce motion, battery and Bluetooth as a glance card with one line
+and a small ring of the battery level, the device's own for Bluetooth when it
+reports one (`CapsuleChangeView.qml`, `tst_capsuleChangeView.qml`), which Bluetooth devices connected or
 disconnected since the last read, none of those connected at start
 (`services/BluetoothConnections.js`), which power change event a battery
 reading makes: plugging in, unplugging, and "Battery low" once at 15% while
