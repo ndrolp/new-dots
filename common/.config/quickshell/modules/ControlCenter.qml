@@ -91,7 +91,7 @@ Scope {
         const window = bar.openPopup.window;
         bar.closePopup();
         if (window)
-            settings.openSectionOn("ControlCenter", window.screen, window);
+            settings.openSectionOn("ControlCenter", window);
     }
 
     Connections {

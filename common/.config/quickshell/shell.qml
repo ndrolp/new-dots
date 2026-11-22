@@ -386,6 +386,7 @@ ShellRoot {
         bookmarks: bookmarks
         plugins: plugins
         cava: cava
+        bar: bar
     }
 
     Modules.Bar {
@@ -411,7 +412,8 @@ ShellRoot {
             wallpapers: wallpaperSelector,
             launcher: applicationLauncher,
             clipboard: clipboardSelector,
-            unifiedSearch: unifiedSearch
+            unifiedSearch: unifiedSearch,
+            settings: settings
         })
     }
 }

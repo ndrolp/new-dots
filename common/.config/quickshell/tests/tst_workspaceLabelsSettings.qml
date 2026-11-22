@@ -1,5 +1,6 @@
 import QtQuick
 import QtTest
+import "../config/Motion.js" as Motion
 import "../components/panels" as Panels
 import "../config" as Config
 
@@ -48,6 +49,7 @@ TestCase {
 
                 property int radius: 12
                 property int textSize: 13
+                readonly property var motion: Motion.motion(false)
                 property var glyphs: ["", "", "", ""]
                 property var saved: []
 
@@ -136,10 +138,10 @@ TestCase {
         compare(built.appearance.saved, [["workspaces", "glyphsEnabled", false]]);
     }
 
-    function test_noFilledCardsAndNothingBold() {
+    function test_onlyTheCardsAreFilledAndNothingBold() {
         const built = make();
         const bold = all(built.item, child => child.font !== undefined && child.font.bold);
-        const filled = all(built.item, child => child instanceof Rectangle && child.radius > 0
+        const filled = all(built.item, child => child instanceof Rectangle && !(child instanceof Panels.SettingsCard) && child.radius > 0
             && child.color.a > 0 && child.height >= 32);
 
         compare(bold.length, 0);

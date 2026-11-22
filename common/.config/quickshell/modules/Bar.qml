@@ -35,7 +35,8 @@ Scope {
     // The control center module (modules/ControlCenter.qml).
     required property var controlCenter
     // The features that open inside a capsule instead of full-screen
-    // (CapsuleFeature.qml): { wallpapers, launcher, clipboard, unifiedSearch }.
+    // (CapsuleFeature.qml), and the settings panel (Settings.qml): { wallpapers,
+    // launcher, clipboard, unifiedSearch, settings }.
     required property var capsuleFeatures
 
     property var openPopup: OpenPopup.none
@@ -95,7 +96,7 @@ Scope {
         id: barWindows
 
         appearance: root.appearance
-        configOpen: root.settings.open
+        configOpen: root.settings.shown
         activePopup: root.openPopup.popup
         activePopupWindow: root.openPopup.window
         monitors: root.monitors
@@ -114,7 +115,7 @@ Scope {
         capsuleFeatures: root.capsuleFeatures
 
         onConfigRequested: function(screen, panelWindow) {
-            root.settings.toggleOn(screen, panelWindow);
+            root.settings.toggleOn(panelWindow);
         }
 
         onPanelReady: function(screen, panelWindow) {
@@ -130,8 +131,11 @@ Scope {
         }
 
         // A bar element that opens no popup was pressed. The settings button
-        // is one, so the focus grab is gone before the settings panel opens.
-        onPopupCloseRequested: root.closePopup()
+        // is one, so the focus grab is gone before the settings panel opens;
+        // the settings panel inside its capsule it leaves to its own click.
+        onPopupCloseRequested: function(element) {
+            root.openPopup = OpenPopup.pressedWithoutPopup(root.openPopup, element);
+        }
 
         onPopupClosed: function(popup, panelWindow) {
             root.openPopup = OpenPopup.closed(root.openPopup, popup, panelWindow);

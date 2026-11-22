@@ -35,7 +35,8 @@ adding or editing one file here.
   failure with the monitors. Each goes by itself after 20 seconds, saving nothing.
 - `Bar.qml`: a bar on every monitor, and which popup is open
   (`OpenPopup.js`, tested). Its settings button opens the settings panel on
-  that bar, and a bar element opens its popup (`barElementOpening` tells
+  that bar: inside its capsule, as the `settings` popup, or centered on any
+  other bar style (`Settings.qml`, `SettingsPlace.js`, tested), and a bar element opens its popup (`barElementOpening` tells
   first); one that opens none closes the open popup. Other modules open and close popups through its `openPopup`,
   `bars()`, `focusedMonitor()` and `closePopup()`. Its `capsule toggle`
   IPC call (SUPER+I) expands the focused monitor's capsule, or collapses it

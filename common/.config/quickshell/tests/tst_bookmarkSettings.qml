@@ -1,5 +1,6 @@
 import QtQuick
 import QtTest
+import "../config/Motion.js" as Motion
 import "../components/panels" as Panels
 import "../config" as Config
 
@@ -30,7 +31,7 @@ TestCase {
     // A bookmark's link is its URL; a search engine's is its search URL.
     function rows(item, kind) {
         const linkKey = kind === "bookmark" ? "url" : "searchUrl";
-        return all(item, child => child.linkKey === linkKey && child.hovered !== undefined);
+        return all(item, child => child.linkKey === linkKey && child.hovering !== undefined);
     }
 
     function textShown(item, text) {
@@ -62,6 +63,7 @@ TestCase {
 
                 property int radius: 12
                 property int textSize: 13
+                readonly property var motion: Motion.motion(false)
             }
 
             QtObject {
@@ -131,7 +133,7 @@ TestCase {
 
         compare(bookmarkRows.length, 2);
         for (const row of bookmarkRows) {
-            compare(row.width, built.item.width);
+            compare(row.width, built.item.width - 32); // its card's width inside the padding
             compare(row.color, Qt.rgba(0, 0, 0, 0));
         }
     }
@@ -204,7 +206,7 @@ TestCase {
         const built = make();
         const row = rows(built.item, "searchEngine")[0];
 
-        compare(row.width, built.item.width);
+        compare(row.width, built.item.width - 32); // its card's width inside the padding
         verify(sameLine(built.item, field(row, "glyph"), field(row, "label")));
         typeInto(field(row, "searchUrl"), "q=%s");
         press(button(built.item, "󰐕  Add search engine"));
@@ -225,10 +227,10 @@ TestCase {
         compare(built.bookmarks.calls, [["removeSearchEngine", 1]]);
     }
 
-    function test_nothingIsBoldAndNoFilledCardsRemain() {
+    function test_nothingIsBoldAndOnlyTheCardsAreFilled() {
         const built = make();
         const bold = all(built.item, child => child.font !== undefined && child.font.bold);
-        const filled = all(built.item, child => child instanceof Rectangle && child.visible
+        const filled = all(built.item, child => child instanceof Rectangle && !(child instanceof Panels.SettingsCard) && child.visible
             && child.color.a > 0);
 
         compare(bold.length, 0);

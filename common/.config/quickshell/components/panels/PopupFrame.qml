@@ -103,6 +103,13 @@ PopupWindow {
     // closes on a click outside. A notification inside the capsule holds one
     // only while its inline reply is written.
     property bool grabsFocus: true
+    // Whether a click outside it and its bar closes it. When not (the
+    // settings panel inside a capsule), that click only ends its focus grab,
+    // so the keyboard goes where it was clicked; a press on it takes the grab
+    // again, and with it the keyboard.
+    property bool closesOnClickOutside: true
+    // Its focus grab ended by a click outside while it stays open.
+    property bool grabReleased: false
     // Closed from outside while still open: a click outside it and its bar,
     // another grab taking over, or its bar hiding.
     signal dismissed()
@@ -135,8 +142,31 @@ PopupWindow {
         windows: PopupGrab.windows(frame, frame.barWindow, focusGrab.active)
         // Not `visible`, which turns true before the popup has a surface: the
         // grab would start with nothing to hold, and never activate.
-        active: frame.open && frame.backingWindowVisible && frame.grabsFocus
-        onCleared: frame.dismissed()
+        active: frame.open && frame.backingWindowVisible && frame.grabsFocus && !frame.grabReleased
+        onCleared: {
+            if (frame.closesOnClickOutside)
+                frame.dismissed();
+            else
+                frame.grabReleased = true;
+        }
+    }
+
+    onOpenChanged: grabReleased = false
+
+    // A press on it, once a click outside ended its grab, takes it again. It
+    // only watches, so the press still reaches what is under it.
+    Item {
+        anchors.fill: parent
+        z: 1
+
+        PointHandler {
+            enabled: frame.grabReleased
+            acceptedButtons: Qt.AllButtons
+            onActiveChanged: {
+                if (active)
+                    frame.grabReleased = false;
+            }
+        }
     }
 
     PopupSurface {

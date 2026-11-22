@@ -24,7 +24,7 @@ Scope {
     function arrange() {
         const window = OpenPopup.focusedBar(root.bar.bars(), root.bar.focusedMonitor());
         if (window !== null)
-            root.settings.openSectionOn("Monitors", window.screen, window);
+            root.settings.openSectionOn("Monitors", window);
     }
 
     // More said to an open notice gets the full time.

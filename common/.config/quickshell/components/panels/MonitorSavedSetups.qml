@@ -3,25 +3,17 @@ import "." as Panels
 
 // The saved monitor setups, each named after its monitors, with Forget as the only action. Forget
 // only asks, and waits out a change being tried out, which rewrites the same file.
-Column {
+Panels.SettingsCard {
     id: root
 
-    required property var appearance
     // As Services.MonitorSetups.savedSetups gives them.
     property var setups: []
     property bool canForget: true
     signal forgetAsked(string combination)
 
-    width: parent ? parent.width : 0
+    title: "Saved setups"
     spacing: 6
     visible: setups.length > 0
-
-    Panels.SettingsHeading {
-        width: parent.width
-        appearance: root.appearance
-        text: "Saved setups"
-        topPadding: 4
-    }
 
     Repeater {
         model: root.setups
@@ -32,7 +24,7 @@ Column {
             required property var modelData
             readonly property string setupName: modelData.name
 
-            width: root.width
+            width: parent.width
             height: forget.height
 
             Panels.ShellText {

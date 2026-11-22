@@ -10,7 +10,7 @@ Column {
     property var monitors
 
     width: parent ? parent.width : 0
-    spacing: 14
+    spacing: 12
 
     property string selectedMonitor: ""
 
@@ -18,18 +18,23 @@ Column {
         id: connectedDisplays
     }
 
-    Panels.SettingsMonitorChoice {
-        width: parent.width
+    Panels.SettingsCard {
         appearance: root.appearance
-        displays: connectedDisplays.values
-        value: root.selectedMonitor
-        onChosen: description => root.selectedMonitor = description
-    }
+        title: "Monitor"
 
-    Panels.SettingsHint {
-        width: parent.width
-        appearance: root.appearance
-        text: "Enable a widget, then choose where it appears on this monitor's desktop."
+        Panels.SettingsMonitorChoice {
+            width: parent.width
+            appearance: root.appearance
+            displays: connectedDisplays.values
+            value: root.selectedMonitor
+            onChosen: description => root.selectedMonitor = description
+        }
+
+        Panels.SettingsHint {
+            width: parent.width
+            appearance: root.appearance
+            text: "Enable a widget, then choose where it appears on this monitor's desktop."
+        }
     }
 
     Panels.DesktopWidgetsMonitorSettings {

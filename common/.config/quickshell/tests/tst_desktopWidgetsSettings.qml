@@ -270,6 +270,24 @@ TestCase {
         verify(textShown(built.item, "2. Media"));
     }
 
+    // Each group of a monitor's desktop widgets is a card, and no text is
+    // left outside one. (The settings panel test can't open this section:
+    // it needs Hyprland's monitors.)
+    function test_eachGroupIsACard() {
+        const built = make();
+        const cards = all(built.item, child => child instanceof Panels.SettingsCard);
+        const texts = all(built.item, child => child.visible && child.font !== undefined
+            && typeof child.text === "string" && child.text !== "");
+
+        compare(cards.map(card => card.title), ["Edges", "Background clock", "Widgets", "Stack order"]);
+        for (const text of texts) {
+            let card = text.parent;
+            while (card && !(card instanceof Panels.SettingsCard))
+                card = card.parent;
+            verify(card, "\"" + text.text + "\" is outside every card");
+        }
+    }
+
     function test_noFilledCardsOrBoldTextRemain() {
         const built = make();
         const bold = all(built.item, child => child.font !== undefined && child.font.bold);

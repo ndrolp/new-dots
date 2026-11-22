@@ -3,7 +3,8 @@ import "../../config" as Config
 import "." as Panels
 
 // A choice between more options than a SettingsChoice has room for: each its own hairline-bordered
-// chip, wrapping onto new lines. The chosen one has accent text and a faint fill. Choosing only asks:
+// chip, wrapping onto new lines. The chosen one has accent text and a faint fill; the one under the
+// pointer has the faint fill and an accent border. Choosing only asks:
 // whoever owns the setting sets `value`.
 Flow {
     id: control
@@ -23,18 +24,23 @@ Flow {
     Repeater {
         model: control.options
 
-        delegate: Rectangle {
+        delegate: Panels.SettingsHoverFill {
             id: option
 
             required property var modelData
             readonly property bool isChosen: control.value === modelData.value
 
+            appearance: control.appearance
             width: Math.min(optionLabel.implicitWidth + 20, control.width)
             height: 30
             radius: control.appearance.radius
-            color: isChosen ? theme.surfaceHover : "transparent"
-            border.color: theme.border
+            color: isChosen || hovering ? theme.cardHover : "transparent"
+            border.color: hovering ? theme.accent : theme.border
             border.width: 1
+
+            Behavior on border.color {
+                ColorAnimation { duration: control.appearance.motion.short }
+            }
 
             Panels.ShellText {
                 id: optionLabel

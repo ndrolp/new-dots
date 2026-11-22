@@ -24,6 +24,7 @@ Panels.SettingsField {
         SettingsSlider {
             id: numberSlider
 
+            appearance: cell.appearance
             width: parent.width - numberField.width - parent.spacing
             height: numberField.height
             from: cell.from

@@ -19,8 +19,9 @@ Item {
     // stage and the panels its tiles open, handed to its popup as one.
     required property var controlCenter
     // The features that open inside a capsule instead of full-screen
-    // (modules/CapsuleFeature.qml), handed to their popups: { wallpapers,
-    // launcher, clipboard, unifiedSearch }.
+    // (modules/CapsuleFeature.qml) and the settings panel (modules/Settings.qml),
+    // handed to their popups: { wallpapers, launcher, clipboard, unifiedSearch,
+    // settings }.
     required property var capsuleFeatures
     // The notifications this bar's capsule shows, with notifications in the
     // capsule on (components/bar/CapsuleNotifications.qml); null elsewhere.
@@ -122,6 +123,11 @@ Item {
     UnifiedSearchPopup {
         popups: root
         feature: root.capsuleFeatures.unifiedSearch
+    }
+
+    SettingsPopup {
+        popups: root
+        feature: root.capsuleFeatures.settings
     }
 
     CapsuleNotificationPopup {

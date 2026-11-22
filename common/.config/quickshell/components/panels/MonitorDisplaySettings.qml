@@ -4,7 +4,7 @@ import "../../config/BarProfileModel.js" as BarProfileModel
 
 // One monitor's settings in the Displays section: the workspaces it shows and
 // what the shell draws on it, for the monitor MonitorArrangeSettings has
-// selected.
+// selected, in the card headed by that monitor.
 Column {
     id: root
 
@@ -20,13 +20,6 @@ Column {
 
     width: parent ? parent.width : 0
     spacing: 14
-
-    Panels.SettingsHeading {
-        width: parent.width
-        appearance: root.appearance
-        text: root.monitorDescription
-        topPadding: 4
-    }
 
     Panels.SettingsGrid {
         Panels.SettingsNumber {

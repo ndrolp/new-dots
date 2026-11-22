@@ -158,11 +158,12 @@ Item {
             }));
             waitForRendering(item);
             const canvas = monitorOnCanvas(item, "DP-2").parent;
+            const canvasTop = canvas.mapToItem(item, 0, 0).y;
             const chip = containing(item, "Samsung " + long.slice(0, 5)).parent;
             const list = chip.parent;
-            verify(chip.mapToItem(item, 0, chip.height).y <= canvas.y);
+            verify(chip.mapToItem(item, 0, chip.height).y <= canvasTop);
             const last = containing(item, "2 AOC").parent;
-            verify(last.mapToItem(item, 0, last.height).y <= canvas.y);
+            verify(last.mapToItem(item, 0, last.height).y <= canvasTop);
             verify(chip.x + chip.width <= list.width);
         }
 
@@ -215,6 +216,24 @@ Item {
             verify(shown(item, "First workspace") !== null);
             verify(shown(item, "Bar profile") !== null);
             verify(shown(item, "1920x1080") !== null);
+        }
+
+        // The monitors to arrange, the selected monitor's settings under its
+        // name and the saved setups are each a card; no text is left outside
+        // one. (The settings panel test opens this section without monitors.)
+        function test_eachGroupOfTheSectionIsACard() {
+            const item = section();
+            const texts = all(item, child => child.visible && child.font !== undefined
+                && typeof child.text === "string" && child.text !== "");
+            const cards = all(item, child => child instanceof Panels.SettingsCard && child.visible);
+
+            compare(cards.map(card => card.title), ["Arrangement", item.selected.description, "Saved setups"]);
+            for (const text of texts) {
+                let card = text.parent;
+                while (card && !(card instanceof Panels.SettingsCard))
+                    card = card.parent;
+                verify(card, "\"" + text.text + "\" is outside every card");
+            }
         }
 
         function test_theRefreshListFollowsTheChosenResolution() {

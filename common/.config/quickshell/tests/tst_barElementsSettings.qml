@@ -78,6 +78,12 @@ TestCase {
                 property int textSize: 13
                 property string barPosition: "top"
                 property string barStyle: "opaque"
+                property int iconSize: 13
+                property int pillVerticalPadding: 4
+                property int workspacePadding: 4
+                property int spacing: 8
+                property bool elementBorder: false
+                property bool pillsTransparent: false
                 property var capsulePlaces: ({ arch: "shown", clock: "shown", battery: "shown",
                     audio: "hidden", media: "liveLeft", recording: "liveRight" })
                 property var barElements: ({
@@ -164,6 +170,12 @@ TestCase {
 
                 property int radius: 12
                 property int textSize: 13
+                property int iconSize: 13
+                property int pillVerticalPadding: 4
+                property int workspacePadding: 4
+                property int spacing: 8
+                property bool elementBorder: false
+                property bool pillsTransparent: false
                 property var barElements: ({
                     left: [],
                     center: [{ id: "media", enabled: true }],
@@ -258,7 +270,7 @@ TestCase {
         const row = elementRow(built.item, "Arch icon");
 
         verify(row);
-        compare(row.width, built.item.width);
+        compare(row.width, built.item.width - 32); // its card's width inside the padding
         compare(row.color, Qt.rgba(0, 0, 0, 0));
     }
 
@@ -646,10 +658,11 @@ TestCase {
         compare(loud.map(child => child.text), []);
     }
 
-    function test_nothingIsAFilledCard() {
+    // The elements sit in their settings card; nothing else is filled.
+    function test_onlyTheCardIsFilled() {
         const built = make();
         mouseClick(textOf(elementRow(built.item, "Workspaces"), "Workspaces"));
-        const filled = all(built.item, child => child.border !== undefined && child.radius !== undefined
+        const filled = all(built.item, child => !(child instanceof Panels.SettingsCard) && child.border !== undefined && child.radius !== undefined
             && child.color.a > 0 && child.width > 200 && child.height > 20 && child.visible);
 
         compare(filled.length, 0);

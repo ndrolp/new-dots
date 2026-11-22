@@ -3,7 +3,8 @@ import "." as Panels
 
 // An on/off setting: a settings row with its label on the left and a switch
 // on the right. A tap anywhere on the row only asks to toggle: whoever owns
-// the setting flips `checked`.
+// the setting flips `checked`. A label too long for its space wraps, and the
+// row grows to hold it.
 Panels.SettingsRow {
     id: row
 
@@ -14,7 +15,8 @@ Panels.SettingsRow {
     readonly property alias switchItem: rowSwitch
     signal toggled()
 
-    height: 40
+    height: Math.max(40, rowLabel.height + 16)
+    clickable: true
 
     Panels.SettingsIcon {
         id: rowIcon
@@ -27,6 +29,8 @@ Panels.SettingsRow {
     }
 
     Panels.SettingsLabel {
+        id: rowLabel
+
         anchors.left: row.icon !== "" ? rowIcon.right : parent.left
         anchors.leftMargin: row.icon !== "" ? 8 : 12
         anchors.right: rowSwitch.left
@@ -44,6 +48,7 @@ Panels.SettingsRow {
         anchors.verticalCenter: parent.verticalCenter
         appearance: row.appearance
         checked: row.checked
+        hovering: row.hovering
     }
 
     TapHandler {
