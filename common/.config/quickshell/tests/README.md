@@ -122,7 +122,12 @@ live elements, `BarElementItems.js`), that only the
 pointer over the capsule itself counts as hovering it, where the capsule sits
 around that row and its pill row, where the pills and the live elements go in
 that row, centred and closing up when one isn't shown, and that only the
-capsule takes clicks in its bar window (`CapsulePlacement.js`), that any one cause holds it expanded and that
+capsule takes clicks in its bar window (`CapsulePlacement.js`), that the
+at-rest row, for profiles mixing shown, live (left and right) and hidden
+elements like the island one, shows its elements evenly apart, centred on the
+capsule and on its pill row with equal padding at both ends, the square
+network, Bluetooth and tray elements padded like the others unless they draw
+their own pill (`tst_capsuleRestingRow.qml`, `BarElementItems.elementLength`), that any one cause holds it expanded and that
 SUPER+I acts only on the focused monitor's capsule (`CapsuleRouting.js`),
 that hovering it expands it only after a moment and collapses it a while after
 the pointer leaves (`CapsuleHover.qml`), that SUPER+I holds it expanded until
