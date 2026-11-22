@@ -34,7 +34,8 @@ contents, and that it ignores input while closing (`PopupSurface.qml`; `PopupFra
 tested here), that a popup's reveal waits for its freshly mapped window's
 first frames (`PopupWarmUp.qml`), what a popup's focus grab holds
 (`PopupGrab.js`), which bar elements close the open popup when pressed
-(`BarPopupCloser.qml`), the shared popup parts (`PopupTitle`,
+(`BarPopupCloser.qml`), and that the settings button's press leaves the settings panel inside
+a capsule to its own click (`OpenPopup.pressedWithoutPopup`), the shared popup parts (`PopupTitle`,
 `PopupHeader`, `PopupRow`…), the control center's tiles and sliders,
 active, muted, disabled and icon-only (`ControlTile.qml`, `ControlSlider.qml`;
 `ControlCenterBody.qml` itself needs Quickshell's services and isn't tested
@@ -245,7 +246,11 @@ countdown: starting, restarting, running out and turning off by hand, the
 coarse time left a live element shows, and
 what the keybind's OSD says (`services/KeepAwakeState.js`),
 which popup is open across the bars and which bar IPC opens one on
-(`modules/OpenPopup.js`), one part of the shell opening another in its
+(`modules/OpenPopup.js`), where the settings panel opens: inside the capsule of the bar it is
+asked from, or of the focused monitor's for IPC and other panels, centered on any other bar and
+while that capsule is hidden for a fullscreen window, and which of those closes it
+(`modules/SettingsPlace.js`; the popup inside, `SettingsPopup.qml`, is a Quickshell window and isn't
+tested here), one part of the shell opening another in its
 place unless its plugin is off (`modules/SwitchTo.js`), which bar element a popup opens under
 and that the pomodoro shows only while one is started
 (`components/bar/BarElementItems.js`), the notifications in the control
