@@ -181,7 +181,7 @@ Un destino al que se puede enviar el sonido del sistema: auriculares, altavoces,
 _Avoid_: Sink, dispositivo, device
 
 **Settings panel** (panel de ajustes):
-La ventana que se abre desde la shell para editar toda su configuración, dividida en secciones. No es un popup: no pertenece a ningún bar element. En un monitor con cápsula se abre dentro de ella, como el lanzador o el portapapeles; con cualquier otro estilo de barra se abre centrada en la pantalla.
+La ventana que se abre desde la shell para editar toda su configuración, dividida en secciones. No es un popup: no pertenece a ningún bar element. En un monitor con cápsula se abre dentro de ella, como el lanzador o el portapapeles; con cualquier otro estilo de barra se abre centrada en la pantalla. Su búsqueda encuentra secciones y ajustes sueltos por su nombre (solo los que el estilo de barra del perfil editado usa); cada ajuste encontrado aparece bajo su sección en la barra lateral, y al elegirlo se abre la sección, se desplaza hasta él y se resalta un momento.
 _Avoid_: Config panel, settings window, preferencias
 
 **Section** (sección):

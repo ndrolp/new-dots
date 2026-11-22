@@ -65,7 +65,13 @@ motion), its frame
 the sections list, the header's title, search and Done at the panel's
 margins, the selected sidebar section's fill, accent bar and accent text, its
 view (section, search text, scroll position) that another panel picks up, and
-every section's content in cards 12px apart, its text inside their padding)
+every section's content in cards 12px apart, its text inside their padding),
+its search landing on a setting (`tst_settingsSearch.qml`, `SettingsSearch.js`:
+a setting's label lists it in the sidebar under its section, only when the
+edited profile's bar style shows it; choosing it, or Enter on the first
+match, opens its section, scrolls it into view and flashes it with the accent;
+section-only matches still list just the section; and the sections list's
+index of setting labels matches what each section shows on every bar style)
 and the settings panel sections built from them, among
 them the four Bar positions and the zone names of a side bar, which keep their
 saved keys, the bar style as one choice of every style the profile model lists, and the Bar section as one scroll of cards in order (Profile, Style, Bar, Groups, Elements, and Capsule only for a capsule), each with only the settings the bar uses on the edited profile's bar style, shown or hidden as soon as the style changes and a card with none of them hidden whole (`tst_barSettingStyles.qml` covers which settings each bar style shows, `BarProfileModel.barSettingShown`), no workspace bar padding (nothing on the bar reads it), Edge margin (stored under `transparentBarTopMargin`) keeping its stored value, and searching its card names landing on it (`BarSettings.qml`, `BarSizeStyleSettings.qml`, `BarElementsSettings.qml`, `ConfigPanel.qml`), the Bluetooth device list and turning Bluetooth
