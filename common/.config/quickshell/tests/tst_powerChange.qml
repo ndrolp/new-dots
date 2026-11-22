@@ -129,7 +129,7 @@ TestCase {
                 shown: { icon: String.fromCodePoint(0xF007F), tone: "muted", label: "On battery · 64%",
                     level: null, highlighted: false, compact: true } },
             { tag: "battery low", event: { kind: "low", percentage: 0.15 },
-                shown: { icon: String.fromCodePoint(0xF0083), tone: "muted", label: "Battery low · 15%",
+                shown: { icon: String.fromCodePoint(0xF0083), tone: "warning", label: "Battery low · 15%",
                     level: null, highlighted: true, compact: true } }
         ];
     }

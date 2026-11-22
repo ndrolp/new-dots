@@ -10,7 +10,8 @@ import "../StatusText.js" as StatusText
 // the player can seek, clicking the progress bar, or dragging along it and
 // letting go, moves playback there. With more than one player, "N more
 // players" expands a list of the others; choosing one makes the popup follow
-// it until the popup closes.
+// it until the popup closes. Inside a capsule it is the capsule's rich media
+// view instead (CapsuleMediaView), with "N more players" kept under it.
 BarPopup {
     id: root
 
@@ -90,7 +91,7 @@ BarPopup {
     Component.onCompleted: updatePlayer()
 
     popup: "media"
-    popupWidth: 440
+    popupWidth: inside ? 420 : 440
 
     Config.Theme {
         id: theme
@@ -107,7 +108,15 @@ BarPopup {
         width: parent.width
         spacing: 10
 
+        CapsuleMediaView {
+            width: parent.width
+            visible: root.inside
+            appearance: root.appearance
+            media: root
+        }
+
         Row {
+            visible: !root.inside
             width: parent.width
             spacing: 12
 
@@ -176,67 +185,10 @@ BarPopup {
                     visible: !!root.player && root.player.lengthSupported
                     spacing: 4
 
-                    Item {
-                        id: seekBar
-
-                        readonly property bool active: seekArea.containsMouse || root.dragFraction >= 0
-
+                    MediaSeekBar {
+                        appearance: root.appearance
+                        media: root
                         width: parent.width
-                        // Taller than the bar, so it is easy to hit.
-                        height: 14
-
-                        PopupProgress {
-                            id: progress
-
-                            appearance: root.appearance
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width
-                            height: seekBar.active && root.seekable ? 6 : 4
-                            radius: height / 2
-                            fraction: root.player && root.player.length > 0
-                                ? root.shownPosition / root.player.length : 0
-
-                            Behavior on height {
-                                NumberAnimation { duration: root.appearance.motion.short }
-                            }
-                        }
-
-                        Rectangle {
-                            visible: seekBar.active && root.seekable
-                            width: 12
-                            height: 12
-                            radius: 6
-                            anchors.verticalCenter: parent.verticalCenter
-                            x: Math.max(0, Math.min(parent.width - width,
-                                parent.width * progress.fraction - width / 2))
-                            color: theme.accent
-                        }
-
-                        MouseArea {
-                            id: seekArea
-
-                            function fractionAt(x) {
-                                return Math.max(0, Math.min(1, x / width));
-                            }
-
-                            anchors.fill: parent
-                            enabled: root.seekable
-                            hoverEnabled: true
-                            cursorShape: root.seekable ? Qt.PointingHandCursor : Qt.ArrowCursor
-                            preventStealing: true
-
-                            onPressed: mouse => root.dragFraction = fractionAt(mouse.x)
-                            onPositionChanged: mouse => {
-                                if (pressed)
-                                    root.dragFraction = fractionAt(mouse.x);
-                            }
-                            onReleased: mouse => {
-                                const fraction = fractionAt(mouse.x);
-                                root.dragFraction = -1;
-                                root.seekTo(fraction * root.player.length);
-                            }
-                            onCanceled: root.dragFraction = -1
-                        }
                     }
 
                     Item {

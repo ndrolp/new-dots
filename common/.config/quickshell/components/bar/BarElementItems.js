@@ -55,3 +55,34 @@ var elementsWithoutPopup = Object.freeze(["arch", "workspaces", "currentApp", "r
 function opensPopup(element) {
     return !elementsWithoutPopup.includes(element);
 }
+
+// The room along the bar between a bar element's edge and its content, at
+// both ends.
+var elementPadding = 8;
+
+// The bar elements that show a lone glyph, drawn in a square pill
+// (workspaceButtonSize long) while they draw their own.
+var squareElements = Object.freeze(["network", "bluetooth", "tray"]);
+
+// Whether bar element `element` draws its own pill: not while its pills are
+// transparent, on a docked bar, or in a group of two or more of the elements
+// `isShown` says are shown, which draws one background for them all.
+function drawsOwnPill(element, profile, isShown) {
+    if (profile.pillsTransparent || BarProfileModel.docked(profile))
+        return false;
+    const zone = BarProfileModel.elementZone(profile.barElements, element);
+    return !BarProfileModel.zoneGroups(profile.barElements, zone, isShown)
+        .some(group => group.length > 1 && group.indexOf(element) !== -1);
+}
+
+// How long bar element `element` is along the bar around its content,
+// `contentLength` long: elementPadding at both ends, so what the elements
+// show sits evenly apart and a capsule's row is centred on what it shows. A
+// square element that draws its own pill keeps it square: the pills' edges
+// are what sits evenly apart then. Takes the bar profile, with the bar
+// elements it draws, and which of them are shown, `isShown(id)`.
+function elementLength(element, contentLength, profile, isShown) {
+    if (squareElements.indexOf(element) !== -1 && drawsOwnPill(element, profile, isShown))
+        return profile.workspaceButtonSize;
+    return contentLength + elementPadding * 2;
+}

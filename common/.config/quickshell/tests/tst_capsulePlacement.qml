@@ -199,4 +199,17 @@ TestCase {
     function test_aPopupInsideGrowsTheCapsuleRoundIt(data) {
         compare(CapsulePlacement.withPopup(row, data.popup, data.barPosition), data.place);
     }
+
+    // Round a popup the capsule is a rounded rectangle, no longer a full
+    // pill: its corners come down to 20 px (the popup's 8 px corners plus its
+    // 12 px padding), the CapsuleSurface spring morphing them there and back.
+    // A row already rounder than that keeps its own.
+    function test_aPopupInsideRoundsTheCapsulesCornersLess() {
+        const deep = { x: 800, y: 0, width: 320, height: 64, radius: 32 };
+        const popup = { width: 424, height: 300 };
+
+        compare(CapsulePlacement.withPopup(deep, popup, "top").radius, 20);
+        compare(CapsulePlacement.withPopup(deep, null, "top").radius, 32);
+        compare(CapsulePlacement.withPopup(row, popup, "top").radius, 16);
+    }
 }

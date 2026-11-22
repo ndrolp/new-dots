@@ -8,6 +8,7 @@ import "BarElementItems.js" as BarElementItemsModel
 import "BarLayout.js" as BarLayout
 import "BarPlacement.js" as BarPlacement
 import "CapsulePlacement.js" as CapsulePlacement
+import "CapsuleRouting.js" as CapsuleRouting
 import "LiveElements.js" as LiveElements
 
 Item {
@@ -37,6 +38,16 @@ Item {
     // The change a capsule shows instead of its row (see CapsuleChange.qml),
     // or null while it shows none.
     property var capsuleChange: null
+    // How a capsule's row looks mid-crossfade between its views, { opacity,
+    // scale } (CapsuleContentTransition in Bar.qml): its bar elements, group
+    // backgrounds and the change it shows take it; its live elements and
+    // workspace pills don't. { 1, 1 } on any other bar style.
+    property var rowContents: ({ opacity: 1, scale: 1 })
+    // How the row before that crossfade looks, captured, as it fades out
+    // while the capsule springs to the new one, { capturing, opacity, scale }
+    // (CapsuleContentTransition's outgoing look): `capturing` the frame it is
+    // captured. Never shown on any other bar style.
+    property var rowOutgoing: ({ capturing: false, opacity: 0, scale: 1 })
     // How long the capsule's workspace pills are along the bar.
     property real workspacePillsLength: 0
 
@@ -120,6 +131,20 @@ Item {
     // included, not elsewhere in its bar window.
     readonly property bool capsuleHovered: capsulePlace !== null && pointer.hovered
         && CapsulePlacement.contains(capsulePlace, pointer.point.position)
+    // Whether the pointer is over one of the capsule's live elements shown
+    // beside its pills.
+    readonly property bool liveElementHovered: capsuleHovered
+        && LiveElements.ids(liveElements).some(element => {
+            const item = elementItem(element);
+            return item !== null && item.shown
+                && item.contains(item.mapFromItem(root, pointer.point.position));
+        })
+    // Whether hovering expands the capsule: over it, not over a live element,
+    // whose click opens its popup straight from rest (CapsuleRouting.hoverExpands).
+    readonly property bool capsuleHoverExpands: CapsuleRouting.hoverExpands({
+        overCapsule: capsuleHovered,
+        overLiveElement: liveElementHovered
+    })
 
     HoverHandler {
         id: pointer
@@ -326,6 +351,8 @@ Item {
         // As large as the bar content and where it is, so what is inside
         // keeps its places.
         Item {
+            id: rowLayer
+
             x: -rowClip.x
             y: -rowClip.y
             width: root.width
@@ -338,6 +365,8 @@ Item {
                 x: root.changePlace.x
                 y: root.changePlace.y
                 change: root.capsuleChange
+                opacity: root.rowContents.opacity
+                scale: root.rowContents.scale
                 appearance: root.appearance
                 theme: theme
             }
@@ -370,6 +399,8 @@ Item {
                             width: rect.width
                             height: rect.height
                             radius: root.appearance.groupRadius
+                            opacity: root.rowContents.opacity
+                            scale: root.rowContents.scale
                             color: Qt.rgba(theme.surface.r, theme.surface.g, theme.surface.b,
                                 theme.surface.a * root.appearance.barOpacity / 100)
                             border.width: root.appearance.groupBorder ? 1 : 0
@@ -387,6 +418,9 @@ Item {
             ArchButton {
                 id: archButton
 
+                opacity: root.rowContents.opacity
+                scale: root.rowContents.scale
+
                 visible: root.elementVisible("arch")
                 x: root.elementX("arch")
                 y: root.elementY("arch")
@@ -401,6 +435,9 @@ Item {
             CurrentApp {
                 id: currentApp
 
+                opacity: root.rowContents.opacity
+                scale: root.rowContents.scale
+
                 x: root.elementX("currentApp")
                 y: root.elementY("currentApp")
                 grouped: root.elementGrouped("currentApp")
@@ -411,6 +448,9 @@ Item {
 
             AppMenu {
                 id: appMenuElement
+
+                opacity: root.rowContents.opacity
+                scale: root.rowContents.scale
 
                 x: root.elementX("appMenu")
                 y: root.elementY("appMenu")
@@ -426,6 +466,9 @@ Item {
             SystemMonitor {
                 id: systemMonitor
 
+                opacity: root.rowContents.opacity
+                scale: root.rowContents.scale
+
                 visible: root.elementVisible("systemMonitor")
                 x: root.elementX("systemMonitor")
                 y: root.elementY("systemMonitor")
@@ -437,6 +480,9 @@ Item {
 
             Workspaces {
                 id: workspaces
+
+                opacity: root.rowContents.opacity
+                scale: root.rowContents.scale
                 visible: root.elementVisible("workspaces")
                 x: root.elementX("workspaces")
                 y: root.elementY("workspaces")
@@ -464,6 +510,7 @@ Item {
                 deviceCaptures: root.deviceCaptures
                 cava: root.cava
                 barVisible: root.barVisible
+                rowContents: root.rowContents
                 elementX: element => root.elementX(element)
                 elementY: element => root.elementY(element)
                 elementGrouped: element => root.elementGrouped(element)
@@ -471,6 +518,33 @@ Item {
                 onPopupRequested: function(popup) {
                     root.popupRequested(popup);
                 }
+            }
+        }
+
+        // The row as it was before the capsule's view changed, captured the
+        // frame before the new row is drawn and fading and shrinking away
+        // where it was while the capsule springs to the new one
+        // (rowOutgoing). Drawn only then.
+        ShaderEffectSource {
+            id: rowGhost
+
+            readonly property bool capturing: root.rowOutgoing.capturing
+
+            x: -rowClip.x
+            y: -rowClip.y
+            width: root.width
+            height: root.height
+            sourceItem: rowLayer
+            live: false
+            hideSource: false
+            enabled: false
+            visible: capturing || root.rowOutgoing.opacity > 0
+            opacity: root.rowOutgoing.opacity
+            scale: root.rowOutgoing.scale
+
+            onCapturingChanged: {
+                if (capturing)
+                    scheduleUpdate();
             }
         }
     }

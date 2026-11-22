@@ -5,6 +5,7 @@ import Quickshell.Services.Mpris
 import Quickshell.Services.Pipewire
 import Quickshell.Services.SystemTray
 import Quickshell.Services.UPower
+import Quickshell.Widgets
 import QtQuick
 import "../../config" as Config
 import "../../config/BarProfileModel.js" as BarProfileModel
@@ -16,6 +17,7 @@ import "../panels/ControlCenterNames.js" as Names
 import "../panels/MediaCard.js" as MediaCard
 import "RecordingIndicator.js" as RecordingIndicator
 import "PrivacyIndicator.js" as PrivacyIndicator
+import "PomodoroRing.js" as PomodoroRing
 import ".." as Components
 
 // The bar elements that need no component of their own (notifications,
@@ -42,6 +44,10 @@ Item {
     // Whether the bar holding these elements is shown on its monitor.
     property bool barVisible: true
     property string activePopup: ""
+    // How the capsule's row looks mid-crossfade, { opacity, scale }
+    // (CapsuleContentTransition): every element in it takes it, live ones
+    // beside the pills don't. Always { 1, 1 } on any other bar style.
+    property var rowContents: ({ opacity: 1, scale: 1 })
     // Where each element goes, provided by the bar's single walk per zone.
     property var elementX: element => 0
     property var elementY: element => 0
@@ -92,12 +98,24 @@ Item {
         return BarLayout.size(appearance, length, thickness === undefined ? itemHeight : thickness);
     }
 
-    // The size of an element around its content, with the padding along the bar.
-    function sizeAround(content, thickness) {
-        return elementSize(BarLayout.itemLength(appearance, {
+    // How long `content` is along the bar.
+    function contentLength(content) {
+        return BarLayout.itemLength(appearance, {
             width: content.implicitWidth,
             height: content.implicitHeight
-        }) + 16, thickness);
+        });
+    }
+
+    // The size of an element around its content, with the padding along the bar.
+    function sizeAround(content, thickness) {
+        return elementSize(contentLength(content) + BarElementItems.elementPadding * 2, thickness);
+    }
+
+    // The size of a square element (network, Bluetooth, tray) around its
+    // glyph, `content` (see BarElementItems.elementLength).
+    function squareSize(element, content) {
+        return elementSize(BarElementItems.elementLength(element, contentLength(content), appearance,
+            id => itemVisible(id)));
     }
 
     PwObjectTracker {
@@ -210,6 +228,8 @@ Item {
         readonly property var size: root.sizeAround(notificationContent)
 
         visible: root.itemVisible("notifications")
+        opacity: root.rowContents.opacity
+        scale: root.rowContents.scale
         x: root.elementX("notifications")
         y: root.elementY("notifications")
         width: size.width
@@ -439,10 +459,33 @@ Item {
                 // The title runs sideways on a side bar, the note stays upright.
                 rotation: BarLayout.turn(root.appearance)
 
+                // Live, beside a capsule's pills, the art stands in for the
+                // note, as a small rounded thumbnail, once it loads.
+                ClippingRectangle {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: mediaItem.live && mediaThumbnail.status === Image.Ready
+                    width: mediaItem.sizes.iconSize + 4
+                    height: width
+                    radius: Math.max(3, width / 4)
+                    color: "transparent"
+
+                    Image {
+                        id: mediaThumbnail
+
+                        anchors.fill: parent
+                        source: mediaItem.live && root.player ? root.player.trackArtUrl : ""
+                        sourceSize.width: 48
+                        sourceSize.height: 48
+                        fillMode: Image.PreserveAspectCrop
+                        asynchronous: true
+                    }
+                }
+
                 ShellText {
                     anchors.verticalCenter: parent.verticalCenter
                     rotation: -parent.rotation
                     visible: root.shown("media").icon
+                        && !(mediaItem.live && mediaThumbnail.status === Image.Ready)
                     text: "󰎈"
                     color: theme.green
                     font.pixelSize: mediaItem.sizes.iconSize
@@ -466,6 +509,23 @@ Item {
                     transform: Translate {
                         id: mediaLabelTranslation
                     }
+                }
+
+                // Live, moving bars follow: cava's, or an equaliser when cava
+                // can't run (MediaCard.liveBars).
+                MediaLiveBars {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: mediaItem.live
+                    height: Math.round(mediaItem.sizes.iconSize * 0.8)
+                    width: implicitWidth
+                    barCount: 4
+                    barWidth: 2
+                    cava: root.cava
+                    motion: root.appearance.motion
+                    playing: !!root.player && root.player.isPlaying
+                    drawing: mediaItem.live && root.liveActive("media") && root.barVisible
+                    smoothing: bars.source === "cava" ? root.appearance.motion.frame
+                        : Math.min(root.appearance.motion.frame * 3, equaliserInterval)
                 }
 
                 SequentialAnimation {
@@ -523,6 +583,8 @@ Item {
         readonly property int barCount: options.barCount
 
         visible: root.itemVisible("cava")
+        opacity: root.rowContents.opacity
+        scale: root.rowContents.scale
         x: root.elementX("cava")
         y: root.elementY("cava")
         width: size.width
@@ -573,6 +635,8 @@ Item {
         readonly property var size: root.sizeAround(audioContent)
 
         visible: root.itemVisible("audio")
+        opacity: root.rowContents.opacity
+        scale: root.rowContents.scale
         x: root.elementX("audio")
         y: root.elementY("audio")
         width: size.width
@@ -614,9 +678,13 @@ Item {
     Rectangle {
         id: bluetoothButton
 
-        readonly property var size: root.elementSize(root.appearance.workspaceButtonSize)
+        // Square while it draws its own pill, padded like the others when
+        // not (BarElementItems.elementLength).
+        readonly property var size: root.squareSize("bluetooth", bluetoothGlyph)
 
         visible: root.itemVisible("bluetooth")
+        opacity: root.rowContents.opacity
+        scale: root.rowContents.scale
         x: root.elementX("bluetooth")
         y: root.elementY("bluetooth")
         width: size.width
@@ -638,6 +706,8 @@ Item {
         }
 
         ShellText {
+            id: bluetoothGlyph
+
             anchors.centerIn: parent
             text: root.bluetoothAdapter && root.bluetoothAdapter.enabled ? "󰂯" : "󰂲"
             color: theme.blue
@@ -654,9 +724,13 @@ Item {
     Rectangle {
         id: trayButton
 
-        readonly property var size: root.elementSize(root.appearance.workspaceButtonSize)
+        // Square while it draws its own pill, padded like the others when
+        // not (BarElementItems.elementLength).
+        readonly property var size: root.squareSize("tray", trayGlyph)
 
         visible: root.itemVisible("tray")
+        opacity: root.rowContents.opacity
+        scale: root.rowContents.scale
         x: root.elementX("tray")
         y: root.elementY("tray")
         width: size.width
@@ -678,6 +752,8 @@ Item {
         }
 
         ShellText {
+            id: trayGlyph
+
             anchors.centerIn: parent
             text: StatusText.trayIcon(root.appearance.barPosition, root.activePopup === "tray")
             color: theme.green
@@ -694,9 +770,13 @@ Item {
     Rectangle {
         id: networkButton
 
-        readonly property var size: root.elementSize(root.appearance.workspaceButtonSize)
+        // Square while it draws its own pill, padded like the others when
+        // not (BarElementItems.elementLength).
+        readonly property var size: root.squareSize("network", networkGlyph)
 
         visible: root.itemVisible("network")
+        opacity: root.rowContents.opacity
+        scale: root.rowContents.scale
         x: root.elementX("network")
         y: root.elementY("network")
         width: size.width
@@ -718,6 +798,8 @@ Item {
         }
 
         ShellText {
+            id: networkGlyph
+
             anchors.centerIn: parent
             text: root.networkIcon()
             color: theme.purple
@@ -738,6 +820,8 @@ Item {
         readonly property var size: root.sizeAround(batteryContent)
 
         visible: root.itemVisible("battery")
+        opacity: root.rowContents.opacity
+        scale: root.rowContents.scale
         x: root.elementX("battery")
         y: root.elementY("battery")
         width: size.width
@@ -786,6 +870,8 @@ Item {
         readonly property var size: root.sizeAround(clockContent)
 
         visible: root.itemVisible("clock")
+        opacity: root.rowContents.opacity
+        scale: root.rowContents.scale
         x: root.elementX("clock")
         y: root.elementY("clock")
         width: size.width
@@ -824,7 +910,9 @@ Item {
 
     // The pomodoro's countdown, shown only while one is started: green while
     // it runs, muted while paused. It opens the same popup as the clock. As
-    // a capsule's live element it shows while started, paused included.
+    // a capsule's live element it shows while started, paused included, as
+    // a tiny ring of the time left in the phase, in the phase's colour
+    // (PomodoroRing.js), and mm:ss.
     LiveCapableItem {
         id: pomodoroItem
 
@@ -835,7 +923,9 @@ Item {
         Rectangle {
             id: pomodoroButton
 
-            readonly property var size: root.sizeAround(pomodoroContent, pomodoroItem.sizes.thickness)
+            readonly property Item content: pomodoroItem.live ? pomodoroLiveContent : pomodoroContent
+            readonly property var size: root.sizeAround(content, pomodoroItem.sizes.thickness)
+            readonly property color phaseColor: PomodoroRing.phaseColor(root.pomodoro.phase, theme)
 
             width: size.width
             height: size.height
@@ -858,6 +948,7 @@ Item {
             IconValue {
                 id: pomodoroContent
 
+                visible: !pomodoroItem.live
                 anchors.centerIn: parent
                 appearance: root.appearance
                 icon: "󰔟"
@@ -865,6 +956,33 @@ Item {
                 iconSize: pomodoroItem.sizes.iconSize
                 valueSize: pomodoroItem.sizes.textSize
                 value: root.pomodoro.remainingLabel
+            }
+
+            Row {
+                id: pomodoroLiveContent
+
+                visible: pomodoroItem.live
+                anchors.centerIn: parent
+                spacing: 5
+
+                PomodoroRingShape {
+                    anchors.verticalCenter: parent.verticalCenter
+                    size: pomodoroItem.sizes.iconSize
+                    thickness: 2
+                    fraction: PomodoroRing.fraction(root.pomodoro.remainingSeconds, root.pomodoro.phaseSeconds)
+                    color: pomodoroButton.phaseColor
+                    trackColor: theme.surfaceHover
+                    opacity: root.pomodoro.running ? 1 : 0.6
+                }
+
+                ElementText {
+                    anchors.verticalCenter: parent.verticalCenter
+                    appearance: root.appearance
+                    value: root.pomodoro.remainingLabel
+                    color: root.pomodoro.running ? theme.text : theme.textMuted
+                    font.pixelSize: pomodoroItem.sizes.textSize
+                    font.bold: true
+                }
             }
 
             MouseArea {

@@ -78,12 +78,14 @@ Variants {
                 property bool groupBorder: bar.appearance.barProfileValue(panel.profileName, "groupBorder")
                 property int barOpacity: bar.appearance.barProfileValue(panel.profileName, "barOpacity")
                 property bool capsuleNotifications: bar.appearance.barProfileValue(panel.profileName, "capsuleNotifications")
-                // On a capsule, only the row it shows (see CapsuleElements.drawnElements).
+                // On a capsule, only the row it shows (see CapsuleElements.drawnElements):
+                // the view its crossfade shows (rowView), the new one from
+                // the frame after a change; a capture of the old one fades out.
                 property var barElements: CapsuleElements.drawnElements({
                     barStyle: panel.barAppearance.barStyle,
                     barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
-                    expanded: panel.capsuleExpanded,
-                    change: panel.showingChange,
+                    expanded: rowView.shownKey === "expanded",
+                    change: rowView.shownKey === "change",
                     capsulePlaces: bar.appearance.barProfileValue(panel.profileName, "capsulePlaces")
                 })
                 // On a capsule, the live elements beside its workspace pills,
@@ -214,11 +216,12 @@ Variants {
                 id: theme
             }
 
-            // Hovering the capsule expands it after a moment.
+            // Hovering the capsule expands it after a moment; not over a live
+            // element, whose click opens its popup straight from rest.
             CapsuleHover {
                 id: capsuleHover
 
-                hovering: barContent.capsuleHovered
+                hovering: barContent.capsuleHoverExpands
             }
 
             // How much taller a capsule's window is for the popups inside it.
@@ -235,6 +238,24 @@ Variants {
                 id: capsuleToggle
 
                 hovering: barContent.capsuleHovered
+            }
+
+            // The capsule's row crossfades between its views, at rest,
+            // expanded or showing a change (CapsuleRouting.rowView): the new
+            // row is drawn a frame after the change, which springs the
+            // capsule to fit it at once; a capture of the old row fades and
+            // shrinks away as it moves (BarContent's rowOutgoing) and the new
+            // one fades and grows in from a third of the way. Always "rest"
+            // on other bar styles, which never crossfade.
+            CapsuleContentTransition {
+                id: rowView
+
+                key: BarProfileModel.capsule(panel.barAppearance) ? CapsuleRouting.rowView({
+                    change: panel.showingChange,
+                    expanded: panel.capsuleExpanded
+                }) : "rest"
+                motion: panel.barAppearance.motion
+                visible: false
             }
 
             // A change (volume, brightness, Caps Lock, audio output, bar
@@ -348,7 +369,10 @@ Variants {
                     barVisible: panel.visible
                     systemMonitor: panel.systemMonitor
                     workspaceService: panel.workspaceService
-                    capsuleChange: panel.showingChange ? capsuleChange.change : null
+                    capsuleChange: rowView.shownKey === "change" ? capsuleChange.change : null
+                    rowContents: ({ opacity: rowView.contentsOpacity, scale: rowView.contentsScale })
+                    rowOutgoing: ({ capturing: rowView.capturing, opacity: rowView.outgoingOpacity,
+                        scale: rowView.outgoingScale })
                     workspacePillsLength: workspaceRow.width
 
                     onConfigRequested: function(screen) {
