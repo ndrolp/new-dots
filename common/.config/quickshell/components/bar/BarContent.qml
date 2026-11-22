@@ -45,8 +45,8 @@ Item {
 
     signal configRequested(var screen)
     signal popupRequested(string popup)
-    // A bar element that opens no popup was pressed.
-    signal popupCloseRequested()
+    // A bar element that opens no popup was pressed: `element`, its id.
+    signal popupCloseRequested(string element)
     readonly property var zoneNames: ["left", "center", "right"]
     // The docked bar's zones match an attached popup's color and opacity; the
     // capsule takes the same, the profile's background at its opacity.
@@ -477,6 +477,6 @@ Item {
 
     BarPopupCloser {
         elementItems: root.elementItems
-        onCloseRequested: root.popupCloseRequested()
+        onCloseRequested: element => root.popupCloseRequested(element)
     }
 }

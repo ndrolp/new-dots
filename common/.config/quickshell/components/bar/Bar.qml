@@ -38,7 +38,7 @@ Variants {
     signal panelReady(var screen, var panelWindow)
     signal popupRequested(string popup, var panelWindow)
     signal popupClosed(string popup, var panelWindow)
-    signal popupCloseRequested()
+    signal popupCloseRequested(string element)
     signal audioOutputSelected(var output)
     // A capsule hands back the notifications it can't show any more, to show
     // as toasts (CapsuleNotifications.released).
@@ -360,7 +360,7 @@ Variants {
                         bar.popupRequested(popup, panel);
                     }
 
-                    onPopupCloseRequested: bar.popupCloseRequested()
+                    onPopupCloseRequested: element => bar.popupCloseRequested(element)
                 }
             }
 

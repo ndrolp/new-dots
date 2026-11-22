@@ -27,6 +27,8 @@ TestCase {
             property alias cava: cava
             // What the bar did, in order.
             property var events: []
+            // The element the last close named.
+            property string pressed: ""
 
             function record(event) {
                 events = events.concat(event);
@@ -92,7 +94,10 @@ TestCase {
                     "battery": battery,
                     "cava": cava
                 })
-                onCloseRequested: fakeBar.record("popup closed")
+                onCloseRequested: element => {
+                    fakeBar.record("popup closed");
+                    fakeBar.pressed = element;
+                }
             }
         }
     }
@@ -166,5 +171,16 @@ TestCase {
 
         mouseClick(bar.workspaces, 25, 20, Qt.RightButton);
         compare(bar.events, ["popup closed"]);
+    }
+
+    // It names the element pressed: the settings button leaves the settings
+    // panel inside a capsule to its own click (OpenPopup.pressedWithoutPopup).
+    function test_itNamesTheElementPressed() {
+        const bar = makeBar();
+
+        mouseClick(bar.settingsButton);
+        compare(bar.pressed, "arch");
+        mouseClick(bar.workspaces);
+        compare(bar.pressed, "workspaces");
     }
 }
