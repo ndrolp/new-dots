@@ -411,15 +411,50 @@ TestCase {
     }
 
     // Inside a capsule the capsule is drawn round the surface, so the surface
-    // has no fill and no border of its own, and its contents fade in where
-    // they rest without sliding.
+    // has no fill and no border of its own, and its contents crossfade where
+    // they rest without sliding, on the capsule's timings
+    // (CapsuleMotion.contents): opening, they wait a third of the capsule's
+    // expanding spring, then fade and grow in from 0.95.
     function test_aSurfaceInsideACapsuleDrawsOnlyItsContentsFadingInPlace() {
-        const surface = makeSurface({ inside: true, open: false });
+        const surface = makeSurface({ inside: true, open: true });
 
         revealTo(surface, 0.3);
         compare(surface.color.a, 0);
         compare(surface.border.width, 0);
-        compare(drawnOpacity(surface.box, surface), 0.3);
+        compare(drawnOpacity(surface.box, surface), 0);
+        fuzzyCompare(surface.contentsScale, 0.95, 0.001);
         compare(surface.mapToItem(surface.parent, 0, 0).y, 0);
+        revealTo(surface, 0.6);
+        const halfway = drawnOpacity(surface.box, surface);
+        verify(halfway > 0 && halfway < 1);
+        revealTo(surface, 1);
+        compare(drawnOpacity(surface.box, surface), 1);
+        compare(surface.contentsScale, 1);
+    }
+
+    // Closing, they fade and shrink to 0.95 at once, well before the capsule
+    // has collapsed round them.
+    function test_aSurfaceInsideACapsuleFadesItsContentsOutFirstWhenClosing() {
+        const surface = makeSurface({ inside: true, open: true });
+        revealTo(surface, 1);
+
+        surface.open = false;
+        revealTo(surface, 0.9);
+        const fading = drawnOpacity(surface.box, surface);
+        verify(fading > 0 && fading < 1);
+        verify(surface.contentsScale < 1);
+        revealTo(surface, 0.5);
+        compare(drawnOpacity(surface.box, surface), 0);
+    }
+
+    // Its reveal runs as long as the capsule's spring, at an even pace, so
+    // the contents' timings line up with the capsule round them.
+    function test_aSurfaceInsideACapsuleRevealsWithTheCapsulesSpring() {
+        const surface = makeSurface({ inside: true, open: true });
+
+        compare(surface.revealDuration, 350);
+        compare(surface.revealEasing, Easing.Linear);
+        surface.open = false;
+        compare(surface.revealDuration, 280);
     }
 }

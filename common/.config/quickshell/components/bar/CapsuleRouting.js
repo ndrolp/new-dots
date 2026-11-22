@@ -10,6 +10,16 @@ function expanded(causes) {
     return Object.keys(causes || {}).some(cause => causes[cause] === true);
 }
 
+// Which view a capsule's row shows: "change" while it shows a change,
+// "expanded" while it is expanded, else "rest". Given { change, expanded }.
+// The row crossfades from one view to the next (CapsuleContentTransition.qml
+// keyed on it).
+function rowView(row) {
+    if (row.change === true)
+        return "change";
+    return row.expanded === true ? "expanded" : "rest";
+}
+
 // Whether a bar window's capsule is hidden: only a capsule, and only while
 // its monitor's focused workspace has a real fullscreen window (not a
 // maximized one), given as { capsule, fullscreen }. Other bar styles stay.

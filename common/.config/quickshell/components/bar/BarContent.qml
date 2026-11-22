@@ -37,6 +37,11 @@ Item {
     // The change a capsule shows instead of its row (see CapsuleChange.qml),
     // or null while it shows none.
     property var capsuleChange: null
+    // How a capsule's row looks mid-crossfade between its views, { opacity,
+    // scale } (CapsuleContentTransition in Bar.qml): its bar elements, group
+    // backgrounds and the change it shows take it; its live elements and
+    // workspace pills don't. { 1, 1 } on any other bar style.
+    property var rowContents: ({ opacity: 1, scale: 1 })
     // How long the capsule's workspace pills are along the bar.
     property real workspacePillsLength: 0
 
@@ -338,6 +343,8 @@ Item {
                 x: root.changePlace.x
                 y: root.changePlace.y
                 change: root.capsuleChange
+                opacity: root.rowContents.opacity
+                scale: root.rowContents.scale
                 appearance: root.appearance
                 theme: theme
             }
@@ -370,6 +377,8 @@ Item {
                             width: rect.width
                             height: rect.height
                             radius: root.appearance.groupRadius
+                            opacity: root.rowContents.opacity
+                            scale: root.rowContents.scale
                             color: Qt.rgba(theme.surface.r, theme.surface.g, theme.surface.b,
                                 theme.surface.a * root.appearance.barOpacity / 100)
                             border.width: root.appearance.groupBorder ? 1 : 0
@@ -387,6 +396,9 @@ Item {
             ArchButton {
                 id: archButton
 
+                opacity: root.rowContents.opacity
+                scale: root.rowContents.scale
+
                 visible: root.elementVisible("arch")
                 x: root.elementX("arch")
                 y: root.elementY("arch")
@@ -401,6 +413,9 @@ Item {
             CurrentApp {
                 id: currentApp
 
+                opacity: root.rowContents.opacity
+                scale: root.rowContents.scale
+
                 x: root.elementX("currentApp")
                 y: root.elementY("currentApp")
                 grouped: root.elementGrouped("currentApp")
@@ -411,6 +426,9 @@ Item {
 
             AppMenu {
                 id: appMenuElement
+
+                opacity: root.rowContents.opacity
+                scale: root.rowContents.scale
 
                 x: root.elementX("appMenu")
                 y: root.elementY("appMenu")
@@ -426,6 +444,9 @@ Item {
             SystemMonitor {
                 id: systemMonitor
 
+                opacity: root.rowContents.opacity
+                scale: root.rowContents.scale
+
                 visible: root.elementVisible("systemMonitor")
                 x: root.elementX("systemMonitor")
                 y: root.elementY("systemMonitor")
@@ -437,6 +458,9 @@ Item {
 
             Workspaces {
                 id: workspaces
+
+                opacity: root.rowContents.opacity
+                scale: root.rowContents.scale
                 visible: root.elementVisible("workspaces")
                 x: root.elementX("workspaces")
                 y: root.elementY("workspaces")
@@ -464,6 +488,7 @@ Item {
                 deviceCaptures: root.deviceCaptures
                 cava: root.cava
                 barVisible: root.barVisible
+                rowContents: root.rowContents
                 elementX: element => root.elementX(element)
                 elementY: element => root.elementY(element)
                 elementGrouped: element => root.elementGrouped(element)

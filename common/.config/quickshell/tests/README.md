@@ -161,7 +161,16 @@ one ends and all handed back oldest first as toasts
 toast or in the capsule: its timeout, a critical one staying, its actions,
 inline reply and "+N" (`components/panels/NewNotificationCard.qml`,
 `NotificationCard.newNotificationTimeout`), how it is
-drawn with its fill and bar border (`CapsuleSurface.qml`), that it reaches past its row for its
+drawn with its fill and bar border, that it springs to a new size (growing
+overshoots slightly and settles, shrinking doesn't bounce), its corners morph
+on the same spring and reduce motion moves it at once (`CapsuleSurface.qml`),
+which spring a size change takes and how its contents look a given time into a
+crossfade (`CapsuleMotion.js`, `tst_capsuleMotion.qml`), that its contents
+crossfade between views by key, the old one fading and shrinking away before
+the new one shows and fades and grows in (`CapsuleContentTransition.qml`),
+which view its row shows (`CapsuleRouting.rowView`), that a popup inside it
+crossfades its contents on the capsule's timings (`PopupSurface.qml`), that its corners come down round a
+popup inside (`CapsulePlacement.withPopup`), that it reaches past its row for its
 workspace pills, and where they sit inside it, under the row of a top
 capsule and above the row of a bottom one, centred on it, how it grows round a popup
 inside it (`CapsulePlacement.js`), that its window grows at once for a popup inside and
@@ -210,7 +219,8 @@ its length is capped against and where an app menu title ends up for its popup,
 checked against a really rotated item (`BarLayout.turn`, `BarLayout.screenLength`,
 `BarLayout.turnedArea`; `AppMenu.qml` and `CurrentApp.qml` need Quickshell's
 Hyprland, so the elements themselves aren't tested here), how long animations take
-with and without reduce motion (`config/Motion.js`), night light's
+with and without reduce motion, the capsule's springs and contents timings
+among them (`config/Motion.js`), night light's
 temperature bounds, the saved temperature, how hyprsunset is run and when
 night light turns on and off (`services/NightLightState.js`), when the lock screen
 locks, checks a password and unlocks (`components/lock/LockState.js`) and what it

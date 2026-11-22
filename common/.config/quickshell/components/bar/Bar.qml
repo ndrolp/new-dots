@@ -78,12 +78,14 @@ Variants {
                 property bool groupBorder: bar.appearance.barProfileValue(panel.profileName, "groupBorder")
                 property int barOpacity: bar.appearance.barProfileValue(panel.profileName, "barOpacity")
                 property bool capsuleNotifications: bar.appearance.barProfileValue(panel.profileName, "capsuleNotifications")
-                // On a capsule, only the row it shows (see CapsuleElements.drawnElements).
+                // On a capsule, only the row it shows (see CapsuleElements.drawnElements):
+                // the view its crossfade shows (rowView), so the old row
+                // stays while it fades out.
                 property var barElements: CapsuleElements.drawnElements({
                     barStyle: panel.barAppearance.barStyle,
                     barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
-                    expanded: panel.capsuleExpanded,
-                    change: panel.showingChange,
+                    expanded: rowView.shownKey === "expanded",
+                    change: rowView.shownKey === "change",
                     capsulePlaces: bar.appearance.barProfileValue(panel.profileName, "capsulePlaces")
                 })
                 // On a capsule, the live elements beside its workspace pills,
@@ -237,6 +239,22 @@ Variants {
                 hovering: barContent.capsuleHovered
             }
 
+            // The capsule's row crossfades between its views, at rest,
+            // expanded or showing a change (CapsuleRouting.rowView): the old
+            // row fades and shrinks away, then the new one is drawn, which
+            // springs the capsule to fit it, and fades and grows in. Always
+            // "rest" on other bar styles, which never crossfade.
+            CapsuleContentTransition {
+                id: rowView
+
+                key: BarProfileModel.capsule(panel.barAppearance) ? CapsuleRouting.rowView({
+                    change: panel.showingChange,
+                    expanded: panel.capsuleExpanded
+                }) : "rest"
+                motion: panel.barAppearance.motion
+                visible: false
+            }
+
             // A change (volume, brightness, Caps Lock, audio output, bar
             // profile or keep-awake) shows in the capsule for a moment.
             CapsuleChange {
@@ -348,7 +366,8 @@ Variants {
                     barVisible: panel.visible
                     systemMonitor: panel.systemMonitor
                     workspaceService: panel.workspaceService
-                    capsuleChange: panel.showingChange ? capsuleChange.change : null
+                    capsuleChange: rowView.shownKey === "change" ? capsuleChange.change : null
+                    rowContents: ({ opacity: rowView.contentsOpacity, scale: rowView.contentsScale })
                     workspacePillsLength: workspaceRow.width
 
                     onConfigRequested: function(screen) {
