@@ -15,13 +15,13 @@ TestCase {
     ]
 
     function test_openingOnACapsuleBarPutsItInsideThatCapsule() {
-        const opened = SettingsPlace.openedOn(SettingsPlace.closed, capsuleBar, bars);
+        const opened = SettingsPlace.openedOn(capsuleBar, bars);
         compare(opened.where, "inside");
         compare(opened.window, capsuleBar);
     }
 
     function test_openingOnAnyOtherBarCentersIt() {
-        const opened = SettingsPlace.openedOn(SettingsPlace.closed, opaqueBar, bars);
+        const opened = SettingsPlace.openedOn(opaqueBar, bars);
         compare(opened.where, "centered");
         compare(opened.window, opaqueBar);
     }
@@ -29,7 +29,7 @@ TestCase {
     // A real fullscreen window hides the capsule: it can't hold the panel.
     function test_openingWhileTheCapsuleIsHiddenCentersIt() {
         const hidden = [{ window: capsuleBar, monitor: "AOC", visible: true, capsule: true, capsuleHidden: true }];
-        compare(SettingsPlace.openedOn(SettingsPlace.closed, capsuleBar, hidden).where, "centered");
+        compare(SettingsPlace.openedOn(capsuleBar, hidden).where, "centered");
     }
 
     // The settings button: opens it on its bar, closes it if it is open there.
@@ -78,7 +78,7 @@ TestCase {
     // The bar style of the profile its bar draws changes live (or a pending
     // style change is discarded): the panel follows it and stays open.
     function test_aBarStyleChangeAwayFromCapsuleCentersIt() {
-        const inside = SettingsPlace.openedOn(SettingsPlace.closed, capsuleBar, bars);
+        const inside = SettingsPlace.openedOn(capsuleBar, bars);
         const restyled = [{ window: capsuleBar, monitor: "AOC", visible: true, capsule: false, capsuleHidden: false }];
         const followed = SettingsPlace.followed(inside, restyled);
         compare(followed.where, "centered");

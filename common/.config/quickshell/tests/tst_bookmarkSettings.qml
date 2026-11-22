@@ -31,7 +31,7 @@ TestCase {
     // A bookmark's link is its URL; a search engine's is its search URL.
     function rows(item, kind) {
         const linkKey = kind === "bookmark" ? "url" : "searchUrl";
-        return all(item, child => child.linkKey === linkKey && child.hovered !== undefined);
+        return all(item, child => child.linkKey === linkKey && child.hovering !== undefined);
     }
 
     function textShown(item, text) {

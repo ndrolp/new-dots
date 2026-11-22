@@ -26,4 +26,10 @@ QtObject {
     readonly property color text: colorscheme.colours.text
     readonly property color textMuted: colorscheme.colours.textMuted
     readonly property color textDisabled: colorscheme.colours.textDisabled
+
+    // The faint fill a control on a settings card takes while hovered or
+    // chosen. The card is already filled with surfaceHover, so this is that
+    // tinted a fifth of the way toward the accent, to stand out in every
+    // colorscheme.
+    readonly property color cardHover: Qt.tint(surfaceHover, Qt.rgba(accent.r, accent.g, accent.b, 0.2))
 }

@@ -12,7 +12,7 @@ TestCase {
         "barHeight", "barOpacity", "radius", "horizontalPadding", "elementVerticalPadding",
         "barBorder", "transparentBarTopMargin",
         "groupRadius", "groupHorizontalPadding", "groupVerticalPadding", "groupBorder",
-        "iconSize", "pillVerticalPadding", "workspacePadding", "spacing", "elementBorder",
+        "iconSize", "pillVerticalPadding", "spacing", "elementBorder",
         "pillsTransparent",
         "capsuleVerticalPadding", "capsuleNotifications"
     ]
@@ -49,12 +49,6 @@ TestCase {
     function test_barBorderShowsForEveryStyleButTransparent() {
         compare(BarProfileModel.barStyles.filter(style =>
             BarProfileModel.barSettingShown(style, "barBorder")), ["opaque", "docked", "capsule"]);
-    }
-
-    // Nothing on the bar reads the workspace bar padding any more.
-    function test_workspaceBarPaddingShowsForNoStyle() {
-        compare(BarProfileModel.barStyles.filter(style =>
-            BarProfileModel.barSettingShown(style, "workspacePadding")), []);
     }
 
     // A card's settings list, kept to those the style shows, in its order.

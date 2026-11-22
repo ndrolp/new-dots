@@ -216,7 +216,7 @@ TestCase {
         verify(yIn(row, elements) > yIn(lastSetting, elements));
     }
 
-    // Edge margin is the transparent bar margin of before: same key, same value.
+    // Edge margin (stored under `transparentBarTopMargin`): same key, same value.
     function test_edgeMarginKeepsTheStoredMargin() {
         const built = make("transparent");
         const margin = all(card(built.item, "Bar"), child => child.label === "Edge margin"

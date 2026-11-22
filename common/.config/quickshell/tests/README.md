@@ -58,7 +58,7 @@ the settings panel's own parts (`SettingsNumber`,
 eliding, and a grid too narrow for two cells side by side is one column; `SettingsCard`:
 the hairline-bordered card, one step lighter than the panel and without hover,
 that holds a headed group), the one
-hover they share (a faint fill, a pointing hand, an accent border on bordered
+hover they share (`SettingsHoverFill`: a faint fill that stands out from the card they sit on, a pointing hand, an accent border on bordered
 controls, a growing slider thumb, a brighter switch, instant under reduce
 motion), its frame
 (`ConfigPanel.qml`: each section's title and description from its entry in
@@ -68,7 +68,7 @@ view (section, search text, scroll position) that another panel picks up, and
 every section's content in cards 12px apart, its text inside their padding)
 and the settings panel sections built from them, among
 them the four Bar positions and the zone names of a side bar, which keep their
-saved keys, the bar style as one choice of every style the profile model lists, and the Bar section as one scroll of cards in order (Profile, Style, Bar, Groups, Elements, and Capsule only for a capsule), each with only the settings the bar uses on the edited profile's bar style, shown or hidden as soon as the style changes and a card with none of them hidden whole (`tst_barSettingStyles.qml` covers which settings each bar style shows, `BarProfileModel.barSettingShown`), the edge margin stored as the transparent bar margin it was, and searching its card names landing on it (`BarSettings.qml`, `BarSizeStyleSettings.qml`, `BarElementsSettings.qml`, `ConfigPanel.qml`), the Bluetooth device list and turning Bluetooth
+saved keys, the bar style as one choice of every style the profile model lists, and the Bar section as one scroll of cards in order (Profile, Style, Bar, Groups, Elements, and Capsule only for a capsule), each with only the settings the bar uses on the edited profile's bar style, shown or hidden as soon as the style changes and a card with none of them hidden whole (`tst_barSettingStyles.qml` covers which settings each bar style shows, `BarProfileModel.barSettingShown`), no workspace bar padding (nothing on the bar reads it), Edge margin (stored under `transparentBarTopMargin`) keeping its stored value, and searching its card names landing on it (`BarSettings.qml`, `BarSizeStyleSettings.qml`, `BarElementsSettings.qml`, `ConfigPanel.qml`), the Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
 (`AudioOutputs.js`), how the volume is shown as text
 (`components/VolumeText.js`), what the popups and bar elements show for the

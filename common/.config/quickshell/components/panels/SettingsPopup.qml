@@ -10,12 +10,10 @@ BarPopup {
 
     // The settings panel module (modules/Settings.qml).
     required property var feature
-    // The panel's own size, whatever the capsule's row under it.
-    readonly property real panelWidth: 980
-    readonly property real panelHeight: 560
-
     popup: "settings"
-    popupWidth: panelWidth
+    // The panel's own size (ConfigPanel's implicit size), whatever the
+    // capsule's row under it.
+    popupWidth: panel.implicitWidth
     closesOnClickOutside: false
 
     function close() {
@@ -31,7 +29,7 @@ BarPopup {
         id: keys
 
         width: parent.width
-        height: root.panelHeight
+        height: panel.implicitHeight
         focus: true
 
         Keys.onEscapePressed: root.close()
@@ -39,9 +37,8 @@ BarPopup {
         Loader {
             id: panel
 
+            // Unsized, it takes the panel's implicit size.
             anchors.horizontalCenter: parent.horizontalCenter
-            width: root.panelWidth
-            height: root.panelHeight
             active: root.open || root.reveal > 0
 
             sourceComponent: ConfigPanel {

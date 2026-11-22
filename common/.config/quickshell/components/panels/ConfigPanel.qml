@@ -271,7 +271,7 @@ Rectangle {
                             height: 38
                             appearance: root.appearance
                             clickable: true
-                            color: selected || hovered ? theme.surfaceHover : "transparent"
+                            color: selected || hovering ? theme.surfaceHover : "transparent"
 
                             Rectangle {
                                 anchors.left: parent.left

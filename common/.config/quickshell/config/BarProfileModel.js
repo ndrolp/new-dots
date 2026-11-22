@@ -288,15 +288,14 @@ function barPositionsFor(barStyle) {
 // edge margin keeps a floating bar or a capsule off its edge
 // (BarPlacement.margin); the bar border outlines an opaque bar's edge, the
 // docked zones and the capsule, but a transparent bar has no outline; a
-// docked bar's pills are always see-through; and nothing reads the
-// workspace bar padding any more. Settings not listed show for every style.
+// docked bar's pills are always see-through. Settings not listed show for
+// every style.
 const barSettingStyles = {
     elementVerticalPadding: ["opaque"],
     pillVerticalPadding: ["transparent", "docked", "capsule"],
     transparentBarTopMargin: ["transparent", "capsule"],
     barBorder: ["opaque", "docked", "capsule"],
     pillsTransparent: ["opaque", "transparent", "capsule"],
-    workspacePadding: [],
     capsuleVerticalPadding: ["capsule"],
     capsuleNotifications: ["capsule"]
 };

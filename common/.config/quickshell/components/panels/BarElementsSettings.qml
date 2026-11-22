@@ -118,7 +118,6 @@ Column {
             settings: [
                 { label: "Icon size", from: 8, to: 32, propertyName: "iconSize" },
                 { label: "Pill vertical padding", from: 0, to: 8, propertyName: "pillVerticalPadding" },
-                { label: "Workspace bar padding", from: 0, to: 10, propertyName: "workspacePadding" },
                 { label: "Component spacing", from: 0, to: 24, propertyName: "spacing" },
                 { label: "Element border", propertyName: "elementBorder" },
                 { label: "Transparent pills", propertyName: "pillsTransparent" }
