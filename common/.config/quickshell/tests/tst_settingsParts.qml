@@ -185,6 +185,26 @@ TestCase {
     }
 
     Component {
+        id: switchGrid
+
+        Panels.SettingsGrid {
+            width: 400
+
+            Panels.SettingsSwitchRow {
+                width: parent.cellWidth
+                appearance: barAppearance
+                label: "Notifications in the capsule"
+            }
+
+            Panels.SettingsSwitchRow {
+                width: parent.cellWidth
+                appearance: barAppearance
+                label: "Capsule vertical padding"
+            }
+        }
+    }
+
+    Component {
         id: button
 
         Panels.SettingsButton {
@@ -294,6 +314,30 @@ TestCase {
         compare(item.switchItem.color, Qt.rgba(0, 0, 0, 0));
         compare(item.switchItem.border.color, theme.border);
         verify(item.switchItem.x > rowLabel.x + rowLabel.width);
+    }
+
+    // A label longer than its space wraps to further lines instead of
+    // eliding, and the row grows to hold it, clear of its switch.
+    function test_aLongLabelInANarrowSwitchRowWrapsClearOfItsSwitch() {
+        const item = make(switchRow, { width: 180, label: "Notifications in the capsule" });
+        const rowLabel = textOf(item, "Notifications in the capsule");
+
+        compare(rowLabel.elide, Text.ElideNone);
+        verify(rowLabel.lineCount > 1);
+        verify(!rowLabel.truncated);
+        verify(rowLabel.x + rowLabel.width <= item.switchItem.x);
+        verify(rowLabel.y >= 0);
+        verify(rowLabel.y + rowLabel.height <= item.height);
+    }
+
+    // A label on top of its control wraps too, and pushes the control down.
+    function test_aLongLabelOnTopOfItsControlWrapsAndPushesItDown() {
+        const item = make(number, { width: 120, label: "Capsule vertical padding" });
+        const fieldLabel = textOf(item, "Capsule vertical padding");
+
+        compare(fieldLabel.elide, Text.ElideNone);
+        verify(fieldLabel.lineCount > 1);
+        verify(fieldLabel.mapToItem(item, 0, fieldLabel.height).y <= item.slider.mapToItem(item, 0, 0).y);
     }
 
     function test_aCheckedSwitchRowFillsItsSwitchWithTheAccent() {
@@ -572,6 +616,34 @@ TestCase {
         compare(cells[1].y, cells[0].y);
         compare(cells[2].x, 0);
         verify(cells[2].y >= cells[0].y + 40);
+    }
+
+    // Cells too narrow to hold a label and its control side by side make it
+    // one column: each control takes the whole width, one per line.
+    function test_aNarrowGridShowsOneColumn() {
+        const item = createTemporaryObject(switchGrid, this);
+        const cells = item.children.filter(child => child.switchItem !== undefined);
+
+        compare(item.columns, 1);
+        compare(item.cellWidth, 400);
+        compare(cells[0].x, 0);
+        compare(cells[1].x, 0);
+        verify(cells[1].y >= cells[0].y + cells[0].height);
+    }
+
+    // Wide enough, the same grid is two columns again, and a long label
+    // wraps inside its cell, clear of its switch and of the next cell.
+    function test_aWideGridShowsTwoColumnsAndWrapsALongLabelInItsCell() {
+        const item = createTemporaryObject(switchGrid, this, { width: 560 });
+        const cells = item.children.filter(child => child.switchItem !== undefined);
+        const longLabel = textOf(cells[0], "Notifications in the capsule");
+
+        compare(item.columns, 2);
+        compare(cells[1].y, cells[0].y);
+        verify(cells[0].x + cells[0].width <= cells[1].x);
+        verify(longLabel.lineCount > 1);
+        verify(longLabel.x + longLabel.width <= cells[0].switchItem.x);
+        verify(longLabel.y + longLabel.height <= cells[0].height);
     }
 
     // A quiet text button: no fill at rest, its label in the normal text
