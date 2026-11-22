@@ -29,6 +29,12 @@ PanelWindow {
         configPanel.restoreView(view);
     }
 
+    // Opened, the panel takes the keyboard, so Escape closes it.
+    onOpenChanged: {
+        if (open)
+            configPanel.forceActiveFocus();
+    }
+
     visible: reveal > 0 && targetWindow !== null
     screen: targetWindow ? targetWindow.screen : null
     color: "transparent"
@@ -59,6 +65,7 @@ PanelWindow {
         id: configPanel
 
         anchors.centerIn: parent
+        focus: true
         opacity: root.reveal
         transform: Translate {
             y: -16 * (1 - root.reveal)

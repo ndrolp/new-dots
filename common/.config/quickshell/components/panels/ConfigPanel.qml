@@ -110,6 +110,10 @@ Rectangle {
 
     signal closeRequested()
 
+    // Escape closes it, the same as Done, unless a control inside takes it
+    // first (a selector closing, say).
+    Keys.onEscapePressed: closeRequested()
+
     // Shows `view` (another panel's `view`), without the transition.
     function restoreView(view) {
         if (!view || view.section === undefined)

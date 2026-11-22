@@ -322,4 +322,36 @@ TestCase {
             }
         }
     }
+
+    SignalSpy {
+        id: closeSpy
+
+        signalName: "closeRequested"
+    }
+
+    // Escape closes the panel, the same as Done: on the panel itself and
+    // while typing in its search field.
+    function test_escapeClosesThePanel() {
+        const item = createTemporaryObject(panel, this);
+        closeSpy.target = item;
+        closeSpy.clear();
+        item.forceActiveFocus();
+
+        keyClick(Qt.Key_Escape);
+
+        compare(closeSpy.count, 1);
+    }
+
+    function test_escapeInTheSearchFieldClosesThePanel() {
+        const item = createTemporaryObject(panel, this);
+        closeSpy.target = item;
+        closeSpy.clear();
+        const search = all(item, child => child.placeholderText === "Search settings")[0];
+        search.forceActiveFocus();
+        keyClick(Qt.Key_W);
+
+        keyClick(Qt.Key_Escape);
+
+        compare(closeSpy.count, 1);
+    }
 }
