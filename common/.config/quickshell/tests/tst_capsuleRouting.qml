@@ -212,4 +212,19 @@ TestCase {
     function test_aCapsuleIsAvailableWhileShownAndNotHidden(data) {
         compare(CapsuleRouting.capsuleAvailable(data.bar), data.available);
     }
+
+    // Which view a capsule's row shows, so it crossfades between them: a
+    // change over everything, then expanded, else at rest.
+    function test_aCapsulesRowShowsOneView_data() {
+        return [
+            { tag: "at rest", row: { change: false, expanded: false }, view: "rest" },
+            { tag: "expanded", row: { change: false, expanded: true }, view: "expanded" },
+            { tag: "a change", row: { change: true, expanded: false }, view: "change" },
+            { tag: "a change while expanded", row: { change: true, expanded: true }, view: "change" }
+        ];
+    }
+
+    function test_aCapsulesRowShowsOneView(data) {
+        compare(CapsuleRouting.rowView(data.row), data.view);
+    }
 }

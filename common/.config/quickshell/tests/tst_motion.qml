@@ -32,4 +32,41 @@ TestCase {
         compare(Motion.motion(false).easing, Easing.OutCubic);
         compare(Motion.motion(true).easing, Easing.OutCubic);
     }
+
+    // The capsule's springs: expanding overshoots slightly and settles in
+    // about 350 ms; collapsing is a bit faster and doesn't bounce.
+    function test_theCapsuleExpandsWithASlightOvershoot() {
+        const expand = Motion.motion(false).capsule.expand;
+
+        compare(expand.duration, 350);
+        compare(expand.easing, Easing.OutBack);
+        verify(expand.overshoot > 0 && expand.overshoot < 1.70158, "slighter than OutBack's default");
+    }
+
+    function test_theCapsuleCollapsesFasterWithoutBounce() {
+        const collapse = Motion.motion(false).capsule.collapse;
+
+        verify(collapse.duration < 350);
+        verify(collapse.duration >= 250);
+        compare(collapse.easing, Easing.OutCubic);
+    }
+
+    // Its contents: the outgoing fade and shrink to 0.95, the incoming grow
+    // back from 0.95 starting a third of the way into the expanding spring.
+    function test_capsuleContentsCrossfadeWithASlightScale() {
+        const capsule = Motion.motion(false).capsule;
+
+        compare(capsule.contentsScale, 0.95);
+        compare(capsule.contentsDelay, 117);
+        verify(capsule.contentsOut > 0 && capsule.contentsOut < capsule.contentsDelay + 1);
+        verify(capsule.contentsIn > 0);
+    }
+
+    function test_reduceMotionMakesTheCapsuleInstant() {
+        const capsule = Motion.motion(true).capsule;
+
+        compare([capsule.expand.duration, capsule.collapse.duration, capsule.contentsOut,
+            capsule.contentsDelay, capsule.contentsIn], [0, 0, 0, 0, 0]);
+        compare(capsule.contentsScale, 0.95);
+    }
 }

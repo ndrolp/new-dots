@@ -33,10 +33,16 @@ function surface(content, span, padding, strip, across) {
     return Object.assign(rect, { radius: reach / 2 });
 }
 
+// How round a capsule's corners are with a popup inside: a rounded
+// rectangle, not a pill, concentric with the popup's own 8 px corners inset
+// by its 12 px padding (PopupSurface.qml).
+const popupCornerRadius = 20;
+
 // The capsule with a popup inside, { x, y, width, height, radius }: its row's
 // `place` (as surface gives it) grown to the wider of the row and the popup,
 // staying centred on the row, and as deep as the row and the popup together,
-// away from the screen edge at `barPosition` ("top" or "bottom"). Takes the
+// away from the screen edge at `barPosition` ("top" or "bottom"), with its
+// corners down to popupCornerRadius (never rounder than the row's). Takes the
 // popup's { width, height }, or null without one, when it is just its row.
 function withPopup(place, popup, barPosition) {
     if (!popup)
@@ -48,7 +54,7 @@ function withPopup(place, popup, barPosition) {
         y: barPosition === "bottom" ? place.y - popup.height : place.y,
         width: width,
         height: place.height + popup.height,
-        radius: place.radius
+        radius: Math.min(place.radius, popupCornerRadius)
     };
 }
 

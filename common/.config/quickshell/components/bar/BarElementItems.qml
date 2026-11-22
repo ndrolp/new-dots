@@ -42,6 +42,10 @@ Item {
     // Whether the bar holding these elements is shown on its monitor.
     property bool barVisible: true
     property string activePopup: ""
+    // How the capsule's row looks mid-crossfade, { opacity, scale }
+    // (CapsuleContentTransition): every element in it takes it, live ones
+    // beside the pills don't. Always { 1, 1 } on any other bar style.
+    property var rowContents: ({ opacity: 1, scale: 1 })
     // Where each element goes, provided by the bar's single walk per zone.
     property var elementX: element => 0
     property var elementY: element => 0
@@ -222,6 +226,8 @@ Item {
         readonly property var size: root.sizeAround(notificationContent)
 
         visible: root.itemVisible("notifications")
+        opacity: root.rowContents.opacity
+        scale: root.rowContents.scale
         x: root.elementX("notifications")
         y: root.elementY("notifications")
         width: size.width
@@ -535,6 +541,8 @@ Item {
         readonly property int barCount: options.barCount
 
         visible: root.itemVisible("cava")
+        opacity: root.rowContents.opacity
+        scale: root.rowContents.scale
         x: root.elementX("cava")
         y: root.elementY("cava")
         width: size.width
@@ -585,6 +593,8 @@ Item {
         readonly property var size: root.sizeAround(audioContent)
 
         visible: root.itemVisible("audio")
+        opacity: root.rowContents.opacity
+        scale: root.rowContents.scale
         x: root.elementX("audio")
         y: root.elementY("audio")
         width: size.width
@@ -631,6 +641,8 @@ Item {
         readonly property var size: root.squareSize("bluetooth", bluetoothGlyph)
 
         visible: root.itemVisible("bluetooth")
+        opacity: root.rowContents.opacity
+        scale: root.rowContents.scale
         x: root.elementX("bluetooth")
         y: root.elementY("bluetooth")
         width: size.width
@@ -675,6 +687,8 @@ Item {
         readonly property var size: root.squareSize("tray", trayGlyph)
 
         visible: root.itemVisible("tray")
+        opacity: root.rowContents.opacity
+        scale: root.rowContents.scale
         x: root.elementX("tray")
         y: root.elementY("tray")
         width: size.width
@@ -719,6 +733,8 @@ Item {
         readonly property var size: root.squareSize("network", networkGlyph)
 
         visible: root.itemVisible("network")
+        opacity: root.rowContents.opacity
+        scale: root.rowContents.scale
         x: root.elementX("network")
         y: root.elementY("network")
         width: size.width
@@ -762,6 +778,8 @@ Item {
         readonly property var size: root.sizeAround(batteryContent)
 
         visible: root.itemVisible("battery")
+        opacity: root.rowContents.opacity
+        scale: root.rowContents.scale
         x: root.elementX("battery")
         y: root.elementY("battery")
         width: size.width
@@ -810,6 +828,8 @@ Item {
         readonly property var size: root.sizeAround(clockContent)
 
         visible: root.itemVisible("clock")
+        opacity: root.rowContents.opacity
+        scale: root.rowContents.scale
         x: root.elementX("clock")
         y: root.elementY("clock")
         width: size.width

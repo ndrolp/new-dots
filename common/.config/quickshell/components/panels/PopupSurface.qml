@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Shapes
 import "../../config" as Config
 import "../BarPosition.js" as BarPosition
+import "../bar/CapsuleMotion.js" as CapsuleMotion
 import "PopupOutline.js" as PopupOutline
 import "PopupPlacement.js" as PopupPlacement
 
@@ -10,8 +11,11 @@ import "PopupPlacement.js" as PopupPlacement
 // fade and a short slide away from the bar. Attached, it hangs from the bar with
 // no border unless the bar border is on: square corners against it, small curved corners joining it to the
 // bar, round corners away from it, unfolding away from the bar with its contents
-// fading in after. Inside a capsule it draws only its contents, fading in,
-// since the capsule is drawn round it. Any window can host it; hide the window
+// fading in after. Inside a capsule it draws only its contents, since the
+// capsule is drawn round it, and they crossfade on the capsule's timings: its
+// reveal runs as long as the capsule's spring, evenly, and its contents look
+// as CapsuleMotion.contents has them that far in (fading and growing in from
+// 0.95 a third of the way into the spring; fading and shrinking out at once). Any window can host it; hide the window
 // while reveal is 0. It takes no appearance, so the host passes in its motion settings. Closing, it
 // ignores input while the animation runs.
 Rectangle {
@@ -46,7 +50,18 @@ Rectangle {
     property real padding: 12
     // 0 while closed, 1 once open; animates in between.
     property real reveal: open ? 1 : 0
-    readonly property int revealDuration: attached ? motion.medium : motion.short
+    readonly property int revealDuration: revealDurationTo(open ? 1 : 0)
+    // Inside a capsule it reveals at an even pace, so `reveal` is how far in
+    // time it is into the capsule's spring.
+    readonly property int revealEasing: inside ? Easing.Linear : motion.easing
+    // How the contents of a surface inside a capsule look now, { opacity,
+    // scale }: `reveal` as ms into the capsule's expanding spring opening, or
+    // its collapsing one closing (CapsuleMotion.contents).
+    readonly property var insideLook: inside
+        ? CapsuleMotion.contents(motion, open ? reveal * motion.capsule.expand.duration
+            : (1 - reveal) * motion.capsule.collapse.duration, open)
+        : { opacity: 1, scale: 1 }
+    readonly property real contentsScale: insideLook.scale
     // How far towards the bar a floating surface starts sliding from.
     readonly property real revealOffset: 8
     // How far an attached surface has unfolded, measured from the bar.
@@ -70,7 +85,7 @@ Rectangle {
     border.color: borderColor
     border.width: attached || inside ? 0 : 1
     radius: theme.radius
-    opacity: attached ? 1 : reveal
+    opacity: attached || inside ? 1 : reveal
     transform: Translate {
         readonly property var offset: PopupPlacement.towardsBar(surface.barPosition,
             surface.attached || surface.inside ? 0 : surface.revealOffset * (1 - surface.reveal))
@@ -79,10 +94,22 @@ Rectangle {
         y: offset.y
     }
 
+    // How long revealing to `to` (1 opening, 0 closing) takes: inside a
+    // capsule, its expanding or collapsing spring.
+    function revealDurationTo(to) {
+        if (inside)
+            return to > 0 ? motion.capsule.expand.duration : motion.capsule.collapse.duration;
+        return attached ? motion.medium : motion.short;
+    }
+
     Behavior on reveal {
+        id: revealBehavior
+
         NumberAnimation {
-            duration: surface.revealDuration
-            easing.type: surface.motion.easing
+            // From the value it heads to, set before the animation starts,
+            // not `open`, which may not have reached every binding yet.
+            duration: surface.revealDurationTo(revealBehavior.targetValue)
+            easing.type: surface.revealEasing
         }
     }
 
@@ -209,7 +236,9 @@ Rectangle {
             width: surface.width - surface.padding * 2
             height: childrenRect.height
             opacity: surface.attached
-                ? Math.max(0, (surface.reveal - surface.contentsDelay) / (1 - surface.contentsDelay)) : 1
+                ? Math.max(0, (surface.reveal - surface.contentsDelay) / (1 - surface.contentsDelay))
+                : surface.insideLook.opacity
+            scale: surface.insideLook.scale
         }
     }
 }
