@@ -1,5 +1,6 @@
 import QtQuick
 import "../../config" as Config
+import "../Clamp.js" as Clamp
 
 // The media popup's progress bar. When the player can seek, clicking it, or
 // dragging along it and letting go, moves playback there; while dragged, the
@@ -55,7 +56,7 @@ Item {
         id: seekArea
 
         function fractionAt(x) {
-            return Math.max(0, Math.min(1, x / width));
+            return Clamp.unit(x / width);
         }
 
         anchors.fill: parent

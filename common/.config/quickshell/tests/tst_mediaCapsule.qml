@@ -2,6 +2,7 @@ import QtQuick
 import QtTest
 import "../components/bar" as Bar
 import "../components/panels/MediaCard.js" as MediaCard
+import "../config/Motion.js" as Motion
 
 // The media view inside a capsule and the media live element at rest: the
 // one colour quantized from the art that tints the view, and what moves the
@@ -143,6 +144,7 @@ TestCase {
         Bar.MediaLiveBars {
             height: 12
             barCount: 4
+            motion: Motion.motion(false)
         }
     }
 
@@ -176,5 +178,15 @@ TestCase {
         const paused = JSON.stringify(bars.frame);
         wait(400);
         compare(JSON.stringify(bars.frame), paused);
+    }
+
+    // Reduce motion stops the equaliser, playing or not.
+    function test_reduceMotionStopsTheEqualiser() {
+        const cava = fakeCava.createObject(this, { failureHint: "cava isn't installed, so the bars stay flat." });
+        const bars = liveBars({ cava: cava, playing: true, drawing: true, motion: Motion.motion(true) });
+        const still = JSON.stringify(bars.frame);
+
+        wait(400);
+        compare(JSON.stringify(bars.frame), still);
     }
 }

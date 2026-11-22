@@ -99,7 +99,8 @@ them the four Bar positions and the zone names of a side bar, which keep their
 saved keys, the bar style as one choice of every style the profile model lists, and the Bar section as one scroll of cards in order (Profile, Style, Bar, Groups, Elements, and Capsule only for a capsule), each with only the settings the bar uses on the edited profile's bar style, shown or hidden as soon as the style changes and a card with none of them hidden whole (`tst_barSettingStyles.qml` covers which settings each bar style shows, `BarProfileModel.barSettingShown`), no workspace bar padding (nothing on the bar reads it), Edge margin (stored under `transparentBarTopMargin`) keeping its stored value, and searching its card names landing on it (`BarSettings.qml`, `BarSizeStyleSettings.qml`, `BarElementsSettings.qml`, `ConfigPanel.qml`), the Bluetooth device list and turning Bluetooth
 on (`BluetoothDevices.js`, `BluetoothPower.js`), how an audio output is named
 (`AudioOutputs.js`), how the volume is shown as text
-(`components/VolumeText.js`), what the popups and bar elements show for the
+(`components/VolumeText.js`), that a share or level is held between 0 and 1
+(`components/Clamp.js`, `tst_clamp.qml`), what the popups and bar elements show for the
 media position, audio outputs, Wi-Fi, the battery and the network
 and how a value stands on a side bar (`components/StatusText.js`) and what the audio bar element shows and how
 wide it is (`components/bar/AudioLevel.qml`), how scrolling turns into

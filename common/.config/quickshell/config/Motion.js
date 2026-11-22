@@ -14,7 +14,10 @@ const normal = {
     // The bar's background and elements moving across it.
     long: 220,
     // Smoothing between two frames the Cava bar element draws.
-    frame: 50
+    frame: 50,
+    // How often the media live element's equaliser steps, when cava can't
+    // run (components/bar/MediaLiveBars.qml); 0 stops it.
+    equaliser: 160
 };
 
 // The capsule's own motion (capsule bar style only; every other bar style and

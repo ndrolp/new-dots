@@ -1,4 +1,5 @@
 .pragma library
+.import "../Clamp.js" as Clamp
 
 // How the capsule moves (capsule bar style only), over the capsule motion
 // config/Motion.js gives as `motion.capsule`. Pure, no Quickshell. The parts
@@ -25,15 +26,15 @@ function spring(motion, from, to) {
 // How far along a stretch `elapsed` is, 0 to 1, easing out (cubic); a 0 ms
 // stretch is done at once.
 function eased(elapsed, length) {
-    const t = length <= 0 ? 1 : Math.max(0, Math.min(1, elapsed / length));
+    const t = length <= 0 ? 1 : Clamp.unit(elapsed / length);
     return 1 - Math.pow(1 - t, 3);
 }
 
 // How the capsule's contents look `elapsed` ms into a crossfade, counted
-// from when the shape starts moving, { opacity, scale }. Incoming, they wait `contentsDelay` (a third
-// of the shape's spring) at `contentsScale` and transparent, then fade and
-// grow to 1 over `contentsIn`. Outgoing, they fade and shrink to
-// `contentsScale` over `contentsOut`, starting at once.
+// from when the shape starts moving, { opacity, scale }. Incoming, they wait
+// `contentsDelay` (a third of the shape's spring) at `contentsScale` and
+// transparent, then fade and grow to 1 over `contentsIn`. Outgoing, they fade
+// and shrink to `contentsScale` over `contentsOut`, starting at once.
 function contents(motion, elapsed, incoming) {
     const capsule = motion.capsule;
     const shrink = 1 - capsule.contentsScale;

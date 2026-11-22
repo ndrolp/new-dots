@@ -3,6 +3,7 @@
 .import "BluetoothDevices.js" as BluetoothDevices
 .import "../../services/KeepAwakeState.js" as KeepAwakeState
 .import "../StatusText.js" as StatusText
+.import "../Clamp.js" as Clamp
 
 // The changes the OSD shows (volume, brightness, Caps Lock, audio output,
 // bar profile, keep-awake, Do Not Disturb, Bluetooth connections and power),
@@ -125,7 +126,7 @@ function audioOutputIcon(type) {
 // `highlighted` (Caps Lock, keep-awake or Do Not Disturb on, battery low) puts
 // the icon on the accent, and `compact` ones show just their icon and label.
 function display(change) {
-    const level = Math.max(0, Math.min(1, change.level || 0));
+    const level = Clamp.unit(change.level || 0);
 
     switch (change.kind) {
     case "volume":
@@ -163,7 +164,7 @@ function display(change) {
 // low under a third, medium under two thirds, high from there. Muted volume
 // is the struck-through speaker, whatever its level.
 function levelIcon(change) {
-    const level = Math.max(0, Math.min(1, change.level || 0));
+    const level = Clamp.unit(change.level || 0);
     const step = level < 1 / 3 ? 0 : level < 2 / 3 ? 1 : 2;
     if (change.kind === "brightness")
         return ["󰃞", "󰃟", "󰃠"][step];
@@ -194,7 +195,7 @@ function capsuleLook(change) {
         const ring = change.kind === "power" ? change.percentage
             : change.connected && change.battery !== null ? change.battery / 100 : null;
         return { card: "glance", icon: shown.icon, tone: shown.tone, text: shown.label,
-            ring: ring === null ? null : Math.max(0, Math.min(1, ring)), highlighted: shown.highlighted };
+            ring: ring === null ? null : Clamp.unit(ring), highlighted: shown.highlighted };
     }
     default:
         return { card: "row" };

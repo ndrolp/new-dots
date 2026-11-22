@@ -521,6 +521,7 @@ Item {
                     barCount: 4
                     barWidth: 2
                     cava: root.cava
+                    motion: root.appearance.motion
                     playing: !!root.player && root.player.isPlaying
                     drawing: mediaItem.live && root.liveActive("media") && root.barVisible
                     smoothing: bars.source === "cava" ? root.appearance.motion.frame

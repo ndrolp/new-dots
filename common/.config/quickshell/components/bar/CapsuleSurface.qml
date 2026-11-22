@@ -63,29 +63,23 @@ Item {
         target = place;
     }
 
+    // One of its place's numbers moving to where it is headed on the spring.
+    component Spring: NumberAnimation {
+        target: root
+        to: root.target ? root.target[property] : 0
+        duration: root.spring.duration
+        easing.type: root.spring.easing
+        easing.overshoot: root.spring.overshoot
+    }
+
     ParallelAnimation {
         id: motion
 
-        NumberAnimation {
-            target: root; property: "x"; to: root.target ? root.target.x : 0
-            duration: root.spring.duration; easing.type: root.spring.easing; easing.overshoot: root.spring.overshoot
-        }
-        NumberAnimation {
-            target: root; property: "y"; to: root.target ? root.target.y : 0
-            duration: root.spring.duration; easing.type: root.spring.easing; easing.overshoot: root.spring.overshoot
-        }
-        NumberAnimation {
-            target: root; property: "width"; to: root.target ? root.target.width : 0
-            duration: root.spring.duration; easing.type: root.spring.easing; easing.overshoot: root.spring.overshoot
-        }
-        NumberAnimation {
-            target: root; property: "height"; to: root.target ? root.target.height : 0
-            duration: root.spring.duration; easing.type: root.spring.easing; easing.overshoot: root.spring.overshoot
-        }
-        NumberAnimation {
-            target: root; property: "radius"; to: root.target ? root.target.radius : 0
-            duration: root.spring.duration; easing.type: root.spring.easing; easing.overshoot: root.spring.overshoot
-        }
+        Spring { property: "x" }
+        Spring { property: "y" }
+        Spring { property: "width" }
+        Spring { property: "height" }
+        Spring { property: "radius" }
     }
 
     Rectangle {

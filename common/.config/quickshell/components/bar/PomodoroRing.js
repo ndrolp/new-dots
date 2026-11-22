@@ -1,5 +1,6 @@
 .pragma library
 .import "../../services/PomodoroPhases.js" as PomodoroPhases
+.import "../Clamp.js" as Clamp
 
 // The pomodoro's ring, inside a capsule (the ring view of
 // components/panels/PomodoroPopup.qml) and on its live element at rest: how
@@ -12,7 +13,7 @@
 function fraction(remaining, total) {
     if (!(total > 0))
         return 0;
-    return Math.max(0, Math.min(1, remaining / total));
+    return Clamp.unit(remaining / total);
 }
 
 // The phase's colour from the colorscheme's colours (Theme.qml): work is
