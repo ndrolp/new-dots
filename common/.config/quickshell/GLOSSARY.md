@@ -117,6 +117,10 @@ _Avoid_: Notificación (que es otra cosa), aviso, OSD event
 Un ajuste del perfil de barra que dibuja una línea fina en el color de borde del colorscheme por la propia barra: con la barra opaca, a lo largo del borde que da al escritorio; con la docked bar, por el contorno de cada zona, salvo por el lado pegado al borde de la pantalla. Un popup anclado continúa esa línea por su contorno, sin línea donde se une a la barra. Con cualquier otra barra transparente no dibuja nada; un popup flotante tiene siempre su propio borde.
 _Avoid_: Transparent bar border, borde transparente
 
+**Edge margin** (margen al borde):
+Un ajuste del perfil de barra: la distancia entre una barra que flota (la transparente o la cápsula) y el borde de la pantalla en el que está. Con la barra opaca o la docked bar no existe: van pegadas al borde.
+_Avoid_: Transparent bar margin, top margin
+
 **Element border** (borde de los elementos):
 Un ajuste del perfil de barra que dibuja la misma línea alrededor de la pill de cada bar element que no está en un grupo, con cualquier estilo de barra.
 _Avoid_: Pill border
@@ -173,7 +177,7 @@ Un destino al que se puede enviar el sonido del sistema: auriculares, altavoces,
 _Avoid_: Sink, dispositivo, device
 
 **Settings panel** (panel de ajustes):
-La ventana que se abre desde la shell para editar toda su configuración, dividida en secciones. No es un popup: no pertenece a ningún bar element ni se despliega desde la barra.
+La ventana que se abre desde la shell para editar toda su configuración, dividida en secciones. No es un popup: no pertenece a ningún bar element. En un monitor con cápsula se abre dentro de ella, como el lanzador o el portapapeles; con cualquier otro estilo de barra se abre centrada en la pantalla.
 _Avoid_: Config panel, settings window, preferencias
 
 **Section** (sección):
