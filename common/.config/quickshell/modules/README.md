@@ -94,6 +94,11 @@ adding or editing one file here.
 - `Lock.qml` (the one lock screen and the `lock` IPC call) and
   `LowBattery.qml` (the low-battery notification, which stays alongside the
   "Battery low" change event).
+- `FailedReload.qml`: the failed reload notice. When a live reload fails the
+  shell still running the previous config raises a critical notification
+  with the first error line; the next successful reload withdraws it. The
+  notice's id survives the reload as a persistent property; what it shows and
+  withdraws is `FailedReload.js` (tested).
 
 These files import Quickshell, so they can't be loaded under the tests; what
 they decide that is more than wiring lives in plain JS.
