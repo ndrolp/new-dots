@@ -50,7 +50,7 @@ TextField {
 
     background: Rectangle {
         radius: control.appearance.radius
-        color: control.hovering ? theme.surfaceHover : "transparent"
+        color: control.hovering ? theme.cardHover : "transparent"
         border.color: control.activeFocus || control.hovering ? theme.accent : theme.border
         border.width: 1
 

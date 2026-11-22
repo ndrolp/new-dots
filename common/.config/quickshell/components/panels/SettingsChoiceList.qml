@@ -35,7 +35,7 @@ Flow {
             width: Math.min(optionLabel.implicitWidth + 20, control.width)
             height: 30
             radius: control.appearance.radius
-            color: isChosen || hovered ? theme.surfaceHover : "transparent"
+            color: isChosen || hovered ? theme.cardHover : "transparent"
             border.color: hovered ? theme.accent : theme.border
             border.width: 1
 

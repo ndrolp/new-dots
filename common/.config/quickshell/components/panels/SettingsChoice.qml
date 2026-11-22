@@ -53,7 +53,7 @@ Rectangle {
                 width: parent.width / control.options.length
                 height: parent.height
                 radius: Math.max(0, control.radius - control.border.width)
-                color: isChosen || hovered ? theme.surfaceHover : "transparent"
+                color: isChosen || hovered ? theme.cardHover : "transparent"
 
                 Behavior on color {
                     ColorAnimation { duration: control.appearance.motion.short }

@@ -17,7 +17,7 @@ Rectangle {
     implicitWidth: buttonLabel.implicitWidth + 28
     implicitHeight: 32
     radius: appearance.radius
-    color: hovered && enabled ? theme.surfaceHover : "transparent"
+    color: hovered && enabled ? theme.cardHover : "transparent"
     opacity: enabled ? 1 : 0.4
 
     Behavior on color {

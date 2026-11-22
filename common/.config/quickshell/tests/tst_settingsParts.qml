@@ -236,6 +236,26 @@ TestCase {
         }
     }
 
+    Component {
+        id: controlsInCard
+
+        Panels.SettingsCard {
+            width: 400
+
+            Panels.SettingsButton {
+                appearance: reducedAppearance
+                label: "Done"
+            }
+
+            Panels.SettingsChoice {
+                width: 300
+                appearance: reducedAppearance
+                value: "compact"
+                options: [{ label: "Compact", value: "compact" }, { label: "Spacious", value: "spacious" }]
+            }
+        }
+    }
+
     SignalSpy {
         id: editedSpy
 
@@ -398,7 +418,7 @@ TestCase {
         const item = make(choice, { appearance: reducedAppearance, value: "compact" });
 
         item.value = "balanced";
-        compare(textOf(item, "Balanced").parent.color, theme.surfaceHover);
+        compare(textOf(item, "Balanced").parent.color, theme.cardHover);
         compare(textOf(item, "Compact").parent.color, Qt.rgba(0, 0, 0, 0));
     }
 
@@ -421,7 +441,7 @@ TestCase {
         const other = textOf(item, "Compact");
 
         compare(chosen.color, theme.accent);
-        compare(chosen.parent.color, theme.surfaceHover);
+        compare(chosen.parent.color, theme.cardHover);
         compare(other.color, theme.text);
         compare(other.parent.color, Qt.rgba(0, 0, 0, 0));
         verify(!chosen.font.bold);
@@ -731,6 +751,20 @@ TestCase {
         compare(item.height, contentTop.y + content.height + 16);
     }
 
+    // The controls sit on a card, so their hover and chosen fill must stand
+    // out from the card's own fill.
+    function test_hoveredAndChosenFillsStandOutFromTheCardTheyAreOn() {
+        const item = make(controlsInCard);
+        const hoveredButton = textOf(item, "Done").parent;
+        const chosen = textOf(item, "Compact").parent;
+
+        hoveredButton.hovered = true;
+        verify(!Qt.colorEqual(hoveredButton.color, item.color),
+               "hovered button fill " + hoveredButton.color + " is the card's " + item.color);
+        verify(!Qt.colorEqual(chosen.color, item.color),
+               "chosen option fill " + chosen.color + " is the card's " + item.color);
+    }
+
     // The card itself has no hover; only the controls in it react.
     function test_aCardHasNoHover() {
         const item = make(card);
@@ -745,7 +779,7 @@ TestCase {
         const item = make(row, { appearance: reducedAppearance });
 
         item.hovered = true;
-        compare(item.color, theme.surfaceHover);
+        compare(item.color, theme.cardHover);
     }
 
     function test_aRowThatIsClickedShowsAPointingHand() {
@@ -766,7 +800,7 @@ TestCase {
         const item = make(button, { appearance: reducedAppearance });
 
         item.hovered = true;
-        compare(item.color, theme.surfaceHover);
+        compare(item.color, theme.cardHover);
         compare(hoverOf(item).cursorShape, Qt.PointingHandCursor);
     }
 
@@ -779,7 +813,7 @@ TestCase {
         item.hovered = true;
         compare(item.border.color, theme.accent);
         option.hovered = true;
-        compare(option.color, theme.surfaceHover);
+        compare(option.color, theme.cardHover);
         compare(hoverOf(option).cursorShape, Qt.PointingHandCursor);
     }
 
@@ -791,7 +825,7 @@ TestCase {
 
         compare(chip.border.color, theme.border);
         chip.hovered = true;
-        compare(chip.color, theme.surfaceHover);
+        compare(chip.color, theme.cardHover);
         compare(chip.border.color, theme.accent);
         compare(hoverOf(chip).cursorShape, Qt.PointingHandCursor);
     }
@@ -802,7 +836,7 @@ TestCase {
 
         item.hovering = true;
         compare(item.background.border.color, theme.accent);
-        compare(item.background.color, theme.surfaceHover);
+        compare(item.background.color, theme.cardHover);
     }
 
     // A slider's thumb grows under the pointer.
@@ -836,7 +870,7 @@ TestCase {
         const item = make(button);
 
         item.hovered = true;
-        verify(!Qt.colorEqual(item.color, theme.surfaceHover));
-        tryCompare(item, "color", theme.surfaceHover, 500);
+        verify(!Qt.colorEqual(item.color, theme.cardHover));
+        tryCompare(item, "color", theme.cardHover, 500);
     }
 }

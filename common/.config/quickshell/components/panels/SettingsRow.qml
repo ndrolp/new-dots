@@ -13,7 +13,7 @@ Rectangle {
     property bool hovered: rowHover.hovered
 
     radius: appearance.radius
-    color: hovered ? theme.surfaceHover : "transparent"
+    color: hovered ? theme.cardHover : "transparent"
 
     Behavior on color {
         ColorAnimation { duration: row.appearance.motion.short }
