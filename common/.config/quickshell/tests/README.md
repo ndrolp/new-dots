@@ -256,6 +256,10 @@ and time left (`components/bar/KeepAwakeElement.qml`,
 countdown: starting, restarting, running out and turning off by hand, the
 coarse time left a live element shows, and
 what the keybind's OSD says (`services/KeepAwakeState.js`),
+the failed reload notice: what a failed live reload shows (critical, the first
+error line, as text), a repeat failure replacing it and the next successful
+reload withdrawing it (`modules/FailedReload.js`; `FailedReload.qml` needs
+Quickshell and isn't tested here),
 which popup is open across the bars and which bar IPC opens one on
 (`modules/OpenPopup.js`), where the settings panel opens: inside the capsule of the bar it is
 asked from, or of the focused monitor's for IPC and other panels, centered on any other bar and
