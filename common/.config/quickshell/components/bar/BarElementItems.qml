@@ -17,6 +17,7 @@ import "../panels/ControlCenterNames.js" as Names
 import "../panels/MediaCard.js" as MediaCard
 import "RecordingIndicator.js" as RecordingIndicator
 import "PrivacyIndicator.js" as PrivacyIndicator
+import "PomodoroRing.js" as PomodoroRing
 import ".." as Components
 
 // The bar elements that need no component of their own (notifications,
@@ -908,7 +909,9 @@ Item {
 
     // The pomodoro's countdown, shown only while one is started: green while
     // it runs, muted while paused. It opens the same popup as the clock. As
-    // a capsule's live element it shows while started, paused included.
+    // a capsule's live element it shows while started, paused included, as
+    // a tiny ring of the time left in the phase, in the phase's colour
+    // (PomodoroRing.js), and mm:ss.
     LiveCapableItem {
         id: pomodoroItem
 
@@ -919,7 +922,9 @@ Item {
         Rectangle {
             id: pomodoroButton
 
-            readonly property var size: root.sizeAround(pomodoroContent, pomodoroItem.sizes.thickness)
+            readonly property Item content: pomodoroItem.live ? pomodoroLiveContent : pomodoroContent
+            readonly property var size: root.sizeAround(content, pomodoroItem.sizes.thickness)
+            readonly property color phaseColor: PomodoroRing.phaseColor(root.pomodoro.phase, theme)
 
             width: size.width
             height: size.height
@@ -942,6 +947,7 @@ Item {
             IconValue {
                 id: pomodoroContent
 
+                visible: !pomodoroItem.live
                 anchors.centerIn: parent
                 appearance: root.appearance
                 icon: "󰔟"
@@ -949,6 +955,33 @@ Item {
                 iconSize: pomodoroItem.sizes.iconSize
                 valueSize: pomodoroItem.sizes.textSize
                 value: root.pomodoro.remainingLabel
+            }
+
+            Row {
+                id: pomodoroLiveContent
+
+                visible: pomodoroItem.live
+                anchors.centerIn: parent
+                spacing: 5
+
+                PomodoroRingShape {
+                    anchors.verticalCenter: parent.verticalCenter
+                    size: pomodoroItem.sizes.iconSize
+                    thickness: 2
+                    fraction: PomodoroRing.fraction(root.pomodoro.remainingSeconds, root.pomodoro.phaseSeconds)
+                    color: pomodoroButton.phaseColor
+                    trackColor: theme.surfaceHover
+                    opacity: root.pomodoro.running ? 1 : 0.6
+                }
+
+                ElementText {
+                    anchors.verticalCenter: parent.verticalCenter
+                    appearance: root.appearance
+                    value: root.pomodoro.remainingLabel
+                    color: root.pomodoro.running ? theme.text : theme.textMuted
+                    font.pixelSize: pomodoroItem.sizes.textSize
+                    font.bold: true
+                }
             }
 
             MouseArea {

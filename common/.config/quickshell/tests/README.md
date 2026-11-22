@@ -186,7 +186,7 @@ crossfade (`CapsuleMotion.js`, `tst_capsuleMotion.qml`), that its contents
 crossfade between views by key, the old one fading and shrinking away before
 the new one shows and fades and grows in (`CapsuleContentTransition.qml`),
 which view its row shows (`CapsuleRouting.rowView`), that a popup inside it
-crossfades its contents on the capsule's timings (`PopupSurface.qml`), that its corners come down round a
+crossfades its contents on the capsule's timings (`PopupSurface.qml`), how much of the pomodoro's ring, in its ring view and on its live element, is drawn for the time left in the phase, in which colour (work red, a break green) and the phase's name (`PomodoroRing.js`, `tst_pomodoroRing.qml`), the pomodoro's phases, focus then a running break then an unstarted focus, and each phase's length (`services/PomodoroPhases.js`, `tst_pomodoroPhases.qml`), that its corners come down round a
 popup inside (`CapsulePlacement.withPopup`), that it reaches past its row for its
 workspace pills, and where they sit inside it, under the row of a top
 capsule and above the row of a bottom one, centred on it, how it grows round a popup
