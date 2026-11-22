@@ -162,6 +162,8 @@ ShellRoot {
 
     Modules.LowBattery {}
 
+    Modules.FailedReload {}
+
     Modules.Osd {
         id: osd
 

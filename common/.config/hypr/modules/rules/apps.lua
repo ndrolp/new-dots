@@ -31,27 +31,22 @@ hl.layer_rule({
 hl.curve("easy", { type = "spring", mass = 1, stiffness = 71.2633, dampening = 15.8273644 })
 
 hl.layer_rule({
-	name = "ndro-bar-no-blur",
-	match = { namespace = "ndro-shell-settings|ndro-shell-notifications" },
+	name = "ndro-notifications-no-blur",
+	match = { namespace = "ndro-shell-notifications" },
 	ignore_alpha = 0.0,
 	blur = false,
 	dim_around = false,
 	animation = "slide",
 })
 
+-- The centered settings panel is translucent, so the desktop behind it is
+-- blurred. Its layer covers the whole screen; ignore_alpha keeps the blur to
+-- the panel itself, skipping the fully transparent rest.
 hl.layer_rule({
-	name = "ndro-notifications-no-blur",
-	match = { namespace = "ndro-shell-notifications" },
-	ignore_alpha = 0.0,
-	blur = false,
-	dim_around = false,
-})
-
-hl.layer_rule({
-	name = "ndro-bar-no-blur",
+	name = "ndro-settings-blur",
 	match = { namespace = "ndro-shell-settings" },
 	ignore_alpha = 0.0,
-	blur = false,
+	blur = true,
 	dim_around = true,
 	animation = "popin",
 })
