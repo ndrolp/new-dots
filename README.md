@@ -47,6 +47,21 @@ The clone's `origin` is switched to SSH, so add an SSH key to GitHub before you 
 
 The wallpaper images aren't part of this repo.
 
+### Capsule
+
+One of the bar styles: the bar becomes a single capsule centred at the top. Hovering it or pressing SUPER+I expands it to every bar element. Volume, brightness and other changes show inside it, and popups and panels open inside it instead of full-screen.
+
+| | |
+| --- | --- |
+| ![Capsule at rest](docs/screenshots/capsule-resting.jpg) | ![Capsule expanded](docs/screenshots/capsule-expanded.jpg) |
+| **At rest** | **Expanded** |
+| ![Volume change in the capsule](docs/screenshots/capsule-change.jpg) | ![Control center in the capsule](docs/screenshots/capsule-control-center.jpg) |
+| **A change** | **Control center** |
+| ![Colorscheme selector in the capsule](docs/screenshots/capsule-colorschemes.jpg) | ![Quick search in the capsule](docs/screenshots/capsule-quick-search.jpg) |
+| **Colorscheme selector** | **Quick search** |
+| ![Wallpaper selector in the capsule](docs/screenshots/capsule-wallpapers.jpg) | ![Power menu in the capsule](docs/screenshots/capsule-power.jpg) |
+| **Wallpaper selector** | **Power menu** |
+
 ## Keybinds
 
 | Keys | Action |
