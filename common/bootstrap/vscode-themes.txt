@@ -1,6 +1,7 @@
 # VS Code theme extensions the vscode-themes step installs: one per colorscheme (tests check that
 # every colorscheme's colorschemes/<name>/vscode-theme.txt is a label here).
 # <extension id> <theme label, as the colorscheme's vscode-theme.txt names it>
+#   the id builtin names a theme VS Code ships with: nothing is installed for it
 
 catppuccin.catppuccin-vsc                Catppuccin Mocha
 enkia.tokyo-night                        Tokyo Night
@@ -10,5 +11,10 @@ mvllow.rose-pine                         Rosé Pine
 dracula-theme.theme-dracula              Dracula Theme
 jdinhlife.gruvbox                        Gruvbox Dark Medium
 arcticicestudio.nord-visual-studio-code  Nord
+keifererikson.nightfox                   Nightfox
 keifererikson.nightfox                   Carbonfox
 dnlytras.nord-wave                       Nord Wave
+zhuangtongfa.material-theme              One Dark Pro
+teabyii.ayu                              Ayu Dark
+github.github-vscode-theme               GitHub Dark Default
+builtin                                  Solarized Dark

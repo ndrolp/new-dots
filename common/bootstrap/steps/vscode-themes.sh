@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Installs the VS Code theme extensions in common/bootstrap/vscode-themes.txt, so every colorscheme's
-# VS Code theme is there for the colorscheme changer. An extension already installed is skipped. One
-# that fails to install is listed as failed in the summary and the rest go on.
+# VS Code theme is there for the colorscheme changer; a builtin theme needs none. An extension already
+# installed is skipped. One that fails to install is listed as failed in the summary and the rest go on.
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 
@@ -20,6 +20,8 @@ installed() { grep -qxF "${1,,}" <<<"$installed_extensions"; }
 already=0
 failed=0
 while read -r extension label; do
+    # A theme VS Code ships with needs no extension.
+    [[ "$extension" == builtin ]] && continue
     if installed "$extension"; then
         already=$((already + 1))
         continue
