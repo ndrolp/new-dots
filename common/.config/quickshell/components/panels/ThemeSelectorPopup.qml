@@ -14,11 +14,12 @@ BarPopup {
     required property var feature
 
     popup: "colorschemes"
-    popupWidth: 430
+    popupWidth: 640
 
     ThemeSelectorBody {
         width: parent.width
         appearance: root.appearance
+        wallpapers: root.feature.wallpapers
         active: root.shown
 
         onCloseRequested: root.popups.popupClosed(root.popup)

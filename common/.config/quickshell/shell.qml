@@ -225,6 +225,7 @@ ShellRoot {
 
         appearance: appearance
         bar: bar
+        wallpapers: wallpapers
     }
 
     Modules.ApplicationLauncher {

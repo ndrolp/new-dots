@@ -8,11 +8,13 @@ CapsuleFeature {
     id: root
 
     required property var appearance
+    required property var wallpapers
 
     popupName: "colorschemes"
 
     Panels.ThemeSelector {
         appearance: root.appearance
+        wallpapers: root.wallpapers
         open: root.open
 
         onCloseRequested: root.open = false

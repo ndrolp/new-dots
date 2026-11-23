@@ -137,7 +137,7 @@ El conjunto de iconos de aplicaciones y de la bandeja que usa el escritorio (hoy
 _Avoid_: Tema (a secas), que en este proyecto es el *colorscheme* (ver GLOSSARY-MAP)
 
 **Colorscheme selector** (selector de colorscheme):
-El panel a pantalla completa (o dentro de la cápsula) que lista los colorschemes, hace un *colorscheme preview* del que está resaltado y lo aplica al pulsar Enter. Al cerrarlo sin aplicar se vuelve al colorscheme activo.
+El panel a pantalla completa (o dentro de la cápsula) que lista los colorschemes en un deslizador vertical, el resaltado en el centro y los demás más tenues y pequeños cuanto más lejos están; a su derecha se ve uno de los *colorscheme wallpapers* del resaltado, fundiéndose en oscuro hacia la lista (sin ellos, solo oscuro). Hace un *colorscheme preview* del que está resaltado y lo aplica al pulsar Enter. Al cerrarlo sin aplicar se vuelve al colorscheme activo.
 _Avoid_: Theme selector, theme picker, selector de temas
 
 **Control center** (centro de control):
