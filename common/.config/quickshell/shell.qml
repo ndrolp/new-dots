@@ -326,6 +326,7 @@ ShellRoot {
         id: audioOutputSelector
 
         appearance: appearance
+        bar: bar
         osd: osd
     }
 
@@ -423,6 +424,7 @@ ShellRoot {
             quickSearch: quickSearch,
             colorschemes: themeSelector,
             powerMenu: powerMenu,
+            audioOutputs: audioOutputSelector,
             settings: settings
         })
     }
