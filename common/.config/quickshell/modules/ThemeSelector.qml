@@ -2,10 +2,14 @@ import Quickshell.Io
 import QtQuick
 import "../components/panels" as Panels
 
-Feature {
+// The colorscheme selector: full-screen, or inside the capsule on a monitor
+// whose bar is one (components/panels/ThemeSelectorPopup.qml).
+CapsuleFeature {
     id: root
 
     required property var appearance
+
+    popupName: "colorschemes"
 
     Panels.ThemeSelector {
         appearance: root.appearance

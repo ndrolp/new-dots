@@ -224,6 +224,7 @@ ShellRoot {
         id: themeSelector
 
         appearance: appearance
+        bar: bar
     }
 
     Modules.ApplicationLauncher {
@@ -239,6 +240,7 @@ ShellRoot {
         id: powerMenu
 
         appearance: appearance
+        bar: bar
     }
 
     Modules.ClipboardSelector {
@@ -251,7 +253,10 @@ ShellRoot {
     }
 
     Modules.QuickSearch {
+        id: quickSearch
+
         appearance: appearance
+        bar: bar
         bookmarks: bookmarks
         plugins: plugins
     }
@@ -415,6 +420,9 @@ ShellRoot {
             launcher: applicationLauncher,
             clipboard: clipboardSelector,
             unifiedSearch: unifiedSearch,
+            quickSearch: quickSearch,
+            colorschemes: themeSelector,
+            powerMenu: powerMenu,
             settings: settings
         })
     }

@@ -27,6 +27,12 @@ adding or editing one file here.
   app maker, SUPER+SHIFT+W, `web-apps toggle`, which opens a new web app
   itself so it opens once, not once per monitor), `WindowSwitcher` and
   `WorkspaceOverview`.
+- `CapsuleFeature.qml`: a panel that, on a monitor whose bar is a capsule,
+  opens inside the capsule as a bar popup instead of full-screen, decided each
+  time it opens: `WallpaperSelector`, `ApplicationLauncher`,
+  `ClipboardSelector`, `UnifiedSearch`, `QuickSearch`, `ThemeSelector` and
+  `PowerMenu`. Each shares one body between its full-screen panel and its popup
+  (`components/panels/*Body.qml`).
 - `MonitorChange.qml`: not a `Feature`, it follows `services/MonitorSetups.qml`:
   the *Keep* / *Revert* card on every screen that still works, which takes `Enter`
   and `Esc`, and each monitor's number for *Identify*.
