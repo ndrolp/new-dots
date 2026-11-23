@@ -158,6 +158,13 @@ hl.config({
 	},
 })
 
+hl.config({
+	render = {
+		-- Don't auto-switch the monitor to HDR on fullscreen: SDR video (YouTube) looked washed out.
+		cm_auto_hdr = 0,
+	},
+})
+
 ---------------
 ---- INPUT ----
 ---------------

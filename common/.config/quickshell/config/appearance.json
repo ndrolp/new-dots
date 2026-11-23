@@ -158,8 +158,10 @@
             "archButtonHorizontalPadding": 5,
             "barBorder": true,
             "barElements": {
-                "center": [],
-                "left": [],
+                "center": [
+                ],
+                "left": [
+                ],
                 "right": [
                     {
                         "enabled": true,
@@ -174,29 +176,25 @@
                     },
                     {
                         "enabled": true,
-                        "id": "network",
-                        "joinPrevious": true
+                        "id": "network"
                     },
                     {
                         "enabled": true,
                         "id": "clock",
-                        "joinPrevious": true,
                         "options": {
                             "iconVisible": true,
-                            "restIconVisible": true,
+                            "restIconVisible": false,
                             "restTextVisible": true,
                             "textVisible": true
                         }
                     },
                     {
                         "enabled": true,
-                        "id": "pomodoro",
-                        "joinPrevious": true
+                        "id": "pomodoro"
                     },
                     {
                         "enabled": true,
                         "id": "battery",
-                        "joinPrevious": true,
                         "options": {
                             "iconVisible": true,
                             "restIconVisible": true,
@@ -207,7 +205,6 @@
                     {
                         "enabled": true,
                         "id": "notifications",
-                        "joinPrevious": true,
                         "options": {
                             "badgeVisible": true
                         }
@@ -215,7 +212,6 @@
                     {
                         "enabled": true,
                         "id": "recording",
-                        "joinPrevious": true,
                         "options": {
                             "iconVisible": true,
                             "restIconVisible": true,
@@ -225,23 +221,19 @@
                     },
                     {
                         "enabled": true,
-                        "id": "privacy",
-                        "joinPrevious": true
+                        "id": "privacy"
                     },
                     {
                         "enabled": true,
-                        "id": "keepAwake",
-                        "joinPrevious": true
+                        "id": "keepAwake"
                     },
                     {
                         "enabled": true,
-                        "id": "bluetooth",
-                        "joinPrevious": true
+                        "id": "bluetooth"
                     },
                     {
                         "enabled": true,
                         "id": "workspaces",
-                        "joinPrevious": true,
                         "options": {
                             "appCountVisible": false,
                             "glyphs": [
@@ -329,7 +321,7 @@
             "barOpacity": 68,
             "barPosition": "top",
             "barStyle": "capsule",
-            "capsuleNotifications": false,
+            "capsuleNotifications": true,
             "capsulePlaces": {
                 "appMenu": "hidden",
                 "arch": "hidden",
@@ -363,7 +355,7 @@
             "radius": 8,
             "spacing": 4,
             "textSize": 13,
-            "transparentBarTopMargin": 8,
+            "transparentBarTopMargin": 10,
             "workspaceButtonSize": 18
         },
         "media": {
@@ -508,8 +500,10 @@
                         "joinPrevious": true
                     }
                 ],
-                "left": [],
-                "right": []
+                "left": [
+                ],
+                "right": [
+                ]
             },
             "barHeight": 30,
             "barOpacity": 55,
