@@ -14,7 +14,9 @@ Tokyonight-Dark-Moon     fausto   Tokyonight-GTK-Theme  -c dark --tweaks moon ma
 Kanagawa-Dark            fausto   Kanagawa-GKT-Theme    -c dark --tweaks macos
 Rosepine-Dark            fausto   Rose-Pine-GTK-Theme   -c dark --tweaks macos
 Nightfox-Dark-Carbonfox  fausto   Nightfox-GTK-Theme    -c dark --tweaks carbonfox macos
-Colloid-Red-Dark         vinceliuice  Colloid-gtk-theme  -t red -c dark --tweaks rimless
-Colloid-Red-Dark-Nord    vinceliuice  Colloid-gtk-theme  -t red -c dark --tweaks nord rimless
+Nightfox-Dark            fausto   Nightfox-GTK-Theme    -c dark --tweaks macos
+Osaka-Dark-Solarized     fausto   Osaka-GTK-Theme       -c dark --tweaks solarized macos
+Colloid-Dark             vinceliuice  Colloid-gtk-theme  -c dark --tweaks rimless
+Colloid-Yellow-Dark      vinceliuice  Colloid-gtk-theme  -t yellow -c dark --tweaks rimless
 Nordic-darker            release  EliverLara/Nordic     Nordic-darker.tar.xz
 Dracula                  release  dracula/gtk           Dracula.tar.xz

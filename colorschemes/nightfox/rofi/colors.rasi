@@ -1,0 +1,7 @@
+* {
+    bg0: #192330;
+    bg1: #212e3f;
+    fg: #cdcecf;
+    blue: #719cd6;
+    urgent: #c94f6d;
+}

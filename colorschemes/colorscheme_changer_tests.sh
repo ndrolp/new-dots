@@ -172,16 +172,16 @@ test_an_apply_without_an_active_link_leaves_the_default_colorscheme_alone() {
 
 test_listing_names_every_colorscheme_but_not_the_active_link() {
     ACTIVE_COLORSCHEME=nord change_colorscheme --list
-    [[ "$OUT" == "$(printf '%s\n' carbonfox catppuccin dracula everforestdark gruvboxdark \
-        kanagawa nord nordic oxocarbon rosepine tokyonight)" ]] || fail "unexpected list"
+    [[ "$OUT" == "$(printf '%s\n' ayudark catppuccin dracula everforestdark githubdark \
+        gruvboxdark kanagawa nightfox nord nordic onedark oxocarbon rosepine solarizeddark tokyonight)" ]] || fail "unexpected list"
 }
 
 test_listing_names_every_colorscheme_but_not_the_shown_link() {
     ACTIVE_COLORSCHEME=nord change_colorscheme --preview kanagawa
     [[ -L "$HOME_DIR/.dotfiles/colorschemes/shown" ]] || fail "previewing left no shown link"
     run_changer --list
-    [[ "$OUT" == "$(printf '%s\n' carbonfox catppuccin dracula everforestdark gruvboxdark \
-        kanagawa nord nordic oxocarbon rosepine tokyonight)" ]] || fail "unexpected list"
+    [[ "$OUT" == "$(printf '%s\n' ayudark catppuccin dracula everforestdark githubdark \
+        gruvboxdark kanagawa nightfox nord nordic onedark oxocarbon rosepine solarizeddark tokyonight)" ]] || fail "unexpected list"
 }
 
 test_the_active_link_cannot_be_applied_as_a_colorscheme() {

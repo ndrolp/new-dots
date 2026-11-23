@@ -130,6 +130,15 @@ test_an_extension_that_does_not_install_is_failed_and_the_rest_go_on() {
     grep -qx "jdinhlife.gruvbox" "$FAKE/installed" || fail "the extension after the failed one was not installed"
 }
 
+test_a_builtin_theme_installs_nothing() {
+    setup_fakes
+    write_list "builtin  Solarized Dark"
+    run_step
+    [[ $STATUS -eq 0 ]] || fail "exited $STATUS"
+    ! grep -q "^code --install-extension" "$CALLS" || fail "tried to install a built-in theme"
+    ! grep -q "^failed" <<<"$SUMMARY" || fail "a built-in theme failed: $SUMMARY"
+}
+
 test_without_vscode_the_step_skips() {
     setup_fakes
     rm "$FAKE_BIN/code"
