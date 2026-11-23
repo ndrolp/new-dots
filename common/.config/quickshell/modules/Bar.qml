@@ -36,7 +36,8 @@ Scope {
     required property var controlCenter
     // The features that open inside a capsule instead of full-screen
     // (CapsuleFeature.qml), and the settings panel (Settings.qml): { wallpapers,
-    // launcher, clipboard, unifiedSearch, settings }.
+    // launcher, clipboard, unifiedSearch, quickSearch, colorschemes, powerMenu,
+    // settings }.
     required property var capsuleFeatures
 
     property var openPopup: OpenPopup.none

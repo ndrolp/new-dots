@@ -264,7 +264,9 @@ shows on each monitor (`components/lock/LockScreenBody.qml`), what a unified
 search query asks for: its query mode, whether it is maths for the
 calculator and how qalc is run and answers
 (`components/panels/SearchQuery.js`), which emoji the emoji picker finds
-(`components/panels/EmojiSearch.js`), and how the keybind cheatsheet groups
+(`components/panels/EmojiSearch.js`), which bookmarks the quick search shows,
+at most two rows of five in the settings order, the rest only by typing
+(`components/panels/QuickSearchResults.js`), and how the keybind cheatsheet groups
 and filters `hyprctl binds -j` (`components/panels/KeybindCheatsheet.js`),
 the printers the Printers panel lists, read from `lpstat` output, with their
 state, network or USB and the default, their print jobs read from `ipptool`,
