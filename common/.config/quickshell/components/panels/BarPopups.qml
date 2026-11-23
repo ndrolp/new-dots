@@ -21,7 +21,7 @@ Item {
     // The features that open inside a capsule instead of full-screen
     // (modules/CapsuleFeature.qml) and the settings panel (modules/Settings.qml),
     // handed to their popups: { wallpapers, launcher, clipboard, unifiedSearch,
-    // quickSearch, colorschemes, powerMenu, settings }.
+    // quickSearch, colorschemes, powerMenu, audioOutputs, settings }.
     required property var capsuleFeatures
     // The notifications this bar's capsule shows, with notifications in the
     // capsule on (components/bar/CapsuleNotifications.qml); null elsewhere.
@@ -138,6 +138,11 @@ Item {
     PowerMenuPopup {
         popups: root
         feature: root.capsuleFeatures.powerMenu
+    }
+
+    AudioSinkSelectorPopup {
+        popups: root
+        feature: root.capsuleFeatures.audioOutputs
     }
 
     SettingsPopup {
