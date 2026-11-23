@@ -30,10 +30,64 @@ function withAssignment(assignments, monitorDescription, path) {
     return updated;
 }
 
+// `assignments` with each monitor of `picked` ({ description: path }) set,
+// as one fresh object, so they are saved together.
+function withAssignments(assignments, picked) {
+    let updated = assignments;
+    for (const monitorDescription in picked)
+        updated = withAssignment(updated, monitorDescription, picked[monitorDescription]);
+    return updated;
+}
+
 // The index `offset` steps away from `index`, wrapping around both ends.
 function step(index, offset, count) {
     if (count === 0)
         return index;
 
     return (index + offset + count) % count;
+}
+
+// The folder a wallpaper file is in.
+function folderOf(path) {
+    return path.slice(0, path.lastIndexOf("/"));
+}
+
+// The files of `listed` directly in `folder`.
+function wallpapersIn(folder, listed) {
+    return listed.filter(path => folderOf(path) === folder);
+}
+
+// The wallpaper folders for `colorscheme`, under `root`: its own Horizontal
+// and Vertical folders, each falling back to Default's when `listed` (the
+// files found in them) has none in it.
+function colorschemeFolders(root, colorscheme, listed) {
+    function folder(orientation) {
+        const own = root + "/" + colorscheme + "/" + orientation;
+        return wallpapersIn(own, listed).length > 0 ? own : root + "/Default/" + orientation;
+    }
+
+    return { horizontal: folder("Horizontal"), vertical: folder("Vertical") };
+}
+
+// A wallpaper for each monitor ({ description, portrait }), from those of its
+// orientation, by `random` (0 ≤ r < 1): one no other monitor got while any is
+// left. Monitors without a description, or without any wallpaper of their
+// orientation, are left out.
+function spread(monitors, horizontal, vertical, random) {
+    const picked = {};
+    const used = [];
+
+    for (const monitor of monitors) {
+        const wallpapers = monitor.portrait ? vertical : horizontal;
+        if (monitor.description === "" || wallpapers.length === 0)
+            continue;
+
+        const unused = wallpapers.filter(path => !used.includes(path));
+        const choices = unused.length > 0 ? unused : wallpapers;
+        const path = choices[Math.min(choices.length - 1, Math.floor(random() * choices.length))];
+        picked[monitor.description] = path;
+        used.push(path);
+    }
+
+    return picked;
 }

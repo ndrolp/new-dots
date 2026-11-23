@@ -10,6 +10,8 @@ Variants {
     id: root
 
     required property var appearance
+    // The wallpapers (config/Wallpapers.qml): each colorscheme's own is shown.
+    property var wallpapers: null
     property bool open: false
 
     signal closeRequested()
@@ -59,7 +61,7 @@ Variants {
 
         Rectangle {
             anchors.centerIn: parent
-            width: Math.min(parent.width - 64, 430)
+            width: Math.min(parent.width - 64, 640)
             height: body.implicitHeight + 32
             radius: 12
             color: Qt.rgba(theme.surface.r, theme.surface.g, theme.surface.b, 0.88)
@@ -74,6 +76,7 @@ Variants {
                 anchors.top: parent.top
                 anchors.margins: 16
                 appearance: root.appearance
+                wallpapers: root.wallpapers
                 active: selector.visible
 
                 onCloseRequested: selector.close()

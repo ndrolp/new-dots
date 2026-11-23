@@ -390,6 +390,17 @@ test_applying_leads_quickshells_colours_to_the_colorschemes_and_asks_the_shell_t
         || fail "the shell was not asked to reload its colours"
 }
 
+test_applying_asks_the_shell_for_the_colorschemes_wallpapers() {
+    change_colorscheme nord
+    grep -qx "quickshell ipc --path $HOME_DIR/.config/quickshell call wallpapers colorscheme nord" "$CALLS" \
+        || fail "the shell was not asked for nord's wallpapers"
+}
+
+test_previewing_leaves_the_wallpapers_alone() {
+    change_colorscheme --preview nord
+    ! grep -q "call wallpapers" "$CALLS" || fail "a preview changed the wallpapers"
+}
+
 test_applying_does_not_restart_quickshell() {
     change_colorscheme nord
     [[ "$(grep "^quickshell " "$CALLS" | grep -vc "^quickshell ipc ")" -eq 0 ]] \

@@ -40,6 +40,10 @@ _Avoid_: Seek bar, barra de progreso (para el estilo *bars*)
 La vista a pantalla completa que se abre sobre el monitor enfocado para elegir el fondo de ese monitor. La lista de fondos dentro de los ajustes no es un wallpaper selector, sino parte de la sección Wallpapers del panel de ajustes.
 _Avoid_: Wallpaper picker, carrusel
 
+**Colorscheme wallpapers** (fondos de un colorscheme):
+Los fondos elegidos para un colorscheme, uno o varios por orientación (horizontales y verticales); un mismo fondo puede ser de varios colorschemes. Al aplicar un colorscheme, el wallpaper selector y los fondos dinámicos pasan a ofrecer solo los suyos, y cada monitor recibe uno al azar, distinto del de los demás monitores mientras queden. Para una orientación sin fondos del colorscheme se usan los de siempre (Default). Un colorscheme preview no cambia los fondos. Pertenecen a la máquina, como los propios fondos.
+_Avoid_: Theme wallpapers, fondos del tema, wallpaper pack
+
 **System monitor**:
 El bar element que muestra el uso de CPU y memoria. No confundir con el desktop widget *System*.
 _Avoid_: System (para el elemento de la barra)
@@ -133,7 +137,7 @@ El conjunto de iconos de aplicaciones y de la bandeja que usa el escritorio (hoy
 _Avoid_: Tema (a secas), que en este proyecto es el *colorscheme* (ver GLOSSARY-MAP)
 
 **Colorscheme selector** (selector de colorscheme):
-El panel a pantalla completa (o dentro de la cápsula) que lista los colorschemes, hace un *colorscheme preview* del que está resaltado y lo aplica al pulsar Enter. Al cerrarlo sin aplicar se vuelve al colorscheme activo.
+El panel a pantalla completa (o dentro de la cápsula) que lista los colorschemes en un deslizador vertical, el resaltado en el centro y los demás más tenues y pequeños cuanto más lejos están; a su derecha se ve uno de los *colorscheme wallpapers* del resaltado, fundiéndose en oscuro hacia la lista (sin ellos, solo oscuro). Hace un *colorscheme preview* del que está resaltado y lo aplica al pulsar Enter. Al cerrarlo sin aplicar se vuelve al colorscheme activo.
 _Avoid_: Theme selector, theme picker, selector de temas
 
 **Control center** (centro de control):

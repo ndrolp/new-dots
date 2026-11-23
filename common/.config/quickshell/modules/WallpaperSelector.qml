@@ -28,5 +28,10 @@ CapsuleFeature {
         function toggle() {
             root.toggle();
         }
+
+        // The colorscheme changer applied `colorscheme`: its wallpapers.
+        function colorscheme(colorscheme: string): void {
+            root.wallpapers.useColorscheme(colorscheme);
+        }
     }
 }
