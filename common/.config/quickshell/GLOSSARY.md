@@ -40,6 +40,10 @@ _Avoid_: Seek bar, barra de progreso (para el estilo *bars*)
 La vista a pantalla completa que se abre sobre el monitor enfocado para elegir el fondo de ese monitor. La lista de fondos dentro de los ajustes no es un wallpaper selector, sino parte de la sección Wallpapers del panel de ajustes.
 _Avoid_: Wallpaper picker, carrusel
 
+**Colorscheme wallpapers** (fondos de un colorscheme):
+Los fondos elegidos para un colorscheme, uno o varios por orientación (horizontales y verticales); un mismo fondo puede ser de varios colorschemes. Al aplicar un colorscheme, el wallpaper selector y los fondos dinámicos pasan a ofrecer solo los suyos, y cada monitor recibe uno al azar, distinto del de los demás monitores mientras queden. Para una orientación sin fondos del colorscheme se usan los de siempre (Default). Un colorscheme preview no cambia los fondos. Pertenecen a la máquina, como los propios fondos.
+_Avoid_: Theme wallpapers, fondos del tema, wallpaper pack
+
 **System monitor**:
 El bar element que muestra el uso de CPU y memoria. No confundir con el desktop widget *System*.
 _Avoid_: System (para el elemento de la barra)

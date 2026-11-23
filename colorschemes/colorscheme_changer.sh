@@ -240,6 +240,12 @@ apply_quickshell() {
   recolour_quickshell
 }
 
+# The shell moves its wallpaper folders to the colorscheme's own and gives every monitor one of its
+# wallpapers (config/Wallpapers.qml, useColorscheme). A preview never does: it only recolours.
+apply_wallpapers() {
+  quickshell ipc --path "$HOME/.config/quickshell" call wallpapers colorscheme "$COLORSCHEME"
+}
+
 # Spotify's colours come from spicetify's Dotfiles theme, whose color.ini links through the active
 # colorscheme (bootstrap.sh --spicetify sets it up). spicetify bakes them into Spotify's files, so it is
 # asked to refresh them. Spotify only reads them when it starts, so a running Spotify is restarted, in
@@ -262,6 +268,7 @@ step nvim apply_nvim
 step vscode apply_vscode
 step gtk apply_gtk
 step quickshell apply_quickshell
+step wallpapers apply_wallpapers
 step spotify apply_spotify
 
 report_failed_steps

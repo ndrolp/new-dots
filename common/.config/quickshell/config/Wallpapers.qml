@@ -12,6 +12,9 @@ QtObject {
     property alias verticalFolder: settings.verticalFolder
     property alias dynamicEnabled: settings.dynamicEnabled
     property alias dynamicIntervalMinutes: settings.dynamicIntervalMinutes
+    // The folder holding a folder per colorscheme (and Default), each with
+    // Horizontal and Vertical; "" when wallpapers don't follow the colorscheme.
+    property alias colorschemesFolder: settings.colorschemesFolder
 
     function localPath(path) {
         if (path === undefined || path === null)
@@ -93,6 +96,7 @@ QtObject {
 
     function advanceAll() {
         const monitors = Hyprland.monitors.values;
+        const next = {};
 
         for (let index = 0; index < monitors.length; index++) {
             const monitor = monitors[index];
@@ -104,8 +108,58 @@ QtObject {
             const nextPath = nextWallpaper(model, pathFor(monitor.description));
 
             if (nextPath !== "")
-                setWallpaper(monitor.description, nextPath);
+                next[monitor.description] = nextPath;
         }
+
+        setWallpapers(next);
+    }
+
+    // A colorscheme was applied: the wallpaper folders move to its own (or
+    // Default's, for an orientation it has none for) and every monitor gets
+    // one of its wallpapers, each a different one where there are enough.
+    // The folders are listed first, so the choice never waits on a folder
+    // model.
+    function useColorscheme(colorscheme) {
+        const folder = colorschemesFolder.replace(/\/+$/, "");
+        if (folder === "" || colorscheme === "")
+            return;
+
+        colorschemeListing.colorscheme = colorscheme;
+        colorschemeListing.listed = [];
+        colorschemeListing.command = ["find", "-L",
+            folder + "/" + colorscheme + "/Horizontal", folder + "/" + colorscheme + "/Vertical",
+            folder + "/Default/Horizontal", folder + "/Default/Vertical",
+            "-maxdepth", "1", "-type", "f", "(",
+            "-iname", "*.png", "-o", "-iname", "*.jpg", "-o", "-iname", "*.jpeg", "-o", "-iname", "*.webp",
+            ")"];
+        colorschemeListing.running = true;
+    }
+
+    function useListedColorscheme(folder, colorscheme, listed) {
+        const folders = WallpaperModel.colorschemeFolders(folder, colorscheme, listed);
+        horizontalFolder = folders.horizontal;
+        verticalFolder = folders.vertical;
+
+        const monitors = Hyprland.monitors.values.map(monitor => ({
+            description: monitor.description,
+            portrait: isPortraitMonitor(monitor)
+        }));
+        const picked = WallpaperModel.spread(monitors,
+            WallpaperModel.wallpapersIn(folders.horizontal, listed),
+            WallpaperModel.wallpapersIn(folders.vertical, listed), Math.random);
+        setWallpapers(picked);
+    }
+
+    // Sets several monitors' wallpapers ({ description: path }) in one save:
+    // one save per monitor would race the settings file reloading, and keep
+    // only the last.
+    function setWallpapers(picked) {
+        const local = {};
+        for (const description in picked)
+            local[description] = localPath(picked[description]);
+        assignments = WallpaperModel.withAssignments(assignments, local);
+        for (const description in local)
+            apply(description, local[description]);
     }
 
     function apply(monitorDescription, path) {
@@ -136,6 +190,25 @@ QtObject {
             if (exitCode !== 0)
                 console.warn("awww exited with code", exitCode, "status", exitStatus);
         }
+    }
+
+    // Lists a colorscheme's wallpaper folders and Default's (useColorscheme).
+    // A missing folder only makes find exit non-zero: what it found counts.
+    property var colorschemeListing: Process {
+        id: colorschemeListing
+
+        property string colorscheme: ""
+        property var listed: []
+
+        stdout: SplitParser {
+            onRead: line => {
+                if (line !== "")
+                    colorschemeListing.listed.push(line);
+            }
+        }
+
+        onExited: root.useListedColorscheme(root.colorschemesFolder.replace(/\/+$/, ""),
+            colorscheme, listed)
     }
 
     property var horizontalWallpapers: WallpaperFiles {
@@ -180,6 +253,7 @@ QtObject {
             property string verticalFolder: ""
             property bool dynamicEnabled: false
             property int dynamicIntervalMinutes: 30
+            property string colorschemesFolder: ""
         }
     }
 }

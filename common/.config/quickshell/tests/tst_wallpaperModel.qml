@@ -31,6 +31,14 @@ TestCase {
         compare(before["AOC"], "/a.png");
     }
 
+    function test_assigningSeveralMonitorsAtOnceKeepsTheOthers() {
+        const before = { "AOC": "/a.png", "Philips": "/p.png", "Samsung": "/s.png" };
+
+        const after = WallpaperModel.withAssignments(before, { "AOC": "/b.png", "Philips": "/q.png" });
+
+        compare(after, { "AOC": "/b.png", "Philips": "/q.png", "Samsung": "/s.png" });
+    }
+
     function test_aMonitorWithoutDescriptionIsNeverAssigned() {
         const after = WallpaperModel.withAssignment({ "AOC": "/a.png" }, "", "/b.png");
 

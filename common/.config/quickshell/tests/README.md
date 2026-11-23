@@ -331,6 +331,10 @@ listed from, never the folder plus its name, so a folder switched while the
 first is still being listed never gives a thumbnail a file that isn't there
 (`config/WallpaperFiles.qml`, `WallpaperThumbnail.qml`; `tst_wallpaperFiles.qml`,
 and `tst_wallpaperSettings.qml` for the section's tiles),
+the colorscheme wallpapers: the folders applying a colorscheme moves to, its
+own or Default's for an orientation it has none for, and a wallpaper for each
+monitor apart from the others' while there are enough, saved in one go
+(`config/WallpaperModel.js`; `tst_colorschemeWallpapers.qml`),
 which popup is open across the bars and which bar IPC opens one on
 (`modules/OpenPopup.js`), where the settings panel opens: inside the capsule of the bar it is
 asked from, or of the focused monitor's for IPC and other panels, centered on any other bar and
