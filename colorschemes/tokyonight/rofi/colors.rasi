@@ -1,1 +1,7 @@
-@import "~/.config/rofi/custom/colors/tokyonight.rasi"
+* {
+    bg0: #222436;
+    bg1: #2f334d;
+    fg: #c8d3f5;
+    blue: #82aaff;
+    urgent: #ff757f;
+}
