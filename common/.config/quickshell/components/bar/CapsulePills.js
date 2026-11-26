@@ -1,7 +1,7 @@
 .pragma library
 
-// The capsule's workspace pills (CapsuleWorkspaceRow.qml): which workspaces
-// get one, how each looks and how big it is, at rest and expanded. Pure
+// The capsule's workspace pills (CapsuleWorkspaceRow.qml), one per workspace
+// of its monitor, at rest and expanded: how each looks and how big it is, at rest and expanded. Pure
 // functions; they never mutate what they are given.
 
 // What workspace `id` is to the pills of the monitor on `screen`: "shown",
@@ -15,13 +15,6 @@ function role(id, workspaceService, screen) {
     if (workspaceService.isUrgent(id))
         return "urgent";
     return workspaceService.isOccupied(id) ? "occupied" : "empty";
-}
-
-// Whether a workspace of `role` has a pill: at rest every one but an empty
-// one; expanded, every one, as a chip. Scrolling over the pills still goes
-// through every workspace.
-function hasPill(role, expanded) {
-    return expanded || role !== "empty";
 }
 
 // What a chip of workspace `id` shows: its glyph when the workspaces bar

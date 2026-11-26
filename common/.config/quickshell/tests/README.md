@@ -239,8 +239,9 @@ capsule and above the row of a bottom one, centred on it, as deep as the
 chips while expanded, how it grows round a popup
 inside it (`CapsulePlacement.js`), that its window grows at once for a popup inside and
 never shrinks back (`CapsuleWindowHold.qml`), that at rest the
-pills are small and unlabelled, one per workspace with windows in order and
-none for an empty one unless its monitor shows it, focused or not, and that
+pills are small and unlabelled, one per workspace of the monitor in order,
+an empty one dimmest, the long one on the one its monitor shows, focused or
+not, and that
 expanded every workspace is a chip with its number or glyph, an empty one dim
 and clickable, growing on the capsule's spring, at once with reduce motion,
 and back to pills on collapse (`CapsulePills.js`), highlight the

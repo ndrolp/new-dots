@@ -4,9 +4,8 @@ import "../components/bar"
 import "../config" as Config
 
 // The capsule's workspace pills. At rest: one small pill per workspace of its
-// monitor with windows, and the one it shows even when empty, with no label;
-// the shown one wider and in the accent, an urgent one red and an occupied
-// one dim; an empty one has no pill. Expanded: every workspace is a chip with
+// monitor, with no label; the shown one wider and in the accent, an urgent
+// one red, an occupied one dim and an empty one dimmer. Expanded: every workspace is a chip with
 // its number or glyph, in the same colours, an empty one dim and clickable;
 // collapsed, they are pills again. A click on a pill switches to its
 // workspace; scrolling goes through every workspace, empty ones too.
@@ -146,7 +145,7 @@ TestCase {
         compare(colorAt(built, 10 + 20, 10 + 2), { r: 0, g: 1, b: 0 });
         workspaces.shownOnMonitor = 3;
         tryCompare(pillFor(built.row, 3), "role", "shown");
-        compare(built.row.pills.map(pill => pill.workspaceId), [1, 3]);
+        compare(built.row.pills.map(pill => pill.workspaceId), [1, 2, 3]);
     }
 
     // On a monitor without focus, the workspace it shows keeps its long
@@ -156,29 +155,19 @@ TestCase {
         workspaces.focused = 7;
         const built = createTemporaryObject(area, this);
 
-        compare(built.row.pills.map(pill => [pill.workspaceId, pill.width]), [[2, 16]]);
-        compare(colorAt(built, 10 + 8, 10 + 2), { r: 0, g: 1, b: 0 });
+        compare(built.row.pills.map(pill => [pill.workspaceId, pill.width]), [[1, 8], [2, 16], [3, 8]]);
+        compare(colorAt(built, 10 + 20, 10 + 2), { r: 0, g: 1, b: 0 });
     }
 
-    function test_anEmptyWorkspaceHasNoPill() {
+    // Every workspace of the monitor has a pill at rest, an empty one too, in
+    // the empty colour.
+    function test_atRestEveryWorkspaceHasAPill() {
         workspaces.occupied = [1];
         const built = createTemporaryObject(area, this);
 
-        compare(built.row.pills.map(pill => pill.workspaceId), [1, 2]);
-        compare(built.row.implicitWidth, 28);
-        workspaces.occupied = [1, 3];
-        tryCompare(built.row, "implicitWidth", 40);
         compare(built.row.pills.map(pill => pill.workspaceId), [1, 2, 3]);
-    }
-
-    function test_theShownWorkspaceHasAPillEvenWhenEmpty() {
-        workspaces.occupied = [];
-        const built = createTemporaryObject(area, this);
-
-        compare(built.row.pills.map(pill => pill.workspaceId), [2]);
-        workspaces.shownOnMonitor = 3;
-        tryCompare(built.row, "pills", [pillFor(built.row, 3)]);
-        compare(colorAt(built, 10 + 8, 10 + 2), { r: 0, g: 1, b: 0 });
+        compare(built.row.implicitWidth, 40);
+        compare(colorAt(built, 10 + 36, 10 + 2), { r: 0, g: 0, b: 1 });
     }
 
     // One asking for attention is red until it is shown.
@@ -191,8 +180,9 @@ TestCase {
         compare(colorAt(built, 10 + 36, 10 + 2), { r: 1, g: 1, b: 0 });
         workspaces.shownOnMonitor = 3;
         tryCompare(pillFor(built.row, 3), "role", "shown");
-        // Workspace 2, empty and no longer shown, has gone.
-        compare(colorAt(built, 10 + 20, 10 + 2), { r: 0, g: 1, b: 0 });
+        // Workspace 2, empty and no longer shown, is in the empty colour.
+        compare(colorAt(built, 10 + 16, 10 + 2), { r: 0, g: 0, b: 1 });
+        compare(colorAt(built, 10 + 32, 10 + 2), { r: 0, g: 1, b: 0 });
     }
 
     // Unless told otherwise, an occupied pill is the text at about 40%,
@@ -254,7 +244,7 @@ TestCase {
         compare(workspaces.switchedTo, [3]);
     }
 
-    // Collapsing returns to the pills at rest: no label, no empty ones.
+    // Collapsing returns to the pills at rest, with no label.
     function test_collapsingReturnsToThePills() {
         const built = createTemporaryObject(area, this);
 
@@ -309,13 +299,13 @@ TestCase {
         compare(workspaces.switchedTo, [3, 1]);
     }
 
-    // Scrolling steps through every workspace the monitor shows, even an
-    // empty one with no pill.
+    // Scrolling steps through every workspace the monitor shows, an empty
+    // one too.
     function test_scrollingReachesAnEmptyWorkspace() {
         workspaces.shownOnMonitor = 1;
         const built = createTemporaryObject(area, this);
 
-        compare(built.row.pills.map(pill => pill.workspaceId), [1, 3]);
+        compare(built.row.pills.map(pill => pill.workspaceId), [1, 2, 3]);
         mouseWheel(built.row, 4, 2, 0, -120);
         workspaces.shownOnMonitor = 3;
         mouseWheel(built.row, 4, 2, 0, 120);

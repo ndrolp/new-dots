@@ -7,13 +7,12 @@ import "../../config" as Config
 
 // The capsule's workspace pills, inside the capsule past its row of bar
 // elements. At rest: one small pill, with no label, per workspace of its
-// monitor with windows, and the one it shows even when empty; an empty one
-// has no pill. The pill of the workspace its monitor shows (whichever monitor
+// monitor, an empty one dimmest. The pill of the workspace its monitor shows (whichever monitor
 // has focus) is twice as long and in the accent, one asking for attention is
 // red and one with windows dim (CapsulePills.role). Expanded, the pills grow
 // on the capsule's spring into small chips with the workspace's number, or
 // its glyph when the workspaces bar element uses glyphs, in the same
-// colours, and empty workspaces come back as dim chips; collapsed, they are
+// colours, an empty one dim and clickable; collapsed, they are
 // pills again (CapsulePills). A click on a pill switches to its workspace;
 // scrolling over the pills goes to the next or previous workspace, an empty
 // one too, at most one per touchpad gesture, stopping at either end.
@@ -95,10 +94,6 @@ Row {
                 labelLength: chipLabel.implicitWidth
             })
             property alias label: chipLabel
-
-            // A workspace without a pill keeps its place in the Repeater, so
-            // the others keep theirs and animate, but the Row skips it.
-            visible: CapsulePills.hasPill(role, root.expanded)
 
             width: size.width
             height: size.height

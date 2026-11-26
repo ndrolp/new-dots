@@ -2,10 +2,8 @@ import QtQuick
 import QtTest
 import "../components/bar/CapsulePills.js" as CapsulePills
 
-// The capsule's workspace pills. At rest, the workspace its monitor shows has
-// a pill, empty or not, and every one with windows; an empty one has none.
-// Expanded, every workspace of the monitor is a chip with its number or
-// glyph, an empty one dim.
+// The capsule's workspace pills: one per workspace of its monitor. At rest a
+// bare pill; expanded, a chip with its number or glyph.
 TestCase {
     name: "CapsulePills"
 
@@ -26,12 +24,6 @@ TestCase {
         return [1, 2, 3, 4].map(id => CapsulePills.role(id, service, "monitor"));
     }
 
-    // The workspaces of 1 to 4 with a pill.
-    function pills(service, expanded) {
-        return [1, 2, 3, 4].filter(id =>
-            CapsulePills.hasPill(CapsulePills.role(id, service, "monitor"), expanded));
-    }
-
     function test_eachWorkspaceHasARole() {
         compare(roles(workspaces(2, [1, 3, 4], [3])), ["occupied", "shown", "urgent", "occupied"]);
     }
@@ -40,24 +32,6 @@ TestCase {
     // focus; one asking for attention there is still the shown one.
     function test_theShownWorkspaceIsTheMonitorsNotTheFocusedOne() {
         compare(roles(workspaces(2, [1, 2], [2], 7)), ["occupied", "shown", "empty", "empty"]);
-    }
-
-    function test_atRestAnEmptyWorkspaceHasNoPill() {
-        compare(pills(workspaces(1, [1, 3]), false), [1, 3]);
-    }
-
-    function test_atRestTheShownWorkspaceHasAPillEvenWhenEmpty() {
-        compare(pills(workspaces(2, [1, 3]), false), [1, 2, 3]);
-        compare(pills(workspaces(4, []), false), [4]);
-    }
-
-    // On a monitor without focus, its shown workspace keeps its pill.
-    function test_atRestAnUnfocusedMonitorKeepsItsShownPill() {
-        compare(pills(workspaces(2, [], [], 7), false), [2]);
-    }
-
-    function test_expandedEveryWorkspaceHasAChip() {
-        compare(pills(workspaces(1, [1]), true), [1, 2, 3, 4]);
     }
 
     // A chip shows its workspace's number, or its glyph when the workspaces
