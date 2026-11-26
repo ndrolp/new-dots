@@ -257,7 +257,8 @@ and clickable, growing on the capsule's spring, at once with reduce motion,
 and back to pills on collapse (`CapsulePills.js`), highlight the
 one its monitor shows as it changes, dim an occupied one, switch workspace on a click and
 go to the next or previous one on a scroll, an empty one too, as the bar's
-workspaces element does, stopping at either end (`CapsuleWorkspaceRow.qml`,
+workspaces element does, stopping at either end, and keep their pills and
+length while the row is hidden (`CapsuleWorkspaceRow.qml`,
 `Workspaces.qml`), that a mouse wheel
 steps once per notch and a touchpad gesture at most once
 (`components/WheelSteps.js`; `WheelStepHandler.qml` feeds it), and that a capsule sits only at the top or
