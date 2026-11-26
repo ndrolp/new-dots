@@ -58,6 +58,17 @@ function withPopup(place, popup, barPosition) {
     };
 }
 
+// Where the capsule glance goes in the bar content, { x, y }: where a popup
+// inside would, centred on its row's `place` (as surface gives it) and just
+// past it, away from the screen edge at `barPosition` ("top" or "bottom").
+// Takes the glance's { width, height }; withPopup grows the capsule round it.
+function glancePlace(place, glance, barPosition) {
+    return {
+        x: place.x + (place.width - glance.width) / 2,
+        y: barPosition === "bottom" ? place.y - glance.height : place.y + place.height
+    };
+}
+
 // The part of the bar window that takes clicks, { x, y, width, height }: only
 // the capsule, so clicks around it reach the windows below. Takes the
 // capsule's surface and where the bar content starts in the window,

@@ -206,4 +206,46 @@ TestCase {
 
         compare(look, { opacity: 0.5, scale: 0.97, slide: 0 });
     }
+
+    // The glance's cards enter just after the row, one after another left to
+    // right: card i takes the step after the row's last, plus i, of all the
+    // steps, and slides in from the left. 2 row steps and 2 cards make 4
+    // steps of 290 ms, 20 ms apart.
+    function test_theGlanceCardsEnterAfterTheRow_data() {
+        return [
+            { tag: "first card waiting", index: 0, elapsed: 39, opacity: 0, slide: -6 },
+            { tag: "first card halfway", index: 0, elapsed: 40 + 145, opacity: 0.875, slide: -0.75 },
+            { tag: "second card waiting", index: 1, elapsed: 59, opacity: 0, slide: -6 },
+            { tag: "second card halfway", index: 1, elapsed: 60 + 145, opacity: 0.875, slide: -0.75 },
+            { tag: "second card in", index: 1, elapsed: 350, opacity: 1, slide: 0 }
+        ];
+    }
+
+    function test_theGlanceCardsEnterAfterTheRow(data) {
+        const look = CapsuleMotion.cardLook(motion, {
+            entering: true, elapsed: data.elapsed, entry: entry, crossfade: crossfade
+        }, data.index, 2);
+
+        fuzzyCompare(look.opacity, data.opacity, 0.0001);
+        compare(look.scale, 1);
+        fuzzyCompare(look.slide, data.slide, 0.0001);
+    }
+
+    // With reduce motion every card is in at once.
+    function test_withReduceMotionTheCardsAreInAtOnce() {
+        const look = CapsuleMotion.cardLook(Motion.motion(true), {
+            entering: true, elapsed: 0, entry: entry, crossfade: crossfade
+        }, 1, 2);
+
+        compare(look, { opacity: 1, scale: 1, slide: 0 });
+    }
+
+    // Otherwise a card takes the crossfade's look, in place.
+    function test_aCardNotEnteringTakesTheCrossfade() {
+        const look = CapsuleMotion.cardLook(motion, {
+            entering: false, elapsed: 0, entry: entry, crossfade: crossfade
+        }, 0, 2);
+
+        compare(look, { opacity: 0.5, scale: 0.97, slide: 0 });
+    }
 }

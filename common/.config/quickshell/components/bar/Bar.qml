@@ -5,6 +5,7 @@ import "../../config" as Config
 import "../panels" as Panels
 import "BarPlacement.js" as BarPlacement
 import "CapsuleElements.js" as CapsuleElements
+import "CapsuleGlance.js" as CapsuleGlance
 import "CapsuleMotion.js" as CapsuleMotion
 import "LiveElements.js" as LiveElements
 import "CapsulePlacement.js" as CapsulePlacement
@@ -82,11 +83,13 @@ Variants {
                 // On a capsule, only the row it shows (see CapsuleElements.drawnElements):
                 // the view its crossfade shows (rowView), the new one from
                 // the frame after a change; a capture of the old one fades out.
+                // Expanded, the elements whose glance cards show leave it.
                 property var barElements: CapsuleElements.drawnElements({
                     barStyle: panel.barAppearance.barStyle,
                     barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
                     expanded: rowView.shownKey === "expanded",
                     change: rowView.shownKey === "change",
+                    glance: CapsuleGlance.leavingElements(barContent.glanceCards, panel.glanceShown),
                     capsulePlaces: bar.appearance.barProfileValue(panel.profileName, "capsulePlaces")
                 })
                 // On a capsule, the live elements beside its workspace pills,
@@ -118,6 +121,16 @@ Variants {
             // for a moment after one (see CapsuleChange.qml), unless a popup
             // is inside, which a change never interrupts.
             readonly property bool showingChange: capsuleChange.showing && panel.activePopup === ""
+            // Whether this window's capsule shows its glance under its
+            // expanded row (CapsuleGlance.shown): expanded by hovering or
+            // SUPER+I, as the row shows it, not for a change nor with a popup
+            // inside, and with cards to show. Always false on other bar
+            // styles, whose row view is always "rest".
+            readonly property bool glanceShown: CapsuleGlance.shown({
+                view: rowView.shownKey,
+                popupInside: panel.activePopup !== "",
+                cards: barContent.glanceCards
+            })
             // Whether this window's capsule is hidden, while its monitor's
             // focused workspace has a real fullscreen window (see
             // CapsuleRouting.hidden); always false on other bar styles. It
@@ -225,12 +238,14 @@ Variants {
                 hovering: barContent.capsuleHoverExpands
             }
 
-            // How much taller a capsule's window is for the popups inside it.
+            // How much taller a capsule's window is for the popups and the
+            // glance inside it.
             CapsuleWindowHold {
                 id: capsuleWindowHold
 
-                needed: barPopups.openPopup && barPopups.openPopup.inside
-                    ? barPopups.openPopup.windowHeight : 0
+                needed: Math.max(barPopups.openPopup && barPopups.openPopup.inside
+                    ? barPopups.openPopup.windowHeight : 0,
+                    barContent.glanceSize ? barContent.glanceSize.height : 0)
             }
 
             // SUPER+I expands the capsule until pressed again or until the
@@ -263,7 +278,8 @@ Variants {
                 }) : "rest"
                 motion: panel.barAppearance.motion
                 length: shownKey === "expanded"
-                    ? CapsuleMotion.entryLength(motion, barContent.rowEntry.steps) : 0
+                    ? CapsuleMotion.entryLength(motion, barContent.rowEntry.steps
+                        + (panel.glanceShown ? barContent.glanceCards.length : 0)) : 0
                 visible: false
             }
 
@@ -386,6 +402,7 @@ Variants {
                         scale: rowView.outgoingScale })
                     workspacePillsLength: workspaceRow.length
                     workspacePillsDepth: workspaceRow.depth
+                    glanceShown: panel.glanceShown
 
                     onConfigRequested: function(screen) {
                         bar.configRequested(screen, panel);

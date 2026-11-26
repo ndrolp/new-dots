@@ -209,19 +209,40 @@ Item {
 
     onPlayerLabelChanged: mediaLabelTransition.restart()
 
-    // A Wi-Fi device shows its connected network's signal.
-    function networkIcon() {
-        return StatusText.networkIcon(Networking.devices.values.map(device => {
+    // The network devices as plain values, { connected, wifi, signalStrength,
+    // name }: a Wi-Fi device's are its connected network's.
+    function networkDevices() {
+        return Networking.devices.values.map(device => {
             const wifi = DeviceType.toString(device.type) === "Wifi";
             const network = wifi && device.networks
                 ? device.networks.values.find(candidate => candidate.connected) : null;
             return {
                 connected: device.connected,
                 wifi: wifi,
-                signalStrength: network ? network.signalStrength : 0
+                signalStrength: network ? network.signalStrength : 0,
+                name: network ? network.name : ""
             };
-        }));
+        });
     }
+
+    // A Wi-Fi device shows its connected network's signal.
+    function networkIcon() {
+        return StatusText.networkIcon(networkDevices());
+    }
+
+    // What the capsule glance's cards show (CapsuleGlance.cards), as plain
+    // values: the battery, null without one, and the network devices.
+    readonly property var glanceStatus: ({
+        battery: hasBattery ? {
+            isPresent: true,
+            percentage: battery.percentage,
+            state: battery.state,
+            timeToEmpty: battery.timeToEmpty
+        } : null,
+        networks: networkDevices()
+    })
+    // UPower's device states, for CapsuleGlance.cards.
+    readonly property var batteryStates: UPowerDeviceState
 
     Rectangle {
         id: notificationButton

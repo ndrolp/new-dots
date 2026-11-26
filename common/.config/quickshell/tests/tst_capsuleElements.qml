@@ -114,6 +114,25 @@ TestCase {
             [["systemMonitor"], ["notifications"], ["battery", "clock"]]);
     }
 
+    // While the glance shows, the bar elements whose cards it shows leave the
+    // expanded row; collapsed, the glance's elements don't count.
+    function test_theGlancesElementsLeaveTheExpandedRow_data() {
+        return [
+            { tag: "expanded", expanded: true, center: ["arch", "systemMonitor", "notifications", "clock"] },
+            { tag: "collapsed", expanded: false, center: ["battery", "clock"] }
+        ];
+    }
+
+    function test_theGlancesElementsLeaveTheExpandedRow(data) {
+        const elements = barElements();
+        elements.right.push(element("network"));
+        const row = CapsuleElements.drawnElements({ barStyle: "capsule", barElements: elements,
+            capsulePlaces: places({ battery: "shown" }), expanded: data.expanded,
+            glance: ["battery", "network"] });
+
+        compare(shownIds(row, "center"), data.center);
+    }
+
     // Expanding means nothing on any other bar style.
     function test_onlyACapsuleExpands() {
         const drawn = CapsuleElements.drawnElements({ barStyle: "opaque", barElements: barElements(), expanded: true });
