@@ -1,6 +1,7 @@
 import QtQuick
 import "BarPlacement.js" as BarPlacement
 import "CapsulePills.js" as CapsulePills
+import "CapsuleMotion.js" as CapsuleMotion
 import "../../services/WorkspaceState.js" as WorkspaceState
 import ".." as Components
 import "../../config" as Config
@@ -54,9 +55,8 @@ Row {
             items.push(pillRepeater.itemAt(index));
         return items.filter(item => item !== null);
     }
-    // The capsule's spring for the way it is going now (Motion.js `capsule`).
-    readonly property var spring: expanded ? appearance.motion.capsule.expand
-        : appearance.motion.capsule.collapse
+    // The capsule's spring for the way it is going now (CapsuleMotion.springFor).
+    readonly property var spring: CapsuleMotion.springFor(appearance.motion, expanded)
 
     height: depth
     spacing: appearance.spacing

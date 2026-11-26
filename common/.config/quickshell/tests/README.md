@@ -207,7 +207,7 @@ that its clock then shows the date, dimmer, before the time, while at rest,
 held expanded with its row at rest (a popup inside, a change) and on every
 other bar style it shows only the time (`CapsuleLook.looksExpanded`, `CapsuleLook.js`, `tst_capsuleLook.qml`; the dimmer lead before
 a value in `IconValue.qml`, `tst_iconValue.qml`),
-which spring a size change takes and how its contents look a given time into a
+which spring a size change takes, and expanding or collapsing (`springFor`), and how its contents look a given time into a
 crossfade, the old contents gone before the new fade in a third of the way
 into the spring, and that expanding, its row's elements enter one after
 another from its centre out, 20 ms apart, each fading in and sliding to its

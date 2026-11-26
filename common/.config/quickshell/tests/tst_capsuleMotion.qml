@@ -28,6 +28,14 @@ TestCase {
         compare(CapsuleMotion.spring(motion, rest, data.to), motion.capsule[data.spring]);
     }
 
+    // Whatever moves with the capsule as it expands or collapses (its
+    // solidity, its workspace chips) takes the same spring: expanding
+    // overshoots, collapsing doesn't bounce.
+    function test_expandingOrCollapsingTakesItsSpring() {
+        compare(CapsuleMotion.springFor(motion, true), motion.capsule.expand);
+        compare(CapsuleMotion.springFor(motion, false), motion.capsule.collapse);
+    }
+
     // Incoming contents wait a third of the expanding spring (117 ms), then
     // fade and grow from 0.95 to 1 over 200 ms, easing out.
     function test_incomingContentsWaitThenFadeAndGrowIn_data() {

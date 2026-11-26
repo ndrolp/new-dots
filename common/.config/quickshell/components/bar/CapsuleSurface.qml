@@ -32,7 +32,7 @@ Item {
     // Its corner radius as drawn, morphing with its size.
     property real radius: 0
     // The spring it moves on now (CapsuleMotion.spring).
-    property var spring: root.appearance.motion.capsule.collapse
+    property var spring: CapsuleMotion.springFor(root.appearance.motion, false)
     // Where it is headed: the last place it was given.
     property var target: null
     // Whether it looks expanded (CapsuleLook.looksExpanded): more solid, more
@@ -43,7 +43,7 @@ Item {
     property real solidity: 0
 
     onExpandedChanged: {
-        const spring = expanded ? appearance.motion.capsule.expand : appearance.motion.capsule.collapse;
+        const spring = CapsuleMotion.springFor(appearance.motion, expanded);
         solidifying.stop();
         if (spring.duration <= 0) {
             solidity = expanded ? 1 : 0;
@@ -66,7 +66,8 @@ Item {
     // Springs to `to`, from wherever it is now; jumps there with reduce
     // motion, or across the bar while following a popup.
     function moveTo(to) {
-        spring = target ? CapsuleMotion.spring(appearance.motion, target, to) : appearance.motion.capsule.collapse;
+        spring = target ? CapsuleMotion.spring(appearance.motion, target, to)
+            : CapsuleMotion.springFor(appearance.motion, false);
         target = to;
         motion.stop();
         if (following) {
