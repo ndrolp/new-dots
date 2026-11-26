@@ -65,10 +65,11 @@ var elementPadding = 8;
 var squareElements = Object.freeze(["network", "bluetooth", "tray"]);
 
 // Whether bar element `element` draws its own pill: not while its pills are
-// transparent, on a docked bar, or in a group of two or more of the elements
-// `isShown` says are shown, which draws one background for them all.
+// transparent, on a docked bar, inside a capsule
+// (BarProfileModel.elementPillsDrawn), or in a group of two or more of the
+// elements `isShown` says are shown, which draws one background for them all.
 function drawsOwnPill(element, profile, isShown) {
-    if (profile.pillsTransparent || BarProfileModel.docked(profile))
+    if (!BarProfileModel.elementPillsDrawn(profile))
         return false;
     const zone = BarProfileModel.elementZone(profile.barElements, element);
     return !BarProfileModel.zoneGroups(profile.barElements, zone, isShown)

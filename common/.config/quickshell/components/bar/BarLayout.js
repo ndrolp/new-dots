@@ -4,9 +4,10 @@
 
 // Where things sit in the bar, measured along it: from the left on a top or
 // bottom bar, from the top on a side bar. `bar` is { barPosition, width, height,
-// spacing, groupPadding, groupInset, endPadding }: the Bar position, the size
-// of the bar content, the room between groups, the room inside one along the
-// bar and across it, and the room kept at the bar's ends. Without a Bar position it lays out like a top bar.
+// spacing, groupPadding, groupInset, endPadding, groupGap, groupBackgrounds }:
+// the Bar position, the size of the bar content, the room between elements,
+// the room inside a group along the bar and across it, the room kept at the
+// bar's ends, and how a group is told apart (see groupLook). Without a Bar position it lays out like a top bar.
 
 function barLength(bar) {
     return BarPosition.sideBar(bar.barPosition) ? bar.height : bar.width;
@@ -17,19 +18,42 @@ function itemLength(bar, item) {
     return BarPosition.sideBar(bar.barPosition) ? item.height : item.width;
 }
 
+// How a bar profile's groups are laid out, as the bar BarLayout measures takes
+// it: the `spacing` between elements, the room inside a group along the bar
+// (`groupPadding`) and across it (`groupInset`), the `groupGap` between a group
+// and what is beside it, and whether a group draws its shared background
+// (`groupBackgrounds`). Inside a capsule, its elements' only background, a
+// group draws none and takes no room for one: it is told apart by a gap twice
+// the spacing instead.
+function groupLook(profile) {
+    const capsule = BarProfileModel.capsule(profile);
+    return {
+        spacing: profile.spacing,
+        groupPadding: capsule ? 0 : profile.groupHorizontalPadding,
+        groupInset: profile.groupVerticalPadding,
+        groupGap: capsule ? profile.spacing * 2 : profile.spacing,
+        groupBackgrounds: !capsule
+    };
+}
+
 // Takes the bar, a zone's groups of shown elements in order (see
 // BarProfileModel.zoneGroups) and each element's length along the bar. Returns its elements' `positions`, { start, grouped } by element
-// id, one { start, length } per group of two or more in `backgrounds`, and
-// its `length`, all relative to the zone's start.
+// id, one { start, length } per group of two or more in `backgrounds` (none
+// when the bar's `groupBackgrounds` is false), and its `length`, all relative
+// to the zone's start. A group of two or more sits the bar's `groupGap` (the
+// spacing without one) from what is beside it; lone elements, the spacing.
 function zone(bar, groups, lengthOf) {
     const positions = {};
     const backgrounds = [];
+    const groupGap = bar.groupGap === undefined ? bar.spacing : bar.groupGap;
     let end = 0;
 
     for (let groupIndex = 0; groupIndex < groups.length; groupIndex++) {
         const group = groups[groupIndex];
         const grouped = group.length > 1;
-        const start = groupIndex > 0 ? end + bar.spacing : 0;
+        const gap = grouped || (groupIndex > 0 && groups[groupIndex - 1].length > 1)
+            ? groupGap : bar.spacing;
+        const start = groupIndex > 0 ? end + gap : 0;
 
         end = start + (grouped ? bar.groupPadding : 0);
         for (let index = 0; index < group.length; index++) {
@@ -41,7 +65,8 @@ function zone(bar, groups, lengthOf) {
 
         if (grouped) {
             end += bar.groupPadding;
-            backgrounds.push({ start: start, length: end - start });
+            if (bar.groupBackgrounds !== false)
+                backgrounds.push({ start: start, length: end - start });
         }
     }
 
