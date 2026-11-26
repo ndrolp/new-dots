@@ -12,8 +12,9 @@
 
 // Each card's look from what there is, `status`, by card id, in the order
 // the cards stand left to right; a card with nothing to show gives null and
-// isn't there. Media goes first once it has a card.
+// isn't there.
 const cardLooks = [
+    { id: "media", element: "media", popup: "media", look: mediaLook },
     { id: "battery", element: "battery", popup: "battery", look: batteryLook },
     { id: "network", element: "network", popup: "network", look: networkLook }
 ];
@@ -24,6 +25,25 @@ function hoursAndMinutes(seconds) {
     const minutes = Math.floor(Math.max(0, seconds) / 60);
     const hours = Math.floor(minutes / 60);
     return hours > 0 ? hours + " h " + minutes % 60 + " m" : minutes + " m";
+}
+
+// The media card, from the Mpris player the Media element follows (`player`,
+// null without one) as { trackTitle, trackArtist, trackArtUrl, identity,
+// isPlaying }: its cover (`art`), the title over the artist, the player's
+// name with no title, and whether it plays, for its play/pause button. No
+// ring: the cover takes its place. None without a player.
+function mediaLook(status) {
+    const player = status.player;
+    if (!player)
+        return null;
+    return {
+        icon: "󰎈",
+        ring: 0,
+        title: player.trackTitle || player.identity || "",
+        text: player.trackArtist || "",
+        art: player.trackArtUrl || "",
+        playing: player.isPlaying === true
+    };
 }
 
 // The battery card, from UPower's display device (`battery`, null without
@@ -65,11 +85,12 @@ function networkLook(status) {
 }
 
 // The glance cards, left to right, from what there is, `status`:
-// { battery, networks } (see batteryLook and networkLook), and UPower's
-// UPowerDeviceState, `states`, which plain JS can't see on its own. Each is
-// { id, element, popup, icon, ring, title, text }: the bar element it stands
-// for and the popup a click on it opens, inside the capsule; an icon, a ring
-// from 0 to 1, a title and a line of text under it ("" for none).
+// { player, battery, networks } (see mediaLook, batteryLook and
+// networkLook), and UPower's UPowerDeviceState, `states`, which plain JS
+// can't see on its own. Each is { id, element, popup, icon, ring, title,
+// text }: the bar element it stands for and the popup a click on it opens,
+// inside the capsule; an icon, a ring from 0 to 1, a title and a line of
+// text under it ("" for none). The media card adds { art, playing }.
 function cards(status, states) {
     return cardLooks.map(card => {
         const look = card.look(status || {}, states);

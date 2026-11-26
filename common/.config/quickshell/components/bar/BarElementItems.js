@@ -8,18 +8,22 @@
 // Whether `element` is shown: it must be enabled in `barElements`, or be one
 // of a capsule's `live` elements (LiveElements.liveElements), which its
 // row lists switched off. A live element of a collapsed capsule shows only
-// while it is active (LiveElements.active). Otherwise, the ones that can have
+// while it is active (LiveElements.active), and none shows while the
+// capsule glance shows its card (`glance`, CapsuleGlance.leavingElements).
+// Otherwise, the ones that can have
 // nothing to show are hidden then: media without a player, the battery
 // without one, the recording and privacy indicators while they aren't
 // active and cava while silent, and the pomodoro while none is started
 // (running or paused); every other element is always shown when enabled.
 // `status` says what there is: `live`, `expanded` (whether the capsule is),
 // `player`, `recordings`, `keepAwakeOn`, `captures` (see
-// LiveElements.activeRules), `hasBattery`, `cavaSilent` and
-// `pomodoroStarted`.
+// LiveElements.activeRules), `hasBattery`, `cavaSilent`, `pomodoroStarted`
+// and `glance`.
 function itemVisible(element, barElements, status) {
     const live = (status.live || []).indexOf(element) !== -1;
     if (!BarProfileModel.elementEnabled(barElements, element) && !live)
+        return false;
+    if (live && (status.glance || []).indexOf(element) !== -1)
         return false;
     if (live && status.expanded !== true)
         return LiveElements.active(element, status);

@@ -21,6 +21,9 @@ TestCase {
             timeToEmpty: 12000, timeToFull: 0 }, fields);
     }
 
+    readonly property var player: ({ trackTitle: "Teardrop", trackArtist: "Massive Attack",
+        trackArtUrl: "file:///art/mezzanine.jpg", identity: "Spotify", isPlaying: true })
+
     function card(cards, id) {
         return cards.find(candidate => candidate.id === id);
     }
@@ -76,6 +79,47 @@ TestCase {
         compare(shown.title, data.title);
     }
 
+    // Media goes first, then battery and Wi-Fi, each with the bar element
+    // whose popup it opens.
+    function test_mediaGoesFirst() {
+        const cards = CapsuleGlance.cards({ player: player, battery: battery({}), networks: [wifi] }, states);
+
+        compare(cards.map(card => card.id), ["media", "battery", "network"]);
+        compare(cards[0].element, "media");
+        compare(cards[0].popup, "media");
+    }
+
+    // The media card: the cover, the title over the artist, and whether it
+    // plays, for its play/pause button; a track with no title shows the
+    // player's name.
+    function test_theMediaCardShowsTheTrack_data() {
+        return [
+            { tag: "playing", player: player, title: "Teardrop", text: "Massive Attack",
+                art: "file:///art/mezzanine.jpg", playing: true },
+            { tag: "paused", player: Object.assign({}, player, { isPlaying: false }), title: "Teardrop",
+                text: "Massive Attack", art: "file:///art/mezzanine.jpg", playing: false },
+            { tag: "no title", player: { trackTitle: "", trackArtist: "", trackArtUrl: "", identity: "mpv",
+                isPlaying: false }, title: "mpv", text: "", art: "", playing: false }
+        ];
+    }
+
+    function test_theMediaCardShowsTheTrack(data) {
+        const shown = card(CapsuleGlance.cards({ player: data.player, battery: null, networks: [] }, states),
+            "media");
+
+        compare(shown.title, data.title);
+        compare(shown.text, data.text);
+        compare(shown.art, data.art);
+        compare(shown.playing, data.playing);
+    }
+
+    // Without a player there is no media card.
+    function test_noPlayerNoMediaCard() {
+        const cards = CapsuleGlance.cards({ player: null, battery: battery({}), networks: [wifi] }, states);
+
+        compare(cards.map(card => card.id), ["battery", "network"]);
+    }
+
     // A card with nothing to show isn't there: no battery, no battery card.
     function test_aCardWithNothingToShowIsAbsent_data() {
         return [
@@ -116,6 +160,8 @@ TestCase {
     function test_theCardsElementsLeaveTheRow_data() {
         return [
             { tag: "both", cards: someCards, shown: true, leaving: ["battery", "network"] },
+            { tag: "media", cards: CapsuleGlance.cards({ player: player, battery: null, networks: [wifi] },
+                states), shown: true, leaving: ["media", "network"] },
             { tag: "no battery", cards: CapsuleGlance.cards({ battery: null, networks: [wifi] }, states),
                 shown: true, leaving: ["network"] },
             { tag: "no glance", cards: someCards, shown: false, leaving: [] }

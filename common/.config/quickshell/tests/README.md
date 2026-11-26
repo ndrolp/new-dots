@@ -208,16 +208,23 @@ place from the centre's side, the last in as the spring settles, at once with
 reduce motion, and the capsule glance's cards just after it, one after
 another left to right (`CapsuleMotion.centreOut`, `entering`, `rowEntry`,
 `rowLook`, `cardLook`; `CapsuleMotion.js`, `tst_capsuleMotion.qml`), which
-glance cards the capsule glance shows and what each says (battery: its
-level, percentage and charging, the time left or full; Wi-Fi: its signal and
-network, Ethernet or Offline), absent with nothing to show, that it shows
-only under the expanded row, never for a change or with a popup inside, and
-which bar elements leave the expanded row while it does
-(`CapsuleGlance.js`, `tst_capsuleGlance.qml`; `CapsuleElements.drawnElements`,
-`tst_capsuleElements.qml`), where it goes, past the row as a popup inside
+glance cards the capsule glance shows and what each says (media first: its
+cover, title over artist, the player's name with no title, and whether it
+plays; battery: its level, percentage and charging, the time left or full;
+Wi-Fi: its signal and network, Ethernet or Offline), absent with nothing to
+show (no player, no media card), that it shows only under the expanded row,
+never for a change or with a popup inside, and which bar elements leave the
+expanded row while it does (`CapsuleGlance.js`, `tst_capsuleGlance.qml`;
+`CapsuleElements.drawnElements`, `tst_capsuleElements.qml`) and, live, their
+place beside the pills (`BarElementItems.itemVisible`,
+`tst_barElements.qml`), where it goes, past the row as a popup inside
 would (`CapsulePlacement.glancePlace`, `tst_capsulePlacement.qml`), and that
-it draws a card per card whose click asks for its popup
-(`CapsuleGlanceView.qml`, `tst_capsuleGlanceView.qml`), that its
+it draws a card per card whose click asks for its popup, the media card with
+its cover and a play/pause button in the art's tint that only plays or
+pauses, and a scroll over it that changes track
+(`CapsuleGlanceView.qml`, `tst_capsuleGlanceView.qml`; the tint itself,
+`MediaArtTint.qml`, needs Quickshell's ColorQuantizer and isn't tested
+here), that its
 contents crossfade between views by key: the new one shown a frame after the
 change, so the shape moves at once, the old one fading and shrinking away
 while it does and the new one fading and growing in, each as

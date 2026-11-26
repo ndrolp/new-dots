@@ -12,6 +12,8 @@ import "CapsulePlacement.js" as CapsulePlacement
 import "CapsuleMotion.js" as CapsuleMotion
 import "CapsuleRouting.js" as CapsuleRouting
 import "LiveElements.js" as LiveElements
+import "../panels" as Panels
+import "../panels/MediaCard.js" as MediaCard
 
 Item {
     id: root
@@ -313,6 +315,18 @@ Item {
         id: theme
     }
 
+    // The colour the glance's media card takes from the art, as the media
+    // popup inside the capsule does; read only while that card is there.
+    Panels.MediaArtTint {
+        id: glanceArtTint
+
+        readonly property var mediaCard: root.glanceCards.find(card => card.id === "media") || null
+
+        artUrl: mediaCard ? mediaCard.art : ""
+        artShown: artUrl !== ""
+        theme: theme
+    }
+
     DockedSurface {
         id: leftSurface
 
@@ -429,6 +443,8 @@ Item {
                 height: implicitHeight
                 visible: root.glanceSize !== null
                 cards: root.glanceCards
+                mediaTint: glanceArtTint.tint
+                mediaOnTint: glanceArtTint.onTint
                 cardLook: index => CapsuleMotion.cardLook(root.appearance.motion, {
                     entering: root.rowEntering,
                     elapsed: root.rowElapsed,
@@ -439,6 +455,12 @@ Item {
                 theme: theme
 
                 onCardClicked: popup => root.popupRequested(popup)
+                onPlayPauseClicked: {
+                    const player = barElementItems.player;
+                    if (player && player.canTogglePlaying)
+                        player.togglePlaying();
+                }
+                onMediaStepped: step => MediaCard.skipTrack(barElementItems.player, step)
             }
 
             // One shared background per group.
