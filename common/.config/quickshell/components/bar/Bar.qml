@@ -106,6 +106,11 @@ Variants {
                     panel.glanceShown)
                 // Whether this window's capsule is expanded (see panel.capsuleExpanded).
                 property bool capsuleExpanded: panel.capsuleExpanded
+                // Whether its row shows its expanded view (the crossfade's
+                // "expanded"), when the capsule looks expanded
+                // (CapsuleLook.looksExpanded): not with a popup inside, its
+                // row at rest, nor while a change shows instead.
+                property bool capsuleRowExpanded: rowView.shownKey === "expanded"
                 // Global, not part of the bar profile.
                 property bool doNotDisturb: bar.appearance.doNotDisturb
                 property var controlCenterTiles: bar.appearance.controlCenterTiles
@@ -282,6 +287,9 @@ Variants {
                     expanded: panel.capsuleExpanded
                 }) : "rest"
                 motion: panel.barAppearance.motion
+                // As long as the expanded row's entry, its glance's cards
+                // after it: read as they arrive, after the swap, not from the
+                // row at rest before it.
                 length: shownKey === "expanded"
                     ? CapsuleMotion.entryLength(motion, barContent.rowEntry.steps
                         + (panel.glanceShown ? barContent.glanceCards.length : 0)) : 0

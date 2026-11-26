@@ -4,6 +4,8 @@
 // How the capsule moves (capsule bar style only), over the capsule motion
 // config/Motion.js gives as `motion.capsule`. Pure, no Quickshell. The parts
 // to build a capsule transition from:
+// - springFor(motion, expanding): the spring whatever moves with the capsule
+//   expanding or collapsing takes (its solidity, its workspace chips).
 // - spring(motion, from, to): the spring a size change takes, for the
 //   NumberAnimation that moves it (CapsuleSurface.qml moves the capsule's
 //   size, place and corner radius with it).
@@ -19,13 +21,18 @@
 // inside the capsule (components/panels/PopupSurface.qml) drives them from
 // its reveal.
 
+// The spring for a move that is `expanding` (growing) or not: `expand`,
+// overshooting slightly, or `collapse`, without bounce. Returns { duration,
+// easing, overshoot }.
+function springFor(motion, expanding) {
+    return expanding ? motion.capsule.expand : motion.capsule.collapse;
+}
+
 // The spring the capsule takes from size `from` to size `to` (each
-// { width, height }): `expand`, overshooting slightly, when it grows either
-// way; `collapse`, without bounce, when it shrinks or keeps its size.
-// Returns { duration, easing, overshoot }.
+// { width, height }): expanding's when it grows either way, collapsing's
+// when it shrinks or keeps its size (springFor).
 function spring(motion, from, to) {
-    const grows = to.width > from.width || to.height > from.height;
-    return grows ? motion.capsule.expand : motion.capsule.collapse;
+    return springFor(motion, to.width > from.width || to.height > from.height);
 }
 
 // How far along a stretch `elapsed` is, 0 to 1, easing out (cubic); a 0 ms

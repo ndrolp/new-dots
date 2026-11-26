@@ -2,37 +2,26 @@ import QtQuick
 import QtTest
 import "../components/bar/CapsuleLook.js" as CapsuleLook
 
-// How the capsule looks expanded: more solid, and its clock with the date.
+// How the capsule looks expanded, while its row shows its expanded view:
+// more solid.
 TestCase {
     name: "CapsuleLook"
 
-    // Thursday 26 November 2026, 14:32.
-    readonly property var thursday: new Date(2026, 10, 26, 14, 32, 5)
-
-    // The expanded capsule's clock shows the date before the time.
-    function test_theExpandedCapsulesClockShowsTheDate() {
-        compare(CapsuleLook.clockText({ barStyle: "capsule", capsuleExpanded: true }, thursday),
-            { date: "Thu 26 Nov · ", time: "14:32" });
-    }
-
-    // At rest, and on every other bar style, only the time.
-    function test_otherwiseTheClockShowsOnlyTheTime_data() {
+    // The capsule looks expanded, solid and with the date on its clock, while
+    // its row shows its expanded view, not merely while it is held expanded.
+    function test_itLooksExpandedWhileItsRowIs_data() {
         return [
-            { tag: "capsule at rest", bar: { barStyle: "capsule", capsuleExpanded: false } },
-            { tag: "opaque", bar: { barStyle: "opaque", capsuleExpanded: true } },
-            { tag: "transparent", bar: { barStyle: "transparent" } },
-            { tag: "docked", bar: { barStyle: "docked" } }
+            { tag: "row expanded", bar: { barStyle: "capsule", capsuleExpanded: true,
+                capsuleRowExpanded: true }, expected: true },
+            { tag: "held expanded, row at rest", bar: { barStyle: "capsule", capsuleExpanded: true,
+                capsuleRowExpanded: false }, expected: false },
+            { tag: "at rest", bar: { barStyle: "capsule", capsuleRowExpanded: false }, expected: false },
+            { tag: "docked", bar: { barStyle: "docked", capsuleRowExpanded: true }, expected: false }
         ];
     }
 
-    function test_otherwiseTheClockShowsOnlyTheTime(data) {
-        compare(CapsuleLook.clockText(data.bar, thursday), { date: "", time: "14:32" });
-    }
-
-    // A single-digit day has no leading zero; the time keeps its own.
-    function test_anEarlyDayAndHour() {
-        compare(CapsuleLook.clockText({ barStyle: "capsule", capsuleExpanded: true }, new Date(2026, 0, 5, 9, 7)),
-            { date: "Mon 5 Jan · ", time: "09:07" });
+    function test_itLooksExpandedWhileItsRowIs(data) {
+        compare(CapsuleLook.looksExpanded(data.bar), data.expected);
     }
 
     // Its fill is the profile's opacity at rest, 15 points more expanded,

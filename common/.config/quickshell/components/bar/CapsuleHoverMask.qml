@@ -8,7 +8,7 @@ import "CapsulePlacement.js" as CapsulePlacement
 // cards as over the capsule; a HoverHandler only counts a point its item
 // contains, and without a mask that is only the item's own bounds.
 QtObject {
-    // The capsule, as CapsulePlacement.withPopup grows it round the glance,
+    // The capsule, as CapsulePlacement.withInside grows it round the glance,
     // or null without one, when nothing is hovered.
     property var place: null
 

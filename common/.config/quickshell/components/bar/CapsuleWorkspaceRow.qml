@@ -1,14 +1,15 @@
 import QtQuick
 import "BarPlacement.js" as BarPlacement
 import "CapsulePills.js" as CapsulePills
+import "CapsuleMotion.js" as CapsuleMotion
 import "../../services/WorkspaceState.js" as WorkspaceState
 import ".." as Components
 import "../../config" as Config
 
 // The capsule's workspace pills, inside the capsule past its row of bar
 // elements. At rest: one small pill, with no label, per workspace of its
-// monitor, an empty one dimmest. The pill of the workspace its monitor shows (whichever monitor
-// has focus) is twice as long and in the accent, one asking for attention is
+// monitor, an empty one dimmest. The pill of the workspace its monitor shows
+// (whichever monitor has focus) is twice as long and in the accent, one asking for attention is
 // red and one with windows dim (CapsulePills.role). Expanded, the pills grow
 // on the capsule's spring into small chips with the workspace's number, or
 // its glyph when the workspaces bar element uses glyphs, in the same
@@ -19,8 +20,8 @@ import "../../config" as Config
 Row {
     id: root
 
-    // The monitor's workspaces, in the order the workspace service lists them;
-    // scrolling goes through all of them, pill or not.
+    // The monitor's workspaces, in the order the workspace service lists them,
+    // each with its pill; scrolling goes through all of them.
     required property var workspaceIds
     // Tells which workspace its monitor shows and switches to one
     // (services/WorkspaceService.qml).
@@ -45,16 +46,17 @@ Row {
         : BarPlacement.workspacePillDepth
     readonly property real length: pills.reduce((total, pill) => total + pill.size.width, 0)
         + Math.max(0, pills.length - 1) * spacing
-    // The pills shown, in order.
+    // The pills, one per workspace, in order. Read whether or not the row is
+    // shown: the bar shows it only once the capsule has a place, which takes
+    // its length.
     readonly property var pills: {
         const items = [];
         for (let index = 0; index < pillRepeater.count; index++)
             items.push(pillRepeater.itemAt(index));
-        return items.filter(item => item !== null && item.visible);
+        return items.filter(item => item !== null);
     }
-    // The capsule's spring for the way it is going now (Motion.js `capsule`).
-    readonly property var spring: expanded ? appearance.motion.capsule.expand
-        : appearance.motion.capsule.collapse
+    // The capsule's spring for the way it is going now (CapsuleMotion.springFor).
+    readonly property var spring: CapsuleMotion.springFor(appearance.motion, expanded)
 
     height: depth
     spacing: appearance.spacing

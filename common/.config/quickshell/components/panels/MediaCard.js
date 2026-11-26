@@ -26,6 +26,12 @@ function skipTrack(player, step) {
         player.previous();
 }
 
+// The capsule glance's play/pause: plays or pauses `player`, where it can.
+function togglePlaying(player) {
+    if (player && player.canTogglePlaying)
+        player.togglePlaying();
+}
+
 // The one colour the media view inside a capsule tints its progress bar, play
 // button and the glow behind the art with: one of `artColors` (what
 // Quickshell's ColorQuantizer found in the art, each with r, g, b from 0 to

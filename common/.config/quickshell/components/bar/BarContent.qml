@@ -8,6 +8,7 @@ import "BarElementItems.js" as BarElementItemsModel
 import "BarLayout.js" as BarLayout
 import "BarPlacement.js" as BarPlacement
 import "CapsuleGlance.js" as CapsuleGlance
+import "CapsuleLook.js" as CapsuleLook
 import "CapsulePlacement.js" as CapsulePlacement
 import "CapsuleMotion.js" as CapsuleMotion
 import "CapsuleRouting.js" as CapsuleRouting
@@ -137,11 +138,11 @@ Item {
     readonly property var glanceSize: capsuleRowPlace !== null && glanceShown
         ? { width: glanceView.width, height: glanceView.height } : null
     // On a capsule, where the capsule is drawn around its row, its pill row
-    // and the glance past them while it shows, grown round it as round a
-    // popup inside (CapsulePlacement.withPopup), so the pointer over its
+    // and the glance past them while it shows, grown round what is inside
+    // it (CapsulePlacement.withInside), so the pointer over the glance's
     // cards is over the capsule; null on any other bar style.
     readonly property var capsulePlace: capsuleRowPlace === null ? null
-        : CapsulePlacement.withPopup(capsuleRowPlace, glanceSize, appearance.barPosition)
+        : CapsulePlacement.withInside(capsuleRowPlace, glanceSize, appearance.barPosition)
     // Where a change the capsule shows starts along the bar: centred, as its
     // row would be.
     readonly property real changeStart: BarLayout.zoneStart(layoutBar, "center", changeView.width)
@@ -151,9 +152,9 @@ Item {
     readonly property var insidePopup: capsulePlace !== null && openPopup && openPopup.inside
         ? openPopup : null
     // The capsule as drawn: its row, grown round a popup inside it
-    // (CapsulePlacement.withPopup); null on any other bar style.
+    // (CapsulePlacement.withInside); null on any other bar style.
     readonly property var capsuleShape: capsulePlace === null ? null
-        : CapsulePlacement.withPopup(capsulePlace, insidePopup, appearance.barPosition)
+        : CapsulePlacement.withInside(capsulePlace, insidePopup, appearance.barPosition)
     // Whether the pointer is over the capsule itself, its workspace pills
     // included, not elsewhere in its bar window.
     readonly property bool capsuleHovered: capsulePlace !== null && pointer.hovered
@@ -280,15 +281,19 @@ Item {
     // `steps`.
     readonly property var rowEntry: CapsuleMotion.rowEntry(zoneLayout("center").positions)
 
+    // How the capsule's row moves now, as CapsuleMotion.rowLook and cardLook
+    // take it: { entering, elapsed, entry, crossfade }.
+    readonly property var rowMotion: ({
+        entering: rowEntering,
+        elapsed: rowElapsed,
+        entry: rowEntry,
+        crossfade: rowContents
+    })
+
     // How a bar element looks in the capsule's row, by id, { opacity, scale,
     // slide } (CapsuleMotion.rowLook).
     function rowLook(element) {
-        return CapsuleMotion.rowLook(appearance.motion, {
-            entering: rowEntering,
-            elapsed: rowElapsed,
-            entry: rowEntry,
-            crossfade: rowContents
-        }, element);
+        return CapsuleMotion.rowLook(appearance.motion, rowMotion, element);
     }
 
     // Grouped elements drop their own pill: the group draws one background.
@@ -392,7 +397,7 @@ Item {
         place: root.capsuleShape || { x: 0, y: 0, width: 0, height: 0, radius: 0 }
         following: root.insidePopup !== null && root.insidePopup.resizing
         visible: root.capsulePlace !== null
-        expanded: root.appearance.capsuleExpanded === true
+        expanded: CapsuleLook.looksExpanded(root.appearance)
         fillColor: root.dockedColor
         appearance: root.appearance
         z: -1
@@ -457,21 +462,13 @@ Item {
                 cards: root.glanceCards
                 mediaTint: glanceArtTint.tint
                 mediaOnTint: glanceArtTint.onTint
-                cardLook: index => CapsuleMotion.cardLook(root.appearance.motion, {
-                    entering: root.rowEntering,
-                    elapsed: root.rowElapsed,
-                    entry: root.rowEntry,
-                    crossfade: root.rowContents
-                }, index, root.glanceCards.length)
+                cardLook: index => CapsuleMotion.cardLook(root.appearance.motion, root.rowMotion,
+                    index, root.glanceCards.length)
                 appearance: root.appearance
                 theme: theme
 
                 onCardClicked: popup => root.popupRequested(popup)
-                onPlayPauseClicked: {
-                    const player = barElementItems.player;
-                    if (player && player.canTogglePlaying)
-                        player.togglePlaying();
-                }
+                onPlayPauseClicked: MediaCard.togglePlaying(barElementItems.player)
                 onMediaStepped: step => MediaCard.skipTrack(barElementItems.player, step)
             }
 
@@ -522,9 +519,7 @@ Item {
             ArchButton {
                 id: archButton
 
-                opacity: root.rowLook("arch").opacity
-                scale: root.rowLook("arch").scale
-                transform: Translate { x: root.rowLook("arch").slide }
+                RowLook { target: archButton; look: root.rowLook("arch") }
 
                 visible: root.elementVisible("arch")
                 x: root.elementX("arch")
@@ -540,9 +535,7 @@ Item {
             CurrentApp {
                 id: currentApp
 
-                opacity: root.rowLook("currentApp").opacity
-                scale: root.rowLook("currentApp").scale
-                transform: Translate { x: root.rowLook("currentApp").slide }
+                RowLook { target: currentApp; look: root.rowLook("currentApp") }
 
                 x: root.elementX("currentApp")
                 y: root.elementY("currentApp")
@@ -555,9 +548,7 @@ Item {
             AppMenu {
                 id: appMenuElement
 
-                opacity: root.rowLook("appMenu").opacity
-                scale: root.rowLook("appMenu").scale
-                transform: Translate { x: root.rowLook("appMenu").slide }
+                RowLook { target: appMenuElement; look: root.rowLook("appMenu") }
 
                 x: root.elementX("appMenu")
                 y: root.elementY("appMenu")
@@ -573,9 +564,7 @@ Item {
             SystemMonitor {
                 id: systemMonitor
 
-                opacity: root.rowLook("systemMonitor").opacity
-                scale: root.rowLook("systemMonitor").scale
-                transform: Translate { x: root.rowLook("systemMonitor").slide }
+                RowLook { target: systemMonitor; look: root.rowLook("systemMonitor") }
 
                 visible: root.elementVisible("systemMonitor")
                 x: root.elementX("systemMonitor")
@@ -589,9 +578,7 @@ Item {
             Workspaces {
                 id: workspaces
 
-                opacity: root.rowLook("workspaces").opacity
-                scale: root.rowLook("workspaces").scale
-                transform: Translate { x: root.rowLook("workspaces").slide }
+                RowLook { target: workspaces; look: root.rowLook("workspaces") }
                 visible: root.elementVisible("workspaces")
                 x: root.elementX("workspaces")
                 y: root.elementY("workspaces")

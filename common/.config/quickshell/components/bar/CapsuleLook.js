@@ -8,7 +8,18 @@
 // below 0 mid-overshoot:
 // - fillAlpha(alpha, solidity): its fill's opacity.
 // - shadowRings(solidity): how dark each ring of its shadow is.
-// Expanded, its clock also shows the date before the time (clockText).
+// "Expanded" here is its row showing its expanded view (looksExpanded), not
+// merely the capsule held expanded; its clock then shows the date too
+// (ClockText.js).
+
+// Whether the capsule on `bar`, anything with { barStyle, capsuleRowExpanded
+// }, looks expanded: solid, with the date on its clock. Only while its row
+// shows its expanded view (the row crossfade's "expanded"): not with a popup
+// inside, which sets the row at rest, nor while a change shows instead of it;
+// never on any other bar style.
+function looksExpanded(bar) {
+    return BarProfileModel.capsule(bar) && bar.capsuleRowExpanded === true;
+}
 
 // How much more opaque, 0 to 1, the expanded capsule's fill is than the
 // profile's opacity.
@@ -30,25 +41,4 @@ function shadowRings(solidity) {
 // `expandedOpacity` more expanded, never past fully opaque.
 function fillAlpha(alpha, solidity) {
     return Math.min(1, alpha + expandedOpacity * Clamp.unit(solidity));
-}
-
-// The day and month names the clock's date takes, in English like the rest
-// of the shell, whatever the system locale.
-const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-function twoDigits(number) {
-    return (number < 10 ? "0" : "") + number;
-}
-
-// What the clock shows at `date` on `bar`, anything with { barStyle,
-// capsuleExpanded }: { date, time }. The time is "HH:mm"; the date, drawn
-// dimmer before it, is "Thu 26 Nov · " in an expanded capsule and empty at
-// rest and on every other bar style.
-function clockText(bar, date) {
-    const time = twoDigits(date.getHours()) + ":" + twoDigits(date.getMinutes());
-    if (!BarProfileModel.capsule(bar) || !bar.capsuleExpanded)
-        return { date: "", time: time };
-    const day = days[date.getDay()] + " " + date.getDate() + " " + months[date.getMonth()];
-    return { date: day + " · ", time: time };
 }

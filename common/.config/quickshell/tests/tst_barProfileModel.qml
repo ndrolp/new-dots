@@ -331,6 +331,44 @@ TestCase {
         compare(profile.capsuleElements, undefined);
     }
 
+    // The step itself (schema 16 to 17) places as the capsule drew then,
+    // whatever the defaults are now: media live left; the recording
+    // indicator, the privacy indicator and the pomodoro live right, listed or
+    // not; any other listed element shown, the battery among them, which
+    // only became live later; every other element hidden.
+    function test_theListToPlacesStepKeepsItsHistoricPlaces() {
+        const places = SchemaMigrations.capsulePlacesFromShownElements({ barProfiles: {
+            saved: { barStyle: "capsule", capsuleElements: ["battery", "clock", "privacy", "pomodoro"] },
+            unlisted: { barStyle: "capsule", capsuleElements: ["clock"] }
+        } }, {}).appearance.barProfiles;
+
+        compare(places.saved.capsulePlaces.battery, "shown");
+        compare(places.saved.capsulePlaces.clock, "shown");
+        compare(places.saved.capsulePlaces.privacy, "liveRight");
+        compare(places.saved.capsulePlaces.pomodoro, "liveRight");
+        compare(places.saved.capsulePlaces.media, "liveLeft");
+        compare(places.saved.capsulePlaces.recording, "liveRight");
+        compare(places.saved.capsulePlaces.arch, "hidden");
+        compare(places.unlisted.capsulePlaces.battery, "hidden");
+        compare(places.unlisted.capsulePlaces.privacy, "liveRight");
+        compare(places.unlisted.capsulePlaces.pomodoro, "liveRight");
+        compare(places.unlisted.capsulePlaces.media, "liveLeft");
+    }
+
+    // An old list naming the privacy indicator and the pomodoro migrates to
+    // the current schema with both live right, after the recording
+    // indicator, as it does on main.
+    function test_anOldListWithPrivacyAndPomodoroMigrates() {
+        const profile = migratedProfiles({ saved: { barStyle: "capsule",
+            capsuleElements: ["clock", "privacy", "pomodoro", "battery"] } }).saved;
+
+        compare(profile.capsulePlaces.privacy, "liveRight");
+        compare(profile.capsulePlaces.pomodoro, "liveRight");
+        compare(profile.capsulePlaces.recording, "liveRight");
+        compare(profile.capsulePlaces.battery, "shown");
+        compare(profile.capsulePlaces.clock, "shown");
+    }
+
     // A profile that saved no list gets the default places when it loads,
     // which are what its collapsed capsule showed without one.
     function test_aProfileSavedWithoutAListGetsTheDefaultPlaces() {

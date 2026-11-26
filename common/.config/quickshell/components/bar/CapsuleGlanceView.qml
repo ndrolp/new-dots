@@ -1,10 +1,11 @@
 import QtQuick
 import QtQuick.Effects
 import ".." as Components
+import "BarElementItems.js" as BarElementItems
 
 // The capsule glance as drawn: its glance cards in a row, left to right, in
-// the order CapsuleGlance.cards gives them. Each is a glance card, as a
-// change's is in CapsuleChangeView.qml: a ring (GlanceRing) round the card's
+// the order CapsuleGlance.cards gives them. Each is drawn as a change's ring
+// card is in CapsuleChangeView.qml: a level ring (LevelRing) round the card's
 // icon, its title and, when there is one, a line of text under it. The media
 // card shows the small rounded cover in the ring's place and a play/pause
 // button after its title and artist, tinted with the colour from the art
@@ -29,8 +30,9 @@ Item {
     required property var appearance
     // The colorscheme (config/Theme.qml).
     required property var theme
-    // The room round the cards, inside the capsule.
-    readonly property real padding: 8
+    // The room round the cards, inside the capsule, and between them: a bar
+    // element's padding (BarElementItems.elementPadding).
+    readonly property real padding: BarElementItems.elementPadding
 
     // A card was clicked: `popup`, its bar element's popup.
     signal cardClicked(string popup)
@@ -56,7 +58,7 @@ Item {
 
         x: root.padding
         y: root.padding
-        spacing: 8
+        spacing: root.padding
 
         Repeater {
             id: cardRepeater
@@ -87,9 +89,7 @@ Item {
                 color: media
                     ? Qt.tint(surface, Qt.rgba(root.mediaTint.r, root.mediaTint.g, root.mediaTint.b, 0.22))
                     : surface
-                opacity: look.opacity
-                scale: look.scale
-                transform: Translate { x: card.look.slide }
+                RowLook { target: card; look: card.look }
 
                 HoverHandler {
                     id: cardHover
@@ -110,7 +110,7 @@ Item {
                         width: card.ringSize
                         height: card.ringSize
 
-                        GlanceRing {
+                        LevelRing {
                             anchors.fill: parent
                             level: card.modelData.ring
                             trackColor: root.theme.backgroundSecondary

@@ -5,8 +5,9 @@ to ask a profile for each bar style (`config/BarProfileModel.js`), desktop widge
 and schema migrations (`config/SchemaMigrations.js`), among them the one that
 turns the two bar style switches into one bar style and keeps each saved
 profile's look (`tst_barStyleMigration.qml`), and the one that turns a capsule
-profile's list of shown bar elements into collapsed places
-(`tst_barProfileModel.qml`), and the one that splits the pomodoro out of the
+profile's list of shown bar elements into collapsed places, as the capsule
+drew them then whatever the defaults are now (privacy and pomodoro live
+right, a listed battery shown) (`tst_barProfileModel.qml`), and the one that splits the pomodoro out of the
 clock, right after it, in its group and on or off as the clock was, and the
 one that places it live right in a capsule, after the recording indicator,
 and the one that puts the privacy indicator right after the recording
@@ -109,7 +110,9 @@ wide it is (`components/bar/AudioLevel.qml`), how scrolling turns into
 steps, at most one per wheel notch or touchpad gesture, its momentum and a
 touchpad with no scroll phases included (`components/WheelSteps.js`,
 `WheelStepHandler.qml` feeds it), and that a step over the media bar element skips its player to the next or
-previous track where it can (`MediaCard.skipTrack`), how the Cava bar element
+previous track where it can (`MediaCard.skipTrack`), that the capsule
+glance's play/pause plays or pauses its player where it can
+(`MediaCard.togglePlaying`), how the Cava bar element
 reads cava and tries it again when it fails (`services/CavaOutput.js`) and
 what it draws, from the bottom or from the side, and the track progress painted on its bars (`components/bar/CavaBars.qml`), what the Cava desktop widget shows of the player: the media info, the progress line and when they show (`components/widgets/CavaMedia.js`, `CavaMediaInfo.qml`), how a docked bar zone hangs
 from the screen edge the bar sits on and keeps its sides on the screen's edge
@@ -168,7 +171,7 @@ what each change shows in the OSD (`components/panels/OsdChange.js`), and
 in the capsule (`OsdChange.capsuleLook`, `levelIcon`): volume and brightness
 as a wide fill bar with a glyph that follows the level (muted, the
 struck-through speaker and an empty grey bar) and bounces on each change but
-not under reduce motion, battery and Bluetooth as a glance card with one line
+not under reduce motion, battery and Bluetooth as a ring card with one line
 and a small ring of the battery level, the device's own for Bluetooth when it
 reports one, low battery in the colorscheme's red, charging in the accent
 (`CapsuleChangeView.qml`, `tst_capsuleChangeView.qml`), which Bluetooth devices connected or
@@ -198,19 +201,23 @@ inline reply and "+N" (`components/panels/NewNotificationCard.qml`,
 drawn with its fill and a soft shadow that follows its shape, never the bar border, that it springs to a new size (growing
 overshoots slightly and settles, shrinking doesn't bounce), its corners morph
 on the same spring and reduce motion moves it at once (`CapsuleSurface.qml`),
-that expanded it is more solid, its fill 15 points more opaque and its shadow
-a little larger, on the same spring, and that its clock then shows the date,
-dimmer, before the time, while at rest and on every other bar style it shows
-only the time (`CapsuleLook.js`, `tst_capsuleLook.qml`; the dimmer lead before
+that while its row shows its expanded view it is more solid, its fill 15
+points more opaque and its shadow a little larger, on the same spring, and
+that its clock then shows the date, dimmer, before the time, while at rest,
+held expanded with its row at rest (a popup inside, a change) and on every
+other bar style it shows only the time (`CapsuleLook.looksExpanded`, `CapsuleLook.js`, `tst_capsuleLook.qml`; the clock's text in
+`ClockText.js`, `tst_clockText.qml`; the dimmer lead before
 a value in `IconValue.qml`, `tst_iconValue.qml`),
-which spring a size change takes and how its contents look a given time into a
+which spring a size change takes, and expanding or collapsing (`springFor`), and how its contents look a given time into a
 crossfade, the old contents gone before the new fade in a third of the way
 into the spring, and that expanding, its row's elements enter one after
 another from its centre out, 20 ms apart, each fading in and sliding to its
 place from the centre's side, the last in as the spring settles, at once with
 reduce motion, and the capsule glance's cards just after it, one after
 another left to right (`CapsuleMotion.centreOut`, `entering`, `rowEntry`,
-`rowLook`, `cardLook`; `CapsuleMotion.js`, `tst_capsuleMotion.qml`), which
+`rowLook`, `cardLook`; `CapsuleMotion.js`, `tst_capsuleMotion.qml`), that
+an element's item or a glance card takes that look's opacity, scale and
+slide, following it as it changes (`RowLook.qml`, `tst_rowLook.qml`), which
 glance cards the capsule glance shows and what each says (media first: its
 cover, title over artist, the player's name with no title, and whether it
 plays; battery: its level, percentage and charging, the time left or full;
@@ -232,7 +239,7 @@ contents crossfade between views by key: the new one shown a frame after the
 change, so the shape moves at once, the old one fading and shrinking away
 while it does and the new one fading and growing in, each as
 `CapsuleMotion.contents` has it at the time elapsed, running on until a
-longer entry is in, checked by phase and
+longer entry is in, its length read as it arrives after the swap, checked by phase and
 elapsed time, not the clock (`CapsuleContentTransition.qml`,
 `tst_capsuleContentTransition.qml`), which view its row shows
 (`CapsuleRouting.rowView`), that a popup inside it crossfades its contents on
@@ -243,7 +250,7 @@ phase, in which colour (work red, a break green) and the phase's name
 then a running break then an unstarted focus, each phase's length and what
 the popup outside a capsule says while one runs or is paused
 (`services/PomodoroPhases.js`, `tst_pomodoroPhases.qml`), that its corners
-come down round a popup inside (`CapsulePlacement.withPopup`), that it reaches past its row for its
+come down round a popup inside, or the glance (`CapsulePlacement.withInside`), that it reaches past its row for its
 workspace pills, and where they sit inside it, under the row of a top
 capsule and above the row of a bottom one, centred on it, as deep as the
 chips while expanded, how it grows round a popup
@@ -257,7 +264,8 @@ and clickable, growing on the capsule's spring, at once with reduce motion,
 and back to pills on collapse (`CapsulePills.js`), highlight the
 one its monitor shows as it changes, dim an occupied one, switch workspace on a click and
 go to the next or previous one on a scroll, an empty one too, as the bar's
-workspaces element does, stopping at either end (`CapsuleWorkspaceRow.qml`,
+workspaces element does, stopping at either end, and keep their pills and
+length while the row is hidden (`CapsuleWorkspaceRow.qml`,
 `Workspaces.qml`), that a mouse wheel
 steps once per notch and a touchpad gesture at most once
 (`components/WheelSteps.js`; `WheelStepHandler.qml` feeds it), and that a capsule sits only at the top or

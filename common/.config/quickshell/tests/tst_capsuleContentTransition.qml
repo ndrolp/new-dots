@@ -130,6 +130,34 @@ TestCase {
         tryCompare(shown, "changing", false);
     }
 
+    // The entry's length is the new view's, read as its contents arrive: a
+    // row whose elements (and the glance's cards after them) come in only
+    // after the swap still runs until they are in, not as long as the view
+    // before it would have taken.
+    function test_anEntryLengthArrivingAfterTheSwapCounts() {
+        const shown = createTemporaryObject(transition, this, { length: 10 });
+
+        shown.key = "expanded";
+        tryCompare(shown, "phase", "moving");
+        shown.length = 600;
+        tryVerify(() => shown.elapsed > CapsuleMotion.contentsLength(motion) + 50);
+        verify(shown.changing);
+        tryCompare(shown, "changing", false, 2000);
+        compare(shown.shownKey, "expanded");
+    }
+
+    // A shorter entry arriving mid-way ends it once that is in, as long as
+    // a crossfade at least.
+    function test_aShorterEntryArrivingMidwayEndsSooner() {
+        const shown = createTemporaryObject(transition, this, { length: 5000 });
+
+        shown.key = "expanded";
+        tryCompare(shown, "phase", "moving");
+        shown.length = 10;
+        tryCompare(shown, "changing", false, 2000);
+        verify(shown.elapsed >= CapsuleMotion.contentsLength(motion) - 1);
+    }
+
     // It never ends before the crossfade does.
     function test_itRunsAtLeastAsLongAsACrossfade() {
         const shown = createTemporaryObject(transition, this, { length: 10 });

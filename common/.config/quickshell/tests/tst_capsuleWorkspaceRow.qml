@@ -132,6 +132,17 @@ TestCase {
         compare(built.row.depth, 4);
     }
 
+    // The bar hides the row until the capsule has its place, a place that
+    // takes the row's length: the length must not hang on the row being
+    // shown, or the two would wait on each other in a binding loop.
+    function test_aHiddenRowKeepsItsPillsAndLength() {
+        const built = createTemporaryObject(area, this);
+
+        built.row.visible = false;
+        compare(built.row.pills.map(pill => pill.workspaceId), [1, 2, 3]);
+        compare(built.row.length, 40);
+    }
+
     function test_atRestThePillsHaveNoLabel() {
         const built = createTemporaryObject(area, this);
 

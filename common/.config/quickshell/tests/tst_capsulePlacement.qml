@@ -202,7 +202,7 @@ TestCase {
 
     // Without a popup inside, the capsule is just its row.
     function test_withoutAPopupInsideTheCapsuleIsItsRow() {
-        compare(CapsulePlacement.withPopup(row, null, "top"), row);
+        compare(CapsulePlacement.withInside(row, null, "top"), row);
     }
 
     // With a popup inside it grows to the wider of the row and the popup,
@@ -220,7 +220,7 @@ TestCase {
     }
 
     function test_aPopupInsideGrowsTheCapsuleRoundIt(data) {
-        compare(CapsulePlacement.withPopup(row, data.popup, data.barPosition), data.place);
+        compare(CapsulePlacement.withInside(row, data.popup, data.barPosition), data.place);
     }
 
     // Round a popup the capsule is a rounded rectangle, no longer a full
@@ -231,9 +231,9 @@ TestCase {
         const deep = { x: 800, y: 0, width: 320, height: 64, radius: 32 };
         const popup = { width: 424, height: 300 };
 
-        compare(CapsulePlacement.withPopup(deep, popup, "top").radius, 20);
-        compare(CapsulePlacement.withPopup(deep, null, "top").radius, 32);
-        compare(CapsulePlacement.withPopup(row, popup, "top").radius, 16);
+        compare(CapsulePlacement.withInside(deep, popup, "top").radius, 20);
+        compare(CapsulePlacement.withInside(deep, null, "top").radius, 32);
+        compare(CapsulePlacement.withInside(row, popup, "top").radius, 16);
     }
 
     // The glance goes where a popup inside would: centred on the row, just
@@ -249,7 +249,7 @@ TestCase {
 
     function test_theGlanceGoesPastTheRow(data) {
         const glance = { width: 300, height: 60 };
-        const grown = CapsulePlacement.withPopup(row, glance, data.barPosition);
+        const grown = CapsulePlacement.withInside(row, glance, data.barPosition);
 
         compare(CapsulePlacement.glancePlace(row, glance, data.barPosition), data.at);
         verify(CapsulePlacement.contains(grown, { x: data.at.x + 10, y: data.at.y + 10 }));
