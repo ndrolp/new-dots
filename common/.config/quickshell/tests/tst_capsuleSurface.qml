@@ -4,7 +4,7 @@ import "../components/bar"
 import "../config/Motion.js" as Motion
 
 // The capsule is drawn in the profile's background colour and opacity, with
-// the bar border around it when that setting is on.
+// a soft shadow round it, always, and never the bar border.
 TestCase {
     name: "CapsuleSurface"
     width: 300
@@ -27,7 +27,6 @@ TestCase {
 
                 place: ({ x: 50, y: 20, width: 200, height: 40, radius: 20 })
                 fillColor: "#ff0000"
-                borderColor: "#0000ff"
                 appearance: ({ barPosition: "top", motion: Motion.motion(true) })
             }
         }
@@ -61,13 +60,53 @@ TestCase {
         compare(colorAt(built, 51, 21), { r: 1, g: 1, b: 1 });
     }
 
-    function test_theBarBorderRunsAroundTheCapsuleWhenOn() {
+    // Right at its edge it is its own colour: no line runs round it.
+    function test_noBorderRunsAroundTheCapsule() {
         const built = createTemporaryObject(area, this);
 
         compare(colorAt(built, 150, 20), { r: 1, g: 0, b: 0 });
-        built.surface.border = true;
-        compare(colorAt(built, 150, 20), { r: 0, g: 0, b: 1 });
-        compare(colorAt(built, 150, 59), { r: 0, g: 0, b: 1 });
+        compare(colorAt(built, 150, 59), { r: 1, g: 0, b: 0 });
+    }
+
+    // How dark the desktop is under a pixel of the area, 0 untouched to 1
+    // black: what the shadow adds there.
+    function shadeAt(item, x, y) {
+        const pixel = grabImage(item).pixel(x, y);
+        return 1 - (pixel.r + pixel.g + pixel.b) / 3;
+    }
+
+    // A soft, tight, faint shadow: just past its edge the desktop is a little
+    // darker, and a few pixels further it is untouched.
+    function test_aSoftShadowSurroundsTheCapsule() {
+        const built = createTemporaryObject(area, this);
+
+        const under = shadeAt(built, 150, 61);
+        verify(under > 0.02, "shaded just below: " + under);
+        verify(under < 0.35, "faint: " + under);
+        verify(shadeAt(built, 150, 18) > 0, "shaded just above");
+        verify(shadeAt(built, 48, 40) > 0, "shaded just past its end");
+        compare(shadeAt(built, 150, 90), 0, "tight");
+    }
+
+    // The shadow takes the capsule's shape: past a pill's round end the
+    // corner of its box stays clear, while round a popup, as a rounded
+    // rectangle, it is shaded there; and it follows the capsule as it grows.
+    function test_theShadowFollowsTheCapsulesShape() {
+        const built = createTemporaryObject(area, this);
+
+        compare(shadeAt(built, 51, 19), 0, "clear past a pill's round end");
+        built.surface.place = { x: 50, y: 20, width: 200, height: 40, radius: 4 };
+        verify(shadeAt(built, 51, 19) > 0, "shaded at a rounded rectangle's corner");
+        built.surface.place = { x: 50, y: 20, width: 200, height: 60, radius: 4 };
+        verify(shadeAt(built, 150, 81) > 0.02, "shaded below the grown capsule");
+    }
+
+    // With no row there is no capsule, and no shadow either.
+    function test_aCapsuleWithNoSizeCastsNoShadow() {
+        const built = createTemporaryObject(area, this);
+
+        built.surface.place = { x: 150, y: 40, width: 0, height: 0, radius: 0 };
+        compare(shadeAt(built, 150, 40), 0);
     }
 
     Component {

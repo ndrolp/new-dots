@@ -2,6 +2,7 @@ import QtQuick
 import QtTest
 import "../components/bar/BarElementItems.js" as BarElementItems
 import "../components/bar/BarLayout.js" as BarLayout
+import "../components/bar/BarPlacement.js" as BarPlacement
 import "../components/bar/CapsuleElements.js" as CapsuleElements
 import "../components/bar/CapsulePlacement.js" as CapsulePlacement
 import "../components/bar/LiveElements.js" as LiveElements
@@ -93,7 +94,7 @@ TestCase {
             left: live.left.map(entry), right: live.right.map(entry)
         });
         const surface = CapsulePlacement.surface(bar, CapsulePlacement.span(row, pills),
-            given.horizontalPadding, pills.depth + given.spacing, 0);
+            BarPlacement.capsuleEndPadding(given), pills.depth + given.spacing, 0);
         const shownInks = Object.keys(zone.positions)
             .map(id => {
                 const inkStart = start + zone.positions[id].start + (lengthOf(id) - inks[id]) / 2;

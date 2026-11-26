@@ -29,6 +29,13 @@ function capsulePadding(bar) {
     return BarProfileModel.capsule(bar) ? (bar.capsuleVerticalPadding || 0) : 0;
 }
 
+// The room a capsule keeps inside it at its two ends along the bar, past its
+// row and its pill row: half again the profile's horizontal padding, so its
+// round ends never crowd what they hold. There is no setting of its own.
+function capsuleEndPadding(bar) {
+    return bar.horizontalPadding * 1.5;
+}
+
 // The space the bar takes from its screen edge inwards: on a capsule, its
 // workspace pills and its vertical padding included.
 function thickness(bar) {

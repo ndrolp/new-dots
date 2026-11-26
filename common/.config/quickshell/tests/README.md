@@ -192,7 +192,7 @@ one ends and all handed back oldest first as toasts
 toast or in the capsule: its timeout, a critical one staying, its actions,
 inline reply and "+N" (`components/panels/NewNotificationCard.qml`,
 `NotificationCard.newNotificationTimeout`), how it is
-drawn with its fill and bar border, that it springs to a new size (growing
+drawn with its fill and a soft shadow that follows its shape, never the bar border, that it springs to a new size (growing
 overshoots slightly and settles, shrinking doesn't bounce), its corners morph
 on the same spring and reduce motion moves it at once (`CapsuleSurface.qml`),
 which spring a size change takes and how its contents look a given time into a
