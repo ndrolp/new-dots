@@ -1,4 +1,5 @@
 import QtQuick
+import "CapsuleLook.js" as CapsuleLook
 import "CapsuleMotion.js" as CapsuleMotion
 
 // The capsule itself: a round-ended shape in the profile's background colour
@@ -6,7 +7,9 @@ import "CapsuleMotion.js" as CapsuleMotion
 // shadow round it, always: the bar border never runs round a capsule. The
 // shadow is a few faint rings just outside the shape, fading outwards, so it
 // takes its round ends or rounded corners as they morph, never darkens a
-// see-through fill, and goes with it when the capsule hides.
+// see-through fill, and goes with it when the capsule hides. Expanded it is
+// more solid, more opaque with a slightly larger shadow (CapsuleLook.js), on
+// the capsule's spring too.
 // It slides and stretches along the bar as the row
 // changes, and grows and shrinks across it as a popup inside opens, closes or
 // resizes, on the capsule's springs (Motion.js `capsule`, picked by
@@ -32,6 +35,33 @@ Item {
     property var spring: root.appearance.motion.capsule.collapse
     // Where it is headed: the last place it was given.
     property var target: null
+    // Whether it is expanded, when it looks more solid: more opaque, with a
+    // larger shadow (CapsuleLook.js).
+    property bool expanded: false
+    // How solid it looks, 0 at rest to 1 expanded, on the capsule's spring:
+    // expanding's, overshooting, or collapsing's; at once with reduce motion.
+    property real solidity: 0
+
+    onExpandedChanged: {
+        const spring = expanded ? appearance.motion.capsule.expand : appearance.motion.capsule.collapse;
+        solidifying.stop();
+        if (spring.duration <= 0) {
+            solidity = expanded ? 1 : 0;
+            return;
+        }
+        solidifying.duration = spring.duration;
+        solidifying.easing.type = spring.easing;
+        solidifying.easing.overshoot = spring.overshoot;
+        solidifying.to = expanded ? 1 : 0;
+        solidifying.start();
+    }
+
+    NumberAnimation {
+        id: solidifying
+
+        target: root
+        property: "solidity"
+    }
 
     // Springs to `to`, from wherever it is now; jumps there with reduce
     // motion, or across the bar while following a popup.
@@ -87,15 +117,15 @@ Item {
     // included.
     readonly property real drawnRadius: Math.max(0, Math.min(radius, width / 2, height / 2))
     // How dark each ring of its shadow is, from its edge outwards: a few
-    // pixels, faint and fading.
-    readonly property var shadowRings: [0.14, 0.09, 0.05, 0.02]
+    // pixels, faint and fading, a little larger as it is more solid.
+    readonly property var shadowRings: CapsuleLook.shadowRings(solidity)
 
     Repeater {
-        model: root.width > 0 && root.height > 0 ? root.shadowRings : []
+        // As many rings as there are, so they stay put while they darken.
+        model: root.width > 0 && root.height > 0 ? root.shadowRings.length : 0
 
         Rectangle {
             required property int index
-            required property real modelData
             readonly property int reach: index + 1
 
             x: -reach
@@ -105,13 +135,14 @@ Item {
             radius: root.drawnRadius + reach
             color: "transparent"
             border.width: 1
-            border.color: Qt.rgba(0, 0, 0, modelData)
+            border.color: Qt.rgba(0, 0, 0, root.shadowRings[index])
         }
     }
 
     Rectangle {
         anchors.fill: parent
         radius: root.drawnRadius
-        color: root.fillColor
+        color: Qt.rgba(root.fillColor.r, root.fillColor.g, root.fillColor.b,
+            CapsuleLook.fillAlpha(root.fillColor.a, root.solidity))
     }
 }

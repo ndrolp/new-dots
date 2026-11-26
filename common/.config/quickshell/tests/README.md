@@ -195,6 +195,11 @@ inline reply and "+N" (`components/panels/NewNotificationCard.qml`,
 drawn with its fill and a soft shadow that follows its shape, never the bar border, that it springs to a new size (growing
 overshoots slightly and settles, shrinking doesn't bounce), its corners morph
 on the same spring and reduce motion moves it at once (`CapsuleSurface.qml`),
+that expanded it is more solid, its fill 15 points more opaque and its shadow
+a little larger, on the same spring, and that its clock then shows the date,
+dimmer, before the time, while at rest and on every other bar style it shows
+only the time (`CapsuleLook.js`, `tst_capsuleLook.qml`; the dimmer lead before
+a value in `IconValue.qml`, `tst_iconValue.qml`),
 which spring a size change takes and how its contents look a given time into a
 crossfade, the old contents gone before the new fade in a third of the way
 into the spring, and that expanding, its row's elements enter one after
