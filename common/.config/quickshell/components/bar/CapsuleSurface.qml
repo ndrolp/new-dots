@@ -16,7 +16,7 @@ import "CapsuleMotion.js" as CapsuleMotion
 // CapsuleMotion.spring): growing overshoots slightly and settles, shrinking
 // is a bit faster without bounce. Its corners morph on the same spring, from
 // a full pill at rest to a rounded rectangle round a popup and back
-// (CapsulePlacement.withPopup). Reduce motion moves it at once.
+// (CapsulePlacement.withInside). Reduce motion moves it at once.
 Item {
     id: root
 

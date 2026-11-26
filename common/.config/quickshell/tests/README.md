@@ -250,7 +250,7 @@ phase, in which colour (work red, a break green) and the phase's name
 then a running break then an unstarted focus, each phase's length and what
 the popup outside a capsule says while one runs or is paused
 (`services/PomodoroPhases.js`, `tst_pomodoroPhases.qml`), that its corners
-come down round a popup inside (`CapsulePlacement.withPopup`), that it reaches past its row for its
+come down round a popup inside, or the glance (`CapsulePlacement.withInside`), that it reaches past its row for its
 workspace pills, and where they sit inside it, under the row of a top
 capsule and above the row of a bottom one, centred on it, as deep as the
 chips while expanded, how it grows round a popup

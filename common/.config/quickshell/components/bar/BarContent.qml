@@ -138,11 +138,11 @@ Item {
     readonly property var glanceSize: capsuleRowPlace !== null && glanceShown
         ? { width: glanceView.width, height: glanceView.height } : null
     // On a capsule, where the capsule is drawn around its row, its pill row
-    // and the glance past them while it shows, grown round it as round a
-    // popup inside (CapsulePlacement.withPopup), so the pointer over its
+    // and the glance past them while it shows, grown round what is inside
+    // it (CapsulePlacement.withInside), so the pointer over the glance's
     // cards is over the capsule; null on any other bar style.
     readonly property var capsulePlace: capsuleRowPlace === null ? null
-        : CapsulePlacement.withPopup(capsuleRowPlace, glanceSize, appearance.barPosition)
+        : CapsulePlacement.withInside(capsuleRowPlace, glanceSize, appearance.barPosition)
     // Where a change the capsule shows starts along the bar: centred, as its
     // row would be.
     readonly property real changeStart: BarLayout.zoneStart(layoutBar, "center", changeView.width)
@@ -152,9 +152,9 @@ Item {
     readonly property var insidePopup: capsulePlace !== null && openPopup && openPopup.inside
         ? openPopup : null
     // The capsule as drawn: its row, grown round a popup inside it
-    // (CapsulePlacement.withPopup); null on any other bar style.
+    // (CapsulePlacement.withInside); null on any other bar style.
     readonly property var capsuleShape: capsulePlace === null ? null
-        : CapsulePlacement.withPopup(capsulePlace, insidePopup, appearance.barPosition)
+        : CapsulePlacement.withInside(capsulePlace, insidePopup, appearance.barPosition)
     // Whether the pointer is over the capsule itself, its workspace pills
     // included, not elsewhere in its bar window.
     readonly property bool capsuleHovered: capsulePlace !== null && pointer.hovered
