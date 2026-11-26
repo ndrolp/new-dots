@@ -91,12 +91,13 @@ function inputRegion(surface, margins) {
 // it. A live element not `shown` takes no room: it waits just outside its
 // side of what is shown, to fade there.
 // Takes the bar content, { barPosition, height }, and { centre, spacing,
-// pills (their length), left, right }, each side a list of live elements
+// pills (their length), pillDepth (their depth: the pills' at rest, the
+// chips' expanded), left, right }, each side a list of live elements
 // { id, length, depth, shown } from the pills outwards for the right and
 // inwards for the left. Returns { start, end, depth, pills: { x, y },
 // elements: { id: { x, y } } }.
 function pillRow(content, given) {
-    const pillDepth = BarPlacement.workspacePillDepth;
+    const pillDepth = given.pillDepth;
     const shown = given.left.concat(given.right).filter(element => element.shown);
     const depth = Math.max(pillDepth, ...shown.map(element => element.depth));
     const length = shown.reduce((total, element) => total + element.length + given.spacing, given.pills);

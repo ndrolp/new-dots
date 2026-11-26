@@ -400,7 +400,8 @@ Variants {
                     rowElapsed: rowView.elapsed
                     rowOutgoing: ({ capturing: rowView.capturing, opacity: rowView.outgoingOpacity,
                         scale: rowView.outgoingScale })
-                    workspacePillsLength: workspaceRow.width
+                    workspacePillsLength: workspaceRow.length
+                    workspacePillsDepth: workspaceRow.depth
                     glanceShown: panel.glanceShown
 
                     onConfigRequested: function(screen) {
@@ -434,6 +435,10 @@ Variants {
                 workspaceService: panel.workspaceService
                 monitorScreen: panel.screen
                 appearance: panel.barAppearance
+                // Chips while its row shows expanded, as its bar elements do.
+                expanded: rowView.shownKey === "expanded"
+                workspaceOptions: BarProfileModel.elementOptions(
+                    bar.appearance.barProfileValue(panel.profileName, "barElements"), "workspaces")
 
                 AlongBarBehavior on x { appearance: panel.barAppearance }
             }

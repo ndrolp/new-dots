@@ -99,6 +99,7 @@ TestCase {
             centre: 500,
             spacing: 8,
             pills: 40,
+            pillDepth: 4,
             left: [{ id: "media", length: 100, depth: 24, shown: media }],
             right: [{ id: "recording", length: 60, depth: 24, shown: recording }]
         };
@@ -139,6 +140,28 @@ TestCase {
         compare(row.pills, data.pills);
         compare(row.depth, 4);
         compare({ start: row.start, end: row.end }, { start: 480, end: 520 });
+    }
+
+    // Expanded, the pills are chips, as deep as they are given: deeper than
+    // the live elements, they make the row as deep as themselves; shallower,
+    // they are centred across it.
+    function test_theRowIsAsDeepAsTheChips_data() {
+        return [
+            { tag: "deeper chips", pillDepth: 30, depth: 30, pills: { x: 500, y: 30 },
+                media: { x: 392, y: 33 } },
+            { tag: "shallower chips", pillDepth: 16, depth: 24, pills: { x: 500, y: 34 },
+                media: { x: 392, y: 30 } }
+        ];
+    }
+
+    function test_theRowIsAsDeepAsTheChips(data) {
+        const content = { barPosition: "top", width: 1000, height: 30 };
+        const given = Object.assign(pillRowGiven(true, true), { pillDepth: data.pillDepth });
+        const row = CapsulePlacement.pillRow(content, given);
+
+        compare(row.depth, data.depth);
+        compare(row.pills, data.pills);
+        compare(row.elements.media, data.media);
     }
 
     // A live element that isn't shown takes no room: the others close up

@@ -192,7 +192,7 @@ one ends and all handed back oldest first as toasts
 toast or in the capsule: its timeout, a critical one staying, its actions,
 inline reply and "+N" (`components/panels/NewNotificationCard.qml`,
 `NotificationCard.newNotificationTimeout`), how it is
-drawn with its fill and bar border, that it springs to a new size (growing
+drawn with its fill and a soft shadow that follows its shape, never the bar border, that it springs to a new size (growing
 overshoots slightly and settles, shrinking doesn't bounce), its corners morph
 on the same spring and reduce motion moves it at once (`CapsuleSurface.qml`),
 which spring a size change takes and how its contents look a given time into a
@@ -230,12 +230,16 @@ the popup outside a capsule says while one runs or is paused
 (`services/PomodoroPhases.js`, `tst_pomodoroPhases.qml`), that its corners
 come down round a popup inside (`CapsulePlacement.withPopup`), that it reaches past its row for its
 workspace pills, and where they sit inside it, under the row of a top
-capsule and above the row of a bottom one, centred on it, how it grows round a popup
+capsule and above the row of a bottom one, centred on it, as deep as the
+chips while expanded, how it grows round a popup
 inside it (`CapsulePlacement.js`), that its window grows at once for a popup inside and
-never shrinks back (`CapsuleWindowHold.qml`), that the
+never shrinks back (`CapsuleWindowHold.qml`), that at rest the
 pills are small and unlabelled, one per workspace with windows in order and
-none for an empty one unless it is active (`CapsulePills.js`), highlight the
-active one as it changes, dim an occupied one, switch workspace on a click and
+none for an empty one unless its monitor shows it, focused or not, and that
+expanded every workspace is a chip with its number or glyph, an empty one dim
+and clickable, growing on the capsule's spring, at once with reduce motion,
+and back to pills on collapse (`CapsulePills.js`), highlight the
+one its monitor shows as it changes, dim an occupied one, switch workspace on a click and
 go to the next or previous one on a scroll, an empty one too, as the bar's
 workspaces element does, stopping at either end (`CapsuleWorkspaceRow.qml`,
 `Workspaces.qml`), that a mouse wheel

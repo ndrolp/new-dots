@@ -56,8 +56,10 @@ Item {
     // (CapsuleContentTransition's outgoing look): `capturing` the frame it is
     // captured. Never shown on any other bar style.
     property var rowOutgoing: ({ capturing: false, opacity: 0, scale: 1 })
-    // How long the capsule's workspace pills are along the bar.
+    // How long the capsule's workspace pills are along the bar, and how deep
+    // across it: the pills' depth at rest, the chips' expanded.
     property real workspacePillsLength: 0
+    property real workspacePillsDepth: BarPlacement.workspacePillDepth
     // Whether the capsule shows its glance under its expanded row
     // (CapsuleGlance.shown, from `glanceCards`); never on any other bar style.
     property bool glanceShown: false
@@ -107,12 +109,14 @@ Item {
             centre: (rowSpan.start + rowSpan.end) / 2,
             spacing: appearance.spacing,
             pills: workspacePillsLength,
+            pillDepth: workspacePillsDepth,
             left: liveElements.left.map(liveEntry),
             right: liveElements.right.map(liveEntry)
         })
         : null
-    // How much deeper the live elements make the pill row than the pills
-    // alone.
+    // How much deeper the live elements, or the chips while expanded, make
+    // the pill row than the pills at rest; the bar window grows to hold it,
+    // but the reserved space stays as it is at rest.
     readonly property real pillRowExtra: pillRow ? pillRow.depth - BarPlacement.workspacePillDepth : 0
     // How deep the deepest live element active on the capsule is, 0 with
     // none: what the capsule reserves for them (BarPlacement.reservedSpace),
@@ -124,7 +128,7 @@ Item {
     // row past it; null on any other bar style.
     readonly property var capsuleRowPlace: pillRow
         ? CapsulePlacement.surface(layoutBar, CapsulePlacement.span(rowSpan, pillRow),
-            appearance.horizontalPadding, pillRow.depth + appearance.spacing,
+            BarPlacement.capsuleEndPadding(appearance), pillRow.depth + appearance.spacing,
             BarPlacement.capsulePadding(appearance))
         : null
     // The capsule glance's size while it shows, or null.
@@ -363,8 +367,6 @@ Item {
         following: root.insidePopup !== null && root.insidePopup.resizing
         visible: root.capsulePlace !== null
         fillColor: root.dockedColor
-        border: root.appearance.barBorder
-        borderColor: theme.border
         appearance: root.appearance
         z: -1
     }
