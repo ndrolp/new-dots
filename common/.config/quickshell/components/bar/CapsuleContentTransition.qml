@@ -30,7 +30,12 @@ Item {
     // How long, in ms, the new view's contents take to come in, when they
     // take longer than a crossfade (a row entering one after another,
     // CapsuleMotion.entryLength): it runs that long, `elapsed` counting on.
+    // Read all the way through, not once at the swap: the new view's contents
+    // can arrive a moment after it shows, and their length with them.
     property real length: 0
+    // How long, in ms, the crossfade runs now: the new view's `length`, never
+    // less than a crossfade.
+    readonly property real runLength: Math.max(CapsuleMotion.contentsLength(motion), length)
     // The view shown now: the new one from the frame after a change.
     property var shownKey
     // The view fading out while the shape moves, or null.
@@ -67,9 +72,28 @@ Item {
         previousKey = shownKey;
         phase = "moving";
         shownKey = key;
-        timeline.duration = Math.max(CapsuleMotion.contentsLength(motion), length);
-        timeline.to = timeline.duration;
+        runFrom(0);
+    }
+
+    // Runs the timeline on from `from` ms to the end of the crossfade, or
+    // settles if it is past it already.
+    function runFrom(from) {
+        timeline.stop();
+        if (from >= runLength) {
+            elapsed = runLength;
+            settle();
+            return;
+        }
+        timeline.from = from;
+        timeline.to = runLength;
+        timeline.duration = runLength - from;
         timeline.start();
+    }
+
+    // A length that arrives while it moves sets where it ends.
+    onRunLengthChanged: {
+        if (phase === "moving")
+            runFrom(elapsed);
     }
 
     function settle() {
@@ -116,7 +140,6 @@ Item {
 
         target: root
         property: "elapsed"
-        from: 0
         onFinished: root.settle()
     }
 }

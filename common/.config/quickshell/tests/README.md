@@ -233,7 +233,7 @@ contents crossfade between views by key: the new one shown a frame after the
 change, so the shape moves at once, the old one fading and shrinking away
 while it does and the new one fading and growing in, each as
 `CapsuleMotion.contents` has it at the time elapsed, running on until a
-longer entry is in, checked by phase and
+longer entry is in, its length read as it arrives after the swap, checked by phase and
 elapsed time, not the clock (`CapsuleContentTransition.qml`,
 `tst_capsuleContentTransition.qml`), which view its row shows
 (`CapsuleRouting.rowView`), that a popup inside it crossfades its contents on

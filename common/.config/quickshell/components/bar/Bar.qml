@@ -287,6 +287,9 @@ Variants {
                     expanded: panel.capsuleExpanded
                 }) : "rest"
                 motion: panel.barAppearance.motion
+                // As long as the expanded row's entry, its glance's cards
+                // after it: read as they arrive, after the swap, not from the
+                // row at rest before it.
                 length: shownKey === "expanded"
                     ? CapsuleMotion.entryLength(motion, barContent.rowEntry.steps
                         + (panel.glanceShown ? barContent.glanceCards.length : 0)) : 0
