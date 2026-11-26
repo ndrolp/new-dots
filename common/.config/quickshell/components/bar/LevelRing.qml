@@ -1,9 +1,9 @@
 import QtQuick
 import QtQuick.Shapes
 
-// A glance card's ring (a change's glance card in CapsuleChangeView.qml, the
-// capsule glance's cards in CapsuleGlanceView.qml): a track, and an arc from
-// the top round to the level.
+// A level ring round a card's icon (a change's ring card in
+// CapsuleChangeView.qml, the capsule glance's cards in CapsuleGlanceView.qml):
+// a track, and an arc from the top round to the level.
 Shape {
     id: ring
 

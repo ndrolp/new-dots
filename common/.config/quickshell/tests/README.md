@@ -169,7 +169,7 @@ what each change shows in the OSD (`components/panels/OsdChange.js`), and
 in the capsule (`OsdChange.capsuleLook`, `levelIcon`): volume and brightness
 as a wide fill bar with a glyph that follows the level (muted, the
 struck-through speaker and an empty grey bar) and bounces on each change but
-not under reduce motion, battery and Bluetooth as a glance card with one line
+not under reduce motion, battery and Bluetooth as a ring card with one line
 and a small ring of the battery level, the device's own for Bluetooth when it
 reports one, low battery in the colorscheme's red, charging in the accent
 (`CapsuleChangeView.qml`, `tst_capsuleChangeView.qml`), which Bluetooth devices connected or

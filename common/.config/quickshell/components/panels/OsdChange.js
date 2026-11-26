@@ -176,7 +176,7 @@ function levelIcon(change) {
 // What a change shows in the capsule, by `card`:
 // - "level" (volume, brightness): { icon (levelIcon), tone, level, percent };
 //   muted volume is an empty bar in the muted tone.
-// - "glance" (battery, Bluetooth): { icon, tone, text, ring, highlighted }:
+// - "ring" (battery, Bluetooth): { icon, tone, text, ring, highlighted }:
 //   one line of text and `ring`, the battery level 0 to 1 for a small ring
 //   (the device's own for Bluetooth), or null when there is none.
 // - "row": any other change, shown as `display` gives it.
@@ -194,7 +194,7 @@ function capsuleLook(change) {
         const shown = display(change);
         const ring = change.kind === "power" ? change.percentage
             : change.connected && change.battery !== null ? change.battery / 100 : null;
-        return { card: "glance", icon: shown.icon, tone: shown.tone, text: shown.label,
+        return { card: "ring", icon: shown.icon, tone: shown.tone, text: shown.label,
             ring: ring === null ? null : Clamp.unit(ring), highlighted: shown.highlighted };
     }
     default:

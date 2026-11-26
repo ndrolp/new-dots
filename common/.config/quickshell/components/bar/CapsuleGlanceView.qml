@@ -3,8 +3,8 @@ import QtQuick.Effects
 import ".." as Components
 
 // The capsule glance as drawn: its glance cards in a row, left to right, in
-// the order CapsuleGlance.cards gives them. Each is a glance card, as a
-// change's is in CapsuleChangeView.qml: a ring (GlanceRing) round the card's
+// the order CapsuleGlance.cards gives them. Each is drawn as a change's ring
+// card is in CapsuleChangeView.qml: a level ring (LevelRing) round the card's
 // icon, its title and, when there is one, a line of text under it. The media
 // card shows the small rounded cover in the ring's place and a play/pause
 // button after its title and artist, tinted with the colour from the art
@@ -110,7 +110,7 @@ Item {
                         width: card.ringSize
                         height: card.ringSize
 
-                        GlanceRing {
+                        LevelRing {
                             anchors.fill: parent
                             level: card.modelData.ring
                             trackColor: root.theme.backgroundSecondary
