@@ -151,7 +151,9 @@ SUPER+I acts only on the focused monitor's capsule (`CapsuleRouting.js`),
 that hovering one of its live elements doesn't expand it, so a click there
 opens the element's popup straight from rest (`CapsuleRouting.hoverExpands`),
 that hovering it expands it only after a moment and collapses it a while after
-the pointer leaves (`CapsuleHover.qml`), that SUPER+I holds it expanded until
+the pointer leaves (`CapsuleHover.qml`), that the pointer hovers it anywhere
+over it, its glance cards included though they are drawn past the bar
+content, and nowhere beside it (`CapsuleHoverMask.qml`), that SUPER+I holds it expanded until
 pressed again or until the pointer leaves it (`CapsuleToggle.qml`), that a
 change (volume, brightness, Caps Lock, audio output, bar profile,
 keep-awake, Do Not Disturb, a Bluetooth connection or power) goes to the focused
