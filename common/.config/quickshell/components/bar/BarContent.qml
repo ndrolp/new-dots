@@ -281,15 +281,19 @@ Item {
     // `steps`.
     readonly property var rowEntry: CapsuleMotion.rowEntry(zoneLayout("center").positions)
 
+    // How the capsule's row moves now, as CapsuleMotion.rowLook and cardLook
+    // take it: { entering, elapsed, entry, crossfade }.
+    readonly property var rowMotion: ({
+        entering: rowEntering,
+        elapsed: rowElapsed,
+        entry: rowEntry,
+        crossfade: rowContents
+    })
+
     // How a bar element looks in the capsule's row, by id, { opacity, scale,
     // slide } (CapsuleMotion.rowLook).
     function rowLook(element) {
-        return CapsuleMotion.rowLook(appearance.motion, {
-            entering: rowEntering,
-            elapsed: rowElapsed,
-            entry: rowEntry,
-            crossfade: rowContents
-        }, element);
+        return CapsuleMotion.rowLook(appearance.motion, rowMotion, element);
     }
 
     // Grouped elements drop their own pill: the group draws one background.
@@ -458,12 +462,8 @@ Item {
                 cards: root.glanceCards
                 mediaTint: glanceArtTint.tint
                 mediaOnTint: glanceArtTint.onTint
-                cardLook: index => CapsuleMotion.cardLook(root.appearance.motion, {
-                    entering: root.rowEntering,
-                    elapsed: root.rowElapsed,
-                    entry: root.rowEntry,
-                    crossfade: root.rowContents
-                }, index, root.glanceCards.length)
+                cardLook: index => CapsuleMotion.cardLook(root.appearance.motion, root.rowMotion,
+                    index, root.glanceCards.length)
                 appearance: root.appearance
                 theme: theme
 
