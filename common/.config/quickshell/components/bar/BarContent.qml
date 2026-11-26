@@ -8,6 +8,7 @@ import "BarElementItems.js" as BarElementItemsModel
 import "BarLayout.js" as BarLayout
 import "BarPlacement.js" as BarPlacement
 import "CapsuleGlance.js" as CapsuleGlance
+import "CapsuleLook.js" as CapsuleLook
 import "CapsulePlacement.js" as CapsulePlacement
 import "CapsuleMotion.js" as CapsuleMotion
 import "CapsuleRouting.js" as CapsuleRouting
@@ -392,7 +393,7 @@ Item {
         place: root.capsuleShape || { x: 0, y: 0, width: 0, height: 0, radius: 0 }
         following: root.insidePopup !== null && root.insidePopup.resizing
         visible: root.capsulePlace !== null
-        expanded: root.appearance.capsuleExpanded === true
+        expanded: CapsuleLook.looksExpanded(root.appearance)
         fillColor: root.dockedColor
         appearance: root.appearance
         z: -1

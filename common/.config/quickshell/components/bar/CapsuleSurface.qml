@@ -35,8 +35,8 @@ Item {
     property var spring: root.appearance.motion.capsule.collapse
     // Where it is headed: the last place it was given.
     property var target: null
-    // Whether it is expanded, when it looks more solid: more opaque, with a
-    // larger shadow (CapsuleLook.js).
+    // Whether it looks expanded (CapsuleLook.looksExpanded): more solid, more
+    // opaque with a larger shadow (CapsuleLook.js).
     property bool expanded: false
     // How solid it looks, 0 at rest to 1 expanded, on the capsule's spring:
     // expanding's, overshooting, or collapsing's; at once with reduce motion.

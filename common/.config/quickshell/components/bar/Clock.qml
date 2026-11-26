@@ -3,8 +3,8 @@ import QtQuick
 import "CapsuleLook.js" as CapsuleLook
 
 // The time beside its icon, with the hours above the minutes on a side bar.
-// In an expanded capsule the date comes before the time, dimmer
-// (CapsuleLook.clockText).
+// In a capsule whose row shows its expanded view the date comes before the
+// time, dimmer (CapsuleLook.clockText).
 IconValue {
     id: root
 

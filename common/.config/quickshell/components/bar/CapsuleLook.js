@@ -9,6 +9,17 @@
 // - fillAlpha(alpha, solidity): its fill's opacity.
 // - shadowRings(solidity): how dark each ring of its shadow is.
 // Expanded, its clock also shows the date before the time (clockText).
+// "Expanded" here is its row showing its expanded view (looksExpanded), not
+// merely the capsule held expanded.
+
+// Whether the capsule on `bar`, anything with { barStyle, capsuleRowExpanded
+// }, looks expanded: solid, with the date on its clock. Only while its row
+// shows its expanded view (the row crossfade's "expanded"): not with a popup
+// inside, which sets the row at rest, nor while a change shows instead of it;
+// never on any other bar style.
+function looksExpanded(bar) {
+    return BarProfileModel.capsule(bar) && bar.capsuleRowExpanded === true;
+}
 
 // How much more opaque, 0 to 1, the expanded capsule's fill is than the
 // profile's opacity.
@@ -41,13 +52,12 @@ function twoDigits(number) {
     return (number < 10 ? "0" : "") + number;
 }
 
-// What the clock shows at `date` on `bar`, anything with { barStyle,
-// capsuleExpanded }: { date, time }. The time is "HH:mm"; the date, drawn
-// dimmer before it, is "Thu 26 Nov · " in an expanded capsule and empty at
-// rest and on every other bar style.
+// What the clock shows at `date` on `bar`, as looksExpanded takes it:
+// { date, time }. The time is "HH:mm"; the date, drawn dimmer before it, is
+// "Thu 26 Nov · " while the capsule looks expanded, and empty otherwise.
 function clockText(bar, date) {
     const time = twoDigits(date.getHours()) + ":" + twoDigits(date.getMinutes());
-    if (!BarProfileModel.capsule(bar) || !bar.capsuleExpanded)
+    if (!looksExpanded(bar))
         return { date: "", time: time };
     const day = days[date.getDay()] + " " + date.getDate() + " " + months[date.getMonth()];
     return { date: day + " · ", time: time };

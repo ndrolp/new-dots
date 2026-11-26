@@ -106,6 +106,11 @@ Variants {
                     panel.glanceShown)
                 // Whether this window's capsule is expanded (see panel.capsuleExpanded).
                 property bool capsuleExpanded: panel.capsuleExpanded
+                // Whether its row shows its expanded view (the crossfade's
+                // "expanded"), when the capsule looks expanded
+                // (CapsuleLook.looksExpanded): not with a popup inside, its
+                // row at rest, nor while a change shows instead.
+                property bool capsuleRowExpanded: rowView.shownKey === "expanded"
                 // Global, not part of the bar profile.
                 property bool doNotDisturb: bar.appearance.doNotDisturb
                 property var controlCenterTiles: bar.appearance.controlCenterTiles
