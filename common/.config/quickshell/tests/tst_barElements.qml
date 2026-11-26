@@ -376,7 +376,7 @@ TestCase {
     // recording or sound, keep-awake off and no pomodoro started.
     function nothingGoingOn(values) {
         return Object.assign({ live: [], expanded: false, player: null, recordings: [], hasBattery: false,
-            cavaSilent: true, keepAwakeOn: false, pomodoroStarted: false,
+            onBattery: false, cavaSilent: true, keepAwakeOn: false, pomodoroStarted: false,
             captures: { microphone: [], camera: [] } }, values);
     }
 
@@ -444,7 +444,8 @@ TestCase {
     // A capsule's row lists its live elements switched off, but a collapsed
     // capsule shows them beside its workspace pills while they are active:
     // media while a track plays, the recording indicator while recording,
-    // keep-awake while on. Expanded, they show as on any other bar style.
+    // keep-awake while on, the battery while on battery. Expanded, they show
+    // as on any other bar style.
     function test_aLiveElementShowsCollapsedOnlyWhileActive_data() {
         const playing = { isPlaying: true };
         const paused = { isPlaying: false };
@@ -468,16 +469,23 @@ TestCase {
             { tag: "microphone and camera in use", element: "privacy",
                 status: { captures: { microphone: ["Firefox"], camera: ["Firefox"] } }, shown: true },
             { tag: "nothing captured", element: "privacy", status: {}, shown: false },
-            { tag: "nothing captured, expanded", element: "privacy", status: { expanded: true }, shown: false }
+            { tag: "nothing captured, expanded", element: "privacy", status: { expanded: true }, shown: false },
+            { tag: "on battery", element: "battery", status: { hasBattery: true, onBattery: true }, shown: true },
+            { tag: "plugged in", element: "battery", status: { hasBattery: true }, shown: false },
+            { tag: "plugged in, expanded", element: "battery", status: { hasBattery: true, expanded: true },
+                shown: true },
+            { tag: "no battery", element: "battery", status: { onBattery: true }, shown: false },
+            { tag: "no battery, expanded", element: "battery", status: { expanded: true }, shown: false }
         ];
     }
 
     function test_aLiveElementShowsCollapsedOnlyWhileActive(data) {
         const barElements = { left: [], right: [], center: [{ id: "recording", enabled: false },
             { id: "media", enabled: false }, { id: "keepAwake", enabled: false },
-            { id: "pomodoro", enabled: false }, { id: "privacy", enabled: false }] };
+            { id: "pomodoro", enabled: false }, { id: "privacy", enabled: false },
+            { id: "battery", enabled: false }] };
         const status = nothingGoingOn(Object.assign({ live: ["recording", "media", "keepAwake", "pomodoro",
-            "privacy"] },
+            "privacy", "battery"] },
             data.status));
 
         compare(BarElementItems.itemVisible(data.element, barElements, status), data.shown);
@@ -493,14 +501,18 @@ TestCase {
                 shown: false },
             { tag: "no glance", element: "media", status: { player: playing, glance: [] }, shown: true },
             { tag: "another's card", element: "keepAwake", status: { keepAwakeOn: true, glance: ["media"] },
-                shown: true }
+                shown: true },
+            { tag: "battery's card shows", element: "battery",
+                status: { hasBattery: true, onBattery: true, glance: ["battery"] }, shown: false },
+            { tag: "battery, no glance", element: "battery",
+                status: { hasBattery: true, onBattery: true, glance: [] }, shown: true }
         ];
     }
 
     function test_aLiveElementLeavesWhileItsCardShows(data) {
         const barElements = { left: [], right: [], center: [{ id: "media", enabled: false },
-            { id: "keepAwake", enabled: false }] };
-        const status = nothingGoingOn(Object.assign({ live: ["media", "keepAwake"], expanded: true },
+            { id: "keepAwake", enabled: false }, { id: "battery", enabled: false }] };
+        const status = nothingGoingOn(Object.assign({ live: ["media", "keepAwake", "battery"], expanded: true },
             data.status));
 
         compare(BarElementItems.itemVisible(data.element, barElements, status), data.shown);

@@ -17,7 +17,8 @@ from every saved profile (`tst_densityPresets.qml`). That a migration writes
 both files ending in a newline, as the adapters do, and that the tracked
 `config/appearance.json` and `monitors.json` are committed already migrated,
 so the shell's first run leaves the checkout clean, and that the tracked
-capsule profile shows only the clock at rest, without its icon, is in
+capsule profile shows only the clock at rest, without its icon, and puts
+the battery live, is in
 `tst_schemaMigrationFiles.qml`. They also cover where
 the bar sits on its screen: the edges its window is anchored to, the space it
 reserves (on a capsule, with the live elements it shows collapsed), where the margin goes and where its content sits, against its edge

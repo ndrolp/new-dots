@@ -34,14 +34,16 @@ function ids(sides) {
 // Each rule takes what there is to show, { player (the Mpris player media
 // follows, or null), recordings (RecordingIndicator.recordings), keepAwakeOn,
 // pomodoroStarted (running or paused), captures (the apps using the
-// microphone or a camera, PrivacyIndicator.captures) }.
+// microphone or a camera, PrivacyIndicator.captures), hasBattery, onBattery
+// (running on battery, not charging: UPower.onBattery) }.
 // A new live element needs its rule here and its id in liveElementIds.
 const activeRules = Object.freeze({
     recording: status => status.recordings.length > 0,
     media: status => !!status.player && status.player.isPlaying === true,
     keepAwake: status => status.keepAwakeOn === true,
     pomodoro: status => status.pomodoroStarted === true,
-    privacy: status => PrivacyIndicator.capturing(status.captures)
+    privacy: status => PrivacyIndicator.capturing(status.captures),
+    battery: status => status.hasBattery === true && status.onBattery === true
 });
 
 // Whether bar element `id` is active, given what there is to show (see

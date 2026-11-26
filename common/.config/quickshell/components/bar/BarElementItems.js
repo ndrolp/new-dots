@@ -17,7 +17,7 @@
 // (running or paused); every other element is always shown when enabled.
 // `status` says what there is: `live`, `expanded` (whether the capsule is),
 // `player`, `recordings`, `keepAwakeOn`, `captures` (see
-// LiveElements.activeRules), `hasBattery`, `cavaSilent`, `pomodoroStarted`
+// LiveElements.activeRules), `hasBattery`, `onBattery`, `cavaSilent`, `pomodoroStarted`
 // and `glance`.
 function itemVisible(element, barElements, status) {
     const live = (status.live || []).indexOf(element) !== -1;
