@@ -205,7 +205,8 @@ that while its row shows its expanded view it is more solid, its fill 15
 points more opaque and its shadow a little larger, on the same spring, and
 that its clock then shows the date, dimmer, before the time, while at rest,
 held expanded with its row at rest (a popup inside, a change) and on every
-other bar style it shows only the time (`CapsuleLook.looksExpanded`, `CapsuleLook.js`, `tst_capsuleLook.qml`; the dimmer lead before
+other bar style it shows only the time (`CapsuleLook.looksExpanded`, `CapsuleLook.js`, `tst_capsuleLook.qml`; the clock's text in
+`ClockText.js`, `tst_clockText.qml`; the dimmer lead before
 a value in `IconValue.qml`, `tst_iconValue.qml`),
 which spring a size change takes, and expanding or collapsing (`springFor`), and how its contents look a given time into a
 crossfade, the old contents gone before the new fade in a third of the way
