@@ -606,6 +606,19 @@ TestCase {
             "#00ff00"), "cava", "color"), "red");
     }
 
+    // The clock's 12-hour option is off by default, and in saved profiles
+    // without it, so they keep 24-hour time; it can be turned on.
+    function test_theClocksTwelveHourOption() {
+        const saved = BarProfileModel.normalizeBarElements({
+            right: [{ id: "clock", enabled: true, options: { iconVisible: true } }]
+        });
+
+        compare(BarProfileModel.elementOption(saved, "clock", "twelveHour"), false);
+        compare(BarProfileModel.elementOption(BarProfileModel.setElementOption(saved, "clock",
+            "twelveHour", true), "clock", "twelveHour"), true);
+        compare(BarProfileModel.elementOptionField("clock", "twelveHour"), { kind: "switch" });
+    }
+
     // How the Bar section edits each option: a switch, a number in a range or
     // a choice among labelled values.
     function test_eachOptionSaysHowItIsEdited() {

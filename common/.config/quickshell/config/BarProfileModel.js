@@ -58,7 +58,9 @@ const elementOptionDefaults = {
     "notifications": { badgeVisible: true },
     // `color` names one of the theme's colors, so it follows the theme.
     "cava": { barCount: 12, barWidth: 3, color: "blue" },
-    "audio": { meterVisible: true }
+    "audio": { meterVisible: true },
+    // Off, the clock shows 24-hour time (ClockText.timeText).
+    "clock": { twelveHour: false }
 };
 for (const id of iconTextElementIds)
     elementOptionDefaults[id] = Object.assign({}, elementOptionDefaults[id] || {}, iconTextOptionDefaults);

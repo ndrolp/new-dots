@@ -633,6 +633,18 @@ TestCase {
         compare(built.appearance.calls, [["option", "clock", "restTextVisible", true]]);
     }
 
+    // The clock's 12-hour time sits with its other options, off here.
+    function test_theClockOffersTwelveHourTime() {
+        const built = make();
+        mouseClick(textOf(elementRow(built.item, "Clock"), "Clock"));
+
+        const twelveHour = switchRow(built.item, "12-hour time");
+        verify(twelveHour);
+        verify(!twelveHour.checked);
+        twelveHour.toggled();
+        compare(built.appearance.calls, [["option", "clock", "twelveHour", true]]);
+    }
+
     function test_shortOptionsSitTwoPerLine() {
         const built = make();
 

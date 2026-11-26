@@ -14,11 +14,22 @@ function twoDigits(number) {
     return (number < 10 ? "0" : "") + number;
 }
 
+// The time at `date`: "HH:mm", or with `twelveHour` "h:mm AM" / "h:mm PM"
+// (midnight and noon are 12).
+function timeText(date, twelveHour) {
+    const hours = date.getHours();
+    const minutes = twoDigits(date.getMinutes());
+    if (!twelveHour)
+        return twoDigits(hours) + ":" + minutes;
+    return ((hours + 11) % 12 + 1) + ":" + minutes + (hours < 12 ? " AM" : " PM");
+}
+
 // What the clock shows at `date` on `bar`, as CapsuleLook.looksExpanded takes
-// it: { date, time }. The time is "HH:mm"; the date, drawn dimmer before it, is
-// "Thu 26 Nov · " while the capsule looks expanded, and empty otherwise.
-function clockText(bar, date) {
-    const time = twoDigits(date.getHours()) + ":" + twoDigits(date.getMinutes());
+// it: { date, time }. The time is timeText's, 12-hour with `twelveHour` (the
+// clock's option); the date, drawn dimmer before it, is "Thu 26 Nov · " while
+// the capsule looks expanded, and empty otherwise.
+function clockText(bar, date, twelveHour) {
+    const time = timeText(date, twelveHour);
     if (!CapsuleLook.looksExpanded(bar))
         return { date: "", time: time };
     const day = days[date.getDay()] + " " + date.getDate() + " " + months[date.getMonth()];
