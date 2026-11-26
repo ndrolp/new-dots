@@ -223,7 +223,8 @@ an element's item or a glance card takes that look's opacity, scale and
 slide, following it as it changes (`RowLook.qml`, `tst_rowLook.qml`), which
 glance cards the capsule glance shows and what each says (media first: its
 cover, title over artist, the player's name with no title, and whether it
-plays; battery: its level, percentage and charging, the time left or full;
+plays; battery: its level, percentage and the time left, the time to full while
+charging, plugged in while a charge limit holds it, or full;
 Wi-Fi: its signal and network, Ethernet or Offline), absent with nothing to
 show (no player, no media card), that it shows only under the expanded row,
 never for a change or with a popup inside, and which bar elements leave the

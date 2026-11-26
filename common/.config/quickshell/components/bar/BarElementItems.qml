@@ -247,7 +247,8 @@ Item {
             isPresent: true,
             percentage: battery.percentage,
             state: battery.state,
-            timeToEmpty: battery.timeToEmpty
+            timeToEmpty: battery.timeToEmpty,
+            timeToFull: battery.timeToFull
         } : null,
         networks: networkDevices()
     })

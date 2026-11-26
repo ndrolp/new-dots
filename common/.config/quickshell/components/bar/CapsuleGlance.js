@@ -48,15 +48,18 @@ function mediaLook(status) {
 
 // The battery card, from UPower's display device (`battery`, null without
 // one) and its UPowerDeviceState (`states`): a ring with the level, the
-// percentage, and "Charging", the time left or "Full" ("On battery" while
-// UPower doesn't know the time left). None without a battery.
+// percentage, and the time left on battery ("3 h 20 m left"), the time to
+// full while charging ("1 h 10 m to full"), "Plugged in" while a charge limit
+// holds it, or "Full"; "On battery" or "Charging" while UPower doesn't know
+// the time yet. None without a battery.
 function batteryLook(status, states) {
     const battery = status.battery;
     if (!battery || battery.isPresent === false)
         return null;
 
-    const charging = battery.state === states.Charging || battery.state === states.PendingCharge;
-    const text = charging ? "Charging"
+    const text = battery.state === states.Charging
+            ? battery.timeToFull > 0 ? hoursAndMinutes(battery.timeToFull) + " to full" : "Charging"
+        : battery.state === states.PendingCharge ? "Plugged in"
         : battery.state === states.FullyCharged ? "Full"
         : battery.timeToEmpty > 0 ? hoursAndMinutes(battery.timeToEmpty) + " left"
         : "On battery";

@@ -37,14 +37,16 @@ TestCase {
         compare(cards.map(card => card.popup), ["battery", "network"]);
     }
 
-    // The battery card: a ring with the level, the percentage, and charging,
-    // the time left or full.
+    // The battery card: a ring with the level, the percentage, and the time
+    // left on battery, the time to full while charging, plugged in while a
+    // charge limit holds it, or full.
     function test_theBatteryCardSaysHowItIs_data() {
         return [
             { tag: "discharging", battery: { state: 2, timeToEmpty: 12000 }, text: "3 h 20 m left" },
             { tag: "under an hour", battery: { state: 2, timeToEmpty: 2700 }, text: "45 m left" },
-            { tag: "charging", battery: { state: 1 }, text: "Charging" },
-            { tag: "pending charge", battery: { state: 5 }, text: "Charging" },
+            { tag: "charging", battery: { state: 1, timeToFull: 4200 }, text: "1 h 10 m to full" },
+            { tag: "charging, time unknown", battery: { state: 1, timeToFull: 0 }, text: "Charging" },
+            { tag: "pending charge", battery: { state: 5 }, text: "Plugged in" },
             { tag: "full", battery: { state: 4, percentage: 1 }, text: "Full" },
             { tag: "time unknown", battery: { state: 2, timeToEmpty: 0 }, text: "On battery" }
         ];
