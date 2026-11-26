@@ -139,7 +139,12 @@ at-rest row, for profiles mixing shown, live (left and right) and hidden
 elements like the island one, shows its elements evenly apart, centred on the
 capsule and on its pill row with equal padding at both ends, the square
 network, Bluetooth and tray elements padded like the others unless they draw
-their own pill (`tst_capsuleRestingRow.qml`, `BarElementItems.elementLength`), that any one cause holds it expanded and that
+their own pill (`tst_capsuleRestingRow.qml`, `BarElementItems.elementLength`),
+that it is its elements' only background: no element pill nor outline and
+no group background inside it, whatever the profile says, a group set apart
+by a gap twice the spacing instead, and every other bar style as before
+(`tst_capsuleBackground.qml`, `BarProfileModel.elementPillsDrawn`,
+`elementBorderDrawn`, `BarLayout.groupLook`), that any one cause holds it expanded and that
 SUPER+I acts only on the focused monitor's capsule (`CapsuleRouting.js`),
 that hovering one of its live elements doesn't expand it, so a click there
 opens the element's popup straight from rest (`CapsuleRouting.hoverExpands`),

@@ -48,7 +48,7 @@ Rectangle {
     radius: appearance.radius
     color: BarProfileModel.transparent(appearance) && !appearance.pillsTransparent && !grouped
         ? theme.surface : "transparent"
-    border.width: appearance.elementBorder && !grouped ? 1 : 0
+    border.width: BarProfileModel.elementBorderDrawn(appearance) && !grouped ? 1 : 0
     border.color: appearance.elementBorder ? theme.border : "transparent"
 
     Behavior on color {
@@ -108,7 +108,7 @@ Rectangle {
                 radius: root.options.radius
                 color: active ? theme.accent : urgent
                     ? Qt.rgba(theme.red.r, theme.red.g, theme.red.b, 0.22)
-                    : occupied && !appearance.pillsTransparent && !BarProfileModel.docked(appearance)
+                    : occupied && BarProfileModel.elementPillsDrawn(appearance)
                         && !root.grouped
                         ? theme.surface : "transparent"
                 border.color: urgent ? theme.red : "transparent"

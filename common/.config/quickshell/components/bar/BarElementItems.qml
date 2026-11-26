@@ -236,10 +236,9 @@ Item {
         height: size.height
         radius: root.appearance.radius
         color: notificationHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("notifications") || root.appearance.pillsTransparent
-                || BarProfileModel.docked(root.appearance)
+            : root.elementGrouped("notifications") || !BarProfileModel.elementPillsDrawn(root.appearance)
                 ? "transparent" : theme.surface
-        border.width: root.appearance.elementBorder && !root.elementGrouped("notifications") ? 1 : 0
+        border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("notifications") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -289,10 +288,9 @@ Item {
             height: size.height
             radius: root.appearance.radius
             color: recordingHover.hovered ? theme.surfaceHover
-                : root.elementGrouped("recording") || root.appearance.pillsTransparent
-                    || BarProfileModel.docked(root.appearance)
+                : root.elementGrouped("recording") || !BarProfileModel.elementPillsDrawn(root.appearance)
                     ? "transparent" : theme.surface
-            border.width: root.appearance.elementBorder && !root.elementGrouped("recording") ? 1 : 0
+            border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("recording") ? 1 : 0
             border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
             Behavior on color {
@@ -366,9 +364,8 @@ Item {
             height: size.height
             radius: root.appearance.radius
             color: privacyHover.hovered ? theme.surfaceHover
-                : root.elementGrouped("privacy") || root.appearance.pillsTransparent
-                    || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
-            border.width: root.appearance.elementBorder && !root.elementGrouped("privacy") ? 1 : 0
+                : root.elementGrouped("privacy") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
+            border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("privacy") ? 1 : 0
             border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
             Behavior on color {
@@ -431,14 +428,13 @@ Item {
 
             readonly property var size: root.elementSize(mediaContent.implicitWidth + 16, mediaItem.sizes.thickness)
 
-            border.width: root.appearance.elementBorder && !root.elementGrouped("media") ? 1 : 0
+            border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("media") ? 1 : 0
             border.color: root.appearance.elementBorder ? theme.border : "transparent"
             width: size.width
             height: size.height
             radius: root.appearance.radius
             color: mediaHover.hovered ? theme.surfaceHover
-                : root.elementGrouped("media") || root.appearance.pillsTransparent
-                    || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+                : root.elementGrouped("media") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
 
             Behavior on color {
                 ColorAnimation { duration: root.appearance.motion.short }
@@ -590,9 +586,8 @@ Item {
         width: size.width
         height: size.height
         radius: root.appearance.radius
-        color: root.elementGrouped("cava") || root.appearance.pillsTransparent
-            || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
-        border.width: root.appearance.elementBorder && !root.elementGrouped("cava") ? 1 : 0
+        color: root.elementGrouped("cava") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
+        border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("cava") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         onDrawingChanged: root.cava.setDrawing(cavaElement, drawing)
@@ -643,10 +638,9 @@ Item {
         height: size.height
         radius: root.appearance.radius
         color: audioHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("audio") || root.appearance.pillsTransparent
-                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+            : root.elementGrouped("audio") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
 
-        border.width: root.appearance.elementBorder && !root.elementGrouped("audio") ? 1 : 0
+        border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("audio") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -691,10 +685,9 @@ Item {
         height: size.height
         radius: root.appearance.radius
         color: bluetoothHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("bluetooth") || root.appearance.pillsTransparent
-                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+            : root.elementGrouped("bluetooth") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
 
-        border.width: root.appearance.elementBorder && !root.elementGrouped("bluetooth") ? 1 : 0
+        border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("bluetooth") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -737,10 +730,9 @@ Item {
         height: size.height
         radius: root.appearance.radius
         color: trayHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("tray") || root.appearance.pillsTransparent
-                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+            : root.elementGrouped("tray") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
 
-        border.width: root.appearance.elementBorder && !root.elementGrouped("tray") ? 1 : 0
+        border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("tray") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -783,10 +775,9 @@ Item {
         height: size.height
         radius: root.appearance.radius
         color: networkHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("network") || root.appearance.pillsTransparent
-                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+            : root.elementGrouped("network") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
 
-        border.width: root.appearance.elementBorder && !root.elementGrouped("network") ? 1 : 0
+        border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("network") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -828,10 +819,9 @@ Item {
         height: size.height
         radius: root.appearance.radius
         color: batteryHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("battery") || root.appearance.pillsTransparent
-                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+            : root.elementGrouped("battery") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
 
-        border.width: root.appearance.elementBorder && !root.elementGrouped("battery") ? 1 : 0
+        border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("battery") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -878,10 +868,9 @@ Item {
         height: size.height
         radius: root.appearance.radius
         color: clockHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("clock") || root.appearance.pillsTransparent
-                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+            : root.elementGrouped("clock") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
 
-        border.width: root.appearance.elementBorder && !root.elementGrouped("clock") ? 1 : 0
+        border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("clock") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -931,10 +920,9 @@ Item {
             height: size.height
             radius: root.appearance.radius
             color: pomodoroHover.hovered ? theme.surfaceHover
-                : root.elementGrouped("pomodoro") || root.appearance.pillsTransparent
-                    || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+                : root.elementGrouped("pomodoro") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
 
-            border.width: root.appearance.elementBorder && !root.elementGrouped("pomodoro") ? 1 : 0
+            border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("pomodoro") ? 1 : 0
             border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
             Behavior on color {

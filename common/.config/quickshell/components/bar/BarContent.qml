@@ -65,18 +65,16 @@ Item {
         theme.background.b, appearance.barOpacity / 100)
     readonly property real dockedPadding: BarProfileModel.docked(appearance)
         ? appearance.horizontalPadding : 0
-    // Room between a group's shared background and its first and last element.
-    readonly property real groupPadding: appearance.groupHorizontalPadding
-    // The bar as BarLayout measures it.
-    readonly property var layoutBar: ({
+    // The bar as BarLayout measures it, its groups laid out as the profile's
+    // bar style has them (BarLayout.groupLook): inside a capsule, its
+    // elements' only background, a group draws no background and is set
+    // apart by a wider gap instead.
+    readonly property var layoutBar: Object.assign({
         barPosition: appearance.barPosition,
         width: root.width,
         height: root.height,
-        spacing: appearance.spacing,
-        groupPadding: groupPadding,
-        groupInset: appearance.groupVerticalPadding,
         endPadding: dockedPadding
-    })
+    }, BarLayout.groupLook(appearance))
     // Whether the bar runs from the top of the screen down.
     readonly property bool sideBar: BarPosition.sideBar(appearance.barPosition)
     // On a capsule, the span along the bar of its row: the centre zone (see
