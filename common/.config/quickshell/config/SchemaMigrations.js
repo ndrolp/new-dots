@@ -571,29 +571,41 @@ function singleBarStyle(appearance, monitors) {
     return { appearance: migrated, monitors: monitors };
 }
 
+// The live places step 17 gives, frozen as they were then: whatever the
+// defaults (BarProfileModel.capsulePlacesShowing) become later, the step
+// places the same.
+const historicLivePlaces = Object.freeze({
+    media: "liveLeft", recording: "liveRight", privacy: "liveRight", pomodoro: "liveRight"
+});
+
+// The collapsed places step 17 makes of a list of `shown` elements: the
+// historic live places, every other listed element shown (the battery among
+// them, which only became live later) and the rest hidden.
+function historicCapsulePlaces(shown) {
+    const places = {};
+    for (const id of BarProfileModel.elementIds) {
+        if (BarProfileModel.capsulePlacesFor(id).length === 0)
+            continue;
+        places[id] = historicLivePlaces[id] || (shown.indexOf(id) !== -1 ? "shown" : "hidden");
+    }
+    return places;
+}
+
 // Step 17: a capsule profile's list of the bar elements its collapsed capsule
 // shows becomes a collapsed place for each bar element: the elements it
-// listed stay shown, media goes live left and the recording indicator live
-// right, as they were drawn, and every other element is hidden. A profile
-// with no list, or one that isn't a list, gets the default places when it
-// loads, which are what its capsule showed without one. A listed element
-// that only became live later (the battery) stays shown, as it was drawn.
-const liveBeforeCollapsedPlaces = ["media", "recording"];
-
+// listed stay shown, media goes live left and the recording indicator, the
+// privacy indicator and the pomodoro live right, as they were drawn, and
+// every other element is hidden (historicCapsulePlaces). A profile with no
+// list, or one that isn't a list, gets the default places when it loads,
+// which are what its capsule showed without one.
 function capsulePlacesFromShownElements(appearance, monitors) {
     const migrated = cloneValue(appearance);
     for (const profileName in migrated.barProfiles || {}) {
         const profile = migrated.barProfiles[profileName];
         if (profile.capsuleElements === undefined)
             continue;
-        if (profile.capsulePlaces === undefined && Array.isArray(profile.capsuleElements)) {
-            const places = BarProfileModel.capsulePlacesShowing(profile.capsuleElements);
-            for (const id of profile.capsuleElements) {
-                if (id in places && liveBeforeCollapsedPlaces.indexOf(id) === -1)
-                    places[id] = "shown";
-            }
-            profile.capsulePlaces = places;
-        }
+        if (profile.capsulePlaces === undefined && Array.isArray(profile.capsuleElements))
+            profile.capsulePlaces = historicCapsulePlaces(profile.capsuleElements);
         delete profile.capsuleElements;
     }
 

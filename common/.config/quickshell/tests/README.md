@@ -5,8 +5,9 @@ to ask a profile for each bar style (`config/BarProfileModel.js`), desktop widge
 and schema migrations (`config/SchemaMigrations.js`), among them the one that
 turns the two bar style switches into one bar style and keeps each saved
 profile's look (`tst_barStyleMigration.qml`), and the one that turns a capsule
-profile's list of shown bar elements into collapsed places
-(`tst_barProfileModel.qml`), and the one that splits the pomodoro out of the
+profile's list of shown bar elements into collapsed places, as the capsule
+drew them then whatever the defaults are now (privacy and pomodoro live
+right, a listed battery shown) (`tst_barProfileModel.qml`), and the one that splits the pomodoro out of the
 clock, right after it, in its group and on or off as the clock was, and the
 one that places it live right in a capsule, after the recording indicator,
 and the one that puts the privacy indicator right after the recording
