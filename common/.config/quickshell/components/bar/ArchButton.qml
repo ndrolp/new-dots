@@ -21,10 +21,10 @@ Rectangle {
     height: size.height
     radius: appearance.radius
     color: hover.hovered ? theme.surfaceHover
-        : appearance.pillsTransparent || BarProfileModel.docked(appearance) || root.grouped
+        : !BarProfileModel.elementPillsDrawn(appearance) || root.grouped
             ? "transparent" : theme.surface
 
-    border.width: appearance.elementBorder && !root.grouped ? 1 : 0
+    border.width: BarProfileModel.elementBorderDrawn(appearance) && !root.grouped ? 1 : 0
     border.color: appearance.elementBorder ? theme.border : "transparent"
 
     Behavior on color {

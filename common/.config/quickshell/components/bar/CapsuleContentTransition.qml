@@ -27,6 +27,10 @@ Item {
     property var key
     // Appearance.motion, with its `capsule` timings.
     required property var motion
+    // How long, in ms, the new view's contents take to come in, when they
+    // take longer than a crossfade (a row entering one after another,
+    // CapsuleMotion.entryLength): it runs that long, `elapsed` counting on.
+    property real length: 0
     // The view shown now: the new one from the frame after a change.
     property var shownKey
     // The view fading out while the shape moves, or null.
@@ -63,7 +67,7 @@ Item {
         previousKey = shownKey;
         phase = "moving";
         shownKey = key;
-        timeline.duration = CapsuleMotion.contentsLength(motion);
+        timeline.duration = Math.max(CapsuleMotion.contentsLength(motion), length);
         timeline.to = timeline.duration;
         timeline.start();
     }

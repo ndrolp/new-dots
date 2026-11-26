@@ -196,16 +196,16 @@ TestCase {
             .barPosition, data.loaded);
     }
 
-    // A profile that never chose its collapsed capsule's places shows Arch,
-    // the clock and the control center in the row, media live left of the
-    // workspace pills and the recording indicator live right; every other
-    // bar element but the workspaces is hidden.
+    // A profile that never chose its collapsed capsule's places shows only
+    // the clock in the row, media live left of the workspace pills and the
+    // recording indicator live right; every other bar element but the
+    // workspaces is hidden.
     function test_aProfileWithoutCollapsedPlacesGetsTheDefaultOnes() {
         const places = BarProfileModel.completeProfile({ barStyle: "capsule" }).capsulePlaces;
 
-        compare(places.arch, "shown");
         compare(places.clock, "shown");
-        compare(places.notifications, "shown");
+        compare(places.arch, "hidden");
+        compare(places.notifications, "hidden");
         compare(places.media, "liveLeft");
         compare(places.recording, "liveRight");
         compare(places.keepAwake, "hidden");
@@ -245,6 +245,23 @@ TestCase {
         compare(BarProfileModel.iconTextShown(barElements, "battery", true), { icon: true, text: false });
         barElements = BarProfileModel.setElementOption(barElements, "battery", "iconVisible", false);
         compare(BarProfileModel.iconTextShown(barElements, "battery", false), { icon: false, text: true });
+    }
+
+    // In a capsule at rest the clock shows only the time by default, without
+    // its icon; on the bar it shows both.
+    function test_theClockShowsOnlyTheTimeAtRestByDefault() {
+        const barElements = BarProfileModel.normalizeBarElements({ right: [{ id: "clock", enabled: true }] });
+
+        compare(BarProfileModel.iconTextShown(barElements, "clock", true), { icon: false, text: true });
+        compare(BarProfileModel.iconTextShown(barElements, "clock", false), { icon: true, text: true });
+    }
+
+    // A clock that saved its at-rest icon keeps it.
+    function test_aClockThatSavedItsAtRestIconKeepsIt() {
+        const barElements = BarProfileModel.normalizeBarElements({ right: [{ id: "clock", enabled: true,
+            options: { restIconVisible: true } }] });
+
+        compare(BarProfileModel.iconTextShown(barElements, "clock", true), { icon: true, text: true });
     }
 
     // Hiding both would leave an empty element: it keeps its icon.
@@ -333,8 +350,8 @@ TestCase {
         compare(places.media, "liveRight");
         compare(places.recording, "hidden");
         compare(places.clock, "shown");
-        compare(places.arch, "shown");
-        compare(places.notifications, "shown");
+        compare(places.arch, "hidden");
+        compare(places.notifications, "hidden");
         compare(places.workspaces, undefined);
         compare(places.wifi, undefined);
     }

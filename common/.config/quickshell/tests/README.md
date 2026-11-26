@@ -16,7 +16,8 @@ the pomodoro, neither added twice to a profile that already lists it
 from every saved profile (`tst_densityPresets.qml`). That a migration writes
 both files ending in a newline, as the adapters do, and that the tracked
 `config/appearance.json` and `monitors.json` are committed already migrated,
-so the shell's first run leaves the checkout clean, is in
+so the shell's first run leaves the checkout clean, and that the tracked
+capsule profile shows only the clock at rest, without its icon, is in
 `tst_schemaMigrationFiles.qml`. They also cover where
 the bar sits on its screen: the edges its window is anchored to, the space it
 reserves (on a capsule, with the live elements it shows collapsed), where the margin goes and where its content sits, against its edge
@@ -139,7 +140,12 @@ at-rest row, for profiles mixing shown, live (left and right) and hidden
 elements like the island one, shows its elements evenly apart, centred on the
 capsule and on its pill row with equal padding at both ends, the square
 network, Bluetooth and tray elements padded like the others unless they draw
-their own pill (`tst_capsuleRestingRow.qml`, `BarElementItems.elementLength`), that any one cause holds it expanded and that
+their own pill (`tst_capsuleRestingRow.qml`, `BarElementItems.elementLength`),
+that it is its elements' only background: no element pill nor outline and
+no group background inside it, whatever the profile says, a group set apart
+by a gap twice the spacing instead, and every other bar style as before
+(`tst_capsuleBackground.qml`, `BarProfileModel.elementPillsDrawn`,
+`elementBorderDrawn`, `BarLayout.groupLook`), that any one cause holds it expanded and that
 SUPER+I acts only on the focused monitor's capsule (`CapsuleRouting.js`),
 that hovering one of its live elements doesn't expand it, so a click there
 opens the element's popup straight from rest (`CapsuleRouting.hoverExpands`),
@@ -186,16 +192,21 @@ one ends and all handed back oldest first as toasts
 toast or in the capsule: its timeout, a critical one staying, its actions,
 inline reply and "+N" (`components/panels/NewNotificationCard.qml`,
 `NotificationCard.newNotificationTimeout`), how it is
-drawn with its fill and bar border, that it springs to a new size (growing
+drawn with its fill and a soft shadow that follows its shape, never the bar border, that it springs to a new size (growing
 overshoots slightly and settles, shrinking doesn't bounce), its corners morph
 on the same spring and reduce motion moves it at once (`CapsuleSurface.qml`),
 which spring a size change takes and how its contents look a given time into a
 crossfade, the old contents gone before the new fade in a third of the way
-into the spring (`CapsuleMotion.js`, `tst_capsuleMotion.qml`), that its
+into the spring, and that expanding, its row's elements enter one after
+another from its centre out, 20 ms apart, each fading in and sliding to its
+place from the centre's side, the last in as the spring settles, at once with
+reduce motion (`CapsuleMotion.centreOut`, `entering`, `rowEntry`, `rowLook`;
+`CapsuleMotion.js`, `tst_capsuleMotion.qml`), that its
 contents crossfade between views by key: the new one shown a frame after the
 change, so the shape moves at once, the old one fading and shrinking away
 while it does and the new one fading and growing in, each as
-`CapsuleMotion.contents` has it at the time elapsed, checked by phase and
+`CapsuleMotion.contents` has it at the time elapsed, running on until a
+longer entry is in, checked by phase and
 elapsed time, not the clock (`CapsuleContentTransition.qml`,
 `tst_capsuleContentTransition.qml`), which view its row shows
 (`CapsuleRouting.rowView`), that a popup inside it crossfades its contents on
@@ -235,8 +246,8 @@ need Quickshell's services, so their parts are covered through those), that what
 runs along the bar animates and what runs across it doesn't, on every Bar position
 (`AlongBarBehavior.qml`), that a bar element that can be live sits at its place,
 as large as its item, and fades out as a live element, keeping its room beside
-the pills until its fade-out ends, at once with reduce motion
-(`LiveCapableItem.qml`), what the workspace overview lists: every monitor's
+the pills until its fade-out ends, at once with reduce motion, and in the
+capsule's row takes the row's look for it (`LiveCapableItem.qml`), what the workspace overview lists: every monitor's
 workspaces in physical order, each one once, how they fit up to 21 with no
 scrolling, what each key does, during a drag too, how the keyboard walks them,
 the number a new one takes, skipping numbers another monitor has or the rules

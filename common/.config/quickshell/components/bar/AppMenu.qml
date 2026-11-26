@@ -129,9 +129,9 @@ Item {
         width: size.width
         height: size.height
         radius: root.appearance.radius
-        color: root.appearance.pillsTransparent || BarProfileModel.docked(root.appearance)
+        color: !BarProfileModel.elementPillsDrawn(root.appearance)
             || root.grouped ? "transparent" : theme.surface
-        border.width: root.appearance.elementBorder && !root.grouped ? 1 : 0
+        border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.grouped ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Row {
