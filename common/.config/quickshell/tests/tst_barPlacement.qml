@@ -226,6 +226,21 @@ TestCase {
         compare(BarPlacement.workspaceStrip(bar(data.values)), data.strip);
     }
 
+    // A capsule keeps half again the profile's horizontal padding at its
+    // ends, without a setting of its own.
+    function test_aCapsulesEndsGetMorePaddingThanItsHorizontalPadding_data() {
+        return [
+            { tag: "12", values: { horizontalPadding: 12 }, padding: 18 },
+            { tag: "10", values: { horizontalPadding: 10 }, padding: 15 },
+            { tag: "none", values: { horizontalPadding: 0 }, padding: 0 }
+        ];
+    }
+
+    function test_aCapsulesEndsGetMorePaddingThanItsHorizontalPadding(data) {
+        compare(BarPlacement.capsuleEndPadding(bar(Object.assign({ barStyle: "capsule" }, data.values))),
+            data.padding);
+    }
+
     function test_theBarContentSitsAgainstItsScreenEdge(data) {
         compare(BarPlacement.contentArea(bar(data.values), data.window), data.area);
     }

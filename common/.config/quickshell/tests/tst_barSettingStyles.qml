@@ -30,7 +30,7 @@ TestCase {
             { tag: "transparent", style: "transparent",
                 only: ["transparentBarTopMargin", "pillVerticalPadding", "pillsTransparent"] },
             { tag: "docked", style: "docked", only: ["barBorder", "pillVerticalPadding"] },
-            { tag: "capsule", style: "capsule", only: ["barBorder", "transparentBarTopMargin",
+            { tag: "capsule", style: "capsule", only: ["transparentBarTopMargin",
                 "pillVerticalPadding", "pillsTransparent", "capsuleVerticalPadding", "capsuleNotifications"] }
         ].map(row => Object.assign(row, { shown: barSettings.filter(key =>
             shared.indexOf(key) !== -1 || row.only.indexOf(key) !== -1) }));
@@ -46,9 +46,10 @@ TestCase {
             BarProfileModel.barSettingShown(style, "transparentBarTopMargin")), ["transparent", "capsule"]);
     }
 
-    function test_barBorderShowsForEveryStyleButTransparent() {
+    // A transparent bar has no outline, and a capsule a soft shadow instead.
+    function test_barBorderShowsOnlyForOpaqueAndDocked() {
         compare(BarProfileModel.barStyles.filter(style =>
-            BarProfileModel.barSettingShown(style, "barBorder")), ["opaque", "docked", "capsule"]);
+            BarProfileModel.barSettingShown(style, "barBorder")), ["opaque", "docked"]);
     }
 
     // A card's settings list, kept to those the style shows, in its order.

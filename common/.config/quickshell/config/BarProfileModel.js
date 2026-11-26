@@ -286,15 +286,16 @@ function barPositionsFor(barStyle) {
 // thickness comes from the vertical padding on an opaque bar and from the
 // pill vertical padding on the others (BarLayout.elementThickness); the
 // edge margin keeps a floating bar or a capsule off its edge
-// (BarPlacement.margin); the bar border outlines an opaque bar's edge, the
-// docked zones and the capsule, but a transparent bar has no outline; a
+// (BarPlacement.margin); the bar border outlines an opaque bar's edge and the
+// docked zones, but a transparent bar has no outline and a capsule a soft
+// shadow instead (CapsuleSurface.qml); a
 // docked bar's pills are always see-through. Settings not listed show for
 // every style.
 const barSettingStyles = {
     elementVerticalPadding: ["opaque"],
     pillVerticalPadding: ["transparent", "docked", "capsule"],
     transparentBarTopMargin: ["transparent", "capsule"],
-    barBorder: ["opaque", "docked", "capsule"],
+    barBorder: ["opaque", "docked"],
     pillsTransparent: ["opaque", "transparent", "capsule"],
     capsuleVerticalPadding: ["capsule"],
     capsuleNotifications: ["capsule"]

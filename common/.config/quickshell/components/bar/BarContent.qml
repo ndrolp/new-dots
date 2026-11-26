@@ -112,7 +112,7 @@ Item {
     // row past it; null on any other bar style.
     readonly property var capsulePlace: pillRow
         ? CapsulePlacement.surface(layoutBar, CapsulePlacement.span(rowSpan, pillRow),
-            appearance.horizontalPadding, pillRow.depth + appearance.spacing,
+            BarPlacement.capsuleEndPadding(appearance), pillRow.depth + appearance.spacing,
             BarPlacement.capsulePadding(appearance))
         : null
     // Where a change the capsule shows starts along the bar: centred, as its
@@ -326,8 +326,6 @@ Item {
         following: root.insidePopup !== null && root.insidePopup.resizing
         visible: root.capsulePlace !== null
         fillColor: root.dockedColor
-        border: root.appearance.barBorder
-        borderColor: theme.border
         appearance: root.appearance
         z: -1
     }

@@ -143,7 +143,7 @@ TestCase {
         return [
             { tag: "Style", settings: ["Bar style", "Bar position"] },
             { tag: "Bar", settings: ["Density preset", "Bar thickness", "Bar opacity", "Corner radius",
-                "Horizontal padding", "Bar border", "Edge margin"] },
+                "Horizontal padding", "Edge margin"] },
             { tag: "Groups", settings: ["Group radius", "Group horizontal padding", "Group vertical padding",
                 "Group border"] },
             { tag: "Elements", settings: ["Icon size", "Pill vertical padding",
@@ -193,7 +193,7 @@ TestCase {
         built.appearance.barStyle = "capsule";
         waitForRendering(built.item);
         compare(settingsIn(card(built.item, "Bar")), ["Density preset", "Bar thickness", "Bar opacity",
-            "Corner radius", "Horizontal padding", "Bar border", "Edge margin"]);
+            "Corner radius", "Horizontal padding", "Edge margin"]);
         verify(card(built.item, "Capsule"));
 
         built.appearance.barStyle = "opaque";
