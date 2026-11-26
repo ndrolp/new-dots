@@ -260,9 +260,7 @@ Item {
         readonly property var size: root.sizeAround(notificationContent)
 
         visible: root.itemVisible("notifications")
-        opacity: root.rowLook("notifications").opacity
-        scale: root.rowLook("notifications").scale
-        transform: Translate { x: root.rowLook("notifications").slide }
+        RowLook { target: notificationButton; look: root.rowLook("notifications") }
         x: root.elementX("notifications")
         y: root.elementY("notifications")
         width: size.width
@@ -612,9 +610,7 @@ Item {
         readonly property int barCount: options.barCount
 
         visible: root.itemVisible("cava")
-        opacity: root.rowLook("cava").opacity
-        scale: root.rowLook("cava").scale
-        transform: Translate { x: root.rowLook("cava").slide }
+        RowLook { target: cavaElement; look: root.rowLook("cava") }
         x: root.elementX("cava")
         y: root.elementY("cava")
         width: size.width
@@ -664,9 +660,7 @@ Item {
         readonly property var size: root.sizeAround(audioContent)
 
         visible: root.itemVisible("audio")
-        opacity: root.rowLook("audio").opacity
-        scale: root.rowLook("audio").scale
-        transform: Translate { x: root.rowLook("audio").slide }
+        RowLook { target: audioButton; look: root.rowLook("audio") }
         x: root.elementX("audio")
         y: root.elementY("audio")
         width: size.width
@@ -712,9 +706,7 @@ Item {
         readonly property var size: root.squareSize("bluetooth", bluetoothGlyph)
 
         visible: root.itemVisible("bluetooth")
-        opacity: root.rowLook("bluetooth").opacity
-        scale: root.rowLook("bluetooth").scale
-        transform: Translate { x: root.rowLook("bluetooth").slide }
+        RowLook { target: bluetoothButton; look: root.rowLook("bluetooth") }
         x: root.elementX("bluetooth")
         y: root.elementY("bluetooth")
         width: size.width
@@ -758,9 +750,7 @@ Item {
         readonly property var size: root.squareSize("tray", trayGlyph)
 
         visible: root.itemVisible("tray")
-        opacity: root.rowLook("tray").opacity
-        scale: root.rowLook("tray").scale
-        transform: Translate { x: root.rowLook("tray").slide }
+        RowLook { target: trayButton; look: root.rowLook("tray") }
         x: root.elementX("tray")
         y: root.elementY("tray")
         width: size.width
@@ -804,9 +794,7 @@ Item {
         readonly property var size: root.squareSize("network", networkGlyph)
 
         visible: root.itemVisible("network")
-        opacity: root.rowLook("network").opacity
-        scale: root.rowLook("network").scale
-        transform: Translate { x: root.rowLook("network").slide }
+        RowLook { target: networkButton; look: root.rowLook("network") }
         x: root.elementX("network")
         y: root.elementY("network")
         width: size.width
@@ -901,9 +889,7 @@ Item {
         readonly property var size: root.sizeAround(clockContent)
 
         visible: root.itemVisible("clock")
-        opacity: root.rowLook("clock").opacity
-        scale: root.rowLook("clock").scale
-        transform: Translate { x: root.rowLook("clock").slide }
+        RowLook { target: clockButton; look: root.rowLook("clock") }
         x: root.elementX("clock")
         y: root.elementY("clock")
         width: size.width

@@ -212,7 +212,9 @@ another from its centre out, 20 ms apart, each fading in and sliding to its
 place from the centre's side, the last in as the spring settles, at once with
 reduce motion, and the capsule glance's cards just after it, one after
 another left to right (`CapsuleMotion.centreOut`, `entering`, `rowEntry`,
-`rowLook`, `cardLook`; `CapsuleMotion.js`, `tst_capsuleMotion.qml`), which
+`rowLook`, `cardLook`; `CapsuleMotion.js`, `tst_capsuleMotion.qml`), that
+an element's item or a glance card takes that look's opacity, scale and
+slide, following it as it changes (`RowLook.qml`, `tst_rowLook.qml`), which
 glance cards the capsule glance shows and what each says (media first: its
 cover, title over artist, the player's name with no title, and whether it
 plays; battery: its level, percentage and charging, the time left or full;

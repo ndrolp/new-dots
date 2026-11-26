@@ -87,9 +87,7 @@ Item {
                 color: media
                     ? Qt.tint(surface, Qt.rgba(root.mediaTint.r, root.mediaTint.g, root.mediaTint.b, 0.22))
                     : surface
-                opacity: look.opacity
-                scale: look.scale
-                transform: Translate { x: card.look.slide }
+                RowLook { target: card; look: card.look }
 
                 HoverHandler {
                     id: cardHover

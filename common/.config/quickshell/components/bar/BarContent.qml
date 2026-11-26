@@ -523,9 +523,7 @@ Item {
             ArchButton {
                 id: archButton
 
-                opacity: root.rowLook("arch").opacity
-                scale: root.rowLook("arch").scale
-                transform: Translate { x: root.rowLook("arch").slide }
+                RowLook { target: archButton; look: root.rowLook("arch") }
 
                 visible: root.elementVisible("arch")
                 x: root.elementX("arch")
@@ -541,9 +539,7 @@ Item {
             CurrentApp {
                 id: currentApp
 
-                opacity: root.rowLook("currentApp").opacity
-                scale: root.rowLook("currentApp").scale
-                transform: Translate { x: root.rowLook("currentApp").slide }
+                RowLook { target: currentApp; look: root.rowLook("currentApp") }
 
                 x: root.elementX("currentApp")
                 y: root.elementY("currentApp")
@@ -556,9 +552,7 @@ Item {
             AppMenu {
                 id: appMenuElement
 
-                opacity: root.rowLook("appMenu").opacity
-                scale: root.rowLook("appMenu").scale
-                transform: Translate { x: root.rowLook("appMenu").slide }
+                RowLook { target: appMenuElement; look: root.rowLook("appMenu") }
 
                 x: root.elementX("appMenu")
                 y: root.elementY("appMenu")
@@ -574,9 +568,7 @@ Item {
             SystemMonitor {
                 id: systemMonitor
 
-                opacity: root.rowLook("systemMonitor").opacity
-                scale: root.rowLook("systemMonitor").scale
-                transform: Translate { x: root.rowLook("systemMonitor").slide }
+                RowLook { target: systemMonitor; look: root.rowLook("systemMonitor") }
 
                 visible: root.elementVisible("systemMonitor")
                 x: root.elementX("systemMonitor")
@@ -590,9 +582,7 @@ Item {
             Workspaces {
                 id: workspaces
 
-                opacity: root.rowLook("workspaces").opacity
-                scale: root.rowLook("workspaces").scale
-                transform: Translate { x: root.rowLook("workspaces").slide }
+                RowLook { target: workspaces; look: root.rowLook("workspaces") }
                 visible: root.elementVisible("workspaces")
                 x: root.elementX("workspaces")
                 y: root.elementY("workspaces")
