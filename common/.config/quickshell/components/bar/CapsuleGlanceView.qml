@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Effects
 import ".." as Components
+import "BarElementItems.js" as BarElementItems
 
 // The capsule glance as drawn: its glance cards in a row, left to right, in
 // the order CapsuleGlance.cards gives them. Each is drawn as a change's ring
@@ -29,8 +30,9 @@ Item {
     required property var appearance
     // The colorscheme (config/Theme.qml).
     required property var theme
-    // The room round the cards, inside the capsule.
-    readonly property real padding: 8
+    // The room round the cards, inside the capsule, and between them: a bar
+    // element's padding (BarElementItems.elementPadding).
+    readonly property real padding: BarElementItems.elementPadding
 
     // A card was clicked: `popup`, its bar element's popup.
     signal cardClicked(string popup)
@@ -56,7 +58,7 @@ Item {
 
         x: root.padding
         y: root.padding
-        spacing: 8
+        spacing: root.padding
 
         Repeater {
             id: cardRepeater
