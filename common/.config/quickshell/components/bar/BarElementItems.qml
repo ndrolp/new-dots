@@ -917,6 +917,7 @@ Item {
             color: theme.orange
             iconVisible: root.shown("clock").icon
             valueVisible: root.shown("clock").text
+            twelveHour: BarProfileModel.elementOption(root.appearance.barElements, "clock", "twelveHour")
         }
 
         MouseArea {

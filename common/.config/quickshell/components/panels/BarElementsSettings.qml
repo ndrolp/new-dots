@@ -63,7 +63,8 @@ Column {
             { label: "Bar width", option: "barWidth" },
             { label: "Color", option: "color" }
         ],
-        "audio": [{ label: "Show volume meter", option: "meterVisible" }]
+        "audio": [{ label: "Show volume meter", option: "meterVisible" }],
+        "clock": [{ label: "12-hour time", option: "twelveHour" }]
     })
 
     // The elements with an icon and text show either or both; a capsule
