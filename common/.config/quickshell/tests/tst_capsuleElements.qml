@@ -9,7 +9,7 @@ import "../config/BarProfileModel.js" as BarProfileModel
 TestCase {
     name: "CapsuleElements"
 
-    // The bar elements a profile shows in its collapsed row by default.
+    // The bar elements these tests show in a collapsed row.
     readonly property var defaultShown: ["arch", "clock", "notifications"]
 
     // Collapsed places with `values` over the default ones.
@@ -88,7 +88,7 @@ TestCase {
     // bar elements as they are on any other bar style.
     function test_onlyACapsuleDrawsTheCollapsedRow_data() {
         return [
-            { tag: "capsule", barStyle: "capsule", center: ["arch", "notifications", "clock"] },
+            { tag: "capsule", barStyle: "capsule", center: ["clock"] },
             { tag: "opaque", barStyle: "opaque", center: ["workspaces"] },
             { tag: "transparent", barStyle: "transparent", center: ["workspaces"] },
             { tag: "docked", barStyle: "docked", center: ["workspaces"] }
@@ -250,7 +250,7 @@ TestCase {
             barElements: BarProfileModel.defaultProfile.barElements
         });
 
-        compare(shownIds(drawn, "center"), ["arch", "notifications", "clock"]);
+        compare(shownIds(drawn, "center"), ["clock"]);
     }
 
     // Any other bar style draws the live-capable elements in its zones like

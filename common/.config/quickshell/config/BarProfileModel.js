@@ -62,6 +62,8 @@ const elementOptionDefaults = {
 };
 for (const id of iconTextElementIds)
     elementOptionDefaults[id] = Object.assign({}, elementOptionDefaults[id] || {}, iconTextOptionDefaults);
+// At rest the clock shows only the time, without its icon.
+elementOptionDefaults.clock.restIconVisible = false;
 
 // Whether element `id` shows its icon and its text, { icon, text }: by its
 // bar options, or its at-rest ones while `resting` (a collapsed capsule).
@@ -115,8 +117,7 @@ function liveSide(place) {
 // The collapsed places a profile starts with: media live left, the
 // recording indicator, the privacy indicator and the pomodoro live right
 // (from the pills outward, in the order elementIds lists them), `shown` in
-// the row (by default Arch, the clock and the control center), every other
-// element hidden.
+// the row (by default only the clock), every other element hidden.
 function capsulePlacesShowing(shown) {
     const livePlaces = { media: "liveLeft", recording: "liveRight", privacy: "liveRight",
         pomodoro: "liveRight" };
@@ -130,8 +131,7 @@ function capsulePlacesShowing(shown) {
     return places;
 }
 
-const defaultCapsulePlaces = Object.freeze(capsulePlacesShowing(["arch", "clock",
-    "notifications"]));
+const defaultCapsulePlaces = Object.freeze(capsulePlacesShowing(["clock"]));
 
 // `places` with a collapsed place for every element that takes one, as a
 // fresh object: missing or unknown places, or ones the element can't take,
