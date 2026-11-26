@@ -13,7 +13,8 @@
 // - centreOut(count), entering(motion, elapsed, step, steps) and
 //   entryLength(motion, steps): a row's elements entering one after another
 //   as the capsule expands, instead of crossfading in. Whatever enters after
-//   the row takes the steps after its last, counted in `steps`.
+//   the row takes the steps after its last, counted in `steps`: the capsule
+//   glance's cards, with cardLook.
 // CapsuleContentTransition.qml runs a keyed crossfade with these; a popup
 // inside the capsule (components/panels/PopupSurface.qml) drives them from
 // its reveal.
@@ -122,4 +123,18 @@ function rowLook(motion, row, element) {
         return { opacity: row.crossfade.opacity, scale: row.crossfade.scale, slide: 0 };
     const look = entering(motion, row.elapsed, place.step, row.entry.steps);
     return { opacity: look.opacity, scale: 1, slide: look.slide * place.side };
+}
+
+// How card `index` of the `count` cards of the capsule glance looks,
+// { opacity, scale, slide }, from `row` (as rowLook takes it). While the row
+// enters, the cards enter just after it, one after another left to right:
+// card `index` takes the step after the row's last plus `index`, of the
+// row's steps and the cards together, unscaled, `slide` px to the left of
+// its place. Otherwise it takes the `crossfade`'s look, in place.
+function cardLook(motion, row, index, count) {
+    if (!row.entering)
+        return { opacity: row.crossfade.opacity, scale: row.crossfade.scale, slide: 0 };
+    const steps = row.entry.steps + count;
+    const look = entering(motion, row.elapsed, row.entry.steps + index, steps);
+    return { opacity: look.opacity, scale: 1, slide: -look.slide };
 }

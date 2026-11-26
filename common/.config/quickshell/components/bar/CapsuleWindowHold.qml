@@ -1,6 +1,7 @@
 import QtQuick
 
-// How much taller a capsule's bar window is held for a popup inside it: as
+// How much taller a capsule's bar window is held for a popup inside it, or
+// its glance (CapsuleGlanceView.qml): as
 // much as the tallest popup has needed so far, from the moment it needs it.
 // It never shrinks: Hyprland animates a layer's size change, stretching its
 // last picture to the old size meanwhile, so a shrinking window would flash

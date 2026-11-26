@@ -212,4 +212,23 @@ TestCase {
         compare(CapsulePlacement.withPopup(deep, null, "top").radius, 32);
         compare(CapsulePlacement.withPopup(row, popup, "top").radius, 16);
     }
+
+    // The glance goes where a popup inside would: centred on the row, just
+    // past it, away from the screen edge, under a top capsule and above a
+    // bottom one; the capsule grows round it as round a popup, so the
+    // pointer over its cards is over the capsule.
+    function test_theGlanceGoesPastTheRow_data() {
+        return [
+            { tag: "top", barPosition: "top", at: { x: 810, y: 32 } },
+            { tag: "bottom", barPosition: "bottom", at: { x: 810, y: -60 } }
+        ];
+    }
+
+    function test_theGlanceGoesPastTheRow(data) {
+        const glance = { width: 300, height: 60 };
+        const grown = CapsulePlacement.withPopup(row, glance, data.barPosition);
+
+        compare(CapsulePlacement.glancePlace(row, glance, data.barPosition), data.at);
+        verify(CapsulePlacement.contains(grown, { x: data.at.x + 10, y: data.at.y + 10 }));
+    }
 }

@@ -47,8 +47,9 @@ function collapsedRow(barElements, shownIds, liveIds) {
 // every element but the live ones (the workspaces take no place: the
 // workspace row shows them), or none while it shows a `change` instead,
 // never the live elements (see LiveElements.liveElements); the profile's own on any
-// other bar style. Takes { barStyle, barElements, capsulePlaces, expanded,
-// change }.
+// other bar style. Expanded, the elements whose cards the capsule glance
+// shows, `glance` (CapsuleGlance.leavingElements), leave the row. Takes
+// { barStyle, barElements, capsulePlaces, expanded, change, glance }.
 function drawnElements(bar) {
     if (!BarProfileModel.capsule(bar))
         return bar.barElements;
@@ -56,6 +57,9 @@ function drawnElements(bar) {
     const liveIds = LiveElements.ids(ids.live);
     if (bar.change === true)
         return collapsedRow(bar.barElements, [], liveIds);
-    return collapsedRow(bar.barElements, bar.expanded ? ids.hidden.concat(ids.shown) : ids.shown,
-        liveIds);
+    if (!bar.expanded)
+        return collapsedRow(bar.barElements, ids.shown, liveIds);
+    const glance = bar.glance || [];
+    return collapsedRow(bar.barElements,
+        ids.hidden.concat(ids.shown).filter(id => glance.indexOf(id) === -1), liveIds);
 }

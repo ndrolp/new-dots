@@ -7,6 +7,7 @@ import "../../config/BarProfileModel.js" as BarProfileModel
 import "BarElementItems.js" as BarElementItemsModel
 import "BarLayout.js" as BarLayout
 import "BarPlacement.js" as BarPlacement
+import "CapsuleGlance.js" as CapsuleGlance
 import "CapsulePlacement.js" as CapsulePlacement
 import "CapsuleMotion.js" as CapsuleMotion
 import "CapsuleRouting.js" as CapsuleRouting
@@ -57,6 +58,12 @@ Item {
     property var rowOutgoing: ({ capturing: false, opacity: 0, scale: 1 })
     // How long the capsule's workspace pills are along the bar.
     property real workspacePillsLength: 0
+    // Whether the capsule shows its glance under its expanded row
+    // (CapsuleGlance.shown, from `glanceCards`); never on any other bar style.
+    property bool glanceShown: false
+    // The capsule glance's cards, left to right (CapsuleGlance.cards).
+    readonly property var glanceCards: CapsuleGlance.cards(barElementItems.glanceStatus,
+        barElementItems.batteryStates)
 
     // The menu the app menu's Popup shows (AppMenuPopup.menuId).
     readonly property string appMenuId: appMenuElement.menuId
@@ -115,11 +122,20 @@ Item {
         .map(element => elementItem(element).height))
     // On a capsule, where the capsule is drawn around its row and its pill
     // row past it; null on any other bar style.
-    readonly property var capsulePlace: pillRow
+    readonly property var capsuleRowPlace: pillRow
         ? CapsulePlacement.surface(layoutBar, CapsulePlacement.span(rowSpan, pillRow),
             appearance.horizontalPadding, pillRow.depth + appearance.spacing,
             BarPlacement.capsulePadding(appearance))
         : null
+    // The capsule glance's size while it shows, or null.
+    readonly property var glanceSize: capsuleRowPlace !== null && glanceShown
+        ? { width: glanceView.width, height: glanceView.height } : null
+    // On a capsule, where the capsule is drawn around its row, its pill row
+    // and the glance past them while it shows, grown round it as round a
+    // popup inside (CapsulePlacement.withPopup), so the pointer over its
+    // cards is over the capsule; null on any other bar style.
+    readonly property var capsulePlace: capsuleRowPlace === null ? null
+        : CapsulePlacement.withPopup(capsuleRowPlace, glanceSize, appearance.barPosition)
     // Where a change the capsule shows starts along the bar: centred, as its
     // row would be.
     readonly property real changeStart: BarLayout.zoneStart(layoutBar, "center", changeView.width)
@@ -390,6 +406,36 @@ Item {
                 scale: root.rowContents.scale
                 appearance: root.appearance
                 theme: theme
+            }
+
+            // The capsule glance, past the row and its pills while it shows:
+            // its cards enter after the row's elements (CapsuleMotion.cardLook)
+            // and a click on one opens its bar element's popup inside the
+            // capsule.
+            CapsuleGlanceView {
+                id: glanceView
+
+                readonly property var place: root.capsuleRowPlace
+                    ? CapsulePlacement.glancePlace(root.capsuleRowPlace,
+                        { width: glanceView.width, height: glanceView.height }, root.appearance.barPosition)
+                    : { x: 0, y: 0 }
+
+                x: place.x
+                y: place.y
+                width: implicitWidth
+                height: implicitHeight
+                visible: root.glanceSize !== null
+                cards: root.glanceCards
+                cardLook: index => CapsuleMotion.cardLook(root.appearance.motion, {
+                    entering: root.rowEntering,
+                    elapsed: root.rowElapsed,
+                    entry: root.rowEntry,
+                    crossfade: root.rowContents
+                }, index, root.glanceCards.length)
+                appearance: root.appearance
+                theme: theme
+
+                onCardClicked: popup => root.popupRequested(popup)
             }
 
             // One shared background per group.

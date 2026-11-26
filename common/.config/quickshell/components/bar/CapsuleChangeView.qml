@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Shapes
 import "../panels" as Panels
 import "../panels/OsdChange.js" as OsdChange
 
@@ -109,50 +108,15 @@ Item {
             theme: root.theme
         }
 
-        // The glance card's battery ring: a track, and an arc from the top
-        // round to the level.
-        Shape {
-            id: ring
-
-            readonly property real level: root.ringShown ? root.look.ring : 0
-            readonly property real stroke: 3
-
+        // The glance card's battery ring.
+        GlanceRing {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.ringShown
             width: root.appearance.textSize + 4
             height: width
-            preferredRendererType: Shape.CurveRenderer
-
-            ShapePath {
-                fillColor: "transparent"
-                strokeColor: root.theme.backgroundSecondary
-                strokeWidth: ring.stroke
-
-                PathAngleArc {
-                    centerX: ring.width / 2
-                    centerY: ring.height / 2
-                    radiusX: (ring.width - ring.stroke) / 2
-                    radiusY: radiusX
-                    startAngle: 0
-                    sweepAngle: 360
-                }
-            }
-
-            ShapePath {
-                fillColor: "transparent"
-                strokeColor: root.toneColor
-                strokeWidth: ring.stroke
-                capStyle: ShapePath.RoundCap
-
-                PathAngleArc {
-                    centerX: ring.width / 2
-                    centerY: ring.height / 2
-                    radiusX: (ring.width - ring.stroke) / 2
-                    radiusY: radiusX
-                    startAngle: -90
-                    sweepAngle: 360 * ring.level
-                }
-            }
+            level: root.ringShown ? root.look.ring : 0
+            trackColor: root.theme.backgroundSecondary
+            levelColor: root.toneColor
         }
     }
 }
