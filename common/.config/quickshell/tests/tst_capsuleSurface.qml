@@ -102,6 +102,71 @@ TestCase {
     }
 
     // With no row there is no capsule, and no shadow either.
+    Component {
+        id: seeThrough
+
+        Rectangle {
+            property alias surface: surface
+
+            width: 300
+            height: 100
+            color: "#ffffff"
+
+            CapsuleSurface {
+                id: surface
+
+                place: ({ x: 50, y: 20, width: 200, height: 40, radius: 20 })
+                fillColor: Qt.rgba(0, 0, 0, 0.5)
+                appearance: ({ barPosition: "top", motion: Motion.motion(true) })
+            }
+        }
+    }
+
+    // Expanded it is more solid: its fill 15 points more opaque than the
+    // profile's opacity, over the white desktop here; collapsing returns it.
+    function test_expandedTheCapsuleIsMoreOpaque() {
+        const built = createTemporaryObject(seeThrough, this);
+        fuzzyCompare(shadeAt(built, 150, 40), 0.5, 0.01);
+
+        built.surface.expanded = true;
+        fuzzyCompare(shadeAt(built, 150, 40), 0.65, 0.01);
+
+        built.surface.expanded = false;
+        fuzzyCompare(shadeAt(built, 150, 40), 0.5, 0.01);
+    }
+
+    // Its shadow is a little larger expanded: it reaches a couple of pixels
+    // further, and is darker just past its edge; collapsing returns it.
+    function test_expandedTheShadowIsLarger() {
+        const built = createTemporaryObject(area, this);
+        const restingEdge = shadeAt(built, 150, 60);
+        compare(shadeAt(built, 150, 65), 0, "at rest it ends within four pixels");
+
+        built.surface.expanded = true;
+        verify(shadeAt(built, 150, 65) > 0, "reaches further expanded");
+        verify(shadeAt(built, 150, 60) > restingEdge, "darker at its edge expanded");
+        compare(shadeAt(built, 150, 90), 0, "still tight");
+
+        built.surface.expanded = false;
+        compare(shadeAt(built, 150, 65), 0, "back at rest");
+        compare(shadeAt(built, 150, 60), restingEdge, "back at rest");
+    }
+
+    // Without reduce motion it gets more solid on the capsule's spring,
+    // settling in about 350 ms, and back again collapsing.
+    function test_itGetsMoreSolidOnTheCapsulesSpring() {
+        const built = createTemporaryObject(seeThrough, this);
+        built.surface.appearance = { barPosition: "top", motion: Motion.motion(false) };
+
+        built.surface.expanded = true;
+        verify(shadeAt(built, 150, 40) < 0.64, "moves rather than jumps");
+        tryVerify(() => Math.abs(shadeAt(built, 150, 40) - 0.65) < 0.01, 600, "settles expanded");
+
+        built.surface.expanded = false;
+        verify(shadeAt(built, 150, 40) > 0.51, "moves back rather than jumps");
+        tryVerify(() => Math.abs(shadeAt(built, 150, 40) - 0.5) < 0.01, 600, "settles at rest");
+    }
+
     function test_aCapsuleWithNoSizeCastsNoShadow() {
         const built = createTemporaryObject(area, this);
 

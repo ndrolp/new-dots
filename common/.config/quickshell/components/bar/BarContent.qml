@@ -380,6 +380,7 @@ Item {
         place: root.capsuleShape || { x: 0, y: 0, width: 0, height: 0, radius: 0 }
         following: root.insidePopup !== null && root.insidePopup.resizing
         visible: root.capsulePlace !== null
+        expanded: root.appearance.capsuleExpanded === true
         fillColor: root.dockedColor
         appearance: root.appearance
         z: -1

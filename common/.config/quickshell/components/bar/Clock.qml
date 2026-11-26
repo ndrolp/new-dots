@@ -1,17 +1,23 @@
 import Quickshell
 import QtQuick
+import "CapsuleLook.js" as CapsuleLook
 
 // The time beside its icon, with the hours above the minutes on a side bar.
+// In an expanded capsule the date comes before the time, dimmer
+// (CapsuleLook.clockText).
 IconValue {
     id: root
 
     property color color: "white"
+    readonly property var shown: CapsuleLook.clockText(appearance, clock.date)
 
     icon: "󰥔"
     iconColor: color
     iconSize: appearance.iconSize
     valueSize: appearance.textSize
-    value: Qt.formatTime(clock.date, "HH:mm")
+    value: shown.time
+    lead: shown.date
+    leadColor: Qt.rgba(color.r, color.g, color.b, 0.6)
 
     SystemClock {
         id: clock
