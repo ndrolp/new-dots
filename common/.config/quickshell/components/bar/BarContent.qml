@@ -173,6 +173,18 @@ Item {
         overLiveElement: liveElementHovered
     })
 
+    // On a capsule, the pointer hovers the bar content only over the capsule,
+    // and anywhere over it: its pills and glance are drawn past the bar
+    // content, whose own bounds would end the hover at its row
+    // (CapsuleHoverMask.qml).
+    containmentMask: capsulePlace !== null ? capsuleHoverMask : null
+
+    CapsuleHoverMask {
+        id: capsuleHoverMask
+
+        place: root.capsulePlace
+    }
+
     HoverHandler {
         id: pointer
     }
