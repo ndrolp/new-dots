@@ -3,11 +3,13 @@ import QtTest
 import "../components/bar"
 import "../config" as Config
 
-// The capsule's workspace pills at rest: one small pill per workspace of its
-// monitor with windows, and the active one even when empty, with no label; the
-// active one wider and in the accent, an urgent one red and an occupied one
-// dim; an empty one has no pill. A click on a pill switches to its workspace;
-// scrolling goes through every workspace, empty ones too.
+// The capsule's workspace pills. At rest: one small pill per workspace of its
+// monitor with windows, and the one it shows even when empty, with no label;
+// the shown one wider and in the accent, an urgent one red and an occupied
+// one dim; an empty one has no pill. Expanded: every workspace is a chip with
+// its number or glyph, in the same colours, an empty one dim and clickable;
+// collapsed, they are pills again. A click on a pill switches to its
+// workspace; scrolling goes through every workspace, empty ones too.
 TestCase {
     name: "CapsuleWorkspaceRow"
     width: 300
@@ -19,6 +21,7 @@ TestCase {
     QtObject {
         id: workspaces
 
+        // The workspace with focus, which can be on another monitor.
         property int focused: 2
         property var occupied: [1, 3]
         property var urgent: []
@@ -47,6 +50,15 @@ TestCase {
         }
     }
 
+    // Instant, as with reduce motion.
+    readonly property var instant: ({
+        brief: 0, short: 0, medium: 0, long: 0, easing: 0,
+        capsule: {
+            expand: { duration: 0, easing: 34, overshoot: 0.9 },
+            collapse: { duration: 0, easing: 6, overshoot: 0 }
+        }
+    })
+
     Component {
         id: area
 
@@ -68,10 +80,8 @@ TestCase {
                 occupiedColor: "#ff0000"
                 urgentColor: "#ffff00"
                 activeColor: "#00ff00"
-                appearance: ({
-                    spacing: 4,
-                    motion: { brief: 0, short: 0, medium: 0, long: 0, easing: 0 }
-                })
+                emptyColor: "#0000ff"
+                appearance: ({ spacing: 4, textSize: 14, motion: instant })
             }
         }
     }
@@ -87,10 +97,7 @@ TestCase {
             workspaceIds: [1, 2, 3]
             workspaceService: workspaces
             monitorScreen: "monitor"
-            appearance: ({
-                spacing: 4,
-                motion: { brief: 0, short: 0, medium: 0, long: 0, easing: 0 }
-            })
+            appearance: ({ spacing: 4, textSize: 14, motion: instant })
         }
     }
 
@@ -112,7 +119,7 @@ TestCase {
         return { r: Math.round(pixel.r), g: Math.round(pixel.g), b: Math.round(pixel.b) };
     }
 
-    // Pills 4 deep and 8 long, the active one twice as long, the profile's
+    // Pills 4 deep and 8 long, the shown one twice as long, the profile's
     // spacing apart.
     function test_thereIsOneSmallPillPerWorkspaceInOrder() {
         const built = createTemporaryObject(area, this);
@@ -121,23 +128,36 @@ TestCase {
         compare(built.row.pills.map(pill => [pill.x, pill.width, pill.height, pill.radius]),
             [[0, 8, 4, 2], [12, 16, 4, 2], [32, 8, 4, 2]]);
         compare(built.row.implicitWidth, 40);
-        compare(built.row.implicitHeight, 4);
+        compare(built.row.height, 4);
+        compare(built.row.length, 40);
+        compare(built.row.depth, 4);
     }
 
-    function test_thePillsHaveNoLabel() {
+    function test_atRestThePillsHaveNoLabel() {
         const built = createTemporaryObject(area, this);
 
         for (const pill of built.row.pills)
-            compare(pill.children.filter(child => child.text !== undefined).length, 0);
+            compare(pill.label.visible, false);
     }
 
-    function test_theActiveWorkspaceIsHighlightedAndFollowsChanges() {
+    function test_theShownWorkspaceIsHighlightedAndFollowsChanges() {
         const built = createTemporaryObject(area, this);
 
         compare(colorAt(built, 10 + 20, 10 + 2), { r: 0, g: 1, b: 0 });
-        workspaces.focused = 3;
-        tryCompare(pillFor(built.row, 3), "active", true);
+        workspaces.shownOnMonitor = 3;
+        tryCompare(pillFor(built.row, 3), "role", "shown");
         compare(built.row.pills.map(pill => pill.workspaceId), [1, 3]);
+    }
+
+    // On a monitor without focus, the workspace it shows keeps its long
+    // accent pill, even when empty.
+    function test_anUnfocusedMonitorKeepsItsShownPill() {
+        workspaces.occupied = [];
+        workspaces.focused = 7;
+        const built = createTemporaryObject(area, this);
+
+        compare(built.row.pills.map(pill => [pill.workspaceId, pill.width]), [[2, 16]]);
+        compare(colorAt(built, 10 + 8, 10 + 2), { r: 0, g: 1, b: 0 });
     }
 
     function test_anEmptyWorkspaceHasNoPill() {
@@ -151,38 +171,120 @@ TestCase {
         compare(built.row.pills.map(pill => pill.workspaceId), [1, 2, 3]);
     }
 
-    function test_theActiveWorkspaceHasAPillEvenWhenEmpty() {
+    function test_theShownWorkspaceHasAPillEvenWhenEmpty() {
         workspaces.occupied = [];
         const built = createTemporaryObject(area, this);
 
         compare(built.row.pills.map(pill => pill.workspaceId), [2]);
-        workspaces.focused = 3;
+        workspaces.shownOnMonitor = 3;
         tryCompare(built.row, "pills", [pillFor(built.row, 3)]);
         compare(colorAt(built, 10 + 8, 10 + 2), { r: 0, g: 1, b: 0 });
     }
 
-    // One asking for attention is red until it is active.
+    // One asking for attention is red until it is shown.
     function test_occupiedAndUrgentWorkspacesLookDifferent() {
         const built = createTemporaryObject(area, this);
 
         compare(colorAt(built, 10 + 4, 10 + 2), { r: 1, g: 0, b: 0 });
         workspaces.urgent = [3];
-        tryCompare(pillFor(built.row, 3), "urgent", true);
+        tryCompare(pillFor(built.row, 3), "role", "urgent");
         compare(colorAt(built, 10 + 36, 10 + 2), { r: 1, g: 1, b: 0 });
-        workspaces.focused = 3;
-        tryCompare(pillFor(built.row, 3), "urgent", false);
-        // Workspace 2, empty and no longer active, has gone.
+        workspaces.shownOnMonitor = 3;
+        tryCompare(pillFor(built.row, 3), "role", "shown");
+        // Workspace 2, empty and no longer shown, has gone.
         compare(colorAt(built, 10 + 20, 10 + 2), { r: 0, g: 1, b: 0 });
     }
 
     // Unless told otherwise, an occupied pill is the text at about 40%,
-    // quieter than the active and urgent ones.
-    function test_anOccupiedPillIsDimText() {
+    // quieter than the shown and urgent ones, and an empty chip quieter
+    // still.
+    function test_occupiedAndEmptyPillsAreDimText() {
         const row = createTemporaryObject(plainRow, this);
 
         compare(row.occupiedColor.a.toFixed(2), "0.40");
         compare([row.occupiedColor.r, row.occupiedColor.g, row.occupiedColor.b],
             [theme.text.r, theme.text.g, theme.text.b]);
+        verify(row.emptyColor.a < row.occupiedColor.a);
+        compare([row.emptyColor.r, row.emptyColor.g, row.emptyColor.b],
+            [theme.text.r, theme.text.g, theme.text.b]);
+    }
+
+    // Expanded, every workspace is a chip with its number, as deep as the
+    // chips (the text size and 2) and its label plus half that on either
+    // side, the shown one half a chip longer on either side.
+    function test_expandedEveryWorkspaceIsANumberedChip() {
+        workspaces.occupied = [1];
+        const built = createTemporaryObject(area, this);
+
+        built.row.expanded = true;
+        compare(built.row.pills.map(pill => pill.workspaceId), [1, 2, 3]);
+        compare(built.row.pills.map(pill => pill.label.text), ["1", "2", "3"]);
+        for (const pill of built.row.pills) {
+            compare(pill.label.visible, true);
+            compare(pill.height, 16);
+            compare(pill.width, pill.label.implicitWidth + (pill.role === "shown" ? 32 : 16));
+        }
+        compare(built.row.depth, 16);
+        compare(built.row.height, 16);
+        compare(built.row.length, built.row.pills.reduce((total, pill) => total + pill.width, 8));
+    }
+
+    // With glyphs on the workspaces bar element, a chip shows its glyph.
+    function test_expandedAChipShowsItsGlyph() {
+        const built = createTemporaryObject(area, this);
+
+        built.row.workspaceOptions = { glyphsEnabled: true, glyphs: ["a", "", "c"] };
+        built.row.expanded = true;
+        compare(built.row.pills.map(pill => pill.label.text), ["a", "2", "c"]);
+    }
+
+    // Empty workspaces come back as dim chips, which switch to theirs on a
+    // click.
+    function test_expandedAnEmptyWorkspaceIsADimClickableChip() {
+        workspaces.occupied = [1];
+        workspaces.shownOnMonitor = 1;
+        const built = createTemporaryObject(area, this);
+
+        built.row.expanded = true;
+        waitForItemPolished(built.row);
+        const empty = pillFor(built.row, 3);
+        compare(empty.role, "empty");
+        compare(colorAt(built, 10 + empty.x + 3, 10 + empty.height / 2), { r: 0, g: 0, b: 1 });
+        mouseClick(empty);
+        compare(workspaces.switchedTo, [3]);
+    }
+
+    // Collapsing returns to the pills at rest: no label, no empty ones.
+    function test_collapsingReturnsToThePills() {
+        const built = createTemporaryObject(area, this);
+
+        built.row.expanded = true;
+        built.row.expanded = false;
+        compare(built.row.pills.map(pill => [pill.workspaceId, pill.width, pill.height, pill.label.visible]),
+            [[1, 8, 4, false], [2, 16, 4, false], [3, 8, 4, false]]);
+        compare(built.row.depth, 4);
+        compare(built.row.length, 40);
+    }
+
+    // With motion, chips grow on the capsule's spring; the row's depth and
+    // length, which size the capsule, are where they are headed at once.
+    function test_withMotionTheChipsGrowOnTheSpring() {
+        const built = createTemporaryObject(area, this);
+        built.row.appearance = {
+            spacing: 4, textSize: 14,
+            motion: {
+                brief: 100, short: 100, medium: 100, long: 100, easing: 6,
+                capsule: {
+                    expand: { duration: 300, easing: 34, overshoot: 0.9 },
+                    collapse: { duration: 300, easing: 6, overshoot: 0 }
+                }
+            }
+        };
+
+        built.row.expanded = true;
+        compare(built.row.depth, 16);
+        verify(pillFor(built.row, 1).height < 16);
+        tryCompare(pillFor(built.row, 1), "height", 16);
     }
 
     // The pills are small, so each takes clicks a little past its edges.
@@ -210,11 +312,10 @@ TestCase {
     // Scrolling steps through every workspace the monitor shows, even an
     // empty one with no pill.
     function test_scrollingReachesAnEmptyWorkspace() {
-        workspaces.focused = 1;
+        workspaces.shownOnMonitor = 1;
         const built = createTemporaryObject(area, this);
 
         compare(built.row.pills.map(pill => pill.workspaceId), [1, 3]);
-        workspaces.shownOnMonitor = 1;
         mouseWheel(built.row, 4, 2, 0, -120);
         workspaces.shownOnMonitor = 3;
         mouseWheel(built.row, 4, 2, 0, 120);

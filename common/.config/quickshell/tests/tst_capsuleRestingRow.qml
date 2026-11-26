@@ -89,7 +89,7 @@ TestCase {
         const live = LiveElements.liveElements(given);
         const entry = id => ({ id: id, length: liveLength, depth: 20, shown: liveShown.indexOf(id) !== -1 });
         const pills = CapsulePlacement.pillRow(bar, {
-            centre: (row.start + row.end) / 2, spacing: given.spacing, pills: pillsLength,
+            centre: (row.start + row.end) / 2, spacing: given.spacing, pills: pillsLength, pillDepth: 4,
             left: live.left.map(entry), right: live.right.map(entry)
         });
         const surface = CapsulePlacement.surface(bar, CapsulePlacement.span(row, pills),

@@ -48,8 +48,10 @@ Item {
     // (CapsuleContentTransition's outgoing look): `capturing` the frame it is
     // captured. Never shown on any other bar style.
     property var rowOutgoing: ({ capturing: false, opacity: 0, scale: 1 })
-    // How long the capsule's workspace pills are along the bar.
+    // How long the capsule's workspace pills are along the bar, and how deep
+    // across it: the pills' depth at rest, the chips' expanded.
     property real workspacePillsLength: 0
+    property real workspacePillsDepth: BarPlacement.workspacePillDepth
 
     // The menu the app menu's Popup shows (AppMenuPopup.menuId).
     readonly property string appMenuId: appMenuElement.menuId
@@ -95,12 +97,14 @@ Item {
             centre: (rowSpan.start + rowSpan.end) / 2,
             spacing: appearance.spacing,
             pills: workspacePillsLength,
+            pillDepth: workspacePillsDepth,
             left: liveElements.left.map(liveEntry),
             right: liveElements.right.map(liveEntry)
         })
         : null
-    // How much deeper the live elements make the pill row than the pills
-    // alone.
+    // How much deeper the live elements, or the chips while expanded, make
+    // the pill row than the pills at rest; the bar window grows to hold it,
+    // but the reserved space stays as it is at rest.
     readonly property real pillRowExtra: pillRow ? pillRow.depth - BarPlacement.workspacePillDepth : 0
     // How deep the deepest live element active on the capsule is, 0 with
     // none: what the capsule reserves for them (BarPlacement.reservedSpace),
