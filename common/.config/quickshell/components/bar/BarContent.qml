@@ -8,6 +8,7 @@ import "BarElementItems.js" as BarElementItemsModel
 import "BarLayout.js" as BarLayout
 import "BarPlacement.js" as BarPlacement
 import "CapsulePlacement.js" as CapsulePlacement
+import "CapsuleMotion.js" as CapsuleMotion
 import "CapsuleRouting.js" as CapsuleRouting
 import "LiveElements.js" as LiveElements
 
@@ -43,6 +44,12 @@ Item {
     // backgrounds and the change it shows take it; its live elements and
     // workspace pills don't. { 1, 1 } on any other bar style.
     property var rowContents: ({ opacity: 1, scale: 1 })
+    // Whether the capsule's row is entering, expanding, and how far in, in
+    // ms (CapsuleContentTransition's elapsed): its bar elements then enter
+    // one after another from its centre out (rowLook) instead of taking
+    // `rowContents`. Never on any other bar style.
+    property bool rowEntering: false
+    property real rowElapsed: 0
     // How the row before that crossfade looks, captured, as it fades out
     // while the capsule springs to the new one, { capturing, opacity, scale }
     // (CapsuleContentTransition's outgoing look): `capturing` the frame it is
@@ -234,6 +241,22 @@ Item {
         return elementPlace(element).y;
     }
 
+    // How the capsule's row enters, from the centre zone's shown elements
+    // (CapsuleMotion.rowEntry): what comes in after it takes the steps after
+    // `steps`.
+    readonly property var rowEntry: CapsuleMotion.rowEntry(zoneLayout("center").positions)
+
+    // How a bar element looks in the capsule's row, by id, { opacity, scale,
+    // slide } (CapsuleMotion.rowLook).
+    function rowLook(element) {
+        return CapsuleMotion.rowLook(appearance.motion, {
+            entering: rowEntering,
+            elapsed: rowElapsed,
+            entry: rowEntry,
+            crossfade: rowContents
+        }, element);
+    }
+
     // Grouped elements drop their own pill: the group draws one background.
     function elementGrouped(element) {
         const position = elementPosition(element);
@@ -416,8 +439,9 @@ Item {
             ArchButton {
                 id: archButton
 
-                opacity: root.rowContents.opacity
-                scale: root.rowContents.scale
+                opacity: root.rowLook("arch").opacity
+                scale: root.rowLook("arch").scale
+                transform: Translate { x: root.rowLook("arch").slide }
 
                 visible: root.elementVisible("arch")
                 x: root.elementX("arch")
@@ -433,8 +457,9 @@ Item {
             CurrentApp {
                 id: currentApp
 
-                opacity: root.rowContents.opacity
-                scale: root.rowContents.scale
+                opacity: root.rowLook("currentApp").opacity
+                scale: root.rowLook("currentApp").scale
+                transform: Translate { x: root.rowLook("currentApp").slide }
 
                 x: root.elementX("currentApp")
                 y: root.elementY("currentApp")
@@ -447,8 +472,9 @@ Item {
             AppMenu {
                 id: appMenuElement
 
-                opacity: root.rowContents.opacity
-                scale: root.rowContents.scale
+                opacity: root.rowLook("appMenu").opacity
+                scale: root.rowLook("appMenu").scale
+                transform: Translate { x: root.rowLook("appMenu").slide }
 
                 x: root.elementX("appMenu")
                 y: root.elementY("appMenu")
@@ -464,8 +490,9 @@ Item {
             SystemMonitor {
                 id: systemMonitor
 
-                opacity: root.rowContents.opacity
-                scale: root.rowContents.scale
+                opacity: root.rowLook("systemMonitor").opacity
+                scale: root.rowLook("systemMonitor").scale
+                transform: Translate { x: root.rowLook("systemMonitor").slide }
 
                 visible: root.elementVisible("systemMonitor")
                 x: root.elementX("systemMonitor")
@@ -479,8 +506,9 @@ Item {
             Workspaces {
                 id: workspaces
 
-                opacity: root.rowContents.opacity
-                scale: root.rowContents.scale
+                opacity: root.rowLook("workspaces").opacity
+                scale: root.rowLook("workspaces").scale
+                transform: Translate { x: root.rowLook("workspaces").slide }
                 visible: root.elementVisible("workspaces")
                 x: root.elementX("workspaces")
                 y: root.elementY("workspaces")
@@ -508,7 +536,7 @@ Item {
                 deviceCaptures: root.deviceCaptures
                 cava: root.cava
                 barVisible: root.barVisible
-                rowContents: root.rowContents
+                rowLook: element => root.rowLook(element)
                 elementX: element => root.elementX(element)
                 elementY: element => root.elementY(element)
                 elementGrouped: element => root.elementGrouped(element)

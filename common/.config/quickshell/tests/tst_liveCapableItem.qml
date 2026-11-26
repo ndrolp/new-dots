@@ -32,6 +32,10 @@ TestCase {
         function sizes(element) { return { textSize: 11, iconSize: 11, thickness: 21 }; }
         function elementX(element) { return 30; }
         function elementY(element) { return 40; }
+        // How media looks in the capsule's row now, mid-entry.
+        function rowLook(element) {
+            return element === "media" ? { opacity: 0.5, scale: 0.9, slide: -3 } : null;
+        }
     }
 
     Component {
@@ -98,6 +102,27 @@ TestCase {
         bar.mediaShown = false;
         tryCompare(item, "visible", false, 100);
         verify(!item.takesRoom);
+    }
+
+    // In the capsule's row it looks as the row has it look (rowLook): faded,
+    // scaled and slid along the bar.
+    function test_inTheRowItTakesItsLook() {
+        bar.mediaLive = false;
+        const item = createTemporaryObject(media, this);
+
+        compare(item.opacity, 0.5);
+        compare(item.scale, 0.9);
+        compare(item.transform[0].x, -3);
+        compare(item.x, 30);
+    }
+
+    // Live, beside the pills, it doesn't.
+    function test_liveItKeepsItsOwnLook() {
+        const item = createTemporaryObject(media, this);
+
+        compare(item.opacity, 1);
+        compare(item.scale, 1);
+        compare(item.transform[0].x, 0);
     }
 
     // Anywhere else it is hidden at once.

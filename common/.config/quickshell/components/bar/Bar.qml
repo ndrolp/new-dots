@@ -5,6 +5,7 @@ import "../../config" as Config
 import "../panels" as Panels
 import "BarPlacement.js" as BarPlacement
 import "CapsuleElements.js" as CapsuleElements
+import "CapsuleMotion.js" as CapsuleMotion
 import "LiveElements.js" as LiveElements
 import "CapsulePlacement.js" as CapsulePlacement
 import "CapsuleRouting.js" as CapsuleRouting
@@ -245,16 +246,24 @@ Variants {
             // row is drawn a frame after the change, which springs the
             // capsule to fit it at once; a capture of the old row fades and
             // shrinks away as it moves (BarContent's rowOutgoing) and the new
-            // one fades and grows in from a third of the way. Always "rest"
-            // on other bar styles, which never crossfade.
+            // one fades and grows in from a third of the way. Expanding, the
+            // new row's bar elements instead enter one after another from its
+            // centre out (BarContent's rowEntering), and the crossfade runs
+            // until the last is in. Always "rest" on other bar styles, which
+            // never crossfade.
             CapsuleContentTransition {
                 id: rowView
+
+                // Whether the expanded row is entering.
+                readonly property bool entering: changing && shownKey === "expanded"
 
                 key: BarProfileModel.capsule(panel.barAppearance) ? CapsuleRouting.rowView({
                     change: panel.showingChange,
                     expanded: panel.capsuleExpanded
                 }) : "rest"
                 motion: panel.barAppearance.motion
+                length: shownKey === "expanded"
+                    ? CapsuleMotion.entryLength(motion, barContent.rowEntry.steps) : 0
                 visible: false
             }
 
@@ -371,6 +380,8 @@ Variants {
                     workspaceService: panel.workspaceService
                     capsuleChange: rowView.shownKey === "change" ? capsuleChange.change : null
                     rowContents: ({ opacity: rowView.contentsOpacity, scale: rowView.contentsScale })
+                    rowEntering: rowView.entering
+                    rowElapsed: rowView.elapsed
                     rowOutgoing: ({ capturing: rowView.capturing, opacity: rowView.outgoingOpacity,
                         scale: rowView.outgoingScale })
                     workspacePillsLength: workspaceRow.width

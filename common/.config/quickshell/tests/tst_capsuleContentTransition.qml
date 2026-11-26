@@ -118,6 +118,27 @@ TestCase {
         tryCompare(shown, "changing", false);
     }
 
+    // A view whose contents take longer to come in than a crossfade (a row
+    // entering one after another, CapsuleMotion.entryLength) keeps it
+    // running until they are in.
+    function test_aLongerEntryKeepsItRunning() {
+        const shown = createTemporaryObject(transition, this, { length: 500 });
+
+        shown.key = "expanded";
+        tryVerify(() => shown.elapsed > CapsuleMotion.contentsLength(motion) + 50);
+        verify(shown.changing);
+        tryCompare(shown, "changing", false);
+    }
+
+    // It never ends before the crossfade does.
+    function test_itRunsAtLeastAsLongAsACrossfade() {
+        const shown = createTemporaryObject(transition, this, { length: 10 });
+
+        shown.key = "expanded";
+        tryVerify(() => shown.elapsed > 100);
+        verify(shown.changing);
+    }
+
     function test_reduceMotionSwapsAtOnce() {
         const shown = createTemporaryObject(transition, this, { motion: Motion.motion(true) });
 

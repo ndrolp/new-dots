@@ -197,11 +197,16 @@ overshoots slightly and settles, shrinking doesn't bounce), its corners morph
 on the same spring and reduce motion moves it at once (`CapsuleSurface.qml`),
 which spring a size change takes and how its contents look a given time into a
 crossfade, the old contents gone before the new fade in a third of the way
-into the spring (`CapsuleMotion.js`, `tst_capsuleMotion.qml`), that its
+into the spring, and that expanding, its row's elements enter one after
+another from its centre out, 20 ms apart, each fading in and sliding to its
+place from the centre's side, the last in as the spring settles, at once with
+reduce motion (`CapsuleMotion.centreOut`, `entering`, `rowEntry`, `rowLook`;
+`CapsuleMotion.js`, `tst_capsuleMotion.qml`), that its
 contents crossfade between views by key: the new one shown a frame after the
 change, so the shape moves at once, the old one fading and shrinking away
 while it does and the new one fading and growing in, each as
-`CapsuleMotion.contents` has it at the time elapsed, checked by phase and
+`CapsuleMotion.contents` has it at the time elapsed, running on until a
+longer entry is in, checked by phase and
 elapsed time, not the clock (`CapsuleContentTransition.qml`,
 `tst_capsuleContentTransition.qml`), which view its row shows
 (`CapsuleRouting.rowView`), that a popup inside it crossfades its contents on
@@ -237,8 +242,8 @@ need Quickshell's services, so their parts are covered through those), that what
 runs along the bar animates and what runs across it doesn't, on every Bar position
 (`AlongBarBehavior.qml`), that a bar element that can be live sits at its place,
 as large as its item, and fades out as a live element, keeping its room beside
-the pills until its fade-out ends, at once with reduce motion
-(`LiveCapableItem.qml`), what the workspace overview lists: every monitor's
+the pills until its fade-out ends, at once with reduce motion, and in the
+capsule's row takes the row's look for it (`LiveCapableItem.qml`), what the workspace overview lists: every monitor's
 workspaces in physical order, each one once, how they fit up to 21 with no
 scrolling, what each key does, during a drag too, how the keyboard walks them,
 the number a new one takes, skipping numbers another monitor has or the rules
