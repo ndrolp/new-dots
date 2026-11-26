@@ -198,8 +198,8 @@ TestCase {
 
     // A profile that never chose its collapsed capsule's places shows only
     // the clock in the row, media live left of the workspace pills and the
-    // recording indicator live right; every other bar element but the
-    // workspaces is hidden.
+    // recording indicator and the battery live right; every other bar
+    // element but the workspaces is hidden.
     function test_aProfileWithoutCollapsedPlacesGetsTheDefaultOnes() {
         const places = BarProfileModel.completeProfile({ barStyle: "capsule" }).capsulePlaces;
 
@@ -209,7 +209,8 @@ TestCase {
         compare(places.media, "liveLeft");
         compare(places.recording, "liveRight");
         compare(places.keepAwake, "hidden");
-        compare(places.battery, "hidden");
+        compare(places.battery, "liveRight");
+        compare(places.network, "hidden");
         compare(places.workspaces, undefined);
     }
 
@@ -231,7 +232,17 @@ TestCase {
         compare(profile.capsulePlaces.privacy, "liveRight");
         verify(BarProfileModel.canBeLive("privacy"));
         compare(BarProfileModel.capsulePlaceIds(profile.barElements, profile.capsulePlaces).live.right,
-            ["recording", "privacy", "pomodoro"]);
+            ["recording", "privacy", "battery", "pomodoro"]);
+    }
+
+    // A new capsule shows the battery live right of the workspace pills, in
+    // the profile's order; it can take every live place.
+    function test_aProfileWithoutCollapsedPlacesShowsTheBatteryLiveRight() {
+        const places = BarProfileModel.completeProfile({ barStyle: "capsule" }).capsulePlaces;
+
+        compare(places.battery, "liveRight");
+        compare(BarProfileModel.capsulePlacesFor("battery"), ["hidden", "shown", "liveLeft", "liveRight"]);
+        verify(BarProfileModel.canBeLive("battery"));
     }
 
     // The elements with an icon and text show both by default, on the bar and
@@ -356,6 +367,15 @@ TestCase {
         compare(places.wifi, undefined);
     }
 
+    // A profile saved with the battery hidden, before it could be live,
+    // keeps it hidden: only profiles without places take it live.
+    function test_aSavedProfileKeepsTheBatteryWhereItWas() {
+        const profile = migratedProfiles({ saved: { barStyle: "capsule",
+            capsulePlaces: { battery: "hidden", clock: "shown" } } }).saved;
+
+        compare(BarProfileModel.completeProfile(profile).capsulePlaces.battery, "hidden");
+    }
+
     // Choosing a place sets it, without changing the places it was given; a
     // place the element can't take changes nothing.
     function test_choosingACollapsedPlace() {
@@ -364,7 +384,8 @@ TestCase {
         compare(BarProfileModel.setCapsulePlace(places, "keepAwake", "liveLeft").keepAwake, "liveLeft");
         compare(BarProfileModel.setCapsulePlace(places, "media", "liveRight").media, "liveRight");
         compare(BarProfileModel.setCapsulePlace(places, "battery", "shown").battery, "shown");
-        compare(BarProfileModel.setCapsulePlace(places, "battery", "liveLeft").battery, "hidden");
+        compare(BarProfileModel.setCapsulePlace(places, "battery", "liveLeft").battery, "liveLeft");
+        compare(BarProfileModel.setCapsulePlace(places, "network", "liveLeft").network, "hidden");
         compare(BarProfileModel.setCapsulePlace(places, "workspaces", "shown").workspaces, undefined);
         compare(places.media, "liveLeft");
     }

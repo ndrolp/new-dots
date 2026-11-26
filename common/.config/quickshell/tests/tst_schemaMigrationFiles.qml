@@ -75,6 +75,14 @@ TestCase {
         compare(BarProfileModel.iconTextShown(profile.barElements, "clock", true), { icon: false, text: true });
     }
 
+    // The tracked capsule profile puts the battery live right of the
+    // workspace pills, so it shows at rest while on battery.
+    function test_theTrackedCapsuleShowsTheBatteryLive() {
+        const profile = BarProfileModel.completeProfile(trackedState("appearance.json").barProfiles.island);
+
+        compare(profile.capsulePlaces.battery, "liveRight");
+    }
+
     function test_alreadyMigratedFilesAreNotWritten() {
         const current = createTemporaryObject(fakeFile, this, { state: { schemaVersion: 0 } });
         const monitors = createTemporaryObject(fakeFile, this, { state: {} });

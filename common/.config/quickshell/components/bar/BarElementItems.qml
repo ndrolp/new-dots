@@ -150,7 +150,7 @@ Item {
         "bluetooth": bluetoothButton,
         "tray": trayButton,
         "network": networkButton,
-        "battery": batteryButton,
+        "battery": batteryItem,
         "clock": clockButton,
         "pomodoro": pomodoroItem
     })
@@ -180,6 +180,7 @@ Item {
         recordings: recordings,
         keepAwakeOn: keepAwake.on,
         hasBattery: hasBattery,
+        onBattery: UPower.onBattery,
         cavaSilent: cava.silent,
         pomodoroStarted: pomodoro.started,
         captures: deviceCaptures.captures,
@@ -842,52 +843,54 @@ Item {
         }
     }
 
-    Rectangle {
-        id: batteryButton
+    LiveCapableItem {
+        id: batteryItem
 
-        readonly property var size: root.sizeAround(batteryContent)
+        appearance: root.appearance
+        element: "battery"
+        items: root
 
-        visible: root.itemVisible("battery")
-        opacity: root.rowLook("battery").opacity
-        scale: root.rowLook("battery").scale
-        transform: Translate { x: root.rowLook("battery").slide }
-        x: root.elementX("battery")
-        y: root.elementY("battery")
-        width: size.width
-        height: size.height
-        radius: root.appearance.radius
-        color: batteryHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("battery") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
+        Rectangle {
+            id: batteryButton
 
-        border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("battery") ? 1 : 0
-        border.color: root.appearance.elementBorder ? theme.border : "transparent"
+            readonly property var size: root.sizeAround(batteryContent, batteryItem.sizes.thickness)
 
-        Behavior on color {
-            ColorAnimation { duration: root.appearance.motion.short }
-        }
+            width: size.width
+            height: size.height
+            radius: root.appearance.radius
+            color: batteryHover.hovered ? theme.surfaceHover
+                : root.elementGrouped("battery") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
 
-        HoverHandler {
-            id: batteryHover
-        }
+            border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("battery") ? 1 : 0
+            border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
-        IconValue {
-            id: batteryContent
+            Behavior on color {
+                ColorAnimation { duration: root.appearance.motion.short }
+            }
 
-            anchors.centerIn: parent
-            appearance: root.appearance
-            icon: StatusText.batteryIcon(root.battery, UPowerDeviceState)
-            iconColor: theme.yellow
-            // The battery glyphs are narrow: a little bigger, they read at a glance.
-            iconSize: root.appearance.iconSize + 4
-            valueSize: root.appearance.textSize
-            value: Math.round(root.battery.percentage * 100) + "%"
-            iconVisible: root.shown("battery").icon
-            valueVisible: root.shown("battery").text
-        }
+            HoverHandler {
+                id: batteryHover
+            }
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked: root.popupRequested("battery")
+            IconValue {
+                id: batteryContent
+
+                anchors.centerIn: parent
+                appearance: root.appearance
+                icon: StatusText.batteryIcon(root.battery, UPowerDeviceState)
+                iconColor: theme.yellow
+                // The battery glyphs are narrow: a little bigger, they read at a glance.
+                iconSize: batteryItem.sizes.iconSize + 4
+                valueSize: batteryItem.sizes.textSize
+                value: Math.round(root.battery.percentage * 100) + "%"
+                iconVisible: root.shown("battery").icon
+                valueVisible: root.shown("battery").text
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: root.popupRequested("battery")
+            }
         }
     }
 

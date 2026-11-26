@@ -576,15 +576,24 @@ function singleBarStyle(appearance, monitors) {
 // listed stay shown, media goes live left and the recording indicator live
 // right, as they were drawn, and every other element is hidden. A profile
 // with no list, or one that isn't a list, gets the default places when it
-// loads, which are what its capsule showed without one.
+// loads, which are what its capsule showed without one. A listed element
+// that only became live later (the battery) stays shown, as it was drawn.
+const liveBeforeCollapsedPlaces = ["media", "recording"];
+
 function capsulePlacesFromShownElements(appearance, monitors) {
     const migrated = cloneValue(appearance);
     for (const profileName in migrated.barProfiles || {}) {
         const profile = migrated.barProfiles[profileName];
         if (profile.capsuleElements === undefined)
             continue;
-        if (profile.capsulePlaces === undefined && Array.isArray(profile.capsuleElements))
-            profile.capsulePlaces = BarProfileModel.capsulePlacesShowing(profile.capsuleElements);
+        if (profile.capsulePlaces === undefined && Array.isArray(profile.capsuleElements)) {
+            const places = BarProfileModel.capsulePlacesShowing(profile.capsuleElements);
+            for (const id of profile.capsuleElements) {
+                if (id in places && liveBeforeCollapsedPlaces.indexOf(id) === -1)
+                    places[id] = "shown";
+            }
+            profile.capsulePlaces = places;
+        }
         delete profile.capsuleElements;
     }
 

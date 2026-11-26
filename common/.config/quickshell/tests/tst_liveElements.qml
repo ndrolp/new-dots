@@ -28,11 +28,12 @@ TestCase {
 
     // On a capsule, media sits left of the workspace pills and, right of
     // them from the pills outward, the recording indicator, the privacy
-    // indicator then the pomodoro, while the profile enables them.
-    function test_mediaSitsLeftOfThePillsAndRecordingPrivacyThenPomodoroRight() {
+    // indicator, the battery then the pomodoro, while the profile enables
+    // them.
+    function test_mediaSitsLeftOfThePillsAndRecordingPrivacyBatteryThenPomodoroRight() {
         compare(LiveElements.liveElements({ barStyle: "capsule",
             barElements: BarProfileModel.defaultProfile.barElements }),
-            { left: ["media"], right: ["recording", "privacy", "pomodoro"] });
+            { left: ["media"], right: ["recording", "privacy", "battery", "pomodoro"] });
     }
 
     // A live element whose place is Shown is drawn in the row, not beside
@@ -40,7 +41,7 @@ TestCase {
     function test_aLiveElementShownInTheRowIsNotBesideThePills() {
         compare(LiveElements.liveElements({ barStyle: "capsule",
             barElements: BarProfileModel.defaultProfile.barElements, capsulePlaces: places({ media: "shown" }) }),
-            { left: [], right: ["recording", "privacy", "pomodoro"] });
+            { left: [], right: ["recording", "privacy", "battery", "pomodoro"] });
     }
 
     // A hidden one isn't beside the pills either.
@@ -48,18 +49,18 @@ TestCase {
         compare(LiveElements.liveElements({ barStyle: "capsule",
             barElements: BarProfileModel.defaultProfile.barElements,
             capsulePlaces: places({ recording: "hidden" }) }),
-            { left: ["media"], right: ["privacy", "pomodoro"] });
+            { left: ["media"], right: ["privacy", "battery", "pomodoro"] });
     }
 
-    // Live right puts media right of the pills, after the recording
-    // indicator: several on one side follow the profile's order.
+    // Live right puts media right of the pills, before the battery and the
+    // recording indicator: several on one side follow the profile's order.
     function test_liveElementsOnOneSideFollowTheProfilesOrder() {
         const elements = barElements();
         elements.left.unshift(element("media"));
         elements.right.push(element("recording"));
 
         compare(LiveElements.liveElements({ barStyle: "capsule", barElements: elements,
-            capsulePlaces: places({ media: "liveRight" }) }), { left: [], right: ["media", "recording"] });
+            capsulePlaces: places({ media: "liveRight" }) }), { left: [], right: ["media", "battery", "recording"] });
     }
 
     // A live element the profile disables isn't beside the pills either.
@@ -68,7 +69,7 @@ TestCase {
         elements.right.push(element("recording", { enabled: false }), element("media"));
 
         compare(LiveElements.liveElements({ barStyle: "capsule", barElements: elements }),
-            { left: ["media"], right: [] });
+            { left: ["media"], right: ["battery"] });
     }
 
     // Live elements are a capsule's: any other bar style has none.
@@ -88,7 +89,8 @@ TestCase {
     // When each bar element that can be live is active: the recording
     // indicator while recording, media while a track plays, keep-awake
     // while on, the privacy indicator while an app uses the microphone or a
-    // camera. An element that can't be live never is.
+    // camera, the battery while on battery (not charging), never without one.
+    // An element that can't be live never is.
     function test_whenEachLiveElementIsActive_data() {
         return [
             { tag: "recording", id: "recording", status: { recordings: [{ app: "obs" }] }, active: true },
@@ -106,6 +108,9 @@ TestCase {
                 active: true },
             { tag: "nothing captured", id: "privacy", status: { captures: { microphone: [], camera: [] } },
                 active: false },
+            { tag: "on battery", id: "battery", status: { hasBattery: true, onBattery: true }, active: true },
+            { tag: "plugged in", id: "battery", status: { hasBattery: true, onBattery: false }, active: false },
+            { tag: "no battery", id: "battery", status: { hasBattery: false, onBattery: true }, active: false },
             { tag: "clock", id: "clock", status: {}, active: false }
         ];
     }

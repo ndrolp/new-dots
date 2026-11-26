@@ -326,7 +326,7 @@
                 "appMenu": "hidden",
                 "arch": "hidden",
                 "audio": "hidden",
-                "battery": "hidden",
+                "battery": "liveRight",
                 "bluetooth": "hidden",
                 "cava": "hidden",
                 "clock": "shown",
