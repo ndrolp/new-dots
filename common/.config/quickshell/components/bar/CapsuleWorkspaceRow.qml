@@ -1,20 +1,23 @@
 import QtQuick
 import "BarPlacement.js" as BarPlacement
+import "CapsulePills.js" as CapsulePills
 import "../../services/WorkspaceState.js" as WorkspaceState
 import ".." as Components
 import "../../config" as Config
 
 // The capsule's workspace pills, inside the capsule past its row of bar
-// elements: one small pill per workspace of its monitor, with no label. The
-// active workspace's pill is twice as long and highlighted; the others tell
-// what the bar's workspaces do (Workspaces.qml): one asking for attention is
-// red, one with windows bright and an empty one dim. A click on a pill
-// switches to its workspace; scrolling over the pills goes to the next or
-// previous one, at most one per touchpad gesture, stopping at either end.
+// elements: one small pill, with no label, per workspace of its monitor with
+// windows, and the active one even when empty; an empty one has no pill
+// (CapsulePills.hasRestingPill). The active workspace's pill is twice as long and in
+// the accent, one asking for attention is red and one with windows dim. A
+// click on a pill switches to its workspace; scrolling over the pills goes to
+// the next or previous workspace, an empty one too, at most one per touchpad
+// gesture, stopping at either end.
 Row {
     id: root
 
-    // The monitor's workspaces, in the order the workspace service lists them.
+    // The monitor's workspaces, in the order the workspace service lists them;
+    // scrolling goes through all of them, pill or not.
     required property var workspaceIds
     // Tells which workspace is active and switches to one
     // (services/WorkspaceService.qml).
@@ -23,17 +26,16 @@ Row {
     required property var monitorScreen
     property color activeColor: theme.accent
     property color urgentColor: theme.red
-    property color occupiedColor: Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.7)
-    property color emptyColor: Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.2)
+    property color occupiedColor: Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.4)
     // The bar's appearance: its spacing and motion.
     required property var appearance
     readonly property real pillDepth: BarPlacement.workspacePillDepth
-    // The pills, in order.
+    // The pills shown, in order.
     readonly property var pills: {
         const items = [];
         for (let index = 0; index < pillRepeater.count; index++)
             items.push(pillRepeater.itemAt(index));
-        return items.filter(item => item !== null);
+        return items.filter(item => item !== null && item.visible);
     }
 
     spacing: appearance.spacing
@@ -57,13 +59,15 @@ Row {
             readonly property int workspaceId: modelData
             readonly property bool active: root.workspaceService.isActive(workspaceId)
             readonly property bool urgent: !active && root.workspaceService.isUrgent(workspaceId)
-            readonly property bool occupied: root.workspaceService.isOccupied(workspaceId)
+
+            // A workspace without a pill keeps its place in the Repeater, so
+            // the others keep theirs and animate, but the Row skips it.
+            visible: CapsulePills.hasRestingPill(workspaceId, root.workspaceService)
 
             width: root.pillDepth * (active ? 4 : 2)
             height: root.pillDepth
             radius: height / 2
-            color: active ? root.activeColor : urgent ? root.urgentColor
-                : occupied ? root.occupiedColor : root.emptyColor
+            color: active ? root.activeColor : urgent ? root.urgentColor : root.occupiedColor
 
             AlongBarBehavior on width { appearance: root.appearance }
 

@@ -23,15 +23,18 @@ TestCase {
 
     function test_eachBarStyleShowsTheSettingsItsBarUses_data() {
         const shared = ["barHeight", "barOpacity", "radius", "horizontalPadding",
-            "groupRadius", "groupHorizontalPadding", "groupVerticalPadding", "groupBorder",
-            "iconSize", "spacing", "elementBorder"];
+            "groupRadius", "groupHorizontalPadding", "groupVerticalPadding",
+            "iconSize", "spacing"];
         return [
-            { tag: "opaque", style: "opaque", only: ["elementVerticalPadding", "barBorder", "pillsTransparent"] },
+            { tag: "opaque", style: "opaque", only: ["elementVerticalPadding", "barBorder", "pillsTransparent",
+                "groupBorder", "elementBorder"] },
             { tag: "transparent", style: "transparent",
-                only: ["transparentBarTopMargin", "pillVerticalPadding", "pillsTransparent"] },
-            { tag: "docked", style: "docked", only: ["barBorder", "pillVerticalPadding"] },
+                only: ["transparentBarTopMargin", "pillVerticalPadding", "pillsTransparent",
+                    "groupBorder", "elementBorder"] },
+            { tag: "docked", style: "docked", only: ["barBorder", "pillVerticalPadding",
+                "groupBorder", "elementBorder"] },
             { tag: "capsule", style: "capsule", only: ["transparentBarTopMargin",
-                "pillVerticalPadding", "pillsTransparent", "capsuleVerticalPadding", "capsuleNotifications"] }
+                "pillVerticalPadding", "capsuleVerticalPadding", "capsuleNotifications"] }
         ].map(row => Object.assign(row, { shown: barSettings.filter(key =>
             shared.indexOf(key) !== -1 || row.only.indexOf(key) !== -1) }));
     }
@@ -50,6 +53,16 @@ TestCase {
     function test_barBorderShowsOnlyForOpaqueAndDocked() {
         compare(BarProfileModel.barStyles.filter(style =>
             BarProfileModel.barSettingShown(style, "barBorder")), ["opaque", "docked"]);
+    }
+
+    // The capsule is its elements' only background: none of them draws a
+    // pill or a group background there, so nothing is see-through or outlined.
+    function test_aCapsuleHidesThePillAndBorderSettings() {
+        compare(BarProfileModel.barSettingsShown("capsule", [
+            { propertyName: "pillsTransparent" },
+            { propertyName: "elementBorder" },
+            { propertyName: "groupBorder" }
+        ]), []);
     }
 
     // A card's settings list, kept to those the style shows, in its order.

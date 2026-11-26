@@ -36,9 +36,9 @@ Rectangle {
     height: size.height
     radius: appearance.radius
     color: keepAwakeHover.hovered ? theme.surfaceHover
-        : grouped || appearance.pillsTransparent || BarProfileModel.docked(appearance)
+        : grouped || !BarProfileModel.elementPillsDrawn(appearance)
             ? "transparent" : theme.surface
-    border.width: appearance.elementBorder && !grouped ? 1 : 0
+    border.width: BarProfileModel.elementBorderDrawn(appearance) && !grouped ? 1 : 0
     border.color: appearance.elementBorder ? theme.border : "transparent"
 
     Behavior on color {

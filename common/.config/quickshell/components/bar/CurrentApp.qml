@@ -109,10 +109,10 @@ Row {
         height: size.height
         radius: appearance.radius
         color: appHover.hovered ? theme.surfaceHover
-            : root.appearance.pillsTransparent || BarProfileModel.docked(root.appearance)
+            : !BarProfileModel.elementPillsDrawn(root.appearance)
                 || root.grouped ? "transparent" : theme.surface
 
-        border.width: appearance.elementBorder && !root.grouped ? 1 : 0
+        border.width: BarProfileModel.elementBorderDrawn(appearance) && !root.grouped ? 1 : 0
         border.color: appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {

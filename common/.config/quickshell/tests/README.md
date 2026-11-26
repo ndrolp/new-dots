@@ -139,7 +139,12 @@ at-rest row, for profiles mixing shown, live (left and right) and hidden
 elements like the island one, shows its elements evenly apart, centred on the
 capsule and on its pill row with equal padding at both ends, the square
 network, Bluetooth and tray elements padded like the others unless they draw
-their own pill (`tst_capsuleRestingRow.qml`, `BarElementItems.elementLength`), that any one cause holds it expanded and that
+their own pill (`tst_capsuleRestingRow.qml`, `BarElementItems.elementLength`),
+that it is its elements' only background: no element pill nor outline and
+no group background inside it, whatever the profile says, a group set apart
+by a gap twice the spacing instead, and every other bar style as before
+(`tst_capsuleBackground.qml`, `BarProfileModel.elementPillsDrawn`,
+`elementBorderDrawn`, `BarLayout.groupLook`), that any one cause holds it expanded and that
 SUPER+I acts only on the focused monitor's capsule (`CapsuleRouting.js`),
 that hovering one of its live elements doesn't expand it, so a click there
 opens the element's popup straight from rest (`CapsuleRouting.hoverExpands`),
@@ -211,10 +216,12 @@ workspace pills, and where they sit inside it, under the row of a top
 capsule and above the row of a bottom one, centred on it, how it grows round a popup
 inside it (`CapsulePlacement.js`), that its window grows at once for a popup inside and
 never shrinks back (`CapsuleWindowHold.qml`), that the
-pills are small and unlabelled, one per workspace in order, highlight the
-active one as it changes, switch workspace on a click and go to the next or
-previous one on a scroll, as the bar's workspaces element does, stopping at
-either end (`CapsuleWorkspaceRow.qml`, `Workspaces.qml`), that a mouse wheel
+pills are small and unlabelled, one per workspace with windows in order and
+none for an empty one unless it is active (`CapsulePills.js`), highlight the
+active one as it changes, dim an occupied one, switch workspace on a click and
+go to the next or previous one on a scroll, an empty one too, as the bar's
+workspaces element does, stopping at either end (`CapsuleWorkspaceRow.qml`,
+`Workspaces.qml`), that a mouse wheel
 steps once per notch and a touchpad gesture at most once
 (`components/WheelSteps.js`; `WheelStepHandler.qml` feeds it), and that a capsule sits only at the top or
 bottom, where zones, bar elements, group backgrounds and popup

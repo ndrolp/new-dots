@@ -159,9 +159,11 @@ TestCase {
     }
 
     // An icon-only element drawing its own pill keeps it square: then the
-    // pills' edges are what sits evenly apart.
+    // pills' edges are what sits evenly apart. Only outside a capsule, which
+    // draws no element pill (tst_capsuleBackground.qml).
     function test_anIconElementWithItsOwnPillStaysSquare() {
         const given = profile({
+            barStyle: "transparent",
             pillsTransparent: false,
             barElements: { left: [], center: [element("network"), element("clock")], right: [] }
         });
