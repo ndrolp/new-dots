@@ -89,7 +89,7 @@ Variants {
                     barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
                     expanded: rowView.shownKey === "expanded",
                     change: rowView.shownKey === "change",
-                    glance: CapsuleGlance.leavingElements(barContent.glanceCards, panel.glanceShown),
+                    glance: glanceElements,
                     capsulePlaces: bar.appearance.barProfileValue(panel.profileName, "capsulePlaces")
                 })
                 // On a capsule, the live elements beside its workspace pills,
@@ -99,6 +99,11 @@ Variants {
                     barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
                     capsulePlaces: bar.appearance.barProfileValue(panel.profileName, "capsulePlaces")
                 })
+                // The bar elements whose glance cards show
+                // (CapsuleGlance.leavingElements): they leave the expanded
+                // row and, live, their place beside the pills.
+                property var glanceElements: CapsuleGlance.leavingElements(barContent.glanceCards,
+                    panel.glanceShown)
                 // Whether this window's capsule is expanded (see panel.capsuleExpanded).
                 property bool capsuleExpanded: panel.capsuleExpanded
                 // Global, not part of the bar profile.

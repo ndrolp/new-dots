@@ -182,7 +182,8 @@ Item {
         hasBattery: hasBattery,
         cavaSilent: cava.silent,
         pomodoroStarted: pomodoro.started,
-        captures: deviceCaptures.captures
+        captures: deviceCaptures.captures,
+        glance: appearance.glanceElements || []
     })
 
     // Enabled elements with nothing to show (no player, battery, recording,
@@ -231,8 +232,16 @@ Item {
     }
 
     // What the capsule glance's cards show (CapsuleGlance.cards), as plain
-    // values: the battery, null without one, and the network devices.
+    // values: the player media follows, the battery, null without either,
+    // and the network devices.
     readonly property var glanceStatus: ({
+        player: player ? {
+            trackTitle: player.trackTitle,
+            trackArtist: player.trackArtist,
+            trackArtUrl: player.trackArtUrl,
+            identity: player.identity,
+            isPlaying: player.isPlaying
+        } : null,
         battery: hasBattery ? {
             isPresent: true,
             percentage: battery.percentage,

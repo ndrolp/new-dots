@@ -483,6 +483,29 @@ TestCase {
         compare(BarElementItems.itemVisible(data.element, barElements, status), data.shown);
     }
 
+    // While the capsule glance shows a live element's card (`glance`,
+    // CapsuleGlance.leavingElements), it leaves its place beside the pills,
+    // and comes back once the glance goes; the other live elements stay.
+    function test_aLiveElementLeavesWhileItsCardShows_data() {
+        const playing = { isPlaying: true };
+        return [
+            { tag: "media's card shows", element: "media", status: { player: playing, glance: ["media"] },
+                shown: false },
+            { tag: "no glance", element: "media", status: { player: playing, glance: [] }, shown: true },
+            { tag: "another's card", element: "keepAwake", status: { keepAwakeOn: true, glance: ["media"] },
+                shown: true }
+        ];
+    }
+
+    function test_aLiveElementLeavesWhileItsCardShows(data) {
+        const barElements = { left: [], right: [], center: [{ id: "media", enabled: false },
+            { id: "keepAwake", enabled: false }] };
+        const status = nothingGoingOn(Object.assign({ live: ["media", "keepAwake"], expanded: true },
+            data.status));
+
+        compare(BarElementItems.itemVisible(data.element, barElements, status), data.shown);
+    }
+
     function test_keepAwakeCanBeMovedToAnotherZone() {
         const barElements = BarProfileModel.normalizeBarElements(minimalElements());
 
