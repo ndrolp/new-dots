@@ -15,6 +15,12 @@ function margin(bar) {
 // How deep a capsule's workspace pills are.
 var workspacePillDepth = 4;
 
+// How deep a capsule's workspace chips are, its pills grown while it is
+// expanded: a little more than the profile's text size.
+function workspaceChipDepth(bar) {
+    return bar.textSize + 2;
+}
+
 // How far a capsule reaches past its row of bar elements, away from its
 // screen edge, to hold its workspace pills: the pills and the profile's
 // spacing past them. Nothing on any other bar style.

@@ -219,12 +219,16 @@ the popup outside a capsule says while one runs or is paused
 (`services/PomodoroPhases.js`, `tst_pomodoroPhases.qml`), that its corners
 come down round a popup inside (`CapsulePlacement.withPopup`), that it reaches past its row for its
 workspace pills, and where they sit inside it, under the row of a top
-capsule and above the row of a bottom one, centred on it, how it grows round a popup
+capsule and above the row of a bottom one, centred on it, as deep as the
+chips while expanded, how it grows round a popup
 inside it (`CapsulePlacement.js`), that its window grows at once for a popup inside and
-never shrinks back (`CapsuleWindowHold.qml`), that the
+never shrinks back (`CapsuleWindowHold.qml`), that at rest the
 pills are small and unlabelled, one per workspace with windows in order and
-none for an empty one unless it is active (`CapsulePills.js`), highlight the
-active one as it changes, dim an occupied one, switch workspace on a click and
+none for an empty one unless its monitor shows it, focused or not, and that
+expanded every workspace is a chip with its number or glyph, an empty one dim
+and clickable, growing on the capsule's spring, at once with reduce motion,
+and back to pills on collapse (`CapsulePills.js`), highlight the
+one its monitor shows as it changes, dim an occupied one, switch workspace on a click and
 go to the next or previous one on a scroll, an empty one too, as the bar's
 workspaces element does, stopping at either end (`CapsuleWorkspaceRow.qml`,
 `Workspaces.qml`), that a mouse wheel
