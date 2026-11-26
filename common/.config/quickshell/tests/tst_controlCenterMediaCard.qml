@@ -178,4 +178,17 @@ TestCase {
 
         compare(atTheEnds.asked, []);
     }
+
+    // The glance's play/pause plays or pauses the player, where it can.
+    function test_playPauseTogglesOnlyWhereThePlayerCan() {
+        const toggles = { canTogglePlaying: true, asked: 0, togglePlaying() { this.asked++; } };
+        const cannot = { canTogglePlaying: false, asked: 0, togglePlaying() { this.asked++; } };
+
+        MediaCard.togglePlaying(toggles);
+        MediaCard.togglePlaying(cannot);
+        MediaCard.togglePlaying(null);
+
+        compare(toggles.asked, 1);
+        compare(cannot.asked, 0);
+    }
 }

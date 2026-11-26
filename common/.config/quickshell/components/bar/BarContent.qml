@@ -468,11 +468,7 @@ Item {
                 theme: theme
 
                 onCardClicked: popup => root.popupRequested(popup)
-                onPlayPauseClicked: {
-                    const player = barElementItems.player;
-                    if (player && player.canTogglePlaying)
-                        player.togglePlaying();
-                }
+                onPlayPauseClicked: MediaCard.togglePlaying(barElementItems.player)
                 onMediaStepped: step => MediaCard.skipTrack(barElementItems.player, step)
             }
 
