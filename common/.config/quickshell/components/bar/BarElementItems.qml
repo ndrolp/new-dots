@@ -44,10 +44,11 @@ Item {
     // Whether the bar holding these elements is shown on its monitor.
     property bool barVisible: true
     property string activePopup: ""
-    // How the capsule's row looks mid-crossfade, { opacity, scale }
-    // (CapsuleContentTransition): every element in it takes it, live ones
-    // beside the pills don't. Always { 1, 1 } on any other bar style.
-    property var rowContents: ({ opacity: 1, scale: 1 })
+    // How an element, by id, looks in the capsule's row mid-crossfade or
+    // entering, { opacity, scale, slide } (CapsuleMotion.rowLook): every
+    // element in it takes it, live ones beside the pills don't. Always
+    // { 1, 1, 0 } on any other bar style.
+    property var rowLook: element => ({ opacity: 1, scale: 1, slide: 0 })
     // Where each element goes, provided by the bar's single walk per zone.
     property var elementX: element => 0
     property var elementY: element => 0
@@ -228,8 +229,9 @@ Item {
         readonly property var size: root.sizeAround(notificationContent)
 
         visible: root.itemVisible("notifications")
-        opacity: root.rowContents.opacity
-        scale: root.rowContents.scale
+        opacity: root.rowLook("notifications").opacity
+        scale: root.rowLook("notifications").scale
+        transform: Translate { x: root.rowLook("notifications").slide }
         x: root.elementX("notifications")
         y: root.elementY("notifications")
         width: size.width
@@ -583,8 +585,9 @@ Item {
         readonly property int barCount: options.barCount
 
         visible: root.itemVisible("cava")
-        opacity: root.rowContents.opacity
-        scale: root.rowContents.scale
+        opacity: root.rowLook("cava").opacity
+        scale: root.rowLook("cava").scale
+        transform: Translate { x: root.rowLook("cava").slide }
         x: root.elementX("cava")
         y: root.elementY("cava")
         width: size.width
@@ -635,8 +638,9 @@ Item {
         readonly property var size: root.sizeAround(audioContent)
 
         visible: root.itemVisible("audio")
-        opacity: root.rowContents.opacity
-        scale: root.rowContents.scale
+        opacity: root.rowLook("audio").opacity
+        scale: root.rowLook("audio").scale
+        transform: Translate { x: root.rowLook("audio").slide }
         x: root.elementX("audio")
         y: root.elementY("audio")
         width: size.width
@@ -683,8 +687,9 @@ Item {
         readonly property var size: root.squareSize("bluetooth", bluetoothGlyph)
 
         visible: root.itemVisible("bluetooth")
-        opacity: root.rowContents.opacity
-        scale: root.rowContents.scale
+        opacity: root.rowLook("bluetooth").opacity
+        scale: root.rowLook("bluetooth").scale
+        transform: Translate { x: root.rowLook("bluetooth").slide }
         x: root.elementX("bluetooth")
         y: root.elementY("bluetooth")
         width: size.width
@@ -729,8 +734,9 @@ Item {
         readonly property var size: root.squareSize("tray", trayGlyph)
 
         visible: root.itemVisible("tray")
-        opacity: root.rowContents.opacity
-        scale: root.rowContents.scale
+        opacity: root.rowLook("tray").opacity
+        scale: root.rowLook("tray").scale
+        transform: Translate { x: root.rowLook("tray").slide }
         x: root.elementX("tray")
         y: root.elementY("tray")
         width: size.width
@@ -775,8 +781,9 @@ Item {
         readonly property var size: root.squareSize("network", networkGlyph)
 
         visible: root.itemVisible("network")
-        opacity: root.rowContents.opacity
-        scale: root.rowContents.scale
+        opacity: root.rowLook("network").opacity
+        scale: root.rowLook("network").scale
+        transform: Translate { x: root.rowLook("network").slide }
         x: root.elementX("network")
         y: root.elementY("network")
         width: size.width
@@ -820,8 +827,9 @@ Item {
         readonly property var size: root.sizeAround(batteryContent)
 
         visible: root.itemVisible("battery")
-        opacity: root.rowContents.opacity
-        scale: root.rowContents.scale
+        opacity: root.rowLook("battery").opacity
+        scale: root.rowLook("battery").scale
+        transform: Translate { x: root.rowLook("battery").slide }
         x: root.elementX("battery")
         y: root.elementY("battery")
         width: size.width
@@ -870,8 +878,9 @@ Item {
         readonly property var size: root.sizeAround(clockContent)
 
         visible: root.itemVisible("clock")
-        opacity: root.rowContents.opacity
-        scale: root.rowContents.scale
+        opacity: root.rowLook("clock").opacity
+        scale: root.rowLook("clock").scale
+        transform: Translate { x: root.rowLook("clock").slide }
         x: root.elementX("clock")
         y: root.elementY("clock")
         width: size.width
