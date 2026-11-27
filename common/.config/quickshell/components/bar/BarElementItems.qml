@@ -175,7 +175,10 @@ Item {
     // What there is for the elements to show (see BarElementItems.itemVisible).
     readonly property var elementStatus: ({
         live: liveIds,
+        liveRow: appearance.liveRowElements || [],
+        onBatteryRow: appearance.onBatteryElements || [],
         expanded: appearance.capsuleExpanded === true,
+        rowExpanded: appearance.capsuleRowExpanded === true,
         player: player,
         recordings: recordings,
         keepAwakeOn: keepAwake.on,

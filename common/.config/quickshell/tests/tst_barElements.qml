@@ -491,6 +491,51 @@ TestCase {
         compare(BarElementItems.itemVisible(data.element, barElements, status), data.shown);
     }
 
+    // A live element placed in the row of a collapsed capsule shows there only
+    // while active: the battery while on battery. With the row expanded, it
+    // shows as on any other bar style.
+    function test_aLiveElementInTheRowShowsCollapsedOnlyWhileActive_data() {
+        return [
+            { tag: "on battery", status: { hasBattery: true, onBattery: true }, shown: true },
+            { tag: "plugged in", status: { hasBattery: true }, shown: false },
+            { tag: "plugged in, capsule expanded with its row at rest",
+                status: { hasBattery: true, expanded: true }, shown: false },
+            { tag: "plugged in, row expanded",
+                status: { hasBattery: true, expanded: true, rowExpanded: true }, shown: true },
+            { tag: "no battery, row expanded", status: { expanded: true, rowExpanded: true }, shown: false }
+        ];
+    }
+
+    function test_aLiveElementInTheRowShowsCollapsedOnlyWhileActive(data) {
+        const barElements = { left: [], right: [], center: [{ id: "battery", enabled: true }] };
+        const status = nothingGoingOn(Object.assign({ liveRow: ["battery"] }, data.status));
+
+        compare(BarElementItems.itemVisible("battery", barElements, status), data.shown);
+    }
+
+    // An element a collapsed capsule's row shows on battery shows there only
+    // while running on battery, and then only if it has something to show;
+    // with the row expanded, it shows as on any other bar style.
+    function test_anElementOnBatteryShowsCollapsedOnlyOnBattery_data() {
+        return [
+            { tag: "on battery", element: "clock", status: { hasBattery: true, onBattery: true }, shown: true },
+            { tag: "plugged in", element: "clock", status: { hasBattery: true }, shown: false },
+            { tag: "no battery", element: "clock", status: {}, shown: false },
+            { tag: "plugged in, row expanded", element: "clock",
+                status: { hasBattery: true, expanded: true, rowExpanded: true }, shown: true },
+            { tag: "on battery, nothing to show", element: "media",
+                status: { hasBattery: true, onBattery: true }, shown: false }
+        ];
+    }
+
+    function test_anElementOnBatteryShowsCollapsedOnlyOnBattery(data) {
+        const barElements = { left: [], right: [], center: [{ id: "clock", enabled: true },
+            { id: "media", enabled: true }] };
+        const status = nothingGoingOn(Object.assign({ onBatteryRow: ["clock", "media"] }, data.status));
+
+        compare(BarElementItems.itemVisible(data.element, barElements, status), data.shown);
+    }
+
     // While the capsule glance shows a live element's card (`glance`,
     // CapsuleGlance.leavingElements), it leaves its place beside the pills,
     // and comes back once the glance goes; the other live elements stay.

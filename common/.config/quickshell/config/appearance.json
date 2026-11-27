@@ -185,7 +185,8 @@
                             "iconVisible": true,
                             "restIconVisible": false,
                             "restTextVisible": true,
-                            "textVisible": true
+                            "textVisible": true,
+                            "twelveHour": false
                         }
                     },
                     {
@@ -326,14 +327,14 @@
                 "appMenu": "hidden",
                 "arch": "hidden",
                 "audio": "hidden",
-                "battery": "liveRight",
+                "battery": "onBattery",
                 "bluetooth": "hidden",
                 "cava": "hidden",
                 "clock": "shown",
                 "currentApp": "hidden",
                 "keepAwake": "hidden",
                 "media": "hidden",
-                "network": "hidden",
+                "network": "onBattery",
                 "notifications": "hidden",
                 "pomodoro": "liveRight",
                 "privacy": "liveRight",

@@ -314,7 +314,7 @@ TestCase {
 
         verify(privacy);
         compare(placeChoice(privacy).options.map(option => option.label),
-            ["Hidden", "Shown", "Live left", "Live right"]);
+            ["Hidden", "Shown", "On battery", "Live left", "Live right", "Live in row"]);
     }
 
     // The pomodoro is a bar element of its own, apart from the clock: it is
@@ -332,7 +332,7 @@ TestCase {
 
         verify(elementRow(built.item, "Clock"));
         compare(placeChoice(pomodoro).options.map(option => option.label),
-            ["Hidden", "Shown", "Live left", "Live right"]);
+            ["Hidden", "Shown", "On battery", "Live left", "Live right", "Live in row"]);
         mouseClick(pomodoroSwitch);
         compare(built.appearance.calls, [["enabled", "pomodoro", false]]);
     }
@@ -572,12 +572,12 @@ TestCase {
             return choice ? choice.options.map(option => option.label) : [];
         }
 
-        const all = ["Hidden", "Shown", "Live left", "Live right"];
+        const all = ["Hidden", "Shown", "On battery", "Live left", "Live right", "Live in row"];
         compare(labels("Workspaces"), []);
         compare(labels("Recording indicator"), all);
         compare(labels("Media"), all);
         compare(labels("Keep-awake"), all);
-        compare(labels("Clock"), ["Hidden", "Shown"]);
+        compare(labels("Clock"), ["Hidden", "Shown", "On battery"]);
     }
 
     // The choice marks each element's place and saves a change to the profile.

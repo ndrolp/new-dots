@@ -8,9 +8,11 @@
 //
 // Each bar element has a collapsed place in the profile, `capsulePlaces`
 // (see BarProfileModel.capsulePlacesFor): hidden, shown in the collapsed
-// row, or live beside the pills, left or right; a profile without them takes
-// the default ones. A capsule never draws a live one in its row: see
-// LiveElements.js for the ones beside its pills.
+// row, shown in the row only while on battery, live beside the pills, left
+// or right, or live in the row (shown there only while active); a profile
+// without them takes the default ones. A
+// capsule never draws one live beside its pills in its row: see
+// LiveElements.js for those.
 
 const zoneNames = ["left", "center", "right"];
 
@@ -43,7 +45,9 @@ function collapsedRow(barElements, shownIds, liveIds) {
 }
 
 // The bar elements a bar window draws in its zones: on a capsule, the
-// collapsed row of the elements whose place is shown, or while `expanded`
+// collapsed row of the elements whose place is shown, on battery or live in
+// the row (BarElementItems.itemVisible hides the last two off battery or
+// while inactive), or while `expanded`
 // every element but the live ones (the workspaces take no place: the
 // workspace row shows them), or none while it shows a `change` instead,
 // never the live elements (see LiveElements.liveElements); the profile's own on any
@@ -58,8 +62,20 @@ function drawnElements(bar) {
     if (bar.change === true)
         return collapsedRow(bar.barElements, [], liveIds);
     if (!bar.expanded)
-        return collapsedRow(bar.barElements, ids.shown, liveIds);
+        return collapsedRow(bar.barElements, ids.shown.concat(ids.onBattery, ids.liveRow), liveIds);
     const glance = bar.glance || [];
     return collapsedRow(bar.barElements,
-        ids.hidden.concat(ids.shown).filter(id => glance.indexOf(id) === -1), liveIds);
+        ids.hidden.concat(ids.shown, ids.onBattery, ids.liveRow).filter(id => glance.indexOf(id) === -1), liveIds);
+}
+
+// The bar elements a capsule shows in its collapsed row only while running
+// on battery: those its profile enables and places on battery, in the
+// profile's order. None on any other bar style. Takes { barStyle,
+// barElements, capsulePlaces }.
+function onBatteryElements(bar) {
+    if (!BarProfileModel.capsule(bar))
+        return [];
+
+    return BarProfileModel.capsulePlaceIds(bar.barElements, bar.capsulePlaces).onBattery
+        .filter(id => BarProfileModel.elementEnabled(bar.barElements, id));
 }

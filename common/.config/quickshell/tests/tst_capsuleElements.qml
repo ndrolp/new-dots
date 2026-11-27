@@ -203,6 +203,47 @@ TestCase {
         verify(shownIds(CapsuleElements.drawnElements(bar), "center").indexOf("media") !== -1);
     }
 
+    // A live element whose place is Live in row is drawn in the row, collapsed
+    // or expanded (BarElementItems.itemVisible hides it collapsed while
+    // inactive), and not beside the pills.
+    function test_aLiveElementLiveInTheRowIsDrawnThere_data() {
+        return [
+            { tag: "collapsed", expanded: false },
+            { tag: "expanded", expanded: true }
+        ];
+    }
+
+    function test_aLiveElementLiveInTheRowIsDrawnThere(data) {
+        const bar = { barStyle: "capsule", barElements: BarProfileModel.defaultProfile.barElements,
+            capsulePlaces: places({ battery: "liveRow" }), expanded: data.expanded };
+
+        verify(shownIds(CapsuleElements.drawnElements(bar), "center").indexOf("battery") !== -1);
+    }
+
+    // Any element but the workspaces can be placed on battery: it is drawn
+    // in the row, collapsed or expanded (BarElementItems.itemVisible hides
+    // it collapsed while plugged in), and listed by onBatteryElements.
+    function test_anElementOnBatteryIsDrawnInTheRow_data() {
+        return [
+            { tag: "collapsed", expanded: false },
+            { tag: "expanded", expanded: true }
+        ];
+    }
+
+    function test_anElementOnBatteryIsDrawnInTheRow(data) {
+        const bar = { barStyle: "capsule", barElements: BarProfileModel.defaultProfile.barElements,
+            capsulePlaces: places({ network: "onBattery" }), expanded: data.expanded };
+
+        verify(shownIds(CapsuleElements.drawnElements(bar), "center").indexOf("network") !== -1);
+        compare(CapsuleElements.onBatteryElements(bar), ["network"]);
+    }
+
+    function test_onlyACapsuleHasElementsOnBattery() {
+        compare(CapsuleElements.onBatteryElements({ barStyle: "docked",
+            barElements: BarProfileModel.defaultProfile.barElements,
+            capsulePlaces: places({ network: "onBattery" }) }), []);
+    }
+
     // A hidden element isn't in the collapsed row; expanded, it shows in the
     // row like any other element.
     function test_aHiddenLiveElementOnlyShowsExpanded() {

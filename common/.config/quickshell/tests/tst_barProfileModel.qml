@@ -220,7 +220,8 @@ TestCase {
         const places = BarProfileModel.completeProfile({ barStyle: "capsule" }).capsulePlaces;
 
         compare(places.pomodoro, "liveRight");
-        compare(BarProfileModel.capsulePlacesFor("pomodoro"), ["hidden", "shown", "liveLeft", "liveRight"]);
+        compare(BarProfileModel.capsulePlacesFor("pomodoro"), ["hidden", "shown", "onBattery", "liveLeft",
+            "liveRight", "liveRow"]);
         verify(BarProfileModel.canBeLive("pomodoro"));
     }
 
@@ -241,7 +242,8 @@ TestCase {
         const places = BarProfileModel.completeProfile({ barStyle: "capsule" }).capsulePlaces;
 
         compare(places.battery, "liveRight");
-        compare(BarProfileModel.capsulePlacesFor("battery"), ["hidden", "shown", "liveLeft", "liveRight"]);
+        compare(BarProfileModel.capsulePlacesFor("battery"), ["hidden", "shown", "onBattery", "liveLeft",
+            "liveRight", "liveRow"]);
         verify(BarProfileModel.canBeLive("battery"));
     }
 
@@ -441,18 +443,35 @@ TestCase {
             { clock: "shown", arch: "shown", keepAwake: "liveRight", media: "liveRight" });
 
         compare(BarProfileModel.capsulePlaceIds(barElements, places),
-            { hidden: [], shown: ["clock", "arch"], live: { left: [], right: ["recording", "keepAwake", "media"] } });
+            { hidden: [], shown: ["clock", "arch"], onBattery: [], liveRow: [],
+                live: { left: [], right: ["recording", "keepAwake", "media"] } });
+    }
+
+    // An element placed live in the row is listed apart from the shown ones
+    // and from those beside the pills.
+    function test_anElementLiveInTheRowIsListedApart() {
+        const barElements = {
+            left: [{ id: "clock", enabled: true }],
+            center: [{ id: "workspaces", enabled: true }],
+            right: [{ id: "battery", enabled: true }]
+        };
+        const places = Object.assign(BarProfileModel.completeCapsulePlaces(undefined),
+            { clock: "shown", battery: "liveRow" });
+
+        compare(BarProfileModel.capsulePlaceIds(barElements, places),
+            { hidden: [], shown: ["clock"], onBattery: [], liveRow: ["battery"],
+                live: { left: [], right: [] } });
     }
 
     // Every bar element but the workspaces offers Hidden and Shown; only the
     // ones that can be live, the recording indicator, media and keep-awake,
-    // also offer Live left and Live right.
+    // also offer Live left, Live right and Live in row.
     function test_onlyElementsThatCanBeLiveOfferTheLivePlaces_data() {
-        const all = ["Hidden", "Shown", "Live left", "Live right"];
+        const all = ["Hidden", "Shown", "On battery", "Live left", "Live right", "Live in row"];
         return [
             { tag: "recording", id: "recording", labels: all },
             { tag: "media", id: "media", labels: all },
-            { tag: "clock", id: "clock", labels: ["Hidden", "Shown"] },
+            { tag: "clock", id: "clock", labels: ["Hidden", "Shown", "On battery"] },
             { tag: "keepAwake", id: "keepAwake", labels: all },
             { tag: "workspaces", id: "workspaces", labels: [] }
         ];

@@ -94,24 +94,27 @@ function canBeLive(id) {
 }
 
 // Where a collapsed capsule puts a bar element, its collapsed place: hidden,
-// shown in its row, or live beside its workspace pills, on the left or the
-// right. Only the elements that can be live take the live places, and the
-// workspaces, which the capsule shows as pills, take none.
-const capsulePlaceNames = ["hidden", "shown", "liveLeft", "liveRight"];
+// shown in its row, live beside its workspace pills, on the left or the
+// right, live in its row: shown there only while active
+// (LiveElements.active), or in its row only while running on battery. Only
+// the elements that can be live take the live places, and the workspaces,
+// which the capsule shows as pills, take none.
+const capsulePlaceNames = ["hidden", "shown", "onBattery", "liveLeft", "liveRight", "liveRow"];
 const livePlaceSides = { liveLeft: "left", liveRight: "right" };
 const capsulePlaceLabels = {
-    hidden: "Hidden", shown: "Shown", liveLeft: "Live left", liveRight: "Live right"
+    hidden: "Hidden", shown: "Shown", liveLeft: "Live left", liveRight: "Live right",
+    liveRow: "Live in row", onBattery: "On battery"
 };
 
 // The collapsed places element `id` can take, in the order they are offered.
 function capsulePlacesFor(id) {
     if (id === "workspaces" || elementIds.indexOf(id) === -1)
         return [];
-    return canBeLive(id) ? capsulePlaceNames : capsulePlaceNames.slice(0, 2);
+    return canBeLive(id) ? capsulePlaceNames : capsulePlaceNames.slice(0, 3);
 }
 
 // The side of the workspace pills `place` sits on, or "" for a place that
-// isn't live.
+// isn't beside them (liveRow is in the row).
 function liveSide(place) {
     return livePlaceSides[place] || "";
 }
@@ -149,11 +152,11 @@ function completeCapsulePlaces(places) {
 
 // The ids of the bar elements `barElements` lists in each collapsed place
 // of `places` (completed, see completeCapsulePlaces), in the profile's order,
-// enabled or not: { hidden, shown, live: { left, right } }. The workspaces,
+// enabled or not: { hidden, shown, onBattery, liveRow, live: { left, right } }. The workspaces,
 // which take no place, are in none.
 function capsulePlaceIds(barElements, places) {
     const complete = completeCapsulePlaces(places);
-    const ids = { hidden: [], shown: [], live: { left: [], right: [] } };
+    const ids = { hidden: [], shown: [], onBattery: [], liveRow: [], live: { left: [], right: [] } };
 
     for (const zoneName of zoneNames)
         ((barElements || {})[zoneName] || []).forEach(element => {

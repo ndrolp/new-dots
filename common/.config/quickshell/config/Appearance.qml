@@ -193,7 +193,7 @@ QtObject {
     }
 
     // Where the edited profile's collapsed capsule puts `element`: "hidden",
-    // "shown", "liveLeft" or "liveRight" (see BarProfileModel.capsulePlacesFor).
+    // "shown", "onBattery", "liveLeft", "liveRight" or "liveRow" (see BarProfileModel.capsulePlacesFor).
     function setCapsulePlace(element, place) {
         setBarSetting("capsulePlaces", BarProfileModel.setCapsulePlace(capsulePlaces, element, place));
     }

@@ -23,6 +23,18 @@ function liveElements(bar) {
     return { left: live.left.filter(enabled), right: live.right.filter(enabled) };
 }
 
+// The live elements a capsule draws in its row, shown there collapsed only
+// while active: those its profile enables and places live in the row, in
+// the profile's order. None on any other bar style. Takes what
+// liveElements takes.
+function rowLiveElements(bar) {
+    if (!BarProfileModel.capsule(bar))
+        return [];
+
+    return BarProfileModel.capsulePlaceIds(bar.barElements, bar.capsulePlaces).liveRow
+        .filter(id => BarProfileModel.elementEnabled(bar.barElements, id));
+}
+
 // The ids of the live elements by side, `sides` as liveElements gives them
 // (or null for none), as one list: the left ones, then the right ones.
 function ids(sides) {

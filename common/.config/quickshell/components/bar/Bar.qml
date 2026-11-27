@@ -99,6 +99,20 @@ Variants {
                     barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
                     capsulePlaces: bar.appearance.barProfileValue(panel.profileName, "capsulePlaces")
                 })
+                // On a capsule, the live elements in its row, shown there
+                // collapsed only while active (see LiveElements.rowLiveElements).
+                property var liveRowElements: LiveElements.rowLiveElements({
+                    barStyle: panel.barAppearance.barStyle,
+                    barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
+                    capsulePlaces: bar.appearance.barProfileValue(panel.profileName, "capsulePlaces")
+                })
+                // On a capsule, the bar elements its row shows collapsed only
+                // while on battery (see CapsuleElements.onBatteryElements).
+                property var onBatteryElements: CapsuleElements.onBatteryElements({
+                    barStyle: panel.barAppearance.barStyle,
+                    barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
+                    capsulePlaces: bar.appearance.barProfileValue(panel.profileName, "capsulePlaces")
+                })
                 // The bar elements whose glance cards show
                 // (CapsuleGlance.leavingElements): they leave the expanded
                 // row and, live, their place beside the pills.
