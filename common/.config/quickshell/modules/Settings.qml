@@ -20,6 +20,7 @@ Feature {
     required property var appearance
     required property var monitors
     required property var monitorSetups
+    required property var windowAppearance
     required property var wallpapers
     required property var bookmarks
     required property var plugins
@@ -142,6 +143,7 @@ Feature {
         appearance: root.appearance
         monitors: root.monitors
         monitorSetups: root.monitorSetups
+        windowAppearance: root.windowAppearance
         wallpapers: root.wallpapers
         bookmarks: root.bookmarks
         plugins: root.plugins

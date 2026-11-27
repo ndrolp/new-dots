@@ -17,6 +17,8 @@ Rectangle {
     // The shell's cava, so the Bar section can say when it can't run.
     property var cava
     property var monitorSetups
+    // The shell's window appearance service, for the Windows section.
+    property var windowAppearance
 
     property string currentSection: "Bar"
     property string pendingSection: ""
@@ -89,6 +91,13 @@ Rectangle {
             title: "Motion",
             description: "Choose how the shell animates.",
             settings: [{ label: "Reduce motion" }]
+        },
+        {
+            label: "Windows", icon: "󰖯", section: "Windows",
+            keywords: "hyprland gaps rounding decoration transparency active inactive appearance windows",
+            title: "Windows",
+            description: "Choose how Hyprland draws windows.",
+            settings: [{ label: "Inner gaps" }, { label: "Outer gaps" }]
         },
         {
             label: "Displays", icon: "󰍹", section: "Monitors",
@@ -234,6 +243,9 @@ Rectangle {
             source = "ControlCenterSettings.qml";
         } else if (currentSection === "Motion") {
             source = "MotionSettings.qml";
+        } else if (currentSection === "Windows") {
+            source = "WindowsSettings.qml";
+            properties.windowAppearance = root.windowAppearance;
         } else if (currentSection === "Monitors") {
             source = "MonitorArrangeSettings.qml";
             properties.monitors = root.monitors;
@@ -356,7 +368,7 @@ Rectangle {
     }
 
     implicitWidth: 980
-    implicitHeight: 560
+    implicitHeight: 600
     radius: appearance.radius
     // Translucent: centered, the blurred desktop shows through. Inside a
     // capsule the popup's surface replaces it (SettingsPopup.qml).

@@ -90,8 +90,7 @@ hl.permission("/usr/(bin|local/bin)/hyprpm", "plugin", "allow")
 -- Refer to https://wiki.hypr.land/Configuring/Basics/Variables/
 hl.config({
 	general = {
-		gaps_in = 5,
-		gaps_out = 10,
+		-- Gaps come from the Windows section of the shell's settings: modules/appearence/windows.lua
 
 		-- Border size and colours come from the colorscheme: modules/appearence/borders.lua
 
@@ -126,6 +125,7 @@ hl.config({
 })
 
 require("modules.appearence.borders")
+require("modules.appearence.windows").apply()
 require("modules.animations.core")
 
 -- See https://wiki.hypr.land/Configuring/Layouts/Dwindle-Layout/ for more

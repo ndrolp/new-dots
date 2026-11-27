@@ -12,6 +12,7 @@ PanelWindow {
     required property var plugins
     property var cava
     property var monitorSetups
+    property var windowAppearance
     property bool open: false
     property var targetWindow
     property real reveal: open ? 1 : 0
@@ -77,6 +78,7 @@ PanelWindow {
         plugins: root.plugins
         cava: root.cava
         monitorSetups: root.monitorSetups
+        windowAppearance: root.windowAppearance
 
         onCloseRequested: root.closeRequested()
     }

@@ -134,6 +134,17 @@ TestCase {
         verify(sidebarRow(item, "Motion").clickable);
     }
 
+    // Windows, how Hyprland draws windows, comes right after Motion.
+    function test_windowsComesRightAfterMotion() {
+        const item = createTemporaryObject(panel, this);
+        const sections = item.sections.map(section => section.section);
+        const windows = item.sections.find(section => section.section === "Windows");
+
+        compare(sections[sections.indexOf("Motion") + 1], "Windows");
+        compare(windows.label, "Windows");
+        compare(windows.description, "Choose how Hyprland draws windows.");
+    }
+
     function test_searchingForAnimationsFindsTheMotionSection() {
         const item = createTemporaryObject(panel, this, { sectionQuery: "animation" });
 

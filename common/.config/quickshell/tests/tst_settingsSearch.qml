@@ -162,6 +162,33 @@ TestCase {
         compare(listed(item), [["Bar", "Edge margin"]]);
     }
 
+    function test_theGapsAreListedUnderWindows_data() {
+        return [
+            { tag: "inner", query: "inner gaps", listed: [["Windows", "Inner gaps"]] },
+            { tag: "outer", query: "outer gaps", listed: [["Windows", "Outer gaps"]] },
+            { tag: "both", query: "gaps", listed: [["Windows", "Inner gaps", "Outer gaps"]] }
+        ];
+    }
+
+    function test_theGapsAreListedUnderWindows(data) {
+        const item = createTemporaryObject(panel, this, { sectionQuery: data.query });
+
+        compare(listed(item), data.listed);
+    }
+
+    // The Windows section's keywords find it.
+    function test_theWindowsKeywordsFindIt_data() {
+        return ["hyprland", "gaps", "rounding", "decoration", "transparency", "inactive", "appearance"]
+            .map(query => ({ tag: query, query: query }));
+    }
+
+    function test_theWindowsKeywordsFindIt(data) {
+        const item = createTemporaryObject(panel, this, { sectionQuery: data.query });
+
+        verify(item.filteredSections.some(section => section.label === "Windows"),
+            "\"" + data.query + "\" doesn't find the Windows section");
+    }
+
     function test_sectionOnlyMatchesListNoSettings() {
         const item = createTemporaryObject(panel, this, { sectionQuery: "animations" });
 
