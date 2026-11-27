@@ -11,6 +11,7 @@ TestCase {
     name: "WindowsSettings"
     width: 800
     height: 600
+    visible: true
     when: windowShown
 
     function all(item, predicate, found) {
@@ -70,6 +71,17 @@ TestCase {
             ["hyprctl", "eval", 'require("modules.appearence.windows").apply()']);
     }
 
+    // hyprctl fails outside Hyprland, and says "error" when the module's
+    // Lua fails; either way Hyprland didn't take the change.
+    function test_anApplyFailsWhenHyprctlFailsOrReportsAnError() {
+        verify(!WindowAppearance.applyFailed(0, ""), "a quiet success");
+        verify(!WindowAppearance.applyFailed(0, "ok\n"), "an ok");
+        verify(WindowAppearance.applyFailed(1, "HYPRLAND_INSTANCE_SIGNATURE not set! (is hyprland running?)\n"),
+            "outside Hyprland");
+        verify(WindowAppearance.applyFailed(0, "error: [string]:1: attempt to index a nil value\n"), "a Lua error");
+        verify(WindowAppearance.applyFailed(127, ""), "no hyprctl");
+    }
+
     // Where the settings panel shows a section, with a fake service that
     // keeps what it is asked to set.
     Component {
@@ -94,6 +106,13 @@ TestCase {
 
                 property var values: WindowAppearance.valuesFrom('{ "gaps_in": 8 }')
                 property var asked: []
+                property bool applyFailed: false
+                property int resets: 0
+
+                function reset() {
+                    resets++;
+                    values = WindowAppearance.defaults();
+                }
 
                 function set(key, value) {
                     asked = asked.concat([[key, value]]);
@@ -134,6 +153,40 @@ TestCase {
         compare(built.service.asked, [["gaps_in", 12], ["gaps_out", 40]]);
         compare(inner.value, 12);
         compare(outer.value, 40);
+    }
+
+    function button(item, label) {
+        return all(item, child => child.label === label && child.activated !== undefined)[0];
+    }
+
+    function failureHint(item) {
+        return all(item, child => child.text === "Couldn't apply to Hyprland; it will apply on next start.")[0];
+    }
+
+    // Reset needs no confirmation: one press and every setting is back to
+    // its default.
+    function test_resetPutsEverySettingBackStraightAway() {
+        const built = make();
+
+        button(built.section, "Reset to defaults").activated();
+
+        compare(built.service.resets, 1);
+        compare(number(built.section, "Inner gaps").value, 5);
+        compare(number(built.section, "Outer gaps").value, 10);
+    }
+
+    // Shown in the section, not as a toast, while Hyprland couldn't take the
+    // last change; it goes once an apply works.
+    function test_aFailedApplyShowsAHintUntilTheNextOneWorks() {
+        const built = make();
+        const hint = failureHint(built.section);
+
+        verify(hint, "the section has the hint");
+        verify(!hint.visible, "hidden while applies work");
+        built.service.applyFailed = true;
+        verify(hint.visible, "shown after a failed apply");
+        built.service.applyFailed = false;
+        verify(!hint.visible, "cleared by the next apply that works");
     }
 
     // Before the service is there (or in a panel without one) the section
