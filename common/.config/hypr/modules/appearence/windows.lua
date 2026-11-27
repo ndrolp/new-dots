@@ -18,6 +18,12 @@ local M = {}
 M.SETTINGS = {
 	{ key = "gaps_in", option = "general.gaps_in", kind = "integer", min = 0, max = 30, default = 5 },
 	{ key = "gaps_out", option = "general.gaps_out", kind = "integer", min = 0, max = 60, default = 10 },
+	-- 0 hides the border. Its colours come from the colorscheme (borders.lua), which leaves the size alone.
+	{ key = "border_size", option = "general.border_size", kind = "integer", min = 0, max = 6, default = 2 },
+	{ key = "rounding", option = "decoration.rounding", kind = "integer", min = 0, max = 24, default = 5 },
+	{ key = "active_opacity", option = "decoration.active_opacity", kind = "number", min = 0.5, max = 1, default = 1.0 },
+	{ key = "inactive_opacity", option = "decoration.inactive_opacity", kind = "number", min = 0.3, max = 1, default = 0.9 },
+	{ key = "shadows", option = "decoration.shadow.enabled", kind = "boolean", default = true },
 }
 
 local function default_path()
@@ -59,7 +65,11 @@ function M.values(path)
 	local values = {}
 	for _, setting in ipairs(M.SETTINGS) do
 		local value = saved[setting.key]
-		values[setting.key] = valid(setting, value) and value or setting.default
+		if valid(setting, value) then
+			values[setting.key] = value
+		else
+			values[setting.key] = setting.default
+		end
 		if setting.kind == "integer" then
 			values[setting.key] = math.floor(values[setting.key])
 		end

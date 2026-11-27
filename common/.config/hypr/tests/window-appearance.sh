@@ -122,9 +122,141 @@ test_the_full_config_applies_the_saved_gaps() {
     [[ "$OUT" == $'7\t9' ]] || fail "wrong gaps"
 }
 
+# borders_and_rounding_with <saved file contents | none>: like applied_with, but sets OUT to the border
+# size and the corner radius Hyprland ends up with.
+borders_and_rounding_with() {
+    applied_with "$1" "
+        print((config.general or {}).border_size, (config.decoration or {}).rounding)
+        os.exit(0)
+    "
+}
+
+test_without_a_saved_file_the_border_size_and_rounding_are_the_defaults() {
+    borders_and_rounding_with none
+    [[ "$OUT" == $'2\t5' ]] || fail "wrong border size and rounding"
+}
+
+test_the_saved_border_size_and_rounding_apply() {
+    borders_and_rounding_with '{ "border_size": 0, "rounding": 24 }'
+    [[ "$OUT" == $'0\t24' ]] || fail "wrong border size and rounding"
+}
+
+test_a_bad_border_size_or_rounding_falls_back_alone() {
+    borders_and_rounding_with '{ "border_size": 7, "rounding": 12 }'
+    [[ "$OUT" == $'2\t12' ]] || fail "wrong border size and rounding"
+    borders_and_rounding_with '{ "border_size": 4, "rounding": 25 }'
+    [[ "$OUT" == $'4\t5' ]] || fail "wrong border size and rounding"
+    borders_and_rounding_with '{ "border_size": 1.5, "rounding": "round" }'
+    [[ "$OUT" == $'2\t5' ]] || fail "wrong border size and rounding"
+    borders_and_rounding_with '{ "border_size": -1, "rounding": 0 }'
+    [[ "$OUT" == $'2\t0' ]] || fail "wrong border size and rounding"
+}
+
+# The whole config, as a colorscheme change reloads it: the border size and rounding come from the
+# saved file, the border colours from the colorscheme, and neither resets the other.
+test_the_full_config_gives_the_saved_border_size_with_the_colorschemes_colours() {
+    local copy
+    copy="$(mktemp -d "$SCRATCH/hypr.XXXX")"
+    cp -r "$HYPR/." "$copy"
+    rm -f "$copy/custom/colors.lua"
+    printf 'return { accent = "#a7c080", border = "#4f5b58" }\n' >"$copy/custom/colors.lua"
+    applied_with '{ "border_size": 5, "rounding": 9 }' "
+        package.path = '$copy/?.lua'
+        for name in pairs(package.loaded) do
+            if name:match('^modules') or name:match('^custom') then package.loaded[name] = nil end
+        end
+        dofile('$copy/hyprland.lua')
+        local general = config.general or {}
+        print(general.border_size, general.col.active_border, general.col.inactive_border,
+            (config.decoration or {}).rounding)
+        os.exit(0)
+    "
+    [[ "$OUT" == $'5\trgb(a7c080)\trgb(4f5b58)\t9' ]] || fail "wrong borders"
+}
+
+# The colorscheme's borders module sets only the colours, so applying it never resets the saved size.
+test_the_colorschemes_borders_leave_the_border_size_alone() {
+    applied_with '{ "border_size": 5 }' "
+        package.loaded['modules.appearence.borders'] = nil
+        require('modules.appearence.borders')
+        print(config.general.border_size)
+        os.exit(0)
+    "
+    [[ "$OUT" == "5" ]] || fail "the colorscheme's borders reset the size"
+}
+
 test_the_saved_file_is_gitignored() {
     OUT=""
     git -C "$HYPR" check-ignore -q window-appearance.json || fail "window-appearance.json is not gitignored"
+}
+
+# opacity_with <saved file contents | none> [lua]: like applied_with, but sets OUT to the focused and
+# unfocused window opacity and whether shadows are on.
+opacity_with() {
+    applied_with "$1" "${2:-}
+        local decoration = config.decoration or {}
+        print(decoration.active_opacity, decoration.inactive_opacity, (decoration.shadow or {}).enabled)
+        os.exit(0)
+    "
+}
+
+OPACITY_DEFAULTS=$'1.0\t0.9\ttrue'
+
+test_without_a_saved_file_the_opacity_and_shadows_are_the_defaults() {
+    opacity_with none
+    [[ "$OUT" == "$OPACITY_DEFAULTS" ]] || fail "wrong opacity or shadows"
+}
+
+test_the_saved_opacity_and_shadows_apply() {
+    opacity_with '{ "active_opacity": 0.8, "inactive_opacity": 0.5, "shadows": false }'
+    [[ "$OUT" == $'0.8\t0.5\tfalse' ]] || fail "wrong opacity or shadows"
+}
+
+test_an_opacity_out_of_range_falls_back_alone() {
+    opacity_with '{ "active_opacity": 0.4, "inactive_opacity": 0.3 }'
+    [[ "$OUT" == $'1.0\t0.3\ttrue' ]] || fail "wrong opacity"
+    opacity_with '{ "active_opacity": 0.5, "inactive_opacity": 0.2 }'
+    [[ "$OUT" == $'0.5\t0.9\ttrue' ]] || fail "wrong opacity"
+    opacity_with '{ "active_opacity": 1.1, "inactive_opacity": 1 }'
+    [[ "$OUT" == $'1.0\t1\ttrue' ]] || fail "wrong opacity"
+}
+
+test_a_value_of_the_wrong_type_falls_back_alone() {
+    opacity_with '{ "active_opacity": "0.8", "inactive_opacity": 0.7, "shadows": "no" }'
+    [[ "$OUT" == $'1.0\t0.7\ttrue' ]] || fail "wrong opacity or shadows"
+    opacity_with '{ "shadows": 0 }'
+    [[ "$OUT" == "$OPACITY_DEFAULTS" ]] || fail "wrong shadows"
+}
+
+# The whole Hyprland config applies the saved opacity and shadows, and no later setting overrides them;
+# the shadow keeps its colour and range.
+test_the_full_config_applies_the_saved_opacity_and_shadows() {
+    opacity_with '{ "active_opacity": 0.95, "inactive_opacity": 0.6, "shadows": false }' "
+        package.path = '$HYPR/?.lua'
+        for name in pairs(package.loaded) do
+            if name:match('^modules') then package.loaded[name] = nil end
+        end
+        dofile('$HYPR/hyprland.lua')
+        assert(config.decoration.shadow.range == 2, 'the shadow lost its range')
+        assert(config.decoration.shadow.color == 0xee1a1a1a, 'the shadow lost its colour')
+    "
+    [[ "$OUT" == $'0.95\t0.6\tfalse' ]] || fail "wrong opacity or shadows"
+}
+
+# The per-app opacity rule multiplies with the global opacity: it must not override it.
+test_the_per_app_opacity_rule_still_applies_on_top() {
+    OUT="$(lua -e "
+        local rules = {}
+        local anything = setmetatable({}, {})
+        getmetatable(anything).__index = function() return anything end
+        getmetatable(anything).__call = function() return anything end
+        hl = setmetatable({ window_rule = function(rule) rules[#rules + 1] = rule end }, { __index = anything })
+        dofile('$HYPR/modules/rules/windows.lua')
+        for _, rule in ipairs(rules) do
+            if rule.name == 'transparent' then print(rule.opacity, rule.override) end
+        end
+    " 2>&1)"
+    [[ "$OUT" == $'0.9\tnil' ]] || fail "the per-app opacity rule changed"
 }
 
 for t in $(declare -F | awk '{print $3}' | grep "^test_.*${1:-}"); do
