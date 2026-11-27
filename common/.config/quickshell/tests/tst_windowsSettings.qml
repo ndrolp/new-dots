@@ -31,13 +31,35 @@ TestCase {
         return WindowAppearance.valuesFrom(text);
     }
 
-    // Only the gaps of `values`.
     function gaps(values) {
         return { gaps_in: values.gaps_in, gaps_out: values.gaps_out };
     }
 
+    function bordersAndRounding(values) {
+        return { border_size: values.border_size, rounding: values.rounding };
+    }
+
     function toggle(item, label) {
         return all(item, child => child.label === label && child.switchItem !== undefined)[0];
+    }
+
+    function test_withoutASavedFileTheBorderSizeAndRoundingAreTodaysDefaults() {
+        compare(bordersAndRounding(saved(null)), { border_size: 2, rounding: 5 });
+    }
+
+    function test_aBadBorderSizeOrRoundingFallsBackAlone() {
+        compare(bordersAndRounding(saved('{ "border_size": 0, "rounding": 24 }')), { border_size: 0, rounding: 24 });
+        compare(bordersAndRounding(saved('{ "border_size": 7, "rounding": 12 }')), { border_size: 2, rounding: 12 });
+        compare(bordersAndRounding(saved('{ "border_size": 3, "rounding": 25 }')), { border_size: 3, rounding: 5 });
+        compare(bordersAndRounding(saved('{ "border_size": 1.5, "rounding": -1 }')), { border_size: 2, rounding: 5 });
+    }
+
+    function test_theBorderSizeAndRoundingAreKeptInRangeAndWhole() {
+        const values = saved(null);
+
+        compare(WindowAppearance.withValue(values, "border_size", 9).border_size, 6);
+        compare(WindowAppearance.withValue(values, "rounding", 30).rounding, 24);
+        compare(WindowAppearance.withValue(values, "rounding", 3.4).rounding, 3);
     }
 
     function test_withoutASavedFileTheGapsAreTodaysDefaults() {
@@ -62,6 +84,8 @@ TestCase {
         const values = WindowAppearance.withValue(saved(null), "gaps_out", 24);
 
         compare(gaps(JSON.parse(WindowAppearance.fileText(values))), { gaps_in: 5, gaps_out: 24 });
+        compare(Object.keys(JSON.parse(WindowAppearance.fileText(values))).sort(),
+            Object.keys(WindowAppearance.settings).sort());
         verify(WindowAppearance.fileText(values).endsWith("\n"), "it ends in a newline");
     }
 
@@ -168,6 +192,28 @@ TestCase {
         compare(built.service.asked, [["gaps_in", 12], ["gaps_out", 40]]);
         compare(inner.value, 12);
         compare(outer.value, 40);
+    }
+
+    function test_theBorderSizeAndCornerRadiusShowTheirValuesInTheirRanges() {
+        const built = make();
+        const border = number(built.section, "Border size");
+        const radius = number(built.section, "Corner radius");
+
+        compare([border.from, border.to, border.value], [0, 6, 2]);
+        compare([radius.from, radius.to, radius.value], [0, 24, 5]);
+    }
+
+    function test_movingTheBorderSizeOrCornerRadiusSetsIt() {
+        const built = make();
+        const border = number(built.section, "Border size");
+        const radius = number(built.section, "Corner radius");
+
+        border.edited(0);
+        radius.edited(16);
+
+        compare(built.service.asked, [["border_size", 0], ["rounding", 16]]);
+        compare(border.value, 0);
+        compare(radius.value, 16);
     }
 
     function test_theBlurShowsTheSavedValues() {

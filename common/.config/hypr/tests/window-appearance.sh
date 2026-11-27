@@ -212,6 +212,69 @@ test_applying_again_switches_window_blur_off_and_back_on() {
     [[ "$OUT" == $'7\tnil\tfalse' ]] || fail "window blur didn't go off"
 }
 
+# borders_and_rounding_with <saved file contents | none>: like applied_with, but sets OUT to the border
+# size and the corner radius Hyprland ends up with.
+borders_and_rounding_with() {
+    applied_with "$1" "
+        print((config.general or {}).border_size, (config.decoration or {}).rounding)
+        os.exit(0)
+    "
+}
+
+test_without_a_saved_file_the_border_size_and_rounding_are_the_defaults() {
+    borders_and_rounding_with none
+    [[ "$OUT" == $'2\t5' ]] || fail "wrong border size and rounding"
+}
+
+test_the_saved_border_size_and_rounding_apply() {
+    borders_and_rounding_with '{ "border_size": 0, "rounding": 24 }'
+    [[ "$OUT" == $'0\t24' ]] || fail "wrong border size and rounding"
+}
+
+test_a_bad_border_size_or_rounding_falls_back_alone() {
+    borders_and_rounding_with '{ "border_size": 7, "rounding": 12 }'
+    [[ "$OUT" == $'2\t12' ]] || fail "wrong border size and rounding"
+    borders_and_rounding_with '{ "border_size": 4, "rounding": 25 }'
+    [[ "$OUT" == $'4\t5' ]] || fail "wrong border size and rounding"
+    borders_and_rounding_with '{ "border_size": 1.5, "rounding": "round" }'
+    [[ "$OUT" == $'2\t5' ]] || fail "wrong border size and rounding"
+    borders_and_rounding_with '{ "border_size": -1, "rounding": 0 }'
+    [[ "$OUT" == $'2\t0' ]] || fail "wrong border size and rounding"
+}
+
+# The whole config, as a colorscheme change reloads it: the border size and rounding come from the
+# saved file, the border colours from the colorscheme, and neither resets the other.
+test_the_full_config_gives_the_saved_border_size_with_the_colorschemes_colours() {
+    local copy
+    copy="$(mktemp -d "$SCRATCH/hypr.XXXX")"
+    cp -r "$HYPR/." "$copy"
+    rm -f "$copy/custom/colors.lua"
+    printf 'return { accent = "#a7c080", border = "#4f5b58" }\n' >"$copy/custom/colors.lua"
+    applied_with '{ "border_size": 5, "rounding": 9 }' "
+        package.path = '$copy/?.lua'
+        for name in pairs(package.loaded) do
+            if name:match('^modules') or name:match('^custom') then package.loaded[name] = nil end
+        end
+        dofile('$copy/hyprland.lua')
+        local general = config.general or {}
+        print(general.border_size, general.col.active_border, general.col.inactive_border,
+            (config.decoration or {}).rounding)
+        os.exit(0)
+    "
+    [[ "$OUT" == $'5\trgb(a7c080)\trgb(4f5b58)\t9' ]] || fail "wrong borders"
+}
+
+# The colorscheme's borders module sets only the colours, so applying it never resets the saved size.
+test_the_colorschemes_borders_leave_the_border_size_alone() {
+    applied_with '{ "border_size": 5 }' "
+        package.loaded['modules.appearence.borders'] = nil
+        require('modules.appearence.borders')
+        print(config.general.border_size)
+        os.exit(0)
+    "
+    [[ "$OUT" == "5" ]] || fail "the colorscheme's borders reset the size"
+}
+
 test_the_saved_file_is_gitignored() {
     OUT=""
     git -C "$HYPR" check-ignore -q window-appearance.json || fail "window-appearance.json is not gitignored"

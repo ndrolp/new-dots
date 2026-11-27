@@ -50,7 +50,7 @@ QML
 test_a_change_writes_the_file_and_applies_only_the_window_appearance_module() {
     command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
     run_service none 'service.set("gaps_in", 12)'
-    jq -e '.gaps_in == 12 and .gaps_out == 10' "$CONFIG/hypr/window-appearance.json" >/dev/null \
+    jq -e '.gaps_in == 12 and .gaps_out == 10 and .border_size == 2 and .rounding == 5' "$CONFIG/hypr/window-appearance.json" >/dev/null \
         || fail "wrong file: $(cat "$CONFIG/hypr/window-appearance.json" 2>&1)"
     [[ "$(cat "$SCRATCH/hyprctl" 2>&1)" == 'eval require("modules.appearence.windows").apply()' ]] \
         || fail "wrong hyprctl calls: $(cat "$SCRATCH/hyprctl" 2>&1)"
