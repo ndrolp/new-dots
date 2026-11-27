@@ -46,6 +46,31 @@ Column {
         }
     }
 
+    Panels.SettingsCard {
+        appearance: root.appearance
+        title: "Borders"
+
+        Panels.SettingsNumber {
+            width: parent.width
+            appearance: root.appearance
+            label: "Border size"
+            from: WindowAppearance.settings.border_size.min
+            to: WindowAppearance.settings.border_size.max
+            value: root.values.border_size
+            onEdited: number => root.set("border_size", number)
+        }
+
+        Panels.SettingsNumber {
+            width: parent.width
+            appearance: root.appearance
+            label: "Corner radius"
+            from: WindowAppearance.settings.rounding.min
+            to: WindowAppearance.settings.rounding.max
+            value: root.values.rounding
+            onEdited: number => root.set("rounding", number)
+        }
+    }
+
     // Opacity is saved as Hyprland takes it (0–1) and shown as a percentage.
     Panels.SettingsCard {
         appearance: root.appearance

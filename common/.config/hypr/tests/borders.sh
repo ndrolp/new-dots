@@ -12,8 +12,8 @@ trap 'rm -rf "$SCRATCH"' EXIT
 PASSED=0
 FAILED=0
 
-GREYS=$'2\trgba(535353ee)\trgba(2b2b2baa)'
-EVERFOREST=$'2\trgb(a7c080)\trgb(4f5b58)'
+GREYS=$'rgba(535353ee)\trgba(2b2b2baa)'
+EVERFOREST=$'rgb(a7c080)\trgb(4f5b58)'
 
 fail() {
     echo "  FAIL: $*"
@@ -23,9 +23,10 @@ fail() {
 
 # run_hypr_config <config dir> <lua>: runs <lua> under luajit with the config dir on package.path and `hl`
 # stubbed (hl.config records the general settings, anything else is accepted and ignored). Sets OUT to
-# the border size and the active and inactive border colours it ends up with.
+# the active and inactive border colours it ends up with. XDG_CONFIG_HOME is empty, so no saved
+# window appearance is read.
 run_hypr_config() {
-    OUT="$(luajit -e "
+    OUT="$(XDG_CONFIG_HOME="$SCRATCH/no-config" luajit -e "
         package.path = '$1/?.lua'
         local general = {}
         local anything = setmetatable({}, {})
@@ -34,7 +35,7 @@ run_hypr_config() {
         hl = setmetatable({ config = function(c) for k, v in pairs(c.general or {}) do general[k] = v end end },
             { __index = anything })
         $2
-        print(general.border_size, general.col.active_border, general.col.inactive_border)
+        print(general.col.active_border, general.col.inactive_border)
     " 2>&1)"
 }
 
@@ -87,7 +88,7 @@ test_each_colorschemes_hyprland_colours_match_its_quickshell_accent_and_border()
     for colours in "$COLORSCHEMES"/*/quickshell/colors.json; do
         name="$(basename "$(dirname "$(dirname "$colours")")")"
         borders_with "$(cat "$COLORSCHEMES/$name/hypr/colors.lua" 2>/dev/null || echo 'return {}')"
-        expected=$'2\trgb('"$(colour accent)"$')\trgb('"$(colour border)"')'
+        expected=$'rgb('"$(colour accent)"$')\trgb('"$(colour border)"')'
         [[ "$OUT" == "$expected" ]] || fail "$name: expected $expected"
     done
 }

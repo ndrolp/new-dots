@@ -92,7 +92,8 @@ hl.config({
 	general = {
 		-- Gaps come from the Windows section of the shell's settings: modules/appearence/windows.lua
 
-		-- Border size and colours come from the colorscheme: modules/appearence/borders.lua
+		-- Border size comes from the Windows section (modules/appearence/windows.lua), its colours from
+		-- the colorscheme: modules/appearence/borders.lua
 
 		-- Set to true to enable resizing windows by clicking and dragging on borders and gaps
 		resize_on_border = false,
@@ -104,7 +105,7 @@ hl.config({
 	},
 
 	decoration = {
-		rounding = 5,
+		-- Rounding comes from the Windows section: modules/appearence/windows.lua
 		rounding_power = 2,
 
 		-- Focused and unfocused window opacity and whether shadows show come from the Windows section
