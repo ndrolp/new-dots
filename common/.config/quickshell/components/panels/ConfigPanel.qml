@@ -97,7 +97,7 @@ Rectangle {
             keywords: "hyprland gaps rounding decoration transparency active inactive appearance windows",
             title: "Windows",
             description: "Choose how Hyprland draws windows.",
-            settings: [{ label: "Inner gaps" }, { label: "Outer gaps" }]
+            settings: [{ label: "Inner gaps" }, { label: "Outer gaps" }, { label: "Border size" }, { label: "Corner radius" }]
         },
         {
             label: "Displays", icon: "󰍹", section: "Monitors",

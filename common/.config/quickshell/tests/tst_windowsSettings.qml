@@ -31,20 +31,47 @@ TestCase {
         return WindowAppearance.valuesFrom(text);
     }
 
+    function gaps(values) {
+        return { gaps_in: values.gaps_in, gaps_out: values.gaps_out };
+    }
+
+    function bordersAndRounding(values) {
+        return { border_size: values.border_size, rounding: values.rounding };
+    }
+
+    function test_withoutASavedFileTheBorderSizeAndRoundingAreTodaysDefaults() {
+        compare(bordersAndRounding(saved(null)), { border_size: 2, rounding: 5 });
+    }
+
+    function test_aBadBorderSizeOrRoundingFallsBackAlone() {
+        compare(bordersAndRounding(saved('{ "border_size": 0, "rounding": 24 }')), { border_size: 0, rounding: 24 });
+        compare(bordersAndRounding(saved('{ "border_size": 7, "rounding": 12 }')), { border_size: 2, rounding: 12 });
+        compare(bordersAndRounding(saved('{ "border_size": 3, "rounding": 25 }')), { border_size: 3, rounding: 5 });
+        compare(bordersAndRounding(saved('{ "border_size": 1.5, "rounding": -1 }')), { border_size: 2, rounding: 5 });
+    }
+
+    function test_theBorderSizeAndRoundingAreKeptInRangeAndWhole() {
+        const values = saved(null);
+
+        compare(WindowAppearance.withValue(values, "border_size", 9).border_size, 6);
+        compare(WindowAppearance.withValue(values, "rounding", 30).rounding, 24);
+        compare(WindowAppearance.withValue(values, "rounding", 3.4).rounding, 3);
+    }
+
     function test_withoutASavedFileTheGapsAreTodaysDefaults() {
-        compare(saved(null), { gaps_in: 5, gaps_out: 10 });
-        compare(saved(undefined), { gaps_in: 5, gaps_out: 10 });
+        compare(gaps(saved(null)), { gaps_in: 5, gaps_out: 10 });
+        compare(gaps(saved(undefined)), { gaps_in: 5, gaps_out: 10 });
     }
 
     function test_aBadGapFallsBackAloneAndTheOtherIsKept() {
-        compare(saved('{ "gaps_in": 31, "gaps_out": 20 }'), { gaps_in: 5, gaps_out: 20 });
-        compare(saved('{ "gaps_in": 3, "gaps_out": "wide" }'), { gaps_in: 3, gaps_out: 10 });
-        compare(saved('{ "gaps_in": 2.5 }'), { gaps_in: 5, gaps_out: 10 });
+        compare(gaps(saved('{ "gaps_in": 31, "gaps_out": 20 }')), { gaps_in: 5, gaps_out: 20 });
+        compare(gaps(saved('{ "gaps_in": 3, "gaps_out": "wide" }')), { gaps_in: 3, gaps_out: 10 });
+        compare(gaps(saved('{ "gaps_in": 2.5 }')), { gaps_in: 5, gaps_out: 10 });
     }
 
     function test_aFileThatIsntAJsonObjectGivesTheDefaults() {
-        compare(saved('{ "gaps_in": 3,'), { gaps_in: 5, gaps_out: 10 });
-        compare(saved("[3, 20]"), { gaps_in: 5, gaps_out: 10 });
+        compare(gaps(saved('{ "gaps_in": 3,')), { gaps_in: 5, gaps_out: 10 });
+        compare(gaps(saved("[3, 20]")), { gaps_in: 5, gaps_out: 10 });
     }
 
     // A change writes the whole file: every setting, the changed one with
@@ -52,16 +79,18 @@ TestCase {
     function test_aChangeWritesTheFileWithEverySetting() {
         const values = WindowAppearance.withValue(saved(null), "gaps_out", 24);
 
-        compare(JSON.parse(WindowAppearance.fileText(values)), { gaps_in: 5, gaps_out: 24 });
+        compare(gaps(JSON.parse(WindowAppearance.fileText(values))), { gaps_in: 5, gaps_out: 24 });
+        compare(Object.keys(JSON.parse(WindowAppearance.fileText(values))).sort(),
+            Object.keys(WindowAppearance.settings).sort());
         verify(WindowAppearance.fileText(values).endsWith("\n"), "it ends in a newline");
     }
 
     function test_aChangeIsKeptInRangeAndWhole() {
         const values = saved('{ "gaps_in": 8, "gaps_out": 20 }');
 
-        compare(WindowAppearance.withValue(values, "gaps_in", 99), { gaps_in: 30, gaps_out: 20 });
-        compare(WindowAppearance.withValue(values, "gaps_out", -4), { gaps_in: 8, gaps_out: 0 });
-        compare(WindowAppearance.withValue(values, "gaps_in", 6.6), { gaps_in: 7, gaps_out: 20 });
+        compare(gaps(WindowAppearance.withValue(values, "gaps_in", 99)), { gaps_in: 30, gaps_out: 20 });
+        compare(gaps(WindowAppearance.withValue(values, "gaps_out", -4)), { gaps_in: 8, gaps_out: 0 });
+        compare(gaps(WindowAppearance.withValue(values, "gaps_in", 6.6)), { gaps_in: 7, gaps_out: 20 });
     }
 
     // Hyprland re-runs only the window-appearance module, never its whole config.
@@ -134,6 +163,28 @@ TestCase {
         compare(built.service.asked, [["gaps_in", 12], ["gaps_out", 40]]);
         compare(inner.value, 12);
         compare(outer.value, 40);
+    }
+
+    function test_theBorderSizeAndCornerRadiusShowTheirValuesInTheirRanges() {
+        const built = make();
+        const border = number(built.section, "Border size");
+        const radius = number(built.section, "Corner radius");
+
+        compare([border.from, border.to, border.value], [0, 6, 2]);
+        compare([radius.from, radius.to, radius.value], [0, 24, 5]);
+    }
+
+    function test_movingTheBorderSizeOrCornerRadiusSetsIt() {
+        const built = make();
+        const border = number(built.section, "Border size");
+        const radius = number(built.section, "Corner radius");
+
+        border.edited(0);
+        radius.edited(16);
+
+        compare(built.service.asked, [["border_size", 0], ["rounding", 16]]);
+        compare(border.value, 0);
+        compare(radius.value, 16);
     }
 
     // Before the service is there (or in a panel without one) the section

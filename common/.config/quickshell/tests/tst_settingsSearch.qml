@@ -176,6 +176,20 @@ TestCase {
         compare(listed(item), data.listed);
     }
 
+    function test_theBorderSizeAndCornerRadiusAreListedUnderWindows_data() {
+        return [
+            { tag: "border", query: "border size", listed: [["Windows", "Border size"]] },
+            // The bar has a corner radius of its own.
+            { tag: "radius", query: "corner radius", listed: [["Bar", "Corner radius"], ["Windows", "Corner radius"]] }
+        ];
+    }
+
+    function test_theBorderSizeAndCornerRadiusAreListedUnderWindows(data) {
+        const item = createTemporaryObject(panel, this, { sectionQuery: data.query });
+
+        compare(listed(item), data.listed);
+    }
+
     // The Windows section's keywords find it.
     function test_theWindowsKeywordsFindIt_data() {
         return ["hyprland", "gaps", "rounding", "decoration", "transparency", "inactive", "appearance"]

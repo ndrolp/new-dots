@@ -18,6 +18,9 @@ local M = {}
 M.SETTINGS = {
 	{ key = "gaps_in", option = "general.gaps_in", kind = "integer", min = 0, max = 30, default = 5 },
 	{ key = "gaps_out", option = "general.gaps_out", kind = "integer", min = 0, max = 60, default = 10 },
+	-- 0 hides the border. Its colours come from the colorscheme (borders.lua), which leaves the size alone.
+	{ key = "border_size", option = "general.border_size", kind = "integer", min = 0, max = 6, default = 2 },
+	{ key = "rounding", option = "decoration.rounding", kind = "integer", min = 0, max = 24, default = 5 },
 }
 
 local function default_path()

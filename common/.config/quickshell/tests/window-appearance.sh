@@ -50,7 +50,7 @@ QML
 test_a_change_writes_the_file_and_applies_only_the_window_appearance_module() {
     command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
     run_service none 'service.set("gaps_in", 12)'
-    jq -e '. == { "gaps_in": 12, "gaps_out": 10 }' "$CONFIG/hypr/window-appearance.json" >/dev/null \
+    jq -e '.gaps_in == 12 and .gaps_out == 10 and .border_size == 2 and .rounding == 5' "$CONFIG/hypr/window-appearance.json" >/dev/null \
         || fail "wrong file: $(cat "$CONFIG/hypr/window-appearance.json" 2>&1)"
     [[ "$(cat "$SCRATCH/hyprctl" 2>&1)" == 'eval require("modules.appearence.windows").apply()' ]] \
         || fail "wrong hyprctl calls: $(cat "$SCRATCH/hyprctl" 2>&1)"
@@ -60,7 +60,7 @@ test_a_change_keeps_the_other_saved_values() {
     command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
     run_service '{ "gaps_in": 3, "gaps_out": 40 }' 'console.log("shown", service.values.gaps_in); service.set("gaps_in", 8)'
     [[ "$OUT" == *"shown 3"* ]] || fail "didn't show the saved value"
-    jq -e '. == { "gaps_in": 8, "gaps_out": 40 }' "$CONFIG/hypr/window-appearance.json" >/dev/null \
+    jq -e '.gaps_in == 8 and .gaps_out == 40' "$CONFIG/hypr/window-appearance.json" >/dev/null \
         || fail "wrong file: $(cat "$CONFIG/hypr/window-appearance.json" 2>&1)"
 }
 

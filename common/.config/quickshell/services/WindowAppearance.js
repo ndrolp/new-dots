@@ -9,7 +9,10 @@
 // and "number" between min and max, "boolean". Keep them in step with SETTINGS in windows.lua.
 const settings = {
     gaps_in: { kind: "integer", min: 0, max: 30, default: 5 },
-    gaps_out: { kind: "integer", min: 0, max: 60, default: 10 }
+    gaps_out: { kind: "integer", min: 0, max: 60, default: 10 },
+    // 0 hides the border; its colours stay the colorscheme's.
+    border_size: { kind: "integer", min: 0, max: 6, default: 2 },
+    rounding: { kind: "integer", min: 0, max: 24, default: 5 },
 };
 
 // How Hyprland is asked to apply the saved file: only that module, not a full reload.

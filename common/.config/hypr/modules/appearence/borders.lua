@@ -15,9 +15,10 @@ if ok and type(colors) == "table" and hex_digits(colors.accent) and hex_digits(c
 	inactive = "rgb(" .. hex_digits(colors.border) .. ")"
 end
 
+-- Only the colours: the border size is the Windows section's (modules/appearence/windows.lua), so a
+-- colorscheme change never resets it.
 hl.config({
 	general = {
-		border_size = 2,
 		col = {
 			active_border = active,
 			inactive_border = inactive,
