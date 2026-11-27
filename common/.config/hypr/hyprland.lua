@@ -107,12 +107,10 @@ hl.config({
 		rounding = 5,
 		rounding_power = 2,
 
-		-- Change transparency of focused and unfocused windows
-		active_opacity = 1.0,
-		inactive_opacity = 0.9,
+		-- Focused and unfocused window opacity and whether shadows show come from the Windows section
+		-- of the shell's settings: modules/appearence/windows.lua
 
 		shadow = {
-			enabled = true,
 			range = 2,
 			render_power = 3,
 			color = 0xee1a1a1a,

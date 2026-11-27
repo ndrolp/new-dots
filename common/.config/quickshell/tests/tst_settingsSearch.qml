@@ -176,6 +176,21 @@ TestCase {
         compare(listed(item), data.listed);
     }
 
+    function test_theOpacityAndShadowsAreListedUnderWindows_data() {
+        return [
+            { tag: "window opacity", query: "window opacity",
+                listed: [["Windows", "Focused window opacity", "Unfocused window opacity"]] },
+            { tag: "unfocused", query: "unfocused", listed: [["Windows", "Unfocused window opacity"]] },
+            { tag: "shadows", query: "shadows", listed: [["Windows", "Shadows"]] }
+        ];
+    }
+
+    function test_theOpacityAndShadowsAreListedUnderWindows(data) {
+        const item = createTemporaryObject(panel, this, { sectionQuery: data.query });
+
+        compare(listed(item), data.listed);
+    }
+
     // The Windows section's keywords find it.
     function test_theWindowsKeywordsFindIt_data() {
         return ["hyprland", "gaps", "rounding", "decoration", "transparency", "inactive", "appearance"]

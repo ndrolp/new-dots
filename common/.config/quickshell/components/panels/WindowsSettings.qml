@@ -45,4 +45,44 @@ Column {
             onEdited: number => root.set("gaps_out", number)
         }
     }
+
+    // Opacity is saved as Hyprland takes it (0–1) and shown as a percentage.
+    Panels.SettingsCard {
+        appearance: root.appearance
+        title: "Opacity and shadows"
+
+        Panels.SettingsNumber {
+            width: parent.width
+            appearance: root.appearance
+            label: "Focused window opacity"
+            from: Math.round(WindowAppearance.settings.active_opacity.min * 100)
+            to: Math.round(WindowAppearance.settings.active_opacity.max * 100)
+            value: Math.round(root.values.active_opacity * 100)
+            onEdited: number => root.set("active_opacity", number / 100)
+        }
+
+        Panels.SettingsNumber {
+            width: parent.width
+            appearance: root.appearance
+            label: "Unfocused window opacity"
+            from: Math.round(WindowAppearance.settings.inactive_opacity.min * 100)
+            to: Math.round(WindowAppearance.settings.inactive_opacity.max * 100)
+            value: Math.round(root.values.inactive_opacity * 100)
+            onEdited: number => root.set("inactive_opacity", number / 100)
+        }
+
+        Panels.SettingsHint {
+            width: parent.width
+            appearance: root.appearance
+            text: "Some apps are a little more transparent by their own rule."
+        }
+
+        Panels.SettingsSwitchRow {
+            width: parent.width
+            appearance: root.appearance
+            label: "Shadows"
+            checked: root.values.shadows
+            onToggled: root.set("shadows", !root.values.shadows)
+        }
+    }
 }

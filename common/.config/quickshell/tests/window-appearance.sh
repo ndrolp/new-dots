@@ -50,7 +50,7 @@ QML
 test_a_change_writes_the_file_and_applies_only_the_window_appearance_module() {
     command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
     run_service none 'service.set("gaps_in", 12)'
-    jq -e '. == { "gaps_in": 12, "gaps_out": 10 }' "$CONFIG/hypr/window-appearance.json" >/dev/null \
+    jq -e '.gaps_in == 12 and .gaps_out == 10' "$CONFIG/hypr/window-appearance.json" >/dev/null \
         || fail "wrong file: $(cat "$CONFIG/hypr/window-appearance.json" 2>&1)"
     [[ "$(cat "$SCRATCH/hyprctl" 2>&1)" == 'eval require("modules.appearence.windows").apply()' ]] \
         || fail "wrong hyprctl calls: $(cat "$SCRATCH/hyprctl" 2>&1)"
@@ -60,7 +60,7 @@ test_a_change_keeps_the_other_saved_values() {
     command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
     run_service '{ "gaps_in": 3, "gaps_out": 40 }' 'console.log("shown", service.values.gaps_in); service.set("gaps_in", 8)'
     [[ "$OUT" == *"shown 3"* ]] || fail "didn't show the saved value"
-    jq -e '. == { "gaps_in": 8, "gaps_out": 40 }' "$CONFIG/hypr/window-appearance.json" >/dev/null \
+    jq -e '.gaps_in == 8 and .gaps_out == 40' "$CONFIG/hypr/window-appearance.json" >/dev/null \
         || fail "wrong file: $(cat "$CONFIG/hypr/window-appearance.json" 2>&1)"
 }
 
@@ -71,6 +71,14 @@ test_a_drag_is_written_and_applied_once_with_its_last_value() {
     jq -e '.gaps_out == 20' "$CONFIG/hypr/window-appearance.json" >/dev/null \
         || fail "wrong file: $(cat "$CONFIG/hypr/window-appearance.json" 2>&1)"
     [[ "$(wc -l <"$SCRATCH/hyprctl")" -eq 1 ]] || fail "hyprctl calls: $(cat "$SCRATCH/hyprctl")"
+}
+
+test_turning_shadows_off_writes_it_and_keeps_the_saved_opacity() {
+    command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
+    run_service '{ "active_opacity": 0.8, "inactive_opacity": 0.5 }' 'service.set("shadows", false)'
+    jq -e '.shadows == false and .active_opacity == 0.8 and .inactive_opacity == 0.5' \
+        "$CONFIG/hypr/window-appearance.json" >/dev/null \
+        || fail "wrong file: $(cat "$CONFIG/hypr/window-appearance.json" 2>&1)"
 }
 
 for test in $(declare -F | awk '{print $3}' | grep '^test_'); do

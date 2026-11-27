@@ -127,6 +127,75 @@ test_the_saved_file_is_gitignored() {
     git -C "$HYPR" check-ignore -q window-appearance.json || fail "window-appearance.json is not gitignored"
 }
 
+# opacity_with <saved file contents | none> [lua]: like applied_with, but sets OUT to the focused and
+# unfocused window opacity and whether shadows are on.
+opacity_with() {
+    applied_with "$1" "${2:-}
+        local decoration = config.decoration or {}
+        print(decoration.active_opacity, decoration.inactive_opacity, (decoration.shadow or {}).enabled)
+        os.exit(0)
+    "
+}
+
+OPACITY_DEFAULTS=$'1.0\t0.9\ttrue'
+
+test_without_a_saved_file_the_opacity_and_shadows_are_the_defaults() {
+    opacity_with none
+    [[ "$OUT" == "$OPACITY_DEFAULTS" ]] || fail "wrong opacity or shadows"
+}
+
+test_the_saved_opacity_and_shadows_apply() {
+    opacity_with '{ "active_opacity": 0.8, "inactive_opacity": 0.5, "shadows": false }'
+    [[ "$OUT" == $'0.8\t0.5\tfalse' ]] || fail "wrong opacity or shadows"
+}
+
+test_an_opacity_out_of_range_falls_back_alone() {
+    opacity_with '{ "active_opacity": 0.4, "inactive_opacity": 0.3 }'
+    [[ "$OUT" == $'1.0\t0.3\ttrue' ]] || fail "wrong opacity"
+    opacity_with '{ "active_opacity": 0.5, "inactive_opacity": 0.2 }'
+    [[ "$OUT" == $'0.5\t0.9\ttrue' ]] || fail "wrong opacity"
+    opacity_with '{ "active_opacity": 1.1, "inactive_opacity": 1 }'
+    [[ "$OUT" == $'1.0\t1\ttrue' ]] || fail "wrong opacity"
+}
+
+test_a_value_of_the_wrong_type_falls_back_alone() {
+    opacity_with '{ "active_opacity": "0.8", "inactive_opacity": 0.7, "shadows": "no" }'
+    [[ "$OUT" == $'1.0\t0.7\ttrue' ]] || fail "wrong opacity or shadows"
+    opacity_with '{ "shadows": 0 }'
+    [[ "$OUT" == "$OPACITY_DEFAULTS" ]] || fail "wrong shadows"
+}
+
+# The whole Hyprland config applies the saved opacity and shadows, and no later setting overrides them;
+# the shadow keeps its colour and range.
+test_the_full_config_applies_the_saved_opacity_and_shadows() {
+    opacity_with '{ "active_opacity": 0.95, "inactive_opacity": 0.6, "shadows": false }' "
+        package.path = '$HYPR/?.lua'
+        for name in pairs(package.loaded) do
+            if name:match('^modules') then package.loaded[name] = nil end
+        end
+        dofile('$HYPR/hyprland.lua')
+        assert(config.decoration.shadow.range == 2, 'the shadow lost its range')
+        assert(config.decoration.shadow.color == 0xee1a1a1a, 'the shadow lost its colour')
+    "
+    [[ "$OUT" == $'0.95\t0.6\tfalse' ]] || fail "wrong opacity or shadows"
+}
+
+# The per-app opacity rule multiplies with the global opacity: it must not override it.
+test_the_per_app_opacity_rule_still_applies_on_top() {
+    OUT="$(lua -e "
+        local rules = {}
+        local anything = setmetatable({}, {})
+        getmetatable(anything).__index = function() return anything end
+        getmetatable(anything).__call = function() return anything end
+        hl = setmetatable({ window_rule = function(rule) rules[#rules + 1] = rule end }, { __index = anything })
+        dofile('$HYPR/modules/rules/windows.lua')
+        for _, rule in ipairs(rules) do
+            if rule.name == 'transparent' then print(rule.opacity, rule.override) end
+        end
+    " 2>&1)"
+    [[ "$OUT" == $'0.9\tnil' ]] || fail "the per-app opacity rule changed"
+}
+
 for t in $(declare -F | awk '{print $3}' | grep "^test_.*${1:-}"); do
     echo "$t"
     ( set -e; "$t" )
