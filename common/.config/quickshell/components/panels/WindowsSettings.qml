@@ -18,6 +18,20 @@ Column {
             windowAppearance.set(key, value);
     }
 
+    // A slider for one setting, by its key, in that setting's range. `factor`
+    // shows it scaled (100 for a fraction shown as a percentage).
+    component WindowSetting: Panels.SettingsNumber {
+        required property string key
+        property real factor: 1
+
+        width: parent.width
+        appearance: root.appearance
+        from: Math.round(WindowAppearance.settings[key].min * factor)
+        to: Math.round(WindowAppearance.settings[key].max * factor)
+        value: Math.round(root.values[key] * factor)
+        onEdited: number => root.set(key, number / factor)
+    }
+
     width: parent ? parent.width : 0
     spacing: 12
 
@@ -50,24 +64,14 @@ Column {
         appearance: root.appearance
         title: "Gaps"
 
-        Panels.SettingsNumber {
-            width: parent.width
-            appearance: root.appearance
+        WindowSetting {
             label: "Inner gaps"
-            from: WindowAppearance.settings.gaps_in.min
-            to: WindowAppearance.settings.gaps_in.max
-            value: root.values.gaps_in
-            onEdited: number => root.set("gaps_in", number)
+            key: "gaps_in"
         }
 
-        Panels.SettingsNumber {
-            width: parent.width
-            appearance: root.appearance
+        WindowSetting {
             label: "Outer gaps"
-            from: WindowAppearance.settings.gaps_out.min
-            to: WindowAppearance.settings.gaps_out.max
-            value: root.values.gaps_out
-            onEdited: number => root.set("gaps_out", number)
+            key: "gaps_out"
         }
     }
 
@@ -75,24 +79,14 @@ Column {
         appearance: root.appearance
         title: "Borders"
 
-        Panels.SettingsNumber {
-            width: parent.width
-            appearance: root.appearance
+        WindowSetting {
             label: "Border size"
-            from: WindowAppearance.settings.border_size.min
-            to: WindowAppearance.settings.border_size.max
-            value: root.values.border_size
-            onEdited: number => root.set("border_size", number)
+            key: "border_size"
         }
 
-        Panels.SettingsNumber {
-            width: parent.width
-            appearance: root.appearance
+        WindowSetting {
             label: "Corner radius"
-            from: WindowAppearance.settings.rounding.min
-            to: WindowAppearance.settings.rounding.max
-            value: root.values.rounding
-            onEdited: number => root.set("rounding", number)
+            key: "rounding"
         }
     }
 
@@ -101,24 +95,16 @@ Column {
         appearance: root.appearance
         title: "Opacity and shadows"
 
-        Panels.SettingsNumber {
-            width: parent.width
-            appearance: root.appearance
+        WindowSetting {
             label: "Focused window opacity"
-            from: Math.round(WindowAppearance.settings.active_opacity.min * 100)
-            to: Math.round(WindowAppearance.settings.active_opacity.max * 100)
-            value: Math.round(root.values.active_opacity * 100)
-            onEdited: number => root.set("active_opacity", number / 100)
+            key: "active_opacity"
+            factor: 100
         }
 
-        Panels.SettingsNumber {
-            width: parent.width
-            appearance: root.appearance
+        WindowSetting {
             label: "Unfocused window opacity"
-            from: Math.round(WindowAppearance.settings.inactive_opacity.min * 100)
-            to: Math.round(WindowAppearance.settings.inactive_opacity.max * 100)
-            value: Math.round(root.values.inactive_opacity * 100)
-            onEdited: number => root.set("inactive_opacity", number / 100)
+            key: "inactive_opacity"
+            factor: 100
         }
 
         Panels.SettingsHint {
@@ -150,19 +136,13 @@ Column {
             onToggled: root.set("window_blur", !root.values.window_blur)
         }
 
-        Panels.SettingsNumber {
-            width: parent.width
-            appearance: root.appearance
+        WindowSetting {
             label: "Blur strength"
-            from: WindowAppearance.settings.blur_size.min
-            to: WindowAppearance.settings.blur_size.max
-            value: root.values.blur_size
-            onEdited: number => root.set("blur_size", number)
+            key: "blur_size"
         }
 
         Panels.SettingsHint {
-            x: 12
-            width: parent.width - 24
+            width: parent.width
             appearance: root.appearance
             text: "Also used behind the bar and popups."
         }

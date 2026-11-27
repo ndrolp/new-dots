@@ -298,6 +298,15 @@ TestCase {
             "no hint under the blur strength");
     }
 
+    // The section's hints all span their card the same way.
+    function test_theHintsLineUpTheSameWay() {
+        const built = make();
+        const blur = all(built.section, child => child.text === "Also used behind the bar and popups.")[0];
+        const opacity = all(built.section, child => child.text === "Some apps are a little more transparent by their own rule.")[0];
+
+        compare([blur.x, blur.width], [opacity.x, opacity.width]);
+    }
+
     // Before the service is there (or in a panel without one) the section
     // shows the defaults.
     function test_withoutTheServiceTheGapsShowTheDefaults() {

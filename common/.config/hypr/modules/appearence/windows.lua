@@ -73,9 +73,6 @@ function M.values(path)
 		else
 			values[setting.key] = setting.default
 		end
-		if setting.kind == "integer" then
-			values[setting.key] = math.floor(values[setting.key])
-		end
 	end
 	return values
 end
@@ -113,6 +110,8 @@ end
 -- so the shell's layers (the bar, the capsule, popups) keep their blur (modules/rules/apps.lua). The
 -- rule is made once per config load and switched on or off after that, so applying again over
 -- `hyprctl eval` never stacks rules; a reload starts a fresh Lua state, and with it a fresh rule.
+-- set_enabled re-evaluates the rules of every open window itself (Hyprland 0.57's LuaWindowRule.cpp
+-- calls ruleEngine()->updateAllRules()), so windows already open follow the switch.
 local window_blur_rule
 function M.apply_window_blur(on)
 	if window_blur_rule then

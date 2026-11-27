@@ -359,6 +359,32 @@ test_the_per_app_opacity_rule_still_applies_on_top() {
     [[ "$OUT" == $'0.9\tnil' ]] || fail "the per-app opacity rule changed"
 }
 
+# The shell's services/WindowAppearance.js shows and clamps the same settings this module reads: each
+# side lists every setting as "key kind min max default", and the lists must match. Needs node.
+test_the_settings_match_the_shells() {
+    if ! command -v node >/dev/null; then
+        echo "  SKIP: node not installed"
+        return 0
+    fi
+    local lua_side js_side
+    lua_side="$(lua -e "
+        package.path = '$HYPR/?.lua'
+        local function show(v) return type(v) == 'number' and string.format('%g', v) or tostring(v == nil and '-' or v) end
+        for _, s in ipairs(require('modules.appearence.windows').SETTINGS) do
+            print(s.key, s.kind, show(s.min), show(s.max), show(s.default))
+        end
+    " | sort)"
+    js_side="$(node -e "
+        const source = require('fs').readFileSync(process.argv[1], 'utf8').replace(/^\\.pragma.*$/m, '');
+        const settings = new Function(source + '; return settings;')();
+        const show = (v) => (v === undefined ? '-' : String(v));
+        for (const [key, s] of Object.entries(settings))
+            console.log([key, s.kind, show(s.min), show(s.max), show(s.default)].join('\\t'));
+    " "$HYPR/../quickshell/services/WindowAppearance.js" | sort)"
+    OUT="$(diff <(echo "$lua_side") <(echo "$js_side"))"
+    [[ -n "$lua_side" && -z "$OUT" ]] || fail "windows.lua (<) and WindowAppearance.js (>) disagree"
+}
+
 for t in $(declare -F | awk '{print $3}' | grep "^test_.*${1:-}"); do
     echo "$t"
     ( set -e; "$t" )

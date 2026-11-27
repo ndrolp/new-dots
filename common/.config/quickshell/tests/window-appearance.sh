@@ -2,7 +2,7 @@
 # The WindowAppearance service, for real: a headless `qs` on a scratch config with a scratch
 # XDG_CONFIG_HOME and a `hyprctl` shim on PATH, so no live session is touched. A change writes
 # ~/.config/hypr/window-appearance.json and asks Hyprland to re-run only the window-appearance module.
-# Run: common/.config/quickshell/tests/window-appearance.sh
+# Run: common/.config/quickshell/tests/window-appearance.sh [name filter]
 set -uo pipefail
 
 QS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -51,7 +51,6 @@ QML
 }
 
 test_a_change_writes_the_file_and_applies_only_the_window_appearance_module() {
-    command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
     run_service none 'service.set("gaps_in", 12)'
     jq -e '.gaps_in == 12 and .gaps_out == 10 and .border_size == 2 and .rounding == 5' "$CONFIG/hypr/window-appearance.json" >/dev/null \
         || fail "wrong file: $(cat "$CONFIG/hypr/window-appearance.json" 2>&1)"
@@ -60,7 +59,6 @@ test_a_change_writes_the_file_and_applies_only_the_window_appearance_module() {
 }
 
 test_a_change_keeps_the_other_saved_values() {
-    command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
     run_service '{ "gaps_in": 3, "gaps_out": 40, "window_blur": false }' 'console.log("shown", service.values.gaps_in); service.set("gaps_in", 8)'
     [[ "$OUT" == *"shown 3"* ]] || fail "didn't show the saved value"
     jq -e '.gaps_in == 8 and .gaps_out == 40 and .window_blur == false' "$CONFIG/hypr/window-appearance.json" >/dev/null \
@@ -69,7 +67,6 @@ test_a_change_keeps_the_other_saved_values() {
 
 # A slider being dragged: many changes at once are one write and one apply, of the last value.
 test_a_drag_is_written_and_applied_once_with_its_last_value() {
-    command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
     run_service none 'for (let gap = 1; gap <= 20; gap++) service.set("gaps_out", gap)'
     jq -e '.gaps_out == 20' "$CONFIG/hypr/window-appearance.json" >/dev/null \
         || fail "wrong file: $(cat "$CONFIG/hypr/window-appearance.json" 2>&1)"
@@ -79,7 +76,6 @@ test_a_drag_is_written_and_applied_once_with_its_last_value() {
 # Reset removes the saved file rather than writing the defaults into it, so a later change to a
 # default in the repo reaches this machine; every setting shows its default and Hyprland applies again.
 test_a_reset_removes_the_file_and_applies_the_defaults() {
-    command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
     run_service '{ "gaps_in": 3, "gaps_out": 40, "inactive_opacity": 0.5, "shadows": false, "window_blur": false, "blur_size": 12 }' \
         'service.reset(); console.log("shown", JSON.stringify(service.values))'
     [[ ! -e "$CONFIG/hypr/window-appearance.json" ]] || fail "the file is still there: $(cat "$CONFIG/hypr/window-appearance.json")"
@@ -93,7 +89,6 @@ test_a_reset_removes_the_file_and_applies_the_defaults() {
 
 # A change still waiting to be written when Reset is pressed is dropped, not written after it.
 test_a_reset_drops_a_change_not_yet_written() {
-    command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
     run_service '{ "gaps_in": 3 }' 'service.set("gaps_in", 9); service.reset()'
     [[ ! -e "$CONFIG/hypr/window-appearance.json" ]] || fail "the file is back: $(cat "$CONFIG/hypr/window-appearance.json")"
 }
@@ -101,7 +96,6 @@ test_a_reset_drops_a_change_not_yet_written() {
 # Hyprland couldn't take the change (here, hyprctl fails as it does outside Hyprland): the value is
 # still saved, and the service says the apply failed.
 test_a_failed_apply_keeps_the_change_saved_and_says_so() {
-    command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
     HYPRCTL_FAILS=1
     run_service none 'service.applyFailedChanged.connect(() => console.log("failed", service.applyFailed)); service.set("gaps_in", 6)'
     [[ "$OUT" == *"failed true"* ]] || fail "didn't say the apply failed"
@@ -111,14 +105,12 @@ test_a_failed_apply_keeps_the_change_saved_and_says_so() {
 
 # Inside Hyprland, a module that fails makes hyprctl report an error yet exit 0.
 test_an_apply_whose_module_reports_an_error_failed() {
-    command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
     HYPRCTL_SAYS="error: [string]:1: attempt to index a nil value"
     run_service none 'service.applyFailedChanged.connect(() => console.log("failed", service.applyFailed)); service.set("gaps_in", 6)'
     [[ "$OUT" == *"failed true"* ]] || fail "didn't say the apply failed"
 }
 
 test_the_next_successful_apply_clears_the_failure() {
-    command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
     HYPRCTL_FAILS=1
     run_service none 'service.applyFailedChanged.connect(() => { console.log("failed", service.applyFailed); if (service.applyFailed) service.set("gaps_in", 7); }); service.set("gaps_in", 6)'
     [[ "$OUT" == *"failed true"*"failed false"* ]] || fail "the failure didn't clear"
@@ -126,20 +118,20 @@ test_the_next_successful_apply_clears_the_failure() {
 
 
 test_turning_shadows_off_writes_it_and_keeps_the_saved_opacity() {
-    command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
     run_service '{ "active_opacity": 0.8, "inactive_opacity": 0.5 }' 'service.set("shadows", false)'
     jq -e '.shadows == false and .active_opacity == 0.8 and .inactive_opacity == 0.5' \
         "$CONFIG/hypr/window-appearance.json" >/dev/null \
         || fail "wrong file: $(cat "$CONFIG/hypr/window-appearance.json" 2>&1)"
 }
 
-for test in $(declare -F | awk '{print $3}' | grep '^test_'); do
-    echo "$test"
-    if ( set -e; "$test" ); then
-        PASSED=$((PASSED + 1))
-    else
-        FAILED=$((FAILED + 1))
-    fi
+command -v qs >/dev/null || { echo "SKIP: qs not installed"; exit 0; }
+
+# Each test runs in a subshell with set -e, outside any condition so set -e holds: its first failed
+# check ends it.
+for t in $(declare -F | awk '{print $3}' | grep "^test_.*${1:-}"); do
+    echo "$t"
+    ( set -e; "$t" )
+    if [[ $? -eq 0 ]]; then PASSED=$((PASSED + 1)); else FAILED=$((FAILED + 1)); fi
 done
 
 echo
