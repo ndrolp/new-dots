@@ -31,20 +31,29 @@ TestCase {
         return WindowAppearance.valuesFrom(text);
     }
 
+    // Only the gaps of `values`.
+    function gaps(values) {
+        return { gaps_in: values.gaps_in, gaps_out: values.gaps_out };
+    }
+
+    function toggle(item, label) {
+        return all(item, child => child.label === label && child.switchItem !== undefined)[0];
+    }
+
     function test_withoutASavedFileTheGapsAreTodaysDefaults() {
-        compare(saved(null), { gaps_in: 5, gaps_out: 10 });
-        compare(saved(undefined), { gaps_in: 5, gaps_out: 10 });
+        compare(gaps(saved(null)), { gaps_in: 5, gaps_out: 10 });
+        compare(gaps(saved(undefined)), { gaps_in: 5, gaps_out: 10 });
     }
 
     function test_aBadGapFallsBackAloneAndTheOtherIsKept() {
-        compare(saved('{ "gaps_in": 31, "gaps_out": 20 }'), { gaps_in: 5, gaps_out: 20 });
-        compare(saved('{ "gaps_in": 3, "gaps_out": "wide" }'), { gaps_in: 3, gaps_out: 10 });
-        compare(saved('{ "gaps_in": 2.5 }'), { gaps_in: 5, gaps_out: 10 });
+        compare(gaps(saved('{ "gaps_in": 31, "gaps_out": 20 }')), { gaps_in: 5, gaps_out: 20 });
+        compare(gaps(saved('{ "gaps_in": 3, "gaps_out": "wide" }')), { gaps_in: 3, gaps_out: 10 });
+        compare(gaps(saved('{ "gaps_in": 2.5 }')), { gaps_in: 5, gaps_out: 10 });
     }
 
     function test_aFileThatIsntAJsonObjectGivesTheDefaults() {
-        compare(saved('{ "gaps_in": 3,'), { gaps_in: 5, gaps_out: 10 });
-        compare(saved("[3, 20]"), { gaps_in: 5, gaps_out: 10 });
+        compare(gaps(saved('{ "gaps_in": 3,')), { gaps_in: 5, gaps_out: 10 });
+        compare(gaps(saved("[3, 20]")), { gaps_in: 5, gaps_out: 10 });
     }
 
     // A change writes the whole file: every setting, the changed one with
@@ -52,16 +61,41 @@ TestCase {
     function test_aChangeWritesTheFileWithEverySetting() {
         const values = WindowAppearance.withValue(saved(null), "gaps_out", 24);
 
-        compare(JSON.parse(WindowAppearance.fileText(values)), { gaps_in: 5, gaps_out: 24 });
+        compare(gaps(JSON.parse(WindowAppearance.fileText(values))), { gaps_in: 5, gaps_out: 24 });
         verify(WindowAppearance.fileText(values).endsWith("\n"), "it ends in a newline");
     }
 
     function test_aChangeIsKeptInRangeAndWhole() {
         const values = saved('{ "gaps_in": 8, "gaps_out": 20 }');
 
-        compare(WindowAppearance.withValue(values, "gaps_in", 99), { gaps_in: 30, gaps_out: 20 });
-        compare(WindowAppearance.withValue(values, "gaps_out", -4), { gaps_in: 8, gaps_out: 0 });
-        compare(WindowAppearance.withValue(values, "gaps_in", 6.6), { gaps_in: 7, gaps_out: 20 });
+        compare(gaps(WindowAppearance.withValue(values, "gaps_in", 99)), { gaps_in: 30, gaps_out: 20 });
+        compare(gaps(WindowAppearance.withValue(values, "gaps_out", -4)), { gaps_in: 8, gaps_out: 0 });
+        compare(gaps(WindowAppearance.withValue(values, "gaps_in", 6.6)), { gaps_in: 7, gaps_out: 20 });
+    }
+
+    // Blur: on for windows, at today's strength, unless the file says otherwise.
+    function test_withoutASavedFileWindowsAreBlurredAtTodaysStrength() {
+        compare(saved(null).window_blur, true);
+        compare(saved(null).blur_size, 7);
+    }
+
+    function test_theSavedBlurApplies() {
+        const values = saved('{ "window_blur": false, "blur_size": 12 }');
+
+        compare([values.window_blur, values.blur_size], [false, 12]);
+    }
+
+    function test_aBadBlurFallsBackAlone() {
+        compare(saved('{ "window_blur": "off", "blur_size": 3 }').window_blur, true);
+        compare(saved('{ "window_blur": false, "blur_size": 16 }').blur_size, 7);
+        compare(saved('{ "blur_size": 0 }').blur_size, 7);
+        compare(saved('{ "blur_size": 2.5 }').window_blur, true);
+    }
+
+    function test_aBlurStrengthIsKeptInRangeAndWhole() {
+        compare(WindowAppearance.withValue(saved(null), "blur_size", 40).blur_size, 15);
+        compare(WindowAppearance.withValue(saved(null), "blur_size", -2).blur_size, 1);
+        compare(WindowAppearance.withValue(saved(null), "window_blur", false).window_blur, false);
     }
 
     // Hyprland re-runs only the window-appearance module, never its whole config.
@@ -134,6 +168,33 @@ TestCase {
         compare(built.service.asked, [["gaps_in", 12], ["gaps_out", 40]]);
         compare(inner.value, 12);
         compare(outer.value, 40);
+    }
+
+    function test_theBlurShowsTheSavedValues() {
+        const built = make();
+        built.service.values = saved('{ "window_blur": false, "blur_size": 10 }');
+        const strength = number(built.section, "Blur strength");
+
+        compare(toggle(built.section, "Window blur").checked, false);
+        compare([strength.from, strength.to, strength.value], [1, 15, 10]);
+    }
+
+    function test_changingTheBlurSetsIt() {
+        const built = make();
+
+        toggle(built.section, "Window blur").toggled();
+        number(built.section, "Blur strength").edited(4);
+
+        compare(built.service.asked, [["window_blur", false], ["blur_size", 4]]);
+        compare(toggle(built.section, "Window blur").checked, false);
+    }
+
+    // The strength isn't only for windows, and the section says so.
+    function test_theBlurStrengthHintSaysItIsAlsoUsedByTheShell() {
+        const built = make();
+
+        verify(all(built.section, child => child.text === "Also used behind the bar and popups.").length === 1,
+            "no hint under the blur strength");
     }
 
     // Before the service is there (or in a panel without one) the section

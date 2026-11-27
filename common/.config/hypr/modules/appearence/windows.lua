@@ -12,12 +12,14 @@ local json = require("modules.monitors.json")
 
 local M = {}
 
--- One entry per setting: its key in the file, the Hyprland option it sets (a dotted path), what it
--- takes and its default. Kinds: "integer" and "number" between min and max, "boolean". Keep the keys,
+-- One entry per setting: its key in the file, the Hyprland option it sets (a dotted path; none for a
+-- setting M.apply applies itself), what it takes and its default. Kinds: "integer" and "number" between min and max, "boolean". Keep the keys,
 -- ranges and defaults in step with the shell's services/WindowAppearance.js.
 M.SETTINGS = {
 	{ key = "gaps_in", option = "general.gaps_in", kind = "integer", min = 0, max = 30, default = 5 },
 	{ key = "gaps_out", option = "general.gaps_out", kind = "integer", min = 0, max = 60, default = 10 },
+	{ key = "window_blur", kind = "boolean", default = true },
+	{ key = "blur_size", option = "decoration.blur.size", kind = "integer", min = 1, max = 15, default = 7 },
 }
 
 local function default_path()
@@ -59,7 +61,11 @@ function M.values(path)
 	local values = {}
 	for _, setting in ipairs(M.SETTINGS) do
 		local value = saved[setting.key]
-		values[setting.key] = valid(setting, value) and value or setting.default
+		if valid(setting, value) then
+			values[setting.key] = value
+		else
+			values[setting.key] = setting.default
+		end
 		if setting.kind == "integer" then
 			values[setting.key] = math.floor(values[setting.key])
 		end
@@ -71,6 +77,9 @@ end
 function M.config(values)
 	local config = {}
 	for _, setting in ipairs(M.SETTINGS) do
+		if not setting.option then
+			goto continue
+		end
 		local at = config
 		local path = {}
 		for part in setting.option:gmatch("[^.]+") do
@@ -81,13 +90,34 @@ function M.config(values)
 			at = at[path[i]]
 		end
 		at[path[#path]] = values[setting.key]
+		::continue::
 	end
 	return config
 end
 
 -- Reads the saved file (by default ~/.config/hypr/window-appearance.json) and hands Hyprland the result.
 function M.apply(path)
-	hl.config(M.config(M.values(path)))
+	local values = M.values(path)
+	hl.config(M.config(values))
+	M.apply_window_blur(values.window_blur)
+end
+
+-- Window blur off is a window rule turning blur off for every window, not decoration.blur.enabled,
+-- so the shell's layers (the bar, the capsule, popups) keep their blur (modules/rules/apps.lua). The
+-- rule is made once per config load and switched on or off after that, so applying again over
+-- `hyprctl eval` never stacks rules; a reload starts a fresh Lua state, and with it a fresh rule.
+local window_blur_rule
+function M.apply_window_blur(on)
+	if window_blur_rule then
+		window_blur_rule:set_enabled(not on)
+	else
+		window_blur_rule = hl.window_rule({
+			name = "ndro-window-blur-off",
+			match = { class = ".*" },
+			enabled = not on,
+			no_blur = true,
+		})
+	end
 end
 
 return M

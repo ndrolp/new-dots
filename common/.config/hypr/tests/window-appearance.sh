@@ -46,7 +46,16 @@ applied_with() {
         local anything = setmetatable({}, {})
         getmetatable(anything).__index = function() return anything end
         getmetatable(anything).__call = function() return anything end
-        hl = setmetatable({ config = function(c) merge(config, c) end }, { __index = anything })
+        local window_rules = {}
+        local function window_rule(spec)
+            local rule = { spec = spec, enabled = spec.enabled ~= false }
+            function rule:set_enabled(on) self.enabled = on end
+            function rule:is_enabled() return self.enabled end
+            window_rules[#window_rules + 1] = rule
+            return rule
+        end
+        hl = setmetatable({ config = function(c) merge(config, c) end, window_rule = window_rule },
+            { __index = anything })
         require('modules.appearence.windows').apply()
         ${2:-}
         local general = config.general or {}
@@ -120,6 +129,87 @@ test_the_full_config_applies_the_saved_gaps() {
         dofile('$HYPR/hyprland.lua')
     "
     [[ "$OUT" == $'7\t9' ]] || fail "wrong gaps"
+}
+
+# blurred_with <saved file contents | none | unreadable> [lua]: like applied_with, but sets OUT to the
+# blur size, whether blur is on at all (for the shell's layers too), then whether windows are blurred:
+# they aren't when an enabled window rule matching every window turns blur off.
+BLUR_PRINT="
+    local blur = (config.decoration or {}).blur or {}
+    local windows = true
+    for _, rule in ipairs(window_rules) do
+        if rule.enabled and rule.spec.no_blur and rule.spec.match and rule.spec.match.class == '.*' then
+            windows = false
+        end
+    end
+    print(blur.size, blur.enabled, windows)
+    os.exit(0)
+"
+blurred_with() {
+    applied_with "$1" "${2:-}
+$BLUR_PRINT"
+}
+
+test_without_a_saved_file_windows_are_blurred_at_todays_strength() {
+    blurred_with none "
+        package.path = '$HYPR/?.lua'
+        package.loaded['modules.appearence.windows'] = nil
+        dofile('$HYPR/hyprland.lua')
+    "
+    [[ "$OUT" == $'7\ttrue\ttrue' ]] || fail "wrong blur"
+}
+
+test_the_saved_blur_strength_applies() {
+    blurred_with '{ "blur_size": 12 }'
+    [[ "$OUT" == $'12\tnil\ttrue' ]] || fail "wrong blur"
+}
+
+test_a_blur_strength_out_of_range_falls_back_to_todays() {
+    blurred_with '{ "blur_size": 0 }'
+    [[ "$OUT" == $'7\tnil\ttrue' ]] || fail "wrong blur"
+    blurred_with '{ "blur_size": 16 }'
+    [[ "$OUT" == $'7\tnil\ttrue' ]] || fail "wrong blur"
+    blurred_with '{ "blur_size": 4.5 }'
+    [[ "$OUT" == $'7\tnil\ttrue' ]] || fail "wrong blur"
+}
+
+# Window blur off is a window rule: blur itself stays on, so the bar, capsule and popups keep theirs.
+test_window_blur_off_unblurs_only_windows() {
+    blurred_with '{ "window_blur": false }' "
+        package.path = '$HYPR/?.lua'
+        for name in pairs(package.loaded) do
+            if name:match('^modules') then package.loaded[name] = nil end
+        end
+        dofile('$HYPR/hyprland.lua')
+    "
+    [[ "$OUT" == $'7\ttrue\tfalse' ]] || fail "wrong blur"
+}
+
+test_window_blur_that_isnt_a_switch_falls_back_to_on() {
+    blurred_with '{ "window_blur": "no" }'
+    [[ "$OUT" == $'7\tnil\ttrue' ]] || fail "wrong blur"
+}
+
+# The shell applies again over hyprctl eval after each change: window blur goes off and back on.
+test_applying_again_switches_window_blur_off_and_back_on() {
+    blurred_with '{ "window_blur": true }' "
+        local function save(text)
+            local file = io.open(os.getenv('XDG_CONFIG_HOME') .. '/hypr/window-appearance.json', 'w')
+            file:write(text)
+            file:close()
+            require('modules.appearence.windows').apply()
+        end
+        save('{ \"window_blur\": false }')
+        save('{ \"window_blur\": true }')
+    "
+    [[ "$OUT" == $'7\tnil\ttrue' ]] || fail "window blur stayed off"
+    blurred_with '{ "window_blur": true }' "
+        local file = io.open(os.getenv('XDG_CONFIG_HOME') .. '/hypr/window-appearance.json', 'w')
+        file:write('{ \"window_blur\": false }')
+        file:close()
+        require('modules.appearence.windows').apply()
+    "
+    [[ "$OUT" == $'7\tnil\tfalse' ]] || fail "window blur didn't go off"
 }
 
 test_the_saved_file_is_gitignored() {

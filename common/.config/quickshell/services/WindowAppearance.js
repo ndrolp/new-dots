@@ -9,7 +9,9 @@
 // and "number" between min and max, "boolean". Keep them in step with SETTINGS in windows.lua.
 const settings = {
     gaps_in: { kind: "integer", min: 0, max: 30, default: 5 },
-    gaps_out: { kind: "integer", min: 0, max: 60, default: 10 }
+    gaps_out: { kind: "integer", min: 0, max: 60, default: 10 },
+    window_blur: { kind: "boolean", default: true },
+    blur_size: { kind: "integer", min: 1, max: 15, default: 7 }
 };
 
 // How Hyprland is asked to apply the saved file: only that module, not a full reload.
