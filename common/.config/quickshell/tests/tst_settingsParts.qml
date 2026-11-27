@@ -105,6 +105,18 @@ TestCase {
     }
 
     Component {
+        id: select
+
+        Panels.SettingsSelect {
+            options: [
+                { label: "Hidden", value: "hidden" },
+                { label: "On battery", value: "onBattery" },
+                { label: "Live in row", value: "liveRow" }
+            ]
+        }
+    }
+
+    Component {
         id: choiceList
 
         Panels.SettingsChoiceList {
@@ -454,6 +466,25 @@ TestCase {
         compare(textOf(item, "Compact").color, theme.text);
         compare(textOf(item, "Balanced").color, theme.text);
         compare(textOf(item, "Spacious").color, theme.text);
+    }
+
+    // A selector is one hairline-bordered button showing only the chosen
+    // option's label; its options open in a list only when pressed.
+    function test_aSelectorShowsOnlyTheChosenOption() {
+        const item = make(select, { value: "onBattery" });
+
+        compare(item.height, 32);
+        compare(item.border.color, theme.border);
+        compare(item.border.width, 1);
+        verify(textOf(item, "On battery") !== null);
+        verify(!item.open);
+    }
+
+    // A selector whose value matches no option shows no label.
+    function test_aSelectorMatchingNoOptionShowsNone() {
+        const item = make(select, { value: "" });
+
+        compare(item.chosenOption, null);
     }
 
     // A number setting is its label on top, then the slider and a small

@@ -220,11 +220,12 @@ Column {
                                 // capsule puts this element, if the profile shows
                                 // it: hidden, in its row or live beside the
                                 // workspace pills, for the elements that can be
-                                // live (BarProfileModel.capsulePlaceChoices). Not
-                                // offered for the workspaces.
-                                Panels.SettingsChoice {
+                                // live (BarProfileModel.capsulePlaceChoices), as a
+                                // selector, since they are too many to sit side by
+                                // side. Not offered for the workspaces.
+                                Panels.SettingsSelect {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    width: 68 * options.length
+                                    width: 128
                                     visible: BarProfileModel.capsule(root.appearance) && elementDelegate.elementOn
                                         && options.length > 0
                                     appearance: root.appearance
