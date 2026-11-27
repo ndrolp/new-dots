@@ -23,6 +23,12 @@ const settings = {
 // How Hyprland is asked to apply the saved file: only that module, not a full reload.
 const applyCommand = ["hyprctl", "eval", 'require("modules.appearence.windows").apply()'];
 
+// Whether Hyprland didn't take an apply that ended with `exitCode`, having printed `output`: hyprctl
+// fails outside Hyprland (or isn't there), and reports "error" when the module's Lua fails.
+function applyFailed(exitCode, output) {
+    return exitCode !== 0 || /^\s*error\b/i.test(output || "");
+}
+
 function valid(setting, value) {
     if (setting.kind === "boolean")
         return typeof value === "boolean";

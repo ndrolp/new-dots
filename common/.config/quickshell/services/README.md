@@ -122,7 +122,13 @@ file, or one that isn't a JSON object, gives every default) are plain functions
 in `WindowAppearance.js`, tested without Quickshell; its `settings` must stay
 in step with `SETTINGS` in `windows.lua`. A new setting is one entry in each,
 plus its control in `components/panels/WindowsSettings.qml` and its label in
-the section's entry in `ConfigPanel.qml`. The file is gitignored.
+the section's entry in `ConfigPanel.qml`. The file is gitignored. `reset()`
+removes the file rather than writing the defaults into it, so a later change
+to a default in the repo still reaches the machine, and applies at once; it
+needs nothing per setting. `applyFailed` says Hyprland couldn't take the last
+apply (hyprctl failed, as it does outside Hyprland, or reported an error); the
+value is saved all the same, and the next apply that works clears it. The
+section shows it as an inline hint, not a toast.
 
 ## Keep-awake
 

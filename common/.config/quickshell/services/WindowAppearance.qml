@@ -16,6 +16,11 @@ Scope {
     // Every setting's value, by its key in the file (WindowAppearance.settings).
     readonly property var values: internal.values
     readonly property int throttle: 100
+    // Whether Hyprland couldn't take the last apply (the shell runs outside
+    // it, or the module failed). What was set is saved all the same, and
+    // Hyprland reads it when it next starts; the next apply that works
+    // clears it.
+    readonly property bool applyFailed: internal.applyFailed
 
     // Sets `key` to `value`, kept in its range, and saves and applies it soon.
     function set(key, value) {
@@ -32,6 +37,17 @@ Scope {
         file.setText(WindowAppearance.fileText(internal.values));
     }
 
+    // Every setting back to its default, applied straight away. It removes the
+    // saved file rather than writing the defaults into it, so a later change to
+    // a default in the repo still reaches this machine. A change not yet
+    // written is dropped.
+    function reset() {
+        throttleTimer.stop();
+        internal.unsaved = false;
+        internal.values = WindowAppearance.defaults();
+        remover.running = true;
+    }
+
     function apply() {
         if (applier.running)
             internal.applyAgain = true;
@@ -45,6 +61,7 @@ Scope {
         property var values: WindowAppearance.defaults()
         property bool unsaved: false
         property bool applyAgain: false
+        property bool applyFailed: false
     }
 
     FileView {
@@ -70,10 +87,21 @@ Scope {
     }
 
     Process {
+        id: remover
+
+        command: ["rm", "-f", file.path]
+        onExited: root.apply()
+    }
+
+    Process {
         id: applier
 
         command: WindowAppearance.applyCommand
-        onExited: {
+        stdout: StdioCollector {
+            id: applierOutput
+        }
+        onExited: exitCode => {
+            internal.applyFailed = WindowAppearance.applyFailed(exitCode, applierOutput.text);
             if (internal.applyAgain) {
                 internal.applyAgain = false;
                 applier.running = true;

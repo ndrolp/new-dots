@@ -212,6 +212,16 @@ test_applying_again_switches_window_blur_off_and_back_on() {
     [[ "$OUT" == $'7\tnil\tfalse' ]] || fail "window blur didn't go off"
 }
 
+# Reset in the shell removes the file and applies again: window blur comes back on at today's strength.
+test_applying_again_after_the_file_is_removed_restores_the_blur_defaults() {
+    blurred_with '{ "window_blur": false, "blur_size": 12 }' "
+        require('modules.appearence.windows').apply()
+        os.remove(os.getenv('XDG_CONFIG_HOME') .. '/hypr/window-appearance.json')
+        require('modules.appearence.windows').apply()
+    "
+    [[ "$OUT" == $'7\tnil\ttrue' ]] || fail "blur didn't return to its defaults"
+}
+
 # borders_and_rounding_with <saved file contents | none>: like applied_with, but sets OUT to the border
 # size and the corner radius Hyprland ends up with.
 borders_and_rounding_with() {

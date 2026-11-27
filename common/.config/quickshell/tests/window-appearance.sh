@@ -28,7 +28,10 @@ run_service() {
     chmod 700 "$SCRATCH/run"
     rm -f "$SCRATCH/hyprctl"
     [[ "$1" == none ]] || printf '%s\n' "$1" >"$CONFIG/hypr/window-appearance.json"
-    printf '#!/bin/sh\necho "$*" >>"%s/hyprctl"\n' "$SCRATCH" >"$SCRATCH/bin/hyprctl"
+    # The shim fails its first $HYPRCTL_FAILS calls, as hyprctl outside Hyprland would, and then
+    # prints $HYPRCTL_SAYS.
+    printf '#!/bin/sh\necho "$*" >>"%s/hyprctl"\n[ "$(wc -l <"%s/hyprctl")" -gt "${HYPRCTL_FAILS:-0}" ] || { echo "HYPRLAND_INSTANCE_SIGNATURE not set! (is hyprland running?)"; exit 1; }\necho "$HYPRCTL_SAYS"\n' \
+        "$SCRATCH" "$SCRATCH" >"$SCRATCH/bin/hyprctl"
     chmod +x "$SCRATCH/bin/hyprctl"
     cp "$QS_DIR/services/WindowAppearance.qml" "$QS_DIR/services/WindowAppearance.js" "$cfg/services/"
     cat >"$cfg/shell.qml" <<QML
@@ -43,7 +46,7 @@ ShellRoot {
 }
 QML
     OUT="$(cd "$SCRATCH" && env -u HYPRLAND_INSTANCE_SIGNATURE -u WAYLAND_DISPLAY -u DISPLAY \
-        PATH="$SCRATCH/bin:$PATH" XDG_CONFIG_HOME="$CONFIG" QT_QPA_PLATFORM=offscreen \
+        PATH="$SCRATCH/bin:$PATH" HYPRCTL_FAILS="${HYPRCTL_FAILS:-0}" HYPRCTL_SAYS="${HYPRCTL_SAYS:-ok}" XDG_CONFIG_HOME="$CONFIG" QT_QPA_PLATFORM=offscreen \
         XDG_RUNTIME_DIR="$SCRATCH/run" timeout 20 qs -p "$cfg/shell.qml" 2>&1)"
 }
 
@@ -72,6 +75,55 @@ test_a_drag_is_written_and_applied_once_with_its_last_value() {
         || fail "wrong file: $(cat "$CONFIG/hypr/window-appearance.json" 2>&1)"
     [[ "$(wc -l <"$SCRATCH/hyprctl")" -eq 1 ]] || fail "hyprctl calls: $(cat "$SCRATCH/hyprctl")"
 }
+
+# Reset removes the saved file rather than writing the defaults into it, so a later change to a
+# default in the repo reaches this machine; every setting shows its default and Hyprland applies again.
+test_a_reset_removes_the_file_and_applies_the_defaults() {
+    command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
+    run_service '{ "gaps_in": 3, "gaps_out": 40, "inactive_opacity": 0.5, "shadows": false, "window_blur": false, "blur_size": 12 }' \
+        'service.reset(); console.log("shown", JSON.stringify(service.values))'
+    [[ ! -e "$CONFIG/hypr/window-appearance.json" ]] || fail "the file is still there: $(cat "$CONFIG/hypr/window-appearance.json")"
+    local shown
+    shown="$(grep -o 'shown {.*}' <<<"$OUT" | cut -d' ' -f2-)"
+    jq -e '.gaps_in == 5 and .gaps_out == 10 and .inactive_opacity == 0.9 and .shadows == true and .window_blur == true and .blur_size == 7' <<<"$shown" >/dev/null \
+        || fail "didn't show the defaults: $shown"
+    [[ "$(cat "$SCRATCH/hyprctl" 2>&1)" == 'eval require("modules.appearence.windows").apply()' ]] \
+        || fail "wrong hyprctl calls: $(cat "$SCRATCH/hyprctl" 2>&1)"
+}
+
+# A change still waiting to be written when Reset is pressed is dropped, not written after it.
+test_a_reset_drops_a_change_not_yet_written() {
+    command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
+    run_service '{ "gaps_in": 3 }' 'service.set("gaps_in", 9); service.reset()'
+    [[ ! -e "$CONFIG/hypr/window-appearance.json" ]] || fail "the file is back: $(cat "$CONFIG/hypr/window-appearance.json")"
+}
+
+# Hyprland couldn't take the change (here, hyprctl fails as it does outside Hyprland): the value is
+# still saved, and the service says the apply failed.
+test_a_failed_apply_keeps_the_change_saved_and_says_so() {
+    command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
+    HYPRCTL_FAILS=1
+    run_service none 'service.applyFailedChanged.connect(() => console.log("failed", service.applyFailed)); service.set("gaps_in", 6)'
+    [[ "$OUT" == *"failed true"* ]] || fail "didn't say the apply failed"
+    jq -e '.gaps_in == 6' "$CONFIG/hypr/window-appearance.json" >/dev/null \
+        || fail "wrong file: $(cat "$CONFIG/hypr/window-appearance.json" 2>&1)"
+}
+
+# Inside Hyprland, a module that fails makes hyprctl report an error yet exit 0.
+test_an_apply_whose_module_reports_an_error_failed() {
+    command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
+    HYPRCTL_SAYS="error: [string]:1: attempt to index a nil value"
+    run_service none 'service.applyFailedChanged.connect(() => console.log("failed", service.applyFailed)); service.set("gaps_in", 6)'
+    [[ "$OUT" == *"failed true"* ]] || fail "didn't say the apply failed"
+}
+
+test_the_next_successful_apply_clears_the_failure() {
+    command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
+    HYPRCTL_FAILS=1
+    run_service none 'service.applyFailedChanged.connect(() => { console.log("failed", service.applyFailed); if (service.applyFailed) service.set("gaps_in", 7); }); service.set("gaps_in", 6)'
+    [[ "$OUT" == *"failed true"*"failed false"* ]] || fail "the failure didn't clear"
+}
+
 
 test_turning_shadows_off_writes_it_and_keeps_the_saved_opacity() {
     command -v qs >/dev/null || { echo "  SKIP: qs not installed"; return 0; }
