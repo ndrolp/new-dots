@@ -5,6 +5,8 @@ import "../../config" as Config
 import "../panels" as Panels
 import "BarPlacement.js" as BarPlacement
 import "CapsuleElements.js" as CapsuleElements
+import "CapsuleGlance.js" as CapsuleGlance
+import "CapsuleMotion.js" as CapsuleMotion
 import "LiveElements.js" as LiveElements
 import "CapsulePlacement.js" as CapsulePlacement
 import "CapsuleRouting.js" as CapsuleRouting
@@ -81,11 +83,13 @@ Variants {
                 // On a capsule, only the row it shows (see CapsuleElements.drawnElements):
                 // the view its crossfade shows (rowView), the new one from
                 // the frame after a change; a capture of the old one fades out.
+                // Expanded, the elements whose glance cards show leave it.
                 property var barElements: CapsuleElements.drawnElements({
                     barStyle: panel.barAppearance.barStyle,
                     barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
                     expanded: rowView.shownKey === "expanded",
                     change: rowView.shownKey === "change",
+                    glance: glanceElements,
                     capsulePlaces: bar.appearance.barProfileValue(panel.profileName, "capsulePlaces")
                 })
                 // On a capsule, the live elements beside its workspace pills,
@@ -95,8 +99,32 @@ Variants {
                     barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
                     capsulePlaces: bar.appearance.barProfileValue(panel.profileName, "capsulePlaces")
                 })
+                // On a capsule, the live elements in its row, shown there
+                // collapsed only while active (see LiveElements.rowLiveElements).
+                property var liveRowElements: LiveElements.rowLiveElements({
+                    barStyle: panel.barAppearance.barStyle,
+                    barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
+                    capsulePlaces: bar.appearance.barProfileValue(panel.profileName, "capsulePlaces")
+                })
+                // On a capsule, the bar elements its row shows collapsed only
+                // while on battery (see CapsuleElements.onBatteryElements).
+                property var onBatteryElements: CapsuleElements.onBatteryElements({
+                    barStyle: panel.barAppearance.barStyle,
+                    barElements: bar.appearance.barProfileValue(panel.profileName, "barElements"),
+                    capsulePlaces: bar.appearance.barProfileValue(panel.profileName, "capsulePlaces")
+                })
+                // The bar elements whose glance cards show
+                // (CapsuleGlance.leavingElements): they leave the expanded
+                // row and, live, their place beside the pills.
+                property var glanceElements: CapsuleGlance.leavingElements(barContent.glanceCards,
+                    panel.glanceShown)
                 // Whether this window's capsule is expanded (see panel.capsuleExpanded).
                 property bool capsuleExpanded: panel.capsuleExpanded
+                // Whether its row shows its expanded view (the crossfade's
+                // "expanded"), when the capsule looks expanded
+                // (CapsuleLook.looksExpanded): not with a popup inside, its
+                // row at rest, nor while a change shows instead.
+                property bool capsuleRowExpanded: rowView.shownKey === "expanded"
                 // Global, not part of the bar profile.
                 property bool doNotDisturb: bar.appearance.doNotDisturb
                 property var controlCenterTiles: bar.appearance.controlCenterTiles
@@ -117,6 +145,16 @@ Variants {
             // for a moment after one (see CapsuleChange.qml), unless a popup
             // is inside, which a change never interrupts.
             readonly property bool showingChange: capsuleChange.showing && panel.activePopup === ""
+            // Whether this window's capsule shows its glance under its
+            // expanded row (CapsuleGlance.shown): expanded by hovering or
+            // SUPER+I, as the row shows it, not for a change nor with a popup
+            // inside, and with cards to show. Always false on other bar
+            // styles, whose row view is always "rest".
+            readonly property bool glanceShown: CapsuleGlance.shown({
+                view: rowView.shownKey,
+                popupInside: panel.activePopup !== "",
+                cards: barContent.glanceCards
+            })
             // Whether this window's capsule is hidden, while its monitor's
             // focused workspace has a real fullscreen window (see
             // CapsuleRouting.hidden); always false on other bar styles. It
@@ -224,12 +262,14 @@ Variants {
                 hovering: barContent.capsuleHoverExpands
             }
 
-            // How much taller a capsule's window is for the popups inside it.
+            // How much taller a capsule's window is for the popups and the
+            // glance inside it.
             CapsuleWindowHold {
                 id: capsuleWindowHold
 
-                needed: barPopups.openPopup && barPopups.openPopup.inside
-                    ? barPopups.openPopup.windowHeight : 0
+                needed: Math.max(barPopups.openPopup && barPopups.openPopup.inside
+                    ? barPopups.openPopup.windowHeight : 0,
+                    barContent.glanceSize ? barContent.glanceSize.height : 0)
             }
 
             // SUPER+I expands the capsule until pressed again or until the
@@ -245,16 +285,28 @@ Variants {
             // row is drawn a frame after the change, which springs the
             // capsule to fit it at once; a capture of the old row fades and
             // shrinks away as it moves (BarContent's rowOutgoing) and the new
-            // one fades and grows in from a third of the way. Always "rest"
-            // on other bar styles, which never crossfade.
+            // one fades and grows in from a third of the way. Expanding, the
+            // new row's bar elements instead enter one after another from its
+            // centre out (BarContent's rowEntering), and the crossfade runs
+            // until the last is in. Always "rest" on other bar styles, which
+            // never crossfade.
             CapsuleContentTransition {
                 id: rowView
+
+                // Whether the expanded row is entering.
+                readonly property bool entering: changing && shownKey === "expanded"
 
                 key: BarProfileModel.capsule(panel.barAppearance) ? CapsuleRouting.rowView({
                     change: panel.showingChange,
                     expanded: panel.capsuleExpanded
                 }) : "rest"
                 motion: panel.barAppearance.motion
+                // As long as the expanded row's entry, its glance's cards
+                // after it: read as they arrive, after the swap, not from the
+                // row at rest before it.
+                length: shownKey === "expanded"
+                    ? CapsuleMotion.entryLength(motion, barContent.rowEntry.steps
+                        + (panel.glanceShown ? barContent.glanceCards.length : 0)) : 0
                 visible: false
             }
 
@@ -371,9 +423,13 @@ Variants {
                     workspaceService: panel.workspaceService
                     capsuleChange: rowView.shownKey === "change" ? capsuleChange.change : null
                     rowContents: ({ opacity: rowView.contentsOpacity, scale: rowView.contentsScale })
+                    rowEntering: rowView.entering
+                    rowElapsed: rowView.elapsed
                     rowOutgoing: ({ capturing: rowView.capturing, opacity: rowView.outgoingOpacity,
                         scale: rowView.outgoingScale })
-                    workspacePillsLength: workspaceRow.width
+                    workspacePillsLength: workspaceRow.length
+                    workspacePillsDepth: workspaceRow.depth
+                    glanceShown: panel.glanceShown
 
                     onConfigRequested: function(screen) {
                         bar.configRequested(screen, panel);
@@ -406,6 +462,10 @@ Variants {
                 workspaceService: panel.workspaceService
                 monitorScreen: panel.screen
                 appearance: panel.barAppearance
+                // Chips while its row shows expanded, as its bar elements do.
+                expanded: rowView.shownKey === "expanded"
+                workspaceOptions: BarProfileModel.elementOptions(
+                    bar.appearance.barProfileValue(panel.profileName, "barElements"), "workspaces")
 
                 AlongBarBehavior on x { appearance: panel.barAppearance }
             }

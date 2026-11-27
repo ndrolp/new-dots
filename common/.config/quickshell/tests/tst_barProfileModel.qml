@@ -196,20 +196,21 @@ TestCase {
             .barPosition, data.loaded);
     }
 
-    // A profile that never chose its collapsed capsule's places shows Arch,
-    // the clock and the control center in the row, media live left of the
-    // workspace pills and the recording indicator live right; every other
-    // bar element but the workspaces is hidden.
+    // A profile that never chose its collapsed capsule's places shows only
+    // the clock in the row, media live left of the workspace pills and the
+    // recording indicator and the battery live right; every other bar
+    // element but the workspaces is hidden.
     function test_aProfileWithoutCollapsedPlacesGetsTheDefaultOnes() {
         const places = BarProfileModel.completeProfile({ barStyle: "capsule" }).capsulePlaces;
 
-        compare(places.arch, "shown");
         compare(places.clock, "shown");
-        compare(places.notifications, "shown");
+        compare(places.arch, "hidden");
+        compare(places.notifications, "hidden");
         compare(places.media, "liveLeft");
         compare(places.recording, "liveRight");
         compare(places.keepAwake, "hidden");
-        compare(places.battery, "hidden");
+        compare(places.battery, "liveRight");
+        compare(places.network, "hidden");
         compare(places.workspaces, undefined);
     }
 
@@ -219,7 +220,8 @@ TestCase {
         const places = BarProfileModel.completeProfile({ barStyle: "capsule" }).capsulePlaces;
 
         compare(places.pomodoro, "liveRight");
-        compare(BarProfileModel.capsulePlacesFor("pomodoro"), ["hidden", "shown", "liveLeft", "liveRight"]);
+        compare(BarProfileModel.capsulePlacesFor("pomodoro"), ["hidden", "shown", "onBattery", "liveLeft",
+            "liveRight", "liveRow"]);
         verify(BarProfileModel.canBeLive("pomodoro"));
     }
 
@@ -231,7 +233,18 @@ TestCase {
         compare(profile.capsulePlaces.privacy, "liveRight");
         verify(BarProfileModel.canBeLive("privacy"));
         compare(BarProfileModel.capsulePlaceIds(profile.barElements, profile.capsulePlaces).live.right,
-            ["recording", "privacy", "pomodoro"]);
+            ["recording", "privacy", "battery", "pomodoro"]);
+    }
+
+    // A new capsule shows the battery live right of the workspace pills, in
+    // the profile's order; it can take every live place.
+    function test_aProfileWithoutCollapsedPlacesShowsTheBatteryLiveRight() {
+        const places = BarProfileModel.completeProfile({ barStyle: "capsule" }).capsulePlaces;
+
+        compare(places.battery, "liveRight");
+        compare(BarProfileModel.capsulePlacesFor("battery"), ["hidden", "shown", "onBattery", "liveLeft",
+            "liveRight", "liveRow"]);
+        verify(BarProfileModel.canBeLive("battery"));
     }
 
     // The elements with an icon and text show both by default, on the bar and
@@ -245,6 +258,23 @@ TestCase {
         compare(BarProfileModel.iconTextShown(barElements, "battery", true), { icon: true, text: false });
         barElements = BarProfileModel.setElementOption(barElements, "battery", "iconVisible", false);
         compare(BarProfileModel.iconTextShown(barElements, "battery", false), { icon: false, text: true });
+    }
+
+    // In a capsule at rest the clock shows only the time by default, without
+    // its icon; on the bar it shows both.
+    function test_theClockShowsOnlyTheTimeAtRestByDefault() {
+        const barElements = BarProfileModel.normalizeBarElements({ right: [{ id: "clock", enabled: true }] });
+
+        compare(BarProfileModel.iconTextShown(barElements, "clock", true), { icon: false, text: true });
+        compare(BarProfileModel.iconTextShown(barElements, "clock", false), { icon: true, text: true });
+    }
+
+    // A clock that saved its at-rest icon keeps it.
+    function test_aClockThatSavedItsAtRestIconKeepsIt() {
+        const barElements = BarProfileModel.normalizeBarElements({ right: [{ id: "clock", enabled: true,
+            options: { restIconVisible: true } }] });
+
+        compare(BarProfileModel.iconTextShown(barElements, "clock", true), { icon: true, text: true });
     }
 
     // Hiding both would leave an empty element: it keeps its icon.
@@ -303,6 +333,44 @@ TestCase {
         compare(profile.capsuleElements, undefined);
     }
 
+    // The step itself (schema 16 to 17) places as the capsule drew then,
+    // whatever the defaults are now: media live left; the recording
+    // indicator, the privacy indicator and the pomodoro live right, listed or
+    // not; any other listed element shown, the battery among them, which
+    // only became live later; every other element hidden.
+    function test_theListToPlacesStepKeepsItsHistoricPlaces() {
+        const places = SchemaMigrations.capsulePlacesFromShownElements({ barProfiles: {
+            saved: { barStyle: "capsule", capsuleElements: ["battery", "clock", "privacy", "pomodoro"] },
+            unlisted: { barStyle: "capsule", capsuleElements: ["clock"] }
+        } }, {}).appearance.barProfiles;
+
+        compare(places.saved.capsulePlaces.battery, "shown");
+        compare(places.saved.capsulePlaces.clock, "shown");
+        compare(places.saved.capsulePlaces.privacy, "liveRight");
+        compare(places.saved.capsulePlaces.pomodoro, "liveRight");
+        compare(places.saved.capsulePlaces.media, "liveLeft");
+        compare(places.saved.capsulePlaces.recording, "liveRight");
+        compare(places.saved.capsulePlaces.arch, "hidden");
+        compare(places.unlisted.capsulePlaces.battery, "hidden");
+        compare(places.unlisted.capsulePlaces.privacy, "liveRight");
+        compare(places.unlisted.capsulePlaces.pomodoro, "liveRight");
+        compare(places.unlisted.capsulePlaces.media, "liveLeft");
+    }
+
+    // An old list naming the privacy indicator and the pomodoro migrates to
+    // the current schema with both live right, after the recording
+    // indicator, as it does on main.
+    function test_anOldListWithPrivacyAndPomodoroMigrates() {
+        const profile = migratedProfiles({ saved: { barStyle: "capsule",
+            capsuleElements: ["clock", "privacy", "pomodoro", "battery"] } }).saved;
+
+        compare(profile.capsulePlaces.privacy, "liveRight");
+        compare(profile.capsulePlaces.pomodoro, "liveRight");
+        compare(profile.capsulePlaces.recording, "liveRight");
+        compare(profile.capsulePlaces.battery, "shown");
+        compare(profile.capsulePlaces.clock, "shown");
+    }
+
     // A profile that saved no list gets the default places when it loads,
     // which are what its collapsed capsule showed without one.
     function test_aProfileSavedWithoutAListGetsTheDefaultPlaces() {
@@ -333,10 +401,19 @@ TestCase {
         compare(places.media, "liveRight");
         compare(places.recording, "hidden");
         compare(places.clock, "shown");
-        compare(places.arch, "shown");
-        compare(places.notifications, "shown");
+        compare(places.arch, "hidden");
+        compare(places.notifications, "hidden");
         compare(places.workspaces, undefined);
         compare(places.wifi, undefined);
+    }
+
+    // A profile saved with the battery hidden, before it could be live,
+    // keeps it hidden: only profiles without places take it live.
+    function test_aSavedProfileKeepsTheBatteryWhereItWas() {
+        const profile = migratedProfiles({ saved: { barStyle: "capsule",
+            capsulePlaces: { battery: "hidden", clock: "shown" } } }).saved;
+
+        compare(BarProfileModel.completeProfile(profile).capsulePlaces.battery, "hidden");
     }
 
     // Choosing a place sets it, without changing the places it was given; a
@@ -347,7 +424,8 @@ TestCase {
         compare(BarProfileModel.setCapsulePlace(places, "keepAwake", "liveLeft").keepAwake, "liveLeft");
         compare(BarProfileModel.setCapsulePlace(places, "media", "liveRight").media, "liveRight");
         compare(BarProfileModel.setCapsulePlace(places, "battery", "shown").battery, "shown");
-        compare(BarProfileModel.setCapsulePlace(places, "battery", "liveLeft").battery, "hidden");
+        compare(BarProfileModel.setCapsulePlace(places, "battery", "liveLeft").battery, "liveLeft");
+        compare(BarProfileModel.setCapsulePlace(places, "network", "liveLeft").network, "hidden");
         compare(BarProfileModel.setCapsulePlace(places, "workspaces", "shown").workspaces, undefined);
         compare(places.media, "liveLeft");
     }
@@ -365,18 +443,35 @@ TestCase {
             { clock: "shown", arch: "shown", keepAwake: "liveRight", media: "liveRight" });
 
         compare(BarProfileModel.capsulePlaceIds(barElements, places),
-            { hidden: [], shown: ["clock", "arch"], live: { left: [], right: ["recording", "keepAwake", "media"] } });
+            { hidden: [], shown: ["clock", "arch"], onBattery: [], liveRow: [],
+                live: { left: [], right: ["recording", "keepAwake", "media"] } });
+    }
+
+    // An element placed live in the row is listed apart from the shown ones
+    // and from those beside the pills.
+    function test_anElementLiveInTheRowIsListedApart() {
+        const barElements = {
+            left: [{ id: "clock", enabled: true }],
+            center: [{ id: "workspaces", enabled: true }],
+            right: [{ id: "battery", enabled: true }]
+        };
+        const places = Object.assign(BarProfileModel.completeCapsulePlaces(undefined),
+            { clock: "shown", battery: "liveRow" });
+
+        compare(BarProfileModel.capsulePlaceIds(barElements, places),
+            { hidden: [], shown: ["clock"], onBattery: [], liveRow: ["battery"],
+                live: { left: [], right: [] } });
     }
 
     // Every bar element but the workspaces offers Hidden and Shown; only the
     // ones that can be live, the recording indicator, media and keep-awake,
-    // also offer Live left and Live right.
+    // also offer Live left, Live right and Live in row.
     function test_onlyElementsThatCanBeLiveOfferTheLivePlaces_data() {
-        const all = ["Hidden", "Shown", "Live left", "Live right"];
+        const all = ["Hidden", "Shown", "On battery", "Live left", "Live right", "Live in row"];
         return [
             { tag: "recording", id: "recording", labels: all },
             { tag: "media", id: "media", labels: all },
-            { tag: "clock", id: "clock", labels: ["Hidden", "Shown"] },
+            { tag: "clock", id: "clock", labels: ["Hidden", "Shown", "On battery"] },
             { tag: "keepAwake", id: "keepAwake", labels: all },
             { tag: "workspaces", id: "workspaces", labels: [] }
         ];

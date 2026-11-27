@@ -58,10 +58,14 @@ const elementOptionDefaults = {
     "notifications": { badgeVisible: true },
     // `color` names one of the theme's colors, so it follows the theme.
     "cava": { barCount: 12, barWidth: 3, color: "blue" },
-    "audio": { meterVisible: true }
+    "audio": { meterVisible: true },
+    // Off, the clock shows 24-hour time (ClockText.timeText).
+    "clock": { twelveHour: false }
 };
 for (const id of iconTextElementIds)
     elementOptionDefaults[id] = Object.assign({}, elementOptionDefaults[id] || {}, iconTextOptionDefaults);
+// At rest the clock shows only the time, without its icon.
+elementOptionDefaults.clock.restIconVisible = false;
 
 // Whether element `id` shows its icon and its text, { icon, text }: by its
 // bar options, or its at-rest ones while `resting` (a collapsed capsule).
@@ -81,7 +85,7 @@ function iconTextShown(barElements, id, resting) {
 // show them beside its workspace pills, collapsed only while they are active.
 // Keep-awake is live only if a profile places it so: by default it is hidden.
 // Each one says when it is active in LiveElements.activeRules.
-const liveElementIds = ["recording", "media", "keepAwake", "pomodoro", "privacy"];
+const liveElementIds = ["recording", "media", "keepAwake", "pomodoro", "privacy", "battery"];
 
 // Whether bar element `id` can be a live element, so a capsule profile can
 // place it live left or right of the workspace pills.
@@ -90,36 +94,38 @@ function canBeLive(id) {
 }
 
 // Where a collapsed capsule puts a bar element, its collapsed place: hidden,
-// shown in its row, or live beside its workspace pills, on the left or the
-// right. Only the elements that can be live take the live places, and the
-// workspaces, which the capsule shows as pills, take none.
-const capsulePlaceNames = ["hidden", "shown", "liveLeft", "liveRight"];
+// shown in its row, live beside its workspace pills, on the left or the
+// right, live in its row: shown there only while active
+// (LiveElements.active), or in its row only while running on battery. Only
+// the elements that can be live take the live places, and the workspaces,
+// which the capsule shows as pills, take none.
+const capsulePlaceNames = ["hidden", "shown", "onBattery", "liveLeft", "liveRight", "liveRow"];
 const livePlaceSides = { liveLeft: "left", liveRight: "right" };
 const capsulePlaceLabels = {
-    hidden: "Hidden", shown: "Shown", liveLeft: "Live left", liveRight: "Live right"
+    hidden: "Hidden", shown: "Shown", liveLeft: "Live left", liveRight: "Live right",
+    liveRow: "Live in row", onBattery: "On battery"
 };
 
 // The collapsed places element `id` can take, in the order they are offered.
 function capsulePlacesFor(id) {
     if (id === "workspaces" || elementIds.indexOf(id) === -1)
         return [];
-    return canBeLive(id) ? capsulePlaceNames : capsulePlaceNames.slice(0, 2);
+    return canBeLive(id) ? capsulePlaceNames : capsulePlaceNames.slice(0, 3);
 }
 
 // The side of the workspace pills `place` sits on, or "" for a place that
-// isn't live.
+// isn't beside them (liveRow is in the row).
 function liveSide(place) {
     return livePlaceSides[place] || "";
 }
 
 // The collapsed places a profile starts with: media live left, the
-// recording indicator, the privacy indicator and the pomodoro live right
-// (from the pills outward, in the order elementIds lists them), `shown` in
-// the row (by default Arch, the clock and the control center), every other
-// element hidden.
+// recording indicator, the privacy indicator, the battery and the pomodoro
+// live right (from the pills outward, in the order elementIds lists them), `shown` in
+// the row (by default only the clock), every other element hidden.
 function capsulePlacesShowing(shown) {
     const livePlaces = { media: "liveLeft", recording: "liveRight", privacy: "liveRight",
-        pomodoro: "liveRight" };
+        battery: "liveRight", pomodoro: "liveRight" };
     const places = {};
 
     for (const id of elementIds) {
@@ -130,8 +136,7 @@ function capsulePlacesShowing(shown) {
     return places;
 }
 
-const defaultCapsulePlaces = Object.freeze(capsulePlacesShowing(["arch", "clock",
-    "notifications"]));
+const defaultCapsulePlaces = Object.freeze(capsulePlacesShowing(["clock"]));
 
 // `places` with a collapsed place for every element that takes one, as a
 // fresh object: missing or unknown places, or ones the element can't take,
@@ -147,11 +152,11 @@ function completeCapsulePlaces(places) {
 
 // The ids of the bar elements `barElements` lists in each collapsed place
 // of `places` (completed, see completeCapsulePlaces), in the profile's order,
-// enabled or not: { hidden, shown, live: { left, right } }. The workspaces,
+// enabled or not: { hidden, shown, onBattery, liveRow, live: { left, right } }. The workspaces,
 // which take no place, are in none.
 function capsulePlaceIds(barElements, places) {
     const complete = completeCapsulePlaces(places);
-    const ids = { hidden: [], shown: [], live: { left: [], right: [] } };
+    const ids = { hidden: [], shown: [], onBattery: [], liveRow: [], live: { left: [], right: [] } };
 
     for (const zoneName of zoneNames)
         ((barElements || {})[zoneName] || []).forEach(element => {
@@ -275,6 +280,21 @@ function capsule(bar) {
     return bar.barStyle === "capsule";
 }
 
+// Whether a bar element draws a pill of its own: not while the profile's pills
+// are transparent, on a docked bar, nor inside a capsule, which is its
+// elements' only background. A grouped element draws none either: its group
+// draws one background for them all.
+function elementPillsDrawn(bar) {
+    return !bar.pillsTransparent && !docked(bar) && !capsule(bar);
+}
+
+// Whether a bar element not in a group is outlined, with the profile's element
+// border on: on every bar style but the capsule, inside which no element has a
+// pill to outline.
+function elementBorderDrawn(bar) {
+    return bar.elementBorder === true && !capsule(bar);
+}
+
 // The Bar positions a bar of this bar style can take: a capsule only sits at
 // the top or the bottom.
 function barPositionsFor(barStyle) {
@@ -286,16 +306,20 @@ function barPositionsFor(barStyle) {
 // thickness comes from the vertical padding on an opaque bar and from the
 // pill vertical padding on the others (BarLayout.elementThickness); the
 // edge margin keeps a floating bar or a capsule off its edge
-// (BarPlacement.margin); the bar border outlines an opaque bar's edge, the
-// docked zones and the capsule, but a transparent bar has no outline; a
-// docked bar's pills are always see-through. Settings not listed show for
-// every style.
+// (BarPlacement.margin); the bar border outlines an opaque bar's edge and the
+// docked zones, but a transparent bar has no outline and a capsule a soft
+// shadow instead (CapsuleSurface.qml); a docked bar's pills are always
+// see-through; and inside a capsule, its only background, no element draws a
+// pill nor a group a background, so there is nothing to make see-through or
+// outline. Settings not listed show for every style.
 const barSettingStyles = {
     elementVerticalPadding: ["opaque"],
     pillVerticalPadding: ["transparent", "docked", "capsule"],
     transparentBarTopMargin: ["transparent", "capsule"],
-    barBorder: ["opaque", "docked", "capsule"],
-    pillsTransparent: ["opaque", "transparent", "capsule"],
+    barBorder: ["opaque", "docked"],
+    pillsTransparent: ["opaque", "transparent"],
+    elementBorder: ["opaque", "transparent", "docked"],
+    groupBorder: ["opaque", "transparent", "docked"],
     capsuleVerticalPadding: ["capsule"],
     capsuleNotifications: ["capsule"]
 };

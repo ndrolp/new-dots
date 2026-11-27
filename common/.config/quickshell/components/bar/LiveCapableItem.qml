@@ -13,9 +13,9 @@ Item {
     required property string element
     // Where the bar draws its elements (BarElementItems): whether one is
     // shown (`itemVisible`) and live (`live`), its `sizes` and its place
-    // (`elementX`, `elementY`), each taking the element's id, and how the
-    // capsule's row looks mid-crossfade (`rowContents`), which it takes in
-    // the row, not live.
+    // (`elementX`, `elementY`), each taking the element's id, and how it
+    // looks in the capsule's row mid-crossfade or entering (`rowLook`, see
+    // CapsuleMotion.rowLook), which it takes in the row, not live.
     required property var items
 
     // Whether it is shown. While it fades out it is no longer shown, but
@@ -27,10 +27,13 @@ Item {
     // The sizes its item is drawn at (LiveElements.elementSizes).
     readonly property var sizes: items.sizes(element)
     readonly property Item content: children.length > 0 ? children[0] : null
+    // How it looks in the row, or null live or with no row to take it from.
+    readonly property var rowLook: live || !items.rowLook ? null : items.rowLook(element)
 
     visible: takesRoom
-    opacity: (shown ? 1 : 0) * (live || !items.rowContents ? 1 : items.rowContents.opacity)
-    scale: live || !items.rowContents ? 1 : items.rowContents.scale
+    opacity: (shown ? 1 : 0) * (rowLook ? rowLook.opacity : 1)
+    scale: rowLook ? rowLook.scale : 1
+    transform: Translate { x: root.rowLook ? root.rowLook.slide : 0 }
     x: items.elementX(element)
     y: items.elementY(element)
     width: content ? content.width : 0

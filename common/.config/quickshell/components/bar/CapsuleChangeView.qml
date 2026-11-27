@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Shapes
 import "../panels" as Panels
 import "../panels/OsdChange.js" as OsdChange
 
@@ -7,7 +6,7 @@ import "../panels/OsdChange.js" as OsdChange
 // as deep as the capsule, by its card (OsdChange.capsuleLook):
 // - volume and brightness: an icon whose glyph follows the level and bounces
 //   slightly on each change, a wide fill bar and the percentage;
-// - battery and Bluetooth: a glance card, the icon, one line of text and a
+// - battery and Bluetooth: a ring card, the icon, one line of text and a
 //   small ring of the battery level when there is one;
 // - anything else: the OSD's icon and label.
 Item {
@@ -29,9 +28,9 @@ Item {
     readonly property color toneColor: OsdChange.toneColor(
         !look ? "muted" : card === "row" ? display.tone : look.tone, theme)
     readonly property bool highlighted: !look ? false
-        : card === "row" ? display.highlighted : card === "glance" && look.highlighted
-    // Whether the glance card's level ring shows.
-    readonly property bool ringShown: card === "glance" && look.ring !== null
+        : card === "row" ? display.highlighted : card === "ring" && look.highlighted
+    // Whether the ring card's level ring shows.
+    readonly property bool ringShown: card === "ring" && look.ring !== null
     // The icon's scale, bouncing slightly on each volume or brightness change.
     property real iconScale: 1
 
@@ -92,7 +91,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.card !== "level"
             width: Math.min(implicitWidth, 240)
-            text: !root.look ? "" : root.card === "glance" ? root.look.text : root.display.label
+            text: !root.look ? "" : root.card === "ring" ? root.look.text : root.display.label
             color: root.theme.text
             elide: Text.ElideRight
             font.pixelSize: root.appearance.textSize
@@ -109,50 +108,15 @@ Item {
             theme: root.theme
         }
 
-        // The glance card's battery ring: a track, and an arc from the top
-        // round to the level.
-        Shape {
-            id: ring
-
-            readonly property real level: root.ringShown ? root.look.ring : 0
-            readonly property real stroke: 3
-
+        // The ring card's battery ring.
+        LevelRing {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.ringShown
             width: root.appearance.textSize + 4
             height: width
-            preferredRendererType: Shape.CurveRenderer
-
-            ShapePath {
-                fillColor: "transparent"
-                strokeColor: root.theme.backgroundSecondary
-                strokeWidth: ring.stroke
-
-                PathAngleArc {
-                    centerX: ring.width / 2
-                    centerY: ring.height / 2
-                    radiusX: (ring.width - ring.stroke) / 2
-                    radiusY: radiusX
-                    startAngle: 0
-                    sweepAngle: 360
-                }
-            }
-
-            ShapePath {
-                fillColor: "transparent"
-                strokeColor: root.toneColor
-                strokeWidth: ring.stroke
-                capStyle: ShapePath.RoundCap
-
-                PathAngleArc {
-                    centerX: ring.width / 2
-                    centerY: ring.height / 2
-                    radiusX: (ring.width - ring.stroke) / 2
-                    radiusY: radiusX
-                    startAngle: -90
-                    sweepAngle: 360 * ring.level
-                }
-            }
+            level: root.ringShown ? root.look.ring : 0
+            trackColor: root.theme.backgroundSecondary
+            levelColor: root.toneColor
         }
     }
 }

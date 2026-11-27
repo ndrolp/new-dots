@@ -1,6 +1,7 @@
 import QtQuick
 import QtTest
 import "../config" as Config
+import "../config/BarProfileModel.js" as BarProfileModel
 
 // The schema migration writes appearance.json and monitors.json as the shell
 // writes them otherwise: indented JSON ending in a newline.
@@ -61,6 +62,26 @@ TestCase {
 
         compare(appearance.written, "");
         compare(monitors.written, "");
+    }
+
+    // The tracked capsule profile shows only the clock at rest, the time
+    // without its icon, besides its live elements.
+    function test_theTrackedCapsuleShowsOnlyTheClockAtRest() {
+        const profile = BarProfileModel.completeProfile(trackedState("appearance.json").barProfiles.island);
+        const ids = BarProfileModel.capsulePlaceIds(profile.barElements, profile.capsulePlaces);
+
+        compare(profile.barStyle, "capsule");
+        compare(ids.shown, ["clock"]);
+        compare(BarProfileModel.iconTextShown(profile.barElements, "clock", true), { icon: false, text: true });
+    }
+
+    // The tracked capsule profile puts the battery in its row on battery, or
+    // live in it, so it shows there at rest while on battery.
+    function test_theTrackedCapsuleShowsTheBatteryLive() {
+        const profile = BarProfileModel.completeProfile(trackedState("appearance.json").barProfiles.island);
+
+        verify(["onBattery", "liveRow"].indexOf(profile.capsulePlaces.battery) !== -1,
+            profile.capsulePlaces.battery);
     }
 
     function test_alreadyMigratedFilesAreNotWritten() {

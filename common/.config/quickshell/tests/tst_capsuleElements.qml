@@ -9,7 +9,7 @@ import "../config/BarProfileModel.js" as BarProfileModel
 TestCase {
     name: "CapsuleElements"
 
-    // The bar elements a profile shows in its collapsed row by default.
+    // The bar elements these tests show in a collapsed row.
     readonly property var defaultShown: ["arch", "clock", "notifications"]
 
     // Collapsed places with `values` over the default ones.
@@ -88,7 +88,7 @@ TestCase {
     // bar elements as they are on any other bar style.
     function test_onlyACapsuleDrawsTheCollapsedRow_data() {
         return [
-            { tag: "capsule", barStyle: "capsule", center: ["arch", "notifications", "clock"] },
+            { tag: "capsule", barStyle: "capsule", center: ["clock"] },
             { tag: "opaque", barStyle: "opaque", center: ["workspaces"] },
             { tag: "transparent", barStyle: "transparent", center: ["workspaces"] },
             { tag: "docked", barStyle: "docked", center: ["workspaces"] }
@@ -103,15 +103,35 @@ TestCase {
 
     // Expanded, the capsule shows every bar element the profile enables, in
     // its order and with its groups, except the workspaces: the workspace row
-    // already shows them.
+    // already shows them; nor the live elements, the battery by default,
+    // beside the pills.
     function test_anExpandedCapsuleShowsEveryElementButTheWorkspaces() {
         const elements = barElements();
         elements.left[0].enabled = false;
         const row = CapsuleElements.drawnElements({ barStyle: "capsule", barElements: elements, expanded: true });
 
-        compare(shownIds(row, "center"), ["systemMonitor", "notifications", "battery", "clock"]);
+        compare(shownIds(row, "center"), ["systemMonitor", "notifications", "clock"]);
         compare(BarProfileModel.zoneGroups(row, "center"),
-            [["systemMonitor"], ["notifications"], ["battery", "clock"]]);
+            [["systemMonitor"], ["notifications"], ["clock"]]);
+    }
+
+    // While the glance shows, the bar elements whose cards it shows leave the
+    // expanded row; collapsed, the glance's elements don't count.
+    function test_theGlancesElementsLeaveTheExpandedRow_data() {
+        return [
+            { tag: "expanded", expanded: true, center: ["arch", "systemMonitor", "notifications", "clock"] },
+            { tag: "collapsed", expanded: false, center: ["battery", "clock"] }
+        ];
+    }
+
+    function test_theGlancesElementsLeaveTheExpandedRow(data) {
+        const elements = barElements();
+        elements.right.push(element("network"));
+        const row = CapsuleElements.drawnElements({ barStyle: "capsule", barElements: elements,
+            capsulePlaces: places({ battery: "shown" }), expanded: data.expanded,
+            glance: ["battery", "network"] });
+
+        compare(shownIds(row, "center"), data.center);
     }
 
     // Expanding means nothing on any other bar style.
@@ -183,6 +203,47 @@ TestCase {
         verify(shownIds(CapsuleElements.drawnElements(bar), "center").indexOf("media") !== -1);
     }
 
+    // A live element whose place is Live in row is drawn in the row, collapsed
+    // or expanded (BarElementItems.itemVisible hides it collapsed while
+    // inactive), and not beside the pills.
+    function test_aLiveElementLiveInTheRowIsDrawnThere_data() {
+        return [
+            { tag: "collapsed", expanded: false },
+            { tag: "expanded", expanded: true }
+        ];
+    }
+
+    function test_aLiveElementLiveInTheRowIsDrawnThere(data) {
+        const bar = { barStyle: "capsule", barElements: BarProfileModel.defaultProfile.barElements,
+            capsulePlaces: places({ battery: "liveRow" }), expanded: data.expanded };
+
+        verify(shownIds(CapsuleElements.drawnElements(bar), "center").indexOf("battery") !== -1);
+    }
+
+    // Any element but the workspaces can be placed on battery: it is drawn
+    // in the row, collapsed or expanded (BarElementItems.itemVisible hides
+    // it collapsed while plugged in), and listed by onBatteryElements.
+    function test_anElementOnBatteryIsDrawnInTheRow_data() {
+        return [
+            { tag: "collapsed", expanded: false },
+            { tag: "expanded", expanded: true }
+        ];
+    }
+
+    function test_anElementOnBatteryIsDrawnInTheRow(data) {
+        const bar = { barStyle: "capsule", barElements: BarProfileModel.defaultProfile.barElements,
+            capsulePlaces: places({ network: "onBattery" }), expanded: data.expanded };
+
+        verify(shownIds(CapsuleElements.drawnElements(bar), "center").indexOf("network") !== -1);
+        compare(CapsuleElements.onBatteryElements(bar), ["network"]);
+    }
+
+    function test_onlyACapsuleHasElementsOnBattery() {
+        compare(CapsuleElements.onBatteryElements({ barStyle: "docked",
+            barElements: BarProfileModel.defaultProfile.barElements,
+            capsulePlaces: places({ network: "onBattery" }) }), []);
+    }
+
     // A hidden element isn't in the collapsed row; expanded, it shows in the
     // row like any other element.
     function test_aHiddenLiveElementOnlyShowsExpanded() {
@@ -223,21 +284,21 @@ TestCase {
     function test_aLiveElementLeavesItsGroup_data() {
         return [
             { tag: "first of its group", right: [element("media"), element("audio", { joinPrevious: true }),
-                element("clock", { joinPrevious: true })], groups: [["battery"], ["audio", "clock"]] },
+                element("clock", { joinPrevious: true })], groups: [["network"], ["audio", "clock"]] },
             { tag: "inside its group", right: [element("audio"), element("media", { joinPrevious: true }),
-                element("clock", { joinPrevious: true })], groups: [["battery"], ["audio", "clock"]] },
+                element("clock", { joinPrevious: true })], groups: [["network"], ["audio", "clock"]] },
             { tag: "last of its group", right: [element("audio"), element("clock", { joinPrevious: true }),
-                element("recording", { joinPrevious: true })], groups: [["battery"], ["audio", "clock"]] },
+                element("recording", { joinPrevious: true })], groups: [["network"], ["audio", "clock"]] },
             { tag: "alone in its group", right: [element("media"), element("clock", { joinPrevious: true })],
-                groups: [["battery"], ["clock"]] },
+                groups: [["network"], ["clock"]] },
             { tag: "both live", right: [element("media"), element("recording", { joinPrevious: true }),
                 element("audio", { joinPrevious: true }), element("clock", { joinPrevious: true })],
-                groups: [["battery"], ["audio", "clock"]] }
+                groups: [["network"], ["audio", "clock"]] }
         ];
     }
 
     function test_aLiveElementLeavesItsGroup(data) {
-        const elements = { left: [], center: [element("workspaces"), element("battery")], right: data.right };
+        const elements = { left: [], center: [element("workspaces"), element("network")], right: data.right };
         const drawn = CapsuleElements.drawnElements({ barStyle: "capsule", barElements: elements, expanded: true });
 
         compare(BarProfileModel.zoneGroups(drawn, "center"), data.groups);
@@ -250,7 +311,7 @@ TestCase {
             barElements: BarProfileModel.defaultProfile.barElements
         });
 
-        compare(shownIds(drawn, "center"), ["arch", "notifications", "clock"]);
+        compare(shownIds(drawn, "center"), ["clock"]);
     }
 
     // Any other bar style draws the live-capable elements in its zones like

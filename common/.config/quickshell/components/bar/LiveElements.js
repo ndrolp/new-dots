@@ -23,6 +23,18 @@ function liveElements(bar) {
     return { left: live.left.filter(enabled), right: live.right.filter(enabled) };
 }
 
+// The live elements a capsule draws in its row, shown there collapsed only
+// while active: those its profile enables and places live in the row, in
+// the profile's order. None on any other bar style. Takes what
+// liveElements takes.
+function rowLiveElements(bar) {
+    if (!BarProfileModel.capsule(bar))
+        return [];
+
+    return BarProfileModel.capsulePlaceIds(bar.barElements, bar.capsulePlaces).liveRow
+        .filter(id => BarProfileModel.elementEnabled(bar.barElements, id));
+}
+
 // The ids of the live elements by side, `sides` as liveElements gives them
 // (or null for none), as one list: the left ones, then the right ones.
 function ids(sides) {
@@ -34,14 +46,16 @@ function ids(sides) {
 // Each rule takes what there is to show, { player (the Mpris player media
 // follows, or null), recordings (RecordingIndicator.recordings), keepAwakeOn,
 // pomodoroStarted (running or paused), captures (the apps using the
-// microphone or a camera, PrivacyIndicator.captures) }.
+// microphone or a camera, PrivacyIndicator.captures), hasBattery, onBattery
+// (running on battery, not charging: UPower.onBattery) }.
 // A new live element needs its rule here and its id in liveElementIds.
 const activeRules = Object.freeze({
     recording: status => status.recordings.length > 0,
     media: status => !!status.player && status.player.isPlaying === true,
     keepAwake: status => status.keepAwakeOn === true,
     pomodoro: status => status.pomodoroStarted === true,
-    privacy: status => PrivacyIndicator.capturing(status.captures)
+    privacy: status => PrivacyIndicator.capturing(status.captures),
+    battery: status => status.hasBattery === true && status.onBattery === true
 });
 
 // Whether bar element `id` is active, given what there is to show (see

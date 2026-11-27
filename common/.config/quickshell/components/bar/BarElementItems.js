@@ -8,20 +8,33 @@
 // Whether `element` is shown: it must be enabled in `barElements`, or be one
 // of a capsule's `live` elements (LiveElements.liveElements), which its
 // row lists switched off. A live element of a collapsed capsule shows only
-// while it is active (LiveElements.active). Otherwise, the ones that can have
+// while it is active (LiveElements.active), as does one live in its row
+// (`liveRow`, LiveElements.rowLiveElements); one its row shows on battery
+// (`onBatteryRow`, CapsuleElements.onBatteryElements) shows there only while
+// running on battery, and none shows while the
+// capsule glance shows its card (`glance`, CapsuleGlance.leavingElements).
+// Otherwise, the ones that can have
 // nothing to show are hidden then: media without a player, the battery
 // without one, the recording and privacy indicators while they aren't
 // active and cava while silent, and the pomodoro while none is started
 // (running or paused); every other element is always shown when enabled.
-// `status` says what there is: `live`, `expanded` (whether the capsule is),
+// `status` says what there is: `live`, `liveRow`, `onBatteryRow`, `expanded` (whether the capsule is), `rowExpanded`
+// (whether its row shows its expanded view),
 // `player`, `recordings`, `keepAwakeOn`, `captures` (see
-// LiveElements.activeRules), `hasBattery`, `cavaSilent` and
-// `pomodoroStarted`.
+// LiveElements.activeRules), `hasBattery`, `onBattery`, `cavaSilent`, `pomodoroStarted`
+// and `glance`.
 function itemVisible(element, barElements, status) {
     const live = (status.live || []).indexOf(element) !== -1;
     if (!BarProfileModel.elementEnabled(barElements, element) && !live)
         return false;
+    if (status.rowExpanded !== true && (status.onBatteryRow || []).indexOf(element) !== -1
+            && !(status.hasBattery === true && status.onBattery === true))
+        return false;
+    if (live && (status.glance || []).indexOf(element) !== -1)
+        return false;
     if (live && status.expanded !== true)
+        return LiveElements.active(element, status);
+    if (status.rowExpanded !== true && (status.liveRow || []).indexOf(element) !== -1)
         return LiveElements.active(element, status);
     if (element === "media")
         return !!status.player;
@@ -65,10 +78,11 @@ var elementPadding = 8;
 var squareElements = Object.freeze(["network", "bluetooth", "tray"]);
 
 // Whether bar element `element` draws its own pill: not while its pills are
-// transparent, on a docked bar, or in a group of two or more of the elements
-// `isShown` says are shown, which draws one background for them all.
+// transparent, on a docked bar, inside a capsule
+// (BarProfileModel.elementPillsDrawn), or in a group of two or more of the
+// elements `isShown` says are shown, which draws one background for them all.
 function drawsOwnPill(element, profile, isShown) {
-    if (profile.pillsTransparent || BarProfileModel.docked(profile))
+    if (!BarProfileModel.elementPillsDrawn(profile))
         return false;
     const zone = BarProfileModel.elementZone(profile.barElements, element);
     return !BarProfileModel.zoneGroups(profile.barElements, zone, isShown)

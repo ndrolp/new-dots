@@ -376,7 +376,7 @@ TestCase {
     // recording or sound, keep-awake off and no pomodoro started.
     function nothingGoingOn(values) {
         return Object.assign({ live: [], expanded: false, player: null, recordings: [], hasBattery: false,
-            cavaSilent: true, keepAwakeOn: false, pomodoroStarted: false,
+            onBattery: false, cavaSilent: true, keepAwakeOn: false, pomodoroStarted: false,
             captures: { microphone: [], camera: [] } }, values);
     }
 
@@ -444,7 +444,8 @@ TestCase {
     // A capsule's row lists its live elements switched off, but a collapsed
     // capsule shows them beside its workspace pills while they are active:
     // media while a track plays, the recording indicator while recording,
-    // keep-awake while on. Expanded, they show as on any other bar style.
+    // keep-awake while on, the battery while on battery. Expanded, they show
+    // as on any other bar style.
     function test_aLiveElementShowsCollapsedOnlyWhileActive_data() {
         const playing = { isPlaying: true };
         const paused = { isPlaying: false };
@@ -468,16 +469,95 @@ TestCase {
             { tag: "microphone and camera in use", element: "privacy",
                 status: { captures: { microphone: ["Firefox"], camera: ["Firefox"] } }, shown: true },
             { tag: "nothing captured", element: "privacy", status: {}, shown: false },
-            { tag: "nothing captured, expanded", element: "privacy", status: { expanded: true }, shown: false }
+            { tag: "nothing captured, expanded", element: "privacy", status: { expanded: true }, shown: false },
+            { tag: "on battery", element: "battery", status: { hasBattery: true, onBattery: true }, shown: true },
+            { tag: "plugged in", element: "battery", status: { hasBattery: true }, shown: false },
+            { tag: "plugged in, expanded", element: "battery", status: { hasBattery: true, expanded: true },
+                shown: true },
+            { tag: "no battery", element: "battery", status: { onBattery: true }, shown: false },
+            { tag: "no battery, expanded", element: "battery", status: { expanded: true }, shown: false }
         ];
     }
 
     function test_aLiveElementShowsCollapsedOnlyWhileActive(data) {
         const barElements = { left: [], right: [], center: [{ id: "recording", enabled: false },
             { id: "media", enabled: false }, { id: "keepAwake", enabled: false },
-            { id: "pomodoro", enabled: false }, { id: "privacy", enabled: false }] };
+            { id: "pomodoro", enabled: false }, { id: "privacy", enabled: false },
+            { id: "battery", enabled: false }] };
         const status = nothingGoingOn(Object.assign({ live: ["recording", "media", "keepAwake", "pomodoro",
-            "privacy"] },
+            "privacy", "battery"] },
+            data.status));
+
+        compare(BarElementItems.itemVisible(data.element, barElements, status), data.shown);
+    }
+
+    // A live element placed in the row of a collapsed capsule shows there only
+    // while active: the battery while on battery. With the row expanded, it
+    // shows as on any other bar style.
+    function test_aLiveElementInTheRowShowsCollapsedOnlyWhileActive_data() {
+        return [
+            { tag: "on battery", status: { hasBattery: true, onBattery: true }, shown: true },
+            { tag: "plugged in", status: { hasBattery: true }, shown: false },
+            { tag: "plugged in, capsule expanded with its row at rest",
+                status: { hasBattery: true, expanded: true }, shown: false },
+            { tag: "plugged in, row expanded",
+                status: { hasBattery: true, expanded: true, rowExpanded: true }, shown: true },
+            { tag: "no battery, row expanded", status: { expanded: true, rowExpanded: true }, shown: false }
+        ];
+    }
+
+    function test_aLiveElementInTheRowShowsCollapsedOnlyWhileActive(data) {
+        const barElements = { left: [], right: [], center: [{ id: "battery", enabled: true }] };
+        const status = nothingGoingOn(Object.assign({ liveRow: ["battery"] }, data.status));
+
+        compare(BarElementItems.itemVisible("battery", barElements, status), data.shown);
+    }
+
+    // An element a collapsed capsule's row shows on battery shows there only
+    // while running on battery, and then only if it has something to show;
+    // with the row expanded, it shows as on any other bar style.
+    function test_anElementOnBatteryShowsCollapsedOnlyOnBattery_data() {
+        return [
+            { tag: "on battery", element: "clock", status: { hasBattery: true, onBattery: true }, shown: true },
+            { tag: "plugged in", element: "clock", status: { hasBattery: true }, shown: false },
+            { tag: "no battery", element: "clock", status: {}, shown: false },
+            { tag: "plugged in, row expanded", element: "clock",
+                status: { hasBattery: true, expanded: true, rowExpanded: true }, shown: true },
+            { tag: "on battery, nothing to show", element: "media",
+                status: { hasBattery: true, onBattery: true }, shown: false }
+        ];
+    }
+
+    function test_anElementOnBatteryShowsCollapsedOnlyOnBattery(data) {
+        const barElements = { left: [], right: [], center: [{ id: "clock", enabled: true },
+            { id: "media", enabled: true }] };
+        const status = nothingGoingOn(Object.assign({ onBatteryRow: ["clock", "media"] }, data.status));
+
+        compare(BarElementItems.itemVisible(data.element, barElements, status), data.shown);
+    }
+
+    // While the capsule glance shows a live element's card (`glance`,
+    // CapsuleGlance.leavingElements), it leaves its place beside the pills,
+    // and comes back once the glance goes; the other live elements stay.
+    function test_aLiveElementLeavesWhileItsCardShows_data() {
+        const playing = { isPlaying: true };
+        return [
+            { tag: "media's card shows", element: "media", status: { player: playing, glance: ["media"] },
+                shown: false },
+            { tag: "no glance", element: "media", status: { player: playing, glance: [] }, shown: true },
+            { tag: "another's card", element: "keepAwake", status: { keepAwakeOn: true, glance: ["media"] },
+                shown: true },
+            { tag: "battery's card shows", element: "battery",
+                status: { hasBattery: true, onBattery: true, glance: ["battery"] }, shown: false },
+            { tag: "battery, no glance", element: "battery",
+                status: { hasBattery: true, onBattery: true, glance: [] }, shown: true }
+        ];
+    }
+
+    function test_aLiveElementLeavesWhileItsCardShows(data) {
+        const barElements = { left: [], right: [], center: [{ id: "media", enabled: false },
+            { id: "keepAwake", enabled: false }, { id: "battery", enabled: false }] };
+        const status = nothingGoingOn(Object.assign({ live: ["media", "keepAwake", "battery"], expanded: true },
             data.status));
 
         compare(BarElementItems.itemVisible(data.element, barElements, status), data.shown);
@@ -569,6 +649,19 @@ TestCase {
 
         compare(BarProfileModel.elementOption(BarProfileModel.setElementOption(red, "cava", "color",
             "#00ff00"), "cava", "color"), "red");
+    }
+
+    // The clock's 12-hour option is off by default, and in saved profiles
+    // without it, so they keep 24-hour time; it can be turned on.
+    function test_theClocksTwelveHourOption() {
+        const saved = BarProfileModel.normalizeBarElements({
+            right: [{ id: "clock", enabled: true, options: { iconVisible: true } }]
+        });
+
+        compare(BarProfileModel.elementOption(saved, "clock", "twelveHour"), false);
+        compare(BarProfileModel.elementOption(BarProfileModel.setElementOption(saved, "clock",
+            "twelveHour", true), "clock", "twelveHour"), true);
+        compare(BarProfileModel.elementOptionField("clock", "twelveHour"), { kind: "switch" });
     }
 
     // How the Bar section edits each option: a switch, a number in a range or

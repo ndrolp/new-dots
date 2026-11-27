@@ -79,6 +79,17 @@ Feature {
             panelWindowItem.restoreView(view);
     }
 
+    // Opening it, or moving it to another bar while open, edits the profile
+    // that bar draws. Pending changes to another profile keep it edited
+    // (Appearance.editBarProfile ignores the switch), so nothing is lost.
+    function editWindowProfile() {
+        if (shown && window && window.profileName)
+            appearance.editBarProfile(window.profileName);
+    }
+
+    onShownChanged: editWindowProfile()
+    onWindowChanged: editWindowProfile()
+
     onWindowCapsuleChanged: {
         if (moving || !bar)
             return;

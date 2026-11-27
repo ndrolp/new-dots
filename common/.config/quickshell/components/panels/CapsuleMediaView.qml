@@ -1,17 +1,14 @@
-import Quickshell
-import Quickshell.Io
 import Quickshell.Widgets
 import QtQuick
 import QtQuick.Effects
 import "../../config" as Config
 import "." as Panels
-import "MediaCard.js" as MediaCard
 import "../StatusText.js" as StatusText
 
 // The media popup inside a capsule: the art on the left, rounded, with a
 // soft glow behind it; a bold title with the artist under it; a scrubbable
 // progress bar with the elapsed and total time; previous, play/pause and
-// next. One colour quantized from the art (MediaCard.artTint) tints the
+// next. One colour quantized from the art (MediaArtTint.qml) tints the
 // progress bar, the play button and the glow; with no art it is the accent.
 // The capsule's background stays the profile's.
 Item {
@@ -24,34 +21,8 @@ Item {
     readonly property var player: media.player
     readonly property real artSize: 88
     readonly property bool artShown: artImage.status === Image.Ready
-    readonly property color tint: MediaCard.artTint(quantizer.colors, artShown, theme.accent)
-    // What reads on the tint: the colorscheme's background or text, whichever
-    // stands out on it (MediaCard.onTint).
-    readonly property color onTint: MediaCard.onTint(tint, theme)
-    // Where ColorQuantizer reads the art from (MediaCard.artSource): local art
-    // as it is, web art (Spotify's) from its copy in the art cache, once
-    // fetched.
-    readonly property var artFile: MediaCard.artSource(player ? player.trackArtUrl : "",
-        MediaCard.artCacheDir(Quickshell.env("XDG_CACHE_HOME"), Quickshell.env("HOME")))
-    // The art the quantizer reads now: web art only once its copy is there.
-    property string quantizedArt: ""
-
-    onArtFileChanged: fetchArt()
-    Component.onCompleted: fetchArt()
-
-    // Hands the art to the quantizer, fetching web art first; a fetch still
-    // running for earlier art fetches this one once it ends.
-    function fetchArt() {
-        if (!artFile.fetch) {
-            quantizedArt = artFile.source;
-            return;
-        }
-        quantizedArt = "";
-        if (artFetch.running)
-            return;
-        artFetch.fetched = artFile;
-        artFetch.running = true;
-    }
+    readonly property color tint: artTint.tint
+    readonly property color onTint: artTint.onTint
 
     implicitHeight: Math.max(artSize, info.implicitHeight)
     height: implicitHeight
@@ -60,32 +31,13 @@ Item {
         id: theme
     }
 
-    ColorQuantizer {
-        id: quantizer
+    // The one colour from the art, and what reads on it.
+    Panels.MediaArtTint {
+        id: artTint
 
-        source: root.quantizedArt
-        depth: 2
-        rescaleSize: 64
-    }
-
-    // Fetches web art into the art cache, unless its copy is already there,
-    // then hands it to the quantizer if it is still the track's art.
-    Process {
-        id: artFetch
-
-        property var fetched: null
-
-        command: ["sh", "-c",
-            "[ -s \"$2\" ] && exit 0; mkdir -p \"$(dirname \"$2\")\" "
-                + "&& curl -sfL --max-time 15 -o \"$2.part\" \"$1\" && mv -f \"$2.part\" \"$2\"",
-            "art-fetch", fetched ? fetched.url : "", fetched ? fetched.path : ""]
-
-        onExited: exitCode => {
-            if (fetched !== root.artFile)
-                Qt.callLater(root.fetchArt);
-            else if (exitCode === 0)
-                root.quantizedArt = fetched.source;
-        }
+        artUrl: root.player ? root.player.trackArtUrl : ""
+        artShown: root.artShown
+        theme: theme
     }
 
     // The soft glow behind the art: a blurred halo of the tint round it.

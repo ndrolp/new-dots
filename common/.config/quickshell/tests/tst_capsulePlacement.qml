@@ -99,6 +99,7 @@ TestCase {
             centre: 500,
             spacing: 8,
             pills: 40,
+            pillDepth: 4,
             left: [{ id: "media", length: 100, depth: 24, shown: media }],
             right: [{ id: "recording", length: 60, depth: 24, shown: recording }]
         };
@@ -141,6 +142,28 @@ TestCase {
         compare({ start: row.start, end: row.end }, { start: 480, end: 520 });
     }
 
+    // Expanded, the pills are chips, as deep as they are given: deeper than
+    // the live elements, they make the row as deep as themselves; shallower,
+    // they are centred across it.
+    function test_theRowIsAsDeepAsTheChips_data() {
+        return [
+            { tag: "deeper chips", pillDepth: 30, depth: 30, pills: { x: 500, y: 30 },
+                media: { x: 392, y: 33 } },
+            { tag: "shallower chips", pillDepth: 16, depth: 24, pills: { x: 500, y: 34 },
+                media: { x: 392, y: 30 } }
+        ];
+    }
+
+    function test_theRowIsAsDeepAsTheChips(data) {
+        const content = { barPosition: "top", width: 1000, height: 30 };
+        const given = Object.assign(pillRowGiven(true, true), { pillDepth: data.pillDepth });
+        const row = CapsulePlacement.pillRow(content, given);
+
+        compare(row.depth, data.depth);
+        compare(row.pills, data.pills);
+        compare(row.elements.media, data.media);
+    }
+
     // A live element that isn't shown takes no room: the others close up
     // round the pills, still centred, and it waits just outside its side of
     // them, to fade there.
@@ -179,7 +202,7 @@ TestCase {
 
     // Without a popup inside, the capsule is just its row.
     function test_withoutAPopupInsideTheCapsuleIsItsRow() {
-        compare(CapsulePlacement.withPopup(row, null, "top"), row);
+        compare(CapsulePlacement.withInside(row, null, "top"), row);
     }
 
     // With a popup inside it grows to the wider of the row and the popup,
@@ -197,7 +220,7 @@ TestCase {
     }
 
     function test_aPopupInsideGrowsTheCapsuleRoundIt(data) {
-        compare(CapsulePlacement.withPopup(row, data.popup, data.barPosition), data.place);
+        compare(CapsulePlacement.withInside(row, data.popup, data.barPosition), data.place);
     }
 
     // Round a popup the capsule is a rounded rectangle, no longer a full
@@ -208,8 +231,27 @@ TestCase {
         const deep = { x: 800, y: 0, width: 320, height: 64, radius: 32 };
         const popup = { width: 424, height: 300 };
 
-        compare(CapsulePlacement.withPopup(deep, popup, "top").radius, 20);
-        compare(CapsulePlacement.withPopup(deep, null, "top").radius, 32);
-        compare(CapsulePlacement.withPopup(row, popup, "top").radius, 16);
+        compare(CapsulePlacement.withInside(deep, popup, "top").radius, 20);
+        compare(CapsulePlacement.withInside(deep, null, "top").radius, 32);
+        compare(CapsulePlacement.withInside(row, popup, "top").radius, 16);
+    }
+
+    // The glance goes where a popup inside would: centred on the row, just
+    // past it, away from the screen edge, under a top capsule and above a
+    // bottom one; the capsule grows round it as round a popup, so the
+    // pointer over its cards is over the capsule.
+    function test_theGlanceGoesPastTheRow_data() {
+        return [
+            { tag: "top", barPosition: "top", at: { x: 810, y: 32 } },
+            { tag: "bottom", barPosition: "bottom", at: { x: 810, y: -60 } }
+        ];
+    }
+
+    function test_theGlanceGoesPastTheRow(data) {
+        const glance = { width: 300, height: 60 };
+        const grown = CapsulePlacement.withInside(row, glance, data.barPosition);
+
+        compare(CapsulePlacement.glancePlace(row, glance, data.barPosition), data.at);
+        verify(CapsulePlacement.contains(grown, { x: data.at.x + 10, y: data.at.y + 10 }));
     }
 }

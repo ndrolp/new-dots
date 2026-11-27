@@ -143,11 +143,10 @@ TestCase {
         return [
             { tag: "Style", settings: ["Bar style", "Bar position"] },
             { tag: "Bar", settings: ["Density preset", "Bar thickness", "Bar opacity", "Corner radius",
-                "Horizontal padding", "Bar border", "Edge margin"] },
-            { tag: "Groups", settings: ["Group radius", "Group horizontal padding", "Group vertical padding",
-                "Group border"] },
+                "Horizontal padding", "Edge margin"] },
+            { tag: "Groups", settings: ["Group radius", "Group horizontal padding", "Group vertical padding"] },
             { tag: "Elements", settings: ["Icon size", "Pill vertical padding",
-                "Component spacing", "Element border", "Transparent pills"] },
+                "Component spacing"] },
             { tag: "Capsule", settings: ["Capsule vertical padding", "Notifications in the capsule"] }
         ];
     }
@@ -175,7 +174,11 @@ TestCase {
             { tag: "docked", style: "docked",
                 bar: ["Density preset", "Bar thickness", "Bar opacity", "Corner radius", "Horizontal padding",
                     "Bar border"],
-                elements: ["Icon size", "Pill vertical padding", "Component spacing", "Element border"] }
+                elements: ["Icon size", "Pill vertical padding", "Component spacing", "Element border"] },
+            { tag: "capsule", style: "capsule",
+                bar: ["Density preset", "Bar thickness", "Bar opacity", "Corner radius", "Horizontal padding",
+                    "Edge margin"],
+                elements: ["Icon size", "Pill vertical padding", "Component spacing"] }
         ];
     }
 
@@ -193,7 +196,7 @@ TestCase {
         built.appearance.barStyle = "capsule";
         waitForRendering(built.item);
         compare(settingsIn(card(built.item, "Bar")), ["Density preset", "Bar thickness", "Bar opacity",
-            "Corner radius", "Horizontal padding", "Bar border", "Edge margin"]);
+            "Corner radius", "Horizontal padding", "Edge margin"]);
         verify(card(built.item, "Capsule"));
 
         built.appearance.barStyle = "opaque";
@@ -208,8 +211,8 @@ TestCase {
         const built = make("capsule");
         const elements = card(built.item, "Elements");
         const row = all(elements, child => child.elementLabel === "Clock")[0];
-        const lastSetting = all(elements, child => child.label === "Transparent pills"
-            && child.switchItem !== undefined)[0];
+        const lastSetting = all(elements, child => child.label === "Component spacing"
+            && child.field !== undefined)[0];
 
         verify(row, "the element list is outside the Elements card");
         verify(yIn(row, elements) > yIn(lastSetting, elements));
@@ -226,18 +229,23 @@ TestCase {
         compare(built.appearance.saved, [["transparentBarTopMargin", 12]]);
     }
 
+    function test_groupBorderSavesUnderItsKey() {
+        const built = make("opaque");
+
+        all(card(built.item, "Groups"), child => child.label === "Group border"
+            && child.switchItem !== undefined)[0].toggled();
+        compare(built.appearance.saved, [["groupBorder", true]]);
+    }
+
     function test_settingsSaveUnderTheirKeys() {
         const built = make("capsule");
         const capsule = card(built.item, "Capsule");
 
         all(capsule, child => child.label === "Notifications in the capsule"
             && child.switchItem !== undefined)[0].toggled();
-        all(card(built.item, "Groups"), child => child.label === "Group border"
-            && child.switchItem !== undefined)[0].toggled();
         all(capsule, child => child.label === "Capsule vertical padding"
             && child.field !== undefined)[0].edited(9);
 
-        compare(built.appearance.saved, [["capsuleNotifications", true], ["groupBorder", true],
-            ["capsuleVerticalPadding", 9]]);
+        compare(built.appearance.saved, [["capsuleNotifications", true], ["capsuleVerticalPadding", 9]]);
     }
 }

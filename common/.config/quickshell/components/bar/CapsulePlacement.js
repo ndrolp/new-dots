@@ -33,28 +33,40 @@ function surface(content, span, padding, strip, across) {
     return Object.assign(rect, { radius: reach / 2 });
 }
 
-// How round a capsule's corners are with a popup inside: a rounded
-// rectangle, not a pill, concentric with the popup's own 8 px corners inset
-// by its 12 px padding (PopupSurface.qml).
+// How round a capsule's corners are with something inside past its row: a
+// rounded rectangle, not a pill, concentric with a popup's own 8 px corners
+// inset by its 12 px padding (PopupSurface.qml).
 const popupCornerRadius = 20;
 
-// The capsule with a popup inside, { x, y, width, height, radius }: its row's
-// `place` (as surface gives it) grown to the wider of the row and the popup,
-// staying centred on the row, and as deep as the row and the popup together,
-// away from the screen edge at `barPosition` ("top" or "bottom"), with its
-// corners down to popupCornerRadius (never rounder than the row's). Takes the
-// popup's { width, height }, or null without one, when it is just its row.
-function withPopup(place, popup, barPosition) {
-    if (!popup)
+// The capsule with something `inside` it past its row (a popup inside, the
+// capsule glance), { x, y, width, height, radius }: its row's `place` (as
+// surface gives it) grown to the wider of the row and what is inside,
+// staying centred on the row, and as deep as the two together, away from the
+// screen edge at `barPosition` ("top" or "bottom"), with its corners down to
+// popupCornerRadius (never rounder than the row's). Takes what is inside as
+// { width, height }, or null with nothing, when it is just its row.
+function withInside(place, inside, barPosition) {
+    if (!inside)
         return place;
 
-    const width = Math.max(place.width, popup.width);
+    const width = Math.max(place.width, inside.width);
     return {
         x: place.x + (place.width - width) / 2,
-        y: barPosition === "bottom" ? place.y - popup.height : place.y,
+        y: barPosition === "bottom" ? place.y - inside.height : place.y,
         width: width,
-        height: place.height + popup.height,
+        height: place.height + inside.height,
         radius: Math.min(place.radius, popupCornerRadius)
+    };
+}
+
+// Where the capsule glance goes in the bar content, { x, y }: where a popup
+// inside would, centred on its row's `place` (as surface gives it) and just
+// past it, away from the screen edge at `barPosition` ("top" or "bottom").
+// Takes the glance's { width, height }; withInside grows the capsule round it.
+function glancePlace(place, glance, barPosition) {
+    return {
+        x: place.x + (place.width - glance.width) / 2,
+        y: barPosition === "bottom" ? place.y - glance.height : place.y + place.height
     };
 }
 
@@ -80,12 +92,13 @@ function inputRegion(surface, margins) {
 // it. A live element not `shown` takes no room: it waits just outside its
 // side of what is shown, to fade there.
 // Takes the bar content, { barPosition, height }, and { centre, spacing,
-// pills (their length), left, right }, each side a list of live elements
+// pills (their length), pillDepth (their depth: the pills' at rest, the
+// chips' expanded), left, right }, each side a list of live elements
 // { id, length, depth, shown } from the pills outwards for the right and
 // inwards for the left. Returns { start, end, depth, pills: { x, y },
 // elements: { id: { x, y } } }.
 function pillRow(content, given) {
-    const pillDepth = BarPlacement.workspacePillDepth;
+    const pillDepth = given.pillDepth;
     const shown = given.left.concat(given.right).filter(element => element.shown);
     const depth = Math.max(pillDepth, ...shown.map(element => element.depth));
     const length = shown.reduce((total, element) => total + element.length + given.spacing, given.pills);

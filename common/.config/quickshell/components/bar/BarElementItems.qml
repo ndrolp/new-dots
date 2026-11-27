@@ -44,10 +44,11 @@ Item {
     // Whether the bar holding these elements is shown on its monitor.
     property bool barVisible: true
     property string activePopup: ""
-    // How the capsule's row looks mid-crossfade, { opacity, scale }
-    // (CapsuleContentTransition): every element in it takes it, live ones
-    // beside the pills don't. Always { 1, 1 } on any other bar style.
-    property var rowContents: ({ opacity: 1, scale: 1 })
+    // How an element, by id, looks in the capsule's row mid-crossfade or
+    // entering, { opacity, scale, slide } (CapsuleMotion.rowLook): every
+    // element in it takes it, live ones beside the pills don't. Always
+    // { 1, 1, 0 } on any other bar style.
+    property var rowLook: element => ({ opacity: 1, scale: 1, slide: 0 })
     // Where each element goes, provided by the bar's single walk per zone.
     property var elementX: element => 0
     property var elementY: element => 0
@@ -149,7 +150,7 @@ Item {
         "bluetooth": bluetoothButton,
         "tray": trayButton,
         "network": networkButton,
-        "battery": batteryButton,
+        "battery": batteryItem,
         "clock": clockButton,
         "pomodoro": pomodoroItem
     })
@@ -174,14 +175,19 @@ Item {
     // What there is for the elements to show (see BarElementItems.itemVisible).
     readonly property var elementStatus: ({
         live: liveIds,
+        liveRow: appearance.liveRowElements || [],
+        onBatteryRow: appearance.onBatteryElements || [],
         expanded: appearance.capsuleExpanded === true,
+        rowExpanded: appearance.capsuleRowExpanded === true,
         player: player,
         recordings: recordings,
         keepAwakeOn: keepAwake.on,
         hasBattery: hasBattery,
+        onBattery: UPower.onBattery,
         cavaSilent: cava.silent,
         pomodoroStarted: pomodoro.started,
-        captures: deviceCaptures.captures
+        captures: deviceCaptures.captures,
+        glance: appearance.glanceElements || []
     })
 
     // Enabled elements with nothing to show (no player, battery, recording,
@@ -208,19 +214,49 @@ Item {
 
     onPlayerLabelChanged: mediaLabelTransition.restart()
 
-    // A Wi-Fi device shows its connected network's signal.
-    function networkIcon() {
-        return StatusText.networkIcon(Networking.devices.values.map(device => {
+    // The network devices as plain values, { connected, wifi, signalStrength,
+    // name }: a Wi-Fi device's are its connected network's.
+    function networkDevices() {
+        return Networking.devices.values.map(device => {
             const wifi = DeviceType.toString(device.type) === "Wifi";
             const network = wifi && device.networks
                 ? device.networks.values.find(candidate => candidate.connected) : null;
             return {
                 connected: device.connected,
                 wifi: wifi,
-                signalStrength: network ? network.signalStrength : 0
+                signalStrength: network ? network.signalStrength : 0,
+                name: network ? network.name : ""
             };
-        }));
+        });
     }
+
+    // A Wi-Fi device shows its connected network's signal.
+    function networkIcon() {
+        return StatusText.networkIcon(networkDevices());
+    }
+
+    // What the capsule glance's cards show (CapsuleGlance.cards), as plain
+    // values: the player media follows, the battery, null without either,
+    // and the network devices.
+    readonly property var glanceStatus: ({
+        player: player ? {
+            trackTitle: player.trackTitle,
+            trackArtist: player.trackArtist,
+            trackArtUrl: player.trackArtUrl,
+            identity: player.identity,
+            isPlaying: player.isPlaying
+        } : null,
+        battery: hasBattery ? {
+            isPresent: true,
+            percentage: battery.percentage,
+            state: battery.state,
+            timeToEmpty: battery.timeToEmpty,
+            timeToFull: battery.timeToFull
+        } : null,
+        networks: networkDevices()
+    })
+    // UPower's device states, for CapsuleGlance.cards.
+    readonly property var batteryStates: UPowerDeviceState
 
     Rectangle {
         id: notificationButton
@@ -228,18 +264,16 @@ Item {
         readonly property var size: root.sizeAround(notificationContent)
 
         visible: root.itemVisible("notifications")
-        opacity: root.rowContents.opacity
-        scale: root.rowContents.scale
+        RowLook { target: notificationButton; look: root.rowLook("notifications") }
         x: root.elementX("notifications")
         y: root.elementY("notifications")
         width: size.width
         height: size.height
         radius: root.appearance.radius
         color: notificationHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("notifications") || root.appearance.pillsTransparent
-                || BarProfileModel.docked(root.appearance)
+            : root.elementGrouped("notifications") || !BarProfileModel.elementPillsDrawn(root.appearance)
                 ? "transparent" : theme.surface
-        border.width: root.appearance.elementBorder && !root.elementGrouped("notifications") ? 1 : 0
+        border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("notifications") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -289,10 +323,9 @@ Item {
             height: size.height
             radius: root.appearance.radius
             color: recordingHover.hovered ? theme.surfaceHover
-                : root.elementGrouped("recording") || root.appearance.pillsTransparent
-                    || BarProfileModel.docked(root.appearance)
+                : root.elementGrouped("recording") || !BarProfileModel.elementPillsDrawn(root.appearance)
                     ? "transparent" : theme.surface
-            border.width: root.appearance.elementBorder && !root.elementGrouped("recording") ? 1 : 0
+            border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("recording") ? 1 : 0
             border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
             Behavior on color {
@@ -366,9 +399,8 @@ Item {
             height: size.height
             radius: root.appearance.radius
             color: privacyHover.hovered ? theme.surfaceHover
-                : root.elementGrouped("privacy") || root.appearance.pillsTransparent
-                    || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
-            border.width: root.appearance.elementBorder && !root.elementGrouped("privacy") ? 1 : 0
+                : root.elementGrouped("privacy") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
+            border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("privacy") ? 1 : 0
             border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
             Behavior on color {
@@ -431,14 +463,13 @@ Item {
 
             readonly property var size: root.elementSize(mediaContent.implicitWidth + 16, mediaItem.sizes.thickness)
 
-            border.width: root.appearance.elementBorder && !root.elementGrouped("media") ? 1 : 0
+            border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("media") ? 1 : 0
             border.color: root.appearance.elementBorder ? theme.border : "transparent"
             width: size.width
             height: size.height
             radius: root.appearance.radius
             color: mediaHover.hovered ? theme.surfaceHover
-                : root.elementGrouped("media") || root.appearance.pillsTransparent
-                    || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+                : root.elementGrouped("media") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
 
             Behavior on color {
                 ColorAnimation { duration: root.appearance.motion.short }
@@ -583,16 +614,14 @@ Item {
         readonly property int barCount: options.barCount
 
         visible: root.itemVisible("cava")
-        opacity: root.rowContents.opacity
-        scale: root.rowContents.scale
+        RowLook { target: cavaElement; look: root.rowLook("cava") }
         x: root.elementX("cava")
         y: root.elementY("cava")
         width: size.width
         height: size.height
         radius: root.appearance.radius
-        color: root.elementGrouped("cava") || root.appearance.pillsTransparent
-            || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
-        border.width: root.appearance.elementBorder && !root.elementGrouped("cava") ? 1 : 0
+        color: root.elementGrouped("cava") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
+        border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("cava") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         onDrawingChanged: root.cava.setDrawing(cavaElement, drawing)
@@ -635,18 +664,16 @@ Item {
         readonly property var size: root.sizeAround(audioContent)
 
         visible: root.itemVisible("audio")
-        opacity: root.rowContents.opacity
-        scale: root.rowContents.scale
+        RowLook { target: audioButton; look: root.rowLook("audio") }
         x: root.elementX("audio")
         y: root.elementY("audio")
         width: size.width
         height: size.height
         radius: root.appearance.radius
         color: audioHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("audio") || root.appearance.pillsTransparent
-                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+            : root.elementGrouped("audio") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
 
-        border.width: root.appearance.elementBorder && !root.elementGrouped("audio") ? 1 : 0
+        border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("audio") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -683,18 +710,16 @@ Item {
         readonly property var size: root.squareSize("bluetooth", bluetoothGlyph)
 
         visible: root.itemVisible("bluetooth")
-        opacity: root.rowContents.opacity
-        scale: root.rowContents.scale
+        RowLook { target: bluetoothButton; look: root.rowLook("bluetooth") }
         x: root.elementX("bluetooth")
         y: root.elementY("bluetooth")
         width: size.width
         height: size.height
         radius: root.appearance.radius
         color: bluetoothHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("bluetooth") || root.appearance.pillsTransparent
-                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+            : root.elementGrouped("bluetooth") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
 
-        border.width: root.appearance.elementBorder && !root.elementGrouped("bluetooth") ? 1 : 0
+        border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("bluetooth") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -729,18 +754,16 @@ Item {
         readonly property var size: root.squareSize("tray", trayGlyph)
 
         visible: root.itemVisible("tray")
-        opacity: root.rowContents.opacity
-        scale: root.rowContents.scale
+        RowLook { target: trayButton; look: root.rowLook("tray") }
         x: root.elementX("tray")
         y: root.elementY("tray")
         width: size.width
         height: size.height
         radius: root.appearance.radius
         color: trayHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("tray") || root.appearance.pillsTransparent
-                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+            : root.elementGrouped("tray") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
 
-        border.width: root.appearance.elementBorder && !root.elementGrouped("tray") ? 1 : 0
+        border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("tray") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -775,18 +798,16 @@ Item {
         readonly property var size: root.squareSize("network", networkGlyph)
 
         visible: root.itemVisible("network")
-        opacity: root.rowContents.opacity
-        scale: root.rowContents.scale
+        RowLook { target: networkButton; look: root.rowLook("network") }
         x: root.elementX("network")
         y: root.elementY("network")
         width: size.width
         height: size.height
         radius: root.appearance.radius
         color: networkHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("network") || root.appearance.pillsTransparent
-                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+            : root.elementGrouped("network") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
 
-        border.width: root.appearance.elementBorder && !root.elementGrouped("network") ? 1 : 0
+        border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("network") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -814,52 +835,54 @@ Item {
         }
     }
 
-    Rectangle {
-        id: batteryButton
+    LiveCapableItem {
+        id: batteryItem
 
-        readonly property var size: root.sizeAround(batteryContent)
+        appearance: root.appearance
+        element: "battery"
+        items: root
 
-        visible: root.itemVisible("battery")
-        opacity: root.rowContents.opacity
-        scale: root.rowContents.scale
-        x: root.elementX("battery")
-        y: root.elementY("battery")
-        width: size.width
-        height: size.height
-        radius: root.appearance.radius
-        color: batteryHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("battery") || root.appearance.pillsTransparent
-                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+        Rectangle {
+            id: batteryButton
 
-        border.width: root.appearance.elementBorder && !root.elementGrouped("battery") ? 1 : 0
-        border.color: root.appearance.elementBorder ? theme.border : "transparent"
+            readonly property var size: root.sizeAround(batteryContent, batteryItem.sizes.thickness)
 
-        Behavior on color {
-            ColorAnimation { duration: root.appearance.motion.short }
-        }
+            width: size.width
+            height: size.height
+            radius: root.appearance.radius
+            color: batteryHover.hovered ? theme.surfaceHover
+                : root.elementGrouped("battery") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
 
-        HoverHandler {
-            id: batteryHover
-        }
+            border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("battery") ? 1 : 0
+            border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
-        IconValue {
-            id: batteryContent
+            Behavior on color {
+                ColorAnimation { duration: root.appearance.motion.short }
+            }
 
-            anchors.centerIn: parent
-            appearance: root.appearance
-            icon: StatusText.batteryIcon(root.battery, UPowerDeviceState)
-            iconColor: theme.yellow
-            // The battery glyphs are narrow: a little bigger, they read at a glance.
-            iconSize: root.appearance.iconSize + 4
-            valueSize: root.appearance.textSize
-            value: Math.round(root.battery.percentage * 100) + "%"
-            iconVisible: root.shown("battery").icon
-            valueVisible: root.shown("battery").text
-        }
+            HoverHandler {
+                id: batteryHover
+            }
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked: root.popupRequested("battery")
+            IconValue {
+                id: batteryContent
+
+                anchors.centerIn: parent
+                appearance: root.appearance
+                icon: StatusText.batteryIcon(root.battery, UPowerDeviceState)
+                iconColor: theme.yellow
+                // The battery glyphs are narrow: a little bigger, they read at a glance.
+                iconSize: batteryItem.sizes.iconSize + 4
+                valueSize: batteryItem.sizes.textSize
+                value: Math.round(root.battery.percentage * 100) + "%"
+                iconVisible: root.shown("battery").icon
+                valueVisible: root.shown("battery").text
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: root.popupRequested("battery")
+            }
         }
     }
 
@@ -870,18 +893,16 @@ Item {
         readonly property var size: root.sizeAround(clockContent)
 
         visible: root.itemVisible("clock")
-        opacity: root.rowContents.opacity
-        scale: root.rowContents.scale
+        RowLook { target: clockButton; look: root.rowLook("clock") }
         x: root.elementX("clock")
         y: root.elementY("clock")
         width: size.width
         height: size.height
         radius: root.appearance.radius
         color: clockHover.hovered ? theme.surfaceHover
-            : root.elementGrouped("clock") || root.appearance.pillsTransparent
-                || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+            : root.elementGrouped("clock") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
 
-        border.width: root.appearance.elementBorder && !root.elementGrouped("clock") ? 1 : 0
+        border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("clock") ? 1 : 0
         border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
         Behavior on color {
@@ -900,6 +921,7 @@ Item {
             color: theme.orange
             iconVisible: root.shown("clock").icon
             valueVisible: root.shown("clock").text
+            twelveHour: BarProfileModel.elementOption(root.appearance.barElements, "clock", "twelveHour")
         }
 
         MouseArea {
@@ -931,10 +953,9 @@ Item {
             height: size.height
             radius: root.appearance.radius
             color: pomodoroHover.hovered ? theme.surfaceHover
-                : root.elementGrouped("pomodoro") || root.appearance.pillsTransparent
-                    || BarProfileModel.docked(root.appearance) ? "transparent" : theme.surface
+                : root.elementGrouped("pomodoro") || !BarProfileModel.elementPillsDrawn(root.appearance) ? "transparent" : theme.surface
 
-            border.width: root.appearance.elementBorder && !root.elementGrouped("pomodoro") ? 1 : 0
+            border.width: BarProfileModel.elementBorderDrawn(root.appearance) && !root.elementGrouped("pomodoro") ? 1 : 0
             border.color: root.appearance.elementBorder ? theme.border : "transparent"
 
             Behavior on color {

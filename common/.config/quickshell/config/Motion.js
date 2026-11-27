@@ -31,12 +31,19 @@ const normal = {
 // incoming start at `contentsScale`, wait `contentsDelay` ms (a third of
 // `expand`, see motion()) into the shape's motion, then fade and grow to 1 in
 // `contentsIn` ms. See components/bar/CapsuleContentTransition.qml.
+// Expanding, its row's elements instead enter one after another
+// (CapsuleMotion.centreOut and entering): each step `entryStep` ms after the
+// one before, fading in and sliding `entrySlide` px to its place, the last in
+// as `expand` settles, though each takes at least `entryMin` ms.
 const capsule = {
     expand: { duration: 350, easing: 34 /* Easing.OutBack */, overshoot: 0.9 },
     collapse: { duration: 280, easing: 6 /* Easing.OutCubic */, overshoot: 0 },
     contentsOut: 110,
     contentsIn: 200,
-    contentsScale: 0.95
+    contentsScale: 0.95,
+    entryStep: 20,
+    entrySlide: 6,
+    entryMin: 120
 };
 
 // How every animation eases: QtQuick's Easing.OutCubic (QEasingCurve's
@@ -46,7 +53,8 @@ const easing = 6;
 // The motion to animate with: the durations above (reduce motion makes every
 // animation instant, and changes still land because a 0 ms animation jumps to
 // its end), `easing`, the easing.type every animation uses, and `capsule`,
-// the capsule's springs and contents timing (instant too with reduce motion).
+// the capsule's springs, contents and entry timing (instant too with reduce
+// motion).
 function motion(reduceMotion) {
     const result = { easing: easing };
     for (const name in normal)
@@ -58,7 +66,10 @@ function motion(reduceMotion) {
         contentsOut: time(capsule.contentsOut),
         contentsDelay: time(Math.round(capsule.expand.duration / 3)),
         contentsIn: time(capsule.contentsIn),
-        contentsScale: capsule.contentsScale
+        contentsScale: capsule.contentsScale,
+        entryStep: time(capsule.entryStep),
+        entrySlide: capsule.entrySlide,
+        entryMin: time(capsule.entryMin)
     };
     return result;
 }

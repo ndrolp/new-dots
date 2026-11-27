@@ -5,7 +5,7 @@ import "../components/panels/OsdChange.js" as OsdChange
 import "../config/Motion.js" as Motion
 
 // A change as the capsule shows it: volume and brightness as a wide fill bar
-// whose icon bounces on each change, battery and Bluetooth as a glance card
+// whose icon bounces on each change, battery and Bluetooth as a ring card
 // with a small level ring.
 TestCase {
     name: "CapsuleChangeView"
@@ -46,17 +46,17 @@ TestCase {
         verify(shown.implicitWidth < 320);
     }
 
-    // Battery and Bluetooth are a glance card: narrower than the fill bar,
+    // Battery and Bluetooth are a ring card: narrower than the fill bar,
     // with a ring when there is a battery level.
-    function test_bluetoothIsAGlanceCardWithARing() {
+    function test_bluetoothIsARingCardWithARing() {
         const shown = view(OsdChange.bluetooth({ deviceName: "Buds", connected: true,
             batteryAvailable: true, battery: 0.6 }));
 
-        compare(shown.look.card, "glance");
+        compare(shown.look.card, "ring");
         compare(shown.ringShown, true);
     }
 
-    function test_aGlanceCardWithoutABatteryHasNoRing() {
+    function test_aRingCardWithoutABatteryHasNoRing() {
         const shown = view(OsdChange.bluetooth({ deviceName: "Keys", connected: true,
             batteryAvailable: false, battery: 0 }));
 
