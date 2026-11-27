@@ -205,6 +205,19 @@ TestCase {
         compare(listed(item), data.listed);
     }
 
+    function test_theBlurIsListedUnderWindows_data() {
+        return [
+            { tag: "window", query: "window blur", listed: [["Windows", "Window blur"]] },
+            { tag: "strength", query: "blur strength", listed: [["Windows", "Blur strength"]] }
+        ];
+    }
+
+    function test_theBlurIsListedUnderWindows(data) {
+        const item = createTemporaryObject(panel, this, { sectionQuery: data.query });
+
+        compare(listed(item), data.listed);
+    }
+
     // The Windows section's keywords find it.
     function test_theWindowsKeywordsFindIt_data() {
         return ["hyprland", "gaps", "rounding", "decoration", "transparency", "inactive", "appearance"]

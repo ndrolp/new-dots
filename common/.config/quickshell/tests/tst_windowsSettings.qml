@@ -40,6 +40,10 @@ TestCase {
         return { border_size: values.border_size, rounding: values.rounding };
     }
 
+    function toggle(item, label) {
+        return all(item, child => child.label === label && child.switchItem !== undefined)[0];
+    }
+
     function test_withoutASavedFileTheBorderSizeAndRoundingAreTodaysDefaults() {
         compare(bordersAndRounding(saved(null)), { border_size: 2, rounding: 5 });
     }
@@ -93,6 +97,31 @@ TestCase {
         compare(gaps(WindowAppearance.withValue(values, "gaps_in", 99)), { gaps_in: 30, gaps_out: 20 });
         compare(gaps(WindowAppearance.withValue(values, "gaps_out", -4)), { gaps_in: 8, gaps_out: 0 });
         compare(gaps(WindowAppearance.withValue(values, "gaps_in", 6.6)), { gaps_in: 7, gaps_out: 20 });
+    }
+
+    // Blur: on for windows, at today's strength, unless the file says otherwise.
+    function test_withoutASavedFileWindowsAreBlurredAtTodaysStrength() {
+        compare(saved(null).window_blur, true);
+        compare(saved(null).blur_size, 7);
+    }
+
+    function test_theSavedBlurApplies() {
+        const values = saved('{ "window_blur": false, "blur_size": 12 }');
+
+        compare([values.window_blur, values.blur_size], [false, 12]);
+    }
+
+    function test_aBadBlurFallsBackAlone() {
+        compare(saved('{ "window_blur": "off", "blur_size": 3 }').window_blur, true);
+        compare(saved('{ "window_blur": false, "blur_size": 16 }').blur_size, 7);
+        compare(saved('{ "blur_size": 0 }').blur_size, 7);
+        compare(saved('{ "blur_size": 2.5 }').window_blur, true);
+    }
+
+    function test_aBlurStrengthIsKeptInRangeAndWhole() {
+        compare(WindowAppearance.withValue(saved(null), "blur_size", 40).blur_size, 15);
+        compare(WindowAppearance.withValue(saved(null), "blur_size", -2).blur_size, 1);
+        compare(WindowAppearance.withValue(saved(null), "window_blur", false).window_blur, false);
     }
 
     // Hyprland re-runs only the window-appearance module, never its whole config.
@@ -187,6 +216,33 @@ TestCase {
         compare(built.service.asked, [["border_size", 0], ["rounding", 16]]);
         compare(border.value, 0);
         compare(radius.value, 16);
+    }
+
+    function test_theBlurShowsTheSavedValues() {
+        const built = make();
+        built.service.values = saved('{ "window_blur": false, "blur_size": 10 }');
+        const strength = number(built.section, "Blur strength");
+
+        compare(toggle(built.section, "Window blur").checked, false);
+        compare([strength.from, strength.to, strength.value], [1, 15, 10]);
+    }
+
+    function test_changingTheBlurSetsIt() {
+        const built = make();
+
+        toggle(built.section, "Window blur").toggled();
+        number(built.section, "Blur strength").edited(4);
+
+        compare(built.service.asked, [["window_blur", false], ["blur_size", 4]]);
+        compare(toggle(built.section, "Window blur").checked, false);
+    }
+
+    // The strength isn't only for windows, and the section says so.
+    function test_theBlurStrengthHintSaysItIsAlsoUsedByTheShell() {
+        const built = make();
+
+        verify(all(built.section, child => child.text === "Also used behind the bar and popups.").length === 1,
+            "no hint under the blur strength");
     }
 
     // Before the service is there (or in a panel without one) the section

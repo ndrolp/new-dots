@@ -110,4 +110,36 @@ Column {
             onToggled: root.set("shadows", !root.values.shadows)
         }
     }
+
+    // Window blur only affects windows (a window rule); the strength is
+    // Hyprland's blur size, so the shell's blur uses it too.
+    Panels.SettingsCard {
+        appearance: root.appearance
+        title: "Blur"
+
+        Panels.SettingsSwitchRow {
+            width: parent.width
+            appearance: root.appearance
+            label: "Window blur"
+            checked: root.values.window_blur
+            onToggled: root.set("window_blur", !root.values.window_blur)
+        }
+
+        Panels.SettingsNumber {
+            width: parent.width
+            appearance: root.appearance
+            label: "Blur strength"
+            from: WindowAppearance.settings.blur_size.min
+            to: WindowAppearance.settings.blur_size.max
+            value: root.values.blur_size
+            onEdited: number => root.set("blur_size", number)
+        }
+
+        Panels.SettingsHint {
+            x: 12
+            width: parent.width - 24
+            appearance: root.appearance
+            text: "Also used behind the bar and popups."
+        }
+    }
 }

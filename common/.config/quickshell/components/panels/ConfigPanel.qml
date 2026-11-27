@@ -98,7 +98,8 @@ Rectangle {
             title: "Windows",
             description: "Choose how Hyprland draws windows.",
             settings: [{ label: "Inner gaps" }, { label: "Outer gaps" }, { label: "Border size" }, { label: "Corner radius" },
-                { label: "Focused window opacity" }, { label: "Unfocused window opacity" }, { label: "Shadows" }]
+                { label: "Focused window opacity" }, { label: "Unfocused window opacity" }, { label: "Shadows" },
+                { label: "Window blur" }, { label: "Blur strength" }]
         },
         {
             label: "Displays", icon: "󰍹", section: "Monitors",

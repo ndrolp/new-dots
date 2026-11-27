@@ -15,7 +15,9 @@ const settings = {
     rounding: { kind: "integer", min: 0, max: 24, default: 5 },
     active_opacity: { kind: "number", min: 0.5, max: 1, default: 1 },
     inactive_opacity: { kind: "number", min: 0.3, max: 1, default: 0.9 },
-    shadows: { kind: "boolean", default: true }
+    shadows: { kind: "boolean", default: true },
+    window_blur: { kind: "boolean", default: true },
+    blur_size: { kind: "integer", min: 1, max: 15, default: 7 }
 };
 
 // How Hyprland is asked to apply the saved file: only that module, not a full reload.
