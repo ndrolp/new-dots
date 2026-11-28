@@ -90,10 +90,10 @@ hl.permission("/usr/(bin|local/bin)/hyprpm", "plugin", "allow")
 -- Refer to https://wiki.hypr.land/Configuring/Basics/Variables/
 hl.config({
 	general = {
-		gaps_in = 5,
-		gaps_out = 10,
+		-- Gaps come from the Windows section of the shell's settings: modules/appearence/windows.lua
 
-		-- Border size and colours come from the colorscheme: modules/appearence/borders.lua
+		-- Border size comes from the Windows section (modules/appearence/windows.lua), its colours from
+		-- the colorscheme: modules/appearence/borders.lua
 
 		-- Set to true to enable resizing windows by clicking and dragging on borders and gaps
 		resize_on_border = false,
@@ -105,15 +105,13 @@ hl.config({
 	},
 
 	decoration = {
-		rounding = 5,
+		-- Rounding comes from the Windows section: modules/appearence/windows.lua
 		rounding_power = 2,
 
-		-- Change transparency of focused and unfocused windows
-		active_opacity = 1.0,
-		inactive_opacity = 0.9,
+		-- Focused and unfocused window opacity and whether shadows show come from the Windows section
+		-- of the shell's settings: modules/appearence/windows.lua
 
 		shadow = {
-			enabled = true,
 			range = 2,
 			render_power = 3,
 			color = 0xee1a1a1a,
@@ -126,6 +124,7 @@ hl.config({
 })
 
 require("modules.appearence.borders")
+require("modules.appearence.windows").apply()
 require("modules.animations.core")
 
 -- See https://wiki.hypr.land/Configuring/Layouts/Dwindle-Layout/ for more

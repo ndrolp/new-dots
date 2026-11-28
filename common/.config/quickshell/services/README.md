@@ -106,6 +106,30 @@ survives a reload of the shell; a shell that restarts, rather than reloads, tell
 fallback again. Nothing is read or told while `locked`, so what happened meanwhile
 comes up after unlock.
 
+## Window appearance
+
+`WindowAppearance.qml` holds the Windows section's settings, how Hyprland
+draws windows: `values`, by their key in the file, and `set(key, value)`.
+Hyprland owns them as it owns monitor setups
+(`docs/adr/0002-hyprland-owns-monitor-setups.md`): `set` writes
+`~/.config/hypr/window-appearance.json` atomically, then runs `hyprctl eval`
+on `apply` in `hypr/modules/appearence/windows.lua`, which re-runs only that
+module, never a full reload. While a slider is dragged that happens at most
+every 100 ms, always with the last value. Hyprland reads the file when its
+config loads, so the values apply without the shell. What each setting takes,
+its default and how a saved file is read (a bad value falls back alone; no
+file, or one that isn't a JSON object, gives every default) are plain functions
+in `WindowAppearance.js`, tested without Quickshell; its `settings` must stay
+in step with `SETTINGS` in `windows.lua`. A new setting is one entry in each,
+plus its control in `components/panels/WindowsSettings.qml` and its label in
+the section's entry in `ConfigPanel.qml`. The file is gitignored. `reset()`
+removes the file rather than writing the defaults into it, so a later change
+to a default in the repo still reaches the machine, and applies at once; it
+needs nothing per setting. `applyFailed` says Hyprland couldn't take the last
+apply (hyprctl failed, as it does outside Hyprland, or reported an error); the
+value is saved all the same, and the next apply that works clears it. The
+section shows it as an inline hint, not a toast.
+
 ## Keep-awake
 
 `KeepAwake.qml` is the shell's one keep-awake. Its `on` and selected `duration`

@@ -101,6 +101,10 @@ ShellRoot {
         id: webApps
     }
 
+    Services.WindowAppearance {
+        id: windowAppearance
+    }
+
     Services.Printers {
         id: printers
     }
@@ -391,6 +395,7 @@ ShellRoot {
         appearance: appearance
         monitors: monitors
         monitorSetups: monitorSetups
+        windowAppearance: windowAppearance
         wallpapers: wallpapers
         bookmarks: bookmarks
         plugins: plugins

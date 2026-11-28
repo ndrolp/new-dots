@@ -49,6 +49,7 @@ BarPopup {
                 plugins: root.feature.plugins
                 cava: root.feature.cava
                 monitorSetups: root.feature.monitorSetups
+                windowAppearance: root.feature.windowAppearance
                 // The popup's surface is its background and border.
                 color: "transparent"
                 border.width: 0

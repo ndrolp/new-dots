@@ -162,6 +162,75 @@ TestCase {
         compare(listed(item), [["Bar", "Edge margin"]]);
     }
 
+    function test_theGapsAreListedUnderWindows_data() {
+        return [
+            { tag: "inner", query: "inner gaps", listed: [["Windows", "Inner gaps"]] },
+            { tag: "outer", query: "outer gaps", listed: [["Windows", "Outer gaps"]] },
+            { tag: "both", query: "gaps", listed: [["Windows", "Inner gaps", "Outer gaps"]] }
+        ];
+    }
+
+    function test_theGapsAreListedUnderWindows(data) {
+        const item = createTemporaryObject(panel, this, { sectionQuery: data.query });
+
+        compare(listed(item), data.listed);
+    }
+
+    function test_theBorderSizeAndCornerRadiusAreListedUnderWindows_data() {
+        return [
+            { tag: "border", query: "border size", listed: [["Windows", "Border size"]] },
+            // The bar has a corner radius of its own.
+            { tag: "radius", query: "corner radius", listed: [["Bar", "Corner radius"], ["Windows", "Corner radius"]] }
+        ];
+    }
+
+    function test_theBorderSizeAndCornerRadiusAreListedUnderWindows(data) {
+        const item = createTemporaryObject(panel, this, { sectionQuery: data.query });
+
+        compare(listed(item), data.listed);
+    }
+
+    function test_theOpacityAndShadowsAreListedUnderWindows_data() {
+        return [
+            { tag: "window opacity", query: "window opacity",
+                listed: [["Windows", "Focused window opacity", "Unfocused window opacity"]] },
+            { tag: "unfocused", query: "unfocused", listed: [["Windows", "Unfocused window opacity"]] },
+            { tag: "shadows", query: "shadows", listed: [["Windows", "Shadows"]] }
+        ];
+    }
+
+    function test_theOpacityAndShadowsAreListedUnderWindows(data) {
+        const item = createTemporaryObject(panel, this, { sectionQuery: data.query });
+
+        compare(listed(item), data.listed);
+    }
+
+    function test_theBlurIsListedUnderWindows_data() {
+        return [
+            { tag: "window", query: "window blur", listed: [["Windows", "Window blur"]] },
+            { tag: "strength", query: "blur strength", listed: [["Windows", "Blur strength"]] }
+        ];
+    }
+
+    function test_theBlurIsListedUnderWindows(data) {
+        const item = createTemporaryObject(panel, this, { sectionQuery: data.query });
+
+        compare(listed(item), data.listed);
+    }
+
+    // The Windows section's keywords find it.
+    function test_theWindowsKeywordsFindIt_data() {
+        return ["hyprland", "gaps", "rounding", "decoration", "transparency", "inactive", "appearance"]
+            .map(query => ({ tag: query, query: query }));
+    }
+
+    function test_theWindowsKeywordsFindIt(data) {
+        const item = createTemporaryObject(panel, this, { sectionQuery: data.query });
+
+        verify(item.filteredSections.some(section => section.label === "Windows"),
+            "\"" + data.query + "\" doesn't find the Windows section");
+    }
+
     function test_sectionOnlyMatchesListNoSettings() {
         const item = createTemporaryObject(panel, this, { sectionQuery: "animations" });
 

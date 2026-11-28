@@ -267,6 +267,10 @@ _Avoid_: Emoji search, emoji panel (no es un panel aparte)
 El ajuste global de la sección Motion del settings panel que hace instantáneas las animaciones de la shell: los cambios ocurren igual, pero sin transición. No forma parte de ningún bar profile y se aplica en cuanto se activa.
 _Avoid_: Disable animations, sin animaciones, modo rápido
 
+**Windows** (ventanas):
+La sección del settings panel que edita cómo dibuja Hyprland las ventanas: los huecos, el grosor del borde, las esquinas, el desenfoque, la transparencia y la sombra. Sus ajustes son globales (no forman parte de ningún bar profile y valen igual en todos los monitores), pertenecen a la máquina como el active colorscheme, y se aplican en cuanto se cambian, sin guardar. Apagar el desenfoque solo lo quita de las ventanas; la intensidad del desenfoque es la de todo el escritorio, también detrás de la barra y los popups. Los colores del borde no están aquí: son del colorscheme, y la transparencia de kitty tampoco: es la terminal transparency.
+_Avoid_: Appearance, Hyprland settings, decoration
+
 **Printer** (impresora):
 Una impresora añadida: una a la que se puede mandar a imprimir. Puede estar en la red o por USB.
 _Avoid_: Cola, queue, device, dispositivo
